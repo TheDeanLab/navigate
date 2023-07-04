@@ -35,6 +35,7 @@ import threading
 import logging
 import multiprocessing as mp
 import time
+import os
 
 # Third Party Imports
 
@@ -65,7 +66,7 @@ from aslm.model.features.feature_related_functions import convert_str_to_feature
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_stage_dict
 from aslm.tools.common_functions import load_module_from_file
-from aslm.tools.file_functions import load_yaml_file
+from aslm.tools.file_functions import load_yaml_file, save_yaml_file
 from aslm.model.device_startup_functions import load_devices
 from aslm.model.microscope import Microscope
 from aslm.config.config import get_aslm_path
@@ -1108,17 +1109,53 @@ class Model:
         self.feature_list.append(convert_str_to_feature_list(feature_list))
 
     def load_feature_records(self):
-        feature_list_file_name = get_aslm_path() + "/config/feature_lists.yaml"
-        feature_records = load_yaml_file(feature_list_file_name)
-        if feature_records:
-            for item in feature_records:
-                if item["module_name"]:
-                    module = load_module_from_file(item["module_name"], item["filename"])
-                    feature = getattr(module, item["module_name"])
-                    self.feature_list.append(feature())
-                elif item["feature_list"]:
-                    feature = convert_str_to_feature_list(item["feature_list"])
-                    self.feature_list.append(feature)
+        feature_lists_path = get_aslm_path() + "/feature_lists"
+        if not os.path.exists(feature_lists_path):
+            os.makedirs(feature_lists_path)
+            return
+        # get __sequence.yml
+        if not os.path.exists(f"{feature_lists_path}/__sequence.yml"):
+            feature_records = []
+        else:
+            feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+
+        # add non added feature lists
+        feature_list_files = [temp for temp in os.listdir(feature_lists_path) if temp[temp.rindex("."):] in (".yml", ".yaml")]
+        for item in feature_list_files:
+            if item == "__sequence.yml":
+                continue
+            temp = load_yaml_file(f"{feature_lists_path}/{item}")
+            add_flag = True
+            for feature in feature_records:
+                if feature["feature_list_name"] == temp["feature_list_name"]:
+                    add_flag = False
+                    break
+            if add_flag:
+                feature_records.append({
+                    "feature_list_name": temp["feature_list_name"],
+                    "yaml_file_name": item 
+                })
+        
+        i = 0
+        while i < len(feature_records):
+            temp = feature_records[i]
+            if not os.path.exists(f"{feature_lists_path}/{temp['yaml_file_name']}"):
+                del feature_records[i]
+                continue
+            item = load_yaml_file(f"{feature_lists_path}/{temp['yaml_file_name']}")
+
+            if item["module_name"]:
+                module = load_module_from_file(item["module_name"], item["filename"])
+                feature = getattr(module, item["module_name"])
+                self.feature_list.append(feature())
+            elif item["feature_list"]:
+                feature = convert_str_to_feature_list(item["feature_list"])
+                self.feature_list.append(feature)
+            else:
+                del feature_records[i]
+                continue
+            i += 1
+        save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
 
     def get_feature_list(self, idx):
         if idx > 0 and idx <= len(self.feature_list):

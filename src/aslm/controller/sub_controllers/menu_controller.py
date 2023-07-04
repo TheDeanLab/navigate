@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 import platform
+import os
 import tkinter as tk
 from tkinter import messagebox
 
@@ -424,15 +425,21 @@ class MenuController(GUIController):
         )
         self.view.menubar.menu_features.add_separator()
         # add feature lists from previous loaded ones
-        feature_list_path = get_aslm_path() + "/config/" + self.feature_list_file_name
-        feature_records = load_yaml_file(feature_list_path)
-        if feature_records:
-            for feature in feature_records:
-                self.view.menubar.menu_features.add_radiobutton(
-                    label=feature["feature_list_name"], variable=self.feature_id_val, value=self.feature_list_count
-                )
-                self.feature_list_names.append(feature["feature_list_name"])
-                self.feature_list_count += 1
+        feature_lists_path = get_aslm_path() + "/feature_lists"
+        if not os.path.exists(feature_lists_path):
+            os.makedirs(feature_lists_path)
+            return
+        # get __sequence.yml
+        feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+        if not feature_records:
+            return
+        
+        for feature in feature_records:
+            self.view.menubar.menu_features.add_radiobutton(
+                label=feature["feature_list_name"], variable=self.feature_id_val, value=self.feature_list_count
+            )
+            self.feature_list_names.append(feature["feature_list_name"])
+            self.feature_list_count += 1
 
 
     def populate_menu(self, menu_dict):
@@ -667,60 +674,69 @@ class MenuController(GUIController):
             return
         module = load_module_from_file(filename[filename.rindex("/")+1:], filename)
         features = [f for f in dir(module) if isinstance(getattr(module, f), FeatureList)]
-        config_path = get_aslm_path() + "/config"
-        feature_records = load_yaml_file(f"{config_path}/{self.feature_list_file_name}")
+        feature_lists_path = get_aslm_path() + "/feature_lists"
+        feature_list_files = [temp for temp in os.listdir(feature_lists_path) if temp[temp.rindex("."):] in (".yml", ".yaml")]
+        feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
         if not feature_records:
             feature_records = []
         added_features = []
         for name in features:
             feature = getattr(module, name)
             feature_list_name = feature.feature_list_name
-            add_flag = True
-            for i, item in enumerate(feature_records):
-                if item["feature_list_name"] == feature_list_name:
-                    print("There is already one feature list named as", \
-                          feature_list_name, \
-                          "The new one isn't loaded!")
-                    add_flag = False
-                    break
-            if add_flag:
-                self.view.menubar.menu_features.add_radiobutton(
-                    label=feature_list_name, variable=self.feature_id_val, value=self.feature_list_count
-                )
-                feature_records.append({
-                    "module_name": name,
-                    "feature_list_name": feature_list_name,
-                    "filename": filename
-                })
-                self.feature_list_count += 1
-                added_features.append(name)
+            if f"{feature_list_name}.yml" in feature_list_files or f"{feature_list_name}.yaml" in feature_list_files:
+                print("There is already one feature list named as", \
+                        feature_list_name, \
+                        "The new one isn't loaded!")
+                continue
+            self.view.menubar.menu_features.add_radiobutton(
+                label=feature_list_name, variable=self.feature_id_val, value=self.feature_list_count
+            )
+            save_yaml_file(feature_lists_path, {
+                "module_name": name,
+                "feature_list_name": feature_list_name,
+                "filename": filename
+            }, f"{'_'.join(feature_list_name.split(' '))}.yml")
+
+            feature_records.append({
+                "feature_list_name": feature_list_name,
+                "yaml_file_name": "_".join(feature_list_name.split(" ")) + ".yml"
+            })
+            self.feature_list_names.append(feature_list_name)
+            self.feature_list_count += 1
+            added_features.append(name)
+        
+        save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
         # tell model to add feature lists
         self.parent_controller.model.load_feature_list_from_file(filename, added_features)
-        # save feature records
-        save_yaml_file(config_path, feature_records, self.feature_list_file_name)
-
 
     def add_feature_list(self, feature_list_name, feature_list):
-        config_path = get_aslm_path() + "/config"
-        feature_records = load_yaml_file(f"{config_path}/{self.feature_list_file_name}")
+        feature_lists_path = get_aslm_path() + "/feature_lists"
+        if os.path.exists(f"{feature_lists_path}/{'_'.join(feature_list_name)}.yml"):
+            return False
         self.view.menubar.menu_features.add_radiobutton(
             label=feature_list_name, variable=self.feature_id_val, value=self.feature_list_count
         )
         self.feature_list_names.append(feature_list_name)
         self.feature_list_count += 1
-        feature_records.append({
+        save_yaml_file(feature_lists_path, {
             "module_name": None,
             "feature_list_name": feature_list_name,
             "feature_list": feature_list
+        }, f"{'_'.join(feature_list_name.split(' '))}.yml")
+        feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+        feature_records.append({
+            "feature_list_name": feature_list_name,
+            "yaml_file_name": "_".join(feature_list_name.split(" ")) + ".yml"
         })
         # tell model to add feature lists
         self.parent_controller.model.load_feature_list_from_str(feature_list)
         # save feature records
-        save_yaml_file(config_path, feature_records, self.feature_list_file_name)
+        save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
+        return True
 
     def delete_feature_list(self):
         feature_id = self.feature_id_val.get()
-        if feature_id <= self.system_feature_list_count:
+        if feature_id < self.system_feature_list_count:
             messagebox.showerror(title="Feature List Error",
                                  message="Can't delete system feature list or you haven't select any feature list")
             return
@@ -729,7 +745,10 @@ class MenuController(GUIController):
         self.view.menubar.menu_features.delete(feature_list_name)
 
         # remove from yaml file
-        config_path = get_aslm_path() + "/config"
-        feature_records = load_yaml_file(f"{config_path}/{self.feature_list_file_name}")
+        feature_lists_path = get_aslm_path() + "/feature_lists"
+        feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+        temp = feature_records[feature_id - self.system_feature_list_count]
+        os.remove(f"{feature_lists_path}/{temp['yaml_file_name']}")
+
         del feature_records[feature_id - self.system_feature_list_count]
-        save_yaml_file(config_path, feature_records, self.feature_list_file_name)
+        save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")

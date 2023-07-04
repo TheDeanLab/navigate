@@ -356,8 +356,11 @@ class FeaturePopupController(GUIController):
             messagebox.showerror(title="Feature List Error",
                                  message="Please enter a name for this feature list!")
             return
-        self.parent_controller.menu_controller.add_feature_list(feature_list_name, feature_list_content)
-        self.exit_func()
+        if not self.parent_controller.menu_controller.add_feature_list(feature_list_name, feature_list_content):
+            messagebox.showerror(title="Feature List Error",
+                                 message="Please enter a new list name! The one you entered has been exist!")
+        else:
+            self.exit_func()
 
     def update_feature_list(self):
         if not self.verify_feature_list():

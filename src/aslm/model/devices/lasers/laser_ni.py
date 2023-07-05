@@ -56,18 +56,19 @@ class LaserNI(LaserBase):
             self.laser_min_do = self.device_config["onoff"]["hardware"]["min"]
             self.laser_max_do = self.device_config["onoff"]["hardware"]["max"]
             self.laser_do_task = nidaqmx.Task()
-            try:
-                # Digital Modulation via a Digital Port
-                self.laser_do_task.do_channels.add_do_chan(
-                    laser_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
-                self.on_off_type = "digital"
-            except DaqError as e:
+
+            if "/ao" in laser_do_port:
                 # Artificial Digital Modulation via an Analog Port
                 self.laser_do_task.ao_channels.add_ao_voltage_chan(
                     laser_do_port, min_val=self.laser_min_do, max_val=self.laser_max_do)
                 self.on_off_type = "analog"
 
-        except KeyError as e:
+            else:
+                # Digital Modulation via a Digital Port
+                self.laser_do_task.do_channels.add_do_chan(
+                    laser_do_port, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES)
+                self.on_off_type = "digital"
+        except (KeyError, DaqError) as e:
             self.laser_do_task = None
             if isinstance(e, DaqError):
                 logger.exception(e)

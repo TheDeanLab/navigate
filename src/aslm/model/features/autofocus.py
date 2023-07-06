@@ -188,8 +188,9 @@ class Autofocus:
         frame_num = self.get_autofocus_frame_num()
         if frame_num < 1:
             return
-        self.model.prepare_acquisition()  # Opens correct shutter and puts all signals
-        # to false
+
+        # Opens correct shutter and puts all signals to false
+        self.model.prepare_acquisition()
         self.model.active_microscope.prepare_next_channel()
 
         # load Autofocus
@@ -240,11 +241,13 @@ class Autofocus:
         ][self.device][self.device_ref]
         frames = 0
         if settings["coarse_selected"]:
-            frames = (
-                int(settings["coarse_range"]) // int(settings["coarse_step_size"]) + 1
-            )
+            coarse_range = float(settings["coarse_range"])
+            coarse_step_size = float(settings["coarse_step_size"])
+            frames = int(coarse_range // coarse_step_size) + 1
         if settings["fine_selected"]:
-            frames += int(settings["fine_range"]) // int(settings["fine_step_size"]) + 1
+            fine_range = float(settings["fine_range"])
+            fine_step_size = float(settings["fine_step_size"])
+            frames += int(fine_range // fine_step_size) + 1
         return frames
 
     @staticmethod
@@ -293,16 +296,16 @@ class Autofocus:
         self.coarse_steps, self.init_pos = 0, 0
 
         if settings["fine_selected"]:
-            self.fine_step_size = int(settings["fine_step_size"])
+            self.fine_step_size = float(settings["fine_step_size"])
             fine_steps, self.fine_pos_offset = self.get_steps(
-                int(settings["fine_range"]), self.fine_step_size
+                float(settings["fine_range"]), self.fine_step_size
             )
             self.init_pos = self.focus_pos - self.fine_pos_offset
 
         if settings["coarse_selected"]:
-            self.coarse_step_size = int(settings["coarse_step_size"])
+            self.coarse_step_size = float(settings["coarse_step_size"])
             self.coarse_steps, coarse_pos_offset = self.get_steps(
-                int(settings["coarse_range"]), self.coarse_step_size
+                float(settings["coarse_range"]), self.coarse_step_size
             )
             self.init_pos = self.focus_pos - coarse_pos_offset
         self.signal_id = 0

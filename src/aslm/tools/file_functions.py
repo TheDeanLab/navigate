@@ -105,6 +105,19 @@ def create_save_path(saving_settings):
     return save_directory
 
 def load_yaml_file(file_path):
+    """Load YAML file from Disk
+
+    Parameters
+    ----------
+    file_path : str/os.path
+        String or path of the yaml file.
+
+    Returns
+    -------
+    config_data: dict/list/None
+        A dictionary/list of the yaml file content.
+        None: if the yaml file has error or not exist.
+    """
     file_path = Path(file_path)
     if not file_path.exists():
         return None

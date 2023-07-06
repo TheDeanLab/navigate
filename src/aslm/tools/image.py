@@ -66,6 +66,28 @@ def text_array(text: str, offset: tuple = (0, 0)):
 
 
 def create_arrow_image(xys, image_width=300, image_height=200, direction="right", image=None):
+    """Create/Update a Image Object 
+
+    Draw lines and arrows in a Image ojbect
+
+    Parameters
+    ----------
+    xys : list
+        list of points [(x, y),] to draw lines
+    image_width : int
+        width of image
+    image_height: int
+        height of image
+    direction: str
+        arrow directions: "left", "right", "up", "down"
+    image: Image/None
+        update an exist Image object/create a new Image object
+
+    Returns
+    -------
+    image:
+        Image object
+    """
     w, h = image_width, image_height
     if not image:
         image = Image.new("RGBA", (w, h), (0, 0, 0, 0))
@@ -85,7 +107,7 @@ def create_arrow_image(xys, image_width=300, image_height=200, direction="right"
     elif direction == "up":
         bounding_circle = ((circle_x, circle_y+10), 10)
         rotation = 0
-    elif direction == "dow":
+    elif direction == "down":
         bounding_circle = ((circle_x, circle_y-10), 10)
         rotation = 180
     draw.regular_polygon(bounding_circle, n_sides=3, rotation=rotation, fill="black")

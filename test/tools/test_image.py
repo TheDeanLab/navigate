@@ -35,9 +35,10 @@ import unittest
 
 # Third-Party Imports
 import numpy as np
+from PIL import Image
 
 # Local Imports
-from aslm.tools.image import text_array
+from aslm.tools.image import text_array, create_arrow_image
 
 
 class TextArrayTestCase(unittest.TestCase):
@@ -72,6 +73,29 @@ class TextArrayTestCase(unittest.TestCase):
         expected_height = 11
         assert width == expected_width
         assert height == expected_height
+
+
+class TestCreateArrowImage(unittest.TestCase):
+
+    def test_create_arrow_image(self):
+        xys = [(50, 50), (150, 50), (200, 100)]
+        image = create_arrow_image(xys, direction="right")
+        self.assertIsInstance(image, Image.Image)
+        self.assertEqual(image.width, 300)
+        self.assertEqual(image.height, 200)
+
+        xys = [(50, 50), (150, 50), (200, 100)]
+        image = create_arrow_image(xys, 400, 300, direction="left")
+        self.assertIsInstance(image, Image.Image)
+        self.assertEqual(image.width, 400)
+        self.assertEqual(image.height, 300)
+
+        image2 = create_arrow_image(xys, 500, 400, direction="up", image=image)
+        self.assertIsInstance(image2, Image.Image)
+        self.assertEqual(image2.width, 400)
+        self.assertEqual(image2.height, 300)
+        assert image == image2
+
 
 
 if __name__ == "__main__":

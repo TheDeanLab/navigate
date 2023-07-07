@@ -31,6 +31,7 @@
 #
 
 # Standard library imports
+import os
 import unittest
 from multiprocessing import Manager
 from multiprocessing.managers import DictProxy, ListProxy
@@ -126,6 +127,35 @@ class CopyProxyObjectTestCase(unittest.TestCase):
         assert copied_object["key"] == "value"
         assert isinstance(copied_object, dict)
 
+
+class TestLoadModuleFromFile(unittest.TestCase):
+
+    def setUp(self):
+        dummy_module = """
+class DummyModule:
+    def __init__(self):
+        self.dummy_variable = "hello"
+    
+    def dummy_function(self):
+        print(self.dummy_variable)
+
+        """
+        with open("dummy_module.py", "w") as f:
+            f.write(dummy_module)
+
+    def tearDown(self):
+        os.remove("dummy_module.py")
+
+    def test_load_module(self):
+        module = common_functions.load_module_from_file("DummyModule", "./dummy_module.py")
+        self.assertIsNotNone(module)
+        self.assertTrue(hasattr(module, "DummyModule"))
+        self.assertTrue(hasattr(module.DummyModule, "dummy_function"))
+
+    def test_invalid_module_file(self):
+
+        with self.assertRaises(FileNotFoundError):
+            common_functions.load_module_from_file("nonexistent_module", "./dummy_module2.py")
 
 if __name__ == "__main__":
     unittest.main()

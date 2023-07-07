@@ -2,9 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only
-# (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -29,38 +28,19 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+#
 
-from time import time
+import tkinter as tk
+from PIL import Image, ImageTk
 
+from aslm.tools.image import create_arrow_image
 
-def function_timer(func):
-    """Decorator for evaluating the duration of time necessary to execute a statement.
+class ArrowLabel(tk.Label):
+    def __init__(self, master, *args, xys=[], direction="right", image_width=300, image_height=200, **kwargs):
+        super().__init__(master, *args, **kwargs)
+        img = create_arrow_image(xys, image_width, image_height, direction)
+        image_gif = img.convert("P", palette=Image.ADAPTIVE)
+        self.image = ImageTk.PhotoImage(image_gif)
+        self["image"] = self.image
 
-    Parameters
-    ----------
-    func : function
-        The function to be timed.
-
-    Returns
-    -------
-    wrap_func : function
-        The wrapped function.
-    """
-
-    def wrap_func(*args, **kwargs):
-        t1 = time()
-        result = func(*args, **kwargs)
-        t2 = time()
-        print(f"Function {func.__name__!r} executed in {(t2 - t1):.4f}s")
-        return result
-
-    return wrap_func
-
-class FeatureList(object):
-    def __init__(self, func):
-        self._feature_list = func
-        temp = func.__name__
-        self.feature_list_name = str.title(temp.replace("_", " "))
-
-    def __call__(self, *args, **kwargs):
-        return self._feature_list()
+        

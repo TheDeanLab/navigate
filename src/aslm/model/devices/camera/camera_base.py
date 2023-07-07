@@ -149,7 +149,7 @@ class CameraBase:
         """
 
         self.camera_line_interval = (full_chip_exposure_time / 1000) / (
-            shutter_width + self.y_pixels + 10
+            shutter_width + self.y_pixels - 1
         )
         exposure_time = self.camera_line_interval * shutter_width * 1000
         return exposure_time, self.camera_line_interval

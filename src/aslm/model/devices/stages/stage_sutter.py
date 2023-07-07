@@ -121,8 +121,8 @@ class SutterStage(StageBase):
         self.device_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
         # Default Operating Parameters
-        self.resolution = "high"
-        self.speed = 1300  # in units microns/s.
+        self.resolution = "low" #"high"
+        self.speed = 3000  #1300  # in units microns/s.
         self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = None, None, None
 
         # Set the resolution and velocity of the stage

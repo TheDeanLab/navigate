@@ -413,30 +413,30 @@ class MP285:
         self.safe_to_write.set()
         return command_complete
 
-    def set_relative_mode(self):
-        """Set MP285 to Relative Position Mode.
-
-        This command sets the nature of the positional values specified with the Move
-        (‘m’) command as relative positions as measured from the current position
-        (absolute position returned by the Get Current Position (‘c’) command).
-        The command sequence consists of 2 bytes: Command byte, followed by the
-        terminator. Return data consists of 1 byte (task-complete indicator).
-
-        Returns
-        -------
-        command_complete : bool
-            True if command was successful, False if not.
-        """
-        # print("calling set_relative_mode")
-        self.flush_buffers()
-        self.safe_write(bytes.fromhex("62") + bytes.fromhex("0d"))
-        response = self.serial.read(1)
-        if response == bytes.fromhex("0d"):
-            command_complete = True
-        else:
-            command_complete = False
-        self.safe_to_write.set()
-        return command_complete
+    # def set_relative_mode(self):
+    #     """Set MP285 to Relative Position Mode.
+    #
+    #     This command sets the nature of the positional values specified with the Move
+    #     (‘m’) command as relative positions as measured from the current position
+    #     (absolute position returned by the Get Current Position (‘c’) command).
+    #     The command sequence consists of 2 bytes: Command byte, followed by the
+    #     terminator. Return data consists of 1 byte (task-complete indicator).
+    #
+    #     Returns
+    #     -------
+    #     command_complete : bool
+    #         True if command was successful, False if not.
+    #     """
+    #     # print("calling set_relative_mode")
+    #     self.flush_buffers()
+    #     self.safe_write(bytes.fromhex("62") + bytes.fromhex("0d"))
+    #     response = self.serial.read(1)
+    #     if response == bytes.fromhex("0d"):
+    #         command_complete = True
+    #     else:
+    #         command_complete = False
+    #     self.safe_to_write.set()
+    #     return command_complete
 
     def refresh_display(self):
         """Refresh the display on the MP-285 controller.

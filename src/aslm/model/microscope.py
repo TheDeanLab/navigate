@@ -674,3 +674,12 @@ class Microscope:
                 f"device_connection, self.configuration, self.is_synthetic)"
             )
             self.info[device_name] = device_ref_name
+
+    def terminate(self):
+        """ Close hardware explicitly. """
+        self.camera.close_camera()
+        try:
+            # Currently only for RemoteFocusEquipmentSolutions
+            self.remote_focus_device.close_connection()
+        except AttributeError:
+            pass

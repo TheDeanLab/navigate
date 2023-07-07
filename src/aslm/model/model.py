@@ -108,6 +108,7 @@ class Model:
     """
 
     def __init__(self, USE_GPU, args, configuration=None, event_queue=None):
+        print("Model initializing")
 
         log_setup("model_logging.yml")
         self.logger = logging.getLogger(p)
@@ -609,6 +610,9 @@ class Model:
                 self.end_acquisition()
             self.active_microscope.get_stage_position()
 
+        elif command == "terminate":
+            self.terminate()
+
     def move_stage(self, pos_dict, wait_until_done=False):
         """Moves the stages.
 
@@ -1090,3 +1094,9 @@ class Model:
             data_buffer[i].shared_memory.close()
             data_buffer[i].shared_memory.unlink()
         del data_buffer
+
+    def terminate(self):
+        for microscope_name in self.microscopes:
+            self.microscopes[microscope_name].terminate()
+        for microscope_name in self.virtual_microscopes:
+           self.virtual_microscopes[microscope_name].terminate()

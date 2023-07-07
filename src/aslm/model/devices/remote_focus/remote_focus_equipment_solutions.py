@@ -197,11 +197,10 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
             self.send_command("k1\r")  # Engage servo
             logger.debug("RemoteFocusEquipmentSolutions - Servo Engaged")
 
-
     def __del__(self):
         """Close the RemoteFocusEquipmentSolutions Class"""
         logger.debug("Closing RemoteFocusEquipmentSolutions Serial Port")
-        self.serial.close()
+        self.close_connection()
 
     def read_bytes(self, num_bytes):
         """Read the specified number of bytes from RemoteFocusEquipmentSolutions.
@@ -290,7 +289,11 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
         --------
         >>> remote_focus_equipment_solutions.close_connection()
         """
-        self.serial.close()
+        try:
+            self.send_command("k0\r")
+            self.serial.close()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

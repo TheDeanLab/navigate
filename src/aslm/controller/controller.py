@@ -671,12 +671,11 @@ class Controller:
                 content_dict=self.configuration["experiment"],
                 filename="experiment.yml",
             )
-
             # self.model.run_command('stop')
             self.sloppy_stop()
             if hasattr(self, "waveform_popup_controller"):
                 self.waveform_popup_controller.save_waveform_constants()
-            self.model.terminate()
+            self.model.run_command("terminate")
             self.model = None
             self.event_queue.put(("stop", ""))
             # self.threads_pool.clear()

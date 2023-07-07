@@ -1103,8 +1103,7 @@ class Model:
         del data_buffer
 
     def terminate(self):
-        for microscope_name in self.microscopes:
-            self.microscopes[microscope_name].terminate()
+        self.active_microscope.terminate()
         for microscope_name in self.virtual_microscopes:
            self.virtual_microscopes[microscope_name].terminate()
 

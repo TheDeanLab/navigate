@@ -169,7 +169,6 @@ class Controller:
 
         # Initialize the View
         self.view = view(root)
-        self.view.root.protocol("WM_DELETE_WINDOW", self.exit_program)
 
         # Sub Gui Controllers
         self.acquire_bar_controller = AcquireBarController(
@@ -197,6 +196,9 @@ class Controller:
             self.view.camera_waveform.waveform_tab, self
         )
         self.keystroke_controller = KeystrokeController(self.view, self)
+
+        # Exit
+        self.view.root.protocol("WM_DELETE_WINDOW", self.acquire_bar_controller.exit_program)
 
         # Bonus config
         self.update_acquire_control()
@@ -678,6 +680,8 @@ class Controller:
         elif command == "exit":
             """Exit the program."""
             # Save current GUI settings to .ASLM/config/experiment.yml file.
+            self.sloppy_stop()
+
             self.update_experiment_setting()
             file_directory = os.path.join(get_aslm_path(), "config")
             save_yaml_file(
@@ -685,14 +689,14 @@ class Controller:
                 content_dict=self.configuration["experiment"],
                 filename="experiment.yml",
             )
-            # self.model.run_command('stop')
-            self.sloppy_stop()
             if hasattr(self, "waveform_popup_controller"):
                 self.waveform_popup_controller.save_waveform_constants()
+
             self.model.run_command("terminate")
             self.model = None
             self.event_queue.put(("stop", ""))
-            # self.threads_pool.clear()
+            self.threads_pool.clear()
+            sys.exit()
 
         logger.info(f"ASLM Controller - command passed from child, {command}, {args}")
 
@@ -978,12 +982,12 @@ class Controller:
                     value
                 )
 
-    def exit_program(self):
-        """Exit the program.
+    # def exit_program(self):
+    #     """Exit the program.
 
-        This function is called when the user clicks the exit button in the GUI.
-        """
-        if messagebox.askyesno("Exit", "Are you sure?"):
-            logger.info("Exiting Program")
-            self.execute("exit")
-            sys.exit()
+    #     This function is called when the user clicks the exit button in the GUI.
+    #     """
+    #     if messagebox.askyesno("Exit", "Are you sure?"):
+    #         logger.info("Exiting Program")
+    #         self.execute("exit")
+    #         sys.exit()

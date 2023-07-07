@@ -663,10 +663,14 @@ class MenuController(GUIController):
 
 
     def popup_feature_list_setting(self):
+        """Show feature list popup window
+        """
         feature_list_popup = FeatureListPopup(self.view, title="Add New Feature List")
         self.parent_controller.features_popup_controller = FeaturePopupController(feature_list_popup, self.parent_controller)
 
     def load_feature_list(self):
+        """Load feature lists from a python file
+        """
         filename = tk.filedialog.askopenfilename(
             defaultextension=".py", filetypes=[("Python files", "*.py")]
         )
@@ -709,7 +713,22 @@ class MenuController(GUIController):
         # tell model to add feature lists
         self.parent_controller.model.load_feature_list_from_file(filename, added_features)
 
-    def add_feature_list(self, feature_list_name, feature_list):
+    def add_feature_list(self, feature_list_name, feature_list_str):
+        """Add feature list to the software and system yaml files
+
+        Parameters
+        ----------
+        feature_list_name: str
+            feature list name
+        feature_list_str: str
+            string of a feature list
+
+        Returns
+        -------
+        result : bool
+            True: add feature list successfully
+            False: failed
+        """
         feature_lists_path = get_aslm_path() + "/feature_lists"
         if os.path.exists(f"{feature_lists_path}/{'_'.join(feature_list_name)}.yml"):
             return False
@@ -721,7 +740,7 @@ class MenuController(GUIController):
         save_yaml_file(feature_lists_path, {
             "module_name": None,
             "feature_list_name": feature_list_name,
-            "feature_list": feature_list
+            "feature_list": feature_list_str
         }, f"{'_'.join(feature_list_name.split(' '))}.yml")
         feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
         feature_records.append({
@@ -729,12 +748,14 @@ class MenuController(GUIController):
             "yaml_file_name": "_".join(feature_list_name.split(" ")) + ".yml"
         })
         # tell model to add feature lists
-        self.parent_controller.model.load_feature_list_from_str(feature_list)
+        self.parent_controller.model.load_feature_list_from_str(feature_list_str)
         # save feature records
         save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
         return True
 
     def delete_feature_list(self):
+        """Delete a selected customized feature list from the software and system yaml file
+        """
         feature_id = self.feature_id_val.get()
         if feature_id < self.system_feature_list_count:
             messagebox.showerror(title="Feature List Error",

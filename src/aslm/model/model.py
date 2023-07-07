@@ -113,8 +113,7 @@ class Model:
     """
 
     def __init__(self, USE_GPU, args, configuration=None, event_queue=None):
-        print("Model initializing")
-
+        
         log_setup("model_logging.yml")
         self.logger = logging.getLogger(p)
 
@@ -1108,7 +1107,7 @@ class Model:
             self.microscopes[microscope_name].terminate()
         for microscope_name in self.virtual_microscopes:
            self.virtual_microscopes[microscope_name].terminate()
-           
+
     def load_feature_list_from_file(self, filename, features):
         module = load_module_from_file(filename[filename.rindex("/")+1:], filename)
         for name in features:

@@ -202,8 +202,7 @@ class Model:
         # automatically switch resolution
         self.feature_list.append(
             [
-                [{"name": ChangeResolution, "args": ("1x",)}, {"name": Snap}],
-                [{"name": ChangeResolution, "args": ("high",)}, {"name": Snap}],
+                {"name": ChangeResolution, "args": ("Mesoscale", "1x")}, {"name": Snap},
             ]
         )
         # z stack acquisition
@@ -1105,10 +1104,20 @@ class Model:
             feature = getattr(module, name)
             self.feature_list.append(feature())
 
-    def load_feature_list_from_str(self, feature_list):
-        self.feature_list.append(convert_str_to_feature_list(feature_list))
+    def load_feature_list_from_str(self, feature_list_str):
+        """Append feature list from feature_list_str
+        
+        Parameters
+        ----------
+        feature_list_str: str
+            str of a feature list
+        """
+        self.feature_list.append(convert_str_to_feature_list(feature_list_str))
 
     def load_feature_records(self):
+        """Load installed feature lists from system folder '..../.ASLM/feature_lists'
+        
+        """
         feature_lists_path = get_aslm_path() + "/feature_lists"
         if not os.path.exists(feature_lists_path):
             os.makedirs(feature_lists_path)
@@ -1158,6 +1167,19 @@ class Model:
         save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
 
     def get_feature_list(self, idx):
+        """Get feature list str by index
+
+        Parameters
+        ----------
+        idx: int
+            index of feature list
+
+        Return
+        ------
+        feature_list_str: str
+            "" if not exist
+            string of the feature list
+        """
         if idx > 0 and idx <= len(self.feature_list):
             return convert_feature_list_to_str(self.feature_list[idx-1])
         return ""

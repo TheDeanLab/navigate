@@ -30,9 +30,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-import random
-
 import pytest
+import os
 
 
 @pytest.fixture(scope="module")
@@ -179,3 +178,57 @@ def test_change_resolution(model):
 
         assert model.active_microscope_name == scope
         assert model.active_microscope.zoom.zoomvalue == zoom
+
+def test_get_feature_list(model):
+
+    feature_lists = model.feature_list
+
+    assert model.get_feature_list(0) == ""
+    assert model.get_feature_list(len(feature_lists) + 1) == ""
+
+    from aslm.model.features.feature_related_functions import convert_str_to_feature_list
+    for i in range(len(feature_lists)):
+        assert convert_str_to_feature_list(model.get_feature_list(i+1)) == feature_lists[i]
+
+def test_load_feature_list_from_str(model):
+    feature_lists = model.feature_list
+
+    l = len(feature_lists)
+    model.load_feature_list_from_str('[{"name": PrepareNextChannel}]')
+    assert len(feature_lists) == l+1
+    from aslm.model.features.feature_related_functions import convert_feature_list_to_str
+    assert convert_feature_list_to_str(feature_lists[-1]) == '[{"name": PrepareNextChannel,},]'
+    del feature_lists[-1]
+
+
+def test_load_feature_records(model):
+    feature_lists = model.feature_list
+    l = len(feature_lists)
+
+    from aslm.config.config import get_aslm_path
+    from aslm.tools.file_functions import save_yaml_file, load_yaml_file
+    from aslm.model.features.feature_related_functions import convert_feature_list_to_str
+
+    feature_lists_path = get_aslm_path() + "/feature_lists"
+
+    if not os.path.exists(feature_lists_path):
+        os.makedirs(feature_lists_path)
+    save_yaml_file(feature_lists_path,
+    {
+        "module_name": None,
+        "feature_list_name": "Test Feature List 1",
+        "feature_list": "[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3,)})]"
+    }, '__test_1.yml')
+
+    model.load_feature_records()
+    assert len(feature_lists) == l+1
+    assert convert_feature_list_to_str(feature_lists[-1]) == '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,)},),]'
+
+    del feature_lists[-1]
+    os.remove(f"{feature_lists_path}/__test_1.yml")
+
+    model.load_feature_records()
+    assert len(feature_lists) == l
+    feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+    assert feature_records == []
+    os.remove(f"{feature_lists_path}/__sequence.yml")

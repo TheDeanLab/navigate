@@ -96,6 +96,12 @@ class TestCreateArrowImage(unittest.TestCase):
         self.assertEqual(image2.height, 300)
         assert image == image2
 
+        image3 = create_arrow_image(xys, 500, 400, direction="down", image=image)
+        self.assertIsInstance(image3, Image.Image)
+        self.assertEqual(image3.width, 400)
+        self.assertEqual(image3.height, 300)
+        assert image == image3
+
 
 
 if __name__ == "__main__":

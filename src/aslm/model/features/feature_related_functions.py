@@ -112,6 +112,10 @@ def convert_feature_list_to_str(feature_list):
                 result += '('
                 f(item)
                 result += '),'
+            elif type(item) is list:
+                result += '['
+                f(item)
+                result += '],'
     
     f(feature_list)
     result += ']'

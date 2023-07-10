@@ -369,11 +369,18 @@ class Autofocus:
 
         else:
             self.init_pos = self.autofocus_pos_queue.get(timeout=self.coarse_steps * 10)
-            self.model.move_stage({"f_abs": self.init_pos}, wait_until_done=True)
-            # self.model.logger.debug(f"*** Autofocus move stage: (f, {self.init_pos})")
-            # self.model.logger.debug(
-            #     f"*** Autofocus stage position: {self.model.get_stage_position()}"
-            # )
+            if self.device == "stage":
+                self.model.move_stage(
+                    {f"{self.device_ref}_abs": self.init_pos}, wait_until_done=True
+                )
+                self.model.logger.debug(
+                    f"*** Autofocus move stage: ({self.device_ref}, {self.init_pos})"
+                )
+            elif self.device == "remote_focus":
+                self.model.active_microscope.move_remote_focus(self.init_pos)
+                self.model.logger.debug(
+                    f"*** Autofocus move remote focus: {self.init_pos}"
+                )
 
         self.signal_id += 1
         return self.init_pos if self.signal_id > self.total_frame_num else None

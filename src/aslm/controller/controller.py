@@ -217,6 +217,7 @@ class Controller:
         self.data_buffer = None
         self.additional_microscopes = {}
         self.additional_microscopes_configs = {}
+        self.stop_acquisition_flag = False
 
         # Set view based on model.experiment
         self.populate_experiment_setting(in_initialize=True)
@@ -632,6 +633,8 @@ class Controller:
             args[0] : string
                 string = 'continuous', 'z-stack', 'single', or 'projection'
             """
+            self.stop_acquisition_flag = False
+
             # Prepare data
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
@@ -671,9 +674,14 @@ class Controller:
 
         elif command == "stop_acquire":
             """Stop the acquisition."""
+            self.stop_acquisition_flag = True
 
             # self.model.run_command('stop')
             self.sloppy_stop()
+
+            # clear show_img_pipe
+            while self.show_img_pipe.poll():
+                image_id = self.show_img_pipe.recv()
 
         elif command == "exit":
             """Exit the program."""
@@ -761,6 +769,8 @@ class Controller:
         )
 
         while True:
+            if self.stop_acquisition_flag:
+                break
             # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
             logger.info(f"ASLM Controller - Received Image: {image_id}")
@@ -808,6 +818,8 @@ class Controller:
         def display_images(camera_view_controller, show_img_pipe, data_buffer):
             images_received = 0
             while True:
+                if self.stop_acquisition_flag:
+                    break
                 # Receive the Image and log it.
                 image_id = show_img_pipe.recv()
                 logger.info(f"ASLM Controller - Received Image: {image_id}")
@@ -882,6 +894,13 @@ class Controller:
                         ),
                     ),
                 )
+
+            # clear show_img_pipe
+            show_img_pipe = self.additional_microscopes[microscope_name]["show_img_pipe"]
+            while show_img_pipe.poll():
+                image_id = show_img_pipe.recv()
+                if image_id == "stop":
+                    break
 
             # start thread
             capture_img_thread = threading.Thread(

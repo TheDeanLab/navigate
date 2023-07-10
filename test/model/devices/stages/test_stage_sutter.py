@@ -87,10 +87,10 @@ class MockMP285Stage:
             self.output_buffer.append(bytes.fromhex("0d"))
 
     def read_until(self, expected, size=100):
-        return self.output_buffer[0]
+        return self.output_buffer.pop(0)
 
     def read(self, byte_num=1):
-        return self.output_buffer[0]
+        return self.output_buffer.pop(0)
 
     def __getattr__(self, __name: str):
         return self.ignore_obj

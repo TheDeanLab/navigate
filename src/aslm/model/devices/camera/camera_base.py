@@ -153,3 +153,6 @@ class CameraBase:
         )
         exposure_time = self.camera_line_interval * shutter_width * 1000
         return exposure_time, self.camera_line_interval
+
+    def close_camera(self):
+        pass

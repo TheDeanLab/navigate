@@ -464,7 +464,6 @@ class AcquireBarController(GUIController):
             self.show_verbose_info("Exiting Program")
             # call the central controller to stop all the threads
             self.parent_controller.execute("exit")
-            sys.exit()
 
     def populate_experiment_values(self):
         """Populate the experiment values from the config file.

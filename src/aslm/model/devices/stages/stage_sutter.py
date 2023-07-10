@@ -121,8 +121,8 @@ class SutterStage(StageBase):
         self.device_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
         # Default Operating Parameters
-        self.resolution = "high"
-        self.speed = 1300  # in units microns/s.
+        self.resolution = "low" #"high"
+        self.speed = 3000  #1300  # in units microns/s.
         self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = None, None, None
 
         # Set the resolution and velocity of the stage
@@ -174,20 +174,18 @@ class SutterStage(StageBase):
             Dictionary containing the position of all axes
         """
         position = {}
-        for _ in range(10):
-            try:
-                self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = self.stage.get_current_position()
-                for axis, hardware_axis in self.axes_mapping.items():
-                    hardware_position = getattr(self, f"stage_{hardware_axis}_pos")
-                    self.__setattr__(f"{axis}_pos", hardware_position)
+        try:
+            self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = self.stage.get_current_position()
+            for axis, hardware_axis in self.axes_mapping.items():
+                hardware_position = getattr(self, f"stage_{hardware_axis}_pos")
+                self.__setattr__(f"{axis}_pos", hardware_position)
 
-                position = self.get_position_dict()
-                logger.debug(f"MP-285 - Position: {position}")
-                break
-            except SerialException as e:
-                print("MP-285: Failed to report position.")
-                logger.debug(f"MP-285 - Error: {e}")
-                time.sleep(0.01)
+            position = self.get_position_dict()
+            logger.debug(f"MP-285 - Position: {position}")
+        except SerialException as e:
+            print("MP-285: Failed to report position.")
+            logger.debug(f"MP-285 - Error: {e}")
+            time.sleep(0.01)
 
         return position
     
@@ -235,9 +233,9 @@ class SutterStage(StageBase):
         if not pos_dict:
             return False
 
-        # if not moving x, y, and z together, need to get current positions
-        if len(pos_dict.keys()) < 3:
-            self.report_position()
+        # rely on cached positions
+        # if len(pos_dict.keys()) < 3:
+        #     self.report_position()
 
         for axis in pos_dict:
             setattr(self, f"stage_{self.axes_mapping[axis]}_pos", pos_dict[axis])
@@ -264,3 +262,4 @@ class SutterStage(StageBase):
             self.stage.interrupt_move()
         except SerialException as error:
             logger.exception(f"MP-285 - Stage stop failed: {error}")
+

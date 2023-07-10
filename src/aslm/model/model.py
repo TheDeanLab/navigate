@@ -113,7 +113,7 @@ class Model:
     """
 
     def __init__(self, USE_GPU, args, configuration=None, event_queue=None):
-
+        
         log_setup("model_logging.yml")
         self.logger = logging.getLogger(p)
 
@@ -615,6 +615,10 @@ class Model:
                 self.data_thread.join()
             else:
                 self.end_acquisition()
+            self.active_microscope.get_stage_position()
+
+        elif command == "terminate":
+            self.terminate()
 
     def move_stage(self, pos_dict, wait_until_done=False):
         """Moves the stages.
@@ -901,6 +905,9 @@ class Model:
         self.stop_acquisition = False
         while self.stop_acquisition is False and self.stop_send_signal is False:
             self.run_acquisition()
+        # Update the stage position.
+        # Allows the user to externally move the stage in the continuous mode.
+        self.get_stage_position()
 
     def run_acquisition(self):
         """Run acquisition along with a feature list one time."""
@@ -1094,6 +1101,11 @@ class Model:
             data_buffer[i].shared_memory.close()
             data_buffer[i].shared_memory.unlink()
         del data_buffer
+
+    def terminate(self):
+        self.active_microscope.terminate()
+        for microscope_name in self.virtual_microscopes:
+           self.virtual_microscopes[microscope_name].terminate()
 
     def load_feature_list_from_file(self, filename, features):
         module = load_module_from_file(filename[filename.rindex("/")+1:], filename)

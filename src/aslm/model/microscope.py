@@ -162,6 +162,9 @@ class Microscope:
                 ):
                     device_connection = self.daq
 
+                if device_ref_name.startswith("EquipmentSolutions"):
+                    device_connection = self.daq
+
                 if device_ref_name.startswith("ASI") and self.tiger_controller is None:
                     # The first ASI instance of a device connection will be passed to
                     # all other ASI devices as self.tiger_controller
@@ -671,3 +674,12 @@ class Microscope:
                 f"device_connection, self.configuration, self.is_synthetic)"
             )
             self.info[device_name] = device_ref_name
+
+    def terminate(self):
+        """ Close hardware explicitly. """
+        self.camera.close_camera()
+        try:
+            # Currently only for RemoteFocusEquipmentSolutions
+            self.remote_focus_device.close_connection()
+        except AttributeError:
+            pass

@@ -807,8 +807,12 @@ def start_remote_focus_device(
 
     if device_type == "NI":
         from aslm.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
-
         return RemoteFocusNI(microscope_name, device_connection, configuration)
+
+    elif device_type == "EquipmentSolutions":
+        from aslm.model.devices.remote_focus.remote_focus_equipment_solutions import RemoteFocusEquipmentSolutions
+        return RemoteFocusEquipmentSolutions(microscope_name, device_connection, configuration)
+
     elif (
         device_type.lower() == "syntheticremotefocus"
         or device_type.lower() == "synthetic"
@@ -816,8 +820,8 @@ def start_remote_focus_device(
         from aslm.model.devices.remote_focus.remote_focus_synthetic import (
             SyntheticRemoteFocus,
         )
-
         return SyntheticRemoteFocus(microscope_name, device_connection, configuration)
+
     else:
         device_not_found(microscope_name, "remote_focus", device_type)
 

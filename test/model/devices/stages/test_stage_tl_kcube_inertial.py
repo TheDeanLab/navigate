@@ -31,43 +31,68 @@
 #
 
 # Standard Library Imports
-import unittest
+import pytest
+import random
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
-from aslm.model.dummy import DummyModel
 
 
-class TestStageTlKCubeInertial(unittest.TestCase):
+class MockKimController:
+    # mocks single serial number device
+    def __init__(self, ignore_obj):
+        self.axes = [1, 2, 3, 4]
+        self.ignore_obj = ignore_obj
+
+        for axis in self.axes:
+            setattr(self, f"{axis}_abs", 0)
+
+    def KIM_RequestCurrentPosition(self, serial_number, axis):
+        pass
+
+    def KIM_GetCurrentPosition(self, serial_number, axis):
+        return getattr(self, f"{axis}_abs", 0)
+    
+    def KIM_MoveAbsolute(self, serial_number, axis, pos: int):
+        if axis in self.axes:
+            setattr(self, f"{axis}_abs", int(pos))
+
+    def __getattr__(self, __name: str):
+        return self.ignore_obj
+    
+
+@pytest.fixture
+def kim_controller(ignore_obj):
+    return MockKimController(ignore_obj)
+
+
+class TestStageTlKCubeInertial:
     """Unit Test for StageBase Class"""
 
-    def test_stage_attributes(self):
-        dummy_model = DummyModel()
-        microscope_name = "Mesoscale"
-        stage = TLKIMStage(microscope_name, None, dummy_model.configuration)
+    @pytest.fixture(autouse=True)
+    def setup_class(self, stage_configuration, kim_controller, random_single_axis_test, random_multiple_axes_test):
+        self.microscope_name = "Mesoscale"
+        self.configuration = {
+            "configuration": {
+                "microscopes": {
+                    self.microscope_name: stage_configuration
+                }
+            }
+        }
+        self.stage_configuration = stage_configuration
+        self.stage_configuration["stage"]["hardware"]["type"] = "Thorlabs"
+        self.kim_controller = kim_controller
+        self.random_single_axis_test = random_single_axis_test
+        self.random_multiple_axes_test = random_multiple_axes_test
 
-        # Attributes
-        assert hasattr(stage, "x_pos")
-        assert hasattr(stage, "y_pos")
-        assert hasattr(stage, "z_pos")
-        assert hasattr(stage, "f_pos")
-        assert hasattr(stage, "theta_pos")
-        assert hasattr(stage, "position_dict")
-        assert hasattr(stage, "x_max")
-        assert hasattr(stage, "y_max")
-        assert hasattr(stage, "z_max")
-        assert hasattr(stage, "f_max")
-        assert hasattr(stage, "x_min")
-        assert hasattr(stage, "y_min")
-        assert hasattr(stage, "z_min")
-        assert hasattr(stage, "f_min")
-        assert hasattr(stage, "theta_min")
+    def test_stage_attributes(self):
+        stage = TLKIMStage(self.microscope_name, None, self.configuration)
 
         # Methods
-        assert hasattr(stage, "create_position_dict") and callable(
-            getattr(stage, "create_position_dict")
+        assert hasattr(stage, "get_position_dict") and callable(
+            getattr(stage, "get_position_dict")
         )
         assert hasattr(stage, "report_position") and callable(
             getattr(stage, "report_position")
@@ -83,6 +108,126 @@ class TestStageTlKCubeInertial(unittest.TestCase):
             getattr(stage, "get_abs_position")
         )
 
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x", "y", "z", "f"], None),
+            (["x"], [1]),
+            (["y"], [3]),
+            (["x", "z"], [3, 1]),
+            (["f", "z"], [1, 4]),
+            (["x", "y", "z"], [1, 2, 4]),
+            (["x", "y", "z", "f"], [1, 3, 2, 4]),
+        ],
+    )
+    def test_initialize_stage(self, axes, axes_mapping):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        stage = TLKIMStage(self.microscope_name, None, self.configuration)
 
-if __name__ == "__main__":
-    unittest.main()
+        # Attributes
+        for axis in axes:
+            assert hasattr(stage, f"{axis}_pos")
+            assert hasattr(stage, f"{axis}_min")
+            assert hasattr(stage, f"{axis}_max")
+            assert getattr(stage, f"{axis}_pos") == 0
+            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
+            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
+
+        if axes_mapping is None:
+            # using default mapping which is hard coded in stage_pi.py
+            default_mapping = {"x": 4, "y": 2, "z": 3, "f": 1}
+            for axis, device_axis in stage.axes_mapping.items():
+                assert default_mapping[axis] == device_axis
+            assert len(stage.axes_mapping) <= len(stage.axes)
+        else:
+            for i, axis in enumerate(axes):
+                assert stage.axes_mapping[axis] == axes_mapping[i]
+
+        assert stage.stage_limits == True
+
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x", "y", "z", "f"], None),
+            (["x"], [1]),
+            (["y"], [3]),
+            (["x", "z"], [3, 1]),
+            (["f", "z"], [1, 4]),
+            (["x", "y", "z"], [1, 2, 4]),
+            (["x", "y", "z", "f"], [1, 3, 2, 4]),
+        ],
+    )
+    def test_report_position(self, axes, axes_mapping):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        stage = TLKIMStage(self.microscope_name, self.kim_controller, self.configuration)
+
+        for _ in range(10):
+            pos_dict = {}
+            for axis in axes:
+                pos = random.randrange(-100, 500)
+                pos_dict[f"{axis}_pos"] = float(pos)
+                setattr(self.kim_controller, f"{stage.axes_mapping[axis]}_abs", pos)
+            temp_pos = stage.report_position()
+            assert pos_dict == temp_pos
+
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x", "y", "z", "f"], None),
+            (["x"], [1]),
+            (["y"], [3]),
+            (["x", "z"], [3, 1]),
+            (["f", "z"], [1, 4]),
+            (["x", "y", "z"], [1, 2, 4]),
+            (["x", "y", "z", "f"], [1, 3, 2, 4]),
+        ],
+    )
+    def test_move_axis_absolute(self, axes, axes_mapping):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        stage = TLKIMStage(self.microscope_name, self.kim_controller, self.configuration)
+        self.random_single_axis_test(stage)
+        stage.stage_limits = False
+        self.random_single_axis_test(stage)
+
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x", "y", "z", "f"], None),
+            (["x"], [1]),
+            (["y"], [3]),
+            (["x", "z"], [3, 1]),
+            (["f", "z"], [1, 4]),
+            (["x", "y", "z"], [1, 2, 4]),
+            (["x", "y", "z", "f"], [1, 3, 2, 4]),
+        ],
+    )
+    def test_move_absolute(self, axes, axes_mapping):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        stage = TLKIMStage(self.microscope_name, self.kim_controller, self.configuration)
+        self.random_multiple_axes_test(stage)
+        stage.stage_limits = False
+        self.random_multiple_axes_test(stage)

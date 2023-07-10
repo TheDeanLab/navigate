@@ -48,7 +48,6 @@ StageParameters:
   f: 66122.8
 MicroscopeState:
   microscope_name: Mesoscale
-  resolution_mode: Mesoscale
   image_mode: live
   zoom: 1x
   stack_cycling_mode: per_stack
@@ -63,11 +62,11 @@ MicroscopeState:
   timepoint_interval: 0
   experiment_duration: 600.0899999999995
   is_multiposition: False
-  multipostion_count: 2
+  multiposition_count: 2
   selected_channels: 3
   channels: {'channel_1': {'is_selected': True, 'laser': '488nm', 'laser_index': 0, 'filter': 'GFP - FF01-515/30-32', 'filter_position': 1, 'camera_exposure_time': 200.0, 'laser_power': '20', 'interval_time': '1', 'defocus': 0.0}, 'channel_2': {'is_selected': True, 'laser': '562nm', 'laser_index': 1, 'filter': 'RFP - FF01-595/31-32', 'filter_position': 2, 'camera_exposure_time': 200.0, 'laser_power': '20', 'interval_time': '1', 'defocus': 0.0}, 'channel_3': {'is_selected': True, 'laser': '642nm', 'laser_index': 2, 'filter': 'Far-Red - BLP01-647R/31-32', 'filter_position': 3, 'camera_exposure_time': 200.0, 'laser_power': '20', 'interval_time': '1', 'defocus': 0.0}}
-  stack_z_origin: 0
-  stack_focus_origin: 0
+  stack_z_origin: 0.0
+  stack_focus_origin: 0.0
   start_focus: 0.0
   end_focus: 0.0
   abs_z_start: 0.0

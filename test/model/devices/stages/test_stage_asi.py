@@ -31,42 +31,116 @@
 #
 
 # Standard Library Imports
-import unittest
+import pytest
+import random
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.devices.stages.stage_asi import ASIStage
-from aslm.model.dummy import DummyModel
+from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController
+
+class MockASIStage:
+    def __init__(self, ignore_obj):
+        self.axes = ["X", "Y", "Z", "M", "N"]
+        self.is_open = False
+        self.input_buffer = []
+        self.output_buffer = []
+        self.ignore_obj = ignore_obj
+
+        for axis in self.axes:
+            setattr(self, f"{axis}_abs", 0)
+    
+    def open(self):
+        self.is_open = True
+
+    def reset_input_buffer(self):
+        self.input_buffer = []
+
+    def reset_output_buffer(self):
+        self.output_buffer = []
+        
+    def write(self, command):
+        command = command.decode(encoding="ascii")[:-1]
+        temps = command.split()
+        command = temps[0]
+        if command == "WHERE":
+            axes = temps[1:]
+            pos = [":A"]
+            for axis in self.axes:
+                if axis not in axes:
+                    continue
+                pos.append(str(getattr(self, f"{axis}_abs")))
+            self.output_buffer.append(" ".join(pos))
+        elif command == "MOVE":
+            success = True
+            for i in range(1, len(temps)):
+                axis, pos = temps[i].split("=")
+                if axis in self.axes:
+                    setattr(self, f"{axis}_abs", float(pos))
+                else:
+                    success = False
+            if success:
+                self.output_buffer.append(":A")
+            else:
+                self.output_buffer.append(":N")
+
+        elif command == "/":
+            self.output_buffer.append(":A")
+        elif command == "HALT":
+            self.output_buffer.append(":A")
+        elif command == "SPEED":
+            self.output_buffer.append(":A")
 
 
-class TestStageASI(unittest.TestCase):
+    def readline(self):
+        return bytes(self.output_buffer[0], encoding="ascii")
+
+
+    def __getattr__(self, __name: str):
+        return self.ignore_obj
+    
+
+@pytest.fixture
+def asi_serial_device(ignore_obj):
+    return MockASIStage(ignore_obj)
+
+
+
+class TestStageASI:
     """Unit Test for ASI Stage Class"""
 
+    @pytest.fixture(autouse=True)
+    def setup_class(self, stage_configuration, asi_serial_device, random_single_axis_test, random_multiple_axes_test):
+        self.microscope_name = "Mesoscale"
+        self.configuration = {
+            "configuration": {
+                "microscopes": {
+                    self.microscope_name: stage_configuration
+                }
+            }
+        }
+        self.stage_configuration = stage_configuration
+        self.stage_configuration["stage"]["hardware"]["type"] = "ASI"
+        self.asi_serial_device = asi_serial_device
+        self.random_single_axis_test = random_single_axis_test
+        self.random_multiple_axes_test = random_multiple_axes_test
+
+    def build_device_connection(self):
+        port = self.stage_configuration["stage"]["hardware"]["port"]
+        baudrate = self.stage_configuration["stage"]["hardware"]["baudrate"]
+
+        asi_stage = TigerController(port, baudrate)
+        asi_stage.serial_port = self.asi_serial_device
+        asi_stage.connect_to_serial()
+        return asi_stage
+
     def test_stage_attributes(self):
-        dummy_model = DummyModel()
-        microscope_name = "Mesoscale"
-        stage = ASIStage(microscope_name, None, dummy_model.configuration)
-        # Attributes
-        assert hasattr(stage, "x_pos")
-        assert hasattr(stage, "y_pos")
-        assert hasattr(stage, "z_pos")
-        assert hasattr(stage, "f_pos")
-        assert hasattr(stage, "theta_pos")
-        assert hasattr(stage, "position_dict")
-        assert hasattr(stage, "x_max")
-        assert hasattr(stage, "y_max")
-        assert hasattr(stage, "z_max")
-        assert hasattr(stage, "f_max")
-        assert hasattr(stage, "x_min")
-        assert hasattr(stage, "y_min")
-        assert hasattr(stage, "z_min")
-        assert hasattr(stage, "f_min")
-        assert hasattr(stage, "theta_min")
+        stage = ASIStage(self.microscope_name, None, self.configuration)
 
         # Methods
-        assert hasattr(stage, "create_position_dict") and callable(
-            getattr(stage, "create_position_dict")
+        assert hasattr(stage, "get_position_dict") and callable(
+            getattr(stage, "get_position_dict")
         )
         assert hasattr(stage, "report_position") and callable(
             getattr(stage, "report_position")
@@ -82,6 +156,130 @@ class TestStageASI(unittest.TestCase):
             getattr(stage, "get_abs_position")
         )
 
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x", "y", "z", "f"], None),
+            (["x"], ["Y"]),
+            (["y"], ["Z"]),
+            (["x", "z"], ["X", "Y"]),
+            (["f", "z"], ["M", "X"]),
+            (["x", "y", "z"], ["Y", "X", "M"]),
+            (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+        ],
+    )
+    def test_initialize_stage(self, axes, axes_mapping):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        stage = ASIStage(self.microscope_name, None, self.configuration)
 
-if __name__ == "__main__":
-    unittest.main()
+        # Attributes
+        for axis in axes:
+            assert hasattr(stage, f"{axis}_pos")
+            assert hasattr(stage, f"{axis}_min")
+            assert hasattr(stage, f"{axis}_max")
+            assert getattr(stage, f"{axis}_pos") == 0
+            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
+            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
+
+        if axes_mapping is None:
+            # using default mapping which is hard coded in stage_pi.py
+            default_mapping = {"x": "Z", "y": "Y", "z": "X", "f": "M"}
+            for axis, device_axis in stage.axes_mapping.items():
+                assert default_mapping[axis] == device_axis
+            assert len(stage.axes_mapping) <= len(stage.axes)
+        else:
+            for i, axis in enumerate(axes):
+                assert stage.axes_mapping[axis] == axes_mapping[i]
+
+        assert stage.stage_limits == True
+
+
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x", "y", "z", "f"], None),
+            (["x"], ["Y"]),
+            (["y"], ["Z"]),
+            (["x", "z"], ["X", "Y"]),
+            (["f", "z"], ["M", "X"]),
+            (["x", "y", "z"], ["Y", "X", "M"]),
+            (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+        ],
+    )
+    def test_report_position(self, axes, axes_mapping):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        asi_stage = self.build_device_connection()
+        stage = ASIStage(self.microscope_name, asi_stage, self.configuration)
+
+        for _ in range(10):
+            pos_dict = {}
+            for axis in axes:
+                pos = random.randrange(-100, 500)
+                pos_dict[f"{axis}_pos"] = float(pos)
+                setattr(asi_stage.serial_port, f"{stage.axes_mapping[axis]}_abs", pos*10.0)
+            temp_pos = stage.report_position()
+            assert pos_dict == temp_pos
+
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x", "y", "z", "f"], None),
+            (["x"], ["Y"]),
+            (["y"], ["Z"]),
+            (["x", "z"], ["X", "Y"]),
+            (["f", "z"], ["M", "X"]),
+            (["x", "y", "z"], ["Y", "X", "M"]),
+            (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+        ],
+    )
+    def test_move_axis_absolute(self, axes, axes_mapping):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        asi_stage = self.build_device_connection()
+        stage = ASIStage(self.microscope_name, asi_stage, self.configuration)
+        self.random_single_axis_test(stage)
+        stage.stage_limits = False
+        self.random_single_axis_test(stage)
+
+    @pytest.mark.parametrize(
+        "axes, axes_mapping",
+        [
+            (["x"], None),
+            (["y"], None),
+            (["x", "z"], None),
+            (["f", "z"], None),
+            (["x", "y", "z"], None),
+            (["x", "y", "z", "f"], None),
+            (["x"], ["Y"]),
+            (["y"], ["Z"]),
+            (["x", "z"], ["X", "Y"]),
+            (["f", "z"], ["M", "X"]),
+            (["x", "y", "z"], ["Y", "X", "M"]),
+            (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+        ],
+    )
+    def test_move_absolute(self, axes, axes_mapping):
+        self.stage_configuration["stage"]["hardware"]["axes"] = axes
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        asi_stage = self.build_device_connection()
+        stage = ASIStage(self.microscope_name, asi_stage, self.configuration)
+        self.random_multiple_axes_test(stage)
+        stage.stage_limits = False
+        self.random_multiple_axes_test(stage)

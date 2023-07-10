@@ -61,7 +61,9 @@ def build_MP285_connection(com_port, baud_rate, timeout=0.25):
         MP285 SutterStage.
     """
     try:
-        return MP285(com_port, baud_rate, timeout)
+        mp285_stage = MP285(com_port, baud_rate, timeout)
+        mp285_stage.connect_to_serial()
+        return mp285_stage
     except SerialException as e:
         logger.debug(f"Sutter MP-285 - Could not establish Serial Port Connection: {e}")
         raise UserWarning(
@@ -100,18 +102,8 @@ class SutterStage(StageBase):
         Set the filter wheel to the empty position and close the communication port.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration, device_id):
+    def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
-
-        # Default mapping from self.axes to corresponding ASI axis labelling
-        axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
-
-        # Focus and Theta axes are not supported for Sutter Stage. Values are pulled
-        # from the configuration file (e.g., [x, y, z, theta, f])
-        if "theta" in self.axes:
-            self.axes.remove("theta")
-        if "f" in self.axes:
-            self.axes.remove("f")
 
         # Device Connection
         if device_connection is None:
@@ -121,13 +113,16 @@ class SutterStage(StageBase):
         self.stage = device_connection
         self.stage.wait_until_done = True
 
-        # Non-default axes_mapping
-        self.axes_mapping = {x: y for x, y in zip(self.axes, ["x", "y", "z"])}
+        # Default mapping from self.axes to corresponding MP285 axis labelling
+        axes_mapping = {"x": "x", "y": "y", "z": "z"}
+        if not self.axes_mapping:
+            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
+
+        self.device_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
         # Default Operating Parameters
-        self.resolution = "high"
-        self.speed = 1300  # in units microns/s.
-        self.x_pos, self.y_pos, self.z_pos = None, None, None
+        self.resolution = "low" #"high"
+        self.speed = 3000  #1300  # in units microns/s.
         self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = None, None, None
 
         # Set the resolution and velocity of the stage
@@ -178,23 +173,44 @@ class SutterStage(StageBase):
         position_dict : dict
             Dictionary containing the position of all axes
         """
-        for _ in range(10):
-            try:
-                self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = self.stage.get_current_position()
-                for hardware_axis in self.axes:
-                    hardware_position = getattr(self, f"stage_{hardware_axis}_pos")
-                    self.__setattr__(f"{self.axes_mapping[hardware_axis]}_pos", hardware_position)
+        position = {}
+        try:
+            self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = self.stage.get_current_position()
+            for axis, hardware_axis in self.axes_mapping.items():
+                hardware_position = getattr(self, f"stage_{hardware_axis}_pos")
+                self.__setattr__(f"{axis}_pos", hardware_position)
 
-                position = {"x": self.x_pos, "y": self.y_pos, "z": self.z_pos}
-                logger.debug(f"MP-285 - Position: {position}")
-                break
-            except SerialException as e:
-                print("MP-285: Failed to report position.")
-                logger.debug(f"MP-285 - Error: {e}")
-                time.sleep(0.01)
+            position = self.get_position_dict()
+            logger.debug(f"MP-285 - Position: {position}")
+        except SerialException as e:
+            print("MP-285: Failed to report position.")
+            logger.debug(f"MP-285 - Error: {e}")
+            time.sleep(0.01)
 
-        self.create_position_dict()
-        return self.position_dict
+        return position
+    
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+        """
+        Implement movement logic along a single axis.
+
+        Example calls:
+
+        Parameters
+        ----------
+        axis : str
+            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
+        abs_pos : float
+            Absolute position value
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
+
+        Returns
+        -------
+        bool
+            Was the move successful?
+        """
+        move_dictionary = {f"{axis}_abs": abs_pos}
+        return self.move_absolute(move_dictionary, wait_until_done)
 
     def move_absolute(self, move_dictionary, wait_until_done=True):
         """Move stage along a single axis.
@@ -213,30 +229,27 @@ class SutterStage(StageBase):
         bool
             Was the move successful?
         """
+        pos_dict = self.verify_abs_position(move_dictionary)
+        if not pos_dict:
+            return False
+
+        # rely on cached positions
+        # if len(pos_dict.keys()) < 3:
+        #     self.report_position()
+
+        for axis in pos_dict:
+            setattr(self, f"stage_{self.axes_mapping[axis]}_pos", pos_dict[axis])
+
         self.stage.wait_until_done = wait_until_done
-        self.report_position()
-
-        for ax, val in move_dictionary.items():
-            # Check to make sure that the move is within the software bounds.
-            software_axis = ax.split("_abs")[0]
-            axis_abs = self.get_abs_position(software_axis, move_dictionary)
-            if axis_abs == -1e50:
-                return False
-
-            # Map the software and hardware axes
-            hardware_axis = [i for i in self.axes_mapping if self.axes_mapping[i] == software_axis]
-            hardware_axis = "stage_" + hardware_axis[0] + "_pos"
-            self.__setattr__(hardware_axis, val)
-
         try:
             self.stage.move_to_specified_position(
                 x_pos=self.stage_x_pos, y_pos=self.stage_y_pos, z_pos=self.stage_z_pos
             )
-            self.report_position()
-            return True
         except SerialException as e:
             logger.debug(f"MP285: move_axis_absolute failed - {e}")
             return False
+        
+        return True
 
     def stop(self):
         """Stop all stage movement abruptly.
@@ -249,3 +262,4 @@ class SutterStage(StageBase):
             self.stage.interrupt_move()
         except SerialException as error:
             logger.exception(f"MP-285 - Stage stop failed: {error}")
+

@@ -66,7 +66,7 @@ class AcquireBarController(GUIController):
             "Projection": "projection",
             "Confocal-Projection": "confocal-projection",
             "ConstantVelocityAcquisition": "ConstantVelocityAcquisition",
-            "Customized": "customized"
+            "Customized": "customized",
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
@@ -136,7 +136,8 @@ class AcquireBarController(GUIController):
         elif mode == "z-stack":
             number_of_slices = microscope_state["number_z_steps"]
         elif mode == "ConstantVelocityAcquisition":
-            # TODO: should be the same as "z-stack" when using "step_size" as a real step size.
+            # TODO: should be the same as "z-stack" when using "step_size" as
+            # a real step size.
             number_of_slices = 100
 
         top_anticipated_images = number_of_slices
@@ -244,6 +245,7 @@ class AcquireBarController(GUIController):
         >>> set_save_option(True)
         """
         self.is_save = is_save
+        self.parent_controller.configuration["experiment"]["MicroscopeState"]["is_save"] = is_save
         self.show_verbose_info("set save data option:", is_save)
 
     def launch_popup_window(self):
@@ -335,7 +337,12 @@ class AcquireBarController(GUIController):
         stack_widgets = self.parent_view.stack_acq_frame.get_widgets()
 
         # Grey out stack acq widgets when not Zstack or projection
-        if mode == "z-stack" or mode == "projection" or mode == "ConstantVelocityAcquisition":
+        if mode in [
+            "z-stack",
+            "projection",
+            "ConstantVelocityAcquisition",
+            "customized",
+        ]:
             state = "normal"
         else:
             state = "disabled"
@@ -457,7 +464,6 @@ class AcquireBarController(GUIController):
             self.show_verbose_info("Exiting Program")
             # call the central controller to stop all the threads
             self.parent_controller.execute("exit")
-            sys.exit()
 
     def populate_experiment_values(self):
         """Populate the experiment values from the config file.
@@ -474,6 +480,10 @@ class AcquireBarController(GUIController):
             "image_mode"
         ]
         self.set_mode(mode)
+        is_save = self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "is_save"
+        ]
+        self.set_save_option(is_save)
 
     def update_experiment_values(self, popup_window):
         """Gets the entries from the popup save dialog and overwrites the

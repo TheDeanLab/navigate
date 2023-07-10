@@ -94,9 +94,9 @@ You would add it to the hardware section:
 
 .. note::
 
-    The type of the device is needed when deciding which python object to instantiate on startup of the software. (eg type: ASI)
-    The other fields are specified by the manufacturers API software. They help the API software communicate with the computer
-    you are using which in turn allows the ASLM software to communicate with the device. (eg port: COM7)
+    The type of the device is needed when deciding which Python object to instantiate on startup of the software. (eg type: ASI)
+    The other fields (eg port: COM7) are specified by the manufacturer's API. They help the API communicate with the computer
+    you are using which in turn allows the ASLM software to communicate with the device.
 
 Running the software with our current microscope setup would fail. It turns out our ASI stage only moves in the x, y, z axes.
 We need a way to handle theta and f axes.
@@ -169,6 +169,7 @@ Here is an abbreviated example, the full file contains field entries for all of 
                     type: ASI
                     serial_number: 123456789
                     axes: [x, y, z]
+                    axes_mapping: [X, Y, Z]
                     -
                     name: stage
                     type: SyntheticStage
@@ -217,11 +218,31 @@ Here is an abbreviated example, the full file contains field entries for all of 
 
             # ...
 
-The stage field has a hardware section that should reflect similar values to the hardware section at the top of the
-configuration file. The only difference is the axes entry that explicility states the axes that the stage will control.
-This lines up with earlier, we needed to add the SyntheticStage to control theta and f. The rest of the values in the
-stage field relate to the bounds of the physical stage. This is what the software uses to set the minimum and maximum values
-for stage movement. Most stages will have different values respectively.
+
+Configuring stages
+^^^^^^^^^^^^^^^^^^
+
+* The ``hardware`` dictionary ``type`` should match one of the instruments the hardware section at the top of the
+configuration file.
+
+* The ``axes`` entry explicility states the axes that the stage will control. In the Hardware Section,
+we needed to add the SyntheticStage to control theta and f. In this section, we explictly give control of these axes to
+the synthetic stage.
+
+* We can optionally add ``axes_mapping`` to the hardware dictionary. ``axes_mapping`` lists the values
+ASLM uses to access stage axes on the stage controller hardware, while ``axes`` tells ASLM which software axis (X, Y, Z,
+Theta or Focus) is controlled by the hardware stage axis at the corresponding index of ``axes_mapping``.
+
+* PI stages will tell you their ``axes_mapping`` in a consistent fashion if queried from their API, so we do not need to
+  specify this information for a PI stage in configuration.yaml. Instead, we assume the user is aware of this mapping in
+  advance (e.g., because they looked at PIMikroMove) and has passed the stage axes in axes in the order they will be found
+  on the hardware controller.
+
+* ASI stages do not provide their ``axes_mapping`` via their API, and so we do need to specify this information for ASI
+  stages in ``configuration.yaml``.
+
+* The rest of the values in the stage dictionary relate to the bounds of the physical stage. This is what the software uses
+to set the minimum and maximum values for stage movement.
 
 GUI Section
 +++++++++++

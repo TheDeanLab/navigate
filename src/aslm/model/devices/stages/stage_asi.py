@@ -47,7 +47,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def build_ASI_Stage_connection(com_port, baud_rate, timeout=1000):
+def build_ASI_Stage_connection(com_port, baud_rate=115200, timeout=1000):
     """Connect to the ASI Stage
 
     Parameters
@@ -70,7 +70,7 @@ def build_ASI_Stage_connection(com_port, baud_rate, timeout=1000):
     wait_start = time.time()
     timeout_s = timeout / 1000
     while block_flag:
-        asi_stage = TigerController(com_port, baud_rate, verbose=True)
+        asi_stage = TigerController(com_port, baud_rate, verbose=False)
         asi_stage.connect_to_serial()
         if asi_stage.is_open():
             block_flag = False
@@ -97,88 +97,93 @@ class ASIStage(StageBase):
     FTP stilt, adding strain to the system. Only move the Z axis, which will change both
     stilt positions simultaneously.
 
-         Parameters
-        ----------
-        microscope_name : str
-            Name of microscope in configuration
-        device_connection : object
-            Hardware device to connect to
-        configuration : multiprocessing.managers.DictProxy
-            Global configuration of the microscope
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocessing.managers.DictProxy
+        Global configuration of the microscope
 
-        Attributes
-        -----------
-        x_pos : float
-            True x position
-        y_pos : float
-            True y position
-        z_pos : float
-            True z position
-        f_pos : float
-            True focus position
-        theta_pos : float
-            True rotation position
-        position_dict : dict
-            Dictionary of true stage positions
-        x_max : float
-            Max x position
-        y_max : float
-            Max y position
-        z_max : float
-            Max y position
-        f_max : float
-            Max focus position
-        theta_max : float
-            Max rotation position
-        x_min : float
-            Min x position
-        y_min : float
-            Min y position
-        z_min : float
-            Min y position
-        f_min : float
-            Min focus position
-        theta_min : float
-            Min rotation position
-        default_speed: float
-            Default speed in millimeters per second
+    Attributes
+    -----------
+    x_pos : float
+        True x position
+    y_pos : float
+        True y position
+    z_pos : float
+        True z position
+    f_pos : float
+        True focus position
+    theta_pos : float
+        True rotation position
+    position_dict : dict
+        Dictionary of true stage positions
+    x_max : float
+        Max x position
+    y_max : float
+        Max y position
+    z_max : float
+        Max y position
+    f_max : float
+        Max focus position
+    theta_max : float
+        Max rotation position
+    x_min : float
+        Min x position
+    y_min : float
+        Min y position
+    z_min : float
+        Min y position
+    f_min : float
+        Min focus position
+    theta_min : float
+        Min rotation position
+    default_speed: float
+        Default speed in millimeters per second
 
-        Methods
-        -------
-        create_position_dict()
-            Creates a dictionary with the hardware stage positions.
-        get_abs_position()
-            Makes sure that the move is within the min and max stage limits.
-        stop()
-            Emergency halt of stage operation.
-        get_position()
-            Get position of specific axis
-        set_speed()
-            Set velocity that the stage can move when scanning.
-        get_speed()
-            Get velocity
-        scanr()
-            Set scan start position, end position, and enc_divide
-        start_scan()
-            Start scan state machine
-        stop_scan()
-            Start scan and stop after scanning
+    Methods
+    -------
+    get_position_dict()
+        Returns a dictionary with the hardware stage positions.
+    get_abs_position()
+        Makes sure that the move is within the min and max stage limits.
+    stop()
+        Emergency halt of stage operation.
+    get_axis_position()
+        Get position of specific axis
+    move_axis_absolute()
+        Move stage along a single axis
+    move_absolute()
+        Move stage.
+    set_speed()
+        Set velocity that the stage can move when scanning.
+    get_speed()
+        Get velocity
+    report_position()
+        Return current stage positions.
+    scanr()
+        Set scan start position, end position, and enc_divide
+    start_scan()
+        Start scan state machine
+    stop_scan()
+        Start scan and stop after scanning
+    verify_abs_position()
+        Return a dictionary with moving positions within the min and max stage limits
 
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
-        # Mapping from self.axes to corresponding ASI axis labelling
-        self.axes_mapping = {"x": "Z", "y": "Y", "z": "X"}
+        # Default axes mapping
+        axes_mapping = {'x': 'Z', 'y': 'Y', 'z': 'X', 'f': 'M'}
+        if not self.axes_mapping:
+            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
 
-        # Focus and Theta axes are not supported for ASI Stage
-        if "theta" in self.axes:
-            self.axes.remove("theta")
-        if "f" in self.axes:
-            self.axes.remove("f")
+        self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
-        self.asi_axes = list(map(lambda a: self.axes_mapping[a], self.axes))
         self.tiger_controller = device_connection
         # set default speed
         self.default_speed =5.745760 #7.68 * 0.67
@@ -200,7 +205,7 @@ class ASIStage(StageBase):
             logger.exception(e)
             raise
 
-    def get_position(self, axis):
+    def get_axis_position(self, axis):
         """Get position of specific axos
         
         Parameters
@@ -213,11 +218,11 @@ class ASIStage(StageBase):
         """
         try:
             axis = self.axes_mapping[axis]
-            pos = self.tiger_controller.get_position_um(axis)
+            pos = self.tiger_controller.get_axis_position_um(axis)
         except TigerException:
             return float("inf")
         except KeyError as e:
-            logger.exception(f"KeyError in get_position: {e}")
+            logger.exception(f"KeyError in get_axis_position: {e}")
             return float("inf")
         return pos
 
@@ -226,22 +231,16 @@ class ASIStage(StageBase):
         position dictionary."""
         try:
             # positions from the device are in microns
-            for ax, n in zip(self.axes, self.asi_axes):
-                try:
-                    pos = self.tiger_controller.get_position_um(n)
-                except:
-                    print(f"*** axis {n} has error when getting its position")
-                    pos = 0
-
-                # Set class attributes and convert to microns
-                setattr(self, f"{ax}_pos", pos)
+            pos_dict = self.tiger_controller.get_position(list(self.asi_axes.keys()))
+            for axis, pos in pos_dict.items():
+                setattr(self, f"{self.asi_axes[axis]}_pos", float(pos) / 10.0)
         except TigerException as e:
             print("Failed to report ASI Stage Position")
             logger.exception(e)
-        self.update_position_dict()
-        return self.position_dict
+        
+        return self.get_position_dict()
 
-    def move_axis_absolute(self, axis, axis_num, move_dictionary):
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """Move stage along a single axis.
 
         Move absolute command for ASI is MOVE [Axis]=[units 1/10 microns]
@@ -251,19 +250,20 @@ class ASIStage(StageBase):
         axis : str
             An axis prefix in move_dictionary. For example, axis='x' corresponds to
             'x_abs', 'x_min', etc.
-        axis_num : int
-            The corresponding number of this axis on a PI stage. Not applicable to the
-            ASI stage.
-        move_dictionary : dict
-            A dictionary of values required for movement. Includes 'x_abs', 'x_min',
-            etc. for one or more axes. Expect values in micrometers.
+        abs_pos : float
+            Absolute position value
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
 
         Returns
         -------
         bool
             Was the move successful?
         """
-        axis_abs = self.get_abs_position(axis, move_dictionary)
+        if axis not in self.axes_mapping:
+            return False
+        
+        axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
             return False
 
@@ -272,8 +272,10 @@ class ASIStage(StageBase):
             axis_abs_um = (
                 axis_abs * 10
             )  # This is to account for the asi 1/10 of a micron units
-            print("*** trying to move stage:", axis_num, axis_abs_um)
-            self.tiger_controller.move_axis(axis_num, axis_abs_um)
+            self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs_um)
+
+            if wait_until_done:
+                self.tiger_controller.wait_for_device()
             return True
         except TigerException as e:
             print(
@@ -302,29 +304,25 @@ class ASIStage(StageBase):
         success : bool
             Was the move successful?
         """
-        for ax, n in zip(self.axes, self.asi_axes):
-            if f"{ax}_abs" not in move_dictionary:
-                continue
-            success = self.move_axis_absolute(ax, n, move_dictionary)
-            if wait_until_done:
-                self.tiger_controller.wait_for_device()
-                # Do we want to wait for device on hardware level? This is an ASI
-                # command call
+        abs_pos_dict = self.verify_abs_position(move_dictionary)
+        if not abs_pos_dict:
+            return False
+        
+        # This is to account for the asi 1/10 of a micron units
+        pos_dict = {self.axes_mapping[axis]: abs_pos_dict[axis]*10 for axis in abs_pos_dict}
+        try:
+            self.tiger_controller.move(pos_dict)
+        except TigerException as e:
+            print(
+                f"ASI stage move axis absolute failed or is trying to move out of "
+                f"range: {e}"
+            )
+            logger.exception(e)
+            return False
+        if wait_until_done:
+            self.tiger_controller.wait_for_device()
 
-        #  TODO This seems to be handled by each individual move_axis_absolute bc of
-        #  ASI's wait_for_device.
-        #  Each axis will move and the stage waits until the axis is done before
-        #  moving on
-        # if success and wait_until_done is True:
-        #     try:
-        #         self.busy()
-        #         success = True
-        #     except BaseException as e:
-        #         print("Problem communicating with tiger controller during "
-        #               "wait command")
-        #         success = False
-        #         #logger.exception(e)
-        return success
+        return True
 
     def stop(self):
         """Stop all stage movement abruptly."""

@@ -199,13 +199,13 @@ class WaveformPopupController(GUIController):
         -------
         None
         """
-        if self.resolution == "high" or self.resolution == "Nanoscale":
-            precision = -3
-            increment = 0.001
+        if self.resolution == "high" or self.resolution == "Nanoscale" or self.resolution == "CTASLMv1":
+            precision = -4
+            increment = 0.0001
         else:
             # resolution is low
-            precision = -2
-            increment = 0.01
+            precision = -3
+            increment = 0.001
 
         laser_min = self.configuration_controller.remote_focus_dict["hardware"]["min"]
         laser_max = self.configuration_controller.remote_focus_dict["hardware"]["max"]
@@ -401,8 +401,8 @@ class WaveformPopupController(GUIController):
 
         # update resolution value in central controller (menu)
         value = f"{self.resolution} {self.mag}"
-        if self.parent_controller.resolution_value.get() != value:
-            self.parent_controller.resolution_value.set(value)
+        if self.parent_controller.menu_controller.resolution_value.get() != value:
+            self.parent_controller.menu_controller.resolution_value.set(value)
 
         # reconfigure widgets
         self.configure_widget_range()
@@ -498,7 +498,9 @@ class WaveformPopupController(GUIController):
             self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
                 laser
             ]["percent_smoothing"] = smoothing
-        self.resolution_info["other_constants"]["remote_focus_settle_duration"] = duty_cycle
+        self.resolution_info["other_constants"][
+            "remote_focus_settle_duration"
+        ] = duty_cycle
 
         # Pass the values to the parent controller.
         try:

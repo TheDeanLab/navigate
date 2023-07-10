@@ -1,15 +1,10 @@
-Hardware Setup
+Supported Hardware
 ====================
 
-Configuration File
-------------------
-Upon running the software the first time, a copy of the configuration file is created in
-``/Users/<username>/AppData/Local/.ASLM/config`` on Windows-based machines, and in ``~/.ASLM/config`` on Mac and
-Linux-based machines. All changes will need to be made to this file.
-The local copy avoids conflicts between different microscopes after pulling new changes on GitHub.
-
 Data Acquisition Card
-------------------------
+----------------------------
+NI
+^^^^^^^^^^
 We have used several different NI-based data acquisition cards to run the software.
 These include PCIe-6738, PXIe-6259, and PXIe-6733. Prior to installing the card within the computer, first install
 the `NI-DAQmx drivers <https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560>`_. Once installed,
@@ -28,11 +23,7 @@ The most important aspect is to wire up the triggering properly. The software fi
 Upon receipt of a trigger, all of the analog an digital tasks are delivered in parallel. This provides us with deterministic behavior on a per-frame basis, which is necessary for proper ASLM-style acquisitions. It does not
 however provide us with deterministic behavior between image frames, and some jitter in timing is anticipated.
 
-
-
 Wiring
-^^^^^^^^^^^^
-
 - Identify the device name in NI MAX, and change it if you would like. Common names are ``Dev1``, ``Dev2``, etc. This name must correspond with the pinouts provided in the configuration file.
 
 - Connect the ``master_trigger_out_line`` to the ``trigger_source`` with a direct wire, commonly ``PXI6259/port0/line1`` and ``/PXI6259/PFI0``
@@ -45,7 +36,7 @@ Wiring
 Cameras
 ----------
 Hamamatsu
-^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 * Insert the USB that came with the camera into the computer and install HCImageLive.
 * When prompted with the DCAM-API Setup
 
@@ -58,19 +49,18 @@ Hamamatsu
 counter port, e.g., ``/PXI6259/ctr0``
 
 Photometrics
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 * Download the `PVCAM software <https://www.photometrics.com/support/software-and-drivers>`_ from Photometrics.
 The PVCAM SDK is also available form this location.
 You will likely have to register and agree to Photometrics terms.
 * Perform the Full Installation of the PVCAM software.
-* Should a 'Base Device' still show up as unknown in the device manager, you may need to install the 
+* Should a 'Base Device' still show up as unknown in the device manager, you may need to install the
 `Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits`_
 * Upon successfully installation, one should be able to acquire images with the manufacturer provided PVCamTest software.
- 
+
 
 Voicecoil
 --------------
-
 Equipment Solutions
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -80,14 +70,82 @@ Equipment Solutions
 
 * `LFA-2010 Linear Focus Actuator <https://www.equipsolutions.com/products/linear-focus-actuators/lfa-2010-linear-focus-actuator/>`_
 
+Thorlabs BLINK
+^^^^^^^^^^^^^^^^^^^^^
+In progress...
 
 Stages
-------
+------------------------
 ASI
-^^^^^
+^^^^^^^^^^^^^^^^^
 Software designed to acquire data in a continuous stage scanning mode. Rather than using the default SYNC ignal
 from the ASI stage to synchronize the start of imaging, we use the encoder output pulsing mode of the ASI stage to
 trigger the acquisition of every frame at precise intervals.  Important for multi-channel imaging that is acquired in
 the per-stack mode, but less so for perZ-based acquisitions.
 
 FTP-2000 Stage. Whatever you do, don't change the F position. You will your stage.
+
+Sutter
+^^^^^^^^^^^^^^^^^
+In progress...
+
+Physik Instrumente
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In progress...
+
+Thorlabs
+^^^^^
+In progress...
+
+Analog Controlled (Galvo/Piezo/etc.)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In progress...
+
+Deformable Mirrors
+------------------------
+Imagine Optics
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In progress...
+
+Filter Wheels
+----------------------------
+Sutter
+^^^^^^^^^^^^^^^^^^^^^^
+In progress...
+
+ASI
+^^^^^^^^^^^^^^^^^^^^^^
+In progress...
+
+Galvanometers
+----------------------------
+Cambridge Technologies/Novanta
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In progress...
+
+ScannerMAX
+^^^^^^^^^^^^^^^^^^^^
+In progress...
+
+
+Lasers
+----------
+Coherent
+^^^^^^^^^^^^^^^^^^^^^
+In progress...
+
+Omicron
+^^^^^^^^^^^^^^^^^^^^^
+
+Shutters
+-----------------------------
+Thorlabs
+^^^^^^^^^^^^
+In progress...
+
+
+Mechanical Zoom
+---------------------------------
+Dynamixel
+^^^^^^^^^^^^
+In progress...

@@ -39,12 +39,10 @@ import numpy as np
 # Local Imports
 
 
-def text_array(text: str, offset: tuple = (0, 0), font_size: int = 16):
+def text_array(text: str, offset: tuple = (0, 0)):
     """Create a binary array from a piece of text
 
-    Original font type was arial.ttf.
-    Not by default available on Darwin-based devices.
-    Switched to cambriab.ttf
+    Use Default font to avoid OS related errors.
 
     Parameters
     ----------
@@ -60,8 +58,58 @@ def text_array(text: str, offset: tuple = (0, 0), font_size: int = 16):
     np.array
         Binary array of text
     """
-    font = ImageFont.truetype("cambriab.ttf", font_size)
+    font = ImageFont.load_default()
     bbox = font.getbbox(text)
-    im = Image.new("1", (bbox[2] + offset[0], bbox[3] + offset[1]))
-    ImageDraw.Draw(im).text(offset, text, 1, font=font)
+    im = Image.new(mode="1", size=(bbox[2] + offset[0], bbox[3] + offset[1]))
+    ImageDraw.Draw(im).text(xy=offset, text=text, fill=1, font=font)
     return np.array(im, dtype=bool)
+
+
+def create_arrow_image(xys, image_width=300, image_height=200, direction="right", image=None):
+    """Create/Update a Image Object 
+
+    Draw lines and arrows in a Image ojbect
+
+    Parameters
+    ----------
+    xys : list
+        list of points [(x, y),] to draw lines
+    image_width : int
+        width of image
+    image_height: int
+        height of image
+    direction: str
+        arrow directions: "left", "right", "up", "down"
+    image: Image/None
+        update an exist Image object/create a new Image object
+
+    Returns
+    -------
+    image:
+        Image object
+    """
+    w, h = image_width, image_height
+    if not image:
+        image = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    # draw line
+    for i in range(len(xys)-1):
+        draw.line([xys[i], xys[i+1]], fill="black", width=2)
+    
+    # draw arrow
+    circle_x, circle_y = xys[-1]
+    if direction == "right":
+        bounding_circle = ((circle_x-10, circle_y), 10)
+        rotation = 270
+    elif direction == "left":
+        bounding_circle = ((circle_x+10, circle_y), 10)
+        rotation = 90
+    elif direction == "up":
+        bounding_circle = ((circle_x, circle_y+10), 10)
+        rotation = 0
+    elif direction == "down":
+        bounding_circle = ((circle_x, circle_y-10), 10)
+        rotation = 180
+    draw.regular_polygon(bounding_circle, n_sides=3, rotation=rotation, fill="black")
+    
+    return image

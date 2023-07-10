@@ -55,9 +55,8 @@ class BigDataViewerDataSource(DataSource):
         self._views = []
         self.__store = None
 
-        # file_name = ".".join(file_name.split(".")[:-1]) + ".hdf"
         self.__file_type = os.path.splitext(os.path.basename(file_name))[-1][1:].lower()
-        if self.__file_type not in ["hdf", "n5"]:
+        if self.__file_type not in ["h5", "n5"]:
             raise ValueError(f"Unknown file type {self.__file_type}.")
         super().__init__(file_name, mode)
 
@@ -110,12 +109,12 @@ class BigDataViewerDataSource(DataSource):
             self._current_frame, self.metadata.per_stack
         )  # find current channel
         if (z == 0) and (c == 0) and (t == 0) and (p == 0):
-            if self.__file_type == "hdf":
+            if self.__file_type == "h5":
                 self._setup_h5()
             elif self.__file_type == "n5":
                 self._setup_n5()
 
-        if self.__file_type == "hdf":
+        if self.__file_type == "h5":
             time_group_name = f"t{t:05}"
             setup_group_name = f"s{(c*self.positions+p):02}"
             ds_name = "/".join([time_group_name, setup_group_name, "???", "cells"])
@@ -144,7 +143,7 @@ class BigDataViewerDataSource(DataSource):
 
     def read(self) -> None:
         self.mode = "r"
-        if self.__file_type == "hdf":
+        if self.__file_type == "h5":
             self.image = h5py.File(self.file_name, "r")
         elif self.__file_type == "n5":
             self.image = zarr.N5Store(self.file_name)
@@ -215,7 +214,7 @@ class BigDataViewerDataSource(DataSource):
         if self._write_mode:
             self._current_frame = 0
             self._views = []
-            if self.__file_type == "hdf":
+            if self.__file_type == "h5":
                 self._setup_h5()
             elif self.__file_type == "n5":
                 self._setup_n5()

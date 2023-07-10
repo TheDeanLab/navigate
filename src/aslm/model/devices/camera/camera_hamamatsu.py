@@ -46,6 +46,8 @@ logger = logging.getLogger(p)
 class HamamatsuOrca(CameraBase):
     """HamamatsuOrca camera class.
 
+    This is by default for an Orca Flash 4.0.
+
     Parameters
     ----------
     microscope_name : str
@@ -72,9 +74,7 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value(
             "binning", int(self.camera_parameters["binning"][0])
         )
-        self.camera_controller.set_property_value(
-            "readout_speed", self.camera_parameters["readout_speed"]
-        )
+        self.camera_controller.set_property_value("readout_speed", 0x7FFFFFFF)
         self.camera_controller.set_property_value(
             "trigger_active", self.camera_parameters["trigger_active"]
         )
@@ -397,3 +397,45 @@ class HamamatsuOrca(CameraBase):
         # trigger_interval =
         #   self.camera_controller.get_property_value('minimum_trigger_interval')
         return trigger_blank
+
+
+class HamamatsuOrcaLightning(HamamatsuOrca):
+    def __init__(self, microscope_name, device_connection, configuration):
+        CameraBase.__init__(self, microscope_name, device_connection, configuration)
+
+        # Values are pulled from the CameraParameters section of the configuration.yml
+        # file. Exposure time converted here from milliseconds to seconds.
+        self.set_sensor_mode(self.camera_parameters["sensor_mode"])
+
+        self.camera_controller.set_property_value(
+            "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
+        )
+        self.camera_controller.set_property_value(
+            "exposure_time", self.camera_parameters["exposure_time"] / 1000
+        )
+        self.camera_controller.set_property_value(
+            "binning", int(self.camera_parameters["binning"][0])
+        )
+        self.camera_controller.set_property_value(
+            "trigger_active", self.camera_parameters["trigger_active"]
+        )
+        self.camera_controller.set_property_value(
+            "trigger_mode", self.camera_parameters["trigger_mode"]
+        )
+        self.camera_controller.set_property_value(
+            "trigger_polarity", self.camera_parameters["trigger_polarity"]
+        )
+        self.camera_controller.set_property_value(
+            "trigger_source", self.camera_parameters["trigger_source"]
+        )
+
+        logger.info("HamamatsuOrcaLightning Initialized")
+
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time, shutter_width
+    ):
+        self.camera_line_interval = (full_chip_exposure_time / 1000) / (
+            (shutter_width + self.y_pixels - 1) / 4
+        )
+        exposure_time = self.camera_line_interval * (shutter_width / 4) * 1000
+        return exposure_time, self.camera_line_interval

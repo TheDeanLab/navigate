@@ -2,13 +2,13 @@ Software Installation
 *********************
 
 Download Git
--------------------------------
+------------
 If you do not have `Git already installed <https://git-scm.com/downloads>`_, you will need to do so before downloading the repo.
 We also recommend installing `GitHub Desktop <https://desktop.github.com/>`_ for a more user-friendly experience.
 
 
-Setup your Python Environment.
--------------------------------
+Setup your Python Environment
+-----------------------------
 Head over to the `miniconda website <https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links>`_
 and install the appropriate version based on your operating system.
 
@@ -49,13 +49,13 @@ After activatin the ASLM environment, it should now show (ASLM).
 * Windows::
 
     (ASLM) C:\Users\Dean-Lab cd Desktop
-    (ASLM) C:\Users\Dean-Lab\Desktop mkdir ASLM
-    (ASLM) C:\users\Dean-Lab\Desktop cd ASLM
+    (ASLM) C:\Users\Dean-Lab\Desktop mkdir Code
+    (ASLM) C:\users\Dean-Lab\Desktop cd Code
 
 * Linux/Mac::
 
-    (ASLM) MyComputer ~ $ mkdir ~/Desktop/ASLM
-    (ASLM) MyComputer ~ $ cd ~/Desktop/ASLM
+    (ASLM) MyComputer ~ $ mkdir ~/Desktop/Code
+    (ASLM) MyComputer ~ $ cd ~/Desktop/Code
 
 **Clone the GitHub repository**::
 
@@ -86,8 +86,12 @@ After completeting these steps you will only need to do the below to start the s
     (base) MyComputer ~ $ conda activate ASLM
     (ASLM) MyComputer ~ $ aslm
 
+.. note::
+
+    If you are running Windows, you can create a desktop shortcut to ASLM by right-clicking the Desktop, navigating to New and then Shortcut and entering ``%windir%\system32\cmd.exe "/c" C:\path\to\miniconda\Scripts\activate.bat aslm && aslm`` into the location text box.
+
 GPU Dependencies
--------------------------------
+----------------
 Some of the software routines for microscope feedback are accelerated using GPU computing.
 These require a CUDA GPU device that is compatible with TensorFlow (1.15), PyTorch (1.10.2), CuPy, ...
 `Excellent directions can be found for CuPy <https://docs.cupy.dev/en/stable/install.html>`_.
@@ -98,7 +102,7 @@ These require a CUDA GPU device that is compatible with TensorFlow (1.15), PyTor
     * Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019
 
 Troubleshooting
--------------------------------
+---------------
 
 If running the software on campus at UTSW you may need to update some of your proxy settings to allow pip/conda to install the proper packages.
     * This can be done by going to Environment Variables for Windows, or another OS equivalent.

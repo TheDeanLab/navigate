@@ -360,20 +360,12 @@ class OtherAxisFrame(ttk.Labelframe):
 
         # Up button
         other_axis_frame.up_btn = tk.Button(
-            other_axis_frame,
-            image=other_axis_frame.up_image,
-            borderwidth=0
-            # style='arrow.TButton',
-            # text="\N{UPWARDS BLACK ARROW}",
+            other_axis_frame, image=other_axis_frame.up_image, borderwidth=0
         )
 
         # Down button
         other_axis_frame.down_btn = tk.Button(
-            other_axis_frame,
-            image=other_axis_frame.down_image,
-            borderwidth=0
-            # style='arrow.TButton',
-            # text="\N{DOWNWARDS BLACK ARROW}",
+            other_axis_frame, image=other_axis_frame.down_image, borderwidth=0
         )
 
         # Zero button
@@ -383,7 +375,6 @@ class OtherAxisFrame(ttk.Labelframe):
         )
 
         # Increment spinbox
-
         other_axis_frame.increment_box = LabelInput(
             parent=other_axis_frame,
             input_class=ValidatedSpinbox,
@@ -410,10 +401,7 @@ class OtherAxisFrame(ttk.Labelframe):
         # Gridding out buttons
         other_axis_frame.up_btn.grid(row=0, column=0, pady=2)  # UP
         other_axis_frame.down_btn.grid(row=3, column=0, pady=2)  # DOWN
-        # other_axis_frame.zero_btn.grid(row=1, column=0, pady=(5,2)) #Zero Z
-        other_axis_frame.increment_box.grid(
-            row=2, column=0, pady=2
-        )  # Increment spinbox
+        other_axis_frame.increment_box.grid(row=2, column=0, pady=2)
         other_axis_frame.increment_box.widget.set_precision(-1)
 
     def get_widget(other_axis_frame):

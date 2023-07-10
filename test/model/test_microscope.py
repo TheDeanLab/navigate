@@ -75,6 +75,16 @@ def test_prepare_acquisition(dummy_microscope):
 
 
 def test_get_stage_position(dummy_microscope):
+    import numpy as np
+
+    pos_dict = {
+        f"{k}_abs": v
+        for k, v in zip(["x", "y", "z", "theta", "f"], np.random.rand(5) * 100)
+    }
+    dummy_microscope.move_stage(pos_dict, wait_until_done=True)
+
+    assert dummy_microscope.ask_stage_for_position is True
+
     stage_dict = dummy_microscope.get_stage_position()
 
     ret_pos_dict = {}
@@ -85,6 +95,11 @@ def test_get_stage_position(dummy_microscope):
 
     assert type(stage_dict) == dict
     assert ret_pos_dict == stage_dict
+
+    # Check caching
+    stage_dict = dummy_microscope.get_stage_position()
+    assert ret_pos_dict == stage_dict
+    assert dummy_microscope.ask_stage_for_position is False
 
 
 def test_prepare_next_channel(dummy_microscope):

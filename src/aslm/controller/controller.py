@@ -635,8 +635,6 @@ class Controller:
             args[0] : string
                 string = 'continuous', 'z-stack', 'single', or 'projection'
             """
-            self.stop_acquisition_flag = False
-
             # Prepare data
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
@@ -676,14 +674,14 @@ class Controller:
 
         elif command == "stop_acquire":
             """Stop the acquisition."""
-            self.stop_acquisition_flag = False
+            self.stop_acquisition_flag = True
 
             # self.model.run_command('stop')
             self.sloppy_stop()
 
             # clear show_img_pipe
-            # while self.show_img_pipe.poll():
-            #     image_id = self.show_img_pipe.recv()
+            while self.show_img_pipe.poll():
+                image_id = self.show_img_pipe.recv()
 
         elif command == "exit":
             """Exit the program."""
@@ -770,6 +768,8 @@ class Controller:
             self.configuration["experiment"]["MicroscopeState"],
             self.configuration["experiment"]["CameraParameters"],
         )
+
+        self.stop_acquisition_flag = False
 
         while True:
             if self.stop_acquisition_flag:
@@ -899,11 +899,11 @@ class Controller:
                 )
 
             # clear show_img_pipe
-            # show_img_pipe = self.additional_microscopes[microscope_name]["show_img_pipe"]
-            # while show_img_pipe.poll():
-            #     image_id = show_img_pipe.recv()
-            #     if image_id == "stop":
-            #         break
+            show_img_pipe = self.additional_microscopes[microscope_name]["show_img_pipe"]
+            while show_img_pipe.poll():
+                image_id = show_img_pipe.recv()
+                if image_id == "stop":
+                    break
 
             # start thread
             capture_img_thread = threading.Thread(

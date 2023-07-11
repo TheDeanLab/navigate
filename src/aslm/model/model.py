@@ -432,7 +432,7 @@ class Model:
                 "is_save"
             ]
             self.prepare_acquisition()
-
+            
             # load features
             if self.imaging_mode == "customized":
                 if self.addon_feature is None:

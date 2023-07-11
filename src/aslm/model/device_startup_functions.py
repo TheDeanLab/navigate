@@ -144,6 +144,24 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
         from aslm.model.devices.camera.camera_synthetic import SyntheticCameraController
 
         return SyntheticCameraController()
+    elif cam_type == 'Photometrics':
+        def import_photometrics(camera_connection):
+            # To make this work, please install the SDK at https://www.photometrics.com/support/download/pvcam-sdk
+            # and go to APIs/photometrics/PyVCAM-master and run `python setup.py install`
+            from pyvcam import pvc
+            from pyvcam.camera import Camera
+            pvc.init_pvcam()
+            print("pvcam initialized")
+            camera_names = Camera.get_available_camera_names()
+            print('Available cameras: ' + str(camera_names))
+            camera_toopen = Camera.select_camera(camera_connection)
+            camera_toopen.open()
+            return camera_toopen
+        camera_connection = configuration['configuration']['hardware']['camera'][camera_id]['camera_connection']
+        print(camera_connection)
+        
+        #return camera object in the auto_redial function.
+        return auto_redial(import_photometrics, (camera_connection,), exception=Exception)
     else:
         device_not_found("camera", camera_id, cam_type)
 
@@ -191,6 +209,11 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
         from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrcaLightning
 
         return HamamatsuOrcaLightning(microscope_name, device_connection, configuration)
+    
+    elif cam_type == "Photometrics":
+        from aslm.model.devices.camera.camera_photometrics import PhotometricsKinetix
+
+        return PhotometricsKinetix(microscope_name, device_connection, configuration)
 
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
         from aslm.model.devices.camera.camera_synthetic import SyntheticCamera

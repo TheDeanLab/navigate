@@ -643,8 +643,6 @@ class Controller:
             args[0] : string
                 string = 'continuous', 'z-stack', 'single', or 'projection'
             """
-            self.stop_acquisition_flag = False
-
             # Prepare data
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
@@ -778,6 +776,8 @@ class Controller:
             self.configuration["experiment"]["MicroscopeState"],
             self.configuration["experiment"]["CameraParameters"],
         )
+
+        self.stop_acquisition_flag = False
 
         while True:
             if self.stop_acquisition_flag:

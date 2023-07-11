@@ -68,8 +68,8 @@ class AutofocusPopup:
         The popup window.
     inputs : dict
         Dictionary of all the input widgets.
-    stage_vars : list
-        List of booleans for the stage checkboxes.
+    setting_vars : list
+        List of booleans for the setting checkboxes.
     autofocus_btn : ttk.Button
         The autofocus button.
     fig : matplotlib.figure.Figure
@@ -96,61 +96,99 @@ class AutofocusPopup:
 
         # Creating content frame
         content_frame = self.popup.get_frame()
+        device_frame = tk.Frame(content_frame)
+        device_frame.grid(row=0, columnspan=3, sticky=tk.NSEW)
 
         # Dictionary for all the variables
         self.inputs = {}
-        self.stage_vars = [
-            tk.BooleanVar(False),
-            tk.BooleanVar(False),
-            tk.BooleanVar(False),
-        ]
+        self.setting_vars = {}
+
+        self.inputs["device"] = LabelInput(
+            parent=device_frame,
+            label="Device",
+            input_class=ttk.Combobox,
+            input_var=tk.StringVar(),
+            input_args={"width": 20},
+            label_args={"padding": (0, 0, 10, 0)},
+        )
+        self.inputs["device"].grid(row=0, column=0, pady=3, padx=5)
+
+        self.inputs["device_ref"] = LabelInput(
+            parent=device_frame,
+            label="Device Reference",
+            input_class=ttk.Combobox,
+            input_var=tk.StringVar(),
+            input_args={"width": 20},
+            label_args={"padding": (0, 0, 10, 0)},
+        )
+        self.inputs["device_ref"].grid(row=0, column=1, pady=3, padx=30)
+
+        starting_row_id = 1
 
         # Row 0, Column Titles
         title_labels = ["Select", "Range", "Step Size"]
         for i in range(3):
             title = ttk.Label(content_frame, text=title_labels[i], padding=(2, 5, 0, 0))
-            title.grid(row=0, column=i, sticky=tk.NSEW)
+            title.grid(row=starting_row_id, column=i, sticky=tk.NSEW)
 
         # Row 1, 2 - Autofocus Settings
         setting_names = ["coarse", "fine", "robust_fit"]
         setting_labels = ["Coarse", "Fine", "Inverse Power Tent Fit"]
         for i in range(2):
             # Column 0 - Checkboxes
-            stage = ttk.Checkbutton(
-                content_frame, text=setting_labels[i], variable=self.stage_vars[i]
+            variable = tk.BooleanVar(False)
+            widget = ttk.Checkbutton(
+                content_frame, text=setting_labels[i], variable=variable
             )
-            stage.grid(row=i + 1, column=0, sticky=tk.NSEW, padx=5)
+            widget.grid(row=i + 1 + starting_row_id, column=0, sticky=tk.NSEW, padx=5)
+            self.setting_vars[setting_names[i] + "_selected"] = variable
 
             # Column 1 - Ranges
-            self.inputs[setting_names[i] + "_range"] = LabelInput(
+            widget = LabelInput(
                 parent=content_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
                 input_args={"from_": 0.0, "to": 50000},
             )
-            self.inputs[setting_names[i] + "_range"].grid(
-                row=i + 1, column=1, sticky=tk.NSEW, padx=(0, 5), pady=(15, 0)
+            widget.grid(
+                row=i + 1 + starting_row_id,
+                column=1,
+                sticky=tk.NSEW,
+                padx=(0, 5),
+                pady=(15, 0),
             )
+            self.inputs[setting_names[i] + "_range"] = widget
+            self.setting_vars[setting_names[i] + "_range"] = widget.get_variable()
 
             # Column 2 - Step Sizes
-            self.inputs[setting_names[i] + "_step_size"] = LabelInput(
+            widget = LabelInput(
                 parent=content_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
                 input_args={"from_": 0.0, "to": 50000},
             )
-            self.inputs[setting_names[i] + "_step_size"].grid(
-                row=i + 1, column=2, sticky=tk.NSEW, padx=(0, 5), pady=(15, 0)
+            widget.grid(
+                row=i + 1 + starting_row_id,
+                column=2,
+                sticky=tk.NSEW,
+                padx=(0, 5),
+                pady=(15, 0),
             )
+            self.inputs[setting_names[i] + "_step_size"] = widget
+            self.setting_vars[setting_names[i] + "_step_size"] = widget.get_variable()
 
         # Row 4, Autofocus Button
         self.autofocus_btn = ttk.Button(content_frame, text="Autofocus")
-        self.autofocus_btn.grid(row=4, column=2, pady=(0, 10))
-
-        robust_fit = ttk.Checkbutton(
-            content_frame, text=setting_labels[2], variable=self.stage_vars[2]
+        self.autofocus_btn.grid(
+            row=starting_row_id + 4, column=2, padx=(0, 25), pady=(10, 10), sticky=tk.E
         )
-        robust_fit.grid(row=4, column=0, sticky=tk.NSEW, padx=5)
+
+        variable = tk.BooleanVar(False)
+        robust_fit = ttk.Checkbutton(
+            content_frame, text=setting_labels[2], variable=variable
+        )
+        robust_fit.grid(row=starting_row_id + 4, column=0, sticky=tk.NSEW, padx=5)
+        self.setting_vars["robust_fit"] = variable
 
         # Row 5, Plot
         self.fig = Figure(figsize=(5, 5), dpi=100)
@@ -164,7 +202,12 @@ class AutofocusPopup:
         canvas = FigureCanvasTkAgg(self.fig, master=content_frame)
         canvas.draw()
         canvas.get_tk_widget().grid(
-            row=5, column=0, columnspan=3, sticky=tk.NSEW, padx=(5, 5), pady=(5, 5)
+            row=starting_row_id + 5,
+            column=0,
+            columnspan=3,
+            sticky=tk.NSEW,
+            padx=(5, 5),
+            pady=(5, 5),
         )
 
     def get_widgets(self):

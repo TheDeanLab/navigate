@@ -558,7 +558,6 @@ class Microscope:
         stage_position : dict
             Dictionary of stage positions.
         """
-
         if self.ask_stage_for_position:
             # self.ret_pos_dict = {}
             for stage, axes in self.stages_list:
@@ -566,6 +565,10 @@ class Microscope:
                 self.ret_pos_dict.update(temp_pos)
             self.ask_stage_for_position = False
         return self.ret_pos_dict
+
+    def move_remote_focus(self, offset=None):
+        readout_time = self.get_readout_time()
+        self.remote_focus_device.move(readout_time, offset)
 
     def update_stage_limits(self, limits_flag=True):
         self.ask_stage_for_position = True

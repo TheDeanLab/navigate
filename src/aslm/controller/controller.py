@@ -70,7 +70,7 @@ from aslm.model.model import Model
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
-from aslm.config.config import load_configs, update_config_dict, get_aslm_path
+from aslm.config.config import load_configs, update_config_dict, verify_configuration, get_aslm_path
 from aslm.tools.file_functions import create_save_path, save_yaml_file
 from aslm.tools.common_dict_tools import update_stage_dict
 from aslm.tools.multipos_table_tools import update_table
@@ -144,6 +144,8 @@ class Controller:
             rest_api_config=rest_api_path,
             waveform_templates=waveform_templates_path,
         )
+
+        verify_configuration(self.manager, self.configuration)
 
         # Initialize the Model
         self.model = ObjectInSubprocess(
@@ -316,6 +318,7 @@ class Controller:
         """
         # read the new file and update info of the configuration dict
         update_config_dict(self.manager, self.configuration, "experiment", file_name)
+        verify_configuration(self.manager, self.configuration)
 
         # update buffer
         self.update_buffer()
@@ -336,6 +339,10 @@ class Controller:
         )
         self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
+
+        # autofocus popup
+        if hasattr(self, "af_popup_controller"):
+            self.af_popup_controller.populate_experiment_values()
 
         # set widget modes
         self.set_mode_of_sub("stop")
@@ -584,6 +591,7 @@ class Controller:
                 args=(
                     "autofocus",
                     "live",
+                    *args
                 ),
             )
 
@@ -733,7 +741,7 @@ class Controller:
             except RuntimeError:
                 e = RuntimeError
 
-    def capture_image(self, command, mode):
+    def capture_image(self, command, mode, *args):
         """Trigger the model to capture images.
 
         Parameters
@@ -754,7 +762,7 @@ class Controller:
             stop=False,
         )
         try:
-            self.model.run_command(command)
+            self.model.run_command(command, *args)
         except Exception as e:
             tkinter.messagebox.showerror(
                 title="Warning",

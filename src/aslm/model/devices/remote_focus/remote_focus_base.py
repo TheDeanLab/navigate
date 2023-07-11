@@ -118,7 +118,7 @@ class RemoteFocusBase:
         """Destructor"""
         pass
 
-    def adjust(self, readout_time):
+    def adjust(self, readout_time, offset=None):
         """Adjusts the remote focus waveform based on the readout time.
 
         Parameters
@@ -221,6 +221,8 @@ class RemoteFocusBase:
                         laser
                     ]["offset"]
                 )
+                if offset != None:
+                    remote_focus_offset += offset
 
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key] = remote_focus_ramp(

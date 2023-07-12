@@ -1,0 +1,2 @@
+If you want to use a photometrics camera, please got to the PyVCAM-master folder and run:
+python setup.py install

@@ -162,6 +162,9 @@ class Microscope:
                 ):
                     device_connection = self.daq
 
+                if device_ref_name.startswith("EquipmentSolutions"):
+                    device_connection = self.daq
+
                 if device_ref_name.startswith("ASI") and self.tiger_controller is None:
                     # The first ASI instance of a device connection will be passed to
                     # all other ASI devices as self.tiger_controller
@@ -555,7 +558,6 @@ class Microscope:
         stage_position : dict
             Dictionary of stage positions.
         """
-
         if self.ask_stage_for_position:
             # self.ret_pos_dict = {}
             for stage, axes in self.stages_list:
@@ -563,6 +565,10 @@ class Microscope:
                 self.ret_pos_dict.update(temp_pos)
             self.ask_stage_for_position = False
         return self.ret_pos_dict
+
+    def move_remote_focus(self, offset=None):
+        readout_time = self.get_readout_time()
+        self.remote_focus_device.move(readout_time, offset)
 
     def update_stage_limits(self, limits_flag=True):
         self.ask_stage_for_position = True
@@ -671,3 +677,12 @@ class Microscope:
                 f"device_connection, self.configuration, self.is_synthetic)"
             )
             self.info[device_name] = device_ref_name
+
+    def terminate(self):
+        """ Close hardware explicitly. """
+        self.camera.close_camera()
+        try:
+            # Currently only for RemoteFocusEquipmentSolutions
+            self.remote_focus_device.close_connection()
+        except AttributeError:
+            pass

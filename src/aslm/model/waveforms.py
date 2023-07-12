@@ -389,6 +389,9 @@ def smooth_waveform(waveform, percent_smoothing=10):
     """
     waveform_length = np.size(waveform)
     window_length = int(np.floor(waveform_length * percent_smoothing / 100))
+    if window_length == 0:
+        # cannot smooth
+        return waveform
     waveform_padded = np.pad(waveform, int(window_length // 2), mode="edge")
     smoothed_waveform = (
         np.convolve(waveform_padded, np.ones(window_length), "valid") / window_length

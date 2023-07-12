@@ -35,6 +35,7 @@ import threading
 import logging
 import multiprocessing as mp
 import time
+import os
 
 # Third Party Imports
 
@@ -61,10 +62,14 @@ from aslm.model.features.common_features import (
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
 from aslm.model.features.volume_search import VolumeSearch
+from aslm.model.features.feature_related_functions import convert_str_to_feature_list, convert_feature_list_to_str
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_stage_dict
+from aslm.tools.common_functions import load_module_from_file
+from aslm.tools.file_functions import load_yaml_file, save_yaml_file
 from aslm.model.device_startup_functions import load_devices
 from aslm.model.microscope import Microscope
+from aslm.config.config import get_aslm_path
 
 
 # Logger Setup
@@ -108,7 +113,7 @@ class Model:
     """
 
     def __init__(self, USE_GPU, args, configuration=None, event_queue=None):
-
+        
         log_setup("model_logging.yml")
         self.logger = logging.getLogger(p)
 
@@ -197,8 +202,7 @@ class Model:
         # automatically switch resolution
         self.feature_list.append(
             [
-                [{"name": ChangeResolution, "args": ("1x",)}, {"name": Snap}],
-                [{"name": ChangeResolution, "args": ("high",)}, {"name": Snap}],
+                {"name": ChangeResolution, "args": ("Mesoscale", "1x")}, {"name": Snap},
             ]
         )
         # z stack acquisition
@@ -293,6 +297,7 @@ class Model:
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "customized": [],
         }
+        self.load_feature_records()
 
     def update_data_buffer(self, img_width=512, img_height=512):
         """Update the Data Buffer
@@ -427,7 +432,7 @@ class Model:
                 "is_save"
             ]
             self.prepare_acquisition()
-
+            
             # load features
             if self.imaging_mode == "customized":
                 if self.addon_feature is None:
@@ -540,19 +545,12 @@ class Model:
 
             Parameters
             ----------
-            Args[0]: dict
-                Dictionary of the microscope state (resolution, zoom, ...)
-            Args[1]: dict
-                Dictionary of the user-defined autofocus parameters
-                {'coarse_range': 500,
-                'coarse_step_size': 50,
-                'coarse_selected': True,
-                'fine_range': 50,
-                'fine_step_size': 5,
-                'fine_selected': True}
+            Args[0]: device name
+            Args[1]: device reference
             """
-            autofocus = Autofocus(self)
-            autofocus.run(*args)
+            print("*** autofocus args:", *args)
+            autofocus = Autofocus(self, *args)
+            autofocus.run()
         elif command == "load_feature":
             """
             args[0]: int, args[0]-1 is the id of features
@@ -566,6 +564,9 @@ class Model:
             if type(args[0]) == int:
                 self.addon_feature = None
                 if args[0] != 0:
+                    if len(args) == 2:
+                        self.feature_list[args[0]-1] = convert_str_to_feature_list(args[1])
+
                     self.addon_feature = self.feature_list[args[0] - 1]
                     self.signal_container, self.data_container = load_features(
                         self, self.addon_feature
@@ -607,6 +608,10 @@ class Model:
                 self.data_thread.join()
             else:
                 self.end_acquisition()
+            self.active_microscope.get_stage_position()
+
+        elif command == "terminate":
+            self.terminate()
 
     def move_stage(self, pos_dict, wait_until_done=False):
         """Moves the stages.
@@ -893,6 +898,9 @@ class Model:
         self.stop_acquisition = False
         while self.stop_acquisition is False and self.stop_send_signal is False:
             self.run_acquisition()
+        # Update the stage position.
+        # Allows the user to externally move the stage in the continuous mode.
+        self.get_stage_position()
 
     def run_acquisition(self):
         """Run acquisition along with a feature list one time."""
@@ -1086,3 +1094,94 @@ class Model:
             data_buffer[i].shared_memory.close()
             data_buffer[i].shared_memory.unlink()
         del data_buffer
+
+    def terminate(self):
+        self.active_microscope.terminate()
+        for microscope_name in self.virtual_microscopes:
+           self.virtual_microscopes[microscope_name].terminate()
+
+    def load_feature_list_from_file(self, filename, features):
+        module = load_module_from_file(filename[filename.rindex("/")+1:], filename)
+        for name in features:
+            feature = getattr(module, name)
+            self.feature_list.append(feature())
+
+    def load_feature_list_from_str(self, feature_list_str):
+        """Append feature list from feature_list_str
+        
+        Parameters
+        ----------
+        feature_list_str: str
+            str of a feature list
+        """
+        self.feature_list.append(convert_str_to_feature_list(feature_list_str))
+
+    def load_feature_records(self):
+        """Load installed feature lists from system folder '..../.ASLM/feature_lists'
+        
+        """
+        feature_lists_path = get_aslm_path() + "/feature_lists"
+        if not os.path.exists(feature_lists_path):
+            os.makedirs(feature_lists_path)
+            return
+        # get __sequence.yml
+        if not os.path.exists(f"{feature_lists_path}/__sequence.yml"):
+            feature_records = []
+        else:
+            feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+
+        # add non added feature lists
+        feature_list_files = [temp for temp in os.listdir(feature_lists_path) if temp[temp.rindex("."):] in (".yml", ".yaml")]
+        for item in feature_list_files:
+            if item == "__sequence.yml":
+                continue
+            temp = load_yaml_file(f"{feature_lists_path}/{item}")
+            add_flag = True
+            for feature in feature_records:
+                if feature["feature_list_name"] == temp["feature_list_name"]:
+                    add_flag = False
+                    break
+            if add_flag:
+                feature_records.append({
+                    "feature_list_name": temp["feature_list_name"],
+                    "yaml_file_name": item 
+                })
+        
+        i = 0
+        while i < len(feature_records):
+            temp = feature_records[i]
+            if not os.path.exists(f"{feature_lists_path}/{temp['yaml_file_name']}"):
+                del feature_records[i]
+                continue
+            item = load_yaml_file(f"{feature_lists_path}/{temp['yaml_file_name']}")
+
+            if item["module_name"]:
+                module = load_module_from_file(item["module_name"], item["filename"])
+                feature = getattr(module, item["module_name"])
+                self.feature_list.append(feature())
+            elif item["feature_list"]:
+                feature = convert_str_to_feature_list(item["feature_list"])
+                self.feature_list.append(feature)
+            else:
+                del feature_records[i]
+                continue
+            i += 1
+        save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
+
+    def get_feature_list(self, idx):
+        """Get feature list str by index
+
+        Parameters
+        ----------
+        idx: int
+            index of feature list
+
+        Return
+        ------
+        feature_list_str: str
+            "" if not exist
+            string of the feature list
+        """
+        if idx > 0 and idx <= len(self.feature_list):
+            return convert_feature_list_to_str(self.feature_list[idx-1])
+        return ""

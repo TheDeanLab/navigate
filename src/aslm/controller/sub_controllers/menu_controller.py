@@ -33,7 +33,9 @@
 # Standard Library Imports
 import logging
 import platform
+import os
 import tkinter as tk
+from tkinter import messagebox
 
 # Third Party Imports
 
@@ -45,16 +47,21 @@ from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
 from aslm.view.popups.waveform_parameter_popup_window import (
     WaveformParameterPopupWindow,
 )
+from aslm.view.popups.feature_list_popup import FeatureListPopup
 from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
 from aslm.controller.sub_controllers import (
     AutofocusPopupController,
     IlastikPopupController,
     CameraMapSettingPopupController,
     WaveformPopupController,
     MicroscopePopupController,
+    FeaturePopupController,
+    HelpPopupController,
 )
-from aslm.tools.file_functions import save_yaml_file
+from aslm.tools.file_functions import save_yaml_file, load_yaml_file
+from aslm.tools.decorators import FeatureList
+from aslm.tools.common_functions import load_module_from_file
+from aslm.config.config import get_aslm_path
 
 
 # Logger Setup
@@ -81,6 +88,10 @@ class MenuController(GUIController):
         self.disable_stage_limits = tk.IntVar(0)
         self.save_data = False
         self.fake_event = None
+        self.feature_list_names = []
+        self.system_feature_list_count = 0
+        self.feature_list_count = 0
+        self.feature_list_file_name = "feature_lists.yaml"
 
     def initialize_menus(self):
         """Initialize menus
@@ -107,10 +118,6 @@ class MenuController(GUIController):
                 "<Control-Return>",
                 "<Control_L-Return>",
             ]
-
-        Parameters
-        ----------
-        None
 
         Returns
         -------
@@ -239,28 +246,28 @@ class MenuController(GUIController):
                 ],
                 "Export Positions": [
                     "standard",
-                    self.parent_controller.multiposition_tab_controller.export_positions,
+                    self.parent_controller.multiposition_tab_controller.export_positions,  # noqa: E501
                     None,
                     None,
                     None,
                 ],
                 "Append Current Position": [
                     "standard",
-                    self.parent_controller.multiposition_tab_controller.add_stage_position,
+                    self.parent_controller.multiposition_tab_controller.add_stage_position,  # noqa: E501
                     None,
                     None,
                     None,
                 ],
                 "Generate Positions": [
                     "standard",
-                    self.parent_controller.multiposition_tab_controller.generate_positions,
+                    self.parent_controller.multiposition_tab_controller.generate_positions,  # noqa: E501
                     None,
                     None,
                     None,
                 ],
                 "Move to Selected Position": [
                     "standard",
-                    self.parent_controller.multiposition_tab_controller.move_to_position,
+                    self.parent_controller.multiposition_tab_controller.move_to_position,  # noqa: E501
                     None,
                     None,
                     None,
@@ -401,7 +408,7 @@ class MenuController(GUIController):
         self.populate_menu(configuration_dict)
 
         # add-on features
-        feature_list = [
+        self.feature_list_names = [
             "None",
             "Switch Resolution",
             "Z Stack Acquisition",
@@ -411,9 +418,12 @@ class MenuController(GUIController):
             "Time Series",
             "Decoupled Focus Stage Multiposition",
         ]
-        for i in range(len(feature_list)):
+        self.feature_list_count = len(self.feature_list_names)
+        self.system_feature_list_count = self.feature_list_count
+
+        for i in range(self.feature_list_count):
             self.view.menubar.menu_features.add_radiobutton(
-                label=feature_list[i], variable=self.feature_id_val, value=i
+                label=self.feature_list_names[i], variable=self.feature_id_val, value=i
             )
         self.feature_id_val.trace_add(
             "write",
@@ -433,6 +443,34 @@ class MenuController(GUIController):
             label="Camera offset and variance maps",
             command=self.popup_camera_map_setting,
         )
+        self.view.menubar.menu_features.add_command(
+            label="Load Customized Feature List", command=self.load_feature_list
+        )
+        self.view.menubar.menu_features.add_command(
+            label="Add Customized Feature List", command=self.popup_feature_list_setting
+        )
+        self.view.menubar.menu_features.add_command(
+            label="Delete Selected Feature List", command=self.delete_feature_list
+        )
+        self.view.menubar.menu_features.add_separator()
+        # add feature lists from previous loaded ones
+        feature_lists_path = get_aslm_path() + "/feature_lists"
+        if not os.path.exists(feature_lists_path):
+            os.makedirs(feature_lists_path)
+            return
+        # get __sequence.yml
+        feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+        if not feature_records:
+            return
+
+        for feature in feature_records:
+            self.view.menubar.menu_features.add_radiobutton(
+                label=feature["feature_list_name"],
+                variable=self.feature_id_val,
+                value=self.feature_list_count,
+            )
+            self.feature_list_names.append(feature["feature_list_name"])
+            self.feature_list_count += 1
 
     def populate_menu(self, menu_dict):
         """Populate the menus from a dictionary.
@@ -674,3 +712,147 @@ class MenuController(GUIController):
     def switch_tabs(self, tab):
         """Switch tabs."""
         self.parent_controller.view.settings.select(tab - 1)
+
+    def popup_feature_list_setting(self):
+        """Show feature list popup window"""
+        feature_list_popup = FeatureListPopup(self.view, title="Add New Feature List")
+        self.parent_controller.features_popup_controller = FeaturePopupController(
+            feature_list_popup, self.parent_controller
+        )
+
+    def load_feature_list(self):
+        """Load feature lists from a python file"""
+        filename = tk.filedialog.askopenfilename(
+            defaultextension=".py", filetypes=[("Python files", "*.py")]
+        )
+        if not filename:
+            return
+        module = load_module_from_file(filename[filename.rindex("/") + 1 :], filename)
+        features = [
+            f for f in dir(module) if isinstance(getattr(module, f), FeatureList)
+        ]
+        feature_lists_path = get_aslm_path() + "/feature_lists"
+        feature_list_files = [
+            temp
+            for temp in os.listdir(feature_lists_path)
+            if temp[temp.rindex(".") :] in (".yml", ".yaml")
+        ]
+        feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+        if not feature_records:
+            feature_records = []
+        added_features = []
+        for name in features:
+            feature = getattr(module, name)
+            feature_list_name = feature.feature_list_name
+            if (
+                f"{feature_list_name}.yml" in feature_list_files
+                or f"{feature_list_name}.yaml" in feature_list_files
+            ):
+                print(
+                    "There is already one feature list named as",
+                    feature_list_name,
+                    "The new one isn't loaded!",
+                )
+                continue
+            self.view.menubar.menu_features.add_radiobutton(
+                label=feature_list_name,
+                variable=self.feature_id_val,
+                value=self.feature_list_count,
+            )
+            save_yaml_file(
+                feature_lists_path,
+                {
+                    "module_name": name,
+                    "feature_list_name": feature_list_name,
+                    "filename": filename,
+                },
+                f"{'_'.join(feature_list_name.split(' '))}.yml",
+            )
+
+            feature_records.append(
+                {
+                    "feature_list_name": feature_list_name,
+                    "yaml_file_name": "_".join(feature_list_name.split(" ")) + ".yml",
+                }
+            )
+            self.feature_list_names.append(feature_list_name)
+            self.feature_list_count += 1
+            added_features.append(name)
+
+        save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
+        # tell model to add feature lists
+        self.parent_controller.model.load_feature_list_from_file(
+            filename, added_features
+        )
+
+    def add_feature_list(self, feature_list_name, feature_list_str):
+        """Add feature list to the software and system yaml files
+
+        Parameters
+        ----------
+        feature_list_name: str
+            feature list name
+        feature_list_str: str
+            string of a feature list
+
+        Returns
+        -------
+        result : bool
+            True: add feature list successfully
+            False: failed
+        """
+        feature_lists_path = get_aslm_path() + "/feature_lists"
+        if os.path.exists(f"{feature_lists_path}/{'_'.join(feature_list_name)}.yml"):
+            return False
+        self.view.menubar.menu_features.add_radiobutton(
+            label=feature_list_name,
+            variable=self.feature_id_val,
+            value=self.feature_list_count,
+        )
+        self.feature_list_names.append(feature_list_name)
+        self.feature_list_count += 1
+        save_yaml_file(
+            feature_lists_path,
+            {
+                "module_name": None,
+                "feature_list_name": feature_list_name,
+                "feature_list": feature_list_str,
+            },
+            f"{'_'.join(feature_list_name.split(' '))}.yml",
+        )
+        feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+        feature_records.append(
+            {
+                "feature_list_name": feature_list_name,
+                "yaml_file_name": "_".join(feature_list_name.split(" ")) + ".yml",
+            }
+        )
+        # tell model to add feature lists
+        self.parent_controller.model.load_feature_list_from_str(feature_list_str)
+        # save feature records
+        save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
+        return True
+
+    def delete_feature_list(self):
+        """Delete a selected customized feature list from the software and system
+        yaml file"""
+        feature_id = self.feature_id_val.get()
+        if feature_id < self.system_feature_list_count:
+            messagebox.showerror(
+                title="Feature List Error",
+                message="Can't delete system feature list or you haven't select any "
+                "feature list",
+            )
+            return
+
+        feature_list_name = self.feature_list_names[feature_id]
+        self.view.menubar.menu_features.delete(feature_list_name)
+
+        # remove from yaml file
+        feature_lists_path = get_aslm_path() + "/feature_lists"
+        feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+        temp = feature_records[feature_id - self.system_feature_list_count]
+        os.remove(f"{feature_lists_path}/{temp['yaml_file_name']}")
+
+        del feature_records[feature_id - self.system_feature_list_count]
+        save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")

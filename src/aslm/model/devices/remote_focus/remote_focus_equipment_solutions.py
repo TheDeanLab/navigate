@@ -38,14 +38,14 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
+from aslm.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
 
-# # Logger Setup
+# Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class RemoteFocusEquipmentSolutions(RemoteFocusBase):
+class RemoteFocusEquipmentSolutions(RemoteFocusNI):
     """RemoteFocusEquipmentSolutions Class
 
     The SCA814 has a single character input buffer that can be overflowed if the proper
@@ -96,8 +96,10 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
         Close connection with the RemoteFocusEquipmentSolutions device.
     """
 
-    def __init__(self):
-        self.comport = "COM1"
+    def __init__(self, microscope_name, device_connection, configuration):
+        super().__init__(microscope_name, device_connection, configuration)
+        self.comport = configuration['configuration']['microscopes'][
+            microscope_name]['remote_focus_device']['hardware'].get('comport', "COM1")
         self.baud_rate = 115200
         self.byte_size = serial.EIGHTBITS
         self.parity = serial.PARITY_NONE
@@ -157,7 +159,6 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
 
             # After write , Before read
             if self.debug:
-                print("RemoteFocusEquipmentSolutions - After Write, Before Read")
                 print(
                     "RemoteFocusEquipmentSolutions - Bytes in Input Buffer: ",
                     self.serial.in_waiting,
@@ -169,6 +170,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
 
             time.sleep(self.timeout)
             data = self.serial.readline()
+            logger.debug(f"RemoteFocusEquipmentSolutions - Received command: {data}")
             if self.debug:
                 print("RemoteFocusEquipmentSolutions - After Read")
                 print("RemoteFocusEquipmentSolutions - Raw Data Received:", data)
@@ -190,10 +192,15 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
                         "RemoteFocusEquipmentSolutions - Nothing received from", string
                     )
 
+            # Initialize Servo
+            self.send_command("k0\r")  # Turn off servo
+            self.send_command("k1\r")  # Engage servo
+            logger.debug("RemoteFocusEquipmentSolutions - Servo Engaged")
+
     def __del__(self):
         """Close the RemoteFocusEquipmentSolutions Class"""
         logger.debug("Closing RemoteFocusEquipmentSolutions Serial Port")
-        self.serial.close()
+        self.close_connection()
 
     def read_bytes(self, num_bytes):
         """Read the specified number of bytes from RemoteFocusEquipmentSolutions.
@@ -282,7 +289,11 @@ class RemoteFocusEquipmentSolutions(RemoteFocusBase):
         --------
         >>> remote_focus_equipment_solutions.close_connection()
         """
-        self.serial.close()
+        try:
+            self.send_command("k0\r")
+            self.serial.close()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

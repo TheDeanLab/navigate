@@ -80,6 +80,7 @@ class MenuController(GUIController):
         self.feature_id_val = tk.IntVar(0)
         self.disable_stage_limits = tk.IntVar(0)
         self.save_data = False
+        self.fake_event = None
 
     def initialize_menus(self):
         """Initialize menus
@@ -664,8 +665,8 @@ class MenuController(GUIController):
                     return
                 elif focus.widgetName == "ttk::combobox":
                     return
-            fake_event = FakeEvent(char=char)
-            self.parent_controller.stage_controller.stage_key_press(fake_event)
+            self.fake_event = FakeEvent(char=char)
+            self.parent_controller.stage_controller.stage_key_press(self.fake_event)
         except KeyError:
             # Avoids KeyError if the user is in a popdown menu.
             pass

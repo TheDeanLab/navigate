@@ -195,7 +195,8 @@ class TestWaveforms(unittest.TestCase):
                 self.assertEqual(np.min(data), -1 * amplitude + offset)
 
     def test_smoothing_length(self):
-        """Test that the smoothed waveform is the same length as the original waveform
+        """Test that the smoothed waveform is proportionally larger than the
+        original waveform.
 
         Parameters
         ----------
@@ -205,6 +206,17 @@ class TestWaveforms(unittest.TestCase):
         -------
         None
         """
+        ps = 10
         waveform = waveforms.remote_focus_ramp()
-        smoothed_waveform = waveforms.smooth_waveform(waveform, 10)
-        self.assertEqual(np.size(smoothed_waveform), np.size(waveform))
+        smoothed_waveform = waveforms.smooth_waveform(waveform, ps)
+        np.testing.assert_almost_equal(
+            len(smoothed_waveform), len(waveform) * (1 + ps / 100) + 1
+        )
+
+    def test_smoothing_bounds(self):
+        ps = 10
+        waveform = waveforms.remote_focus_ramp()
+        smoothed_waveform = waveforms.smooth_waveform(waveform, ps)
+        assert waveform[0] == smoothed_waveform[0]
+        assert waveform[-1] == smoothed_waveform[-1]
+        assert np.max(waveform) >= np.max(smoothed_waveform)

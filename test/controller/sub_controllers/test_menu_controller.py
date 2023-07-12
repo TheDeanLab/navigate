@@ -32,6 +32,8 @@
 
 # Standard Library Imports
 import unittest
+from unittest.mock import MagicMock
+import tkinter as tk
 
 # Third Party Imports
 import pytest
@@ -46,6 +48,60 @@ class TestFakeEvent(unittest.TestCase):
         self.assertEqual(fake_event.char, "a")
         self.assertEqual(fake_event.keysym, "A")
         self.assertEqual(fake_event.state, 0)
+
+
+class TestStageMovement(unittest.TestCase):
+    def setUp(self):
+        # Create a mock parent controller and view
+        self.root = tk.Tk()
+        self.parent_controller = MagicMock()
+        self.parent_controller.stage_controller = MagicMock()
+        self.view = MagicMock()
+        self.view.root = self.root
+
+        # Initialize the menu controller
+        self.mc = MenuController(self.view, self.parent_controller)
+
+    def tearDown(self):
+        self.root.destroy()
+
+    def test_stage_movement_with_ttk_entry(self):
+        self.mc.parent_controller.view.focus_get.return_value = MagicMock(
+            widgetName="ttk::entry"
+        )
+        self.mc.stage_movement("a")
+        self.mc.parent_controller.stage_controller.stage_key_press.assert_not_called()
+
+    def test_stage_movement_with_ttk_combobox(self):
+        self.mc.parent_controller.view.focus_get.return_value = MagicMock(
+            widgetName="ttk::combobox"
+        )
+        self.mc.stage_movement("a")
+        self.mc.parent_controller.stage_controller.stage_key_press.assert_not_called()
+
+    def test_stage_movement_with_other_widget(self):
+        self.mc.parent_controller.view.focus_get.return_value = MagicMock(
+            widgetName="other_widget"
+        )
+        self.mc.stage_movement("a")
+        self.mc.parent_controller.stage_controller.stage_key_press.assert_called_with(
+            self.mc.fake_event
+        )
+
+    def test_stage_movement_with_key_error(self):
+        self.mc.parent_controller.view.focus_get.side_effect = KeyError
+        # Test that no exception is raised
+        try:
+            self.mc.stage_movement("a")
+        except KeyError:
+            self.fail("stage_movement() raised KeyError unexpectedly!")
+
+    def test_stage_movement_with_no_focus(self):
+        self.mc.parent_controller.view.focus_get.return_value = None
+        self.mc.stage_movement("a")
+        self.mc.parent_controller.stage_controller.stage_key_press.assert_called_with(
+            self.mc.fake_event
+        )
 
 
 class TestMenuController(unittest.TestCase):

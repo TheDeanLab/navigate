@@ -44,7 +44,9 @@ from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.popups.help_popup import HelpPopup
 from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
 from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
-from aslm.view.popups.waveform_parameter_popup_window import WaveformParameterPopupWindow
+from aslm.view.popups.waveform_parameter_popup_window import (
+    WaveformParameterPopupWindow,
+)
 from aslm.view.popups.feature_list_popup import FeatureListPopup
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.controller.sub_controllers import (
@@ -54,7 +56,7 @@ from aslm.controller.sub_controllers import (
     WaveformPopupController,
     MicroscopePopupController,
     FeaturePopupController,
-    HelpPopupController
+    HelpPopupController,
 )
 from aslm.tools.file_functions import save_yaml_file, load_yaml_file
 from aslm.tools.decorators import FeatureList
@@ -85,6 +87,7 @@ class MenuController(GUIController):
         self.feature_id_val = tk.IntVar(0)
         self.disable_stage_limits = tk.IntVar(0)
         self.save_data = False
+        self.fake_event = None
         self.feature_list_names = []
         self.system_feature_list_count = 0
         self.feature_list_count = 0
@@ -94,9 +97,27 @@ class MenuController(GUIController):
         """Initialize menus
         This function defines all the menus in the menubar
 
-        Parameters
-        ----------
-        None
+        Each menu item is initialized as a dictionary entry that is associated with
+        a list that provides the following parameters:
+
+        Menu item name: name of the menu item. If the name is specified as
+        add_separator, then a separator is added to the menu.
+
+        List of parameters:
+            Type of entry: standard, checkbutton, radiobutton, cascade
+            Function: function to be called when menu item is selected
+            Accelerator: keyboard shortcut
+            Bindings: keyboard shortcut bindings for Windows
+            Bindings: keyboard shortcut bindings for Mac
+
+        Example:
+            "Acquire Data": [
+                "standard",
+                self.acquire_data,
+                "Ctrl+Enter",
+                "<Control-Return>",
+                "<Control_L-Return>",
+            ]
 
         Returns
         -------
@@ -194,7 +215,13 @@ class MenuController(GUIController):
                 "Move Out": ["standard", self.not_implemented, None, None, None],
                 "Move Focus Up": ["standard", self.not_implemented, None, None, None],
                 "Move Focus Down": ["standard", self.not_implemented, None, None, None],
-                "Rotate Clockwise": ["standard", self.not_implemented, None, None, None],
+                "Rotate Clockwise": [
+                    "standard",
+                    self.not_implemented,
+                    None,
+                    None,
+                    None,
+                ],
                 "Rotate Counter-Clockwise": [
                     "standard",
                     self.not_implemented,
@@ -219,28 +246,28 @@ class MenuController(GUIController):
                 ],
                 "Export Positions": [
                     "standard",
-                    self.parent_controller.multiposition_tab_controller.export_positions,
+                    self.parent_controller.multiposition_tab_controller.export_positions,  # noqa: E501
                     None,
                     None,
                     None,
                 ],
                 "Append Current Position": [
                     "standard",
-                    self.parent_controller.multiposition_tab_controller.add_stage_position,
+                    self.parent_controller.multiposition_tab_controller.add_stage_position,  # noqa: E501
                     None,
                     None,
                     None,
                 ],
                 "Generate Positions": [
                     "standard",
-                    self.parent_controller.multiposition_tab_controller.generate_positions,
+                    self.parent_controller.multiposition_tab_controller.generate_positions,  # noqa: E501
                     None,
                     None,
                     None,
                 ],
                 "Move to Selected Position": [
                     "standard",
-                    self.parent_controller.multiposition_tab_controller.move_to_position,
+                    self.parent_controller.multiposition_tab_controller.move_to_position,  # noqa: E501
                     None,
                     None,
                     None,
@@ -269,16 +296,16 @@ class MenuController(GUIController):
                 "Perform Autofocus": [
                     "standard",
                     lambda x: self.parent_controller.execute("autofocus"),
-                    "Ctrl+A",
-                    "<Control-a>",
-                    "<Control_L-a>",
+                    "Ctrl+Shift+A",
+                    "<Control-A>",
+                    "<Control_L-A>",
                 ],
                 "Autofocus Settings": [
                     "standard",
                     self.popup_autofocus_setting,
-                    "Ctrl+Shift+A",
-                    "<Control-A>",
-                    "<Control_L-A>",
+                    "Ctrl+Alt+Shift+A",
+                    "<Control-Alt-A>",
+                    "<Command-Alt-Key-A>",
                 ],
             }
         }
@@ -354,7 +381,9 @@ class MenuController(GUIController):
                 )
         self.resolution_value.trace_add(
             "write",
-            lambda *args: self.parent_controller.execute("resolution", self.resolution_value.get()),
+            lambda *args: self.parent_controller.execute(
+                "resolution", self.resolution_value.get()
+            ),
         )
 
         configuration_dict = {
@@ -398,7 +427,9 @@ class MenuController(GUIController):
             )
         self.feature_id_val.trace_add(
             "write",
-            lambda *args: self.parent_controller.execute("load_feature", self.feature_id_val.get()),
+            lambda *args: self.parent_controller.execute(
+                "load_feature", self.feature_id_val.get()
+            ),
         )
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(
@@ -409,19 +440,17 @@ class MenuController(GUIController):
             "Ilastik Segmentation", state="disabled"
         )
         self.view.menubar.menu_features.add_command(
-            label="Camera offset and variance maps", command=self.popup_camera_map_setting
+            label="Camera offset and variance maps",
+            command=self.popup_camera_map_setting,
         )
         self.view.menubar.menu_features.add_command(
-            label="Load Customized Feature List",
-            command=self.load_feature_list
+            label="Load Customized Feature List", command=self.load_feature_list
         )
         self.view.menubar.menu_features.add_command(
-            label="Add Customized Feature List",
-            command=self.popup_feature_list_setting
+            label="Add Customized Feature List", command=self.popup_feature_list_setting
         )
         self.view.menubar.menu_features.add_command(
-            label="Delete Selected Feature List",
-            command=self.delete_feature_list
+            label="Delete Selected Feature List", command=self.delete_feature_list
         )
         self.view.menubar.menu_features.add_separator()
         # add feature lists from previous loaded ones
@@ -433,14 +462,15 @@ class MenuController(GUIController):
         feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
         if not feature_records:
             return
-        
+
         for feature in feature_records:
             self.view.menubar.menu_features.add_radiobutton(
-                label=feature["feature_list_name"], variable=self.feature_id_val, value=self.feature_list_count
+                label=feature["feature_list_name"],
+                variable=self.feature_id_val,
+                value=self.feature_list_count,
             )
             self.feature_list_names.append(feature["feature_list_name"])
             self.feature_list_count += 1
-
 
     def populate_menu(self, menu_dict):
         """Populate the menus from a dictionary.
@@ -546,9 +576,7 @@ class MenuController(GUIController):
         )
         if not filename:
             return
-        save_yaml_file(
-            "", self.parent_controller.configuration["experiment"], filename
-        )
+        save_yaml_file("", self.parent_controller.configuration["experiment"], filename)
 
     def load_images(self):
         """Load images from a file."""
@@ -565,8 +593,8 @@ class MenuController(GUIController):
             self.parent_controller.camera_map_popup_controller.showup()
             return
         map_popup = CameraMapSettingPopup(self.view)
-        self.parent_controller.camera_map_popup_controller = CameraMapSettingPopupController(
-            map_popup, self.parent_controller
+        self.parent_controller.camera_map_popup_controller = (
+            CameraMapSettingPopupController(map_popup, self.parent_controller)
         )
 
     def popup_ilastik_setting(self):
@@ -588,7 +616,9 @@ class MenuController(GUIController):
             self.parent_controller.help_controller.showup()
             return
         help_pop = HelpPopup(self.view)
-        self.parent_controller.help_controller = HelpPopupController(help_pop, self.parent_controller)
+        self.parent_controller.help_controller = HelpPopupController(
+            help_pop, self.parent_controller
+        )
 
     def toggle_stage_limits(self, *args):
         """Toggle stage limits."""
@@ -605,7 +635,9 @@ class MenuController(GUIController):
             self.parent_controller.af_popup_controller.showup()
             return
         af_popup = AutofocusPopup(self.view)
-        self.parent_controller.af_popup_controller = AutofocusPopupController(af_popup, self.parent_controller)
+        self.parent_controller.af_popup_controller = AutofocusPopupController(
+            af_popup, self.parent_controller
+        )
 
     def popup_waveform_setting(self):
         if hasattr(self.parent_controller, "waveform_popup_controller"):
@@ -615,7 +647,9 @@ class MenuController(GUIController):
             self.view, self.parent_controller.configuration_controller
         )
         waveform_popup_controller = WaveformPopupController(
-            waveform_constants_popup, self.parent_controller, self.parent_controller.waveform_constants_path
+            waveform_constants_popup,
+            self.parent_controller,
+            self.parent_controller.waveform_constants_path,
         )
         waveform_popup_controller.populate_experiment_values()
         self.parent_controller.waveform_popup_controller = waveform_popup_controller
@@ -638,7 +672,7 @@ class MenuController(GUIController):
         self.parent_controller.microscope_popup_controller = MicroscopePopupController(
             self.view, self.parent_controller, microscope_info
         )
-    
+
     def toggle_save(self, *args):
         """Save the data."""
         self.save_data = not self.save_data
@@ -653,33 +687,56 @@ class MenuController(GUIController):
         print("Not implemented")
 
     def stage_movement(self, char):
-        """Stage movement."""
-        fake_event = FakeEvent(char=char)
-        self.parent_controller.stage_controller.stage_key_press(fake_event)
+        """Stage movement.
+
+        Should not be run if we are in a validated combobox, or a validate entry.
+
+        Parameters
+        ----------
+        char: str
+            The character that was pressed.
+        """
+        try:
+            focus = self.parent_controller.view.focus_get()
+            if hasattr(focus, "widgetName"):
+                if focus.widgetName == "ttk::entry":
+                    return
+                elif focus.widgetName == "ttk::combobox":
+                    return
+            self.fake_event = FakeEvent(char=char)
+            self.parent_controller.stage_controller.stage_key_press(self.fake_event)
+        except KeyError:
+            # Avoids KeyError if the user is in a popdown menu.
+            pass
 
     def switch_tabs(self, tab):
         """Switch tabs."""
         self.parent_controller.view.settings.select(tab - 1)
 
-
     def popup_feature_list_setting(self):
-        """Show feature list popup window
-        """
+        """Show feature list popup window"""
         feature_list_popup = FeatureListPopup(self.view, title="Add New Feature List")
-        self.parent_controller.features_popup_controller = FeaturePopupController(feature_list_popup, self.parent_controller)
+        self.parent_controller.features_popup_controller = FeaturePopupController(
+            feature_list_popup, self.parent_controller
+        )
 
     def load_feature_list(self):
-        """Load feature lists from a python file
-        """
+        """Load feature lists from a python file"""
         filename = tk.filedialog.askopenfilename(
             defaultextension=".py", filetypes=[("Python files", "*.py")]
         )
         if not filename:
             return
-        module = load_module_from_file(filename[filename.rindex("/")+1:], filename)
-        features = [f for f in dir(module) if isinstance(getattr(module, f), FeatureList)]
+        module = load_module_from_file(filename[filename.rindex("/") + 1 :], filename)
+        features = [
+            f for f in dir(module) if isinstance(getattr(module, f), FeatureList)
+        ]
         feature_lists_path = get_aslm_path() + "/feature_lists"
-        feature_list_files = [temp for temp in os.listdir(feature_lists_path) if temp[temp.rindex("."):] in (".yml", ".yaml")]
+        feature_list_files = [
+            temp
+            for temp in os.listdir(feature_lists_path)
+            if temp[temp.rindex(".") :] in (".yml", ".yaml")
+        ]
         feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
         if not feature_records:
             feature_records = []
@@ -687,31 +744,46 @@ class MenuController(GUIController):
         for name in features:
             feature = getattr(module, name)
             feature_list_name = feature.feature_list_name
-            if f"{feature_list_name}.yml" in feature_list_files or f"{feature_list_name}.yaml" in feature_list_files:
-                print("There is already one feature list named as", \
-                        feature_list_name, \
-                        "The new one isn't loaded!")
+            if (
+                f"{feature_list_name}.yml" in feature_list_files
+                or f"{feature_list_name}.yaml" in feature_list_files
+            ):
+                print(
+                    "There is already one feature list named as",
+                    feature_list_name,
+                    "The new one isn't loaded!",
+                )
                 continue
             self.view.menubar.menu_features.add_radiobutton(
-                label=feature_list_name, variable=self.feature_id_val, value=self.feature_list_count
+                label=feature_list_name,
+                variable=self.feature_id_val,
+                value=self.feature_list_count,
             )
-            save_yaml_file(feature_lists_path, {
-                "module_name": name,
-                "feature_list_name": feature_list_name,
-                "filename": filename
-            }, f"{'_'.join(feature_list_name.split(' '))}.yml")
+            save_yaml_file(
+                feature_lists_path,
+                {
+                    "module_name": name,
+                    "feature_list_name": feature_list_name,
+                    "filename": filename,
+                },
+                f"{'_'.join(feature_list_name.split(' '))}.yml",
+            )
 
-            feature_records.append({
-                "feature_list_name": feature_list_name,
-                "yaml_file_name": "_".join(feature_list_name.split(" ")) + ".yml"
-            })
+            feature_records.append(
+                {
+                    "feature_list_name": feature_list_name,
+                    "yaml_file_name": "_".join(feature_list_name.split(" ")) + ".yml",
+                }
+            )
             self.feature_list_names.append(feature_list_name)
             self.feature_list_count += 1
             added_features.append(name)
-        
+
         save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
         # tell model to add feature lists
-        self.parent_controller.model.load_feature_list_from_file(filename, added_features)
+        self.parent_controller.model.load_feature_list_from_file(
+            filename, added_features
+        )
 
     def add_feature_list(self, feature_list_name, feature_list_str):
         """Add feature list to the software and system yaml files
@@ -733,20 +805,28 @@ class MenuController(GUIController):
         if os.path.exists(f"{feature_lists_path}/{'_'.join(feature_list_name)}.yml"):
             return False
         self.view.menubar.menu_features.add_radiobutton(
-            label=feature_list_name, variable=self.feature_id_val, value=self.feature_list_count
+            label=feature_list_name,
+            variable=self.feature_id_val,
+            value=self.feature_list_count,
         )
         self.feature_list_names.append(feature_list_name)
         self.feature_list_count += 1
-        save_yaml_file(feature_lists_path, {
-            "module_name": None,
-            "feature_list_name": feature_list_name,
-            "feature_list": feature_list_str
-        }, f"{'_'.join(feature_list_name.split(' '))}.yml")
+        save_yaml_file(
+            feature_lists_path,
+            {
+                "module_name": None,
+                "feature_list_name": feature_list_name,
+                "feature_list": feature_list_str,
+            },
+            f"{'_'.join(feature_list_name.split(' '))}.yml",
+        )
         feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
-        feature_records.append({
-            "feature_list_name": feature_list_name,
-            "yaml_file_name": "_".join(feature_list_name.split(" ")) + ".yml"
-        })
+        feature_records.append(
+            {
+                "feature_list_name": feature_list_name,
+                "yaml_file_name": "_".join(feature_list_name.split(" ")) + ".yml",
+            }
+        )
         # tell model to add feature lists
         self.parent_controller.model.load_feature_list_from_str(feature_list_str)
         # save feature records
@@ -754,14 +834,17 @@ class MenuController(GUIController):
         return True
 
     def delete_feature_list(self):
-        """Delete a selected customized feature list from the software and system yaml file
-        """
+        """Delete a selected customized feature list from the software and system
+        yaml file"""
         feature_id = self.feature_id_val.get()
         if feature_id < self.system_feature_list_count:
-            messagebox.showerror(title="Feature List Error",
-                                 message="Can't delete system feature list or you haven't select any feature list")
+            messagebox.showerror(
+                title="Feature List Error",
+                message="Can't delete system feature list or you haven't select any "
+                "feature list",
+            )
             return
-        
+
         feature_list_name = self.feature_list_names[feature_id]
         self.view.menubar.menu_features.delete(feature_list_name)
 

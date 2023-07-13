@@ -172,9 +172,6 @@ class ImageWriter:
             )
             logger.exception(e)
 
-        # Make sure that there is enough disk space to save the data.
-        self.calculate_and_check_disk_space()
-
         # Set up the file name and path in the save directory
         self.file_type = self.model.configuration["experiment"]["Saving"]["file_type"]
         current_channel = self.model.active_microscope.current_channel
@@ -190,6 +187,9 @@ class ImageWriter:
         self.data_source.set_metadata_from_configuration_experiment(
             self.model.configuration
         )
+
+        # Make sure that there is enough disk space to save the data.
+        self.calculate_and_check_disk_space()
 
     def save_image(self, frame_ids):
         """Save the data to disk.
@@ -260,6 +260,7 @@ class ImageWriter:
                             self.mip[c_idx, :, :],
                         )
             except OSError as e:
+                self.close()
                 logger.debug(f"ASLM Image Writer: {e}")
                 raise Warning("Cannot save image. Check available disk space.")
 
@@ -338,7 +339,9 @@ class ImageWriter:
 
     def calculate_and_check_disk_space(self):
         """Estimate the size of the data that will be written to disk, and confirm
-        that sufficient disk space is available."""
+        that sufficient disk space is available.
+
+        Assumes 16-bit image type, without compression."""
 
         # Return disk usage statistics in bytes
         _, _, free = shutil.disk_usage(self.save_directory)
@@ -355,9 +358,42 @@ class ImageWriter:
         )
 
         # Calculate the size in bytes.
-        # TODO. Should not be hard-coded. Should this be logged in the CameraParameters?
+        # TODO. Should not be hard-coded. Should bit-depth be logged in the
+        #  CameraParameters?
         bit_depth = 16
         image_size = (total_voxels * bit_depth) // 8
+
+        if self.file_type == "TIFF":
+            pass
+        elif self.file_type == "OME-TIFF":
+            pass
+        elif self.file_type == "H5" or self.file_type == "N5":
+            # Must account for the down-sampling performed in the pyramidal file format.
+            # default 1, 2, 4, and 8x down-sampling in each dimension
+            resolutions = self.data_source.resolutions
+            for resolution in resolutions:
+                # if all resolution values == 1, already calculated above.
+                if all(res == 1 for res in resolution):
+                    pass
+                else:
+                    if self.file_type == "H5":
+                        # BDV stores as YXZ
+                        image_size += (
+                            (self.model.img_height // resolution[0])
+                            * (self.model.img_width // resolution[1])
+                            * self.num_of_slices
+                            // resolution[2]
+                        )
+                    elif self.file_type == "N5":
+                        # N5 stores as XYZ
+                        image_size += (
+                            (self.model.img_height // resolution[1])
+                            * (self.model.img_width // resolution[0])
+                            * self.num_of_slices
+                            // resolution[2]
+                        )
+        else:
+            raise Warning("Image Writer - Unknown file type.")
 
         # Confirm that there is enough disk space to save the data.
         if free < image_size:

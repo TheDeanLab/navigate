@@ -377,21 +377,90 @@ class Microscope:
             Dictionary of all the waveforms.
         """
         readout_time = self.get_readout_time()
+        exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
         camera_waveform = self.daq.calculate_all_waveforms(
-            self.microscope_name, readout_time
+            self.microscope_name, exposure_times, sweep_times
         )
-        remote_focus_waveform = self.remote_focus_device.adjust(readout_time)
-        galvo_waveform = [self.galvo[k].adjust(readout_time) for k in self.galvo]
+        remote_focus_waveform = self.remote_focus_device.adjust(
+            exposure_times, sweep_times
+        )
+        galvo_waveform = [
+            self.galvo[k].adjust(exposure_times, sweep_times) for k in self.galvo
+        ]
         # TODO: calculate waveform for galvo stage
         for stage, axes in self.stages_list:
             if type(stage) == GalvoNIStage:
-                stage.calculate_waveform(readout_time)
+                stage.calculate_waveform(exposure_times, sweep_times)
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,
             "galvo_waveform": galvo_waveform,
         }
         return waveform_dict
+
+    def calculate_exposure_sweep_times(self, readout_time):
+        """Get the exposure and sweep times for all channels.
+
+        Parameters
+        ----------
+        readout_time : float
+            Readout time of the camera (seconds) if we are operating the camera in
+            Normal mode, otherwise -1.
+        """
+        exposure_times = {}
+        sweep_times = {}
+        microscope_state = self.configuration["experiment"]["MicroscopeState"]
+        zoom = microscope_state["zoom"]
+        waveform_constants = self.configuration["waveform_constants"]
+        camera_delay_percent = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["camera"]["delay_percent"]
+        remote_focus_ramp_falling = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["remote_focus_device"]["ramp_falling_percent"]
+
+        duty_cycle_wait_duration = (
+            float(
+                self.configuration["waveform_constants"]
+                .get("other_constants", {})
+                .get("remote_focus_settle_duration", 0)
+            )
+            / 1000
+        )
+        for channel_key in microscope_state["channels"].keys():
+            channel = microscope_state["channels"][channel_key]
+            if channel["is_selected"] is True:
+                exposure_time = channel["camera_exposure_time"] / 1000
+
+                sweep_time = (
+                    exposure_time
+                    + exposure_time
+                    * (camera_delay_percent + remote_focus_ramp_falling)
+                    / 100
+                )
+                if readout_time > 0:
+                    # This addresses the dovetail nature of the camera readout in normal
+                    # mode. The camera reads middle out, and the delay in start of the
+                    # last lines compared to the first lines causes the exposure to be
+                    # net longer than exposure_time. This helps the galvo keep sweeping
+                    # for the full camera exposure time.
+                    sweep_time += readout_time  # we could set it to 0.14 instead of
+                    # 0.16384 according to the test
+
+                ps = float(
+                    waveform_constants["remote_focus_constants"][self.microscope_name][
+                        zoom
+                    ][channel["laser"]].get("percent_smoothing", 0.0)
+                )
+                if ps > 0:
+                    sweep_time = (1 + ps / 100) * sweep_time
+
+                sweep_time += duty_cycle_wait_duration
+
+                exposure_times[channel_key] = exposure_time
+                sweep_times[channel_key] = sweep_time
+
+        return exposure_times, sweep_times
 
     def prepare_next_channel(self):
         """Prepare the next channel.
@@ -568,7 +637,8 @@ class Microscope:
 
     def move_remote_focus(self, offset=None):
         readout_time = self.get_readout_time()
-        self.remote_focus_device.move(readout_time, offset)
+        exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
+        self.remote_focus_device.move(exposure_times, sweep_times, offset)
 
     def update_stage_limits(self, limits_flag=True):
         self.ask_stage_for_position = True
@@ -679,7 +749,7 @@ class Microscope:
             self.info[device_name] = device_ref_name
 
     def terminate(self):
-        """ Close hardware explicitly. """
+        """Close hardware explicitly."""
         self.camera.close_camera()
         try:
             # Currently only for RemoteFocusEquipmentSolutions

@@ -34,7 +34,6 @@
 import logging
 
 # Third Party Imports
-import numpy as np
 
 # Local Imports
 from aslm.model.waveforms import remote_focus_ramp, smooth_waveform
@@ -118,13 +117,15 @@ class RemoteFocusBase:
         """Destructor"""
         pass
 
-    def adjust(self, readout_time, offset=None):
+    def adjust(self, exposure_times, sweep_times, offset=None):
         """Adjusts the remote focus waveform based on the readout time.
 
         Parameters
         ----------
-        readout_time : float
-            Readout time in seconds.
+        exposure_times : dict
+            Dictionary of exposure times for each selected channel
+        sweep_times : dict
+            Dictionary of sweep times for each selected channel
 
         Returns
         -------
@@ -145,15 +146,6 @@ class RemoteFocusBase:
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["sample_rate"]
-        # duty wait duration
-        duty_cycle_wait_duration = (
-            float(
-                waveform_constants.get("other_constants", {}).get(
-                    "remote_focus_settle_duration", 0
-                )
-            )
-            / 1000
-        )
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
@@ -165,21 +157,19 @@ class RemoteFocusBase:
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.
                 # Should Assert.
                 laser = channel["laser"]
-                exposure_time = channel["camera_exposure_time"] / 1000
-                self.sweep_time = exposure_time + exposure_time * (
-                    (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
-                )
-                if readout_time > 0:
-                    # This addresses the dovetail nature of the camera readout in normal
-                    # mode. The camera reads middle out, and the delay in start of the
-                    # last lines compared to the first lines causes the exposure to be
-                    # net longer than exposure_time. This helps the galvo keep sweeping
-                    # for the full camera exposure time.
-                    self.sweep_time += readout_time
-
-                self.sweep_time += duty_cycle_wait_duration
+                exposure_time = exposure_times[channel_key]
+                self.sweep_time = sweep_times[channel_key]
 
                 self.samples = int(self.sample_rate * self.sweep_time)
+
+                # Make sure the smoothing results in a waveform of length sweep time
+                ps = float(
+                    waveform_constants["remote_focus_constants"][self.microscope_name][
+                        zoom
+                    ][channel["laser"]].get("percent_smoothing", 0.0)
+                )
+                if ps > 0:
+                    self.sweep_time = (1 - ps / 100) * self.sweep_time
 
                 # Remote Focus Parameters
                 temp = waveform_constants["remote_focus_constants"][imaging_mode][zoom][
@@ -221,7 +211,7 @@ class RemoteFocusBase:
                         laser
                     ]["offset"]
                 )
-                if offset != None:
+                if offset is not None:
                     remote_focus_offset += offset
 
                 # Calculate the Waveforms
@@ -250,7 +240,6 @@ class RemoteFocusBase:
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] < self.remote_focus_min_voltage
                 ] = self.remote_focus_min_voltage
-
 
         return self.waveform_dict
 

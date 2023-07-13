@@ -225,5 +225,20 @@ class TestWaveforms(unittest.TestCase):
         waveform_smoothing_pct = 10
         waveform = waveforms.remote_focus_ramp(sample_rate=16)
         smoothed_waveform = waveforms.smooth_waveform(waveform, waveform_smoothing_pct)
-        assert(len(waveform)*waveform_smoothing_pct/100 < 1)
+        assert len(waveform) * waveform_smoothing_pct / 100 < 1
         np.testing.assert_array_equal(waveform, smoothed_waveform)
+
+    def test_camera_exposure(self):
+        sr, st, ex, cd = 100000, 0.5, 0.4, 10
+        v = waveforms.camera_exposure(
+            sample_rate=sr, sweep_time=st, exposure=ex, camera_delay=cd
+        )
+        assert np.sum(v > 0) == sr * ex
+
+    def test_camera_exposure_short(self):
+        """In the event the camera delay + exposure_time > sweep time..."""
+        sr, st, ex, cd = 100000, 0.4, 0.4, 10
+        v = waveforms.camera_exposure(
+            sample_rate=sr, sweep_time=st, exposure=ex, camera_delay=cd
+        )
+        assert np.sum(v > 0) == (1 - cd / 100) * sr * ex

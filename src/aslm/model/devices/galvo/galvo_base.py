@@ -34,7 +34,6 @@
 import logging
 
 # Third Party Imports
-import numpy as np
 
 # Local Imports
 from aslm.model.waveforms import sawtooth, sine_wave
@@ -132,7 +131,7 @@ class GalvoBase:
         """Destructor"""
         pass
 
-    def adjust(self, readout_time):
+    def adjust(self, exposure_times, sweep_times):
         """Adjust the galvo waveform to account for the camera readout time.
 
         Parameters
@@ -146,7 +145,7 @@ class GalvoBase:
 
         Examples
         --------
-        >>> galvo.adjust(0.1)
+        >>> galvo.adjust(exposure_times, sweep_times)
         """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         # calculate waveform
@@ -159,15 +158,6 @@ class GalvoBase:
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["sample_rate"]
-        # duty wait duration
-        duty_cycle_wait_duration = (
-            float(
-                self.configuration["waveform_constants"]
-                .get("other_constants", {})
-                .get("remote_focus_settle_duration", 0)
-            )
-            / 1000
-        )
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
@@ -178,19 +168,8 @@ class GalvoBase:
 
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.
                 # Should Assert.
-                exposure_time = channel["camera_exposure_time"] / 1000
-                self.sweep_time = exposure_time + exposure_time * (
-                    (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
-                )
-                if readout_time > 0:
-                    # This addresses the dovetail nature of the camera readout in normal
-                    # mode. The camera reads middle out, and the delay in start of the
-                    # last lines compared to the first lines causes the exposure to be
-                    # net longer than exposure_time. This helps the galvo keep sweeping
-                    # for the full camera exposure time.
-                    self.sweep_time += readout_time
-
-                self.sweep_time += duty_cycle_wait_duration
+                exposure_time = exposure_times[channel_key]
+                self.sweep_time = sweep_times[channel_key]
 
                 self.samples = int(self.sample_rate * self.sweep_time)
 
@@ -203,7 +182,8 @@ class GalvoBase:
                     )
                 except ValueError as e:
                     logger.error(
-                        f"{e} waveform constants.yml doesn't have parameter amplitude/offset/frequency for {self.galvo_name}"
+                        f"{e} waveform constants.yml doesn't have parameter "
+                        f"amplitude/offset/frequency for {self.galvo_name}"
                     )
                     return
 

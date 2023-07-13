@@ -80,7 +80,7 @@ class RemoteFocusNI(RemoteFocusBase):
         Initialize the task.
     __del__()
         Delete the task.
-    adjust(readout_time)
+    adjust(exposure_times, sweep_times)
         Adjust the waveform.
     prepare_task(channel_key)
         Prepare the task.
@@ -146,15 +146,17 @@ class RemoteFocusNI(RemoteFocusBase):
         self.stop_task()
         self.close_task()
 
-    def adjust(self, readout_time, offset=None):
+    def adjust(self, exposure_times, sweep_times, offset=None):
         """Adjust the waveform.
 
         This method adjusts the waveform.
 
         Parameters
         ----------
-        readout_time : float
-            The readout time.
+        exposure_times : dict
+            Dictionary of exposure times for each selected channel
+        sweep_times : dict
+            Dictionary of sweep times for each selected channel
 
         Returns
         -------
@@ -162,9 +164,9 @@ class RemoteFocusNI(RemoteFocusBase):
 
         Examples
         --------
-        >>> self.adjust(readout_time)
+        >>> self.adjust(exposure_times, sweep_times)
         """
-        waveform_dict = super().adjust(readout_time, offset)
+        waveform_dict = super().adjust(exposure_times, sweep_times, offset)
 
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
             "sample_rate": self.sample_rate,
@@ -174,9 +176,9 @@ class RemoteFocusNI(RemoteFocusBase):
         }
 
         return waveform_dict
-    
-    def move(self, readout_time, offset=None):
-        self.adjust(readout_time, offset)
+
+    def move(self, exposure_times, sweep_times, offset=None):
+        self.adjust(exposure_times, sweep_times, offset)
         self.daq.update_analog_task(self.board_name)
 
     def prepare_task(self, channel_key):

@@ -622,7 +622,7 @@ class Controller:
             saving_settings = self.configuration["experiment"]["Saving"]
             file_directory = create_save_path(saving_settings)
             save_yaml_file(
-                file_directory,
+                os.path.join(get_aslm_path(), "config"),
                 self.configuration["experiment"],
                 filename="experiment.yml",
             )

@@ -734,10 +734,13 @@ class MenuController(GUIController):
         """
         try:
             focus = self.parent_controller.view.focus_get()
+            print(focus.widgetName)
             if hasattr(focus, "widgetName"):
                 if focus.widgetName == "ttk::entry":
                     return
                 elif focus.widgetName == "ttk::combobox":
+                    return
+                elif focus.widgetName == "text":
                     return
             self.fake_event = FakeEvent(char=char)
             self.parent_controller.stage_controller.stage_key_press(self.fake_event)

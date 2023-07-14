@@ -33,6 +33,7 @@
 # Standard Library Imports
 import os
 import sys
+import time
 import shutil
 import platform
 from pathlib import Path
@@ -267,6 +268,14 @@ def verify_experiment_config(manager, configuration):
     configuration: configuration object
         contains all the yaml files
     """
+    if type(configuration["experiment"]) is not DictProxy:
+        update_config_dict(
+            manager,
+            configuration,
+            "experiment",
+            {}
+        )
+
     # verify/build autofocus parameter setting
     # get autofocus supported devices(stages, remote_focus) from configuration.yaml file
     device_dict = {}
@@ -298,6 +307,13 @@ def verify_experiment_config(manager, configuration):
         "fine_selected": True,
         "robust_fit": False
     }
+    if "AutoFocusParameters" not in configuration["experiment"] or type(configuration["experiment"]["AutoFocusParameters"]) is not DictProxy:
+        update_config_dict(
+            manager,
+            configuration["experiment"],
+            "AutoFocusParameters",
+            {}
+        )
     autofocus_setting_dict = configuration["experiment"]["AutoFocusParameters"]
     # verify if all the devices have been added to the autofocus parameter dict
     for microscope_name in device_dict:
@@ -337,6 +353,37 @@ def verify_experiment_config(manager, configuration):
                     for device_ref in autofocus_setting_dict[microscope_name][device].keys():
                         if device_ref not in autofocus_setting_dict[microscope_name][device]:
                             autofocus_setting_dict[microscope_name][device].pop(device_ref)
+
+    # saving info
+    saving_dict_sample = {
+        "root_directory": get_aslm_path(),
+        "save_directory": get_aslm_path(),
+        "user": "Kevin",
+        "tissue": "Lung",
+        "celltype": "MV3",
+        "label": "GFP",
+        "file_type": "TIFF",
+        "date": time.strftime("%Y-%m-%d"),
+        "solvent": "BABB"
+    }
+    if "Saving" not in configuration["experiment"] or type(configuration["experiment"]["Saving"]) is not DictProxy:
+        update_config_dict(
+            manager,
+            configuration["experiment"],
+            "Saving",
+            saving_dict_sample
+        )
+    saving_setting_dict = configuration["experiment"]["Saving"]
+    for k in saving_dict_sample:
+        if k not in saving_setting_dict:
+            saving_setting_dict[k] = saving_dict_sample[k]
+
+    # if root directory/saving direcotry doesn't exist
+    if not os.path.exists(saving_setting_dict["root_directory"]):
+        saving_setting_dict["root_directory"] = saving_dict_sample["root_directory"]
+    if not os.path.exists(saving_setting_dict["save_directory"]):
+        saving_setting_dict["save_directory"] = saving_dict_sample["save_directory"]
+
 
 def verify_waveform_constants(manager, configuration):
     if type(configuration["waveform_constants"]) is not DictProxy:

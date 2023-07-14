@@ -10,15 +10,7 @@ Saving:
   file_type: TIFF
   date: 2022-06-07
   solvent: BABB
-Devices:
-  daq: NI
-  camera: HamamatsuOrca
-  etl: ETL
-  filter_wheel: Sutter
-  stage: PI
-  zoom: Dynamixel
 CameraParameters:
-  number_of_cameras: 1
   x_pixels: 2048
   y_pixels: 2048
   sensor_mode: Normal

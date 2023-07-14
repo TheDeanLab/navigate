@@ -243,7 +243,6 @@ class CameraSettingController(GUIController):
         self.camera_setting_dict["x_pixels"] = self.roi_widgets["Width"].get()
         self.camera_setting_dict["y_pixels"] = self.roi_widgets["Height"].get()
 
-        self.camera_setting_dict["number_of_cameras"] = 1
         self.camera_setting_dict["pixel_size"] = self.default_pixel_size
         self.camera_setting_dict["frames_to_average"] = self.framerate_widgets[
             "frames_to_average"

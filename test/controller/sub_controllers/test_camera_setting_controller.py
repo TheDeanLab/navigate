@@ -310,7 +310,6 @@ class TestCameraSettingController:
         assert self.camera_settings.camera_setting_dict["binning"] == "4x4"
         assert self.camera_settings.camera_setting_dict["x_pixels"] == 1600
         assert self.camera_settings.camera_setting_dict["y_pixels"] == 1600
-        assert self.camera_settings.camera_setting_dict["number_of_cameras"] == 1
         assert (
             self.camera_settings.camera_setting_dict["pixel_size"]
             == self.camera_settings.default_pixel_size

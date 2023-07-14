@@ -74,7 +74,7 @@ class GalvoNI(GalvoBase):
         Initialize the NI DAQ task for the galvo
     __del__()
         Deletes the task.
-    adjust(readout_time)
+    adjust(exposure_times, sweep_times)
         Adjust the galvo to the readout time
     prepare_task(channel_key)
         Prepare the task for the given channel
@@ -88,7 +88,7 @@ class GalvoNI(GalvoBase):
     Examples
     --------
     >>> galvo = GalvoNI(microscope_name, device_connection, configuration, galvo_id=0)
-    >>> galvo.adjust(readout_time)
+    >>> galvo.adjust(exposure_times, sweep_times)
     >>> galvo.prepare_task(channel_key)
     >>> galvo.start_task()
     >>> galvo.stop_task(force=False)
@@ -158,13 +158,15 @@ class GalvoNI(GalvoBase):
         self.stop_task()
         self.close_task()
 
-    def adjust(self, readout_time):
+    def adjust(self, exposure_times, sweep_times):
         """Adjust the galvo to the readout time
 
         Parameters
         ----------
-        readout_time : float
-            The readout time in seconds
+        exposure_times : dict
+            Dictionary of exposure times for each selected channel
+        sweep_times : dict
+            Dictionary of sweep times for each selected channel
 
         Returns
         -------
@@ -172,9 +174,9 @@ class GalvoNI(GalvoBase):
 
         Examples
         --------
-        >>> galvo.adjust(readout_time)
+        >>> galvo.adjust(exposure_times, sweep_times)
         """
-        waveform_dict = super().adjust(readout_time)
+        waveform_dict = super().adjust(exposure_times, sweep_times)
 
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
             "sample_rate": self.sample_rate,
@@ -261,6 +263,6 @@ class GalvoNI(GalvoBase):
         --------
         >>> galvo.close_task()
         """
-        
+
         # self.task.close()
         pass

@@ -88,7 +88,7 @@ class DAQBase:
         self.waveform_repeat_num = 1
         self.waveform_expand_num = 1
 
-    def calculate_all_waveforms(self, microscope_name, readout_time):
+    def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in
         a dictionary format.
 
@@ -96,9 +96,10 @@ class DAQBase:
         ----------
         microscope_name : str
             Name of the active microscope
-        readout_time : float
-            Readout time of the camera (seconds) if we are operating the camera in
-            Normal mode, otherwise -1.
+        exposure_times : dict
+            Dictionary of exposure times for each selected channel
+        sweep_times : dict
+            Dictionary of sweep times for each selected channel
 
         Returns
         -------
@@ -116,15 +117,6 @@ class DAQBase:
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]
-        # duty wait duration
-        duty_cycle_wait_duration = (
-            float(
-                self.configuration["waveform_constants"]
-                .get("other_constants", {})
-                .get("remote_focus_settle_duration", 0)
-            )
-            / 1000
-        )
 
         # Iterate through the dictionary.
         for channel_key in microscope_state["channels"].keys():
@@ -133,23 +125,8 @@ class DAQBase:
 
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
-                exposure_time = channel["camera_exposure_time"] / 1000
-                self.sweep_time = exposure_time + exposure_time * (
-                    (
-                        self.camera_delay_percent
-                        + self.remote_focus_ramp_falling[microscope_name]
-                    )
-                    / 100
-                )
-                if readout_time > 0:
-                    # This addresses the dovetail nature of the camera readout in normal
-                    # mode. The camera reads middle out, and the delay in start of the
-                    # last lines compared to the first lines causes the exposure to be
-                    # net longer than exposure_time. This helps the galvo keep sweeping
-                    # for the full camera exposure time.
-                    self.sweep_time += readout_time # we could set it to 0.14 instead of 0.16384 according to the test
-
-                self.sweep_time += duty_cycle_wait_duration
+                exposure_time = exposure_times[channel_key]
+                self.sweep_time = sweep_times[channel_key]
 
                 self.waveform_dict[channel_key] = camera_exposure(
                     sample_rate=self.sample_rate,

@@ -105,15 +105,16 @@ class GalvoNIStage(StageBase):
         self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]["ramp_falling_percent"]
-        self.remote_focus_delay = configuration[
-            "configuration"
-        ]["microscopes"][microscope_name]["remote_focus_device"]["delay_percent"]
+        self.remote_focus_delay = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["remote_focus_device"]["delay_percent"]
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["sample_rate"]
         self.sweep_time = None
         self.samples = None
-        self.readout_time = 0
+        self.exposure_times = None
+        self.sweep_times = None
 
         self.waveform_dict = {}
 
@@ -121,15 +122,16 @@ class GalvoNIStage(StageBase):
     def report_position(self):
         """Reports the position for all axes, and create position dictionary."""
         return self.get_position_dict()
-    
-    def calculate_waveform(self, readout_time):
+
+    def calculate_waveform(self, exposure_times, sweep_times):
+        self.exposure_times = exposure_times
+        self.sweep_times = sweep_times
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         volts = eval(
             self.volts_per_micron,
             {"x": self.configuration["experiment"]["StageParameters"][self.axes[0]]},
         )
-        self.readout_time = readout_time
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
@@ -140,20 +142,9 @@ class GalvoNIStage(StageBase):
 
                 # Get the Waveform Parameters
                 # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
-                exposure_time = channel["camera_exposure_time"] / 1000
-                self.sweep_time = exposure_time + exposure_time * (
-                    (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
-                )
+                exposure_time = self.exposure_times[channel_key]
+                self.sweep_time = self.sweep_times[channel_key]
 
-                if readout_time > 0:
-                    # This addresses the dovetail nature of the
-                    # camera readout in normal mode. The camera reads middle
-                    # out, and the delay in start of the last lines
-                    # compared to the first lines causes the exposure
-                    # to be net longer than exposure_time.
-                    # This helps the galvo keep sweeping for the full camera
-                    # exposure time.
-                    self.sweep_time += readout_time
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # Calculate the Waveforms
@@ -234,7 +225,7 @@ class GalvoNIStage(StageBase):
                         sweep_time=self.sweep_time,
                         amplitude=volts,
                     )
-                
+
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.galvo_max_voltage
                 ] = self.galvo_max_voltage
@@ -278,15 +269,6 @@ class GalvoNIStage(StageBase):
         volts = eval(self.volts_per_micron, {"x": axis_abs})
 
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        # duty wait duration
-        duty_cycle_wait_duration = (
-            float(
-                self.configuration["waveform_constants"]
-                .get("other_constants", {})
-                .get("remote_focus_settle_duration", 0)
-            )
-            / 1000
-        )
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
@@ -297,21 +279,27 @@ class GalvoNIStage(StageBase):
 
                 # Get the Waveform Parameters
                 # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
-                exposure_time = channel["camera_exposure_time"] / 1000
-                self.sweep_time = exposure_time + exposure_time * (
-                    (self.camera_delay_percent + self.remote_focus_ramp_falling) / 100
-                )
-                if self.readout_time > 0:
-                    # This addresses the dovetail nature of the
-                    # camera readout in normal mode. The camera reads middle
-                    # out, and the delay in start of the last lines
-                    # compared to the first lines causes the exposure
-                    # to be net longer than exposure_time.
-                    # This helps the galvo keep sweeping for the full camera
-                    # exposure time.
-                    self.sweep_time += self.readout_time
+                try:
+                    self.sweep_time = self.sweep_times[channel_key]
+                except TypeError:
+                    # In the event we have not called calculate_waveform in advance...
+                    # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
+                    exposure_time = channel["camera_exposure_time"] / 1000
+                    self.sweep_time = exposure_time + exposure_time * (
+                        (self.camera_delay_percent + self.remote_focus_ramp_falling)
+                        / 100
+                    )
 
-                self.sweep_time += duty_cycle_wait_duration
+                    duty_cycle_wait_duration = (
+                        float(
+                            self.configuration["waveform_constants"]
+                            .get("other_constants", {})
+                            .get("remote_focus_settle_duration", 0)
+                        )
+                        / 1000
+                    )
+
+                    self.sweep_time += duty_cycle_wait_duration
 
                 self.samples = int(self.sample_rate * self.sweep_time)
 

@@ -739,6 +739,8 @@ class MenuController(GUIController):
                     return
                 elif focus.widgetName == "ttk::combobox":
                     return
+                elif focus.widgetName == "text":
+                    return
             self.fake_event = FakeEvent(char=char)
             self.parent_controller.stage_controller.stage_key_press(self.fake_event)
         except KeyError:

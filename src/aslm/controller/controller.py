@@ -70,7 +70,7 @@ from aslm.model.model import Model
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
-from aslm.config.config import load_configs, update_config_dict, verify_configuration, get_aslm_path
+from aslm.config.config import load_configs, update_config_dict, verify_experiment_config, verify_waveform_constants, get_aslm_path
 from aslm.tools.file_functions import create_save_path, save_yaml_file
 from aslm.tools.common_dict_tools import update_stage_dict
 from aslm.tools.multipos_table_tools import update_table
@@ -145,7 +145,8 @@ class Controller:
             waveform_templates=waveform_templates_path,
         )
 
-        verify_configuration(self.manager, self.configuration)
+        verify_experiment_config(self.manager, self.configuration)
+        verify_waveform_constants(self.manager, self.configuration)
 
         # Initialize the Model
         self.model = ObjectInSubprocess(
@@ -318,7 +319,7 @@ class Controller:
         """
         # read the new file and update info of the configuration dict
         update_config_dict(self.manager, self.configuration, "experiment", file_name)
-        verify_configuration(self.manager, self.configuration)
+        verify_experiment_config(self.manager, self.configuration)
 
         # update buffer
         self.update_buffer()

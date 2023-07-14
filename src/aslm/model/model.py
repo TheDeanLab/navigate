@@ -62,7 +62,10 @@ from aslm.model.features.common_features import (
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
 from aslm.model.features.volume_search import VolumeSearch
-from aslm.model.features.feature_related_functions import convert_str_to_feature_list, convert_feature_list_to_str
+from aslm.model.features.feature_related_functions import (
+    convert_str_to_feature_list,
+    convert_feature_list_to_str,
+)
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_stage_dict
 from aslm.tools.common_functions import load_module_from_file
@@ -113,7 +116,7 @@ class Model:
     """
 
     def __init__(self, USE_GPU, args, configuration=None, event_queue=None):
-        
+
         log_setup("model_logging.yml")
         self.logger = logging.getLogger(p)
 
@@ -202,7 +205,8 @@ class Model:
         # automatically switch resolution
         self.feature_list.append(
             [
-                {"name": ChangeResolution, "args": ("Mesoscale", "1x")}, {"name": Snap},
+                {"name": ChangeResolution, "args": ("Mesoscale", "1x")},
+                {"name": Snap},
             ]
         )
         # z stack acquisition
@@ -432,7 +436,7 @@ class Model:
                 "is_save"
             ]
             self.prepare_acquisition()
-            
+
             # load features
             if self.imaging_mode == "customized":
                 if self.addon_feature is None:
@@ -565,7 +569,9 @@ class Model:
                 self.addon_feature = None
                 if args[0] != 0:
                     if len(args) == 2:
-                        self.feature_list[args[0]-1] = convert_str_to_feature_list(args[1])
+                        self.feature_list[args[0] - 1] = convert_str_to_feature_list(
+                            args[1]
+                        )
 
                     self.addon_feature = self.feature_list[args[0] - 1]
                     self.signal_container, self.data_container = load_features(
@@ -845,9 +851,13 @@ class Model:
         for m in self.virtual_microscopes:
             self.virtual_microscopes[m].prepare_acquisition()
 
+        # Confirm stage position and software are in agreement.
+        self.active_microscope.ask_stage_for_position = True
+        positions = self.active_microscope.get_stage_position()
+        self.event_queue.put(("update_stage", positions))
+
         # prepare active microscope
         waveform_dict = self.active_microscope.prepare_acquisition()
-
         self.event_queue.put(("waveform", waveform_dict))
 
         self.frame_id = 0
@@ -1098,17 +1108,17 @@ class Model:
     def terminate(self):
         self.active_microscope.terminate()
         for microscope_name in self.virtual_microscopes:
-           self.virtual_microscopes[microscope_name].terminate()
+            self.virtual_microscopes[microscope_name].terminate()
 
     def load_feature_list_from_file(self, filename, features):
-        module = load_module_from_file(filename[filename.rindex("/")+1:], filename)
+        module = load_module_from_file(filename[filename.rindex("/") + 1 :], filename)
         for name in features:
             feature = getattr(module, name)
             self.feature_list.append(feature())
 
     def load_feature_list_from_str(self, feature_list_str):
         """Append feature list from feature_list_str
-        
+
         Parameters
         ----------
         feature_list_str: str
@@ -1117,9 +1127,7 @@ class Model:
         self.feature_list.append(convert_str_to_feature_list(feature_list_str))
 
     def load_feature_records(self):
-        """Load installed feature lists from system folder '..../.ASLM/feature_lists'
-        
-        """
+        """Load installed feature lists from system folder '..../.ASLM/feature_lists'"""
         feature_lists_path = get_aslm_path() + "/feature_lists"
         if not os.path.exists(feature_lists_path):
             os.makedirs(feature_lists_path)
@@ -1131,7 +1139,11 @@ class Model:
             feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
 
         # add non added feature lists
-        feature_list_files = [temp for temp in os.listdir(feature_lists_path) if temp[temp.rindex("."):] in (".yml", ".yaml")]
+        feature_list_files = [
+            temp
+            for temp in os.listdir(feature_lists_path)
+            if temp[temp.rindex(".") :] in (".yml", ".yaml")
+        ]
         for item in feature_list_files:
             if item == "__sequence.yml":
                 continue
@@ -1142,11 +1154,13 @@ class Model:
                     add_flag = False
                     break
             if add_flag:
-                feature_records.append({
-                    "feature_list_name": temp["feature_list_name"],
-                    "yaml_file_name": item 
-                })
-        
+                feature_records.append(
+                    {
+                        "feature_list_name": temp["feature_list_name"],
+                        "yaml_file_name": item,
+                    }
+                )
+
         i = 0
         while i < len(feature_records):
             temp = feature_records[i]
@@ -1183,5 +1197,5 @@ class Model:
             string of the feature list
         """
         if idx > 0 and idx <= len(self.feature_list):
-            return convert_feature_list_to_str(self.feature_list[idx-1])
+            return convert_feature_list_to_str(self.feature_list[idx - 1])
         return ""

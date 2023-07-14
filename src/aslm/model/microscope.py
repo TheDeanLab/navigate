@@ -313,10 +313,6 @@ class Microscope:
         -------
         None
         """
-        # Confirm stage position and software are in agreement.
-        self.ask_stage_for_position = True
-        self.get_stage_position()
-
         self.current_channel = 0
         self.central_focus = None
         self.channels = self.configuration["experiment"]["MicroscopeState"]["channels"]

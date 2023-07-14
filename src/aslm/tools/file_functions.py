@@ -151,9 +151,13 @@ def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
 
     try:
         file_name = os.path.join(file_directory, filename)
+        with open(file_name, "r") as f:
+            file_content = f.read()
         with open(file_name, "w") as f:
             f.write(json.dumps(copy_proxy_object(content_dict), indent=4))
     except BaseException:
+        with open(file_name, "w") as f:
+            f.write(file_content)
         return False
     return True
 

@@ -147,6 +147,15 @@ class RemoteFocusBase:
             self.microscope_name
         ]["daq"]["sample_rate"]
 
+        duty_cycle_wait_duration = (
+            float(
+                self.configuration["waveform_constants"]
+                .get("other_constants", {})
+                .get("remote_focus_settle_duration", 0)
+            )
+            / 1000
+        )
+
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
             channel = microscope_state["channels"][channel_key]
@@ -169,7 +178,7 @@ class RemoteFocusBase:
                     ][channel["laser"]].get("percent_smoothing", 0.0)
                 )
                 if ps > 0:
-                    self.sweep_time = (1 - ps / 100) * self.sweep_time
+                    self.sweep_time = (self.sweep_time - duty_cycle_wait_duration) / (1 + ps / 100) + duty_cycle_wait_duration
 
                 # Remote Focus Parameters
                 temp = waveform_constants["remote_focus_constants"][imaging_mode][zoom][

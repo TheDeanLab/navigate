@@ -85,7 +85,7 @@ class TilingWizardPopup:
         self.popup = PopUp(
             root,
             "Multiposition Tiling Wizard",
-            "505x550+330+330",
+            "625x500+330+330",
             top=False,
             transient=False,
         )
@@ -108,7 +108,7 @@ class TilingWizardPopup:
         pos_grid = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
         data = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
 
-        action_buttons.grid(row=0, sticky=(tk.NSEW))
+        action_buttons.grid(row=0, sticky=tk.NSEW)
         pos_grid.grid(row=1, sticky=tk.NSEW)
         data.grid(row=2, sticky=tk.NSEW)
 
@@ -126,9 +126,20 @@ class TilingWizardPopup:
             "y_end",
             "z_start",
             "z_end",
+            "f_start",
+            "f_end",
         ]
 
-        entry_names = ["x_dist", "x_tiles", "y_dist", "y_tiles", "z_dist", "z_tiles"]
+        entry_names = [
+            "x_dist",
+            "x_tiles",
+            "y_dist",
+            "y_tiles",
+            "z_dist",
+            "z_tiles",
+            "f_dist",
+            "f_tiles",
+        ]
 
         dist_labels = [
             "X Distance",
@@ -136,6 +147,8 @@ class TilingWizardPopup:
             "Y Distance",
             "Num. Tiles",
             "Z Distance",
+            "Num. Tiles",
+            "F Distance",
             "Num. Tiles",
         ]
 
@@ -149,6 +162,8 @@ class TilingWizardPopup:
             "Set Y End",
             "Set Z Start",
             "Set Z End",
+            "Set F Start",
+            "Set F End",
         ]
 
         for i in range(2):
@@ -165,7 +180,7 @@ class TilingWizardPopup:
                     row=i - 2, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
                 )
 
-        # Position Spinboxes
+        # Position Spin boxes
         for i in range(len(names)):
             if i > 1:
                 self.inputs[names[i]] = LabelInput(
@@ -174,7 +189,7 @@ class TilingWizardPopup:
                     input_var=tk.StringVar(),
                 )
                 self.inputs[names[i]].grid(
-                    row=i - 2, column=1, sticky=(tk.NSEW), pady=(20, 0), padx=5
+                    row=i - 2, column=1, sticky=tk.NSEW, pady=(20, 0), padx=5
                 )
                 self.inputs[names[i]].widget.state(["disabled"])
 
@@ -204,7 +219,7 @@ class TilingWizardPopup:
             input_args={"width": 5, "increment": 5, "from_": 0, "to": 100},
         )
         self.inputs["percent_overlay"].grid(
-            row=1, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
+            row=0, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
         )
 
         self.inputs["total_tiles"] = LabelInput(

@@ -32,7 +32,7 @@
 
 # Standard Library Imports
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import tkinter as tk
 
 # Third Party Imports
@@ -206,3 +206,34 @@ class TestMenuController(unittest.TestCase):
                 self.menu_controller.parent_controller.view.settings.index("current")
                 == i - 1
             )
+
+    @patch("src.aslm.controller.sub_controllers.menu_controller.platform.system")
+    @patch("src.aslm.controller.sub_controllers.menu_controller.subprocess.check_call")
+    def test_open_folder(self, mock_check_call, mock_system):
+        mock_system.return_value = "Darwin"
+        self.menu_controller.open_folder("test_path")
+        mock_check_call.assert_called_once_with(["open", "--", "test_path"])
+
+        mock_check_call.reset_mock()
+        mock_system.return_value = "Windows"
+        self.menu_controller.open_folder("test_path")
+        mock_check_call.assert_called_once_with(["explorer", "test_path"])
+
+        mock_check_call.reset_mock()
+        mock_system.return_value = "Linux"
+        self.menu_controller.open_folder("test_path")
+        self.assertEqual(mock_check_call.call_count, 0)
+
+    @patch("src.aslm.controller.sub_controllers.menu_controller.os.path.join")
+    def test_open_log_files(self, mock_join):
+        with patch.object(self.menu_controller, "open_folder") as mock_open_folder:
+            mock_join.return_value = "joined_path"
+            self.menu_controller.open_log_files()
+            mock_open_folder.assert_called_once_with("joined_path")
+
+    @patch("src.aslm.controller.sub_controllers.menu_controller.os.path.join")
+    def test_open_configuration_files(self, mock_join):
+        with patch.object(self.menu_controller, "open_folder") as mock_open_folder:
+            mock_join.return_value = "joined_path"
+            self.menu_controller.open_configuration_files()
+            mock_open_folder.assert_called_once_with("joined_path")

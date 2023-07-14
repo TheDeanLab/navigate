@@ -380,18 +380,26 @@ class MP285:
         self.safe_write(bytes.fromhex("03"))
 
         # Get Response
-        response = self.serial.read(1)
-        if response == bytes.fromhex("0d"):
-            stage_stopped = True
-        else:
-            second_response = self.serial.read(1)
-            if second_response == bytes.fromhex("0d"):
-                stage_stopped = True
-            else:
-                stage_stopped = False
-        self.safe_to_write.set()
+        for _ in range(self.n_waits):
+            # time.sleep(time_to_move)
+            response = self.serial.read(1)
+            # print(f"move response: {response}")
+            if response == b"":
+                time.sleep(self.wait_time)
+            elif response == bytes.fromhex("0d"):
+                self.safe_to_write.set()
+                return True
+            elif response == bytes.fromhex("3d"):
+                for _ in range(self.n_waits):
+                    response2 = self.serial.read(1)
+                    if response2 == b"":
+                        time.sleep(self.wait_time)
+                    elif response == bytes.fromhex("0d"):
+                        self.safe_to_write.set()
+                        return True
 
-        return stage_stopped
+        self.safe_to_write.set()
+        return False
 
     def set_absolute_mode(self):
         """Set MP285 to Absolute Position Mode.
@@ -411,15 +419,18 @@ class MP285:
         self.flush_buffers()
         abs_cmd = bytes.fromhex("61") + bytes.fromhex("0d")
         self.safe_write(abs_cmd)
-        # print(f"sending {abs_cmd}")
-        response = self.serial.read(1)
-        # print(f"received {response}")
-        if response == bytes.fromhex("0d"):
-            command_complete = True
-        else:
-            command_complete = False
+
+        for _ in range(self.n_waits):
+            # time.sleep(time_to_move)
+            response = self.serial.read(1)
+            # print(f"move response: {response}")
+            if response == b"":
+                time.sleep(self.wait_time)
+            elif response == bytes.fromhex("0d"):
+                self.safe_to_write.set()
+                return True
         self.safe_to_write.set()
-        return command_complete
+        return False
 
     # def set_relative_mode(self):
     #     """Set MP285 to Relative Position Mode.

@@ -490,14 +490,15 @@ class MenuController(GUIController):
         path : str
             Path to folder.
         """
-        if platform.system() == "Darwin":  # macOS
-            subprocess.check_call(["open", "--", path])
-
-        elif platform.system() == "Windows":  # Windows
-            subprocess.check_call(["explorer", path])
-
-        else:
-            print("Unsupported platform.")
+        try:
+            if platform.system() == "Darwin":  # macOS
+                subprocess.check_call(["open", "--", path])
+            elif platform.system() == "Windows":  # Windows
+                subprocess.check_call(["explorer", path])
+            else:
+                print("Unsupported platform.")
+        except subprocess.CalledProcessError:
+            pass
 
     def open_log_files(self):
         path = os.path.join(get_aslm_path(), "logs")

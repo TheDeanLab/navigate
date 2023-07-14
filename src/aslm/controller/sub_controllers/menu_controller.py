@@ -734,7 +734,6 @@ class MenuController(GUIController):
         """
         try:
             focus = self.parent_controller.view.focus_get()
-            print(focus.widgetName)
             if hasattr(focus, "widgetName"):
                 if focus.widgetName == "ttk::entry":
                     return

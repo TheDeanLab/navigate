@@ -74,13 +74,13 @@ class MP285:
         self.serial.stopbits = serial.STOPBITS_ONE
         self.serial.xonxoff = False
         self.serial.rtscts = True
-        
+
         self.speed = 1000  # None
         self.resolution = "high"  # None
         self.wait_until_done = True
 
         self.wait_time = 0.002
-        self.n_waits = int(timeout/self.wait_time)
+        self.n_waits = int(timeout / self.wait_time)
 
         # Thread blocking here to prevent calls to get_current_position()
         # while move_to_specified_position is waiting for a response. Serial
@@ -91,8 +91,8 @@ class MP285:
 
     def safe_write(self, command):
         self.safe_to_write.wait()
-        self.serial.write(command)
         self.safe_to_write.clear()
+        self.serial.write(command)
 
     def connect_to_serial(self):
         try:
@@ -100,7 +100,7 @@ class MP285:
         except serial.SerialException as e:
             print("MP285 serial connection failed!")
             raise e
-        
+
     def disconnect_from_serial(self):
         self.serial.close()
 
@@ -183,16 +183,19 @@ class MP285:
         #     expected=bytes.fromhex("0d"), size=100
         # )
         # print(f"sending: {command}")
-        position_information = b''
+        position_information = b""
         for _ in range(self.n_waits):
             position_information = self.serial.read(13)
-            if position_information == b'':
+            if position_information == b"":
                 time.sleep(self.wait_time)
             elif len(position_information) == 13:
                 break
             else:
                 # print(f"Ah hell: {position_information}")
-                raise UserWarning("Encountered response {position_information}. You probably need to power cycle the stage.")
+                raise UserWarning(
+                    "Encountered response {position_information}. "
+                    "You probably need to power cycle the stage."
+                )
         self.safe_to_write.set()
         # print(f"received: {position_information}")
         xs = int.from_bytes(position_information[0:4], byteorder="little", signed=True)
@@ -251,15 +254,17 @@ class MP285:
         z_steps = z_target.to_bytes(length=4, byteorder="little", signed=True)
 
         # Move stage
-        move_cmd = bytes.fromhex("6d") + x_steps + y_steps + z_steps + bytes.fromhex("0d")
-        self.safe_write(move_cmd)        
+        move_cmd = (
+            bytes.fromhex("6d") + x_steps + y_steps + z_steps + bytes.fromhex("0d")
+        )
+        self.safe_write(move_cmd)
         # print(f"move command: {move_cmd} wait_until_done {self.wait_until_done}")
 
         for _ in range(self.n_waits):
             # time.sleep(time_to_move)
             response = self.serial.read(1)
             # print(f"move response: {response}")
-            if response == b'':
+            if response == b"":
                 time.sleep(self.wait_time)
             elif response == bytes.fromhex("0d"):
                 self.safe_to_write.set()
@@ -268,11 +273,14 @@ class MP285:
                 self.safe_to_write.set()
                 self.flush_buffers()
                 # print(f"Uh oh: {response}")
-                raise UserWarning("Encountered response {response}. You probably need to power cycle the stage.")
+                raise UserWarning(
+                    "Encountered response {response}. "
+                    "You probably need to power cycle the stage."
+                )
 
         # # time.sleep(time_to_move)
         # self.safe_to_write.set()
-            
+
         # response = self.serial.read(1)
         # print(f"move response: {response}")
         # if response == bytes.fromhex("0d"):
@@ -512,8 +520,5 @@ class MP285:
         return command_complete
 
     def close(self):
-        """Close the serial connection to the stage
-        
-        """
+        """Close the serial connection to the stage"""
         self.serial.close()
-

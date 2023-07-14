@@ -126,7 +126,7 @@ class TilingWizardController(GUIController):
         self.variables = self.view.get_variables()
 
         # Init widgets to zero
-        self._axes = ["x", "y", "z"]
+        self._axes = ["x", "y", "z", "f"]
         self._percent_overlay = 0.0
         self._fov = dict([(ax, 0.0) for ax in self._axes])
         self.variables["percent_overlay"].set(0.0)
@@ -140,9 +140,7 @@ class TilingWizardController(GUIController):
 
         # Ref to widgets in other views
         # (Camera Settings, Stage Control Positions, Stack Acq Settings)
-        main_view = (
-            self.parent_controller.parent_controller.view
-        )  # channels_tab_controller -> aslm_controller -> view
+        main_view = self.parent_controller.parent_controller.view
         self.cam_settings_widgets = (
             main_view.settings.camera_settings_tab.camera_roi.get_widgets()
         )
@@ -205,6 +203,8 @@ class TilingWizardController(GUIController):
         self.variables["y_end"].trace_add("write", lambda *args: self.update_fov())
         self.variables["z_start"].trace_add("write", lambda *args: self.update_fov())
         self.variables["z_end"].trace_add("write", lambda *args: self.update_fov())
+        self.variables["f_start"].trace_add("write", lambda *args: self.update_fov())
+        self.variables["f_end"].trace_add("write", lambda *args: self.update_fov())
 
         # Calculating Number of Tiles traces
         # TODO: For reasons that make no sense to me at all,
@@ -217,6 +217,9 @@ class TilingWizardController(GUIController):
         )
         self.variables["z_dist"].trace_add(
             "write", lambda *args: self.calculate_tiles("z")
+        )
+        self.variables["f_dist"].trace_add(
+            "write", lambda *args: self.calculate_tiles("f")
         )
 
         # Populate Table trace
@@ -292,6 +295,10 @@ class TilingWizardController(GUIController):
         z_stop = float(self.variables["z_end"].get())
         z_tiles = int(self.variables["z_tiles"].get())
 
+        f_start = float(self.variables["f_start"].get())
+        f_stop = float(self.variables["f_end"].get())
+        f_tiles = int(self.variables["f_tiles"].get())  # noqa
+
         # Default to fixed theta
         r_start = self.stage_position_vars["theta"].get()
         r_stop = self.stage_position_vars["theta"].get()
@@ -310,6 +317,10 @@ class TilingWizardController(GUIController):
             tmp = z_start
             z_start = z_stop
             z_stop = tmp
+        if f_start > f_stop:
+            tmp = f_start
+            f_start = f_stop
+            f_stop = tmp
         if r_start > r_stop:
             tmp = r_start
             r_start = r_stop
@@ -368,8 +379,9 @@ class TilingWizardController(GUIController):
         x = float(self.variables["x_tiles"].get())
         y = float(self.variables["y_tiles"].get())
         z = float(self.variables["z_tiles"].get())
+        f = float(self.variables["f_tiles"].get())
 
-        total_tiles = x * y * z
+        total_tiles = x * y * z * f
 
         self.variables["total_tiles"].set(total_tiles)
 

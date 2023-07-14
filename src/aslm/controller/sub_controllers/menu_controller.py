@@ -36,6 +36,7 @@ import platform
 import os
 import tkinter as tk
 from tkinter import messagebox
+import subprocess
 
 # Third Party Imports
 
@@ -169,6 +170,15 @@ class MenuController(GUIController):
                 "Unload Images": [
                     "standard",
                     lambda: self.parent_controller.model.load_images(None),
+                    None,
+                    None,
+                    None,
+                ],
+                "add_separator_1": [None, None, None, None, None],
+                "Open Log Files": ["standard", self.open_log_files, None, None, None],
+                "Open Configuration Files": [
+                    "standard",
+                    self.open_configuration_files,
                     None,
                     None,
                     None,
@@ -471,6 +481,32 @@ class MenuController(GUIController):
             )
             self.feature_list_names.append(feature["feature_list_name"])
             self.feature_list_count += 1
+
+    def open_folder(self, path):
+        """Open folder in file explorer.
+
+        Parameters
+        ----------
+        path : str
+            Path to folder.
+        """
+        try:
+            if platform.system() == "Darwin":  # macOS
+                subprocess.check_call(["open", "--", path])
+            elif platform.system() == "Windows":  # Windows
+                subprocess.check_call(["explorer", path])
+            else:
+                print("Unsupported platform.")
+        except subprocess.CalledProcessError:
+            pass
+
+    def open_log_files(self):
+        path = os.path.join(get_aslm_path(), "logs")
+        self.open_folder(path)
+
+    def open_configuration_files(self):
+        path = os.path.join(get_aslm_path(), "config")
+        self.open_folder(path)
 
     def populate_menu(self, menu_dict):
         """Populate the menus from a dictionary.

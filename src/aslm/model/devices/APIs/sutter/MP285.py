@@ -80,7 +80,7 @@ class MP285:
         self.wait_until_done = True
 
         self.wait_time = 0.002
-        self.n_waits = int(timeout / self.wait_time)
+        self.n_waits = max(int(timeout / self.wait_time), 1)
 
         # Thread blocking here to prevent calls to get_current_position()
         # while move_to_specified_position is waiting for a response. Serial

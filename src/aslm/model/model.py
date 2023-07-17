@@ -613,7 +613,7 @@ class Model:
                 self.data_thread.join()
             else:
                 self.end_acquisition()
-            self.active_microscope.get_stage_position()
+            self.stop_stage()
 
         elif command == "terminate":
             self.terminate()
@@ -850,9 +850,11 @@ class Model:
         for m in self.virtual_microscopes:
             self.virtual_microscopes[m].prepare_acquisition()
 
+        # Confirm stage position and software are in agreement.
+        self.stop_stage()
+
         # prepare active microscope
         waveform_dict = self.active_microscope.prepare_acquisition()
-
         self.event_queue.put(("waveform", waveform_dict))
 
         self.frame_id = 0

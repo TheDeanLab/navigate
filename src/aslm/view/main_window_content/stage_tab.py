@@ -294,6 +294,12 @@ class StageControlTab(tk.Frame):
         result.update(self.stop_frame.get_buttons())
         return result
 
+    def toggle_button_states(self, non_default_images = False):
+        self.xy_frame.toggle_button_states(non_default_images)
+        self.z_frame.toggle_button_states(non_default_images)
+        self.f_frame.toggle_button_states(non_default_images)
+        self.theta_frame.toggle_button_states(non_default_images)
+        self.stop_frame.toggle_button_states(non_default_images)
 
 class OtherAxisFrame(ttk.Labelframe):
     """Frame for the other axis movement buttons.
@@ -353,8 +359,27 @@ class OtherAxisFrame(ttk.Labelframe):
         other_axis_frame.down_image = tk.PhotoImage(
             file=image_directory.joinpath("images", "greydown.png")
         )
+
+        other_axis_frame.d_up_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greyup_disabled.png")
+        )
+        other_axis_frame.d_down_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greydown_disabled.png")
+        )
+
         other_axis_frame.up_image = other_axis_frame.up_image.subsample(2, 2)
         other_axis_frame.down_image = other_axis_frame.down_image.subsample(2, 2)
+
+        other_axis_frame.default_images = [other_axis_frame.up_image,
+                                           other_axis_frame.down_image
+                                           ]
+
+        other_axis_frame.d_up_image = other_axis_frame.d_up_image.subsample(2, 2)
+        other_axis_frame.d_down_image = other_axis_frame.d_down_image.subsample(2, 2)
+
+        other_axis_frame.disabled_images = [other_axis_frame.d_up_image,
+                                           other_axis_frame.d_down_image
+                                           ]
 
         # Setting up buttons for up, down, zero and increment spinbox
 
@@ -413,7 +438,23 @@ class OtherAxisFrame(ttk.Labelframe):
             "down": other_axis_frame.down_btn,
             "zero": other_axis_frame.zero_btn,
         }
+    
+    def toggle_button_states(other_axis_frame, non_default_images = False):
+        """Switches the images used as buttons between two states
 
+        Parameters
+        ----------
+        other_axis_frame : OtherAxisFrame
+            The OtherAxisFrame object
+
+        """
+        buttons = [other_axis_frame.up_btn,other_axis_frame.down_btn]
+        if non_default_images:
+            image_list = other_axis_frame.disabled_images
+        else:
+            image_list = other_axis_frame.default_images
+        for k in range(len(buttons)):
+                buttons[k].config(image = image_list[k])
 
 class PositionFrame(ttk.Labelframe):
     """Frame for the stage position entries.
@@ -525,6 +566,16 @@ class PositionFrame(ttk.Labelframe):
             variables[name] = position_frame.inputs[name].get_variable()
         return variables
 
+    def toggle_button_states(position_frame, non_default_images = False):
+        """Switches the images used as buttons between two states
+
+        Parameters
+        ----------
+        x_y_frame : XYFrame
+            The XYFrame object
+
+        """
+        pass
 
 class XYFrame(ttk.Labelframe):
     """Frame for the x and y movement buttons.
@@ -593,10 +644,37 @@ class XYFrame(ttk.Labelframe):
         x_y_frame.right_image = tk.PhotoImage(
             file=image_directory.joinpath("images", "greyright.png")
         )
+        x_y_frame.d_up_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greyup_disabled.png")
+        )
+        x_y_frame.d_down_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greydown_disabled.png")
+        )
+        x_y_frame.d_left_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greyleft_disabled.png")
+        )
+        x_y_frame.d_right_image = tk.PhotoImage(
+            file=image_directory.joinpath("images", "greyright_disabled.png")
+        )
         x_y_frame.up_image = x_y_frame.up_image.subsample(2, 2)
         x_y_frame.down_image = x_y_frame.down_image.subsample(2, 2)
         x_y_frame.left_image = x_y_frame.left_image.subsample(2, 2)
         x_y_frame.right_image = x_y_frame.right_image.subsample(2, 2)
+
+        x_y_frame.default_images = [x_y_frame.right_image,
+                                    x_y_frame.left_image,
+                                    x_y_frame.up_image,
+                                    x_y_frame.down_image]
+        
+        x_y_frame.d_up_image = x_y_frame.d_up_image.subsample(2, 2)
+        x_y_frame.d_down_image = x_y_frame.d_down_image.subsample(2, 2)
+        x_y_frame.d_left_image = x_y_frame.d_left_image.subsample(2, 2)
+        x_y_frame.d_right_image = x_y_frame.d_right_image.subsample(2, 2)
+
+        x_y_frame.disabled_images = [x_y_frame.d_right_image,
+                                     x_y_frame.d_left_image,
+                                     x_y_frame.d_up_image,
+                                     x_y_frame.d_down_image]
 
         # Up button
         x_y_frame.up_y_btn = HoverTkButton(
@@ -715,7 +793,23 @@ class XYFrame(ttk.Labelframe):
         """
         names = ["up_x_btn", "down_x_btn", "up_y_btn", "down_y_btn", "zero_xy_btn"]
         return {k: getattr(x_y_frame, k) for k in names}
+    
+    def toggle_button_states(x_y_frame, non_default_images = False):
+        """Switches the images used as buttons between two states
 
+        Parameters
+        ----------
+        x_y_frame : XYFrame
+            The XYFrame object
+
+        """
+        buttons = [x_y_frame.up_x_btn,x_y_frame.down_x_btn,x_y_frame.up_y_btn,x_y_frame.down_y_btn]
+        if non_default_images:
+            image_list = x_y_frame.disabled_images
+        else:
+            image_list = x_y_frame.default_images
+        for k in range(len(buttons)):
+                buttons[k].config(image = image_list[k])
 
 class StopFrame(ttk.Frame):
     """Frame for the stop button
@@ -755,18 +849,34 @@ class StopFrame(ttk.Frame):
 
         # Stop button
         self.stop_btn = tk.Button(
-            self, bg="red", fg="white", text="STOP", width=10, height=2
+            self, bg="red", fg="white", text="STOP", width=20, height=6
         )
 
         self.joystick_btn = tk.Button(
-            self, bg="white", fg="black", text="Joystick Mode", width=10, height=2
+            self, bg="white", fg="black", text="Enable Joystick", width=15, height=2
         )
 
         # Gridding out buttons
         self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
-        self.joystick_btn.grid(row=1, column=0, rowspan=2, pady=2)
+        self.joystick_btn.grid(row=2, column=0, rowspan=2, pady=2)
 
     def get_buttons(self):
         return {"stop": self.stop_btn,
                 "joystick": self.joystick_btn
                 }
+
+    def toggle_button_states(stop_frame, non_default_images = False):
+        """Switches the images used as buttons between two states
+
+        Parameters
+        ----------
+        stop_frame : StopFrame
+            The StopFrame object
+        non_default_images : bool
+            False if the default button visuals are in use
+
+        """
+        if non_default_images:
+            stop_frame.joystick_btn.config(text="Disable Joystick")
+        else:
+            stop_frame.joystick_btn.config(text=" Enable Joystick")

@@ -483,8 +483,7 @@ class StageController(GUIController):
         else:
             self.joystick_is_on = True
         self.view.after(250, lambda: self.parent_controller.execute("joystick_toggle"))
-        print(f"widgets in position frame: {self.view.settings.stage_control_tab.position_frame.get_widgets}")
-        # print(f"joystick on: {self.joystick_is_on}")
+        self.view.toggle_button_states(self.joystick_is_on)
         
 
     def position_callback(self, axis, **kwargs):

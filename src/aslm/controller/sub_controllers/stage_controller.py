@@ -117,6 +117,7 @@ class StageController(GUIController):
 
     def __init__(self, view, main_view, canvas, parent_controller):
         super().__init__(view, parent_controller)
+
         self.joystick_is_on = False
         self.main_view = main_view
         self.canvas = canvas
@@ -225,7 +226,7 @@ class StageController(GUIController):
         Parameters
         ----------
         None
-joy
+
         Returns
         -------
         None
@@ -357,7 +358,6 @@ joy
         handler : object
             Function for setting desired stage positions in the View.
         """
-        
         position_val = self.widget_vals[axis]
         if axis == "x" or axis == "y":
             step_val = self.widget_vals["xy_step"]
@@ -366,6 +366,7 @@ joy
 
         def handler():
             if not self.joystick_is_on:
+
                 try:
                     temp = position_val.get() + step_val.get()
                 except AttributeError:
@@ -379,10 +380,8 @@ joy
                 if position_val.get() != temp:
                     position_val.set(temp)
 
-            
-
         return handler
-        
+
     def down_btn_handler(self, axis):
         """This function generates command functions according to the desired axis
         to move.
@@ -398,7 +397,6 @@ joy
         handler : object
             Function for setting desired stage positions in the View.
         """
-        
         position_val = self.widget_vals[axis]
         if axis == "x" or axis == "y":
             step_val = self.widget_vals["xy_step"]
@@ -419,8 +417,6 @@ joy
                 # guarantee stage won't move out of limits
                 if position_val.get() != temp:
                     position_val.set(temp)
-        
-        
 
         return handler
 
@@ -483,12 +479,13 @@ joy
     def joystick_button_handler(self):
         """Toggle the joystick operation mode."""
         if self.joystick_is_on:
-            self.joystick_is_on = False
+            self.joystick_is_on = False 
         else:
             self.joystick_is_on = True
-        print(f"joystick on: {self.joystick_is_on}")
+        self.view.after(250, lambda: self.parent_controller.execute("joystick_toggle"))
+        print(f"widgets in position frame: {self.view.settings.stage_control_tab.position_frame.get_widgets}")
+        # print(f"joystick on: {self.joystick_is_on}")
         
-
 
     def position_callback(self, axis, **kwargs):
         """Callback functions bind to position variables.

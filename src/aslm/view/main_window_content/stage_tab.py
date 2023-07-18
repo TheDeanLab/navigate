@@ -737,7 +737,6 @@ class StopFrame(ttk.Frame):
         The name of the frame
     stop_btn : tk.Button
         The stop button
-    
 
     Methods
     -------
@@ -756,18 +755,17 @@ class StopFrame(ttk.Frame):
 
         # Stop button
         self.stop_btn = tk.Button(
-            self, bg="red", fg="white", text="STOP", width=20, height=5
+            self, bg="red", fg="white", text="STOP", width=10, height=2
         )
 
         self.joystick_btn = tk.Button(
-            self, bg="white", fg="black", text="Joystick Mode", width=20, 
-            height=5
+            self, bg="white", fg="black", text="Joystick Mode", width=10, height=2
         )
 
         # Gridding out buttons
         self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
-        self.joystick_btn.grid(row=2, column=0, rowspan=2, pady=2)
-        
+        self.joystick_btn.grid(row=1, column=0, rowspan=2, pady=2)
+
     def get_buttons(self):
         return {"stop": self.stop_btn,
                 "joystick": self.joystick_btn

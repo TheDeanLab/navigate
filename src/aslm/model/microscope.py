@@ -582,6 +582,8 @@ class Microscope:
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
+            if axis == "f":
+                self.central_focus = None
             return self.stages[axis].move_axis_absolute(
                 axis, pos_dict[axis_key], wait_until_done
             )
@@ -595,6 +597,9 @@ class Microscope:
             }
             if pos:
                 success = stage.move_absolute(pos, wait_until_done) and success
+
+        if "f_abs" in pos_dict:
+            self.central_focus = None
 
         return success
 

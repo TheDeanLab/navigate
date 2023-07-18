@@ -514,11 +514,11 @@ class Microscope:
 
         # Laser Settings
         current_laser_index = channel["laser_index"]
+        for k in self.lasers:
+            self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].set_power(
             channel["laser_power"]
         )
-        for k in self.lasers:
-            self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
 
         # stop daq before writing new waveform

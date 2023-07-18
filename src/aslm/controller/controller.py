@@ -457,6 +457,7 @@ class Controller:
         __________
         args* : function-specific passes.
         """
+
         if command == "stage":
             """Creates a thread and uses it to call the model to move stage
 

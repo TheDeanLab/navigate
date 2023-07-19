@@ -445,11 +445,10 @@ class AcquireBarController(GUIController):
         if is_valid:
             self.is_acquiring = True
             self.view.acquire_btn.configure(state="disabled")
-            # tell central controller, save the image/data
-            self.parent_controller.execute("acquire_and_save")
-
             # Close the window
             popup_window.popup.dismiss()
+            # tell central controller, save the image/data
+            self.parent_controller.execute("acquire_and_save")
 
     def exit_program(self):
         """Exit Button

@@ -85,8 +85,8 @@ class MenuController(GUIController):
         self.parent_controller = parent_controller
         self.view = view
         self.resolution_value = tk.StringVar()
-        self.feature_id_val = tk.IntVar(0)
-        self.disable_stage_limits = tk.IntVar(0)
+        self.feature_id_val = tk.IntVar()
+        self.disable_stage_limits = tk.IntVar()
         self.save_data = False
         self.fake_event = None
         self.feature_list_names = []
@@ -288,17 +288,18 @@ class MenuController(GUIController):
         self.populate_menu(stage_control_menu)
         self.view.menubar.menu_multi_positions.add_radiobutton(
             label="Disable Stage Limits",
-            value=0,
+            value=1,
             command=self.toggle_stage_limits,
             variable=self.disable_stage_limits,
         )
         self.view.menubar.menu_multi_positions.add_radiobutton(
             label="Enable Stage Limits",
-            value=1,
+            value=0,
             command=self.toggle_stage_limits,
             variable=self.disable_stage_limits,
         )
         self.disable_stage_limits.set(1)
+        self.toggle_stage_limits()
 
         # autofocus menu
         autofocus_menu = {
@@ -660,10 +661,10 @@ class MenuController(GUIController):
         """Toggle stage limits."""
         if self.disable_stage_limits.get() == 1:
             logger.debug("Disabling stage limits")
-            self.parent_controller.execute("stage_limits", True)
+            self.parent_controller.execute("stage_limits", False)
         else:
             logger.debug("Enabling stage limits")
-            self.parent_controller.execute("stage_limits", False)
+            self.parent_controller.execute("stage_limits", True)
 
     def popup_autofocus_setting(self, *args):
         """Pop up the Autofocus setting window."""
@@ -738,6 +739,8 @@ class MenuController(GUIController):
                 if focus.widgetName == "ttk::entry":
                     return
                 elif focus.widgetName == "ttk::combobox":
+                    return
+                elif focus.widgetName == "text":
                     return
             self.fake_event = FakeEvent(char=char)
             self.parent_controller.stage_controller.stage_key_press(self.fake_event)

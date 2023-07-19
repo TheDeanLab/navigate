@@ -514,11 +514,11 @@ class Microscope:
 
         # Laser Settings
         current_laser_index = channel["laser_index"]
+        for k in self.lasers:
+            self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].set_power(
             channel["laser_power"]
         )
-        for k in self.lasers:
-            self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
 
         # stop daq before writing new waveform
@@ -537,6 +537,7 @@ class Microscope:
         self.move_stage(
             {"f_abs": self.central_focus + float(channel["defocus"])},
             wait_until_done=True,
+            update_focus=False,
         )
 
     def get_readout_time(self):
@@ -563,7 +564,7 @@ class Microscope:
             readout_time, _ = self.camera.calculate_readout_time()
         return readout_time
 
-    def move_stage(self, pos_dict, wait_until_done=False):
+    def move_stage(self, pos_dict, wait_until_done=False, update_focus=True):
         """Move stage to a position.
 
         Parameters
@@ -572,6 +573,8 @@ class Microscope:
             Dictionary of stage positions.
         wait_until_done : bool, optional
             Wait until stage is done moving, by default False
+        update_focus : bool, optional
+            Update the central focus
 
         Returns
         -------
@@ -582,6 +585,8 @@ class Microscope:
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
+            if update_focus and axis == "f":
+                self.central_focus = None
             return self.stages[axis].move_axis_absolute(
                 axis, pos_dict[axis_key], wait_until_done
             )
@@ -595,6 +600,9 @@ class Microscope:
             }
             if pos:
                 success = stage.move_absolute(pos, wait_until_done) and success
+
+        if update_focus and "f_abs" in pos_dict:
+            self.central_focus = None
 
         return success
 

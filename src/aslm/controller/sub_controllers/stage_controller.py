@@ -174,14 +174,15 @@ class StageController(GUIController):
         if current_position is None:
             return
         xy_increment = self.widget_vals["xy_step"].get()
-        if char == "w":
-            current_position["y"] += xy_increment
-        elif char == "a":
-            current_position["x"] -= xy_increment
-        elif char == "s":
-            current_position["y"] -= xy_increment
-        elif char == "d":
-            current_position["x"] += xy_increment
+        if not self.joystick_is_on:
+            if char == "w":
+                current_position["y"] += xy_increment
+            elif char == "a":
+                current_position["x"] -= xy_increment
+            elif char == "s":
+                current_position["y"] -= xy_increment
+            elif char == "d":
+                current_position["x"] += xy_increment
         self.set_position(current_position)
 
     def initialize(self):
@@ -463,30 +464,30 @@ class StageController(GUIController):
 
         return handler
 
-    def stop_button_handler(self):
+    def stop_button_handler(self, *args):
         """This function stops the stage after a 250 ms debouncing period of time.
 
         Parameters
         ----------
-        None
+        None11111
 
         Returns
         -------
         None
         """
-        self.view.after(250, lambda: self.parent_controller.execute("stop_stage"))
+        self.view.after(250, lambda *args: self.parent_controller.execute("stop_stage"))
 
-    def joystick_button_handler(self):
+    def joystick_button_handler(self, event=None, *args):
         """Toggle the joystick operation mode."""
         if self.joystick_is_on:
             self.joystick_is_on = False 
         else:
             self.joystick_is_on = True
-        self.view.after(250, lambda: self.parent_controller.execute("joystick_toggle"))
+        self.view.after(250, lambda *args: self.parent_controller.execute("joystick_toggle"))
         self.view.toggle_button_states(self.joystick_is_on)
-        
 
-    def position_callback(self, axis, **kwargs):
+
+    def position_callback(self, axis, *args, **kwargs):
         """Callback functions bind to position variables.
 
         Implements debounce functionality for user inputs (or click buttons) to reduce
@@ -539,7 +540,7 @@ class StageController(GUIController):
             # 1s, only moves to the final value.
             self.event_id[axis] = self.view.after(
                 250,
-                lambda: self.parent_controller.execute("stage", position, axis),
+                lambda *args: self.parent_controller.execute("stage", position, axis),
             )
 
             self.show_verbose_info("Stage position changed")

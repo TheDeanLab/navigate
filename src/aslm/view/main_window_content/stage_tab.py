@@ -233,8 +233,26 @@ class StageControlTab(tk.Frame):
         self.xy_frame.up_y_btn.hover.setdescription(
             "Increases the Y value of the stage's position"
         )
+        self.xy_frame.up_x_btn.hover.setdescription(
+            "Increases the X value of the stage's position"
+        )
+        self.xy_frame.down_y_btn.hover.setdescription(
+            "Decreases the Y value of the stage's position"
+        )
+        self.xy_frame.down_x_btn.hover.setdescription(
+            "Decreases the X value of the stage's position"
+        )
         self.position_frame.inputs["y"].widget.hover.setdescription(
             "Y position of the stage"
+        )
+        self.position_frame.inputs["x"].widget.hover.setdescription(
+            "X position of the stage"
+        )
+        self.position_frame.inputs["z"].widget.hover.setdescription(
+            "Z position of the stage"
+        )
+        self.position_frame.inputs["f"].widget.hover.setdescription(
+            "Focus"
         )
 
     def get_widgets(self):
@@ -675,6 +693,12 @@ class XYFrame(ttk.Labelframe):
                                      x_y_frame.d_left_image,
                                      x_y_frame.d_up_image,
                                      x_y_frame.d_down_image]
+        
+        # x_y_frame.disabled_hover = []
+
+        # x_y_frame.up_y_btn.hover.setdescription(
+        #     "Increases the Y value of the stage's position"
+        # )
 
         # Up button
         x_y_frame.up_y_btn = HoverTkButton(
@@ -686,7 +710,7 @@ class XYFrame(ttk.Labelframe):
             # text="\N{UPWARDS BLACK ARROW}"
         )
         # Down button
-        x_y_frame.down_y_btn = tk.Button(
+        x_y_frame.down_y_btn = HoverTkButton(
             x_y_frame,
             image=x_y_frame.down_image,
             borderwidth=0
@@ -696,7 +720,7 @@ class XYFrame(ttk.Labelframe):
         )
 
         # Right button
-        x_y_frame.up_x_btn = tk.Button(
+        x_y_frame.up_x_btn = HoverTkButton(
             x_y_frame,
             image=x_y_frame.right_image,
             borderwidth=0
@@ -706,7 +730,7 @@ class XYFrame(ttk.Labelframe):
         )
 
         # Left button
-        x_y_frame.down_x_btn = tk.Button(
+        x_y_frame.down_x_btn = HoverTkButton(
             x_y_frame,
             image=x_y_frame.left_image,
             borderwidth=0
@@ -716,7 +740,7 @@ class XYFrame(ttk.Labelframe):
         )
 
         # Zero button
-        x_y_frame.zero_xy_btn = HoverButton(x_y_frame, text="ZERO XY")
+        x_y_frame.zero_xy_btn = HoverTkButton(x_y_frame, text="ZERO XY")
 
         # Increment spinbox
         x_y_frame.increment_box = LabelInput(
@@ -806,10 +830,13 @@ class XYFrame(ttk.Labelframe):
         buttons = [x_y_frame.up_x_btn,x_y_frame.down_x_btn,x_y_frame.up_y_btn,x_y_frame.down_y_btn]
         if non_default_images:
             image_list = x_y_frame.disabled_images
+            # hover_list = x_y_frame.disabled_hover
         else:
             image_list = x_y_frame.default_images
+            # hover_list = x_y_frame.default_hover
         for k in range(len(buttons)):
                 buttons[k].config(image = image_list[k])
+                # buttons[k].hover.setdescription(hover_list[k])
 
 class StopFrame(ttk.Frame):
     """Frame for the stop button
@@ -879,4 +906,4 @@ class StopFrame(ttk.Frame):
         if non_default_images:
             stop_frame.joystick_btn.config(text="Disable Joystick")
         else:
-            stop_frame.joystick_btn.config(text=" Enable Joystick")
+            stop_frame.joystick_btn.config(text="Enable Joystick")

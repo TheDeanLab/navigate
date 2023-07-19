@@ -746,7 +746,7 @@ class Model:
 
             # show image
             self.logger.info(f"ASLM Model - Sent through pipe{frame_ids[0]}")
-            self.show_img_pipe.send(frame_ids[0])
+            self.show_img_pipe.send(frame_ids[-1])
 
             if count_frame and acquired_frame_num >= num_of_frames:
                 self.logger.info("ASLM Model - Loop stop condition met.")
@@ -817,7 +817,7 @@ class Model:
                 f"ASLM Model - Sent through pipe{frame_ids[0]} -- "
                 f"{microscope.microscope_name}"
             )
-            show_img_pipe.send(frame_ids[0])
+            show_img_pipe.send(frame_ids[-1])
 
             acquired_frame_num += len(frame_ids)
 

@@ -85,7 +85,7 @@ class TilingWizardPopup:
         self.popup = PopUp(
             root,
             "Multiposition Tiling Wizard",
-            "625x500+330+330",
+            "625x530+330+330",
             top=False,
             transient=False,
         )
@@ -105,12 +105,14 @@ class TilingWizardPopup:
 
         # Sub Frames
         action_buttons = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
+        operation_mode = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
         pos_grid = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
         data = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
 
         action_buttons.grid(row=0, sticky=tk.NSEW)
-        pos_grid.grid(row=1, sticky=tk.NSEW)
-        data.grid(row=2, sticky=tk.NSEW)
+        operation_mode.grid(row=1, sticky=tk.NSEW)
+        pos_grid.grid(row=2, sticky=tk.NSEW)
+        data.grid(row=3, sticky=tk.NSEW)
 
         """Creating the widgets for the popup"""
         # Dictionary for all the variables
@@ -155,7 +157,7 @@ class TilingWizardPopup:
         # Action buttons
         btn_labels = [
             "Save to Disk",
-            "Populate Multiposition Table",
+            "Populate Multi-Position Table",
             "Set X Start",
             "Set X End",
             "Set Y Start",
@@ -166,10 +168,40 @@ class TilingWizardPopup:
             "Set F End",
         ]
 
+        # LUT Radio buttons - Gray is default
+        self.operating_modes = [
+            "Tile Z&F",
+            "Tile F",
+        ]
+        """
+        save to disk    populate table
+        set x start     x distance
+        set x end       x tiles
+        set y start     y distance
+        set y end       y tiles
+        set z start     z distance
+        set z end       z tiles
+        set f start     f distance
+        set f end       f tiles
+        """
+
         for i in range(2):
             self.buttons[names[i]] = ttk.Button(action_buttons, text=btn_labels[i])
             self.buttons[names[i]].grid(
                 row=0, column=i, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
+            )
+
+        self.mode = tk.StringVar()
+        for i in range(len(self.operating_modes)):
+            self.inputs[self.operating_modes[i]] = LabelInput(
+                parent=operation_mode,
+                label=self.operating_modes[i],
+                input_class=ttk.Radiobutton,
+                input_var=self.mode,
+                input_args={"value": self.operating_modes[i]},
+            )
+            self.inputs[self.operating_modes[i]].grid(
+                row=0, column=i, sticky=tk.NSEW, pady=3
             )
 
         # Position buttons
@@ -205,11 +237,6 @@ class TilingWizardPopup:
                 row=i, column=2, sticky=tk.NSEW, padx=(5, 0), pady=(17, 0)
             )
             self.inputs[entry_names[i]].widget.state(["disabled"])
-
-        # Data widgets
-        # data_labels = ["Percent Overlay", "Total Tiles"]
-
-        # data_names = ["percent_overlay", "total_tiles"]
 
         self.inputs["percent_overlay"] = LabelInput(
             parent=data,

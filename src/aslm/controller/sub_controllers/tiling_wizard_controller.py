@@ -138,6 +138,9 @@ class TilingWizardController(GUIController):
             self.variables[f"{ax}_dist"].set(0.0)
             self.variables[f"{ax}_tiles"].set(1)
 
+        self.widgets["Tile Z&F"].widget.invoke()
+        self.variables["Tile Z&F"].trace_add("write", self.operating_mode)
+
         # Ref to widgets in other views
         # (Camera Settings, Stage Control Positions, Stack Acq Settings)
         main_view = self.parent_controller.parent_controller.view
@@ -255,6 +258,32 @@ class TilingWizardController(GUIController):
                 lambda: delattr(self.parent_controller, "tiling_wizard_controller"),
             ),
         )
+
+    def operating_mode(self, *args, **kwargs):
+        """Handles toggling between tiling in Z&F, or just in Z.
+
+        In the Z&F mode, Z acts as tiling and scanning, and focus is adjusted
+        throughout.
+
+        In the F mode, Z acts as tiling, and F acts as scanning. No additional
+        focus adjustments provided.
+
+        Parameters
+        ----------
+        self : object
+            Tiling Wizard Controller instance
+
+        Returns
+        -------
+        None
+        """
+        # TODO: Needs to implement the logic for the different tiling modes.
+        tiling_mode = self.variables["Tile Z&F"].get()
+        if tiling_mode == "Tile F":
+            print("Operating in Tile F mode")
+        else:
+            print("Operating in Tile Z&F mode")
+        pass
 
     def set_table(self):
         """Set the multipoint table to the values in the tiling wizard

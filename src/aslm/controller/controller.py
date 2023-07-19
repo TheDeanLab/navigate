@@ -70,7 +70,12 @@ from aslm.model.model import Model
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
-from aslm.config.config import load_configs, update_config_dict, verify_configuration, get_aslm_path
+from aslm.config.config import (
+    load_configs,
+    update_config_dict,
+    verify_configuration,
+    get_aslm_path,
+)
 from aslm.tools.file_functions import create_save_path, save_yaml_file
 from aslm.tools.common_dict_tools import update_stage_dict
 from aslm.tools.multipos_table_tools import update_table
@@ -200,7 +205,9 @@ class Controller:
         self.keystroke_controller = KeystrokeController(self.view, self)
 
         # Exit
-        self.view.root.protocol("WM_DELETE_WINDOW", self.acquire_bar_controller.exit_program)
+        self.view.root.protocol(
+            "WM_DELETE_WINDOW", self.acquire_bar_controller.exit_program
+        )
 
         # Bonus config
         self.update_acquire_control()
@@ -389,7 +396,7 @@ class Controller:
         Sets sub-controller's mode to 'live' when 'continuous is selected, or 'stop'.
         """
         if not self.update_experiment_setting():
-            tkinter.messagebox.showerror(
+            messagebox.showerror(
                 title="Warning",
                 message="There are some missing/wrong settings! "
                 "Cannot start acquisition!",
@@ -588,11 +595,7 @@ class Controller:
             self.threads_pool.createThread(
                 "camera",
                 self.capture_image,
-                args=(
-                    "autofocus",
-                    "live",
-                    *args
-                ),
+                args=("autofocus", "live", *args),
             )
 
         elif command == "load_feature":
@@ -647,15 +650,19 @@ class Controller:
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
-            
+
             # ask user to verify feature list parameters if in "customized" mode
             if self.acquire_bar_controller.mode == "customized":
                 feature_id = self.menu_controller.feature_id_val.get()
                 if feature_id > 0:
                     if hasattr(self, "features_popup_controller"):
                         self.features_popup_controller.exit_func()
-                    feature_list_popup = FeatureListPopup(self.view, title="Feature List Configuration")
-                    self.features_popup_controller = FeaturePopupController(feature_list_popup, self)
+                    feature_list_popup = FeatureListPopup(
+                        self.view, title="Feature List Configuration"
+                    )
+                    self.features_popup_controller = FeaturePopupController(
+                        feature_list_popup, self
+                    )
                     self.features_popup_controller.populate_feature_list(feature_id)
                     # wait until close the popup windows
                     self.view.wait_window(feature_list_popup.popup)
@@ -689,7 +696,7 @@ class Controller:
 
             # clear show_img_pipe
             while self.show_img_pipe.poll():
-                image_id = self.show_img_pipe.recv()
+                image_id = self.show_img_pipe.recv()  # noqa
 
         elif command == "exit":
             """Exit the program."""
@@ -762,7 +769,7 @@ class Controller:
         try:
             self.model.run_command(command, *args)
         except Exception as e:
-            tkinter.messagebox.showerror(
+            messagebox.showerror(
                 title="Warning",
                 message=f"There are something wrong! Cannot start acquisition!\n{e}",
             )
@@ -907,7 +914,9 @@ class Controller:
                 )
 
             # clear show_img_pipe
-            show_img_pipe = self.additional_microscopes[microscope_name]["show_img_pipe"]
+            show_img_pipe = self.additional_microscopes[microscope_name][
+                "show_img_pipe"
+            ]
             while show_img_pipe.poll():
                 image_id = show_img_pipe.recv()
                 if image_id == "stop":
@@ -995,7 +1004,6 @@ class Controller:
                 break
 
             elif event == "update_stage":
-                # ZM: I am so sorry for this.
                 for _ in range(10):
                     try:
                         self.update_stage_controller_silent(value)

@@ -336,6 +336,10 @@ class Microscope:
                     "readout_direction"
                 ]
             )
+        # set binning
+        self.camera.set_binning(
+            self.configuration["experiment"]["CameraParameters"]["binning"]
+        )
         # Initialize Image Series - Attaches camera buffer and start imaging
         self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
 

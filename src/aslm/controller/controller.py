@@ -460,8 +460,7 @@ class Controller:
         
         if command == "joystick_toggle":
             if self.stage_controller.joystick_is_on:
-                pass
-                #call for stage position here, probably
+                self.execute("stop_stage")
 
         elif command == "stage":
             """Creates a thread and uses it to call the model to move stage

@@ -8,7 +8,7 @@ specifications of the various hardware that you will be using. The first time yo
 launch the software, ASLM will evaluate the the hardware settings as provided in the
 ``ASLM\config\configuration.yaml`` file. Every subsequent time you launch the
 software, a local version of the ``configuration.yaml`` file can be found
-in either ``Users\name\AppData\Local\.ASLM`` if on Windows or ``~/.ASLM`` if on
+in either ``Users\name\AppData\Local\.ASLM\config`` if on Windows or ``~/.ASLM`` if on
 Mac/Linux.
 
 To avoid confusion, we recommend launching the software in the synthetic hardware
@@ -370,6 +370,9 @@ would then have to import the stages as following:
 
     axes: [z, y, x, theta, f]
 
+Joystick Axes Definition
+""""""""""""""""""""""""
+Fill out this.
 
 Zoom Section
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -80,6 +80,8 @@ class StageController(GUIController):
         The position callbacks bound boolean
     joystick_is_on : bool
         The joystick on/off boolean
+    joystick_axes : list
+        The joystick axes
 
     Methods
     -------
@@ -119,6 +121,8 @@ class StageController(GUIController):
         super().__init__(view, parent_controller)
 
         self.joystick_is_on = False
+        self.joystick_axes = self.parent_controller.configuration['configuration']['microscopes']['Mesoscale']['stage']['joystick_axes']
+
         self.main_view = main_view
         self.canvas = canvas
 
@@ -366,20 +370,19 @@ class StageController(GUIController):
             step_val = self.widget_vals[axis + "_step"]
 
         def handler():
-            if not self.joystick_is_on:
 
-                try:
-                    temp = position_val.get() + step_val.get()
-                except AttributeError:
-                    return
-                if self.stage_limits is True:
-                    if temp > self.position_max[axis]:
-                        temp = self.position_max[axis]
-                    elif temp < self.position_min[axis]:
-                        temp = self.position_min[axis]
-                # guarantee stage won't move out of limits
-                if position_val.get() != temp:
-                    position_val.set(temp)
+            try:
+                temp = position_val.get() + step_val.get()
+            except AttributeError:
+                return
+            if self.stage_limits is True:
+                if temp > self.position_max[axis]:
+                    temp = self.position_max[axis]
+                elif temp < self.position_min[axis]:
+                    temp = self.position_min[axis]
+            # guarantee stage won't move out of limits
+            if position_val.get() != temp:
+                position_val.set(temp)
 
         return handler
 
@@ -405,19 +408,19 @@ class StageController(GUIController):
             step_val = self.widget_vals[axis + "_step"]
 
         def handler():
-            if not self.joystick_is_on:
-                try:
-                    temp = position_val.get() - step_val.get()
-                except AttributeError:
-                    return
-                if self.stage_limits is True:
-                    if temp < self.position_min[axis]:
-                        temp = self.position_min[axis]
-                    elif temp > self.position_max[axis]:
-                        temp = self.position_max[axis]
-                # guarantee stage won't move out of limits
-                if position_val.get() != temp:
-                    position_val.set(temp)
+                
+            try:
+                temp = position_val.get() - step_val.get()
+            except AttributeError:
+                return
+            if self.stage_limits is True:
+                if temp < self.position_min[axis]:
+                    temp = self.position_min[axis]
+                elif temp > self.position_max[axis]:
+                    temp = self.position_max[axis]
+            # guarantee stage won't move out of limits
+            if position_val.get() != temp:
+                position_val.set(temp)
 
         return handler
 
@@ -469,7 +472,7 @@ class StageController(GUIController):
 
         Parameters
         ----------
-        None11111
+        None
 
         Returns
         -------
@@ -484,9 +487,8 @@ class StageController(GUIController):
         else:
             self.joystick_is_on = True
         self.view.after(250, lambda *args: self.parent_controller.execute("joystick_toggle"))
-        self.view.toggle_button_states(self.joystick_is_on)
-
-
+        self.view.toggle_button_states(self.joystick_is_on, self.joystick_axes)
+        
     def position_callback(self, axis, *args, **kwargs):
         """Callback functions bind to position variables.
 

@@ -233,14 +233,14 @@ class StageControlTab(tk.Frame):
         self.xy_frame.up_y_btn.hover.setdescription(
             "Increases the Y value of the stage's position"
         )
-        self.xy_frame.up_x_btn.hover.setdescription(
-            "Increases the X value of the stage's position"
-        )
         self.xy_frame.down_y_btn.hover.setdescription(
             "Decreases the Y value of the stage's position"
         )
         self.xy_frame.down_x_btn.hover.setdescription(
             "Decreases the X value of the stage's position"
+        )
+        self.xy_frame.up_x_btn.hover.setdescription(
+            "Increases the X value of the stage's position"
         )
         self.position_frame.inputs["y"].widget.hover.setdescription(
             "Y position of the stage"
@@ -253,6 +253,9 @@ class StageControlTab(tk.Frame):
         )
         self.position_frame.inputs["f"].widget.hover.setdescription(
             "Focus"
+        )
+        self.stop_frame.joystick_btn.hover.setdescription(
+            "Enables/disables joystick mode"
         )
 
     def get_widgets(self):
@@ -312,12 +315,14 @@ class StageControlTab(tk.Frame):
         result.update(self.stop_frame.get_buttons())
         return result
 
-    def toggle_button_states(self, non_default_images = False):
-        self.xy_frame.toggle_button_states(non_default_images)
-        self.z_frame.toggle_button_states(non_default_images)
-        self.f_frame.toggle_button_states(non_default_images)
-        self.theta_frame.toggle_button_states(non_default_images)
-        self.stop_frame.toggle_button_states(non_default_images)
+    def toggle_button_states(self, joystick_is_on = False, joystick_axes = []):
+        
+        self.xy_frame.toggle_button_states(joystick_is_on, joystick_axes)
+        self.z_frame.toggle_button_states(joystick_is_on, joystick_axes)
+        self.f_frame.toggle_button_states(joystick_is_on, joystick_axes)
+        self.theta_frame.toggle_button_states(joystick_is_on, joystick_axes)
+        self.position_frame.toggle_entry_states(joystick_is_on, joystick_axes)
+        self.stop_frame.toggle_button_states(joystick_is_on, joystick_axes)
 
 class OtherAxisFrame(ttk.Labelframe):
     """Frame for the other axis movement buttons.
@@ -388,7 +393,7 @@ class OtherAxisFrame(ttk.Labelframe):
         other_axis_frame.up_image = other_axis_frame.up_image.subsample(2, 2)
         other_axis_frame.down_image = other_axis_frame.down_image.subsample(2, 2)
 
-        other_axis_frame.default_images = [other_axis_frame.up_image,
+        other_axis_frame.normal_images = [other_axis_frame.up_image,
                                            other_axis_frame.down_image
                                            ]
 
@@ -398,21 +403,21 @@ class OtherAxisFrame(ttk.Labelframe):
         other_axis_frame.disabled_images = [other_axis_frame.d_up_image,
                                            other_axis_frame.d_down_image
                                            ]
-
+        
         # Setting up buttons for up, down, zero and increment spinbox
 
         # Up button
-        other_axis_frame.up_btn = tk.Button(
+        other_axis_frame.up_btn = HoverTkButton(
             other_axis_frame, image=other_axis_frame.up_image, borderwidth=0
         )
 
         # Down button
-        other_axis_frame.down_btn = tk.Button(
+        other_axis_frame.down_btn = HoverTkButton(
             other_axis_frame, image=other_axis_frame.down_image, borderwidth=0
         )
 
         # Zero button
-        other_axis_frame.zero_btn = ttk.Button(
+        other_axis_frame.zero_btn = HoverTkButton(
             other_axis_frame,
             text="ZERO " + other_axis_frame.name,
         )
@@ -441,11 +446,34 @@ class OtherAxisFrame(ttk.Labelframe):
         Zero is 4
         """
 
+        # Button hover text
+        other_axis_frame.hover_text_ending = ""
+        if other_axis_frame.name == "Z":
+            other_axis_frame.hover_text_ending = f"the {other_axis_frame.name} value of the stage's position"
+        elif other_axis_frame.name == "Theta":
+            other_axis_frame.hover_text_ending = f"the angle of sample rotation"
+        else:
+            other_axis_frame.hover_text_ending = f"the {other_axis_frame.name.lower()}"
+            
+        other_axis_frame.up_btn.hover.setdescription(
+            f"Increases {other_axis_frame.hover_text_ending}"
+        )
+        other_axis_frame.down_btn.hover.setdescription(
+            f"Decreases {other_axis_frame.hover_text_ending}"
+        )
+        other_axis_frame.normal_hover_texts = [other_axis_frame.up_btn.hover.getdescription(),
+                                                other_axis_frame.down_btn.hover.getdescription()
+                                                ]
+
+        other_axis_frame.disabled_hover_texts = ["Turn off Joystick Mode to enable",
+                                                 "Turn off Joystick Mode to enable"
+                                                 ]
+        
         # Gridding out buttons
         other_axis_frame.up_btn.grid(row=0, column=0, pady=2)  # UP
         other_axis_frame.down_btn.grid(row=3, column=0, pady=2)  # DOWN
         other_axis_frame.increment_box.grid(row=2, column=0, pady=2)
-        other_axis_frame.increment_box.widget.set_precision(-1)
+        other_axis_frame.increment_box.widget.set_precision(-1)     
 
     def get_widget(other_axis_frame):
         return other_axis_frame.increment_box
@@ -457,7 +485,7 @@ class OtherAxisFrame(ttk.Labelframe):
             "zero": other_axis_frame.zero_btn,
         }
     
-    def toggle_button_states(other_axis_frame, non_default_images = False):
+    def toggle_button_states(other_axis_frame, joystick_is_on = False, joystick_axes = []):
         """Switches the images used as buttons between two states
 
         Parameters
@@ -466,13 +494,23 @@ class OtherAxisFrame(ttk.Labelframe):
             The OtherAxisFrame object
 
         """
-        buttons = [other_axis_frame.up_btn,other_axis_frame.down_btn]
-        if non_default_images:
-            image_list = other_axis_frame.disabled_images
-        else:
-            image_list = other_axis_frame.default_images
-        for k in range(len(buttons)):
-                buttons[k].config(image = image_list[k])
+        if (other_axis_frame.name.lower() in joystick_axes) or (
+            other_axis_frame.name.lower() == "focus" and "f" in joystick_axes):
+
+            buttons = [other_axis_frame.up_btn,other_axis_frame.down_btn]
+            if joystick_is_on:
+                button_state = "disabled"
+                image_list = other_axis_frame.disabled_images
+                hover_list = other_axis_frame.disabled_hover_texts
+            else:
+                button_state = "normal"
+                image_list = other_axis_frame.normal_images
+                hover_list = other_axis_frame.normal_hover_texts
+            for k in range(len(buttons)):
+                    buttons[k]['state'] = button_state
+                    buttons[k].config(image = image_list[k])
+                    buttons[k].hover.setdescription(hover_list[k])
+
 
 class PositionFrame(ttk.Labelframe):
     """Frame for the stage position entries.
@@ -520,6 +558,7 @@ class PositionFrame(ttk.Labelframe):
         entry_labels = ["X", "Y", "Z", "\N{Greek Capital Theta Symbol}", "F"]
 
         # entries
+        position_frame.frame_back_list = []
         for i in range(len(entry_names)):
             position_frame.inputs[entry_names[i]] = LabelInput(
                 parent=position_frame,
@@ -533,7 +572,10 @@ class PositionFrame(ttk.Labelframe):
                     "takefocus": False,
                 },
             )
+            position_frame.frame_back_list.append(tk.Frame(position_frame,bg="#f0f0f0",width=60,height=26))
+            position_frame.frame_back_list[i].grid(row=i,column=0)
             position_frame.inputs[entry_names[i]].grid(row=i, column=0)
+            position_frame.frame_back_list[i].lower()
 
         """
         Grid for frames
@@ -584,7 +626,7 @@ class PositionFrame(ttk.Labelframe):
             variables[name] = position_frame.inputs[name].get_variable()
         return variables
 
-    def toggle_button_states(position_frame, non_default_images = False):
+    def toggle_entry_states(position_frame, joystick_is_on = False, joystick_axes = []):
         """Switches the images used as buttons between two states
 
         Parameters
@@ -593,7 +635,23 @@ class PositionFrame(ttk.Labelframe):
             The XYFrame object
 
         """
-        pass
+        frame_back_counter = 0
+        if joystick_is_on:
+            entry_state = "disabled"
+            frame_back_color = "#ee868a"
+        else:
+            entry_state = "normal"
+            frame_back_color = "#f0f0f0"
+        
+        for variable in position_frame.get_variables():
+            if variable in joystick_axes:
+                position_frame.frame_back_list[frame_back_counter]['bg'] = frame_back_color
+                try:
+                    position_frame.inputs[f'{variable}'].widget['state'] = entry_state
+
+                except KeyError:
+                    pass
+            frame_back_counter += 1
 
 class XYFrame(ttk.Labelframe):
     """Frame for the x and y movement buttons.
@@ -650,6 +708,7 @@ class XYFrame(ttk.Labelframe):
 
         # Path to arrows
         image_directory = Path(__file__).resolve().parent
+        
         x_y_frame.up_image = tk.PhotoImage(
             file=image_directory.joinpath("images", "greyup.png")
         )
@@ -674,31 +733,39 @@ class XYFrame(ttk.Labelframe):
         x_y_frame.d_right_image = tk.PhotoImage(
             file=image_directory.joinpath("images", "greyright_disabled.png")
         )
+        x_y_frame.right_image = x_y_frame.right_image.subsample(2, 2)
+        x_y_frame.left_image = x_y_frame.left_image.subsample(2, 2)
         x_y_frame.up_image = x_y_frame.up_image.subsample(2, 2)
         x_y_frame.down_image = x_y_frame.down_image.subsample(2, 2)
-        x_y_frame.left_image = x_y_frame.left_image.subsample(2, 2)
-        x_y_frame.right_image = x_y_frame.right_image.subsample(2, 2)
 
-        x_y_frame.default_images = [x_y_frame.right_image,
+        x_y_frame.normal_images = [x_y_frame.right_image,
                                     x_y_frame.left_image,
                                     x_y_frame.up_image,
                                     x_y_frame.down_image]
+
+        x_y_frame.normal_hover_texts = ["Decreases the X value of the stage's position",
+                                               "Increases the X value of the stage's position",
+                                               "Increases the Y value of the stage's position",
+                                               "Decreases the Y value of the stage's position"
+                                               ]
         
+        x_y_frame.d_right_image = x_y_frame.d_right_image.subsample(2, 2)
+        x_y_frame.d_left_image = x_y_frame.d_left_image.subsample(2, 2)
         x_y_frame.d_up_image = x_y_frame.d_up_image.subsample(2, 2)
         x_y_frame.d_down_image = x_y_frame.d_down_image.subsample(2, 2)
-        x_y_frame.d_left_image = x_y_frame.d_left_image.subsample(2, 2)
-        x_y_frame.d_right_image = x_y_frame.d_right_image.subsample(2, 2)
 
         x_y_frame.disabled_images = [x_y_frame.d_right_image,
                                      x_y_frame.d_left_image,
                                      x_y_frame.d_up_image,
                                      x_y_frame.d_down_image]
         
-        # x_y_frame.disabled_hover = []
+        x_y_frame.disabled_hover_texts = ["Turn off Joystick Mode to enable",
+                                               "Turn off Joystick Mode to enable",
+                                               "Turn off Joystick Mode to enable",
+                                               "Turn off Joystick Mode to enable"
+                                               ]
 
-        # x_y_frame.up_y_btn.hover.setdescription(
-        #     "Increases the Y value of the stage's position"
-        # )
+
 
         # Up button
         x_y_frame.up_y_btn = HoverTkButton(
@@ -749,7 +816,8 @@ class XYFrame(ttk.Labelframe):
             input_var=tk.DoubleVar(),
             input_args={"width": 5},
         )
-
+        x_y_frame.button_axes_dict = {'x':[x_y_frame.up_x_btn,x_y_frame.down_x_btn],
+                                      'y':[x_y_frame.up_y_btn,x_y_frame.down_y_btn]}
         """
         Grid for buttons
 
@@ -818,25 +886,36 @@ class XYFrame(ttk.Labelframe):
         names = ["up_x_btn", "down_x_btn", "up_y_btn", "down_y_btn", "zero_xy_btn"]
         return {k: getattr(x_y_frame, k) for k in names}
     
-    def toggle_button_states(x_y_frame, non_default_images = False):
+    def toggle_button_states(x_y_frame, joystick_is_on = False, joystick_axes = []):
         """Switches the images used as buttons between two states
 
         Parameters
         ----------
         x_y_frame : XYFrame
             The XYFrame object
+        joystick_is_on : bool
+            False if buttons are normal, True if buttons are disabled
+        joystick_axes : list
+            Contains strings representing joystick axes
 
         """
-        buttons = [x_y_frame.up_x_btn,x_y_frame.down_x_btn,x_y_frame.up_y_btn,x_y_frame.down_y_btn]
-        if non_default_images:
-            image_list = x_y_frame.disabled_images
-            # hover_list = x_y_frame.disabled_hover
-        else:
-            image_list = x_y_frame.default_images
-            # hover_list = x_y_frame.default_hover
-        for k in range(len(buttons)):
-                buttons[k].config(image = image_list[k])
-                # buttons[k].hover.setdescription(hover_list[k])
+        
+        for axis in x_y_frame.button_axes_dict.keys():
+            if axis in joystick_axes:
+                buttons = x_y_frame.button_axes_dict[axis]
+                axis_ascii = ord(axis)
+                if joystick_is_on:
+                    button_state = "disabled"
+                    image_list = x_y_frame.disabled_images
+                    hover_list = x_y_frame.disabled_hover_texts
+                else:
+                    button_state = "normal"
+                    image_list = x_y_frame.normal_images
+                    hover_list = x_y_frame.normal_hover_texts
+                for k in range(len(buttons)):
+                        buttons[k]['state'] = button_state
+                        buttons[k].config(image = image_list[2*(axis_ascii%2)+k])
+                        buttons[k].hover.setdescription(hover_list[2*(axis_ascii%2)+k])
 
 class StopFrame(ttk.Frame):
     """Frame for the stop button
@@ -879,7 +958,7 @@ class StopFrame(ttk.Frame):
             self, bg="red", fg="white", text="STOP", width=20, height=6
         )
 
-        self.joystick_btn = tk.Button(
+        self.joystick_btn = HoverTkButton(
             self, bg="white", fg="black", text="Enable Joystick", width=15, height=2
         )
 
@@ -892,18 +971,18 @@ class StopFrame(ttk.Frame):
                 "joystick": self.joystick_btn
                 }
 
-    def toggle_button_states(stop_frame, non_default_images = False):
+    def toggle_button_states(stop_frame, joystick_is_on = False, joystick_axes = []):
         """Switches the images used as buttons between two states
 
         Parameters
         ----------
         stop_frame : StopFrame
             The StopFrame object
-        non_default_images : bool
-            False if the default button visuals are in use
+        joystick_is_on : bool
+            False if the normal button visuals are in use
 
         """
-        if non_default_images:
+        if joystick_is_on:
             stop_frame.joystick_btn.config(text="Disable Joystick")
         else:
             stop_frame.joystick_btn.config(text="Enable Joystick")

@@ -74,6 +74,7 @@ def test_remote_focus_base_adjust(smoothing):
             waveform_constants["remote_focus_constants"][imaging_mode][zoom][laser][
                 "percent_smoothing"
             ] = smoothing
+            channel["camera_exposure_time"] = np.random.rand() * 150 + 50
 
     rf = RemoteFocusBase(microscope_name, None, model.configuration)
 
@@ -100,7 +101,7 @@ def test_remote_focus_base_adjust(smoothing):
                 continue
             assert np.all(v <= rf.remote_focus_max_voltage)
             assert np.all(v >= rf.remote_focus_min_voltage)
-            assert len(v) == rf.samples
+            assert len(v) == int(sweep_times[k] * rf.sample_rate)
         except KeyError:
             # The channel doesn't exist. Points to an issue in how waveform dict
             # is created.

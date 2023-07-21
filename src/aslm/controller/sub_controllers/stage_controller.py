@@ -149,35 +149,7 @@ class StageController(GUIController):
         self.stage_limits = True
         self.initialize()
 
-    def stage_key_press(self, event):
-        """The stage key press
-
-        Parameters
-        ----------
-        event : tkinter.Event
-            The tkinter event
-
-        Returns
-        -------
-        None
-        """
-        if event.state != 0:
-            return
-        char = event.char.lower()
-        current_position = self.get_position()
-        if current_position is None:
-            return
-        xy_increment = self.widget_vals["xy_step"].get()
-        if char == "w":
-            current_position["y"] += xy_increment
-        elif char == "a":
-            current_position["x"] -= xy_increment
-        elif char == "s":
-            current_position["y"] -= xy_increment
-        elif char == "d":
-            current_position["x"] += xy_increment
-        self.set_position(current_position)
-
+    test1 
     def initialize(self):
         """Initialize the Stage limits of steps and positions
 
@@ -212,6 +184,90 @@ class StageController(GUIController):
                 step_increment = 1
             widgets[step_axis + "_step"].widget.configure(increment=step_increment)
             widgets[step_axis + "_step"].set(step_dict[axis])
+
+    def stage_key_press(self, event):
+        """The stage key press
+
+        Parameters
+        ----------
+        event : tkinter.Event
+            The tkinter event
+
+        Returns
+        -------
+        None
+        """
+        if event.state != 0:
+            return
+        char = event.char.lower()
+        current_position = {}
+        #current_position = self.get_position()
+        #if current_position is None:
+        #    return
+       
+        xy_increment = self.widget_vals["xy_step"].get()
+        
+        for axis in ["x", "y", "z", "theta", "f"]:
+            current_position[axis] = self.widget_vals[axis].get() 
+        
+        config = self.parent_controller.configuration_controller
+        self.position_min = config.get_stage_position_limits("_min")
+        self.position_max = config.get_stage_position_limits("_max")
+
+        self.position_min_x = self.position_min['x']
+        self.position_max_x = self.position_max['x']
+        self.position_min_y = self.position_min['y']
+        self.position_max_y = self.position_max['y']
+        
+        
+        if self.stage_limits is True:
+                if current_position["y"] < self.position_max['y'] and current_position['y'] > self.position_min['y']:
+                        if char == "w":
+                            current_position["y"] += xy_increment
+                        elif char == "s":
+                            current_position["y"] -= xy_increment
+                        #print("inside stage bounds y")
+                elif current_position['y'] >= self.position_max_y:
+                    current_position['y'] = self.position_max_y - xy_increment
+                    #print('Upper Y Stage Limit keystroke')
+                elif current_position['y'] <= self.position_min_y:
+                    #print('Lower Y Stage Limit keystroke')
+                    current_position['y'] = self.position_min_y + xy_increment
+        if self.stage_limits is True:
+                if current_position["x"] < self.position_max['x'] and current_position['x'] > self.position_min['x']:
+                        if char == "a":
+                            current_position["x"] -= xy_increment
+                        elif char == "d":
+                            current_position["x"] += xy_increment
+                        #print("inside stage bounds x")
+                elif current_position['x'] >= self.position_max_x:
+                    #print('Upper X Stage Limit keystroke')
+                    current_position['x'] = self.position_max_x - xy_increment
+                elif current_position['x'] <= self.position_min_x:
+                    #print('Lower X Stage Limit keystroke')
+                    current_position['x'] = self.position_min_x + xy_increment
+        if self.stage_limits is False:
+                if char == "w":
+                    current_position["y"] += xy_increment
+                elif char == "a":
+                    current_position["x"] -= xy_increment
+                elif char == "s":
+                    current_position["y"] -= xy_increment
+                elif char == "d":
+                    current_position["x"] += xy_increment
+                #print("STAGE LIMITS OFF")
+        self.set_position(current_position)
+        # if char == "w":
+        #     current_position["y"] += xy_increment/2
+        # elif char == "a":
+        #     current_position["x"] -= xy_increment/2
+        # elif char == "s":
+        #     current_position["y"] -= xy_increment/2
+        # elif char == "d":
+        #     current_position["x"] += xy_increment/2
+        # print(current_position)
+        # self.set_position(current_position)
+        #return handler
 
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can
@@ -364,10 +420,14 @@ class StageController(GUIController):
             except AttributeError:
                 return
             if self.stage_limits is True:
-                if temp > self.position_max[axis]:
-                    temp = self.position_max[axis]
-                elif temp < self.position_min[axis]:
-                    temp = self.position_min[axis]
+                if temp >= self.position_max[axis]:
+                    temp = position_val.get()
+                    #temp = self.position_max[axis] + step_val.get()
+                    #print('Upper Stage Limit Up')
+                elif temp <= self.position_min[axis]:
+                    temp = position_val.get()
+                    #temp = self.position_min[axis] - step_val.get()
+                    #print('Lower Stage Limit Up')
             # guarantee stage won't move out of limits
             if position_val.get() != temp:
                 position_val.set(temp)
@@ -380,10 +440,7 @@ class StageController(GUIController):
 
         Parameters
         ----------
-        axis : str
-            Should be one of 'x', 'y', 'z', 'theta', 'f'
-            position_axis += step_axis
-
+   
         Returns
         -------
         handler : object
@@ -401,10 +458,13 @@ class StageController(GUIController):
             except AttributeError:
                 return
             if self.stage_limits is True:
-                if temp < self.position_min[axis]:
-                    temp = self.position_min[axis]
-                elif temp > self.position_max[axis]:
-                    temp = self.position_max[axis]
+                if temp <= self.position_min[axis]:
+                    temp = self.position_min[axis] + step_val.get()
+                    #print('Lower Stage Limit down') 
+                elif temp >= self.position_max[axis]:
+                    temp = self.position_max[axis] - step_val.get()
+                    #print('Upper Stage Limit down') 
+                
             # guarantee stage won't move out of limits
             if position_val.get() != temp:
                 position_val.set(temp)
@@ -497,6 +557,7 @@ class StageController(GUIController):
             # if position is not a number, then do not move stage
             try:
                 position = position_var.get()
+                #print(position)
                 if self.stage_limits:
                     widget.trigger_focusout_validation()
                     # if position is not inside limits do not move stage
@@ -506,10 +567,12 @@ class StageController(GUIController):
                     ):
                         return
             except tk._tkinter.TclError:
+                print("tk error")
                 if self.event_id[axis]:
                     self.view.after_cancel(self.event_id[axis])
                 return
             except AttributeError:
+                print("attribute error")
                 logger.error(f"Attribute Error Caught: trying to set position {axis}")
                 return
 

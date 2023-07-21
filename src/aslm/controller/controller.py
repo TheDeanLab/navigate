@@ -289,7 +289,7 @@ class Controller:
         ] = microscope_name
         if self.configuration_controller.change_microscope():
             # update widgets
-            self.stage_controller.initialize(microscope_name)
+            self.stage_controller.initialize(f"{microscope_name}")
             self.channels_tab_controller.initialize()
 
     def initialize_cam_view(self):
@@ -458,7 +458,7 @@ class Controller:
         __________
         args* : function-specific passes.
         """
-        
+
         if command == "joystick_toggle":
             if self.stage_controller.joystick_is_on:
                 self.execute("stop_stage")

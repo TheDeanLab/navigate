@@ -121,7 +121,7 @@ class StageController(GUIController):
         super().__init__(view, parent_controller)
 
         self.joystick_is_on = False
-        self.joystick_axes = self.parent_controller.configuration['configuration']['microscopes']['Mesoscale']['stage']['joystick_axes']
+        self.joystick_axes = self.parent_controller.configuration['configuration']['microscopes'][f'{self.parent_controller.configuration_controller.microscope_name}']['stage']['joystick_axes']
 
         self.main_view = main_view
         self.canvas = canvas
@@ -189,7 +189,7 @@ class StageController(GUIController):
                 current_position["x"] += xy_increment
         self.set_position(current_position)
 
-    def initialize(self):
+    def initialize(self, microscope_name = "Mesoscale"):
         """Initialize the Stage limits of steps and positions
 
         Parameters
@@ -223,6 +223,31 @@ class StageController(GUIController):
                 step_increment = 1
             widgets[step_axis + "_step"].widget.configure(increment=step_increment)
             widgets[step_axis + "_step"].set(step_dict[axis])
+
+        #Joystick
+        
+        self.new_joystick_axes = self.parent_controller.configuration['configuration']['microscopes'][f'{microscope_name}']['stage']['joystick_axes']
+        
+        if self.view.stop_frame.joystick_btn.winfo_ismapped():
+            if self.new_joystick_axes is None or list(self.new_joystick_axes) == []:
+                self.view.stop_frame.joystick_btn.grid_forget()  
+            else:
+                self.view.stop_frame.joystick_btn.grid()
+        else:
+            if self.new_joystick_axes is not None and list(self.new_joystick_axes) != []:
+                self.view.stop_frame.joystick_btn.grid()
+            else:
+                self.view.stop_frame.joystick_btn.grid_forget()
+
+        if list(self.joystick_axes) != list(self.new_joystick_axes):
+                    self.force_enable_all_axes()
+                    self.joystick_is_on = False
+                    self.new_joystick_axes
+                    
+        self.joystick_axes = self.new_joystick_axes     
+                
+        
+
 
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can
@@ -316,7 +341,7 @@ class StageController(GUIController):
         self.unbind_position_callbacks()
 
         self.set_position(position)
-
+        
         self.bind_position_callbacks()
 
     def get_position(self):
@@ -483,12 +508,14 @@ class StageController(GUIController):
     def joystick_button_handler(self, event=None, *args):
         """Toggle the joystick operation mode."""
         if self.joystick_is_on:
-            self.joystick_is_on = False 
+            self.joystick_is_on = False
         else:
             self.joystick_is_on = True
         self.view.after(250, lambda *args: self.parent_controller.execute("joystick_toggle"))
         self.view.toggle_button_states(self.joystick_is_on, self.joystick_axes)
         
+    def force_enable_all_axes(self, event = None, *args):
+        self.view.force_enable_all_axes()
     def position_callback(self, axis, *args, **kwargs):
         """Callback functions bind to position variables.
 

@@ -289,7 +289,7 @@ class Controller:
         ] = microscope_name
         if self.configuration_controller.change_microscope():
             # update widgets
-            self.stage_controller.initialize()
+            self.stage_controller.initialize(microscope_name)
             self.channels_tab_controller.initialize()
 
     def initialize_cam_view(self):
@@ -353,6 +353,7 @@ class Controller:
 
         # set widget modes
         self.set_mode_of_sub("stop")
+        self.stage_controller.initialize(f"{microscope_name}")
 
     def update_experiment_setting(self):
         """Update model.experiment according to values in the GUI

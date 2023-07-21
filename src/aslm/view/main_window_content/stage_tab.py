@@ -324,6 +324,15 @@ class StageControlTab(tk.Frame):
         self.position_frame.toggle_entry_states(joystick_is_on, joystick_axes)
         self.stop_frame.toggle_button_states(joystick_is_on, joystick_axes)
 
+    def force_enable_all_axes(self):
+        print("forcing enable all axes")
+        self.xy_frame.toggle_button_states(False, ['x','y'])
+        self.z_frame.toggle_button_states(False, ['z'])
+        self.f_frame.toggle_button_states(False, ['f'])
+        self.theta_frame.toggle_button_states(False, ['theta'])
+        self.position_frame.toggle_entry_states(False, ['x', 'y', 'z', 'theta', 'f'])
+        self.stop_frame.toggle_button_states(False, [])
+
 class OtherAxisFrame(ttk.Labelframe):
     """Frame for the other axis movement buttons.
 
@@ -494,22 +503,23 @@ class OtherAxisFrame(ttk.Labelframe):
             The OtherAxisFrame object
 
         """
-        if (other_axis_frame.name.lower() in joystick_axes) or (
-            other_axis_frame.name.lower() == "focus" and "f" in joystick_axes):
+        
 
-            buttons = [other_axis_frame.up_btn,other_axis_frame.down_btn]
-            if joystick_is_on:
+        buttons = [other_axis_frame.up_btn,other_axis_frame.down_btn]
+        button_state = "normal"
+        image_list = other_axis_frame.normal_images
+        hover_list = other_axis_frame.normal_hover_texts
+        if joystick_is_on:
+            if (other_axis_frame.name.lower() in joystick_axes) or (
+            other_axis_frame.name.lower() == "focus" and "f" in joystick_axes):
                 button_state = "disabled"
                 image_list = other_axis_frame.disabled_images
                 hover_list = other_axis_frame.disabled_hover_texts
-            else:
-                button_state = "normal"
-                image_list = other_axis_frame.normal_images
-                hover_list = other_axis_frame.normal_hover_texts
-            for k in range(len(buttons)):
-                    buttons[k]['state'] = button_state
-                    buttons[k].config(image = image_list[k])
-                    buttons[k].hover.setdescription(hover_list[k])
+        for k in range(len(buttons)):
+            buttons[k]['state'] = button_state
+            buttons[k].config(image = image_list[k])
+            buttons[k].hover.setdescription(hover_list[k])
+        
 
 
 class PositionFrame(ttk.Labelframe):

@@ -587,7 +587,7 @@ class TestCameraViewController:
 
     @pytest.mark.parametrize("transpose", [True, False])
     def test_display_image(self, transpose):
-        image = np.random.rand(100, 100)
+        images = np.random.rand(10, 100, 100)
         microscope_state = {"stack_cycling_mode": "per_stack"}
         images_received = 0
 
@@ -598,9 +598,11 @@ class TestCameraViewController:
         self.camera_view.process_image = MagicMock()
         self.camera_view.update_max_counts = MagicMock()
 
-        self.camera_view.display_image(image, microscope_state, images_received)
+        self.camera_view.data_buffer = images
+        image_id = np.random.randint(0, 10)
+        self.camera_view.display_image(image_id)
 
-        assert np.shape(self.camera_view.image) == np.shape(image)
+        assert np.shape(self.camera_view.image) == np.shape(images[image_id])
         self.camera_view.image_metrics["Channel"].set.assert_called_with(
             self.camera_view.channel_index
         )

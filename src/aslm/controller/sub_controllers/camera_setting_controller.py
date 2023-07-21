@@ -234,6 +234,8 @@ class CameraSettingController(GUIController):
             self.camera_setting_dict["number_of_pixels"] = self.mode_widgets[
                 "Pixels"
             ].get()
+            # light-sheet doesn't support binning
+            self.roi_widgets["Binning"].set("1x1")
 
         # Camera Binning
         self.camera_setting_dict["binning"] = self.roi_widgets["Binning"].get()
@@ -247,6 +249,17 @@ class CameraSettingController(GUIController):
             "frames_to_average"
         ].get()
 
+        width = int(self.camera_setting_dict["x_pixels"])
+        height = int(self.camera_setting_dict["y_pixels"])
+        binning = self.camera_setting_dict["binning"]
+        x_binning = int(binning[0])
+        y_binning = int(binning[2])
+        img_width = width // x_binning
+        img_height = height // y_binning
+
+        self.camera_setting_dict["img_x_pixels"] = img_width
+        self.camera_setting_dict["img_y_pixels"] = img_height
+        
         return True
 
     def update_sensor_mode(self, *args):
@@ -277,7 +290,8 @@ class CameraSettingController(GUIController):
             self.show_verbose_info("Normal Camera Readout Mode")
 
         elif sensor_value == "Light-Sheet":
-            self.mode_widgets["Readout"].widget.set("Top-to-Bottom")
+            # readout-direction from experiment
+            self.mode_widgets["Readout"].widget.set(self.camera_setting_dict["readout_direction"])
             self.mode_widgets["Readout"].widget["state"] = "readonly"
             self.mode_widgets["Pixels"].set(
                 self.number_of_pixels

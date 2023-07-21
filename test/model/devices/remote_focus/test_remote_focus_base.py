@@ -33,6 +33,7 @@
 # Standard Library Imports
 
 # Third Party Imports
+import pytest
 import numpy as np
 
 # Local Imports
@@ -49,8 +50,8 @@ def test_remote_focus_base_init():
     RemoteFocusBase(microscope_name, None, model.configuration)
 
 
-def test_remote_focus_base_adjust():
-
+@pytest.mark.parametrize("smoothing", [0] + list(np.random.rand(5) * 100))
+def test_remote_focus_base_adjust(smoothing):
     from aslm.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
     from aslm.model.dummy import DummyModel
 
@@ -59,28 +60,47 @@ def test_remote_focus_base_adjust():
         "microscope_name"
     ]
     microscope_state = model.configuration["experiment"]["MicroscopeState"]
+
+    waveform_constants = model.configuration["waveform_constants"]
+    imaging_mode = microscope_state["microscope_name"]
+    zoom = microscope_state["zoom"]
+    for channel_key in microscope_state["channels"].keys():
+        # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
+        channel = microscope_state["channels"][channel_key]
+
+        # Only proceed if it is enabled in the GUI
+        if channel["is_selected"] is True:
+            laser = channel["laser"]
+            waveform_constants["remote_focus_constants"][imaging_mode][zoom][laser][
+                "percent_smoothing"
+            ] = smoothing
+
     rf = RemoteFocusBase(microscope_name, None, model.configuration)
 
-    exposure_times = {
-        k: v["camera_exposure_time"] / 1000
-        for k, v in microscope_state["channels"].items()
-    }
-    sweep_times = {
-        k: 2 * v["camera_exposure_time"] / 1000
-        for k, v in microscope_state["channels"].items()
-    }
+    # exposure_times = {
+    #     k: v["camera_exposure_time"] / 1000
+    #     for k, v in microscope_state["channels"].items()
+    # }
+    # sweep_times = {
+    #     k: 2 * v["camera_exposure_time"] / 1000
+    #     for k, v in microscope_state["channels"].items()
+    # }
+
+    (
+        exposure_times,
+        sweep_times,
+    ) = model.active_microscope.calculate_exposure_sweep_times()
 
     waveform_dict = rf.adjust(exposure_times, sweep_times)
 
     for k, v in waveform_dict.items():
         try:
-            channel = model.configuration["experiment"]["MicroscopeState"]["channels"][
-                k
-            ]
+            channel = microscope_state["channels"][k]
             if not channel["is_selected"]:
                 continue
             assert np.all(v <= rf.remote_focus_max_voltage)
             assert np.all(v >= rf.remote_focus_min_voltage)
+            assert len(v) == rf.samples
         except KeyError:
             # The channel doesn't exist. Points to an issue in how waveform dict
             # is created.

@@ -613,7 +613,7 @@ class Model:
                 self.data_thread.join()
             else:
                 self.end_acquisition()
-            self.active_microscope.get_stage_position()
+            self.stop_stage()
 
         elif command == "terminate":
             self.terminate()
@@ -746,7 +746,7 @@ class Model:
 
             # show image
             self.logger.info(f"ASLM Model - Sent through pipe{frame_ids[0]}")
-            self.show_img_pipe.send(frame_ids[0])
+            self.show_img_pipe.send(frame_ids[-1])
 
             if count_frame and acquired_frame_num >= num_of_frames:
                 self.logger.info("ASLM Model - Loop stop condition met.")
@@ -817,7 +817,7 @@ class Model:
                 f"ASLM Model - Sent through pipe{frame_ids[0]} -- "
                 f"{microscope.microscope_name}"
             )
-            show_img_pipe.send(frame_ids[0])
+            show_img_pipe.send(frame_ids[-1])
 
             acquired_frame_num += len(frame_ids)
 
@@ -850,9 +850,11 @@ class Model:
         for m in self.virtual_microscopes:
             self.virtual_microscopes[m].prepare_acquisition()
 
+        # Confirm stage position and software are in agreement.
+        self.stop_stage()
+
         # prepare active microscope
         waveform_dict = self.active_microscope.prepare_acquisition()
-
         self.event_queue.put(("waveform", waveform_dict))
 
         self.frame_id = 0

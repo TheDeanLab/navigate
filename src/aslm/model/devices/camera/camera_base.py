@@ -75,6 +75,10 @@ class CameraBase:
         self.max_image_height = 2048
         self.x_pixels = self.max_image_width
         self.y_pixels = self.max_image_height
+        self.camera_parameters["x_pixels"] = self.max_image_width
+        self.camera_parameters["y_pixels"] = self.max_image_height
+        self.camera_parameters["trigger_source"] = 2.0
+        self.camera_parameters["readout_speed"] = 1.0
 
         # Initialize offset and variance maps, if present
         self._offset, self._variance = None, None

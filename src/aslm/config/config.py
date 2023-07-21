@@ -384,6 +384,59 @@ def verify_experiment_config(manager, configuration):
     if not os.path.exists(saving_setting_dict["save_directory"]):
         saving_setting_dict["save_directory"] = saving_dict_sample["save_directory"]
 
+    # camera parameters
+    camera_parameters_dict_sample = {
+        "x_pixels": 2048,
+        "y_pixels": 2048,
+        "img_x_pixels": 2048,
+        "img_y_pixels": 2048,
+        "sensor_mode": "Normal",
+        "readout_direction": "Top to Bottom",
+        "number_of_pixels": 10,
+        "binning": "1x1",
+        "pixel_size": 6.5,
+        "frames_to_average": 1.0,
+        "databuffer_size": 100
+    }
+    if "CameraParameters" not in configuration["experiment"] or type(configuration["experiment"]["CameraParameters"]) is not DictProxy:
+        update_config_dict(
+            manager,
+            configuration["experiment"],
+            "CameraParameters",
+            camera_parameters_dict_sample
+        )
+    camera_setting_dict = configuration["experiment"]["CameraParameters"]
+    for k in camera_parameters_dict_sample:
+        if k not in camera_setting_dict.keys():
+            camera_setting_dict[k] = camera_parameters_dict_sample[k]
+    # binning
+    if camera_setting_dict["binning"] not in ["1x1", "2x2", "4x4"]:
+        camera_setting_dict["binning"] = "1x1"
+    # x_pixels and y_pixels
+    try:
+        camera_setting_dict["x_pixels"] = int(camera_setting_dict["x_pixels"])
+    except ValueError:
+        camera_setting_dict["x_pixels"] = camera_parameters_dict_sample["x_pixels"]
+
+    try:
+        camera_setting_dict["y_pixels"] = int(camera_setting_dict["y_pixels"])
+    except ValueError:
+        camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
+
+    # image width and height
+    x_binning = int(camera_setting_dict["binning"][0])
+    y_binning = int(camera_setting_dict["binning"][2])
+    img_x_pixels = camera_setting_dict["x_pixels"] // x_binning
+    img_y_pixels = camera_setting_dict["y_pixels"] // y_binning
+    camera_setting_dict["img_x_pixels"] = img_x_pixels
+    camera_setting_dict["img_y_pixels"] = img_y_pixels
+
+    # sensor mode
+    if camera_setting_dict["sensor_mode"] not in ["Normal", "Light-Sheet"]:
+        camera_setting_dict["sensor_mode"] = "Normal"
+    
+
+
 
 def verify_waveform_constants(manager, configuration):
     if type(configuration["waveform_constants"]) is not DictProxy:

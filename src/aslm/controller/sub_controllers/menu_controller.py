@@ -327,28 +327,28 @@ class MenuController(GUIController):
             self.view.menubar.menu_window: {
                 "Channel Settings": [
                     "standard",
-                    lambda: self.switch_tabs(1),
+                    lambda event: self.switch_tabs(1),
                     "Ctrl+1",
                     "<Control-Key-1>",
                     "<Control_L-Key-1",
                 ],
                 "Camera Settings": [
                     "standard",
-                    lambda: self.switch_tabs(2),
+                    lambda event: self.switch_tabs(2),
                     "Ctrl+2",
                     "<Control-Key-2>",
                     "<Control_L-Key-2",
                 ],
                 "Stage Control": [
                     "standard",
-                    lambda: self.switch_tabs(2),
+                    lambda event: self.switch_tabs(2),
                     "Ctrl+3",
                     "<Control-Key-3>",
                     "<Control_L-Key-3",
                 ],
                 "Multiposition Table": [
                     "standard",
-                    lambda: self.switch_tabs(4),
+                    lambda event: self.switch_tabs(4),
                     "Ctrl+4",
                     "<Control-Key-4>",
                     "<Control_L-Key-4",

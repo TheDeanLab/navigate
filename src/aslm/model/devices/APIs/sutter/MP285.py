@@ -193,7 +193,7 @@ class MP285:
             else:
                 # print(f"Ah hell: {position_information}")
                 raise UserWarning(
-                    "Encountered response {position_information}. "
+                    f"Encountered response {position_information}. "
                     "You probably need to power cycle the stage."
                 )
         self.safe_to_write.set()
@@ -274,7 +274,7 @@ class MP285:
                 self.flush_buffers()
                 # print(f"Uh oh: {response}")
                 raise UserWarning(
-                    "Encountered response {response}. "
+                    f"Encountered response {response}. "
                     "You probably need to power cycle the stage."
                 )
 

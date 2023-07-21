@@ -259,14 +259,22 @@ class Controller:
             Size dictated by x_pixels, y_pixels, an number_of_frames in
             configuration file.
         """
-        img_width = int(
+        width = int(
             self.configuration["experiment"]["CameraParameters"]["x_pixels"]
         )
-        img_height = int(
+        height = int(
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
+        binning = self.configuration["experiment"]["CameraParameters"]["binning"]
+        x_binning = int(binning[0])
+        y_binning = int(binning[2])
+
+        img_width = width // x_binning
+        img_height = height // y_binning
         if img_width == self.img_width and img_height == self.img_height:
             return
+        self.configuration["experiment"]["CameraParameters"]["img_x_pixels"] = img_width
+        self.configuration["experiment"]["CameraParameters"]["img_y_pixels"] = img_height
 
         self.data_buffer = self.model.get_data_buffer(img_width, img_height)
         self.img_width = img_width
@@ -426,6 +434,7 @@ class Controller:
                 "waveform_template"
             ] = "Default"
 
+        # update real image width and height
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
         self.update_buffer()
         return True

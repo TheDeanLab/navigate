@@ -504,7 +504,7 @@ class Microscope:
         ):
             (
                 self.current_exposure_time,
-                self.camera_line_interval,
+                camera_line_interval,
             ) = self.camera.calculate_light_sheet_exposure_time(
                 self.current_exposure_time,
                 int(
@@ -513,7 +513,7 @@ class Microscope:
                     ]
                 ),
             )
-            self.camera.set_line_interval(self.camera_line_interval)
+            self.camera.set_line_interval(camera_line_interval)
         self.camera.set_exposure_time(self.current_exposure_time)
 
         # Laser Settings

@@ -925,10 +925,21 @@ class DCAM:
 
         return cDouble.value
 
-    def get_property_range(self, idprop):
+    def get_property_range(self, name):
         """
         # Returns the range of appropriate values
         """
+        if name not in property_dict:
+            print(
+                "could not set value for",
+                name,
+                "please make sure the property name is correct and is added to property_dict!",
+            )
+            return [None, None]
+
+        # get property code setPropertyValue
+        idprop = property_dict[name]
+
         property_attribute = self.prop_getattr(idprop)
         if property_attribute != None:
             return [
@@ -953,7 +964,7 @@ class DCAM:
         idprop = property_dict[name]
 
         # Find property limits and correct value if necessary
-        r = self.get_property_range(idprop)
+        r = self.get_property_range(name)
 
         [property_value_min, property_value_max] = r  # self.get_property_range(idprop)
         if property_value_min is None:

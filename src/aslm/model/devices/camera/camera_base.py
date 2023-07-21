@@ -71,17 +71,13 @@ class CameraBase:
 
         # Initialize Pixel Information
         self.pixel_size_in_microns = self.camera_parameters["pixel_size_in_microns"]
-        self.binning_string = self.camera_parameters["binning"]
-        self.x_binning = int(self.binning_string[0])
-        self.y_binning = int(self.binning_string[2])
-        self.x_pixels = self.camera_parameters["x_pixels"]
-        self.y_pixels = self.camera_parameters["y_pixels"]
-        self.x_pixels = int(self.x_pixels / self.x_binning)
-        self.y_pixels = int(self.y_pixels / self.y_binning)
+        self.max_image_width = 2048
+        self.max_image_height = 2048
+        self.x_pixels = self.max_image_width
+        self.y_pixels = self.max_image_height
 
         # Initialize Exposure and Display Information - Convert from milliseconds
         # to seconds.
-        self.camera_line_interval = self.camera_parameters["line_interval"]
         self.camera_exposure_time = self.camera_parameters["exposure_time"] / 1000
         self.camera_display_acquisition_subsampling = self.camera_parameters[
             "display_acquisition_subsampling"
@@ -148,11 +144,11 @@ class CameraBase:
             HamamatsuOrca line interval duration (s).
         """
 
-        self.camera_line_interval = (full_chip_exposure_time / 1000) / (
+        camera_line_interval = (full_chip_exposure_time / 1000) / (
             shutter_width + self.y_pixels - 1
         )
-        exposure_time = self.camera_line_interval * shutter_width * 1000
-        return exposure_time, self.camera_line_interval
+        exposure_time = camera_line_interval * shutter_width * 1000
+        return exposure_time, camera_line_interval
 
     def close_camera(self):
         pass

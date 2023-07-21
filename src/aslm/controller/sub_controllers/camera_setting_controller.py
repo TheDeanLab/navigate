@@ -104,7 +104,6 @@ class CameraSettingController(GUIController):
         # Camera Mode
         self.mode_widgets["Sensor"].widget["values"] = ["Normal", "Light-Sheet"]
         self.mode_widgets["Sensor"].widget["state"] = "readonly"
-        self.mode_widgets["Sensor"].widget.set(camera_config_dict["sensor_mode"])
         self.mode_widgets["Sensor"].widget.selection_clear()
 
         # Readout Mode
@@ -147,7 +146,7 @@ class CameraSettingController(GUIController):
 
         # set binning options
         self.roi_widgets["Binning"].widget["values"] = [
-            "{}x{}".format(i, i) for i in range(1, 5)
+            "{}x{}".format(i, i) for i in [1, 2, 4]
         ]
         self.roi_widgets["Binning"].widget["state"] = "readonly"
 

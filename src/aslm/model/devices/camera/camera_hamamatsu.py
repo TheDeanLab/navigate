@@ -61,20 +61,25 @@ class HamamatsuOrca(CameraBase):
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
 
+        self.max_image_width = self.camera_controller.max_image_width
+        self.max_image_height = self.camera_controller.max_image_height
+        self.camera_parameters["x_pixels"] = self.max_image_width
+        self.camera_parameters["y_pixels"] = self.max_image_height
+
+        for k in ["sensor_mode", "defect_correct_mode", "exposure_time", "binning", "readout_speed", "trigger_active", "trigger_mode", "trigger_polarity", "trigger_source"]:
+            r = self.camera_controller.get_property_range(k)
+            print("**** camera parameter:", k, r)
+
+        speed_range = self.camera_controller.get_property_range("readout_speed")
+
         # Values are pulled from the CameraParameters section of the configuration.yml
         # file. Exposure time converted here from milliseconds to seconds.
-        self.set_sensor_mode(self.camera_parameters["sensor_mode"])
 
         self.camera_controller.set_property_value(
             "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
         )
-        self.camera_controller.set_property_value(
-            "exposure_time", self.camera_parameters["exposure_time"] / 1000
-        )
-        self.camera_controller.set_property_value(
-            "binning", int(self.camera_parameters["binning"][0])
-        )
-        self.camera_controller.set_property_value("readout_speed", 0x7FFFFFFF)
+        if speed_range[1] != None:
+            self.camera_controller.set_property_value("readout_speed", int(speed_range[1]))
         self.camera_controller.set_property_value(
             "trigger_active", self.camera_parameters["trigger_active"]
         )
@@ -289,11 +294,16 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value(
             "binning", binning_dict[binning_string]
         )
-        idx = binning_string.index("x")
-        self.x_binning = int(binning_string[:idx])
-        self.y_binning = int(binning_string[idx + 1 :])
-        self.x_pixels = int(self.x_pixels / self.x_binning)
-        self.y_pixels = int(self.y_pixels / self.y_binning)
+        # idx = binning_string.index("x")
+        # x_binning = int(binning_string[:idx])
+        # y_binning = int(binning_string[idx + 1 :])
+        # self.x_pixels = int(self.x_pixels / x_binning)
+        # self.y_pixels = int(self.y_pixels / y_binning)
+
+        w = self.camera_controller.get_property_value("image_width")
+        h = self.camera_controller.get_property_value("image_height")
+        self.x_pixels = w
+        self.y_pixels = h
         # should update experiment in controller side
         # self.configuration['experiment']['CameraParameters']['camera_binning'] =
         #   str(self.x_binning) + 'x' + str(self.y_binning)
@@ -310,8 +320,8 @@ class HamamatsuOrca(CameraBase):
             Width of active camera region.
         """
         # Get the Maximum Number of Pixels from the Configuration File
-        camera_height = self.camera_parameters["y_pixels"]
-        camera_width = self.camera_parameters["x_pixels"]
+        camera_height = self.max_image_height
+        camera_width = self.max_image_width
 
         if (
             roi_height > camera_height
@@ -434,8 +444,8 @@ class HamamatsuOrcaLightning(HamamatsuOrca):
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
     ):
-        self.camera_line_interval = (full_chip_exposure_time / 1000) / (
+        camera_line_interval = (full_chip_exposure_time / 1000) / (
             (shutter_width + self.y_pixels - 1) / 4
         )
-        exposure_time = self.camera_line_interval * (shutter_width / 4) * 1000
-        return exposure_time, self.camera_line_interval
+        exposure_time = camera_line_interval * (shutter_width / 4) * 1000
+        return exposure_time, camera_line_interval

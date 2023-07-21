@@ -79,6 +79,10 @@ class CameraBase:
         self.camera_parameters["trigger_source"] = 2.0
         self.camera_parameters["readout_speed"] = 1.0
         self.camera_parameters["pixel_size_in_microns"] = 6.5
+        self.camera_parameters["trigger_active"] = 1.0
+        self.camera_parameters["trigger_mode"] = 1.0
+        self.camera_parameters["trigger_polarity"] = 2.0
+
 
         # Initialize offset and variance maps, if present
         self._offset, self._variance = None, None

@@ -645,6 +645,8 @@ property_dict = {
     "cyclic_trigger_period": 4206624,  # 0x00403020, R/O, sec,	"TIMING CYCLIC TRIGGER PERIOD"
     "minimum_trigger_blank": 4206640,  # 0x00403030, R/O, sec,	"TIMING MINIMUM TRIGGER BLANKING"
     "minimum_trigger_interval": 4206672,  # 0x00403050, R/O, sec,	"TIMING MINIMUM TRIGGER INTERVAL"
+    "pixel_width": 4327440, # 0x00420810, R/O, micro-meter, "IMAGE DETECTOR PIXEL WIDTH"
+    "pixel_height": 4327456, # 0x00420820, R/O, micro-meter, "IMAGE DETECTOR PIXEL HEIGHT"
 }
 
 

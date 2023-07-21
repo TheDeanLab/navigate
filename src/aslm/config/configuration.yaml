@@ -58,7 +58,6 @@ microscopes:
         name: camera
         type: HamamatsuOrca
         serial_number: 302352
-      pixel_size_in_microns: 6.5
       lightsheet_rolling_shutter_width: 608
       defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
       trigger_active: 1.0
@@ -279,7 +278,6 @@ microscopes:
         name: camera
         type: HamamatsuOrca
         serial_number: 302158
-      pixel_size_in_microns: 6.5
       lightsheet_rolling_shutter_width: 100
       defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
       trigger_active: 1.0

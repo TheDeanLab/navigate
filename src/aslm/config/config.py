@@ -394,7 +394,6 @@ def verify_experiment_config(manager, configuration):
         "readout_direction": "Top to Bottom",
         "number_of_pixels": 10,
         "binning": "1x1",
-        "pixel_size": 6.5,
         "frames_to_average": 1.0,
         "databuffer_size": 100
     }

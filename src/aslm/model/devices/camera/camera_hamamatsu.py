@@ -74,7 +74,7 @@ class HamamatsuOrca(CameraBase):
             self.camera_controller.set_property_value("readout_speed", 1)
             self.camera_parameters["readout_speed"] = 1
 
-        self.camera_parameters["trigger_source"] = 2 # set default trigger source as external source
+        self.camera_parameters["pixel_size_in_microns"] = self.camera_controller.get_property_value("pixel_width")
 
         # Values are pulled from the CameraParameters section of the configuration.yml
         # file. Exposure time converted here from milliseconds to seconds.

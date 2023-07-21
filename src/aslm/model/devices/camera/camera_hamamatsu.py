@@ -71,6 +71,12 @@ class HamamatsuOrca(CameraBase):
             print("**** camera parameter:", k, r)
 
         speed_range = self.camera_controller.get_property_range("readout_speed")
+        if speed_range[1] != None:
+            self.camera_controller.set_property_value("readout_speed", int(speed_range[1]))
+            self.camera_parameters["readout_speed"] = int(speed_range[1])
+        else:
+            self.camera_controller.set_property_value("readout_speed", 1)
+            self.camera_parameters["readout_speed"] = 1
 
         # Values are pulled from the CameraParameters section of the configuration.yml
         # file. Exposure time converted here from milliseconds to seconds.
@@ -78,8 +84,7 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value(
             "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
         )
-        if speed_range[1] != None:
-            self.camera_controller.set_property_value("readout_speed", int(speed_range[1]))
+
         self.camera_controller.set_property_value(
             "trigger_active", self.camera_parameters["trigger_active"]
         )
@@ -419,12 +424,6 @@ class HamamatsuOrcaLightning(HamamatsuOrca):
 
         self.camera_controller.set_property_value(
             "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
-        )
-        self.camera_controller.set_property_value(
-            "exposure_time", self.camera_parameters["exposure_time"] / 1000
-        )
-        self.camera_controller.set_property_value(
-            "binning", int(self.camera_parameters["binning"][0])
         )
         self.camera_controller.set_property_value(
             "trigger_active", self.camera_parameters["trigger_active"]

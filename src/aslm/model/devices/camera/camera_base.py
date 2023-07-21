@@ -78,7 +78,6 @@ class CameraBase:
 
         # Initialize Exposure and Display Information - Convert from milliseconds
         # to seconds.
-        self.camera_exposure_time = self.camera_parameters["exposure_time"] / 1000
         self.camera_display_acquisition_subsampling = self.camera_parameters[
             "display_acquisition_subsampling"
         ]

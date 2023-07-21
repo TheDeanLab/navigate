@@ -131,7 +131,6 @@ class CameraSettingController(GUIController):
         self.framerate_widgets["exposure_time"].widget.max = camera_config_dict[
             "exposure_time_range"
         ]["max"]
-        self.framerate_widgets["exposure_time"].set(camera_config_dict["exposure_time"])
         self.framerate_widgets["exposure_time"].widget["state"] = "disabled"
         self.framerate_widgets["readout_time"].widget["state"] = "disabled"
         self.framerate_widgets["max_framerate"].widget["state"] = "disabled"
@@ -202,6 +201,7 @@ class CameraSettingController(GUIController):
         # 'framerate', 'frames_to_average'
         # Exposure time is currently for just the first active channel
         channels = self.microscope_state_dict["channels"]
+        # TODO: the first selected channel
         exposure_time = channels[list(channels.keys())[0]]["camera_exposure_time"]
         self.framerate_widgets["exposure_time"].set(exposure_time)
         self.framerate_widgets["frames_to_average"].set(

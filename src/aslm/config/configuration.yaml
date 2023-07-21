@@ -62,12 +62,10 @@ microscopes:
       subsampling: [1, 2, 4]
       lightsheet_rolling_shutter_width: 608
       defect_correct_mode: 2.0
-      readout_speed: 1.0
       trigger_active: 1.0
       trigger_mode: 1.0 # external light-sheet mode
       trigger_polarity: 2.0  # positive pulse
       trigger_source: 2.0  # 2 = external, 3 = software.
-      exposure_time: 20 # Use milliseconds throughout.
       delay_percent: 10
       pulse_percent: 1
       display_acquisition_subsampling: 4
@@ -288,12 +286,10 @@ microscopes:
       subsampling: [1, 2, 4]
       lightsheet_rolling_shutter_width: 100
       defect_correct_mode: 2.0
-      readout_speed: 1.0
       trigger_active: 1.0
       trigger_mode: 1.0 # external light-sheet mode
       trigger_polarity: 2.0  # positive pulse
       trigger_source: 2.0  # 2 = external, 3 = software.
-      exposure_time: 20 # Use milliseconds throughout.
       delay_percent: 10
       pulse_percent: 1
       display_acquisition_subsampling: 4

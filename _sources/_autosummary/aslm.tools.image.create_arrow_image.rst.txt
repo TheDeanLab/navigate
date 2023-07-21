@@ -1,0 +1,6 @@
+aslm.tools.image.create\_arrow\_image
+=====================================
+
+.. currentmodule:: aslm.tools.image
+
+.. autofunction:: create_arrow_image

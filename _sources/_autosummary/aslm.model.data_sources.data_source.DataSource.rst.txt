@@ -33,6 +33,7 @@ aslm.model.data\_sources.data\_source.DataSource
       ~DataSource.data
       ~DataSource.mode
       ~DataSource.shape
+      ~DataSource.size
       ~DataSource.voxel_size
    
    

@@ -17,6 +17,7 @@ aslm.model.features.image\_writer.ImageWriter
    .. autosummary::
    
       ~ImageWriter.__init__
+      ~ImageWriter.calculate_and_check_disk_space
       ~ImageWriter.close
       ~ImageWriter.generate_image_name
       ~ImageWriter.generate_meta_data

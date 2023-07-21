@@ -14,6 +14,7 @@ aslm.tools.image
    .. autosummary::
       :toctree:
    
+      create_arrow_image
       text_array
    
    

@@ -35,6 +35,7 @@ aslm.model.data\_sources.bdv\_data\_source.BigDataViewerDataSource
       ~BigDataViewerDataSource.resolutions
       ~BigDataViewerDataSource.shape
       ~BigDataViewerDataSource.shapes
+      ~BigDataViewerDataSource.size
       ~BigDataViewerDataSource.subdivisions
       ~BigDataViewerDataSource.voxel_size
    

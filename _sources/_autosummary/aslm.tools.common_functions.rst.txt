@@ -17,6 +17,7 @@ aslm.tools.common\_functions
       build_ref_name
       combine_funcs
       copy_proxy_object
+      load_module_from_file
    
    
 

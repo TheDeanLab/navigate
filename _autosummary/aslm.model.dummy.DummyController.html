@@ -148,17 +148,26 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.__init__" title="aslm.model.dummy.DummyController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(view)</p></td>
 <td><p>Initialize the Dummy controller.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.execute" title="aslm.model.dummy.DummyController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(str[, sec])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.clear" title="aslm.model.dummy.DummyController.clear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code></a>()</p></td>
+<td><p>Clear command list</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.execute" title="aslm.model.dummy.DummyController.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(str[, sec])</p></td>
 <td><p>Execute a command.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.pop" title="aslm.model.dummy.DummyController.pop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.pop" title="aslm.model.dummy.DummyController.pop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></a>()</p></td>
 <td><p>Pop the oldest command.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyController.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyController.clear" title="Permalink to this definition"></a></dt>
+<dd><p>Clear command list</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyController.execute">
-<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyController.execute" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyController.execute" title="Permalink to this definition"></a></dt>
 <dd><p>Execute a command.</p>
 <p>Appends commands sent via execute,
 first element is oldest command/first to pop off</p>

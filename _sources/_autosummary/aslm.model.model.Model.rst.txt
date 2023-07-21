@@ -23,10 +23,14 @@ aslm.model.model.Model
       ~Model.end_acquisition
       ~Model.get_active_microscope
       ~Model.get_data_buffer
+      ~Model.get_feature_list
       ~Model.get_microscope_info
       ~Model.get_offset_variance_maps
       ~Model.get_stage_position
       ~Model.launch_virtual_microscope
+      ~Model.load_feature_list_from_file
+      ~Model.load_feature_list_from_str
+      ~Model.load_feature_records
       ~Model.load_images
       ~Model.move_stage
       ~Model.pause_data_thread
@@ -40,6 +44,7 @@ aslm.model.model.Model
       ~Model.simplified_data_process
       ~Model.snap_image
       ~Model.stop_stage
+      ~Model.terminate
       ~Model.update_data_buffer
       ~Model.update_ilastik_setting
    

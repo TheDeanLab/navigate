@@ -30,5 +30,6 @@ aslm.model.devices.camera
 
    aslm.model.devices.camera.camera_base
    aslm.model.devices.camera.camera_hamamatsu
+   aslm.model.devices.camera.camera_photometrics
    aslm.model.devices.camera.camera_synthetic
 

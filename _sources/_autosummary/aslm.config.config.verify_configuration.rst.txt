@@ -1,0 +1,6 @@
+aslm.config.config.verify\_configuration
+========================================
+
+.. currentmodule:: aslm.config.config
+
+.. autofunction:: verify_configuration

@@ -177,7 +177,7 @@ that does is used for testing purposes.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.__init__" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.adjust" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.adjust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust</span></code></a>(readout_time)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.adjust" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.adjust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust</span></code></a>(exposure_times, sweep_times)</p></td>
 <td><p>Adjust the galvo waveform to account for the camera readout time.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.close_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_task</span></code></a>()</p></td>
@@ -196,7 +196,7 @@ that does is used for testing purposes.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.adjust">
-<span class="sig-name descname"><span class="pre">adjust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.adjust" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">adjust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sweep_times</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.adjust" title="Permalink to this definition"></a></dt>
 <dd><p>Adjust the galvo waveform to account for the camera readout time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -207,7 +207,7 @@ that does is used for testing purposes.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">galvo</span><span class="o">.</span><span class="n">adjust</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">galvo</span><span class="o">.</span><span class="n">adjust</span><span class="p">(</span><span class="n">exposure_times</span><span class="p">,</span> <span class="n">sweep_times</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

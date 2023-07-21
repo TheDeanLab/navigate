@@ -19,15 +19,18 @@ aslm.model.microscope.Microscope
       ~Microscope.__init__
       ~Microscope.assemble_device_config_lists
       ~Microscope.calculate_all_waveform
+      ~Microscope.calculate_exposure_sweep_times
       ~Microscope.end_acquisition
       ~Microscope.get_readout_time
       ~Microscope.get_stage_position
       ~Microscope.load_and_start_devices
+      ~Microscope.move_remote_focus
       ~Microscope.move_stage
       ~Microscope.move_stage_offset
       ~Microscope.prepare_acquisition
       ~Microscope.prepare_next_channel
       ~Microscope.stop_stage
+      ~Microscope.terminate
       ~Microscope.update_data_buffer
       ~Microscope.update_stage_limits
    

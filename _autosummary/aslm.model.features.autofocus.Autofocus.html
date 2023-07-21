@@ -110,7 +110,7 @@
 <h1>aslm.model.features.autofocus.Autofocus<a class="headerlink" href="#aslm-model-features-autofocus-autofocus" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.features.autofocus.</span></span><span class="sig-name descname"><span class="pre">Autofocus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.features.autofocus.</span></span><span class="sig-name descname"><span class="pre">Autofocus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'stage'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'f'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Autofocus Data Process</p>
 <p>This function is called by the data thread. It will get the data from the
@@ -324,13 +324,13 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'stage'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'f'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.__init__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.__init__" title="aslm.model.features.autofocus.Autofocus.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.__init__" title="aslm.model.features.autofocus.Autofocus.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, device, device_ref])</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.end_func_data" title="aslm.model.features.autofocus.Autofocus.end_func_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_func_data</span></code></a>()</p></td>
@@ -360,7 +360,7 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.robust_autofocus" title="aslm.model.features.autofocus.Autofocus.robust_autofocus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">robust_autofocus</span></code></a>()</p></td>
 <td><p>Robust autofocus routine.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.features.autofocus.Autofocus.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>(*args)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.features.autofocus.Autofocus.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>()</p></td>
 <td><p>Run the Autofocusing Routine</p></td>
 </tr>
 </tbody>
@@ -508,14 +508,11 @@ is unfortunately unstable.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
 <dd><p>Run the Autofocusing Routine</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong><strong>[</strong><strong>0</strong><strong>]</strong> (<em>dict</em>) – Current microscope state.</p></li>
-<li><p><strong>args</strong><strong>[</strong><strong>1</strong><strong>]</strong> (<em>dict</em>) – Autofocus parameters</p></li>
-</ul>
+<dd class="field-odd"><p><strong>None</strong> – </p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Autofocus parameters.</p>

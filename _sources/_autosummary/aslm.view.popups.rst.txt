@@ -32,6 +32,7 @@ aslm.view.popups
    aslm.view.popups.autofocus_setting_popup
    aslm.view.popups.camera_map_setting_popup
    aslm.view.popups.camera_view_popup_window
+   aslm.view.popups.feature_list_popup
    aslm.view.popups.help_popup
    aslm.view.popups.ilastik_setting_popup
    aslm.view.popups.microscope_setting_popup_window

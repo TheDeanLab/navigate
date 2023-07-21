@@ -34,6 +34,7 @@ aslm.model.data\_sources.zarr\_data\_source.ZarrDataSource
       ~ZarrDataSource.data
       ~ZarrDataSource.mode
       ~ZarrDataSource.shape
+      ~ZarrDataSource.size
       ~ZarrDataSource.voxel_size
    
    

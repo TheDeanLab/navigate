@@ -36,6 +36,7 @@ aslm.model.data\_sources.tiff\_data\_source.TiffDataSource
       ~TiffDataSource.is_ome
       ~TiffDataSource.mode
       ~TiffDataSource.shape
+      ~TiffDataSource.size
       ~TiffDataSource.voxel_size
    
    

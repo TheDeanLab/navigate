@@ -266,17 +266,29 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#id2" title="aslm.model.model.Model.get_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_data_buffer</span></code></a>([img_width, img_height])</p></td>
 <td><p>Get the data buffer.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.get_microscope_info" title="aslm.model.model.Model.get_microscope_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_microscope_info</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.get_feature_list" title="aslm.model.model.Model.get_feature_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_feature_list</span></code></a>(idx)</p></td>
+<td><p>Get feature list str by index</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.get_microscope_info" title="aslm.model.model.Model.get_microscope_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_microscope_info</span></code></a>()</p></td>
 <td><p>Return Microscopes device information</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.get_offset_variance_maps" title="aslm.model.model.Model.get_offset_variance_maps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_offset_variance_maps</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.get_offset_variance_maps" title="aslm.model.model.Model.get_offset_variance_maps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_offset_variance_maps</span></code></a>()</p></td>
 <td><p>Get the offset variance maps.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.get_stage_position" title="aslm.model.model.Model.get_stage_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_stage_position</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.get_stage_position" title="aslm.model.model.Model.get_stage_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_stage_position</span></code></a>()</p></td>
 <td><p>Get the position of the stage.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">launch_virtual_microscope</span></code>(microscope_name, ...)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">launch_virtual_microscope</span></code>(microscope_name, ...)</p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_feature_list_from_file</span></code>(filename, features)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.load_feature_list_from_str" title="aslm.model.model.Model.load_feature_list_from_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_feature_list_from_str</span></code></a>(feature_list_str)</p></td>
+<td><p>Append feature list from feature_list_str</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.load_feature_records" title="aslm.model.model.Model.load_feature_records"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_feature_records</span></code></a>()</p></td>
+<td><p>Load installed feature lists from system folder '..../.ASLM/feature_lists'</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.load_images" title="aslm.model.model.Model.load_images"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_images</span></code></a>([filenames])</p></td>
 <td><p>Load/Unload images to the Synthetic Camera</p></td>
@@ -317,10 +329,13 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.stop_stage" title="aslm.model.model.Model.stop_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_stage</span></code></a>()</p></td>
 <td><p>Stop the stages.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id10" title="aslm.model.model.Model.update_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_data_buffer</span></code></a>([img_width, img_height])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">terminate</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id10" title="aslm.model.model.Model.update_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_data_buffer</span></code></a>([img_width, img_height])</p></td>
 <td><p>Update the Data Buffer</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.update_ilastik_setting" title="aslm.model.model.Model.update_ilastik_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ilastik_setting</span></code></a>([...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.update_ilastik_setting" title="aslm.model.model.Model.update_ilastik_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ilastik_setting</span></code></a>([...])</p></td>
 <td><p>Update the ilastik setting.</p></td>
 </tr>
 </tbody>
@@ -401,6 +416,24 @@ returns newly-sized buffer.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.model.Model.get_feature_list">
+<span class="sig-name descname"><span class="pre">get_feature_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_feature_list" title="Permalink to this definition"></a></dt>
+<dd><p>Get feature list str by index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>idx</strong> (<em>int</em>) – index of feature list</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>feature_list_str</strong> – “” if not exist
+string of the feature list</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.get_microscope_info">
 <span class="sig-name descname"><span class="pre">get_microscope_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_microscope_info" title="Permalink to this definition"></a></dt>
 <dd><p>Return Microscopes device information</p>
@@ -432,6 +465,23 @@ returns newly-sized buffer.</p>
 <dd class="field-even"><p>dict</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.model.Model.load_feature_list_from_str">
+<span class="sig-name descname"><span class="pre">load_feature_list_from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_list_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_feature_list_from_str" title="Permalink to this definition"></a></dt>
+<dd><p>Append feature list from feature_list_str</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>feature_list_str</strong> (<em>str</em>) – str of a feature list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.model.Model.load_feature_records">
+<span class="sig-name descname"><span class="pre">load_feature_records</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_feature_records" title="Permalink to this definition"></a></dt>
+<dd><p>Load installed feature lists from system folder ‘…./.ASLM/feature_lists’</p>
 </dd></dl>
 
 <dl class="py method">

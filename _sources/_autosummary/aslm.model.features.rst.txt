@@ -34,6 +34,7 @@ aslm.model.features
    aslm.model.features.constant_velocity_acquisition
    aslm.model.features.dummy_detective
    aslm.model.features.feature_container
+   aslm.model.features.feature_related_functions
    aslm.model.features.image_writer
    aslm.model.features.restful_features
    aslm.model.features.volume_search

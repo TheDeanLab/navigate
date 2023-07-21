@@ -17,6 +17,7 @@ aslm.model.dummy.DummyController
    .. autosummary::
    
       ~DummyController.__init__
+      ~DummyController.clear
       ~DummyController.execute
       ~DummyController.pop
    

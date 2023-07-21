@@ -191,30 +191,36 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.__init__" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.adjust" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.adjust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust</span></code></a>(readout_time)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.adjust" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.adjust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust</span></code></a>(exposure_times, sweep_times[, offset])</p></td>
 <td><p>Adjusts the remote focus waveform based on the readout time.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.close_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_task</span></code></a>()</p></td>
 <td><p>Closes the task.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.prepare_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_task</span></code></a>(channel_key)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code>(readout_time[, offset])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.prepare_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_task</span></code></a>(channel_key)</p></td>
 <td><p>Prepares the task for the given channel.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id2" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.start_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_task</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.start_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_task</span></code></a>()</p></td>
 <td><p>Starts the task.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id3" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.stop_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_task</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id3" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.stop_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_task</span></code></a>()</p></td>
 <td><p>Stops the task.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.adjust">
-<span class="sig-name descname"><span class="pre">adjust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.adjust" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">adjust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sweep_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.adjust" title="Permalink to this definition"></a></dt>
 <dd><p>Adjusts the remote focus waveform based on the readout time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>readout_time</strong> (<em>float</em>) – Readout time in seconds.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>exposure_times</strong> (<em>dict</em>) – Dictionary of exposure times for each selected channel</p></li>
+<li><p><strong>sweep_times</strong> (<em>dict</em>) – Dictionary of sweep times for each selected channel</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>waveform</strong> – Waveform for the remote focus device.</p>

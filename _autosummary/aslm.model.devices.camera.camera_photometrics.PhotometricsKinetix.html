@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix &mdash; ASLM 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="aslm.model.devices.camera.camera_synthetic" href="aslm.model.devices.camera.camera_synthetic.html" />
+    <link rel="prev" title="aslm.model.devices.camera.camera_photometrics" href="aslm.model.devices.camera.camera_photometrics.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ASLM
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../contributing_home.html">Contributing to ASLM</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../contributing_hardware.html">Adding New Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../contributing_feature_container.html">ASLM Feature Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../contributing_model.html">Adding New Model Features</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aslm.model.html">aslm.model</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.concurrency.html">aslm.model.concurrency</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.model.html">aslm.model.model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.waveforms.html">aslm.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.view.html">aslm.view</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.tools.html">aslm.tools</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ASLM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../contributing_home.html">Contributing to ASLM</a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.html">aslm.model</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.devices.html">aslm.model.devices</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.devices.camera.html">aslm.model.devices.camera</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.devices.camera.camera_photometrics.html">aslm.model.devices.camera.camera_photometrics</a></li>
+      <li class="breadcrumb-item active">aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="aslm-model-devices-camera-camera-photometrics-photometricskinetix">
+<h1>aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix<a class="headerlink" href="#aslm-model-devices-camera-camera-photometrics-photometricskinetix" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.camera.camera_photometrics.</span></span><span class="sig-name descname"><span class="pre">PhotometricsKinetix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="aslm.model.devices.camera.camera_base.CameraBase.html#aslm.model.devices.camera.camera_base.CameraBase" title="aslm.model.devices.camera.camera_base.CameraBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">CameraBase</span></code></a></p>
+<p>Photometrics Kinetix camera class. This class is the
+interface between the rest of the microscope code and the Photometrics API.
+, calling the Photometrics camera API functions from here (implemented mainly by Photometrics).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope in configuration</p></li>
+<li><p><strong>device_connection</strong> (<em>object</em>) – Hardware device to connect to. will be saved in camera_controller</p></li>
+<li><p><strong>configuration</strong> (<em>multiprocesing.managers.DictProxy</em>) – Global configuration of the microscope</p></li>
+</ul>
+</dd>
+</dl>
+<p>initialize the Photometrics class.
+:param microscope_name:
+:type microscope_name: used to navigate in camera base class to load the right parameters from the right microscope (e.g. mesoscale or nanoscale)
+:param device_connection:
+:param configuration:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>initialize the Photometrics class.
+:param microscope_name:
+:type microscope_name: used to navigate in camera base class to load the right parameters from the right microscope (e.g. mesoscale or nanoscale)
+:param device_connection:
+:param configuration:</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.__init__" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
+<td><p>initialize the Photometrics class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.calculate_light_sheet_exposure_time" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.calculate_light_sheet_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_light_sheet_exposure_time</span></code></a>(...)</p></td>
+<td><p>Convert normal mode exposure time to light-sheet mode exposure time.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.calculate_readout_time" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.calculate_readout_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_readout_time</span></code></a>()</p></td>
+<td><p>Calculate duration of time needed to readout an image.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.close_camera" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.close_camera"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_camera</span></code></a>()</p></td>
+<td><p>Close Photometrics Kinetix Camera</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.close_image_series" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.close_image_series"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_image_series</span></code></a>()</p></td>
+<td><p>Close image series.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.get_minimum_waiting_time" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.get_minimum_waiting_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_minimum_waiting_time</span></code></a>()</p></td>
+<td><p>Get minimum waiting time for HamamatsuOrca.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.get_new_frame" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.get_new_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_new_frame</span></code></a>()</p></td>
+<td><p>Get frame ids from Photometrics camera.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_offset_variance_maps</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.initialize_image_series" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.initialize_image_series"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_image_series</span></code></a>([data_buffer, ...])</p></td>
+<td><p>Initialize Photometrics image series.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.report_settings" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.report_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_settings</span></code></a>()</p></td>
+<td><p>Print Camera Settings.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_ROI" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_ROI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ROI</span></code></a>([roi_height, roi_width])</p></td>
+<td><p>Change the size of the active region on the camera.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_binning" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_binning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_binning</span></code></a>(binning_string)</p></td>
+<td><p>Set HamamatsuOrca binning mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_exposure_time" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_exposure_time</span></code></a>(exposure_time)</p></td>
+<td><p>Set Photometrics exposure time.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_line_interval" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_line_interval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_line_interval</span></code></a>(line_interval_time)</p></td>
+<td><p>Set Photometrics line interval.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_readout_direction" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_readout_direction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_readout_direction</span></code></a>(mode)</p></td>
+<td><p>Set Photometrics readout direction.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_sensor_mode" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_sensor_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_sensor_mode</span></code></a>(mode)</p></td>
+<td><p>Set Photometrics sensor mode (programmable scan mode), i.e. whether it is normal light sheet or ASLM mode.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">offset</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.serial_number" title="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.serial_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serial_number</span></code></a></p></td>
+<td><p>Get Camera Serial Number :returns: * <strong>serial_number</strong> (<em>str</em>)           * <em>Serial number for the camera.</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">variance</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.calculate_light_sheet_exposure_time">
+<span class="sig-name descname"><span class="pre">calculate_light_sheet_exposure_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_chip_exposure_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shutter_width</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.calculate_light_sheet_exposure_time" title="Permalink to this definition"></a></dt>
+<dd><p>Convert normal mode exposure time to light-sheet mode exposure time.
+Calculate the parameters for an ASLM acquisition</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>full_chip_exposure_time</strong> (<em>float</em>) – Normal mode exposure time.</p></li>
+<li><p><strong>shutter_width</strong> (<em>int</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>exposure_time</strong> (<em>float</em>) – Light-sheet mode exposure time.</p></li>
+<li><p><strong>camera_line_interval</strong> (<em>float</em>) – HamamatsuOrca line interval duration.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.calculate_readout_time">
+<span class="sig-name descname"><span class="pre">calculate_readout_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.calculate_readout_time" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate duration of time needed to readout an image.
+Calculates the readout time and maximum frame rate according to the camera configuration settings.
+Assumes model C13440 with Camera Link communication from Hamamatsu.
+Currently pulling values directly from the camera.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>readout_time</strong> (<em>float</em>) – Duration of time needed to readout an image.</p></li>
+<li><p><strong>max_frame_rate</strong> (<em>float</em>) – Maximum framerate for a given camera acquisition mode.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.close_camera">
+<span class="sig-name descname"><span class="pre">close_camera</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.close_camera" title="Permalink to this definition"></a></dt>
+<dd><p>Close Photometrics Kinetix Camera</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.close_image_series">
+<span class="sig-name descname"><span class="pre">close_image_series</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.close_image_series" title="Permalink to this definition"></a></dt>
+<dd><p>Close image series.</p>
+<p>Stops the acquisition and sets is_acquiring flag to False.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.get_minimum_waiting_time">
+<span class="sig-name descname"><span class="pre">get_minimum_waiting_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.get_minimum_waiting_time" title="Permalink to this definition"></a></dt>
+<dd><p>Get minimum waiting time for HamamatsuOrca.</p>
+<p>This function get timing information from the camera device
+cyclic_trigger_period, minimum_trigger_blank, minimum_trigger_interval
+‘cyclic_trigger_period’ of current device is 0
+according to the document, trigger_blank should be bigger than trigger_interval.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.get_new_frame">
+<span class="sig-name descname"><span class="pre">get_new_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.get_new_frame" title="Permalink to this definition"></a></dt>
+<dd><p>Get frame ids from Photometrics camera.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.initialize_image_series">
+<span class="sig-name descname"><span class="pre">initialize_image_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.initialize_image_series" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize Photometrics image series. This is for starting stacks etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_buffer</strong> (<em>int</em>) – Size of the data to buffer.  Default is None.</p></li>
+<li><p><strong>number_of_frames</strong> (<em>int</em>) – Number of frames.  Default is 100.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.report_settings">
+<span class="sig-name descname"><span class="pre">report_settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.report_settings" title="Permalink to this definition"></a></dt>
+<dd><p>Print Camera Settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_ROI">
+<span class="sig-name descname"><span class="pre">set_ROI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3200</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_ROI" title="Permalink to this definition"></a></dt>
+<dd><p>Change the size of the active region on the camera.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>roi_height</strong> (<em>int</em>) – Height of active camera region.</p></li>
+<li><p><strong>roi_width</strong> (<em>int</em>) – Width of active camera region.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_binning">
+<span class="sig-name descname"><span class="pre">set_binning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binning_string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_binning" title="Permalink to this definition"></a></dt>
+<dd><p>Set HamamatsuOrca binning mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>binning_string</strong> (<em>str</em>) – Desired binning properties (e.g., ‘1x1’, ‘2x2’, ‘4x4’, ‘8x8’, ‘16x16’, ‘1x2’, ‘2x4’)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_exposure_time">
+<span class="sig-name descname"><span class="pre">set_exposure_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_exposure_time" title="Permalink to this definition"></a></dt>
+<dd><p>Set Photometrics exposure time.</p>
+<p>Units of the Hamamatsu API are in seconds.
+All of our units are in milliseconds. Function convert to seconds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exposure_time</strong> (<em>float</em>) – Exposure time in milliseconds.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_line_interval">
+<span class="sig-name descname"><span class="pre">set_line_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line_interval_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_line_interval" title="Permalink to this definition"></a></dt>
+<dd><p>Set Photometrics line interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>line_interval_time</strong> (<em>float</em>) – Line interval duration.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_readout_direction">
+<span class="sig-name descname"><span class="pre">set_readout_direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_readout_direction" title="Permalink to this definition"></a></dt>
+<dd><p>Set Photometrics readout direction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>str</em>) – ‘Top-to-Bottom’, ‘Bottom-to-Top’, ‘Alternate’
+# Scan direction options: {‘Down’: 0, ‘Up’: 1, ‘Down/Up Alternate’: 2}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_sensor_mode">
+<span class="sig-name descname"><span class="pre">set_sensor_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.set_sensor_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Set Photometrics sensor mode (programmable scan mode),
+i.e. whether it is normal light sheet or ASLM mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>str</em>) – ‘Normal (static)’ or ‘Light-Sheet (ASLM)’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.serial_number">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">serial_number</span></span><a class="headerlink" href="#aslm.model.devices.camera.camera_photometrics.PhotometricsKinetix.serial_number" title="Permalink to this definition"></a></dt>
+<dd><p>Get Camera Serial Number
+:returns: * <strong>serial_number</strong> (<em>str</em>)</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>Serial number for the camera.</em></p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="aslm.model.devices.camera.camera_photometrics.html" class="btn btn-neutral float-left" title="aslm.model.devices.camera.camera_photometrics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.devices.camera.camera_synthetic.html" class="btn btn-neutral float-right" title="aslm.model.devices.camera.camera_synthetic" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

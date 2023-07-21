@@ -76,12 +76,6 @@ class CameraBase:
         self.x_pixels = self.max_image_width
         self.y_pixels = self.max_image_height
 
-        # Initialize Exposure and Display Information - Convert from milliseconds
-        # to seconds.
-        self.camera_display_acquisition_subsampling = self.camera_parameters[
-            "display_acquisition_subsampling"
-        ]
-
         # Initialize offset and variance maps, if present
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()

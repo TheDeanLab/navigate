@@ -183,7 +183,7 @@ class SutterStage(StageBase):
             position = self.get_position_dict()
             logger.debug(f"MP-285 - Position: {position}")
         except SerialException as e:
-            print("MP-285: Failed to report position.")
+            print("MP-285: Failed to report position: {e}")
             logger.debug(f"MP-285 - Error: {e}")
             time.sleep(0.01)
 

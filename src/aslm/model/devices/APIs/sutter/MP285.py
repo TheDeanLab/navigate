@@ -185,17 +185,18 @@ class MP285:
         # print(f"sending: {command}")
         position_information = b""
         for _ in range(self.n_waits):
-            position_information = self.serial.read(13)
-            if position_information == b"":
+            curr_read = self.serial.read(1)
+            if curr_read == b"":
                 time.sleep(self.wait_time)
-            elif len(position_information) == 13:
-                break
             else:
-                # print(f"Ah hell: {position_information}")
-                raise UserWarning(
-                    "Encountered response {position_information}. "
-                    "You probably need to power cycle the stage."
-                )
+                position_information += curr_read
+            if len(position_information) == 13:
+                break
+        if len(position_information) != 13:
+            raise UserWarning(
+                f"Encountered response {position_information}. "
+                "You need to power cycle the stage."
+            )
         self.safe_to_write.set()
         # print(f"received: {position_information}")
         xs = int.from_bytes(position_information[0:4], byteorder="little", signed=True)
@@ -257,6 +258,7 @@ class MP285:
         move_cmd = (
             bytes.fromhex("6d") + x_steps + y_steps + z_steps + bytes.fromhex("0d")
         )
+        self.flush_buffers()
         self.safe_write(move_cmd)
         # print(f"move command: {move_cmd} wait_until_done {self.wait_until_done}")
 

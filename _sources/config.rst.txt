@@ -247,54 +247,121 @@ to set the minimum and maximum values for stage movement.
 GUI Section
 +++++++++++
 
-The third and final section of the configuration file is the GUI parameters.
-
-It will look something like the below:
-
-.. code-block:: yaml
-
-    gui:
-        channels:
-            count: 5
-            laser_power:
-            min: 0
-            max: 100
-            step: 10
-            exposure_time:
-            min: 1
-            max: 1000
-            step: 5
-            interval_time:
-            min: 0
-            max: 1000
-            step: 5
-        stack_acquisition:
-            step_size:
-            min: 0.200
-            max: 1000
-            step: 0.1
-            start_pos:
-            min: -5000
-            max: 5000
-            step: 1
-            end_pos:
-            min: -5000
-            max: 10000
-            step: 1
-        timepoint:
-            timepoints:
-            min: 1
-            max: 1000
-            step: 1
-            stack_pause:
-            min: 0
-            max: 1000
-            step: 1
-
-The values in each field relate to GUI widgets. They will set the min, max and step size for each of the
-respective spinboxes in the example above.
+The third and final section of the configuration file is the default GUI parameters.
+These allow you to specify the number of GUI entries (e.g., number of channels),
+spinbox intervals, and other GUI related parameters.
 
 .. note::
 
     This section is still under development. The plan going forward is to have all widgets be controlled in this
     manner.
+
+Channels
+^^^^^^^^
+
+The ``channels`` section in the GUI configuration relates to the channels tab, where
+you define how you would like to acquire the data. ``interval_time`` is not yet
+implemented, but will eventually allow the user to specify how frequently that
+channel is acquired. For example, with an interval_time of 2, that channel will only
+be acquired every other time point.
+
+- ``count`` (int): The number of rows/channels (e.g., CH00, CH01, CH02...) available.
+
+- ``laser_power`` (dict): Settings for laser power.
+
+  - ``min`` (int): Minimum laser power value in percent.
+  - ``max`` (int): Maximum laser power value in percent.
+  - ``step`` (int): Increment step for adjusting laser power.
+- ``exposure_time`` (dict): Settings for exposure time.
+
+  - ``min`` (int): Minimum exposure time value in milliseconds.
+  - ``max`` (int): Maximum exposure time value in milliseconds.
+  - ``step`` (int): Increment step for adjusting exposure time.
+- ``interval_time`` (dict): Settings for interval time control.
+
+  - ``min`` (int): Minimum interval time value (inclusive).
+  - ``max`` (int): Maximum interval time value (inclusive).
+  - ``step`` (int): Increment step for adjusting interval time.
+
+Stack Acquisition
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``stack_acquisition`` section in the GUI configuration allows you to specify
+settings related to stack acquisition parameters.
+
+- ``step_size`` (float): The step size for acquiring stack data.
+
+  - ``min`` (float): Minimum step size value.
+  - ``max`` (float): Maximum step size value.
+  - ``step`` (float): Increment step for adjusting the step size.
+- ``start_pos`` (int): The starting position for stack acquisition.
+
+  - ``min`` (int): Minimum starting position value.
+  - ``max`` (int): Maximum starting position value.
+  - ``step`` (int): Increment step for adjusting the starting position.
+- ``end_pos`` (int): The ending position for stack acquisition.
+
+  - ``min`` (int): Minimum ending position value.
+  - ``max`` (int): Maximum ending position value.
+  - ``step`` (int): Increment step for adjusting the ending position.
+
+Timepoint
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``timepoint`` section in the GUI configuration allows you to specify settings
+related to timepoints.
+
+- ``timepoints`` (int): The total number of timepoints.
+  - ``min`` (int): Minimum timepoints value (inclusive).
+  - ``max`` (int): Maximum timepoints value (inclusive).
+  - ``step`` (int): Increment step for adjusting the number of timepoints.
+- ``stack_pause`` (int): The pause time between stacks in milliseconds.
+
+  - ``min`` (int): Minimum stack pause time value (inclusive).
+  - ``max`` (int): Maximum stack pause time value (inclusive).
+  - ``step`` (int): Increment step for adjusting the stack pause time.
+
+Example YAML Configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here is an example YAML configuration based on the provided settings:
+
+.. code-block:: yaml
+
+   gui:
+       channels:
+           count: 5
+           laser_power:
+               min: 0
+               max: 100
+               step: 10
+           exposure_time:
+               min: 1
+               max: 1000
+               step: 5
+           interval_time:
+               min: 0
+               max: 1000
+               step: 5
+       stack_acquisition:
+           step_size:
+               min: 0.200
+               max: 1000
+               step: 0.1
+           start_pos:
+               min: -5000
+               max: 5000
+               step: 1
+           end_pos:
+               min: -5000
+               max: 10000
+               step: 1
+       timepoint:
+           timepoints:
+               min: 1
+               max: 1000
+               step: 1
+           stack_pause:
+               min: 0
+               max: 1000
+               step: 1

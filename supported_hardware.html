@@ -65,7 +65,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#stages">Stages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#asi">ASI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#asi-tiger-controller">ASI Tiger Controller</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sutter">Sutter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#physik-instrumente">Physik Instrumente</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#thorlabs">Thorlabs</a></li>
@@ -78,7 +78,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#filter-wheels">Filter Wheels</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">Sutter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">ASI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#asi">ASI</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#galvanometers">Galvanometers</a><ul>
@@ -92,7 +92,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#shutters">Shutters</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id3">Thorlabs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Thorlabs</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#mechanical-zoom">Mechanical Zoom</a><ul>
@@ -208,12 +208,17 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 You will likely have to register and agree to Photometrics terms.
 * Perform the Full Installation of the PVCAM software.
 * Should a ‘Base Device’ still show up as unknown in the device manager, you may need to install the
-<a href="#id4"><span class="problematic" id="id5">`Broadcom PCI/PCIe Software Development Kit &lt;https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits`_</span></a>
+<a href="#id3"><span class="problematic" id="id4">`Broadcom PCI/PCIe Software Development Kit &lt;https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits`_</span></a>
 * Upon successfully installation, one should be able to acquire images with the manufacturer provided PVCamTest software.</p>
 </section>
 </section>
 <section id="voicecoil">
 <h2>Voicecoil<a class="headerlink" href="#voicecoil" title="Permalink to this heading"></a></h2>
+<p>Voice coils, also known as linear actuators, play a crucial role in implementing
+aberration-free remote focusing in ASLM. These electromagnetic actuators are used to
+control the axial position of the light-sheet and the sample relative to the
+microscope objective lens. By precisely adjusting the axial position, the focal plane
+can be shifted without moving the objective lens, thus enabling remote focusing.</p>
 <section id="equipment-solutions">
 <h3>Equipment Solutions<a class="headerlink" href="#equipment-solutions" title="Permalink to this heading"></a></h3>
 <ul>
@@ -234,13 +239,23 @@ You will likely have to register and agree to Photometrics terms.
 </section>
 <section id="stages">
 <h2>Stages<a class="headerlink" href="#stages" title="Permalink to this heading"></a></h2>
-<section id="asi">
-<h3>ASI<a class="headerlink" href="#asi" title="Permalink to this heading"></a></h3>
-<p>Software designed to acquire data in a continuous stage scanning mode. Rather than using the default SYNC ignal
-from the ASI stage to synchronize the start of imaging, we use the encoder output pulsing mode of the ASI stage to
-trigger the acquisition of every frame at precise intervals.  Important for multi-channel imaging that is acquired in
-the per-stack mode, but less so for perZ-based acquisitions.</p>
-<p>FTP-2000 Stage. Whatever you do, don’t change the F position. You will your stage.</p>
+<p>Our software empowers users with a flexible solution for configuring
+multiple stages, catering to diverse microscope modalities. Each stage can be
+customized to suit the specific requirements of a particular modality or shared
+across  various modalities. Our unique approach allows seamless integration of stages
+from different manufacturers, enabling users to mix and match components for a truly
+versatile and optimized setup tailored to their research needs.</p>
+<section id="asi-tiger-controller">
+<h3>ASI Tiger Controller<a class="headerlink" href="#asi-tiger-controller" title="Permalink to this heading"></a></h3>
+<p>Constant Velocity Acquisition - Software is designed to acquire data in a continuous
+stage scanning mode. Rather than using the default SYNC signal from the ASI stage to
+synchronize the start of imaging, we use the encoder output pulsing mode of the ASI
+stage to trigger the acquisition of every frame at precise intervals.  Important for
+multi-channel imaging that is acquired in the per-stack mode, but less so for
+perZ-based acquisitions.</p>
+<p>FTP-2000 Stage.
+Whatever you do, don’t change the F position. You will damage your
+stage.</p>
 </section>
 <section id="sutter">
 <h3>Sutter<a class="headerlink" href="#sutter" title="Permalink to this heading"></a></h3>
@@ -272,8 +287,8 @@ the per-stack mode, but less so for perZ-based acquisitions.</p>
 <h3>Sutter<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
-<section id="id2">
-<h3>ASI<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<section id="asi">
+<h3>ASI<a class="headerlink" href="#asi" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 </section>
@@ -300,8 +315,8 @@ the per-stack mode, but less so for perZ-based acquisitions.</p>
 </section>
 <section id="shutters">
 <h2>Shutters<a class="headerlink" href="#shutters" title="Permalink to this heading"></a></h2>
-<section id="id3">
-<h3>Thorlabs<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<section id="id2">
+<h3>Thorlabs<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 </section>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.tools.common_functions &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.tools.common_functions.VariableWithLock &mdash; ASLM 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="aslm.tools.common_functions.build_ref_name" href="aslm.tools.common_functions.build_ref_name.html" />
-    <link rel="prev" title="aslm.tools.common_dict_tools.update_stage_dict" href="aslm.tools.common_dict_tools.update_stage_dict.html" /> 
+    <link rel="next" title="aslm.tools.decorators" href="aslm.tools.decorators.html" />
+    <link rel="prev" title="aslm.tools.common_functions.load_module_from_file" href="aslm.tools.common_functions.load_module_from_file.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -60,7 +60,7 @@
 <li class="toctree-l3 current"><a class="reference internal" href="aslm.tools.html">aslm.tools</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="aslm.tools.beams.html">aslm.tools.beams</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.tools.common_dict_tools.html">aslm.tools.common_dict_tools</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">aslm.tools.common_functions</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="aslm.tools.common_functions.html">aslm.tools.common_functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.tools.decorators.html">aslm.tools.decorators</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.tools.file_functions.html">aslm.tools.file_functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.tools.image.html">aslm.tools.image</a></li>
@@ -96,9 +96,10 @@
           <li class="breadcrumb-item"><a href="../contributing_home.html">Contributing to ASLM</a></li>
           <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
           <li class="breadcrumb-item"><a href="aslm.tools.html">aslm.tools</a></li>
-      <li class="breadcrumb-item active">aslm.tools.common_functions</li>
+          <li class="breadcrumb-item"><a href="aslm.tools.common_functions.html">aslm.tools.common_functions</a></li>
+      <li class="breadcrumb-item active">aslm.tools.common_functions.VariableWithLock</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/aslm.tools.common_functions.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/aslm.tools.common_functions.VariableWithLock.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -106,41 +107,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-aslm.tools.common_functions">
-<span id="aslm-tools-common-functions"></span><h1>aslm.tools.common_functions<a class="headerlink" href="#module-aslm.tools.common_functions" title="Permalink to this heading"></a></h1>
-<p class="rubric">Functions</p>
+  <section id="aslm-tools-common-functions-variablewithlock">
+<h1>aslm.tools.common_functions.VariableWithLock<a class="headerlink" href="#aslm-tools-common-functions-variablewithlock" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="aslm.tools.common_functions.VariableWithLock">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.tools.common_functions.</span></span><span class="sig-name descname"><span class="pre">VariableWithLock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">VariableType</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.tools.common_functions.VariableWithLock" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.tools.common_functions.VariableWithLock.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">VariableType</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.tools.common_functions.VariableWithLock.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="aslm.tools.common_functions.build_ref_name.html#aslm.tools.common_functions.build_ref_name" title="aslm.tools.common_functions.build_ref_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_ref_name</span></code></a>(separator, *args)</p></td>
-<td><p>this function will build a reference name</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="aslm.tools.common_functions.combine_funcs.html#aslm.tools.common_functions.combine_funcs" title="aslm.tools.common_functions.combine_funcs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">combine_funcs</span></code></a>(*funclist)</p></td>
-<td><p>this function will combine a list of functions to a new function</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="aslm.tools.common_functions.copy_proxy_object.html#aslm.tools.common_functions.copy_proxy_object" title="aslm.tools.common_functions.copy_proxy_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_proxy_object</span></code></a>(content)</p></td>
-<td><p>This function will serialize proxy dict and list</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="aslm.tools.common_functions.load_module_from_file.html#aslm.tools.common_functions.load_module_from_file" title="aslm.tools.common_functions.load_module_from_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_module_from_file</span></code></a>(module_name, file_path)</p></td>
-<td><p>This function will load python file from file path as a module</p></td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Classes</p>
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="aslm.tools.common_functions.VariableWithLock.html#aslm.tools.common_functions.VariableWithLock" title="aslm.tools.common_functions.VariableWithLock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariableWithLock</span></code></a>(VariableType)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.tools.common_functions.VariableWithLock.__init__" title="aslm.tools.common_functions.VariableWithLock.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(VariableType)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="aslm.tools.common_dict_tools.update_stage_dict.html" class="btn btn-neutral float-left" title="aslm.tools.common_dict_tools.update_stage_dict" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="aslm.tools.common_functions.build_ref_name.html" class="btn btn-neutral float-right" title="aslm.tools.common_functions.build_ref_name" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="aslm.tools.common_functions.load_module_from_file.html" class="btn btn-neutral float-left" title="aslm.tools.common_functions.load_module_from_file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.tools.decorators.html" class="btn btn-neutral float-right" title="aslm.tools.decorators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -302,54 +302,135 @@ stages in <code class="docutils literal notranslate"><span class="pre">configura
 </section>
 <section id="gui-section">
 <h3>GUI Section<a class="headerlink" href="#gui-section" title="Permalink to this heading"></a></h3>
-<p>The third and final section of the configuration file is the GUI parameters.</p>
-<p>It will look something like the below:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">gui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">channels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">        </span><span class="nt">laser_power</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
-<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
-<span class="w">        </span><span class="nt">exposure_time</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">        </span><span class="nt">interval_time</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">    </span><span class="nt">stack_acquisition</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">step_size</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.200</span>
-<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
-<span class="w">        </span><span class="nt">start_pos</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5000</span>
-<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
-<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">end_pos</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5000</span>
-<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
-<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">    </span><span class="nt">timepoint</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">timepoints</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">stack_pause</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</pre></div>
-</div>
-<p>The values in each field relate to GUI widgets. They will set the min, max and step size for each of the
-respective spinboxes in the example above.</p>
+<p>The third and final section of the configuration file is the default GUI parameters.
+These allow you to specify the number of GUI entries (e.g., number of channels),
+spinbox intervals, and other GUI related parameters.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This section is still under development. The plan going forward is to have all widgets be controlled in this
 manner.</p>
 </div>
+<section id="channels">
+<h4>Channels<a class="headerlink" href="#channels" title="Permalink to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">channels</span></code> section in the GUI configuration relates to the channels tab, where
+you define how you would like to acquire the data. <code class="docutils literal notranslate"><span class="pre">interval_time</span></code> is not yet
+implemented, but will eventually allow the user to specify how frequently that
+channel is acquired. For example, with an interval_time of 2, that channel will only
+be acquired every other time point.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">count</span></code> (int): The number of rows/channels (e.g., CH00, CH01, CH02…) available.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">laser_power</span></code> (dict): Settings for laser power.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span></code> (int): Minimum laser power value in percent.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span></code> (int): Maximum laser power value in percent.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">step</span></code> (int): Increment step for adjusting laser power.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exposure_time</span></code> (dict): Settings for exposure time.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span></code> (int): Minimum exposure time value in milliseconds.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span></code> (int): Maximum exposure time value in milliseconds.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">step</span></code> (int): Increment step for adjusting exposure time.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">interval_time</span></code> (dict): Settings for interval time control.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span></code> (int): Minimum interval time value (inclusive).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span></code> (int): Maximum interval time value (inclusive).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">step</span></code> (int): Increment step for adjusting interval time.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="stack-acquisition">
+<h4>Stack Acquisition<a class="headerlink" href="#stack-acquisition" title="Permalink to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">stack_acquisition</span></code> section in the GUI configuration allows you to specify
+settings related to stack acquisition parameters.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">step_size</span></code> (float): The step size for acquiring stack data.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span></code> (float): Minimum step size value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span></code> (float): Maximum step size value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">step</span></code> (float): Increment step for adjusting the step size.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">start_pos</span></code> (int): The starting position for stack acquisition.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span></code> (int): Minimum starting position value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span></code> (int): Maximum starting position value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">step</span></code> (int): Increment step for adjusting the starting position.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">end_pos</span></code> (int): The ending position for stack acquisition.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span></code> (int): Minimum ending position value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span></code> (int): Maximum ending position value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">step</span></code> (int): Increment step for adjusting the ending position.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="timepoint">
+<h4>Timepoint<a class="headerlink" href="#timepoint" title="Permalink to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">timepoint</span></code> section in the GUI configuration allows you to specify settings
+related to timepoints.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">timepoints</span></code> (int): The total number of timepoints.
+- <code class="docutils literal notranslate"><span class="pre">min</span></code> (int): Minimum timepoints value (inclusive).
+- <code class="docutils literal notranslate"><span class="pre">max</span></code> (int): Maximum timepoints value (inclusive).
+- <code class="docutils literal notranslate"><span class="pre">step</span></code> (int): Increment step for adjusting the number of timepoints.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stack_pause</span></code> (int): The pause time between stacks in milliseconds.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span></code> (int): Minimum stack pause time value (inclusive).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span></code> (int): Maximum stack pause time value (inclusive).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">step</span></code> (int): Increment step for adjusting the stack pause time.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="example-yaml-configuration">
+<h4>Example YAML Configuration<a class="headerlink" href="#example-yaml-configuration" title="Permalink to this heading"></a></h4>
+<p>Here is an example YAML configuration based on the provided settings:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">gui</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">channels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="nt">laser_power</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">        </span><span class="nt">exposure_time</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="nt">interval_time</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">    </span><span class="nt">stack_acquisition</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">step_size</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.200</span>
+<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">        </span><span class="nt">start_pos</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5000</span>
+<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
+<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">end_pos</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5000</span>
+<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">timepoint</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">timepoints</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">stack_pause</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 </section>

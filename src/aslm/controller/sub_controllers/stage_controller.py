@@ -142,6 +142,11 @@ class StageController(GUIController):
             elif k.startswith("zero"):
                 buttons[k].configure(command=self.zero_btn_handler(k[5:-4]))
 
+        for k in ["xy", "z", "f", "theta"]:
+            self.widget_vals[k + "_step"].trace_add(
+                "write", self.update_step_size_handler(k)
+            )
+
         buttons["stop"].configure(command=self.stop_button_handler)
         self.position_callback_traces = {}
         self.position_callbacks_bound = False
@@ -196,7 +201,7 @@ class StageController(GUIController):
         self.position_max = config.get_stage_position_limits("_max")
 
         widgets = self.view.get_widgets()
-        step_dict = config.stage_step
+        step_dict = self.stage_setting_dict[config.microscope_name]
         for axis in ["x", "y", "z", "theta", "f"]:
             widgets[axis].widget.min = self.position_min[axis]
             widgets[axis].widget.max = self.position_max[axis]
@@ -207,11 +212,11 @@ class StageController(GUIController):
             # the minimum step should be non-zero and non-negative.
             widgets[step_axis + "_step"].widget.configure(from_=1)
             widgets[step_axis + "_step"].widget.configure(to=self.position_max[axis])
-            step_increment = step_dict[axis] // 10
+            step_increment = step_dict[step_axis + "_step"] // 10
             if step_increment == 0:
                 step_increment = 1
             widgets[step_axis + "_step"].widget.configure(increment=step_increment)
-            widgets[step_axis + "_step"].set(step_dict[axis])
+            widgets[step_axis + "_step"].set(step_dict[step_axis + "_step"])
 
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can
@@ -526,3 +531,28 @@ class StageController(GUIController):
             self.show_verbose_info("Stage position changed")
 
         return handler
+
+    def update_step_size_handler(self, axis):
+        """Callback functions bind to step size variables
+        
+        Parameters
+        ----------
+        axis : str
+            axis can be 'xy', 'z', 'theta', 'f'
+
+        Returns
+        -------
+        handler : object
+            Function to update step size in experiment.yml.
+        """
+        def func(*args):
+            microscope_name = self.parent_controller.configuration["experiment"][
+                "MicroscopeState"
+            ]["microscope_name"]
+            try:
+                step_size = int(self.widget_vals[axis + "_step"].get())
+            except (ValueError, tk._tkinter.TclError):
+                return
+            self.stage_setting_dict[microscope_name][axis + "_step"] = step_size
+
+        return func

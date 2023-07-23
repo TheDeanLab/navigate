@@ -32,11 +32,7 @@ StageParameters:
   z_step: 500.0
   theta_step: 30.0
   f_step: 500.0
-  x: 16000.0
-  y: 53941.67
-  z: 47100.0
-  theta: 55.00006
-  f: 66122.8
+  limits: True
 MicroscopeState:
   microscope_name: Mesoscale
   image_mode: live

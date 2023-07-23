@@ -340,6 +340,9 @@ class Controller:
             f"{microscope_name} "
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
         )
+        self.menu_controller.disable_stage_limits.set(
+            0 if self.configuration["experiment"]["StageParameters"]["limits"] else 1
+        )
 
         self.acquire_bar_controller.populate_experiment_values()
         # self.stage_controller.populate_experiment_values()
@@ -627,7 +630,7 @@ class Controller:
             saving_settings = self.configuration["experiment"]["Saving"]
             file_directory = create_save_path(saving_settings)
             save_yaml_file(
-                os.path.join(get_aslm_path(), "config"),
+                file_directory,
                 self.configuration["experiment"],
                 filename="experiment.yml",
             )

@@ -5,6 +5,7 @@ from serial import EIGHTBITS
 from serial import PARITY_NONE
 from serial import STOPBITS_ONE
 from serial.tools import list_ports
+import threading
 
 import time
 
@@ -16,7 +17,7 @@ class TigerException(Exception):
     Atrributes:
         - command: error code received from Tiger Console
 
-    """
+"""
 
     def __init__(self, code: str):
 
@@ -54,8 +55,9 @@ class TigerController:
         self.com_port = com_port
         self.baud_rate = baud_rate
         self.verbose = verbose
-        self.print = self.report_to_console
-        self.default_axes_sequence = ["X", "Y", "Z", "F", "M", "N"]
+        # self.default_axes_sequence = ["X", "Y", "Z", "F", "M", "N"]
+        self.safe_to_write = threading.Event()
+        self.safe_to_write.set()
 
     @staticmethod
     def scan_ports() -> list[str]:
@@ -94,7 +96,7 @@ class TigerController:
         try:
             self.serial_port.open()
         except SerialException:
-            self.print(
+            self.report_to_console(
                 f"SerialException: can't connect to {self.com_port} at {self.baud_rate}!"
             )
 
@@ -103,8 +105,8 @@ class TigerController:
             self.serial_port.reset_input_buffer()
             self.serial_port.reset_output_buffer()
             # report connection status to user
-            self.print("Connected to the serial port.")
-            self.print(f"Serial port = {self.com_port} :: Baud rate = {self.baud_rate}")
+            self.report_to_console("Connected to the serial port.")
+            self.report_to_console(f"Serial port = {self.com_port} :: Baud rate = {self.baud_rate}")
 
     def disconnect_from_serial(self) -> None:
         """
@@ -112,7 +114,7 @@ class TigerController:
         """
         if self.is_open():
             self.serial_port.close()
-            self.print("Disconnected from the serial port.")
+            self.report_to_console("Disconnected from the serial port.")
 
     def is_open(self) -> bool:
         """
@@ -134,24 +136,31 @@ class TigerController:
         Send a serial command to the device.
         """
         # always reset the buffers before a new command is sent
+        self.safe_to_write.wait()
+        self.safe_to_write.clear()
         self.serial_port.reset_input_buffer()
         self.serial_port.reset_output_buffer()
 
         # send the serial command to the controller
+        self.report_to_console(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
         self.serial_port.write(command)
-        self.print(f"Sent Command: {command.decode(encoding='ascii')}")
+        # print(f"Sent Command: {command.decode(encoding='ascii')}")
 
     def read_response(self) -> str:
         """
         Read a line from the serial response.
         """
         response = self.serial_port.readline()
+        self.safe_to_write.set()
+
         response = response.decode(encoding="ascii")
 
         # Remove leading and trailing empty spaces
-        response = response.strip()
-        self.print(f"Received Response: {response}")
+        self.report_to_console(f"Received Response: {response.strip()}")
+        if response.startswith(":N"):
+            raise TigerException(response)
+        
         return response  # in case we want to read the response
 
     # Basic Serial Commands for the Stage
@@ -160,76 +169,65 @@ class TigerController:
         """Move the stage with a relative move on multiple axes"""
         self.send_command(f"MOVREL X={x} Y={y} Z={z}\r")
         res = self.read_response()
-        if res.startswith(":N"):
-            raise TigerException(res)
 
     def moverel_axis(self, axis: str, distance: float) -> None:
         """Move the stage with a relative move on one axis"""
         self.send_command(f"MOVREL {axis}={round(distance, 6)}\r")
         res = self.read_response()
-        if res.startswith(":N"):
-            raise TigerException(res)
 
     def move(self, pos_dict) -> None:
         """Move the stage with an absolute move on multiple axes"""
-        pos_str = " ".join([f"{axis}={round(pos_dict[axis], 6)}" for axis in pos_dict])
+        pos_str = " ".join([f"{axis}={round(pos, 6)}" for axis, pos in pos_dict.items()])
         self.send_command(f"MOVE {pos_str}\r")
         res = self.read_response()
-        if res.startswith(":N"):
-            raise TigerException(res)
 
     def move_axis(self, axis: str, distance: float) -> None:
         """Move the stage with an absolute move on one axis"""
         self.send_command(f"MOVE {axis}={round(distance, 6)}\r")
         res = self.read_response()
-        if res.startswith(":N"):
-            raise TigerException(res)
 
     def set_max_speed(self, axis: str, speed: float) -> None:
         """Set the speed on a specific axis. Speed is in mm/s."""
         self.send_command(f"SPEED {axis}={speed}\r")
         res = self.read_response()
-        if res.startswith(":N"):
-            raise TigerException(res)
 
     def get_axis_position(self, axis: str) -> int:
         """Return the position of the stage in ASI units (tenths of microns)."""
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
-        else:
-            try:
-                pos = int(response.split(" ")[1])
-            except:
-                pos = float('Inf')
-            return pos
+        # try:
+        pos = float(response.split(" ")[1])
+        # except:
+        #     pos = float('Inf')
+        return pos
 
     def get_axis_position_um(self, axis: str) -> float:
         """Return the position of the stage in microns."""
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
-        else:
-            return float(response.split(" ")[1]) / 10.0
+        return float(response.split(" ")[1]) / 10.0
         
     def get_position(self, axes) -> dict:
-        """Return current stage position
+        """Return current stage position in ASI units.
+
+        DO NOT USE UNLESS YOU KNOW WHAT YOU ARE DOING!!
+        WATCH OUT! This will return the positions in the order
+        of the underlying hardware no matter what order the axes
+        are passed in.
+
+        See https://asiimaging.com/docs/products/serial_commands#commandwhere_w
         
         Returns
         -------
         dictionary:
              {axis: position}
         """
-        self.send_command(f"WHERE {' '.join(axes)}\r")
+
+        cmd = f"WHERE {' '.join(axes)}\r"
+        self.send_command(cmd)
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
-        else:
-            pos = response.split(" ")
-            axes_seq = list(filter(lambda axis: axis if axis in axes else False, self.default_axes_sequence))
-            return {axis: pos[1+i] for i, axis in enumerate(axes_seq)}
+
+        return response.split(" ")[1:-1]
 
     # Utility Functions
 
@@ -237,19 +235,13 @@ class TigerController:
         """Returns True if the axis is busy."""
         self.send_command(f"RS {axis}?\r")
         res = self.read_response()
-        if res.startswith(":N"):
-            raise TigerException(res)
-        else:
-            return "B" in res
+        return "B" in res
 
     def is_device_busy(self) -> bool:
         """Returns True if any axis is busy."""
         self.send_command("/")
         res = self.read_response()
-        if res.startswith(":N"):
-            raise TigerException(res)
-        else:
-            return "B" in res
+        return "B" in res
 
     def wait_for_device(self, report: bool = False, timeout: float = 100) -> None:
         """Waits for the all motors to stop moving."""
@@ -259,12 +251,14 @@ class TigerController:
         self.verbose = report
         busy = True
         waiting_time = 0.0
+        
         while busy:
-            busy = self.is_device_busy()
             if waiting_time >= timeout:
                 break
-            waiting_time += 0.1
-            time.sleep(0.1)
+            busy = self.is_device_busy()
+            waiting_time += 0.01
+            time.sleep(0.01)
+
         self.verbose = temp
 
     def stop(self):
@@ -274,31 +268,23 @@ class TigerController:
 
         self.send_command("HALT")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
-        else:
-            print("ASI Stages stopped successfully")
+        print("ASI Stages stopped successfully")
 
-    def set_speed(self, **axes:float):
+    def set_speed(self, speed_dict):
         """
         Set speed
         """
-        axes = " ".join([f"{x}={round(v, 6)}" for x,v in axes.items()])
+        axes = " ".join([f"{x}={round(v, 6)}" for x,v in speed_dict.items()])
         self.send_command(f"SPEED {axes}")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
-        
+
     def get_speed(self, axis: str):
         """
         Get speed
         """
         self.send_command(f"SPEED {axis}?")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
-        else:
-            return float(response.split("=")[1])
+        return float(response.split("=")[1])
 
     def get_encoder_counts_per_mm(self, axis: str):
         """
@@ -307,10 +293,7 @@ class TigerController:
 
         self.send_command(f"CNTS {axis}?")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
-        else:
-            return float(response.split("=")[1].split()[0])
+        return float(response.split("=")[1].split()[0])
         
     def scanr(self, start_position_mm: float, end_position_mm: float, enc_divide: float=0, axis: str='X'):
         """
@@ -324,8 +307,6 @@ class TigerController:
         command = f"SCANR X={round(start_position_mm, 6)} Y={round(end_position_mm, 6)} Z={round(enc_divide)}"
         self.send_command(command)
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
         
     def start_scan(self, axis: str, is_single_axis_scan: bool=True):
         """
@@ -340,8 +321,6 @@ class TigerController:
             slow_axis_id = 9
         self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
 
     def stop_scan(self):
         """
@@ -349,8 +328,6 @@ class TigerController:
         """
         self.send_command("SCAN P")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
 
     # Basic Serial Commands for Filter Wheels
 
@@ -365,7 +342,8 @@ class TigerController:
         # send the serial command to the controller
         command = bytes(f"{cmd}\n\r", encoding="ascii")
         self.serial_port.write(command)
-        self.print(f"Sent Command: {command.decode(encoding='ascii')}")
+        self.read_response()
+        # print(f"Sent Command: {command.decode(encoding='ascii')}")
 
     def select_filter_wheel(self, filter_wheel_number=0):
         """
@@ -380,8 +358,6 @@ class TigerController:
         assert filter_wheel_number in range(2)
         self.send_filter_wheel_command(f"FW {filter_wheel_number}")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
 
     def move_filter_wheel(self, filter_wheel_position=0):
         """
@@ -390,8 +366,6 @@ class TigerController:
         assert filter_wheel_position in range(8)
         self.send_filter_wheel_command(f"MP {filter_wheel_position}")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
 
     def move_filter_wheel_to_home(self):
         """
@@ -399,8 +373,6 @@ class TigerController:
         """
         self.send_filter_wheel_command("HO")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
 
     def change_filter_wheel_speed(self, speed=0):
         """
@@ -414,8 +386,6 @@ class TigerController:
         """
         self.send_filter_wheel_command(f"SV {speed}")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)
 
     def halt_filter_wheel(self):
         """
@@ -423,5 +393,3 @@ class TigerController:
         """
         self.send_filter_wheel_command("HA")
         response = self.read_response()
-        if response.startswith(":N"):
-            raise TigerException(response)

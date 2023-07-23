@@ -17,7 +17,7 @@ class TigerException(Exception):
     Atrributes:
         - command: error code received from Tiger Console
 
-    """
+"""
 
     def __init__(self, code: str):
 
@@ -55,7 +55,7 @@ class TigerController:
         self.com_port = com_port
         self.baud_rate = baud_rate
         self.verbose = verbose
-        self.default_axes_sequence = ["X", "Y", "Z", "F", "M", "N"]
+        # self.default_axes_sequence = ["X", "Y", "Z", "F", "M", "N"]
         self.safe_to_write = threading.Event()
         self.safe_to_write.set()
 
@@ -96,7 +96,7 @@ class TigerController:
         try:
             self.serial_port.open()
         except SerialException:
-            print(
+            self.report_to_console(
                 f"SerialException: can't connect to {self.com_port} at {self.baud_rate}!"
             )
 
@@ -105,8 +105,8 @@ class TigerController:
             self.serial_port.reset_input_buffer()
             self.serial_port.reset_output_buffer()
             # report connection status to user
-            print("Connected to the serial port.")
-            print(f"Serial port = {self.com_port} :: Baud rate = {self.baud_rate}")
+            self.report_to_console("Connected to the serial port.")
+            self.report_to_console(f"Serial port = {self.com_port} :: Baud rate = {self.baud_rate}")
 
     def disconnect_from_serial(self) -> None:
         """
@@ -114,7 +114,7 @@ class TigerController:
         """
         if self.is_open():
             self.serial_port.close()
-            print("Disconnected from the serial port.")
+            self.report_to_console("Disconnected from the serial port.")
 
     def is_open(self) -> bool:
         """
@@ -142,6 +142,7 @@ class TigerController:
         self.serial_port.reset_output_buffer()
 
         # send the serial command to the controller
+        self.report_to_console(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
         self.serial_port.write(command)
         # print(f"Sent Command: {command.decode(encoding='ascii')}")
@@ -151,15 +152,14 @@ class TigerController:
         Read a line from the serial response.
         """
         response = self.serial_port.readline()
+        self.safe_to_write.set()
 
-        response = response.decode(encoding="ascii").strip()
+        response = response.decode(encoding="ascii")
 
         # Remove leading and trailing empty spaces
-        # print(f"Received Response: {response}")
+        self.report_to_console(f"Received Response: {response.strip()}")
         if response.startswith(":N"):
             raise TigerException(response)
-        
-        self.safe_to_write.set()
         
         return response  # in case we want to read the response
 
@@ -177,7 +177,7 @@ class TigerController:
 
     def move(self, pos_dict) -> None:
         """Move the stage with an absolute move on multiple axes"""
-        pos_str = " ".join([f"{axis}={round(pos_dict[axis], 6)}" for axis in pos_dict])
+        pos_str = " ".join([f"{axis}={round(pos, 6)}" for axis, pos in pos_dict.items()])
         self.send_command(f"MOVE {pos_str}\r")
         res = self.read_response()
 
@@ -208,22 +208,26 @@ class TigerController:
         return float(response.split(" ")[1]) / 10.0
         
     def get_position(self, axes) -> dict:
-        """Return current stage position
+        """Return current stage position in ASI units.
+
+        DO NOT USE UNLESS YOU KNOW WHAT YOU ARE DOING!!
+        WATCH OUT! This will return the positions in the order
+        of the underlying hardware no matter what order the axes
+        are passed in.
+
+        See https://asiimaging.com/docs/products/serial_commands#commandwhere_w
         
         Returns
         -------
         dictionary:
              {axis: position}
         """
+
         cmd = f"WHERE {' '.join(axes)}\r"
-        # print(cmd)
         self.send_command(cmd)
         response = self.read_response()
-        pos = response.split(" ")
-        axes_seq = list(filter(lambda axis: axis if axis in axes else False, self.default_axes_sequence))
-        # print(pos)
-        # print(axes_seq)
-        return {axis: pos[1+i] for i, axis in enumerate(axes_seq)}
+
+        return response.split(" ")[1:-1]
 
     # Utility Functions
 
@@ -241,24 +245,20 @@ class TigerController:
 
     def wait_for_device(self, report: bool = False, timeout: float = 100) -> None:
         """Waits for the all motors to stop moving."""
-        import inspect
-
         if not report:
             print("Waiting for device...")
-            print(f"caller name: {inspect.stack()[1][3]}")
         temp = self.verbose
         self.verbose = report
-        # busy = True
+        busy = True
         waiting_time = 0.0
         
-        while True:
-            if self.is_device_busy():
-                if waiting_time >= timeout:
-                    break
-                waiting_time += 0.1
-                time.sleep(0.1)
-            else:
+        while busy:
+            if waiting_time >= timeout:
                 break
+            busy = self.is_device_busy()
+            waiting_time += 0.01
+            time.sleep(0.01)
+
         self.verbose = temp
 
     def stop(self):
@@ -270,11 +270,11 @@ class TigerController:
         response = self.read_response()
         print("ASI Stages stopped successfully")
 
-    def set_speed(self, **axes:float):
+    def set_speed(self, speed_dict):
         """
         Set speed
         """
-        axes = " ".join([f"{x}={round(v, 6)}" for x,v in axes.items()])
+        axes = " ".join([f"{x}={round(v, 6)}" for x,v in speed_dict.items()])
         self.send_command(f"SPEED {axes}")
         response = self.read_response()
 

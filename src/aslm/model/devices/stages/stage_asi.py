@@ -47,7 +47,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def build_ASI_Stage_connection(com_port, baud_rate=115200, timeout=1000):
+def build_ASI_Stage_connection(com_port, baud_rate=115200):
     """Connect to the ASI Stage
 
     Parameters
@@ -56,8 +56,6 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200, timeout=1000):
         Communication port for ASI Tiger Controller - e.g., COM1
     baud_rate : int
         Baud rate for ASI Tiger Controller - e.g., 9600
-    timeout: int
-        Time to wait for stage in milliseconds.
 
     Returns
     -------
@@ -66,20 +64,10 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200, timeout=1000):
     """
 
     # wait until ASI device is ready
-    block_flag = True
-    wait_start = time.time()
-    timeout_s = timeout / 1000
-    while block_flag:
-        asi_stage = TigerController(com_port, baud_rate, verbose=False)
-        asi_stage.connect_to_serial()
-        if asi_stage.is_open():
-            block_flag = False
-        else:
-            print("Trying to connect to the ASI Stage again")
-            elapsed = time.time()
-            if (elapsed - wait_start) > timeout_s:
-                break
-            time.sleep(0.1)
+    asi_stage = TigerController(com_port, baud_rate)
+    asi_stage.connect_to_serial()
+    if not asi_stage.is_open():
+        raise Exception("ASI stage connection failed.")
 
     return asi_stage
 
@@ -182,15 +170,17 @@ class ASIStage(StageBase):
         if not self.axes_mapping:
             self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
 
-        self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
+        # Axes mapping: {'x': 'V', 'y': 'X', 'z': 'Z', 'f': 'Y', 'theta': 'T'}
+        # ASI axes: {'V': 'x', 'X': 'y', 'Z': 'z', 'Y': 'f', 'T': 'theta'}
+        # self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
         self.tiger_controller = device_connection
         # set default speed
-        self.default_speed =5.745760 #7.68 * 0.67
-        default_speeds = [(axis,self.default_speed) for axis in self.asi_axes]
+        self.default_speed = 5.745760 #7.68 * 0.67
+        default_speeds = {axis: self.default_speed for axis in self.axes_mapping.values()}
         if self.tiger_controller != None:
             try:
-                self.tiger_controller.set_speed(**dict(default_speeds))
+                self.tiger_controller.set_speed(default_speeds)
             except TigerException:
                 logger.exception(f"Initialize ASI Stage with default speed failed!")
 
@@ -231,9 +221,19 @@ class ASIStage(StageBase):
         position dictionary."""
         try:
             # positions from the device are in microns
-            pos_dict = self.tiger_controller.get_position(list(self.asi_axes.keys()))
-            for axis, pos in pos_dict.items():
-                setattr(self, f"{self.asi_axes[axis]}_pos", float(pos) / 10.0)
+            # print("reporting...")
+            # axes = list(self.axes_mapping.values())
+            # print(axes)
+            # positions = self.tiger_controller.get_position(axes)
+            # print(positions)
+            # if len(positions) != len(self.axes_mapping):
+            #      print("Failed to report ASI Stage Position")
+            #      logger.exception(f"ASI Stage -- Recievied {positions} for {axes}")
+            # for axis, pos in zip(list(self.axes_mapping.keys()), positions):
+            for axis, asi_axis in self.axes_mapping.items():
+                pos = self.tiger_controller.get_axis_position(asi_axis)
+                print(f"ASI axis {asi_axis} = {pos}")
+                setattr(self, f"{axis}_pos", float(pos) / 10.0)
         except TigerException as e:
             print("Failed to report ASI Stage Position")
             logger.exception(e)
@@ -269,10 +269,11 @@ class ASIStage(StageBase):
 
         # Move stage
         try:
-            axis_abs_um = (
-                axis_abs * 10
-            )  # This is to account for the asi 1/10 of a micron units
-            self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs_um)
+            # print(f"Moving {self.axes_mapping[axis]}")
+            # print(f"Axes mapping: {self.axes_mapping}")
+            # print(f"ASI axes: {self.asi_axes}")
+            # The 10 is to account for the ASI units, 1/10 of a micron
+            self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
 
             if wait_until_done:
                 self.tiger_controller.wait_for_device()
@@ -309,7 +310,7 @@ class ASIStage(StageBase):
             return False
         
         # This is to account for the asi 1/10 of a micron units
-        pos_dict = {self.axes_mapping[axis]: abs_pos_dict[axis]*10 for axis in abs_pos_dict}
+        pos_dict = {self.axes_mapping[axis]: pos*10 for axis, pos in abs_pos_dict.items()}
         try:
             self.tiger_controller.move(pos_dict)
         except TigerException as e:
@@ -348,7 +349,7 @@ class ASIStage(StageBase):
         """
         temp = dict(map(lambda k: (self.axes_mapping[k], velocity_dict[k]), velocity_dict))
         try:
-            self.tiger_controller.set_speed(**temp)
+            self.tiger_controller.set_speed(temp)
         except TigerException:
             return False
         except KeyError as e:

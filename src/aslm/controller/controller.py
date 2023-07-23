@@ -986,7 +986,8 @@ class Controller:
                     table=self.view.settings.multiposition_tab.multipoint_list.get_table(),
                     pos=value,
                 )
-                self.view.settings.channels_tab.multipoint_frame.on_off.set(True)
+                self.channels_tab_controller.is_multiposition_val.set(True)
+                self.channels_tab_controller.toggle_multiposition()
 
             elif event == "ilastik_mask":
                 # Display the ilastik mask

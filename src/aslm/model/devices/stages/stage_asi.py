@@ -232,7 +232,7 @@ class ASIStage(StageBase):
             # for axis, pos in zip(list(self.axes_mapping.keys()), positions):
             for axis, asi_axis in self.axes_mapping.items():
                 pos = self.tiger_controller.get_axis_position(asi_axis)
-                print(f"ASI axis {asi_axis} = {pos}")
+                # print(f"ASI axis {asi_axis} = {pos}")
                 setattr(self, f"{axis}_pos", float(pos) / 10.0)
         except TigerException as e:
             print("Failed to report ASI Stage Position")

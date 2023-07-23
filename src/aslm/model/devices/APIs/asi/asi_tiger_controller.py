@@ -195,10 +195,10 @@ class TigerController:
         """Return the position of the stage in ASI units (tenths of microns)."""
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
-        try:
-            pos = int(response.split(" ")[1])
-        except:
-            pos = float('Inf')
+        # try:
+        pos = float(response.split(" ")[1])
+        # except:
+        #     pos = float('Inf')
         return pos
 
     def get_axis_position_um(self, axis: str) -> float:

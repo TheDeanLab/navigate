@@ -126,7 +126,7 @@ class StageController(GUIController):
         self.joystick_is_on = False
         self.joystick_axes = self.parent_controller.configuration["configuration"][
             "microscopes"
-        ][self.default_microscope]["stage"]["joystick_axes"]
+        ][self.default_microscope]["stage"].get("joystick_axes", [])
 
         self.main_view = main_view
         self.canvas = canvas
@@ -194,13 +194,8 @@ class StageController(GUIController):
                 current_position["x"] += xy_increment
         self.set_position(current_position)
 
-    def initialize(self, microscope_name=None):
+    def initialize(self):
         """Initialize the Stage limits of steps and positions
-
-        Parameters
-        ----------
-        microscope_name : str
-            Name of the microscope at the time of initialization
 
         Returns
         -------
@@ -230,13 +225,11 @@ class StageController(GUIController):
             widgets[step_axis + "_step"].set(step_dict[axis])
 
         # Joystick
-
-        if microscope_name is None:
-            microscope_name = self.default_microscope
+        microscope_name = config.microscope_name
 
         self.new_joystick_axes = self.parent_controller.configuration["configuration"][
             "microscopes"
-        ][f"{microscope_name}"]["stage"]["joystick_axes"]
+        ][f"{microscope_name}"]["stage"].get("joystick_axes", [])
 
         if self.view.stop_frame.joystick_btn.winfo_ismapped():
             if self.new_joystick_axes is None or list(self.new_joystick_axes) == []:

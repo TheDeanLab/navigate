@@ -334,6 +334,7 @@ class Controller:
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
+        self.configuration_controller.change_microscope()
         self.menu_controller.resolution_value.set(
             f"{microscope_name} "
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
@@ -353,6 +354,7 @@ class Controller:
 
         # set widget modes
         self.set_mode_of_sub("stop")
+        self.stage_controller.initialize()
 
     def update_experiment_setting(self):
         """Update model.experiment according to values in the GUI
@@ -457,7 +459,12 @@ class Controller:
         __________
         args* : function-specific passes.
         """
-        if command == "stage":
+
+        if command == "joystick_toggle":
+            if self.stage_controller.joystick_is_on:
+                self.execute("stop_stage")
+
+        elif command == "stage":
             """Creates a thread and uses it to call the model to move stage
 
             Parameters

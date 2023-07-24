@@ -534,7 +534,7 @@ class StageController(GUIController):
 
     def update_step_size_handler(self, axis):
         """Callback functions bind to step size variables
-        
+
         Parameters
         ----------
         axis : str
@@ -545,6 +545,7 @@ class StageController(GUIController):
         handler : object
             Function to update step size in experiment.yml.
         """
+
         def func(*args):
             microscope_name = self.parent_controller.configuration["experiment"][
                 "MicroscopeState"

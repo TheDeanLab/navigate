@@ -200,9 +200,11 @@ class AcquireBarController(GUIController):
         --------
         >>> set_mode('live')
         """
-        self.mode = mode
         # update pull down combobox
         reverse_dict = dict(map(lambda v: (v[1], v[0]), self.mode_dict.items()))
+        if mode not in reverse_dict:
+            mode = list(reverse_dict.keys())[0]
+        self.mode = mode
         self.view.pull_down.set(reverse_dict[mode])
         self.show_verbose_info("Image mode is set to", mode)
 

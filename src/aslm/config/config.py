@@ -497,6 +497,72 @@ def verify_experiment_config(manager, configuration):
                             microscope_name
                         ][k]
 
+    # microscope state parameters
+    microscope_name = configuration["configuration"]["microscopes"].keys()[0]
+    zoom = configuration["configuration"]["microscopes"][microscope_name]["zoom"]["position"].keys()[0]
+    microscope_state_dict_sample = {
+        "microscope_name": microscope_name,
+        "image_mode": "live",
+        "zoom": zoom,
+        "stack_cycling_mode": "per_stack",
+        "start_position": 0.0,
+        "end_position": 100.0,
+        "step_size": 20.0,
+        "number_z_steps": 5,
+        "timepoints": 1,
+        "stack_pause": "0.0",
+        "etl_amplitude": 0,
+        "etl_offset": 0,
+        "is_save": False,
+        "stack_acq_time": 1.0,
+        "timepoint_interval": 0,
+        "experiment_duration": 1.03,
+        "is_multiposition": False,
+        "multiposition_count": 2,
+        "selected_channels": 1,
+        "stack_z_origin": 0,
+        "stack_focus_origin": 0,
+        "start_focus": 0.0,
+        "end_focus": 0.0,
+        "abs_z_start": 0.0,
+        "abs_z_end": 100.0,
+        "scanrange": 500.0,
+        "n_plane": 1.0,
+        "offset_start": 0.0,
+        "offset_end": 9.8,
+        "conpro_cycling_mode": "per_stack",
+        "waveform_template": "Default"
+    }
+    if (
+        "MicroscopeState" not in configuration["experiment"]
+        or type(configuration["experiment"]["MicroscopeState"]) is not DictProxy
+    ):
+        update_config_dict(
+            manager, configuration["experiment"], "MicroscopeState", microscope_state_dict_sample
+        )
+    microscope_setting_dict = configuration["experiment"]["MicroscopeState"]
+    for k in microscope_state_dict_sample:
+        if k not in microscope_setting_dict.keys():
+            microscope_setting_dict[k] = microscope_state_dict_sample[k]
+        elif type(microscope_setting_dict[k]) != type(microscope_state_dict_sample[k]):
+            if type(microscope_state_dict_sample[k]) == float:
+                try:
+                    microscope_setting_dict[k] = float(microscope_setting_dict[k])
+                except ValueError:
+                    microscope_setting_dict[k] = microscope_state_dict_sample[k]
+            else:
+                microscope_setting_dict[k] = microscope_state_dict_sample[k]
+
+    # verify microscope name
+    if microscope_setting_dict["microscope_name"] not in configuration["configuration"]["microscopes"].keys():
+        microscope_setting_dict["microscope_name"] = microscope_name
+    microscope_name = microscope_setting_dict["microscope_name"]
+    # zoom
+    if microscope_setting_dict["zoom"] not in configuration["configuration"]["microscopes"][microscope_name]["zoom"]["position"].keys():
+        microscope_setting_dict["zoom"] = configuration["configuration"]["microscopes"][microscope_name]["zoom"]["position"].keys()[0]
+
+    
+
 
 def verify_waveform_constants(manager, configuration):
     if type(configuration["waveform_constants"]) is not DictProxy:

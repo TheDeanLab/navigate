@@ -149,7 +149,7 @@ class StageController(GUIController):
         self.stage_limits = True
         self.initialize()
 
-    test1 
+     
     def initialize(self):
         """Initialize the Stage limits of steps and positions
 

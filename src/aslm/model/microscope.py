@@ -39,7 +39,6 @@ from aslm.model.device_startup_functions import (
 )
 from aslm.tools.common_functions import build_ref_name
 from aslm.model.devices.stages.stage_galvo import GalvoNIStage
-
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
@@ -160,6 +159,9 @@ class Microscope:
                 elif device_ref_name.startswith("NI") and (
                     device_name == "galvo" or device_name == "remote_focus_device"
                 ):
+                    device_connection = self.daq
+
+                if device_ref_name.startswith("EquipmentSolutions"):
                     device_connection = self.daq
 
                 if device_ref_name.startswith("ASI") and self.tiger_controller is None:
@@ -374,21 +376,90 @@ class Microscope:
             Dictionary of all the waveforms.
         """
         readout_time = self.get_readout_time()
+        exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
         camera_waveform = self.daq.calculate_all_waveforms(
-            self.microscope_name, readout_time
+            self.microscope_name, exposure_times, sweep_times
         )
-        remote_focus_waveform = self.remote_focus_device.adjust(readout_time)
-        galvo_waveform = [self.galvo[k].adjust(readout_time) for k in self.galvo]
+        remote_focus_waveform = self.remote_focus_device.adjust(
+            exposure_times, sweep_times
+        )
+        galvo_waveform = [
+            self.galvo[k].adjust(exposure_times, sweep_times) for k in self.galvo
+        ]
         # TODO: calculate waveform for galvo stage
         for stage, axes in self.stages_list:
             if type(stage) == GalvoNIStage:
-                stage.calculate_waveform(readout_time)
+                stage.calculate_waveform(exposure_times, sweep_times)
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,
             "galvo_waveform": galvo_waveform,
         }
         return waveform_dict
+
+    def calculate_exposure_sweep_times(self, readout_time):
+        """Get the exposure and sweep times for all channels.
+
+        Parameters
+        ----------
+        readout_time : float
+            Readout time of the camera (seconds) if we are operating the camera in
+            Normal mode, otherwise -1.
+        """
+        exposure_times = {}
+        sweep_times = {}
+        microscope_state = self.configuration["experiment"]["MicroscopeState"]
+        zoom = microscope_state["zoom"]
+        waveform_constants = self.configuration["waveform_constants"]
+        camera_delay_percent = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["camera"]["delay_percent"]
+        remote_focus_ramp_falling = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["remote_focus_device"]["ramp_falling_percent"]
+
+        duty_cycle_wait_duration = (
+            float(
+                self.configuration["waveform_constants"]
+                .get("other_constants", {})
+                .get("remote_focus_settle_duration", 0)
+            )
+            / 1000
+        )
+        for channel_key in microscope_state["channels"].keys():
+            channel = microscope_state["channels"][channel_key]
+            if channel["is_selected"] is True:
+                exposure_time = channel["camera_exposure_time"] / 1000
+
+                sweep_time = (
+                    exposure_time
+                    + exposure_time
+                    * (camera_delay_percent + remote_focus_ramp_falling)
+                    / 100
+                )
+                if readout_time > 0:
+                    # This addresses the dovetail nature of the camera readout in normal
+                    # mode. The camera reads middle out, and the delay in start of the
+                    # last lines compared to the first lines causes the exposure to be
+                    # net longer than exposure_time. This helps the galvo keep sweeping
+                    # for the full camera exposure time.
+                    sweep_time += readout_time  # we could set it to 0.14 instead of
+                    # 0.16384 according to the test
+
+                ps = float(
+                    waveform_constants["remote_focus_constants"][self.microscope_name][
+                        zoom
+                    ][channel["laser"]].get("percent_smoothing", 0.0)
+                )
+                if ps > 0:
+                    sweep_time = (1 + ps / 100) * sweep_time
+
+                sweep_time += duty_cycle_wait_duration
+
+                exposure_times[channel_key] = exposure_time
+                sweep_times[channel_key] = sweep_time
+
+        return exposure_times, sweep_times
 
     def prepare_next_channel(self):
         """Prepare the next channel.
@@ -442,11 +513,11 @@ class Microscope:
 
         # Laser Settings
         current_laser_index = channel["laser_index"]
+        for k in self.lasers:
+            self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].set_power(
             channel["laser_power"]
         )
-        for k in self.lasers:
-            self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
 
         # stop daq before writing new waveform
@@ -465,6 +536,7 @@ class Microscope:
         self.move_stage(
             {"f_abs": self.central_focus + float(channel["defocus"])},
             wait_until_done=True,
+            update_focus=False,
         )
 
     def get_readout_time(self):
@@ -491,7 +563,7 @@ class Microscope:
             readout_time, _ = self.camera.calculate_readout_time()
         return readout_time
 
-    def move_stage(self, pos_dict, wait_until_done=False):
+    def move_stage(self, pos_dict, wait_until_done=False, update_focus=True):
         """Move stage to a position.
 
         Parameters
@@ -500,6 +572,8 @@ class Microscope:
             Dictionary of stage positions.
         wait_until_done : bool, optional
             Wait until stage is done moving, by default False
+        update_focus : bool, optional
+            Update the central focus
 
         Returns
         -------
@@ -510,6 +584,8 @@ class Microscope:
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
+            if update_focus and axis == "f":
+                self.central_focus = None
             return self.stages[axis].move_axis_absolute(
                 axis, pos_dict[axis_key], wait_until_done
             )
@@ -523,6 +599,9 @@ class Microscope:
             }
             if pos:
                 success = stage.move_absolute(pos, wait_until_done) and success
+
+        if update_focus and "f_abs" in pos_dict:
+            self.central_focus = None
 
         return success
 
@@ -555,7 +634,6 @@ class Microscope:
         stage_position : dict
             Dictionary of stage positions.
         """
-
         if self.ask_stage_for_position:
             # self.ret_pos_dict = {}
             for stage, axes in self.stages_list:
@@ -563,6 +641,11 @@ class Microscope:
                 self.ret_pos_dict.update(temp_pos)
             self.ask_stage_for_position = False
         return self.ret_pos_dict
+
+    def move_remote_focus(self, offset=None):
+        readout_time = self.get_readout_time()
+        exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
+        self.remote_focus_device.move(exposure_times, sweep_times, offset)
 
     def update_stage_limits(self, limits_flag=True):
         self.ask_stage_for_position = True
@@ -671,3 +754,14 @@ class Microscope:
                 f"device_connection, self.configuration, self.is_synthetic)"
             )
             self.info[device_name] = device_ref_name
+
+    def terminate(self):
+        """Close hardware explicitly."""
+        self.camera.close_camera()
+        self.galvo 
+        print('Camera Closed')
+        try:
+            # Currently only for RemoteFocusEquipmentSolutions
+            self.remote_focus_device.close_connection()
+        except AttributeError:
+            pass

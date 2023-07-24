@@ -8,7 +8,7 @@ specifications of the various hardware that you will be using. The first time yo
 launch the software, ASLM will evaluate the the hardware settings as provided in the
 ``ASLM\config\configuration.yaml`` file. Every subsequent time you launch the
 software, a local version of the ``configuration.yaml`` file can be found
-in either ``Users\name\AppData\Local\.ASLM`` if on Windows or ``~/.ASLM`` if on
+in either ``Users\name\AppData\Local\.ASLM\config`` if on Windows or ``~/.ASLM`` if on
 Mac/Linux.
 
 To avoid confusion, we recommend launching the software in the synthetic hardware
@@ -326,6 +326,7 @@ for stage movement. Most stages will have different values respectively.
                         max: None
                         min: None
 
+                joystick_axes: [x, y, z]
                 x_max: 100000
                 x_min: -100000
                 y_max: 100000
@@ -356,19 +357,42 @@ Many times, the coordinate system of the stage hardware do not agree with the op
 definition of each axes identity. For example, many stages define their vertical
 dimension as `z`, whereas optically, we often define this axis as `x`. Thus, there is
 often a need to map the mechanical axes to the optical axes, and this is done with
-the axes dictionary entry in the stage hardware section. By default, stage axes are
-read in as `x`, `y`, `z`, `theta`, `f`, where theta is rotation and f is focus.
+the axes mapping dictionary entry in the stage hardware section. By default, stage axes are
+read in as `x`, `y`, `z`, `theta`, `f`, where theta is rotation and f is focus, but this 
+can be changed by changing axes mapping.
 
 .. code-block:: yaml
 
     axes: [x, y, z, theta, f]
+    axes_mapping: [x, y, z, theta, f]
 
-If instead, the z stage axis corresponds to the optical y axis, and vice versa, you
-would then have to import the stages as following:
+If, on a certain microscope, the z stage axis corresponds to the optical y axis, 
+and vice versa, you would then have to import the stages as following:
 
 .. code-block:: yaml
 
-    axes: [z, y, x, theta, f]
+    axes: [x, y, z, theta, f]
+    axes_mapping: [x, z, y, theta, f]
+
+Joystick Axes Definition
+""""""""""""""""""""""""
+If you are using a joystick, it is possible to disable GUI control of the stage axes 
+that the joystick can interact with. The axes that the joystick can interact with 
+appear in the stage field as following:
+
+.. code-block:: yaml
+
+    joystick_axes: [x, y, z]
+
+Note that these axes should agree with the optical axes. If, on the same microscope 
+as mentioned in the Stage Axes Definition section, the joystick were to control 
+the optical y axis corresponding to the stage z axis, you would have to put `y` in 
+the joystick axes brackets as following:
+
+.. code-block:: yaml
+
+    joystick_axes: [y]
+
 
 
 Zoom Section

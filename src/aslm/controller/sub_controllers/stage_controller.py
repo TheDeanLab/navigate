@@ -223,7 +223,7 @@ class StageController(GUIController):
 
         self.joystick_axes = self.new_joystick_axes
    
-  def stage_key_press(self, event):
+    def stage_key_press(self, event):
         """The stage key press
 
         Parameters

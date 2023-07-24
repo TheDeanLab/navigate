@@ -445,11 +445,10 @@ class AcquireBarController(GUIController):
         if is_valid:
             self.is_acquiring = True
             self.view.acquire_btn.configure(state="disabled")
-            # tell central controller, save the image/data
-            self.parent_controller.execute("acquire_and_save")
-
             # Close the window
             popup_window.popup.dismiss()
+            # tell central controller, save the image/data
+            self.parent_controller.execute("acquire_and_save")
 
     def exit_program(self):
         """Exit Button
@@ -464,7 +463,6 @@ class AcquireBarController(GUIController):
             self.show_verbose_info("Exiting Program")
             # call the central controller to stop all the threads
             self.parent_controller.execute("exit")
-            sys.exit()
 
     def populate_experiment_values(self):
         """Populate the experiment values from the config file.

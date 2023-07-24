@@ -46,6 +46,7 @@ import copy
 # Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.model.analysis.camera import compute_signal_to_noise
+from aslm.tools.common_functions import VariableWithLock
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -56,6 +57,9 @@ class CameraViewController(GUIController):
     def __init__(self, view, parent_controller=None):
 
         super().__init__(view, parent_controller)
+
+        self.data_buffer = None
+        self.is_displaying_image = VariableWithLock(bool)
 
         # Logging
         self.logger = logging.getLogger(p)
@@ -69,7 +73,6 @@ class CameraViewController(GUIController):
         for color in self.image_palette.values():
             color.widget.config(command=self.update_LUT)
         self.update_snr()
-
 
         # Binding for adjusting the lookup table min and max counts.
         # keys = ['Autoscale', 'Min','Max']
@@ -148,9 +151,7 @@ class CameraViewController(GUIController):
         self.bit_depth = 8  # bit-depth for PIL presentation.
         self.zoom_value = 1
         self.zoom_scale = 1
-        self.zoom_rect = np.array(
-            [[0, self.canvas_width], [0, self.canvas_height]]
-        )
+        self.zoom_rect = np.array([[0, self.canvas_width], [0, self.canvas_height]])
         self.zoom_offset = np.array([[0], [0]])
         self.zoom_width = self.canvas_width
         self.zoom_height = self.canvas_height
@@ -508,10 +509,7 @@ class CameraViewController(GUIController):
         self.zoom_width /= self.zoom_value
         self.zoom_height /= self.zoom_value
 
-        if (
-            self.zoom_width > self.canvas_width
-            or self.zoom_height > self.canvas_height
-        ):
+        if self.zoom_width > self.canvas_width or self.zoom_height > self.canvas_height:
             self.reset_display(False)
         elif self.zoom_width < 5 or self.zoom_height < 5:
             return
@@ -692,6 +690,8 @@ class CameraViewController(GUIController):
         >>> self.initialize_non_live_display(buffer,
         >>> microscope_state, camera_parameters)
         """
+        self.data_buffer = buffer
+        self.is_displaying_image.value = False
         self.image_counter = 0
         self.slice_index = 0
         self.number_of_channels = len(microscope_state["channels"])
@@ -699,7 +699,7 @@ class CameraViewController(GUIController):
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
         self.original_image_width = int(camera_parameters["x_pixels"])
         self.original_image_height = int(camera_parameters["y_pixels"])
-        
+
         self.update_canvas_size()
 
         self.reset_display(False)
@@ -815,7 +815,7 @@ class CameraViewController(GUIController):
         if self.display_state == "ZY Slice":
             self.image = self.image_volume[:, slider_index, :, channel_display_index]
 
-    def display_image(self, image, microscope_state, images_received=0):
+    def display_image(self, image_id):
         """Display an image using the LUT specified in the View.
 
         If Autoscale is selected, automatically calculates
@@ -826,16 +826,12 @@ class CameraViewController(GUIController):
 
         Parameters
         ----------
-        image: ndarray
-            Acquired image.
-        microscope_state : dict
-            State of the microscope
-        images_received : int
-            Number of channels received.
+        image_id: int
+            frame index in the data_buffer.
 
         Example
         -------
-        >>> self.display_image(image, microscope_state, images_received)
+        >>> self.display_image(image_id)
         """
 
         # Identify image identity (e.g., slice #, channel #).
@@ -848,6 +844,7 @@ class CameraViewController(GUIController):
         # self.channel_index] = image[:, ] # copy
 
         # Store the maximum intensity value for the image.
+        image = self.data_buffer[image_id]
         self.max_intensity_history.append(np.max(image))
 
         # If the user has toggled the transpose button, transpose the image.
@@ -873,6 +870,8 @@ class CameraViewController(GUIController):
         self.update_max_counts()
         self.image_metrics["Channel"].set(self.channel_index)
         self.image_count = self.image_count + 1
+        with self.is_displaying_image as is_displaying_image:
+            is_displaying_image.value = False
 
     def add_crosshair(self):
         """Adds a cross-hair to the image.
@@ -1108,7 +1107,7 @@ class CameraViewController(GUIController):
         self.canvas_height = height - 85
         self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
         self.view.update_idletasks()
-        
+
         if self.view.is_popup:
             self.width, self.height = self.view.winfo_width(), self.view.winfo_height()
         else:
@@ -1135,3 +1134,12 @@ class CameraViewController(GUIController):
         self.canvas_height_scale = float(
             self.original_image_height / self.canvas_height
         )
+
+    def try_to_display_image(self, image_id):
+        with self.is_displaying_image as is_displaying_image:
+            if is_displaying_image.value:
+                return
+            is_displaying_image.value = True
+
+        display_thread = threading.Thread(target=self.display_image, args=(image_id,))
+        display_thread.start()

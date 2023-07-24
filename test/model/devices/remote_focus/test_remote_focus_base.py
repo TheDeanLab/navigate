@@ -2,8 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -50,7 +50,6 @@ def test_remote_focus_base_init():
 
 
 def test_remote_focus_base_adjust():
-    import random
 
     from aslm.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
     from aslm.model.dummy import DummyModel
@@ -59,9 +58,19 @@ def test_remote_focus_base_adjust():
     microscope_name = model.configuration["experiment"]["MicroscopeState"][
         "microscope_name"
     ]
+    microscope_state = model.configuration["experiment"]["MicroscopeState"]
     rf = RemoteFocusBase(microscope_name, None, model.configuration)
 
-    waveform_dict = rf.adjust(random.random())
+    exposure_times = {
+        k: v["camera_exposure_time"] / 1000
+        for k, v in microscope_state["channels"].items()
+    }
+    sweep_times = {
+        k: 2 * v["camera_exposure_time"] / 1000
+        for k, v in microscope_state["channels"].items()
+    }
+
+    waveform_dict = rf.adjust(exposure_times, sweep_times)
 
     for k, v in waveform_dict.items():
         try:
@@ -73,7 +82,8 @@ def test_remote_focus_base_adjust():
             assert np.all(v <= rf.remote_focus_max_voltage)
             assert np.all(v >= rf.remote_focus_min_voltage)
         except KeyError:
-            # The channel doesn't exist. Points to an issue in how waveform dict is created.
+            # The channel doesn't exist. Points to an issue in how waveform dict
+            # is created.
             continue
 
 

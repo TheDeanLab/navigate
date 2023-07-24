@@ -33,6 +33,7 @@
 # Standard library imports
 import time
 import serial
+import threading
 
 # Third-party imports
 import numpy as np
@@ -72,10 +73,26 @@ class MP285:
         self.serial.bytesize = serial.EIGHTBITS
         self.serial.stopbits = serial.STOPBITS_ONE
         self.serial.xonxoff = False
-        
-        self.speed = None
-        self.resolution = None
+        self.serial.rtscts = True
+
+        self.speed = 1000  # None
+        self.resolution = "high"  # None
         self.wait_until_done = True
+
+        self.wait_time = 0.002
+        self.n_waits = max(int(timeout / self.wait_time), 1)
+
+        # Thread blocking here to prevent calls to get_current_position()
+        # while move_to_specified_position is waiting for a response. Serial
+        # commands must complete or the MP-285A completely locks up and has
+        # to be power cycled.
+        self.safe_to_write = threading.Event()
+        self.safe_to_write.set()
+
+    def safe_write(self, command):
+        self.safe_to_write.wait()
+        self.safe_to_write.clear()
+        self.serial.write(command)
 
     def connect_to_serial(self):
         try:
@@ -83,7 +100,7 @@ class MP285:
         except serial.SerialException as e:
             print("MP285 serial connection failed!")
             raise e
-        
+
     def disconnect_from_serial(self):
         self.serial.close()
 
@@ -98,8 +115,12 @@ class MP285:
         -------
         None
         """
+        self.safe_to_write.wait()
+        self.safe_to_write.clear()
+        self.serial.read_all()
         self.serial.reset_input_buffer()
         self.serial.reset_output_buffer()
+        self.safe_to_write.set()
 
     @staticmethod
     def convert_microsteps_to_microns(microsteps):
@@ -154,24 +175,37 @@ class MP285:
             Z position in microns
 
         """
+        # print("calling get_current_position")
         self.flush_buffers()
         command = bytes.fromhex("63") + bytes.fromhex("0d")
-        self.serial.write(command)
-        position_information = self.serial.read_until(
-            expected=bytes.fromhex("0d"), size=100
-        )
-        x_pos = self.convert_microsteps_to_microns(microsteps=(
-            int.from_bytes(position_information[0:3], byteorder="little", signed=True)
-            )
-        )
-        y_pos = self.convert_microsteps_to_microns(microsteps=(
-            int.from_bytes(position_information[4:7], byteorder="little", signed=True)
-            )
-        )
-        z_pos = self.convert_microsteps_to_microns(microsteps=(
-            int.from_bytes(position_information[8:11], byteorder="little", signed=True)
-            )
-        )
+        self.safe_write(command)
+        # position_information = self.serial.read_until(
+        #     expected=bytes.fromhex("0d"), size=100
+        # )
+        # print(f"sending: {command}")
+        position_information = b""
+        for _ in range(self.n_waits):
+            position_information = self.serial.read(13)
+            if position_information == b"":
+                time.sleep(self.wait_time)
+            elif len(position_information) == 13:
+                break
+            else:
+                # print(f"Ah hell: {position_information}")
+                raise UserWarning(
+                    f"Encountered response {position_information}. "
+                    "You probably need to power cycle the stage."
+                )
+        self.safe_to_write.set()
+        # print(f"received: {position_information}")
+        xs = int.from_bytes(position_information[0:4], byteorder="little", signed=True)
+        ys = int.from_bytes(position_information[4:8], byteorder="little", signed=True)
+        zs = int.from_bytes(position_information[8:12], byteorder="little", signed=True)
+        # print(f"converted to microsteps: {xs} {ys} {zs}")
+        x_pos = self.convert_microsteps_to_microns(xs)
+        y_pos = self.convert_microsteps_to_microns(ys)
+        z_pos = self.convert_microsteps_to_microns(zs)
+        # print(f"converted to position: {x_pos} {y_pos} {z_pos}")
         return x_pos, y_pos, z_pos
 
     def move_to_specified_position(self, x_pos, y_pos, z_pos):
@@ -200,14 +234,16 @@ class MP285:
         move_complete : bool
             True if move was successful, False if not.
         """
-
+        # print("calling move_to_specified_position")
+        # print(f"moving to {x_pos} {y_pos} {z_pos}")
         # Calculate time to move
-        current_x, current_y, current_z = self.get_current_position()
-        delta_x = abs(x_pos - current_x)
-        delta_y = abs(y_pos - current_y)
-        delta_z = abs(z_pos - current_z)
-        max_distance = max(delta_x, delta_y, delta_z)
-        time_to_move = max_distance / self.speed
+        # current_x, current_y, current_z = self.get_current_position()
+        # delta_x = abs(x_pos - current_x)
+        # delta_y = abs(y_pos - current_y)
+        # delta_z = abs(z_pos - current_z)
+        # max_distance = max(delta_x, delta_y, delta_z)
+        # time_to_move = np.clip(max_distance / self.speed, 0.02, 1.0)
+        # print(f"time to move: {time_to_move} s")
 
         # Convert microns to microsteps and create command.
         x_target = int(self.convert_microns_to_microsteps(x_pos))
@@ -218,19 +254,43 @@ class MP285:
         z_steps = z_target.to_bytes(length=4, byteorder="little", signed=True)
 
         # Move stage
-        self.serial.write(
+        move_cmd = (
             bytes.fromhex("6d") + x_steps + y_steps + z_steps + bytes.fromhex("0d")
         )
+        self.safe_write(move_cmd)
+        # print(f"move command: {move_cmd} wait_until_done {self.wait_until_done}")
 
-        if self.wait_until_done is True:
-            time.sleep(time_to_move)
+        for _ in range(self.n_waits):
+            # time.sleep(time_to_move)
+            response = self.serial.read(1)
+            # print(f"move response: {response}")
+            if response == b"":
+                time.sleep(self.wait_time)
+            elif response == bytes.fromhex("0d"):
+                self.safe_to_write.set()
+                return True
+            else:
+                self.safe_to_write.set()
+                self.flush_buffers()
+                # print(f"Uh oh: {response}")
+                raise UserWarning(
+                    f"Encountered response {response}. "
+                    "You probably need to power cycle the stage."
+                )
 
-        response = self.serial.read(1)
-        if response == bytes.fromhex("0d"):
-            move_complete = True
-        else:
-            move_complete = False
-        return move_complete
+        # # time.sleep(time_to_move)
+        # self.safe_to_write.set()
+
+        # response = self.serial.read(1)
+        # print(f"move response: {response}")
+        # if response == bytes.fromhex("0d"):
+        #     move_complete = True
+        # else:
+        #     move_complete = False
+        # return move_complete
+
+        self.safe_to_write.set()
+        return False
 
     def set_resolution_and_velocity(self, speed, resolution):
         """Sets the MP-285 stage speed and resolution.
@@ -254,6 +314,8 @@ class MP285:
         command_complete : bool
             True if command was successful, False if not.
         """
+        # print("calling set_resolution_and_velocity")
+        # print(f"resolution: {resolution}")
         if resolution == "high":
             resolution_bit = 1
             if speed > 1310:
@@ -282,14 +344,17 @@ class MP285:
 
         # Write Command and get response
         self.flush_buffers()
-        self.serial.write(command)
-        response = self.serial.read_until(expected=bytes.fromhex("0d"), size=100)
+        self.safe_write(command)
+        response = self.serial.read(1)
+        # print(f"Response {response}")
         if response == bytes.fromhex("0d"):
             self.speed = speed
             self.resolution = resolution
             command_complete = True
         else:
             command_complete = False
+        # print(f"Command complete? {command_complete}")
+        self.safe_to_write.set()
         return command_complete
 
     def interrupt_move(self):
@@ -307,23 +372,34 @@ class MP285:
         stage_stopped : bool
             True if move was successful, False if not.
         """
+        # print("calling interrupt_move")
 
         # Send Command
+        self.safe_to_write.set()
         self.flush_buffers()
-        self.serial.write(bytes.fromhex("03"))
+        self.safe_write(bytes.fromhex("03"))
 
         # Get Response
-        response = self.serial.read(1)
-        if response == bytes.fromhex("0d"):
-            stage_stopped = True
-        else:
-            second_response = self.serial.read(1)
-            if second_response == bytes.fromhex("0d"):
-                stage_stopped = True
-            else:
-                stage_stopped = False
+        for _ in range(self.n_waits):
+            # time.sleep(time_to_move)
+            response = self.serial.read(1)
+            # print(f"move response: {response}")
+            if response == b"":
+                time.sleep(self.wait_time)
+            elif response == bytes.fromhex("0d"):
+                self.safe_to_write.set()
+                return True
+            elif response == bytes.fromhex("3d"):
+                for _ in range(self.n_waits):
+                    response2 = self.serial.read(1)
+                    if response2 == b"":
+                        time.sleep(self.wait_time)
+                    elif response == bytes.fromhex("0d"):
+                        self.safe_to_write.set()
+                        return True
 
-        return stage_stopped
+        self.safe_to_write.set()
+        return False
 
     def set_absolute_mode(self):
         """Set MP285 to Absolute Position Mode.
@@ -339,37 +415,47 @@ class MP285:
             True if command was successful, False if not.
 
         """
+        # print("calling set_absolute_mode")
         self.flush_buffers()
-        self.serial.write(bytes.fromhex("61") + bytes.fromhex("0d"))
-        response = self.serial.read(1)
-        if response == bytes.fromhex("0d"):
-            command_complete = True
-        else:
-            command_complete = False
-        return command_complete
+        abs_cmd = bytes.fromhex("61") + bytes.fromhex("0d")
+        self.safe_write(abs_cmd)
 
-    def set_relative_mode(self):
-        """Set MP285 to Relative Position Mode.
+        for _ in range(self.n_waits):
+            # time.sleep(time_to_move)
+            response = self.serial.read(1)
+            # print(f"move response: {response}")
+            if response == b"":
+                time.sleep(self.wait_time)
+            elif response == bytes.fromhex("0d"):
+                self.safe_to_write.set()
+                return True
+        self.safe_to_write.set()
+        return False
 
-        This command sets the nature of the positional values specified with the Move
-        (‘m’) command as relative positions as measured from the current position
-        (absolute position returned by the Get Current Position (‘c’) command).
-        The command sequence consists of 2 bytes: Command byte, followed by the
-        terminator. Return data consists of 1 byte (task-complete indicator).
-
-        Returns
-        -------
-        command_complete : bool
-            True if command was successful, False if not.
-        """
-        self.flush_buffers()
-        self.serial.write(bytes.fromhex("62") + bytes.fromhex("0d"))
-        response = self.serial.read(1)
-        if response == bytes.fromhex("0d"):
-            command_complete = True
-        else:
-            command_complete = False
-        return command_complete
+    # def set_relative_mode(self):
+    #     """Set MP285 to Relative Position Mode.
+    #
+    #     This command sets the nature of the positional values specified with the Move
+    #     (‘m’) command as relative positions as measured from the current position
+    #     (absolute position returned by the Get Current Position (‘c’) command).
+    #     The command sequence consists of 2 bytes: Command byte, followed by the
+    #     terminator. Return data consists of 1 byte (task-complete indicator).
+    #
+    #     Returns
+    #     -------
+    #     command_complete : bool
+    #         True if command was successful, False if not.
+    #     """
+    #     # print("calling set_relative_mode")
+    #     self.flush_buffers()
+    #     self.safe_write(bytes.fromhex("62") + bytes.fromhex("0d"))
+    #     response = self.serial.read(1)
+    #     if response == bytes.fromhex("0d"):
+    #         command_complete = True
+    #     else:
+    #         command_complete = False
+    #     self.safe_to_write.set()
+    #     return command_complete
 
     def refresh_display(self):
         """Refresh the display on the MP-285 controller.
@@ -383,13 +469,15 @@ class MP285:
         command_complete : bool
             True if command was successful, False if not.
         """
+        # print("calling refresh_display")
         self.flush_buffers()
-        self.serial.write(bytes.fromhex("6E") + bytes.fromhex("0d"))
+        self.safe_write(bytes.fromhex("6E") + bytes.fromhex("0d"))
         response = self.serial.read(1)
         if response == bytes.fromhex("0d"):
             command_complete = True
         else:
             command_complete = False
+        self.safe_to_write.set()
         return command_complete
 
     def reset_controller(self):
@@ -404,13 +492,15 @@ class MP285:
         command_complete : bool
             True if command was successful, False if not.
         """
+        # print("calling reset_controller")
         self.flush_buffers()
-        self.serial.write(bytes.fromhex("72") + bytes.fromhex("0d"))
+        self.safe_write(bytes.fromhex("72") + bytes.fromhex("0d"))
         response = self.serial.read(1)
         if response == bytes.fromhex("0d"):
             command_complete = True
         else:
             command_complete = False
+        self.safe_to_write.set()
         return command_complete
 
     def get_controller_status(self):
@@ -426,21 +516,20 @@ class MP285:
         command_complete = bool
             True if command was successful, False if not.
         """
+        # print("calling get_controller_status")
         self.flush_buffers()
-        self.serial.write(bytes.fromhex("73") + bytes.fromhex("0d"))
+        self.safe_write(bytes.fromhex("73") + bytes.fromhex("0d"))
         response = self.serial.read(33)
         if response[-1] == bytes.fromhex("0d"):
             command_complete = True
         else:
             command_complete = False
 
-        print(response)
-
+        # print(response)
+        self.safe_to_write.set()
         # not implemented yet. See page 74 of documentation.
         return command_complete
 
     def close(self):
-        """Close the serial connection to the stage
-        
-        """
+        """Close the serial connection to the stage"""
         self.serial.close()

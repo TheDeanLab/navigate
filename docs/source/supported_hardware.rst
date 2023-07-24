@@ -33,10 +33,29 @@ Wiring
     For NI-based cards, port0/line1 is the equivalent of ``P0.1``.
     There are multiple pins for each PFIO, including source, out, gate, etc. You must use the out terminal.
 
+PCIe-6738
+"""""""""
+The PCIe-6738 can only create one software-timed analog task for every four channels.
+As such, the lasers much be attached to analog output ports outside of the banks used by
+the galvo/remote focus units. For example, if you use AO0, AO2, and AO6 for the
+remote focus, galvo, and galvo stage, the lasers should be connected to AO8, AO9, and
+AO10. In such a configuration, they will not compete with the other AO ports. Since
+only one task will be created created on the AO8, AO9, AO10 bank at a time (only
+one laser is on at a time), only one laser can be on at a time. If we wanted to turn
+lasers on simultaneously, we could distribute the lasers across independent banks (e
+.g. AO8, AO14, AO19).
+
+
+PXI-6259
+"""""""""
+The PXI-6259 can create one software-timed analog task per channel. As such, the
+galvo/remote focus/lasers can be attached to any of the analog output ports.
+
+
 Cameras
 ----------
-Hamamatsu
-^^^^^^^^^^^^^^^^^^^^^^
+Hamamatsu Flash 4.0, Fusion, and Lightning
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Insert the USB that came with the camera into the computer and install HCImageLive.
 * When prompted with the DCAM-API Setup
 
@@ -48,7 +67,7 @@ Hamamatsu
 * Connect the `camera_trigger_out_line` to the External Trigger of the Hamamatsu Camera. Commonly, this is done with a
 counter port, e.g., ``/PXI6259/ctr0``
 
-Photometrics
+Photometrics Iris 15
 ^^^^^^^^^^^^^^^^^^^^^^^^
 * Download the `PVCAM software <https://www.photometrics.com/support/software-and-drivers>`_ from Photometrics.
 The PVCAM SDK is also available form this location.
@@ -61,6 +80,12 @@ You will likely have to register and agree to Photometrics terms.
 
 Voicecoil
 --------------
+Voice coils, also known as linear actuators, play a crucial role in implementing
+aberration-free remote focusing in ASLM. These electromagnetic actuators are used to
+control the axial position of the light-sheet and the sample relative to the
+microscope objective lens. By precisely adjusting the axial position, the focal plane
+can be shifted without moving the objective lens, thus enabling remote focusing.
+
 Equipment Solutions
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -76,14 +101,25 @@ In progress...
 
 Stages
 ------------------------
-ASI
-^^^^^^^^^^^^^^^^^
-Software designed to acquire data in a continuous stage scanning mode. Rather than using the default SYNC ignal
-from the ASI stage to synchronize the start of imaging, we use the encoder output pulsing mode of the ASI stage to
-trigger the acquisition of every frame at precise intervals.  Important for multi-channel imaging that is acquired in
-the per-stack mode, but less so for perZ-based acquisitions.
+Our software empowers users with a flexible solution for configuring
+multiple stages, catering to diverse microscope modalities. Each stage can be
+customized to suit the specific requirements of a particular modality or shared
+across  various modalities. Our unique approach allows seamless integration of stages
+from different manufacturers, enabling users to mix and match components for a truly
+versatile and optimized setup tailored to their research needs.
 
-FTP-2000 Stage. Whatever you do, don't change the F position. You will your stage.
+ASI Tiger Controller
+^^^^^^^^^^^^^^^^^
+Constant Velocity Acquisition - Software is designed to acquire data in a continuous
+stage scanning mode. Rather than using the default SYNC signal from the ASI stage to
+synchronize the start of imaging, we use the encoder output pulsing mode of the ASI
+stage to trigger the acquisition of every frame at precise intervals.  Important for
+multi-channel imaging that is acquired in the per-stack mode, but less so for
+perZ-based acquisitions.
+
+FTP-2000 Stage.
+Whatever you do, don't change the F position. You will damage your
+stage.
 
 Sutter
 ^^^^^^^^^^^^^^^^^

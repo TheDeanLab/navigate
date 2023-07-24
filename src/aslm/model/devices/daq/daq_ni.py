@@ -232,6 +232,11 @@ class NIDAQ(DAQBase):
     def create_camera_task(self, exposure_time):
         """Set up the camera trigger task.
 
+        TTL for triggering the camera. TTL is 4 ms in duration.
+        Channel that the TTL is delivered from, and its delay (typically ~10 ms), are
+        specified in the configuration.yaml file.
+
+
         Parameters
         ----------
         exposure_time : float
@@ -245,12 +250,11 @@ class NIDAQ(DAQBase):
         camera_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["camera_trigger_out_line"]
-        self.camera_high_time = 0.004  # (self.camera_pulse_percent / 100) *
-        # (exposure_time/1000)  # self.sweep_time
+        self.camera_high_time = 0.004
         self.camera_low_time = self.sweep_time - self.camera_high_time
         self.camera_delay = (self.camera_delay_percent / 100) * (
             exposure_time / 1000
-        )  # * 0.01 * self.sweep_time
+        )
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
             camera_trigger_out_line,
@@ -258,16 +262,12 @@ class NIDAQ(DAQBase):
             low_time=self.camera_low_time,
             initial_delay=self.camera_delay,
         )
-        # trigger_source = self.configuration["configuration"]["microscopes"][
-        #     self.microscope_name
-        # ]["daq"]["trigger_source"]
-        # self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
-        #     trigger_source
-        # )
 
         # apply waveform templates
         camera_waveform_repeat_num = self.waveform_repeat_num * self.waveform_expand_num
-        self.camera_trigger_task.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE, samps_per_chan=camera_waveform_repeat_num)
+        self.camera_trigger_task.timing.cfg_implicit_timing(
+            sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+            samps_per_chan=camera_waveform_repeat_num)
 
     def create_master_trigger_task(self):
         """Set up the DO master trigger task.

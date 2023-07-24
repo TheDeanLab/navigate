@@ -57,6 +57,7 @@ def test_config_methods():
         "__name__",
         "__package__",
         "__spec__",
+        "ListProxy",
         "build_nested_dict",
         "get_aslm_path",
         "get_configuration_paths",
@@ -68,6 +69,7 @@ def test_config_methods():
         "sys",
         "update_config_dict",
         "yaml",
+        "verify_configuration"
     ]
     for method in methods:
         assert method in desired_methods

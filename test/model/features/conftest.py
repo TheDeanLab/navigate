@@ -62,10 +62,11 @@ class DummyDevice:
 
 
 class RecordObj:
-    def __init__(self, name_list, record_list, frame_id):
+    def __init__(self, name_list, record_list, frame_id, frame_id_completed=-1):
         self.name_list = name_list
         self.record_list = record_list
         self.frame_id = frame_id
+        self.frame_id_completed = frame_id_completed
 
     def __getattr__(self, __name: str):
         self.name_list += "." + __name
@@ -73,6 +74,7 @@ class RecordObj:
 
     def __call__(self, *args, **kwargs):
         kwargs["__test_frame_id"] = self.frame_id
+        kwargs["__test_frame_id_completed"] = self.frame_id_completed
         print("* calling", self.name_list, args, kwargs)
         self.record_list.append((self.name_list, args, kwargs))
 
@@ -91,6 +93,7 @@ class DummyModelToTestFeatures:
 
         self.stop_acquisition = False
         self.frame_id = 0  # signal_num
+        self.frame_id_completed = -1
 
         self.data = []
         self.signal_records = []
@@ -105,6 +108,8 @@ class DummyModelToTestFeatures:
 
             self.signal_pipe.send("signal")
             self.signal_pipe.recv()
+
+            self.frame_id_completed += 1
 
             if self.signal_container:
                 self.signal_container.run(wait_response=True)
@@ -137,6 +142,7 @@ class DummyModelToTestFeatures:
         self.data_records = []
         self.stop_acquisition = False
         self.frame_id = 0  # signal_num
+        self.frame_id_completed = -1
 
         self.signal_pipe, self.data_pipe = self.device.setup()
 
@@ -158,7 +164,7 @@ class DummyModelToTestFeatures:
         return dict(map(lambda axis: (axis + "_pos", stage_pos[axis]), axes))
 
     def __getattr__(self, __name: str):
-        return RecordObj(__name, self.signal_records, self.frame_id)
+        return RecordObj(__name, self.signal_records, self.frame_id, self.frame_id_completed)
 
 
 @pytest.fixture(scope="module")

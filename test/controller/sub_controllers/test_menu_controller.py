@@ -32,6 +32,8 @@
 
 # Standard Library Imports
 import unittest
+from unittest.mock import MagicMock, patch
+import tkinter as tk
 
 # Third Party Imports
 import pytest
@@ -46,6 +48,60 @@ class TestFakeEvent(unittest.TestCase):
         self.assertEqual(fake_event.char, "a")
         self.assertEqual(fake_event.keysym, "A")
         self.assertEqual(fake_event.state, 0)
+
+
+class TestStageMovement(unittest.TestCase):
+    def setUp(self):
+        # Create a mock parent controller and view
+        self.root = tk.Tk()
+        self.parent_controller = MagicMock()
+        self.parent_controller.stage_controller = MagicMock()
+        self.view = MagicMock()
+        self.view.root = self.root
+
+        # Initialize the menu controller
+        self.mc = MenuController(self.view, self.parent_controller)
+
+    def tearDown(self):
+        self.root.destroy()
+
+    def test_stage_movement_with_ttk_entry(self):
+        self.mc.parent_controller.view.focus_get.return_value = MagicMock(
+            widgetName="ttk::entry"
+        )
+        self.mc.stage_movement("a")
+        self.mc.parent_controller.stage_controller.stage_key_press.assert_not_called()
+
+    def test_stage_movement_with_ttk_combobox(self):
+        self.mc.parent_controller.view.focus_get.return_value = MagicMock(
+            widgetName="ttk::combobox"
+        )
+        self.mc.stage_movement("a")
+        self.mc.parent_controller.stage_controller.stage_key_press.assert_not_called()
+
+    def test_stage_movement_with_other_widget(self):
+        self.mc.parent_controller.view.focus_get.return_value = MagicMock(
+            widgetName="other_widget"
+        )
+        self.mc.stage_movement("a")
+        self.mc.parent_controller.stage_controller.stage_key_press.assert_called_with(
+            self.mc.fake_event
+        )
+
+    def test_stage_movement_with_key_error(self):
+        self.mc.parent_controller.view.focus_get.side_effect = KeyError
+        # Test that no exception is raised
+        try:
+            self.mc.stage_movement("a")
+        except KeyError:
+            self.fail("stage_movement() raised KeyError unexpectedly!")
+
+    def test_stage_movement_with_no_focus(self):
+        self.mc.parent_controller.view.focus_get.return_value = None
+        self.mc.stage_movement("a")
+        self.mc.parent_controller.stage_controller.stage_key_press.assert_called_with(
+            self.mc.fake_event
+        )
 
 
 class TestMenuController(unittest.TestCase):
@@ -150,3 +206,34 @@ class TestMenuController(unittest.TestCase):
                 self.menu_controller.parent_controller.view.settings.index("current")
                 == i - 1
             )
+
+    @patch("src.aslm.controller.sub_controllers.menu_controller.platform.system")
+    @patch("src.aslm.controller.sub_controllers.menu_controller.subprocess.check_call")
+    def test_open_folder(self, mock_check_call, mock_system):
+        mock_system.return_value = "Darwin"
+        self.menu_controller.open_folder("test_path")
+        mock_check_call.assert_called_once_with(["open", "--", "test_path"])
+
+        mock_check_call.reset_mock()
+        mock_system.return_value = "Windows"
+        self.menu_controller.open_folder("test_path")
+        mock_check_call.assert_called_once_with(["explorer", "test_path"])
+
+        mock_check_call.reset_mock()
+        mock_system.return_value = "Linux"
+        self.menu_controller.open_folder("test_path")
+        self.assertEqual(mock_check_call.call_count, 0)
+
+    @patch("src.aslm.controller.sub_controllers.menu_controller.os.path.join")
+    def test_open_log_files(self, mock_join):
+        with patch.object(self.menu_controller, "open_folder") as mock_open_folder:
+            mock_join.return_value = "joined_path"
+            self.menu_controller.open_log_files()
+            mock_open_folder.assert_called_once_with("joined_path")
+
+    @patch("src.aslm.controller.sub_controllers.menu_controller.os.path.join")
+    def test_open_configuration_files(self, mock_join):
+        with patch.object(self.menu_controller, "open_folder") as mock_open_folder:
+            mock_join.return_value = "joined_path"
+            self.menu_controller.open_configuration_files()
+            mock_open_folder.assert_called_once_with("joined_path")

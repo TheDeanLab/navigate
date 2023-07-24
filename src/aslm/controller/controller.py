@@ -46,6 +46,7 @@ import time
 # Local View Imports
 from aslm.view.main_application_window import MainApp as view
 from aslm.view.popups.camera_view_popup_window import CameraViewPopupWindow
+from aslm.view.popups.feature_list_popup import FeatureListPopup
 
 # Local Sub-Controller Imports
 from aslm.controller.configuration_controller import ConfigurationController
@@ -58,6 +59,7 @@ from aslm.controller.sub_controllers import (
     MultiPositionController,
     ChannelsTabController,
     AcquireBarController,
+    FeaturePopupController,
     MenuController,
 )
 
@@ -68,7 +70,12 @@ from aslm.model.model import Model
 from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
-from aslm.config.config import load_configs, update_config_dict, get_aslm_path
+from aslm.config.config import (
+    load_configs,
+    update_config_dict,
+    verify_configuration,
+    get_aslm_path,
+)
 from aslm.tools.file_functions import create_save_path, save_yaml_file
 from aslm.tools.common_dict_tools import update_stage_dict
 from aslm.tools.multipos_table_tools import update_table
@@ -143,6 +150,8 @@ class Controller:
             waveform_templates=waveform_templates_path,
         )
 
+        verify_configuration(self.manager, self.configuration)
+
         # Initialize the Model
         self.model = ObjectInSubprocess(
             Model, use_gpu, args, self.configuration, event_queue=self.event_queue
@@ -167,7 +176,6 @@ class Controller:
 
         # Initialize the View
         self.view = view(root)
-        self.view.root.protocol("WM_DELETE_WINDOW", self.exit_program)
 
         # Sub Gui Controllers
         self.acquire_bar_controller = AcquireBarController(
@@ -196,6 +204,11 @@ class Controller:
         )
         self.keystroke_controller = KeystrokeController(self.view, self)
 
+        # Exit
+        self.view.root.protocol(
+            "WM_DELETE_WINDOW", self.acquire_bar_controller.exit_program
+        )
+
         # Bonus config
         self.update_acquire_control()
 
@@ -215,6 +228,7 @@ class Controller:
         self.data_buffer = None
         self.additional_microscopes = {}
         self.additional_microscopes_configs = {}
+        self.stop_acquisition_flag = False
 
         # Set view based on model.experiment
         self.populate_experiment_setting(in_initialize=True)
@@ -311,6 +325,7 @@ class Controller:
         """
         # read the new file and update info of the configuration dict
         update_config_dict(self.manager, self.configuration, "experiment", file_name)
+        verify_configuration(self.manager, self.configuration)
 
         # update buffer
         self.update_buffer()
@@ -319,6 +334,7 @@ class Controller:
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
+        self.configuration_controller.change_microscope()
         self.menu_controller.resolution_value.set(
             f"{microscope_name} "
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
@@ -332,8 +348,13 @@ class Controller:
         self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
 
+        # autofocus popup
+        if hasattr(self, "af_popup_controller"):
+            self.af_popup_controller.populate_experiment_values()
+
         # set widget modes
         self.set_mode_of_sub("stop")
+        self.stage_controller.initialize()
 
     def update_experiment_setting(self):
         """Update model.experiment according to values in the GUI
@@ -377,7 +398,7 @@ class Controller:
         Sets sub-controller's mode to 'live' when 'continuous is selected, or 'stop'.
         """
         if not self.update_experiment_setting():
-            tkinter.messagebox.showerror(
+            messagebox.showerror(
                 title="Warning",
                 message="There are some missing/wrong settings! "
                 "Cannot start acquisition!",
@@ -438,7 +459,12 @@ class Controller:
         __________
         args* : function-specific passes.
         """
-        if command == "stage":
+
+        if command == "joystick_toggle":
+            if self.stage_controller.joystick_is_on:
+                self.execute("stop_stage")
+
+        elif command == "stage":
             """Creates a thread and uses it to call the model to move stage
 
             Parameters
@@ -576,10 +602,7 @@ class Controller:
             self.threads_pool.createThread(
                 "camera",
                 self.capture_image,
-                args=(
-                    "autofocus",
-                    "live",
-                ),
+                args=("autofocus", "live", *args),
             )
 
         elif command == "load_feature":
@@ -635,6 +658,22 @@ class Controller:
                 self.acquire_bar_controller.stop_acquire()
                 return
 
+            # ask user to verify feature list parameters if in "customized" mode
+            if self.acquire_bar_controller.mode == "customized":
+                feature_id = self.menu_controller.feature_id_val.get()
+                if feature_id > 0:
+                    if hasattr(self, "features_popup_controller"):
+                        self.features_popup_controller.exit_func()
+                    feature_list_popup = FeatureListPopup(
+                        self.view, title="Feature List Configuration"
+                    )
+                    self.features_popup_controller = FeaturePopupController(
+                        feature_list_popup, self
+                    )
+                    self.features_popup_controller.populate_feature_list(feature_id)
+                    # wait until close the popup windows
+                    self.view.wait_window(feature_list_popup.popup)
+
             # if select 'ilastik segmentation',
             # 'show segmentation',
             # and in 'single acquisition'
@@ -644,6 +683,7 @@ class Controller:
                 and self.ilastik_controller.show_segmentation_flag
             )
 
+            self.stop_acquisition_flag = False
             self.launch_additional_microscopes()
 
             self.threads_pool.createThread(
@@ -657,13 +697,22 @@ class Controller:
 
         elif command == "stop_acquire":
             """Stop the acquisition."""
+            self.stop_acquisition_flag = True
 
             # self.model.run_command('stop')
             self.sloppy_stop()
 
+            # clear show_img_pipe
+            while self.show_img_pipe.poll():
+                # TODO: image_id never called.
+                self.show_img_pipe.recv()
+                # image_id = self.show_img_pipe.recv()
+
         elif command == "exit":
             """Exit the program."""
             # Save current GUI settings to .ASLM/config/experiment.yml file.
+            self.sloppy_stop()
+
             self.update_experiment_setting()
             file_directory = os.path.join(get_aslm_path(), "config")
             save_yaml_file(
@@ -671,15 +720,14 @@ class Controller:
                 content_dict=self.configuration["experiment"],
                 filename="experiment.yml",
             )
-
-            # self.model.run_command('stop')
-            self.sloppy_stop()
             if hasattr(self, "waveform_popup_controller"):
                 self.waveform_popup_controller.save_waveform_constants()
-            self.model.terminate()
+
+            self.model.run_command("terminate")
             self.model = None
             self.event_queue.put(("stop", ""))
-            # self.threads_pool.clear()
+            self.threads_pool.clear()
+            sys.exit()
 
         logger.info(f"ASLM Controller - command passed from child, {command}, {args}")
 
@@ -708,7 +756,7 @@ class Controller:
             except RuntimeError:
                 e = RuntimeError
 
-    def capture_image(self, command, mode):
+    def capture_image(self, command, mode, *args):
         """Trigger the model to capture images.
 
         Parameters
@@ -729,11 +777,11 @@ class Controller:
             stop=False,
         )
         try:
-            self.model.run_command(command)
+            self.model.run_command(command, *args)
         except Exception as e:
-            tkinter.messagebox.showerror(
-                title="Warning",
-                message=f"There are something wrong! Cannot start acquisition!\n{e}",
+            messagebox.showerror(
+                title="Error:",
+                message=f"WARNING:\n{e}",
             )
             self.set_mode_of_sub("stop")
             return
@@ -746,7 +794,11 @@ class Controller:
             self.configuration["experiment"]["CameraParameters"],
         )
 
+        self.stop_acquisition_flag = False
+
         while True:
+            if self.stop_acquisition_flag:
+                break
             # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
             logger.info(f"ASLM Controller - Received Image: {image_id}")
@@ -761,11 +813,7 @@ class Controller:
                 self.execute("stop_acquire")
 
             # Display the Image in the View
-            self.camera_view_controller.display_image(
-                image=self.data_buffer[image_id],
-                microscope_state=self.configuration["experiment"]["MicroscopeState"],
-                images_received=images_received,
-            )
+            self.camera_view_controller.try_to_display_image(image_id=image_id)
             images_received += 1
 
             # Update progress bar.
@@ -776,10 +824,7 @@ class Controller:
                 stop=False,
             )
 
-        logger.info(
-            f"ASLM Controller - Captured {self.camera_view_controller.image_count}, "
-            f"{mode} Images"
-        )
+        logger.info(f"ASLM Controller - Captured {images_received}, " f"{mode} Images")
 
         # Stop Progress Bars
         self.acquire_bar_controller.progress_bar(
@@ -792,8 +837,15 @@ class Controller:
 
     def launch_additional_microscopes(self):
         def display_images(camera_view_controller, show_img_pipe, data_buffer):
+            camera_view_controller.initialize_non_live_display(
+                data_buffer,
+                self.configuration["experiment"]["MicroscopeState"],
+                self.configuration["experiment"]["CameraParameters"],
+            )
             images_received = 0
             while True:
+                if self.stop_acquisition_flag:
+                    break
                 # Receive the Image and log it.
                 image_id = show_img_pipe.recv()
                 logger.info(f"ASLM Controller - Received Image: {image_id}")
@@ -809,12 +861,8 @@ class Controller:
 
                 # Display the Image in the View
                 try:
-                    camera_view_controller.display_image(
-                        image=data_buffer[image_id],
-                        microscope_state=self.configuration["experiment"][
-                            "MicroscopeState"
-                        ],
-                        images_received=images_received,
+                    camera_view_controller.try_to_display_image(
+                        image_id=image_id,
                     )
                 except tkinter._tkinter.TclError:
                     print("Can't show images for the additional microscope!")
@@ -855,6 +903,9 @@ class Controller:
                 camera_view_controller = CameraViewController(
                     popup_window.camera_view, self
                 )
+                camera_view_controller.data_buffer = self.additional_microscopes[
+                    microscope_name
+                ]["data_buffer"]
                 popup_window.popup.bind("<Configure>", camera_view_controller.resize)
                 self.additional_microscopes[microscope_name][
                     "camera_view_controller"
@@ -869,6 +920,15 @@ class Controller:
                     ),
                 )
 
+            # clear show_img_pipe
+            show_img_pipe = self.additional_microscopes[microscope_name][
+                "show_img_pipe"
+            ]
+            while show_img_pipe.poll():
+                image_id = show_img_pipe.recv()
+                if image_id == "stop":
+                    break
+
             # start thread
             capture_img_thread = threading.Thread(
                 target=display_images,
@@ -876,7 +936,7 @@ class Controller:
                     self.additional_microscopes[microscope_name][
                         "camera_view_controller"
                     ],
-                    self.additional_microscopes[microscope_name]["show_img_pipe"],
+                    show_img_pipe,
                     self.additional_microscopes[microscope_name]["data_buffer"],
                 ),
             )
@@ -933,7 +993,8 @@ class Controller:
                     table=self.view.settings.multiposition_tab.multipoint_list.get_table(),
                     pos=value,
                 )
-                self.view.settings.channels_tab.multipoint_frame.on_off.set(True)
+                self.channels_tab_controller.is_multiposition_val.set(True)
+                self.channels_tab_controller.toggle_multiposition()
 
             elif event == "ilastik_mask":
                 # Display the ilastik mask
@@ -965,12 +1026,12 @@ class Controller:
                     value
                 )
 
-    def exit_program(self):
-        """Exit the program.
+    # def exit_program(self):
+    #     """Exit the program.
 
-        This function is called when the user clicks the exit button in the GUI.
-        """
-        if messagebox.askyesno("Exit", "Are you sure?"):
-            logger.info("Exiting Program")
-            self.execute("exit")
-            sys.exit()
+    #     This function is called when the user clicks the exit button in the GUI.
+    #     """
+    #     if messagebox.askyesno("Exit", "Are you sure?"):
+    #         logger.info("Exiting Program")
+    #         self.execute("exit")
+    #         sys.exit()

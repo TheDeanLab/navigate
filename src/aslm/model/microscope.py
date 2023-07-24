@@ -287,6 +287,7 @@ class Microscope:
             self.microscope_name
         ]["stage"]
         self.ask_stage_for_position = True
+        # print(self.stages)
         pos_dict = self.get_stage_position()
         for stage, axes in self.stages_list:
             pos = {
@@ -379,10 +380,12 @@ class Microscope:
         exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
         camera_waveform = self.daq.calculate_all_waveforms(
             self.microscope_name, exposure_times, sweep_times
+          
         )
         remote_focus_waveform = self.remote_focus_device.adjust(
             exposure_times, sweep_times
         )
+
         galvo_waveform = [
             self.galvo[k].adjust(exposure_times, sweep_times) for k in self.galvo
         ]
@@ -758,7 +761,7 @@ class Microscope:
     def terminate(self):
         """Close hardware explicitly."""
         self.camera.close_camera()
-    
+
         try:
             # Currently only for RemoteFocusEquipmentSolutions
             self.remote_focus_device.close_connection()

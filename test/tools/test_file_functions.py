@@ -38,7 +38,7 @@ import json
 # Third party imports
 
 # Local application imports
-from aslm.tools.file_functions import create_save_path, save_yaml_file, delete_folder
+from aslm.tools.file_functions import create_save_path, save_yaml_file, delete_folder, load_yaml_file
 
 
 class CreateSavePathTestCase(unittest.TestCase):
@@ -209,6 +209,40 @@ class TestDeleteFolder(unittest.TestCase):
     def test_delete_folder(self):
         delete_folder(self.save_root)
         self.assertFalse(os.path.exists(self.save_root))
+
+
+class TestLoadYamlFile(unittest.TestCase):
+
+    def setUp(self) -> None:
+        os.mkdir("test_dir")
+        self.save_root = "test_dir"
+
+    def tearDown(self) -> None:
+        delete_folder("test_dir")
+
+    def test_load_existing_yaml_file(self):
+        content_dict = {"name": "John Doe", "age": 30, "location": "New York"}
+
+        result = save_yaml_file(self.save_root, content_dict, "test.yml")
+        file_path = os.path.join(self.save_root, "test.yml")
+        result = load_yaml_file(file_path)
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, dict)
+        assert result == content_dict
+
+    def test_load_nonexistent_yaml_file(self):
+        file_path = os.path.join(self.save_root, "test.yml")
+        result = load_yaml_file(file_path)
+        self.assertIsNone(result)
+
+    def test_load_invalid_yaml_file(self):
+        file_path = os.path.join(self.save_root, "test.yml")
+        with open(file_path, "w") as f:
+            f.write("""
+{"name": "John Doe", "age": 30, "locati            
+            """)
+        result = load_yaml_file(file_path)
+        self.assertIsNone(result)
 
 
 if __name__ == "__main__":

@@ -39,7 +39,7 @@ from aslm.model.device_startup_functions import (
 )
 from aslm.tools.common_functions import build_ref_name
 from aslm.model.devices.stages.stage_galvo import GalvoNIStage
-
+from aslm.controller.sub_controllers.waveform_popup_controller import WaveformPopupController
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
@@ -759,8 +759,22 @@ class Microscope:
     def terminate(self):
         """Close hardware explicitly."""
         self.camera.close_camera()
+        print("Camera Closed")
+        
+        try:
+            #turn off galvo on exit
+            for k in self.galvo:
+                self.galvo[k].close_task()
+                #print(k) 
+                #print("closed")
+        except AttributeError:
+            #print("Galvo Passed")
+            pass
+        # set galvo waveform to zero
         try:
             # Currently only for RemoteFocusEquipmentSolutions
             self.remote_focus_device.close_connection()
         except AttributeError:
             pass
+
+       

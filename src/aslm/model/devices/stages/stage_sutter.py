@@ -155,13 +155,7 @@ class SutterStage(StageBase):
         UserWarning
             Error while closing the SutterStage Serial Port.
         """
-        try:
-            self.stop()
-            self.stage.close()
-            logger.debug("MP-285 stage connection closed")
-        except (AttributeError, BaseException) as e:
-            print("Error while closing the MP-285 stage connection", e)
-            logger.debug("Error while disconnecting the MP-285 stage", e)
+        self.close()
 
     def report_position(self):
         """Reports the position for all axes, and creates a position dictionary.
@@ -271,3 +265,11 @@ class SutterStage(StageBase):
         except SerialException as error:
             logger.exception(f"MP-285 - Stage stop failed: {error}")
 
+    def close(self):
+        try:
+            self.stop()
+            self.stage.close()
+            logger.debug("MP-285 stage connection closed")
+        except (AttributeError, BaseException) as e:
+            print("Error while closing the MP-285 stage connection", e)
+            logger.debug("Error while disconnecting the MP-285 stage", e)

@@ -88,11 +88,21 @@ class MP285:
         # to be power cycled.
         self.safe_to_write = threading.Event()
         self.safe_to_write.set()
+        self.last_write_time = time.time()
 
     def safe_write(self, command):
         self.safe_to_write.wait()
         self.safe_to_write.clear()
+        curr_time = time.time()
+        # Recommended time between commands is 2 ms 
+        diff_time = curr_time - self.last_write_time
+        if diff_time < 0.002:
+            time.sleep(0.002-diff_time + 0.0001)
+        self.serial.read_all()
+        self.serial.reset_input_buffer()
+        self.serial.reset_output_buffer()
         self.serial.write(command)
+        self.last_write_time = time.time()
 
     def connect_to_serial(self):
         try:
@@ -176,7 +186,7 @@ class MP285:
 
         """
         # print("calling get_current_position")
-        self.flush_buffers()
+        # self.flush_buffers()
         command = bytes.fromhex("63") + bytes.fromhex("0d")
         self.safe_write(command)
         # position_information = self.serial.read_until(
@@ -258,7 +268,7 @@ class MP285:
         move_cmd = (
             bytes.fromhex("6d") + x_steps + y_steps + z_steps + bytes.fromhex("0d")
         )
-        self.flush_buffers()
+        # self.flush_buffers()
         self.safe_write(move_cmd)
         # print(f"move command: {move_cmd} wait_until_done {self.wait_until_done}")
 
@@ -273,7 +283,7 @@ class MP285:
                 return True
             else:
                 self.safe_to_write.set()
-                self.flush_buffers()
+                # self.flush_buffers()
                 # print(f"Uh oh: {response}")
                 raise UserWarning(
                     "Encountered response {response}. "
@@ -345,7 +355,7 @@ class MP285:
         )
 
         # Write Command and get response
-        self.flush_buffers()
+        # self.flush_buffers()
         self.safe_write(command)
         response = self.serial.read(1)
         # print(f"Response {response}")
@@ -378,7 +388,7 @@ class MP285:
 
         # Send Command
         self.safe_to_write.set()
-        self.flush_buffers()
+        # self.flush_buffers()
         self.safe_write(bytes.fromhex("03"))
 
         # Get Response
@@ -396,7 +406,7 @@ class MP285:
                     response2 = self.serial.read(1)
                     if response2 == b"":
                         time.sleep(self.wait_time)
-                    elif response == bytes.fromhex("0d"):
+                    elif response2 == bytes.fromhex("0d"):
                         self.safe_to_write.set()
                         return True
 
@@ -418,7 +428,7 @@ class MP285:
 
         """
         # print("calling set_absolute_mode")
-        self.flush_buffers()
+        # self.flush_buffers()
         abs_cmd = bytes.fromhex("61") + bytes.fromhex("0d")
         self.safe_write(abs_cmd)
 
@@ -472,7 +482,7 @@ class MP285:
             True if command was successful, False if not.
         """
         # print("calling refresh_display")
-        self.flush_buffers()
+        # self.flush_buffers()
         self.safe_write(bytes.fromhex("6E") + bytes.fromhex("0d"))
         response = self.serial.read(1)
         if response == bytes.fromhex("0d"):
@@ -495,7 +505,7 @@ class MP285:
             True if command was successful, False if not.
         """
         # print("calling reset_controller")
-        self.flush_buffers()
+        # self.flush_buffers()
         self.safe_write(bytes.fromhex("72") + bytes.fromhex("0d"))
         response = self.serial.read(1)
         if response == bytes.fromhex("0d"):
@@ -519,7 +529,7 @@ class MP285:
             True if command was successful, False if not.
         """
         # print("calling get_controller_status")
-        self.flush_buffers()
+        # self.flush_buffers()
         self.safe_write(bytes.fromhex("73") + bytes.fromhex("0d"))
         response = self.serial.read(33)
         if response[-1] == bytes.fromhex("0d"):

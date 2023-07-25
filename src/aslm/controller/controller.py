@@ -347,7 +347,7 @@ class Controller:
         self.acquire_bar_controller.populate_experiment_values()
         # self.stage_controller.populate_experiment_values()
         self.multiposition_tab_controller.set_positions(
-            self.configuration["experiment"]["MultiPositions"]["stage_positions"]
+            self.configuration["experiment"]["MultiPositions"]
         )
         self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
@@ -374,6 +374,8 @@ class Controller:
 
         # TODO: validate experiment dict
         if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
+            return False
+        if self.configuration["experiment"]["MicroscopeState"]["number_z_steps"] < 1:
             return False
         return True
 
@@ -411,8 +413,8 @@ class Controller:
         positions = self.multiposition_tab_controller.get_positions()
         update_config_dict(
             self.manager,
-            self.configuration["experiment"]["MultiPositions"],
-            "stage_positions",
+            self.configuration["experiment"],
+            "MultiPositions",
             positions,
         )
         self.configuration["experiment"]["MicroscopeState"][

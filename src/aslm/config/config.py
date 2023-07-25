@@ -511,8 +511,6 @@ def verify_experiment_config(manager, configuration):
         "number_z_steps": 5,
         "timepoints": 1,
         "stack_pause": "0.0",
-        "etl_amplitude": 0,
-        "etl_offset": 0,
         "is_save": False,
         "stack_acq_time": 1.0,
         "timepoint_interval": 0,
@@ -560,8 +558,76 @@ def verify_experiment_config(manager, configuration):
     # zoom
     if microscope_setting_dict["zoom"] not in configuration["configuration"]["microscopes"][microscope_name]["zoom"]["position"].keys():
         microscope_setting_dict["zoom"] = configuration["configuration"]["microscopes"][microscope_name]["zoom"]["position"].keys()[0]
+    # channels
+    if "channels" not in microscope_setting_dict or type(microscope_setting_dict["channels"]) is not DictProxy:
+        update_config_dict(
+            manager, microscope_setting_dict, "channels", {}
+        )
+    laser_list = [f"{laser['wavelength']}nm" for laser in configuration["configuration"]["microscopes"][microscope_name]["lasers"]]
+    filterwheel_list = list(configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"]["available_filters"].keys())
+    prefix = "channel_"
+    channel_nums = configuration["configuration"]["gui"]["channels"]["count"]
+    channel_setting_dict = microscope_setting_dict["channels"]
+    selected_channel_num = 0
+    for channel in channel_setting_dict.keys():
+        if not channel.startswith(prefix):
+            del channel_setting_dict[channel]
+            continue
+        channel_id = int(channel[len(prefix) :]) - 1
+        if channel_id < 0 or channel_id >= channel_nums:
+            del channel_setting_dict[channel]
+            continue
+        channel_value = channel_setting_dict[channel]
+        # make sure channel values are right
+        # laser
+        if channel_value["laser"] not in laser_list:
+            channel_value["laser"] = laser_list[0]
+        channel_value["laser_index"] = laser_list.index(channel_value["laser"])
+        # filter wheel
+        if channel_value["filter"] not in filterwheel_list:
+            channel_value["filter"] = filterwheel_list[0]
+        channel_value["filter_position"] = filterwheel_list.index( channel_value["filter"])
+        # is_selected
+        if "is_selected" not in channel_value.keys() or type(channel_value["is_selected"]) != bool:
+            channel_value["is_selected"] = False
+        if channel_value["is_selected"]:
+            selected_channel_num += 1
+        # camera_exposure_time and defoucus should be float
+        try:
+            channel_value["camera_exposure_time"] = float(channel_value["camera_exposure_time"])
+        except ValueError:
+            channel_value["camera_exposure_time"] = 200.0
+        try:
+            channel_value["defocus"] = float(channel_value["defocus"])
+        except ValueError:
+            channel_value["defocus"] = 0.0
+    microscope_setting_dict["selected_channels"] = selected_channel_num
 
-    
+    # MultiPositions
+    if "MultiPositions" not in microscope_setting_dict or type(microscope_setting_dict["MultiPositions"]) is not ListProxy:
+        update_config_dict(
+            manager, configuration["experiment"], "MultiPositions", []
+        )
+    position_ids = []
+    multipositions = configuration["experiment"]["MultiPositions"]
+    for i, position in enumerate(multipositions):
+        for axis in ["x", "y", "z", "theta", "f"]:
+            try:
+                position[axis] = float(position[axis])
+            except ValueError:
+                position_ids.append(i)
+                break
+    for idx in position_ids[::-1]:
+        del multipositions[idx]
+    if len(multipositions) < 1:
+        multipositions.append(None)
+        update_config_dict(
+            manager,
+            multipositions,
+            0,
+            {"x": 10.0, "y": 10.0, "z": 10.0, "f": 10.0, "theta": 10.0}
+        )
+    microscope_setting_dict["multiposition_count"] = len(multipositions)
 
 
 def verify_waveform_constants(manager, configuration):

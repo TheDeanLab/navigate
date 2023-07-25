@@ -120,9 +120,7 @@ class AcquireBarController(GUIController):
             number_of_positions = 1
         else:
             number_of_positions = len(
-                self.parent_controller.configuration["experiment"]["MultiPositions"][
-                    "stage_positions"
-                ]
+                self.parent_controller.configuration["experiment"]["MultiPositions"]
             )
 
         if mode == "single":

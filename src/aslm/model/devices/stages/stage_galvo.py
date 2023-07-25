@@ -148,30 +148,30 @@ class GalvoNIStage(StageBase):
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # Calculate the Waveforms
+                # if (
+                #     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                #     == "z-stack"
+                # ):
+                #     z_start = self.configuration["experiment"]["MicroscopeState"][
+                #         "abs_z_start"
+                #     ]
+                #     z_end = self.configuration["experiment"]["MicroscopeState"][
+                #         "abs_z_end"
+                #     ]
+                #     amp = eval(self.volts_per_micron, {"x": 0.5 * (z_end - z_start)})
+                #     off = eval(self.volts_per_micron, {"x": 0.5 * (z_end + z_start)})
+                #     self.waveform_dict[channel_key] = remote_focus_ramp(
+                #         sample_rate=self.sample_rate,
+                #         exposure_time=exposure_time,
+                #         sweep_time=self.sweep_time,
+                #         remote_focus_delay=self.remote_focus_delay,
+                #         camera_delay=self.camera_delay_percent,
+                #         fall=self.remote_focus_ramp_falling,
+                #         amplitude=amp,
+                #         offset=off,
+                #     )
+                # elif (
                 if (
-                    self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                    == "z-stack"
-                ):
-                    # z_start = self.configuration["experiment"]["MicroscopeState"][
-                    #     "abs_z_start"
-                    # ]
-                    # z_end = self.configuration["experiment"]["MicroscopeState"][
-                    #     "abs_z_end"
-                    # ]
-                    # amp = eval(self.volts_per_micron, {"x": 0.5 * (z_end - z_start)})
-                    # off = eval(self.volts_per_micron, {"x": 0.5 * (z_end + z_start)})
-                    # self.waveform_dict[channel_key] = remote_focus_ramp(
-                    #     sample_rate=self.sample_rate,
-                    #     exposure_time=exposure_time,
-                    #     sweep_time=self.sweep_time,
-                    #     remote_focus_delay=self.remote_focus_delay,
-                    #     camera_delay=self.camera_delay_percent,
-                    #     fall=self.remote_focus_ramp_falling,
-                    #     amplitude=amp,
-                    #     offset=off,
-                    # )
-                    return None
-                elif (
                     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                     == "confocal-projection"
                 ):

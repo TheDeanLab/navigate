@@ -239,14 +239,14 @@ class StageController(GUIController):
             return
         char = event.char.lower()
         current_position = {}
-        #current_position = self.get_position()
-        #if current_position is None:
-        #    return
+        current_position = self.get_position()
+        if current_position is None:
+             return
        
         xy_increment = self.widget_vals["xy_step"].get()
         
-        for axis in ["x", "y", "z", "theta", "f"]:
-            current_position[axis] = self.widget_vals[axis].get() 
+        #for axis in ["x", "y", "z", "theta", "f"]:
+        #    current_position[axis] = self.widget_vals[axis].get() 
         
         config = self.parent_controller.configuration_controller
         self.position_min = config.get_stage_position_limits("_min")
@@ -259,31 +259,46 @@ class StageController(GUIController):
         
         
         if self.stage_limits is True:
-                if current_position["y"] < self.position_max['y'] and current_position['y'] > self.position_min['y']:
+                if current_position["y"] + xy_increment <= self.position_max['y'] and current_position['y'] - xy_increment >= self.position_min['y']:
                         if char == "w":
                             current_position["y"] += xy_increment
                         elif char == "s":
                             current_position["y"] -= xy_increment
                         #print("inside stage bounds y")
-                elif current_position['y'] >= self.position_max_y:
-                    current_position['y'] = self.position_max_y - xy_increment
-                    #print('Upper Y Stage Limit keystroke')
-                elif current_position['y'] <= self.position_min_y:
-                    #print('Lower Y Stage Limit keystroke')
-                    current_position['y'] = self.position_min_y + xy_increment
+                elif current_position['y'] + xy_increment > self.position_max_y:
+                        if char == "w":
+                            current_position['y'] = self.position_max_y
+                        elif char == "s":
+                            current_position["y"] -= xy_increment
+                            #print('Upper Y Stage Limit keystroke')
+                elif current_position['y'] - xy_increment < self.position_min_y:
+                        if char == "w":
+                            current_position["y"] += xy_increment
+                        elif char == "s":
+                            current_position['y'] = self.position_min_y
+                        #print('Lower Y Stage Limit keystroke')
+                    
         if self.stage_limits is True:
-                if current_position["x"] < self.position_max['x'] and current_position['x'] > self.position_min['x']:
+                if current_position["x"] + xy_increment <= self.position_max['x'] and current_position['x'] - xy_increment >= self.position_min['x']:
                         if char == "a":
                             current_position["x"] -= xy_increment
                         elif char == "d":
                             current_position["x"] += xy_increment
                         #print("inside stage bounds x")
-                elif current_position['x'] >= self.position_max_x:
+                elif current_position['x'] + xy_increment > self.position_max_x:
                     #print('Upper X Stage Limit keystroke')
-                    current_position['x'] = self.position_max_x - xy_increment
-                elif current_position['x'] <= self.position_min_x:
+                    if char == "a":
+                            current_position["x"] -= xy_increment
+                    elif char == "d":
+                           current_position['x'] = self.position_max_x 
+                
+                elif current_position['x'] - xy_increment < self.position_min_x:
+                    if char == "a":
+                            current_position['x'] = self.position_min_x
+                    elif char == "d":
+                            current_position["x"] += xy_increment
                     #print('Lower X Stage Limit keystroke')
-                    current_position['x'] = self.position_min_x + xy_increment
+                    
         if self.stage_limits is False:
                 if char == "w":
                     current_position["y"] += xy_increment
@@ -293,19 +308,8 @@ class StageController(GUIController):
                     current_position["y"] -= xy_increment
                 elif char == "d":
                     current_position["x"] += xy_increment
-                #print("STAGE LIMITS OFF")
+                print("STAGE LIMITS OFF")
         self.set_position(current_position)
-        # if char == "w":
-        #     current_position["y"] += xy_increment/2
-        # elif char == "a":
-        #     current_position["x"] -= xy_increment/2
-        # elif char == "s":
-        #     current_position["y"] -= xy_increment/2
-        # elif char == "d":
-        #     current_position["x"] += xy_increment/2
-        # print(current_position)
-        # self.set_position(current_position)
-        #return handler
         
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can
@@ -431,6 +435,44 @@ class StageController(GUIController):
             return None
         return position
 
+    def down_btn_handler(self, axis):
+        """This function generates command functions according to the desired axis
+        to move.
+
+        Parameters
+        ----------
+        axis : str
+            Should be one of 'x', 'y', 'z', 'theta', 'f'
+            position_axis += step_axis
+
+        Returns
+        -------
+        handler : object
+            Function for setting desired stage positions in the View.
+        """
+        position_val = self.widget_vals[axis]
+        if axis == "x" or axis == "y":
+            step_val = self.widget_vals["xy_step"]
+        else:
+            step_val = self.widget_vals[axis + "_step"]
+
+        def handler():
+
+            try:
+                temp = position_val.get() - step_val.get()
+            except AttributeError:
+                return
+            if self.stage_limits is True:
+                if temp < self.position_min[axis]:
+                    temp = self.position_min[axis]
+                elif temp > self.position_max[axis]:
+                    temp = self.position_max[axis]
+            # guarantee stage won't move out of limits
+            if position_val.get() != temp:
+                position_val.set(temp)
+
+        return handler
+    
     def up_btn_handler(self, axis):
         """This function generates command functions according to the desired axis
         to move.
@@ -459,12 +501,15 @@ class StageController(GUIController):
             except AttributeError:
                 return
             if self.stage_limits is True:
-                if temp >= self.position_max[axis]:
-                    temp = position_val.get()
+                if temp > self.position_max[axis]:
+                    #temp = position_val.get()
                     #temp = self.position_max[axis] + step_val.get()
+                    temp = self.position_max[axis]
+
                     #print('Upper Stage Limit Up')
-                elif temp <= self.position_min[axis]:
-                    temp = position_val.get()
+                elif temp < self.position_min[axis]:
+                    #temp = position_val.get()
+                    temp = self.position_min[axis]
                     #temp = self.position_min[axis] - step_val.get()
                     #print('Lower Stage Limit Up')
             # guarantee stage won't move out of limits
@@ -473,43 +518,43 @@ class StageController(GUIController):
 
         return handler
 
-    def down_btn_handler(self, axis):
-        """This function generates command functions according to the desired axis
-        to move.
+    # def down_btn_handler(self, axis):
+    #     """This function generates command functions according to the desired axis
+    #     to move.
 
-        Parameters
-        ----------
+    #     Parameters
+    #     ----------
    
-        Returns
-        -------
-        handler : object
-            Function for setting desired stage positions in the View.
-        """
-        position_val = self.widget_vals[axis]
-        if axis == "x" or axis == "y":
-            step_val = self.widget_vals["xy_step"]
-        else:
-            step_val = self.widget_vals[axis + "_step"]
+    #     Returns
+    #     -------
+    #     handler : object
+    #         Function for setting desired stage positions in the View.
+    #     """
+    #     position_val = self.widget_vals[axis]
+    #     if axis == "x" or axis == "y":
+    #         step_val = self.widget_vals["xy_step"]
+    #     else:
+    #         step_val = self.widget_vals[axis + "_step"]
 
-        def handler():
+    #     def handler():
 
-            try:
-                temp = position_val.get() - step_val.get()
-            except AttributeError:
-                return
-            if self.stage_limits is True:
-                if temp <= self.position_min[axis]:
-                    temp = self.position_min[axis] + step_val.get()
-                    #print('Lower Stage Limit down') 
-                elif temp >= self.position_max[axis]:
-                    temp = self.position_max[axis] - step_val.get()
-                    #print('Upper Stage Limit down') 
+    #         try:
+    #             temp = position_val.get() - step_val.get()
+    #         except AttributeError:
+    #             return
+    #         if self.stage_limits is True:
+    #             if temp < self.position_min[axis]:
+    #                 temp = self.position_min[axis]
+    #                 #print('Lower Stage Limit down') 
+    #             elif temp > self.position_max[axis]:
+    #                 temp = self.position_max[axis] 
+    #                 #print('Upper Stage Limit down') 
                 
-            # guarantee stage won't move out of limits
-            if position_val.get() != temp:
-                position_val.set(temp)
+    #         # guarantee stage won't move out of limits
+    #         if position_val.get() != temp:
+    #             position_val.set(temp)
 
-        return handler
+    #     return handler
 
     def zero_btn_handler(self, axis):
         """This function generates command functions according to the desired axis

@@ -208,7 +208,7 @@ def test_down_btn_handler(stage_controller):
             step = stage_controller.widget_vals[axis + "_step"].get()
         temp = pos - step
         if temp < stage_controller.position_min[axis]:
-            temp = stage_controller.position_min[axis]
+            temp = stage_controller.position_min[axis] 
         stage_controller.down_btn_handler(axis)()
         stage_controller.widget_vals[axis].set.assert_called_once_with(temp)
 

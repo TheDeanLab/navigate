@@ -131,12 +131,8 @@ class AcquireBarController(GUIController):
             number_of_slices = 1
         elif mode == "confocal-projection":
             number_of_slices = microscope_state["n_plane"]
-        elif mode == "z-stack":
+        elif mode == "z-stack" or "ConstantVelocityAcquisition":
             number_of_slices = microscope_state["number_z_steps"]
-        elif mode == "ConstantVelocityAcquisition":
-            # TODO: should be the same as "z-stack" when using "step_size" as
-            # a real step size.
-            number_of_slices = 100
 
         top_anticipated_images = number_of_slices
         bottom_anticipated_images = (
@@ -157,7 +153,7 @@ class AcquireBarController(GUIController):
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )
-                    self.view.CurAcq["value"] = top_percent_complete % 100
+                    self.view.CurAcq["value"] = top_percent_complete % 100 if top_percent_complete > 100.0 else top_percent_complete
                     bottom_anticipated_images = 100 * (
                         images_received / bottom_anticipated_images
                     )

@@ -143,6 +143,7 @@ class TextExperimentFile(unittest.TestCase):
             "z": float,
             "theta": float,
             "f": float,
+            "limits": bool,
         }
 
         self.parse_entries(section="StageParameters", expected_values=expected_values)
@@ -216,7 +217,7 @@ class TextExperimentFile(unittest.TestCase):
             "theta": float,
             "f": float,
         }
-        positions = self.data["MultiPositions"]["stage_positions"]
+        positions = self.data["MultiPositions"]
         for position in positions:
             for key in position.keys():
                 self.assertIn(key, expected_values)

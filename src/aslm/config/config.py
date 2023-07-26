@@ -232,8 +232,9 @@ def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
         Dictionary we are adding to
     config_name : str
         Name of subdictionary to replace
-    new_config : dict
-        Dictionary values
+    new_config : dict or str
+        Dictionary values or
+        yaml file name
 
     Returns
     -------
@@ -518,8 +519,8 @@ def verify_experiment_config(manager, configuration):
         "timepoint_interval": 0,
         "experiment_duration": 1.03,
         "is_multiposition": False,
-        "multiposition_count": 2,
-        "selected_channels": 1,
+        "multiposition_count": 1,
+        "selected_channels": 0,
         "stack_z_origin": 0,
         "stack_focus_origin": 0,
         "start_focus": 0.0,

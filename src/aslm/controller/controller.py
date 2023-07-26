@@ -326,8 +326,9 @@ class Controller:
 
         """
         # read the new file and update info of the configuration dict
-        update_config_dict(self.manager, self.configuration, "experiment", file_name)
-        verify_experiment_config(self.manager, self.configuration)
+        if not in_initialize:
+            update_config_dict(self.manager, self.configuration, "experiment", file_name)
+            verify_experiment_config(self.manager, self.configuration)
 
         # update buffer
         self.update_buffer()

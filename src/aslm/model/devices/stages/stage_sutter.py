@@ -249,6 +249,8 @@ class SutterStage(StageBase):
                 )
             except SerialException as e:
                 logger.debug(f"MP285: move_axis_absolute failed - {e}")
+                # make sure the cached positions are the "same" as device
+                self.report_position()
                 return False
 
         return True

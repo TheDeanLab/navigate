@@ -194,7 +194,7 @@ class MP285:
         # )
         # print(f"sending: {command}")
         position_information = b""
-        for _ in range(self.n_waits):
+        for _ in range(self.n_waits * 13):
             curr_read = self.serial.read(1)
             if curr_read == b"":
                 time.sleep(self.wait_time)

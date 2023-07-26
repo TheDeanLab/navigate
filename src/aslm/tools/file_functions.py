@@ -148,6 +148,8 @@ def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
     bool
         True if file was saved successfully, False otherwise.
     """
+    if not os.path.exists(file_directory):
+        return False
 
     try:
         file_name = os.path.join(file_directory, filename)

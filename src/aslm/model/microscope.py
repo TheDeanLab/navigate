@@ -288,6 +288,7 @@ class Microscope:
             self.microscope_name
         ]["stage"]
         self.ask_stage_for_position = True
+        # print(self.stages)
         pos_dict = self.get_stage_position()
         for stage, axes in self.stages_list:
             pos = {

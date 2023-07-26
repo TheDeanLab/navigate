@@ -340,6 +340,7 @@ class TestConfiguration(unittest.TestCase):
             "z_offset",
             "theta_offset",
             "f_offset",
+            "joystick_axes",
         ]
         type_keys = [
             "name",

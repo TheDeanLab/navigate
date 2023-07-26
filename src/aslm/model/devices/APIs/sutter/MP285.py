@@ -286,7 +286,7 @@ class MP285:
                 # self.flush_buffers()
                 # print(f"Uh oh: {response}")
                 raise UserWarning(
-                    "Encountered response {response}. "
+                    f"Encountered response {response}. "
                     "You probably need to power cycle the stage."
                 )
 

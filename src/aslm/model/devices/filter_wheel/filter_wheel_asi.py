@@ -55,20 +55,10 @@ def build_filter_wheel_connection(comport, baudrate=115200, timeout=0.25):
         Baud rate for communicating with the filter wheel, e.g., 9600.
     """
     # wait until ASI device is ready
-    block_flag = True
-    wait_start = time.time()
-    timeout_s = timeout / 1000
-    while block_flag:
-        tiger_controller = TigerController(comport, baudrate, verbose=False)
-        tiger_controller.connect_to_serial()
-        if tiger_controller.is_open():
-            block_flag = False
-        else:
-            print("Trying to connect to the Tiger Controller again")
-            elapsed = time.time()
-            if (elapsed - wait_start) > timeout_s:
-                break
-            time.sleep(0.1)
+    tiger_controller = TigerController(comport, baudrate)
+    tiger_controller.connect_to_serial()
+    if not tiger_controller.is_open():
+        raise Exception("ASI stage connection failed.")
     return tiger_controller
 
 

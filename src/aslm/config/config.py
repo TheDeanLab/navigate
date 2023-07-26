@@ -499,7 +499,9 @@ def verify_experiment_config(manager, configuration):
 
     # microscope state parameters
     microscope_name = configuration["configuration"]["microscopes"].keys()[0]
-    zoom = configuration["configuration"]["microscopes"][microscope_name]["zoom"]["position"].keys()[0]
+    zoom = configuration["configuration"]["microscopes"][microscope_name]["zoom"][
+        "position"
+    ].keys()[0]
     microscope_state_dict_sample = {
         "microscope_name": microscope_name,
         "image_mode": "live",
@@ -529,14 +531,17 @@ def verify_experiment_config(manager, configuration):
         "offset_start": 0.0,
         "offset_end": 9.8,
         "conpro_cycling_mode": "per_stack",
-        "waveform_template": "Default"
+        "waveform_template": "Default",
     }
     if (
         "MicroscopeState" not in configuration["experiment"]
         or type(configuration["experiment"]["MicroscopeState"]) is not DictProxy
     ):
         update_config_dict(
-            manager, configuration["experiment"], "MicroscopeState", microscope_state_dict_sample
+            manager,
+            configuration["experiment"],
+            "MicroscopeState",
+            microscope_state_dict_sample,
         )
     microscope_setting_dict = configuration["experiment"]["MicroscopeState"]
     for k in microscope_state_dict_sample:
@@ -552,19 +557,39 @@ def verify_experiment_config(manager, configuration):
                 microscope_setting_dict[k] = microscope_state_dict_sample[k]
 
     # verify microscope name
-    if microscope_setting_dict["microscope_name"] not in configuration["configuration"]["microscopes"].keys():
+    if (
+        microscope_setting_dict["microscope_name"]
+        not in configuration["configuration"]["microscopes"].keys()
+    ):
         microscope_setting_dict["microscope_name"] = microscope_name
     microscope_name = microscope_setting_dict["microscope_name"]
     # zoom
-    if microscope_setting_dict["zoom"] not in configuration["configuration"]["microscopes"][microscope_name]["zoom"]["position"].keys():
-        microscope_setting_dict["zoom"] = configuration["configuration"]["microscopes"][microscope_name]["zoom"]["position"].keys()[0]
+    if (
+        microscope_setting_dict["zoom"]
+        not in configuration["configuration"]["microscopes"][microscope_name]["zoom"][
+            "position"
+        ].keys()
+    ):
+        microscope_setting_dict["zoom"] = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["zoom"]["position"].keys()[0]
     # channels
-    if "channels" not in microscope_setting_dict or type(microscope_setting_dict["channels"]) is not DictProxy:
-        update_config_dict(
-            manager, microscope_setting_dict, "channels", {}
-        )
-    laser_list = [f"{laser['wavelength']}nm" for laser in configuration["configuration"]["microscopes"][microscope_name]["lasers"]]
-    filterwheel_list = list(configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"]["available_filters"].keys())
+    if (
+        "channels" not in microscope_setting_dict
+        or type(microscope_setting_dict["channels"]) is not DictProxy
+    ):
+        update_config_dict(manager, microscope_setting_dict, "channels", {})
+    laser_list = [
+        f"{laser['wavelength']}nm"
+        for laser in configuration["configuration"]["microscopes"][microscope_name][
+            "lasers"
+        ]
+    ]
+    filterwheel_list = list(
+        configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"][
+            "available_filters"
+        ].keys()
+    )
     prefix = "channel_"
     channel_nums = configuration["configuration"]["gui"]["channels"]["count"]
     channel_setting_dict = microscope_setting_dict["channels"]
@@ -586,15 +611,22 @@ def verify_experiment_config(manager, configuration):
         # filter wheel
         if channel_value["filter"] not in filterwheel_list:
             channel_value["filter"] = filterwheel_list[0]
-        channel_value["filter_position"] = filterwheel_list.index( channel_value["filter"])
+        channel_value["filter_position"] = filterwheel_list.index(
+            channel_value["filter"]
+        )
         # is_selected
-        if "is_selected" not in channel_value.keys() or type(channel_value["is_selected"]) != bool:
+        if (
+            "is_selected" not in channel_value.keys()
+            or type(channel_value["is_selected"]) != bool
+        ):
             channel_value["is_selected"] = False
         if channel_value["is_selected"]:
             selected_channel_num += 1
         # camera_exposure_time and defoucus should be float
         try:
-            channel_value["camera_exposure_time"] = float(channel_value["camera_exposure_time"])
+            channel_value["camera_exposure_time"] = float(
+                channel_value["camera_exposure_time"]
+            )
         except ValueError:
             channel_value["camera_exposure_time"] = 200.0
         try:
@@ -604,10 +636,11 @@ def verify_experiment_config(manager, configuration):
     microscope_setting_dict["selected_channels"] = selected_channel_num
 
     # MultiPositions
-    if "MultiPositions" not in microscope_setting_dict or type(microscope_setting_dict["MultiPositions"]) is not ListProxy:
-        update_config_dict(
-            manager, configuration["experiment"], "MultiPositions", []
-        )
+    if (
+        "MultiPositions" not in microscope_setting_dict
+        or type(microscope_setting_dict["MultiPositions"]) is not ListProxy
+    ):
+        update_config_dict(manager, configuration["experiment"], "MultiPositions", [])
     position_ids = []
     multipositions = configuration["experiment"]["MultiPositions"]
     for i, position in enumerate(multipositions):
@@ -625,7 +658,7 @@ def verify_experiment_config(manager, configuration):
             manager,
             multipositions,
             0,
-            {"x": 10.0, "y": 10.0, "z": 10.0, "f": 10.0, "theta": 10.0}
+            {"x": 10.0, "y": 10.0, "z": 10.0, "f": 10.0, "theta": 10.0},
         )
     microscope_setting_dict["multiposition_count"] = len(multipositions)
 

@@ -201,7 +201,6 @@ class CameraSettingController(GUIController):
         # 'framerate', 'frames_to_average'
         # Exposure time is currently for just the first active channel
         channels = self.microscope_state_dict["channels"]
-        # TODO: the first selected channel
         exposure_time = channels[list(channels.keys())[0]]["camera_exposure_time"]
         self.framerate_widgets["exposure_time"].set(exposure_time)
         self.framerate_widgets["frames_to_average"].set(

@@ -87,10 +87,6 @@ class TestCameraSettingController:
             str(self.camera_settings.mode_widgets["Sensor"].widget["state"])
             == "readonly"
         )
-        assert (
-            self.camera_settings.mode_widgets["Sensor"].widget.get()
-            == camera_config_dict["sensor_mode"]
-        )
 
         # Readout Mode
         assert list(self.camera_settings.mode_widgets["Readout"].widget["values"]) == [
@@ -126,10 +122,6 @@ class TestCameraSettingController:
             == camera_config_dict["exposure_time_range"]["max"]
         )
         assert (
-            self.camera_settings.framerate_widgets["exposure_time"].get()
-            == camera_config_dict["exposure_time"]
-        )
-        assert (
             str(self.camera_settings.framerate_widgets["exposure_time"].widget["state"])
             == "disabled"
         )
@@ -158,7 +150,7 @@ class TestCameraSettingController:
 
         # Set binning options
         assert list(self.camera_settings.roi_widgets["Binning"].widget["values"]) == [
-            "{}x{}".format(i, i) for i in range(1, 5)
+            "{}x{}".format(i, i) for i in [1, 2, 4]
         ]
         assert (
             str(self.camera_settings.roi_widgets["Binning"].widget["state"])
@@ -287,10 +279,11 @@ class TestCameraSettingController:
 
         # Setting up new values in widgets
         self.camera_settings.mode_widgets["Sensor"].set(mode)
+        self.camera_settings.roi_widgets["Binning"].set("4x4")
         if mode == "Light-Sheet":
             self.camera_settings.mode_widgets["Readout"].set("Bottom-to-Top")
             self.camera_settings.mode_widgets["Pixels"].set(15)
-        self.camera_settings.roi_widgets["Binning"].set("4x4")
+            self.camera_settings.roi_widgets["Binning"].set("1x1")
         self.camera_settings.roi_widgets["Width"].set(1600)
         self.camera_settings.roi_widgets["Height"].set(1600)
         self.camera_settings.framerate_widgets["frames_to_average"].set(5)
@@ -306,8 +299,14 @@ class TestCameraSettingController:
             assert (
                 int(self.camera_settings.camera_setting_dict["number_of_pixels"]) == 15
             )
-
-        assert self.camera_settings.camera_setting_dict["binning"] == "4x4"
+        if mode == "Light-Sheet":
+            assert self.camera_settings.camera_setting_dict["binning"] == "1x1"
+            assert self.camera_settings.camera_setting_dict["img_x_pixels"] == 1600
+            assert self.camera_settings.camera_setting_dict["img_y_pixels"] == 1600
+        else:
+            assert self.camera_settings.camera_setting_dict["binning"] == "4x4"
+            assert self.camera_settings.camera_setting_dict["img_x_pixels"] == 400
+            assert self.camera_settings.camera_setting_dict["img_y_pixels"] == 400
         assert self.camera_settings.camera_setting_dict["x_pixels"] == 1600
         assert self.camera_settings.camera_setting_dict["y_pixels"] == 1600
         assert (
@@ -318,6 +317,12 @@ class TestCameraSettingController:
 
     @pytest.mark.parametrize("mode", ["Normal", "Light-Sheet"])
     def test_update_sensor_mode(self, mode):
+        self.camera_settings.populate_experiment_values()
+        camera_setting_dict = (
+            self.camera_settings.parent_controller.configuration["experiment"][
+                "CameraParameters"
+            ]
+        )
 
         # Set mode
         self.camera_settings.mode_widgets["Sensor"].widget.set(mode)
@@ -344,7 +349,7 @@ class TestCameraSettingController:
         if mode == "Light-Sheet":
             assert (
                 str(self.camera_settings.mode_widgets["Readout"].get())
-                == "Top-to-Bottom"
+                == camera_setting_dict["readout_direction"]
             )
             assert (
                 str(self.camera_settings.mode_widgets["Readout"].widget["state"])

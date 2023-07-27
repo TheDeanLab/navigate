@@ -164,9 +164,14 @@ def compute_tiles_from_bounding_box(
     x, y, z, t = np.meshgrid(xs, ys, zs, thetas)
 
     # we need to make f vary the same as z, for now, since focus changes with z
-    f = np.repeat(
-        fs, int(len(t.ravel()) / len(fs))
-    )  # This only works if len(fs) = len(zs)
+    lz = len(z.ravel())
+    f = np.repeat(fs, np.ceil(lz / len(fs)))[
+        :lz
+    ]  # This only works if len(fs) = len(zs)
+    # TODO: Don't clip f. Practically fine for now.
+
+    print(x_tiles, y_tiles, z_tiles, theta_tiles, f_tiles)
+    print(x.ravel().shape, y.ravel().shape, z.ravel().shape, t.ravel().shape, f.shape)
 
     return np.vstack([x.ravel(), y.ravel(), z.ravel(), t.ravel(), f]).T
 

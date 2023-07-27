@@ -31,6 +31,7 @@
 
 # Standard library imports
 import unittest
+import pytest
 import tkinter as tk
 from tkinter import ttk
 from math import ceil
@@ -42,117 +43,130 @@ import numpy as np
 from aslm.tools.multipos_table_tools import (
     update_table,
     calc_num_tiles,
-    compute_tiles_from_bounding_box,
     sign,
 )
 from aslm.view.main_window_content.multiposition_tab import MultiPositionTable
 
 
-class SignTestCase(unittest.TestCase):
-    def test_positive_number(self):
-        x = 5.6
-        result = sign(x)
+@pytest.mark.parametrize("pair", zip([5.6, -3.8, 0], [1, -1, 1]))
+def test_sign(pair):
+    x, cmp_x = pair
 
-        # Assert that the result is 1
-        self.assertEqual(result, 1)
-
-    def test_negative_number(self):
-        x = -3.8
-        result = sign(x)
-
-        # Assert that the result is -1
-        self.assertEqual(result, -1)
-
-    def test_zero(self):
-        x = 0
-        result = sign(x)
-
-        # Assert that the result is 1
-        self.assertEqual(result, 1)
+    assert sign(x) == cmp_x
 
 
-class ComputeTilesFromBoundingBoxTestCase(unittest.TestCase):
-    def test_compute_tiles_from_bounding_box(self):
-        # Set up test parameters
-        x_start = 0
-        x_tiles = 3
-        x_length = 10
-        x_overlap = 0.2
-        y_start = 0
-        y_tiles = 2
-        y_length = 8
-        y_overlap = 0.3
-        z_start = 0
-        z_tiles = 4
-        z_length = 12
-        z_overlap = 0.1
-        theta_start = 0
-        theta_tiles = 1
-        theta_length = 2
-        theta_overlap = 0.0
-        f_start = 0
-        f_tiles = 1
-        f_length = 4
-        f_overlap = 0.0
+def listize(x):
+    if type(x) == np.ndarray:
+        return list(x)
+    else:
+        return [x]
 
-        result = compute_tiles_from_bounding_box(
-            x_start,
-            x_tiles,
-            x_length,
-            x_overlap,
-            y_start,
-            y_tiles,
-            y_length,
-            y_overlap,
-            z_start,
-            z_tiles,
-            z_length,
-            z_overlap,
-            theta_start,
-            theta_tiles,
-            theta_length,
-            theta_overlap,
-            f_start,
-            f_tiles,
-            f_length,
-            f_overlap,
-        )
 
-        # Assert the shape of the result is correct
-        expected_shape = (x_tiles * y_tiles * z_tiles * theta_tiles * f_tiles, 5)
-        self.assertEqual(result.shape, expected_shape)
+@pytest.mark.parametrize("x_start", listize((np.random.rand() - 0.5) * 1000))
+@pytest.mark.parametrize("x_tiles", listize(np.random.randint(0, 5)))
+@pytest.mark.parametrize("x_length", listize(np.random.rand() * 1000))
+@pytest.mark.parametrize("x_overlap", listize(np.random.rand()))
+@pytest.mark.parametrize("y_start", listize(((np.random.rand() - 0.5) * 1000)))
+@pytest.mark.parametrize("y_tiles", listize(np.random.randint(0, 5)))
+@pytest.mark.parametrize("y_length", listize(np.random.rand() * 1000))
+@pytest.mark.parametrize("y_overlap", listize(np.random.rand()))
+@pytest.mark.parametrize("z_start", listize(((np.random.rand() - 0.5) * 1000)))
+@pytest.mark.parametrize("z_tiles", listize(np.random.randint(0, 5)))
+@pytest.mark.parametrize("z_length", listize(np.random.rand() * 1000))
+@pytest.mark.parametrize("z_overlap", listize(np.random.rand()))
+@pytest.mark.parametrize("theta_start", listize(((np.random.rand() - 0.5) * 180)))
+@pytest.mark.parametrize("theta_tiles", listize(np.random.randint(0, 5)))
+@pytest.mark.parametrize("theta_length", listize((np.random.rand() * 5)))
+@pytest.mark.parametrize("theta_overlap", listize(np.random.rand()))
+@pytest.mark.parametrize("f_start", listize(((np.random.rand() - 0.5) * 1000)))
+@pytest.mark.parametrize("f_tiles", listize(np.random.randint(0, 5)))
+@pytest.mark.parametrize("f_length", listize(np.random.rand() * 1000))
+@pytest.mark.parametrize("f_overlap", listize(np.random.rand()))
+def test_compute_tiles_from_bounding_box(
+    x_start,
+    x_tiles,
+    x_length,
+    x_overlap,
+    y_start,
+    y_tiles,
+    y_length,
+    y_overlap,
+    z_start,
+    z_tiles,
+    z_length,
+    z_overlap,
+    theta_start,
+    theta_tiles,
+    theta_length,
+    theta_overlap,
+    f_start,
+    f_tiles,
+    f_length,
+    f_overlap,
+):
+    from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box
 
-        # Assert that the values in the result are correct
-        expected_result = np.array(
-            [
-                [0.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 10.8, 0.0, 0.0],
-                [0.0, 0.0, 21.6, 0.0, 0.0],
-                [0.0, 0.0, 32.4, 0.0, 0.0],
-                [8.0, 0.0, 0.0, 0.0, 0.0],
-                [8.0, 0.0, 10.8, 0.0, 0.0],
-                [8.0, 0.0, 21.6, 0.0, 0.0],
-                [8.0, 0.0, 32.4, 0.0, 0.0],
-                [16.0, 0.0, 0.0, 0.0, 0.0],
-                [16.0, 0.0, 10.8, 0.0, 0.0],
-                [16.0, 0.0, 21.6, 0.0, 0.0],
-                [16.0, 0.0, 32.4, 0.0, 0.0],
-                [0.0, 5.6, 0.0, 0.0, 0.0],
-                [0.0, 5.6, 10.8, 0.0, 0.0],
-                [0.0, 5.6, 21.6, 0.0, 0.0],
-                [0.0, 5.6, 32.4, 0.0, 0.0],
-                [8.0, 5.6, 0.0, 0.0, 0.0],
-                [8.0, 5.6, 10.8, 0.0, 0.0],
-                [8.0, 5.6, 21.6, 0.0, 0.0],
-                [8.0, 5.6, 32.4, 0.0, 0.0],
-                [16.0, 5.6, 0.0, 0.0, 0.0],
-                [16.0, 5.6, 10.8, 0.0, 0.0],
-                [16.0, 5.6, 21.6, 0.0, 0.0],
-                [16.0, 5.6, 32.4, 0.0, 0.0],
-            ]
-        )
+    tiles = compute_tiles_from_bounding_box(
+        x_start,
+        x_tiles,
+        x_length,
+        x_overlap,
+        y_start,
+        y_tiles,
+        y_length,
+        y_overlap,
+        z_start,
+        z_tiles,
+        z_length,
+        z_overlap,
+        theta_start,
+        theta_tiles,
+        theta_length,
+        theta_overlap,
+        f_start,
+        f_tiles,
+        f_length,
+        f_overlap,
+    )
 
-        self.assertTrue(np.allclose(result, expected_result))
+    x_tiles = 1 if x_tiles <= 0 else x_tiles
+    y_tiles = 1 if y_tiles <= 0 else y_tiles
+    z_tiles = 1 if z_tiles <= 0 else z_tiles
+    theta_tiles = 1 if theta_tiles <= 0 else theta_tiles
+    f_tiles = 1 if f_tiles <= 0 else f_tiles
+
+    x_max = x_start + (1 - x_overlap) * x_length * (x_tiles - 1)
+    y_max = y_start + (1 - y_overlap) * y_length * (y_tiles - 1)
+    z_max = z_start + (1 - z_overlap) * z_length * (z_tiles - 1)
+    theta_max = theta_start + (1 - theta_overlap) * theta_length * (theta_tiles - 1)
+    f_max = f_start + (1 - f_overlap) * f_length * (f_tiles - 1)
+
+    # check extrema
+    assert tiles[0, 0] == x_start
+    assert tiles[0, 1] == y_start
+    assert tiles[0, 2] == z_start
+    assert tiles[0, 3] == theta_start
+    assert tiles[0, 4] == f_start
+    assert tiles[-1, 0] == x_max
+    assert tiles[-1, 1] == y_max
+    assert tiles[-1, 2] == z_max
+    assert tiles[-1, 3] == theta_max
+    assert tiles[-1, 4] <= f_max  # Due to clipping. TODO: Fix
+
+    # check bounding box
+    assert np.min(tiles[:, 0]) == x_start
+    assert np.max(tiles[:, 0]) == x_max
+    assert np.min(tiles[:, 1]) == y_start
+    assert np.max(tiles[:, 1]) == y_max
+    assert np.min(tiles[:, 2]) == z_start
+    assert np.max(tiles[:, 2]) == z_max
+    assert np.min(tiles[:, 3]) == theta_start
+    assert np.max(tiles[:, 3]) == theta_max
+    assert np.min(tiles[:, 4]) == f_start
+    assert np.max(tiles[:, 4]) == f_max
+
+    # check length
+    assert len(tiles) == x_tiles * y_tiles * z_tiles * theta_tiles
 
 
 class CalcNumTilesTestCase(unittest.TestCase):

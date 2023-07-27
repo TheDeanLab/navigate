@@ -170,9 +170,6 @@ def compute_tiles_from_bounding_box(
     ]  # This only works if len(fs) = len(zs)
     # TODO: Don't clip f. Practically fine for now.
 
-    print(x_tiles, y_tiles, z_tiles, theta_tiles, f_tiles)
-    print(x.ravel().shape, y.ravel().shape, z.ravel().shape, t.ravel().shape, f.shape)
-
     return np.vstack([x.ravel(), y.ravel(), z.ravel(), t.ravel(), f]).T
 
 

@@ -231,7 +231,7 @@ def update_table(table, pos, append=False):
     """
     frame = pd.DataFrame(pos, columns=list("XYZRF"))
     if append:
-        table.model.df.append(frame, ignore_index=True)
+        table.model.df = table.model.df.append(frame, ignore_index=True)
     else:
         table.model.df = frame
     table.currentrow = table.model.df.shape[0] - 1

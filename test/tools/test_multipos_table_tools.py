@@ -197,24 +197,52 @@ class UpdateTableTestCase(unittest.TestCase):
         self.root.destroy()
 
     def test_update_table_1(self):
-        pos = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]]
+        pos = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
 
         update_table(table=self.table, pos=pos, append=False)
 
-        assert self.table.model.df["X"][0] == pos[0][0]
-        assert self.table.model.df["Y"][1] == pos[1][1]
-        assert self.table.model.df["Z"][2] == pos[2][2]
-        assert self.table.model.df["R"][0] == pos[0][3]
-        assert self.table.model.df["F"][0] == pos[0][4]
-        self.assertEqual(self.table.currentrow, 2)
+        np.testing.assert_array_equal(self.table.model.df["X"], pos[:, 0])
+        np.testing.assert_array_equal(self.table.model.df["Y"], pos[:, 1])
+        np.testing.assert_array_equal(self.table.model.df["Z"], pos[:, 2])
+        np.testing.assert_array_equal(self.table.model.df["R"], pos[:, 3])
+        np.testing.assert_array_equal(self.table.model.df["F"], pos[:, 4])
+        assert self.table.currentrow == 2
 
-        new_positions = [[16, 17, 18, 19, 20], [21, 22, 23, 24, 25]]
+        new_positions = np.array([[16, 17, 18, 19, 20], [21, 22, 23, 24, 25]])
 
+        print(self.table.model.df.shape)
         update_table(self.table, pos=new_positions, append=True)
-        # TODO: I don't think the append function is behaving properly.
-        # number_of_rows = self.table.currentrow
-        # self.assertEqual(number_of_rows, 5)
-        # assert self.table.model.df['X'][3] == pos[0][0]
+        assert self.table.currentrow == 4
+        np.testing.assert_array_equal(
+            self.table.model.df["X"][
+                3:,
+            ],
+            new_positions[:, 0],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Y"][
+                3:,
+            ],
+            new_positions[:, 1],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["Z"][
+                3:,
+            ],
+            new_positions[:, 2],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["R"][
+                3:,
+            ],
+            new_positions[:, 3],
+        )
+        np.testing.assert_array_equal(
+            self.table.model.df["F"][
+                3:,
+            ],
+            new_positions[:, 4],
+        )
 
 
 if __name__ == "__main__":

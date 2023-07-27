@@ -50,7 +50,6 @@ class CameraSettingController(GUIController):
         # default values
         self.in_initialization = True
         self.resolution_value = "1x"
-        self.number_of_pixels = 10
         self.mode = "stop"
         self.solvent = "BABB"
 
@@ -293,7 +292,7 @@ class CameraSettingController(GUIController):
             self.mode_widgets["Readout"].widget.set(self.camera_setting_dict["readout_direction"])
             self.mode_widgets["Readout"].widget["state"] = "readonly"
             self.mode_widgets["Pixels"].set(
-                self.number_of_pixels
+                self.camera_setting_dict["number_of_pixels"]
             )  # Default to 10 pixels
             self.mode_widgets["Pixels"].widget.trigger_focusout_validation()
             self.mode_widgets["Pixels"].widget["state"] = "normal"
@@ -487,12 +486,11 @@ class CameraSettingController(GUIController):
         pixels = self.mode_widgets["Pixels"].get()
         if pixels == "":
             return
-        self.number_of_pixels = int(pixels)
 
         if self.mode != "live":
             return
 
-        self.camera_setting_dict["number_of_pixels"] = self.number_of_pixels
+        self.camera_setting_dict["number_of_pixels"] = int(pixels)
 
         # tell central controller to update model
         if self.pixel_event_id:

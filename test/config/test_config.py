@@ -37,13 +37,14 @@ from multiprocessing import Manager
 from multiprocessing.managers import ListProxy, DictProxy
 import os
 import time
+import random
 
 
 # Third Party Imports
 
 # Local Imports
 import aslm.config.config as config
-from aslm.tools.file_functions import save_yaml_file, delete_folder
+from aslm.tools.file_functions import save_yaml_file, delete_folder, load_yaml_file
 
 
 def test_config_methods():
@@ -185,12 +186,12 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         self.manager = Manager()
         current_path = os.path.abspath(os.path.dirname(__file__))
         root_path = os.path.dirname(os.path.dirname(current_path))
-        self.configuration_yaml_path = os.path.join(root_path, "src", "aslm", "config", "configuration.yaml")
+        self.config_path = os.path.join(root_path, "src", "aslm", "config"  )
         self.test_root = "test_dir"
         os.mkdir(self.test_root)
 
         configuration = config.load_configs(self.manager,
-                                            configuration=self.configuration_yaml_path)
+                                            configuration=os.path.join(self.config_path, "configuration.yaml"))
         saving_dict_sample = {
             "root_directory": config.get_aslm_path(),
             "save_directory": config.get_aslm_path(),
@@ -212,7 +213,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "readout_direction": "Top to Bottom",
             "number_of_pixels": 10,
             "binning": "1x1",
-            "frames_to_average": 1.0,
+            "frames_to_average": 1,
             "databuffer_size": 100,
         }
 
@@ -302,7 +303,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         with open(experiment_file_path, "w") as f:
             f.write("")
         configuration = config.load_configs(self.manager,
-                                            configuration=self.configuration_yaml_path,
+                                            configuration=os.path.join(self.config_path, "configuration.yaml"),
                                             experiment=experiment_file_path)
         config.verify_experiment_config(self.manager, configuration)
 
@@ -333,10 +334,153 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             self.assert_equal_dict(position, experiement_config["MultiPositions"][i])
 
     def test_load_experiment_file_with_missing_parameters(self):
-        pass
+        experiment = load_yaml_file(os.path.join(self.config_path, "experiment.yml"))
+        # Saving prameters
+        saving_parameters = list(self.experiment_sample["Saving"].keys())
+        saving_parameters_deleted = self.delete_random_entries_from_dict(saving_parameters, experiment["Saving"])
+        
+        # Camera parameters
+        camera_parameters = list(self.experiment_sample["CameraParameters"].keys())
+        camera_parameters.append("img_x_pixels")
+        camera_parameters.append("img_y_pixels")
+        camera_parameters_deleted = self.delete_random_entries_from_dict(camera_parameters, experiment["CameraParameters"])
+
+        # StageParameters
+        configuration = load_yaml_file(os.path.join(self.config_path, "configuration.yaml"))
+        # delete limits
+        if "limits" in experiment["StageParameters"].keys():
+            del experiment["StageParameters"]["limits"]
+        # delete part of stage parameters of one microscope
+        microscope_names = list(configuration["microscopes"].keys())
+        if microscope_names[0] not in experiment["StageParameters"]:
+            experiment["StageParameters"][microscope_names[0]] = {
+                "z_step": 100.0,
+                "theta_step": 10.0
+            }
+        # delete all stage parameter of another microscope
+        if microscope_names[1] in experiment["StageParameters"].keys():
+            del experiment["StageParameters"][microscope_names[1]]
+
+        # MicroscopeState
+        micrscope_parameters = list(self.experiment_sample["MicroscopeState"].keys())
+        micrscope_parameters.append("channels")
+        micrscope_parameters_deleted = self.delete_random_entries_from_dict(micrscope_parameters, experiment["MicroscopeState"])
+
+        save_yaml_file(self.test_root, experiment, "experiment_missing_parameters.yml")
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.test_root, "experiment_missing_parameters.yml")
+        )
+        config.verify_experiment_config(self.manager, configuration)
+        # verify Saving parameters are added
+        for k in saving_parameters_deleted:
+            assert k in configuration["experiment"]["Saving"].keys(), f"parameter {k} should be added to Saving parameters"
+
+        # verify CameraParameters are added
+        for k in camera_parameters_deleted:
+            assert k in configuration["experiment"]["CameraParameters"].keys(), f"parameter {k} should be added into CameraParameters"
+
+        # verify MicroscopeState parameters are added
+        for k in micrscope_parameters_deleted:
+            assert k in configuration["experiment"]["MicroscopeState"].keys(), f"parameter {k} should be added to MicroscopeState"
+
+        # verify Stage parameters are added
+        assert "limits" in configuration["experiment"]["StageParameters"].keys(), "limits should be added to Stage parameters"
+        for microscope_name in microscope_names:
+            for k in ["xy_step", "z_step", "f_step", "theta_step"]:
+                assert k in configuration["experiment"]["StageParameters"][microscope_name]
+        
+
 
     def test_load_experiment_file_with_wrong_parameter_values(self):
-        pass
+        configuration = config.load_configs(
+            self.manager,
+            configuration=os.path.join(self.config_path, "configuration.yaml"),
+            experiment=os.path.join(self.config_path, "experiment.yml")
+        )
+        experiment = configuration["experiment"]
+        # Saving parameters
+        # check if root_directory and save_directory exist
+        experiment["Saving"]["root_directory"] = self.config_path
+        experiment["Saving"]["save_directory"] = os.path.join(self.test_root, "not_exist", "not_exist")
+        config.verify_experiment_config(self.manager, configuration)
+        assert experiment["Saving"]["root_directory"] == self.config_path
+        assert os.path.exists(experiment["Saving"]["save_directory"])
+        assert experiment["Saving"]["save_directory"] != os.path.join(self.test_root, "not_exist", "not_exist")
+
+        # CameraParameters
+        # x_pixels, y_pixels
+        experiment["CameraParameters"]["x_pixels"] = -10
+        experiment["CameraParameters"]["y_pixels"] = "abcd"
+        config.verify_experiment_config(self.manager, configuration)
+        assert experiment["CameraParameters"]["x_pixels"] == self.experiment_sample["CameraParameters"]["x_pixels"]
+        assert experiment["CameraParameters"]["y_pixels"] == self.experiment_sample["CameraParameters"]["y_pixels"]
+        binning = int(experiment["CameraParameters"]["binning"][0])
+        assert experiment["CameraParameters"]["img_x_pixels"] == experiment["CameraParameters"]["x_pixels"] // binning
+        assert experiment["CameraParameters"]["img_y_pixels"] == experiment["CameraParameters"]["y_pixels"] // binning
+
+        # binning
+        for v in ["abcd", "3x3", "12.4"]:
+            experiment["CameraParameters"]["binning"] = v
+            config.verify_experiment_config(self.manager, configuration)
+            assert experiment["CameraParameters"]["binning"] == "1x1"
+            assert experiment["CameraParameters"]["img_x_pixels"] == experiment["CameraParameters"]["x_pixels"]
+            assert experiment["CameraParameters"]["img_y_pixels"] == experiment["CameraParameters"]["y_pixels"]
+
+        # sensor_mode
+        experiment["CameraParameters"]["sensor_mode"] = "None"
+        config.verify_experiment_config(self.manager, configuration)
+        assert experiment["CameraParameters"]["sensor_mode"] == "Normal"
+        experiment["CameraParameters"]["sensor_mode"] = "Lightsheet"
+        config.verify_experiment_config(self.manager, configuration)
+        assert experiment["CameraParameters"]["sensor_mode"] == "Normal"
+        experiment["CameraParameters"]["sensor_mode"] = "Light-Sheet"
+        config.verify_experiment_config(self.manager, configuration)
+        assert experiment["CameraParameters"]["sensor_mode"] == "Light-Sheet"
+
+        # readout_direction
+        for v in ["abcd", 123, None]:
+            experiment["CameraParameters"]["readout_direction"] = v
+            config.verify_experiment_config(self.manager, configuration)
+            assert experiment["CameraParameters"]["readout_direction"] == "Top to Bottom"
+
+        experiment["CameraParameters"]["readout_direction"] = "Bottom to Top"
+        config.verify_experiment_config(self.manager, configuration)
+        assert experiment["CameraParameters"]["readout_direction"] == "Bottom to Top"
+
+        # other parameters should be int
+        for k in ["number_of_pixels", "databuffer_size", "frames_to_average"]:
+            for v in ["abc", -10, 0]:
+                experiment["CameraParameters"][k] = v
+                config.verify_experiment_config(self.manager, configuration)
+                assert experiment["CameraParameters"][k] == self.experiment_sample["CameraParameters"][k]
+
+        # StageParameters
+        experiment["StageParameters"]["limits"] = "abc"
+        config.verify_experiment_config(self.manager, configuration)
+        assert experiment["StageParameters"]["limits"] == True
+
+        microscope_names = list(configuration["configuration"]["microscopes"].keys())
+        for microscope_name in microscope_names:
+            for k in ["xy_step", "z_step", "f_step", "theta_step"]:
+                experiment["StageParameters"][microscope_name][k] = "abc"
+                config.verify_experiment_config(self.manager, configuration)
+                assert type(experiment["StageParameters"][microscope_name][k]) is int
+        
+
+
+    def select_random_entries_from_list(self, parameter_list):
+        n = random.randint(1, len(parameter_list))
+        return random.choices(parameter_list, k=n)
+
+    def delete_random_entries_from_dict(self, parameter_list, parameter_dict):
+        n = random.randint(1, len(parameter_list))
+        deleted_parameters =random.choices(parameter_list, k=n)
+        for k in deleted_parameters:
+            if k in parameter_dict.keys():
+                del parameter_dict[k]
+        return deleted_parameters
     
 
 if __name__ == "__main__":

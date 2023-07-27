@@ -398,7 +398,7 @@ def verify_experiment_config(manager, configuration):
         "readout_direction": "Top to Bottom",
         "number_of_pixels": 10,
         "binning": "1x1",
-        "frames_to_average": 1.0,
+        "frames_to_average": 1,
         "databuffer_size": 100,
     }
     if (
@@ -430,6 +430,10 @@ def verify_experiment_config(manager, configuration):
         camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
 
     # image width and height
+    if camera_setting_dict["x_pixels"] <= 0:
+        camera_setting_dict["x_pixels"] = camera_parameters_dict_sample["x_pixels"]
+    if camera_setting_dict["y_pixels"] <= 0:
+        camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
     x_binning = int(camera_setting_dict["binning"][0])
     y_binning = int(camera_setting_dict["binning"][2])
     img_x_pixels = camera_setting_dict["x_pixels"] // x_binning
@@ -446,6 +450,15 @@ def verify_experiment_config(manager, configuration):
         "Bottom to Top",
     ]:
         camera_setting_dict["readout_direction"] = "Top to Bottom"
+
+    # databuffer_size, number_of_pixels
+    for k in ["databuffer_size", "number_of_pixels", "frames_to_average"]:
+        try:
+            camera_setting_dict[k] = int(camera_setting_dict[k])
+        except ValueError:
+            camera_setting_dict[k] = camera_parameters_dict_sample[k]
+        if camera_setting_dict[k] < 1:
+            camera_setting_dict[k] = camera_parameters_dict_sample[k]
 
     # stage parameters
     stage_dict_sample = {}
@@ -471,6 +484,9 @@ def verify_experiment_config(manager, configuration):
     stage_setting_dict = configuration["experiment"]["StageParameters"]
     if "limits" not in stage_setting_dict.keys():
         stage_setting_dict["limits"] = True
+    elif type(stage_setting_dict["limits"]) is not bool:
+        stage_setting_dict["limits"] = True
+
     for microscope_name in stage_dict_sample:
         if (
             microscope_name not in stage_setting_dict.keys()
@@ -494,7 +510,7 @@ def verify_experiment_config(manager, configuration):
                             stage_setting_dict[microscope_name][k]
                         )
                     except ValueError:
-                        stage_setting_dict[microscope_name][k] = saving_dict_sample[
+                        stage_setting_dict[microscope_name][k] = stage_dict_sample[
                             microscope_name
                         ][k]
 

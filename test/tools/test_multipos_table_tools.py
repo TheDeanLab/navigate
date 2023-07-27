@@ -42,14 +42,14 @@ import numpy as np
 # Local application imports
 from aslm.tools.multipos_table_tools import (
     update_table,
-    calc_num_tiles,
-    sign,
 )
 from aslm.view.main_window_content.multiposition_tab import MultiPositionTable
 
 
 @pytest.mark.parametrize("pair", zip([5.6, -3.8, 0], [1, -1, 1]))
 def test_sign(pair):
+    from aslm.tools.multipos_table_tools import sign
+
     x, cmp_x = pair
 
     assert sign(x) == cmp_x
@@ -169,34 +169,22 @@ def test_compute_tiles_from_bounding_box(
     assert len(tiles) == x_tiles * y_tiles * z_tiles * theta_tiles
 
 
-class CalcNumTilesTestCase(unittest.TestCase):
-    def test_calc_num_tiles_1(self):
-        dist = 10
-        overlap = 0.2
-        roi_length = 2
-        expected_num_tiles = ceil(
-            (dist - overlap * roi_length) / (roi_length - overlap * roi_length)
-        )
-        result = calc_num_tiles(dist, overlap, roi_length)
-        self.assertEqual(result, expected_num_tiles)
+@pytest.mark.parametrize("dist", listize(np.random.rand(3) * 1000))
+@pytest.mark.parametrize("overlap", listize(np.random.rand(3)))
+@pytest.mark.parametrize("roi_length", listize(np.random.rand(3) * 1000))
+def test_calc_num_tiles(dist, overlap, roi_length):
+    from aslm.tools.multipos_table_tools import calc_num_tiles
 
-    def test_calc_num_tiles_2(self):
-        dist = 0
-        overlap = 0.3
-        roi_length = 5
-        expected_num_tiles = 1
-        result = calc_num_tiles(dist, overlap, roi_length)
-        self.assertEqual(result, expected_num_tiles)
+    # dist = 300
+    # overlap = .75
+    # roi_length = 525
+    expected_num_tiles = ceil(
+        abs(dist - overlap * roi_length) / abs(roi_length - overlap * roi_length)
+    )
 
-    def test_calc_num_tiles_3(self):
-        dist = 15
-        overlap = 0.1
-        roi_length = 3
-        expected_num_tiles = ceil(
-            (dist - overlap * roi_length) / (roi_length - overlap * roi_length)
-        )
-        result = calc_num_tiles(dist, overlap, roi_length)
-        self.assertEqual(result, expected_num_tiles)
+    result = calc_num_tiles(dist, overlap, roi_length)
+
+    assert result == expected_num_tiles
 
 
 class UpdateTableTestCase(unittest.TestCase):

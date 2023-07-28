@@ -10,8 +10,9 @@ from aslm.tools.file_functions import delete_folder
 @pytest.mark.parametrize("per_stack", [True, False])
 @pytest.mark.parametrize("z_stack", [True, False])
 @pytest.mark.parametrize("stop_early", [True, False])
+@pytest.mark.parametrize("size", [(1024, 2048), (2048, 1024), (2048, 2048)])
 @pytest.mark.parametrize("ext", ["h5", "n5"])
-def test_bdv_write(multiposition, per_stack, z_stack, stop_early, ext):
+def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
     from aslm.model.dummy import DummyModel
     from aslm.model.data_sources.bdv_data_source import BigDataViewerDataSource
 
@@ -24,6 +25,13 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early, ext):
     model = DummyModel()
     z_steps = np.random.randint(1, 3)
     timepoints = np.random.randint(1, 3)
+
+    x_size, y_size = size
+    model.configuration["experiment"]["CameraParameters"]["x_pixels"] = x_size
+    model.configuration["experiment"]["CameraParameters"]["y_pixels"] = y_size
+    model.img_width = x_size
+    model.img_height = y_size
+
     model.configuration["experiment"]["MicroscopeState"]["image_mode"] = (
         "z-stack" if z_stack else "single"
     )
@@ -52,7 +60,7 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early, ext):
         f"t: {ds.shape_t} positions: {ds.positions} per_stack: {ds.metadata.per_stack}"
     )
     # TODO: Why does 2**16 make ImageJ crash??? But 2**8 works???
-    data = (np.random.rand(n_images, ds.shape_x, ds.shape_y) * 2**8).astype("uint16")
+    data = (np.random.rand(n_images, ds.shape_y, ds.shape_x) * 2**8).astype("uint16")
     data_positions = (np.random.rand(n_images, 5) * 50e3).astype(float)
     for i in range(n_images):
         ds.write(

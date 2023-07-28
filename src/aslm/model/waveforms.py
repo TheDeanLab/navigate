@@ -388,7 +388,7 @@ def smooth_waveform(waveform, percent_smoothing=10):
 
     """
     waveform_length = np.size(waveform)
-    window_length = int(waveform_length * percent_smoothing / 100)
+    window_length = int(np.ceil(waveform_length * percent_smoothing / 100))
     if window_length == 0:
         # cannot smooth
         return waveform

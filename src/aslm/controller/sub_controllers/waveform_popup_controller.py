@@ -549,14 +549,12 @@ class WaveformPopupController(GUIController):
                 f"Galvo parameter {parameter} changed: "
                 f"{variable_value} pre if statement"
             )
-            print(f"Galvo parameter {parameter} changed: "
-                f"{variable_value} pre if statement")
+            
             if value != variable_value and variable_value != "":
                 self.galvo_setting[galvo_name][self.resolution][self.mag][
                     parameter
                 ] = variable_value
                 logger.debug(f"Galvo parameter {parameter} changed: {variable_value}")
-                print(f"Galvo parameter {parameter} changed: {variable_value}")
                 # change any galvo parameters as one event
                 try:
                     if self.event_id:

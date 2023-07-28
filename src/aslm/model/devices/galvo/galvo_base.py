@@ -180,12 +180,6 @@ class GalvoBase:
                     galvo_frequency = (
                         float(galvo_parameters.get("frequency", 0)) / exposure_time
                     )
-                    print("galvo amplitude")
-                    print(galvo_amplitude)
-                    print("galvo offset")
-                    print(galvo_offset)
-                    print("galvo frequency")
-                    print(galvo_frequency)
                 except ValueError as e:
                     logger.error(
                         f"{e} waveform constants.yml doesn't have parameter "
@@ -214,110 +208,6 @@ class GalvoBase:
                         offset=galvo_offset,
                         phase=self.device_config["phase"],
                     )
-                else:
-                    print(
-                        "Mistakes were made. "
-                        "Unknown waveform specified in configuration file."
-                    )
-                    self.waveform_dict[channel_key] = None
-                    continue
-                self.waveform_dict[channel_key][
-                    self.waveform_dict[channel_key] > self.galvo_max_voltage
-                ] = self.galvo_max_voltage
-                self.waveform_dict[channel_key][
-                    self.waveform_dict[channel_key] < self.galvo_min_voltage
-                ] = self.galvo_min_voltage
-
-        return self.waveform_dict
-
-    def adjust_zero(self, exposure_times, sweep_times):
-        """Adjust the galvo waveform to account for the camera readout time.
-
-        Parameters
-        ----------
-        readout_time : float
-            Camera readout time in seconds.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> galvo.adjust(exposure_times, sweep_times)
-        """
-        self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
-        # calculate waveform
-        microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        microscope_name = microscope_state["microscope_name"]
-        zoom_value = microscope_state["zoom"]
-        galvo_parameters = self.configuration["waveform_constants"]["galvo_constants"][
-            self.galvo_name
-        ][microscope_name][zoom_value]
-        self.sample_rate = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["daq"]["sample_rate"]
-
-        for channel_key in microscope_state["channels"].keys():
-            # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
-            channel = microscope_state["channels"][channel_key]
-
-            # Only proceed if it is enabled in the GUI
-            if channel["is_selected"] is True:
-
-                # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.
-                # Should Assert.
-                exposure_time = exposure_times[channel_key]
-                self.sweep_time = sweep_times[channel_key]
-
-                self.samples = int(self.sample_rate * self.sweep_time)
-
-                # galvo Parameters
-                try:
-                    # galvo_amplitude = float(galvo_parameters.get("amplitude", 0))
-                    # galvo_offset = float(galvo_parameters.get("offset", 0))
-                    # galvo_frequency = (
-                    #     float(galvo_parameters.get("frequency", 0)) / exposure_time
-                    # )
-                    galvo_amplitude = 0
-                    galvo_offset = 0
-                    galvo_frequency = 0
-
-                except ValueError as e:
-                    logger.error(
-                        f"{e} waveform constants.yml doesn't have parameter "
-                        f"amplitude/offset/frequency for {self.galvo_name}"
-                    )
-                    return
-                print("galvo amplitude zero")
-                print(galvo_amplitude)
-                print("galvo offset zero")
-                print(galvo_offset)
-                print("galvo frequency zero")
-                print(galvo_frequency)
-
-                # Calculate the Waveforms
-                if self.galvo_waveform == "sawtooth":
-                    self.waveform_dict[channel_key] = sawtooth(
-                        sample_rate=self.sample_rate,
-                        sweep_time=self.sweep_time,
-                        frequency=galvo_frequency,
-                        amplitude=galvo_amplitude,
-                        offset=galvo_offset,
-                        phase=(self.camera_delay_percent / 100) * exposure_time,
-                    )
-                    print("Galvo Amplitude Sawtooth")
-                    print(galvo_amplitude)
-                elif self.galvo_waveform == "sine":
-                    self.waveform_dict[channel_key] = sine_wave(
-                        sample_rate=self.sample_rate,
-                        sweep_time=self.sweep_time,
-                        frequency=galvo_frequency,
-                        amplitude=galvo_amplitude,
-                        offset=galvo_offset,
-                        phase=self.device_config["phase"],
-                    )
-                    
                 else:
                     print(
                         "Mistakes were made. "
@@ -402,4 +292,7 @@ class GalvoBase:
         --------
         >>> galvo.close_task()
         """
+        pass
+
+    def turn_off(self):
         pass

@@ -401,32 +401,6 @@ class Microscope:
         }
         return waveform_dict
     
-    def galvo_zero(self):
-        """Set galvo Amplitude, Offset, and Freq to zero
-        """
-        print("Galvo Zero Adjust")
-        readout_time = self.get_readout_time()
-        exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
-        camera_waveform = self.daq.calculate_all_waveforms(
-            self.microscope_name, exposure_times, sweep_times
-        )
-        remote_focus_waveform = self.remote_focus_device.adjust(
-            exposure_times, sweep_times
-        )
-        galvo_waveform = [
-            self.galvo[k].adjust_zero(exposure_times, sweep_times) for k in self.galvo
-        ]
-        # TODO: calculate waveform for galvo stage
-        for stage, axes in self.stages_list:
-            if type(stage) == GalvoNIStage:
-                stage.calculate_waveform(exposure_times, sweep_times)
-        waveform_dict = {
-            "camera_waveform": camera_waveform,
-            "remote_focus_waveform": remote_focus_waveform,
-            "galvo_waveform": galvo_waveform,
-        }
-        return waveform_dict
-
     def calculate_exposure_sweep_times(self, readout_time):
         """Get the exposure and sweep times for all channels.
 
@@ -787,26 +761,15 @@ class Microscope:
 
     def terminate(self):
         """Close hardware explicitly."""
-        # self.camera.close_camera()
-        # print("Camera Closed")
-        self.galvo_zero()
-        # try:
-        #     #turn off galvo on exit
-        #     for k in self.galvo:
-        #         self.galvo_zero()
-        #         #self.galvo[k].close_task()
-        #         print(self.galvo[k]) 
-        #         print("closed")
-        # except AttributeError:
-        #     #print("Galvo Passed")
-        #     pass
-        # set galvo waveform to zero
+        for k in self.galvo:
+            self.galvo[k].turn_off()
+        
         try:
             # Currently only for RemoteFocusEquipmentSolutions
             self.remote_focus_device.close_connection()
         except AttributeError:
             pass
         self.camera.close_camera()
-        print("Camera Closed")
+        
 
        

@@ -84,16 +84,6 @@ class GalvoNI(GalvoBase):
         Stop the NI DAQ task
     close_task()
         Close the NI DAQ task
-
-    Examples
-    --------
-    >>> galvo = GalvoNI(microscope_name, device_connection, configuration, galvo_id=0)
-    >>> galvo.adjust(exposure_times, sweep_times)
-    >>> galvo.prepare_task(channel_key)
-    >>> galvo.start_task()
-    >>> galvo.stop_task(force=False)
-    >>> galvo.close_task()
-
     """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
@@ -104,8 +94,6 @@ class GalvoNI(GalvoBase):
         self.trigger_source = configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["trigger_source"]
-
-        # self.initialize_task()
 
         self.daq = device_connection
 
@@ -119,10 +107,6 @@ class GalvoNI(GalvoBase):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.initialize_task()
         """
 
         # TODO: make sure the task is reusable, Or need to create and close each time.
@@ -150,9 +134,6 @@ class GalvoNI(GalvoBase):
         Returns
         -------
         None
-        Examples
-        --------
-        >>> del galvo
         """
 
         self.stop_task()
@@ -170,11 +151,8 @@ class GalvoNI(GalvoBase):
 
         Returns
         -------
-        None
-
-        Examples
-        --------
-        >>> galvo.adjust(exposure_times, sweep_times)
+        waveform_dict
+            Dictionary with the adjusted waveforms.
         """
         waveform_dict = super().adjust(exposure_times, sweep_times)
 
@@ -197,14 +175,7 @@ class GalvoNI(GalvoBase):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.prepare_task(channel_key)
         """
-
-        # write waveform
-        # self.task.write(self.waveform_dict[channel_key])
         pass
 
     def start_task(self):
@@ -217,13 +188,7 @@ class GalvoNI(GalvoBase):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.start_task()
         """
-
-        # self.task.start()
         pass
 
     def stop_task(self, force=False):
@@ -237,15 +202,7 @@ class GalvoNI(GalvoBase):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.stop_task()
         """
-
-        # if not force:
-        #     self.task.wait_until_done()
-        # self.task.stop()
         pass
 
     def close_task(self):
@@ -258,11 +215,5 @@ class GalvoNI(GalvoBase):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.close_task()
         """
-
-        # self.task.close()
         pass

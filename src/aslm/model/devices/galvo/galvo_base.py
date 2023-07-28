@@ -111,6 +111,7 @@ class GalvoBase:
         self.sweep_time = configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sweep_time"]
+        self.exposure_time = None
         self.camera_delay_percent = configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]["delay_percent"]
@@ -136,19 +137,16 @@ class GalvoBase:
 
         Parameters
         ----------
-        readout_time : float
-            Camera readout time in seconds.
+        exposure_times : float
+            Camera readout time in milliseconds.
+        sweep_times : float
+            Duration of entire sweep time in milliseconds.
 
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.adjust(exposure_times, sweep_times)
         """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
-        # calculate waveform
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         microscope_name = microscope_state["microscope_name"]
         zoom_value = microscope_state["zoom"]
@@ -168,9 +166,8 @@ class GalvoBase:
 
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.
                 # Should Assert.
-                exposure_time = exposure_times[channel_key]
                 self.sweep_time = sweep_times[channel_key]
-
+                self.exposure_time = exposure_times[channel_key]
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # galvo Parameters
@@ -178,7 +175,7 @@ class GalvoBase:
                     galvo_amplitude = float(galvo_parameters.get("amplitude", 0))
                     galvo_offset = float(galvo_parameters.get("offset", 0))
                     galvo_frequency = (
-                        float(galvo_parameters.get("frequency", 0)) / exposure_time
+                        float(galvo_parameters.get("frequency", 0)) / self.exposure_time
                     )
                 except ValueError as e:
                     logger.error(
@@ -195,7 +192,7 @@ class GalvoBase:
                         frequency=galvo_frequency,
                         amplitude=galvo_amplitude,
                         offset=galvo_offset,
-                        phase=(self.camera_delay_percent / 100) * exposure_time,
+                        phase=(self.camera_delay_percent / 100) * self.exposure_time,
                     )
                 elif self.galvo_waveform == "sine":
                     self.waveform_dict[channel_key] = sine_wave(
@@ -233,10 +230,6 @@ class GalvoBase:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.prepare_task('488')
         """
 
         pass
@@ -251,10 +244,6 @@ class GalvoBase:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.start_task()
         """
         pass
 
@@ -268,10 +257,6 @@ class GalvoBase:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.stop_task()
         """
         pass
 
@@ -285,9 +270,5 @@ class GalvoBase:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.close_task()
         """
         pass

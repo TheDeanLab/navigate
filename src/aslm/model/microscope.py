@@ -787,24 +787,26 @@ class Microscope:
 
     def terminate(self):
         """Close hardware explicitly."""
-        self.camera.close_camera()
-        print("Camera Closed")
+        # self.camera.close_camera()
+        # print("Camera Closed")
         self.galvo_zero()
-        try:
-            #turn off galvo on exit
-            for k in self.galvo:
-                self.galvo_zero()
-                #self.galvo[k].close_task()
-                print(self.galvo[k]) 
-                print("closed")
-        except AttributeError:
-            #print("Galvo Passed")
-            pass
+        # try:
+        #     #turn off galvo on exit
+        #     for k in self.galvo:
+        #         self.galvo_zero()
+        #         #self.galvo[k].close_task()
+        #         print(self.galvo[k]) 
+        #         print("closed")
+        # except AttributeError:
+        #     #print("Galvo Passed")
+        #     pass
         # set galvo waveform to zero
         try:
             # Currently only for RemoteFocusEquipmentSolutions
             self.remote_focus_device.close_connection()
         except AttributeError:
             pass
+        self.camera.close_camera()
+        print("Camera Closed")
 
        

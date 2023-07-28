@@ -111,7 +111,6 @@ class GalvoBase:
         self.sweep_time = configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sweep_time"]
-        self.exposure_time = None
         self.camera_delay_percent = configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]["delay_percent"]
@@ -123,9 +122,7 @@ class GalvoBase:
 
         # Galvo Waveform Information
         self.galvo_waveform = self.device_config.get("waveform", "sawtooth")
-
         self.samples = int(self.sample_rate * self.sweep_time)
-
         self.waveform_dict = {}
 
     def __del__(self):
@@ -137,14 +134,17 @@ class GalvoBase:
 
         Parameters
         ----------
-        exposure_times : float
-            Camera readout time in milliseconds.
-        sweep_times : float
-            Duration of entire sweep time in milliseconds.
+        exposure_times : dict
+            Dictionary of camera exposure time in seconds on a per-channel basis.
+            e.g., exposure_times = {"channel_1": 0.1, "channel_2": 0.2}
+        sweep_times : dict
+            Dictionary of acquisition sweep time in seconds on a per-channel basis.
+            e.g., sweep_times = {"channel_1": 0.1, "channel_2": 0.2}
 
         Returns
         -------
-        None
+        waveform_dict : dict
+            Dictionary that includes the galvo waveforms on a per-channel basis.
         """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
@@ -166,8 +166,8 @@ class GalvoBase:
 
                 # Get the Waveform Parameters - Assumes ETL Delay < Camera Delay.
                 # Should Assert.
+                exposure_time = exposure_times[channel_key]
                 self.sweep_time = sweep_times[channel_key]
-                self.exposure_time = exposure_times[channel_key]
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # galvo Parameters
@@ -175,7 +175,7 @@ class GalvoBase:
                     galvo_amplitude = float(galvo_parameters.get("amplitude", 0))
                     galvo_offset = float(galvo_parameters.get("offset", 0))
                     galvo_frequency = (
-                        float(galvo_parameters.get("frequency", 0)) / self.exposure_time
+                        float(galvo_parameters.get("frequency", 0)) / exposure_time
                     )
                 except ValueError as e:
                     logger.error(
@@ -192,7 +192,7 @@ class GalvoBase:
                         frequency=galvo_frequency,
                         amplitude=galvo_amplitude,
                         offset=galvo_offset,
-                        phase=(self.camera_delay_percent / 100) * self.exposure_time,
+                        phase=(self.camera_delay_percent / 100) * exposure_time,
                     )
                 elif self.galvo_waveform == "sine":
                     self.waveform_dict[channel_key] = sine_wave(
@@ -204,10 +204,7 @@ class GalvoBase:
                         phase=self.device_config["phase"],
                     )
                 else:
-                    print(
-                        "Mistakes were made. "
-                        "Unknown waveform specified in configuration file."
-                    )
+                    print("Unknown Galvo waveform specified in configuration file.")
                     self.waveform_dict[channel_key] = None
                     continue
                 self.waveform_dict[channel_key][
@@ -231,7 +228,6 @@ class GalvoBase:
         -------
         None
         """
-
         pass
 
     def start_task(self):

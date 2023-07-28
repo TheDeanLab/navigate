@@ -687,7 +687,13 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         assert "channel_2" in experiment["MicroscopeState"]["channels"].keys()
         for k in expected_value:
             assert experiment["MicroscopeState"]["channels"]["channel_2"][k] == expected_value[k]
-        
+
+        # selected_channels
+        assert experiment["MicroscopeState"]["selected_channels"] == 0
+        experiment["MicroscopeState"]["channels"]["channel_2"]["is_selected"] = True
+        config.verify_experiment_config(self.manager, configuration)
+        assert experiment["MicroscopeState"]["selected_channels"] == 1
+
 
     def select_random_entries_from_list(self, parameter_list):
         n = random.randint(1, len(parameter_list))
@@ -700,7 +706,3 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             if k in parameter_dict.keys():
                 del parameter_dict[k]
         return deleted_parameters
-
-
-if __name__ == "__main__":
-    unittest.main()

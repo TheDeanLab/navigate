@@ -91,6 +91,8 @@ class MockASIStage:
             self.output_buffer.append(":A")
         elif command == "SPEED":
             self.output_buffer.append(":A")
+        elif command == "BU":
+            self.output_buffer.append("TIGER_COMM\rMotor Axes: X Y Z F M N\rAxis Addr: 1 1 2 2 8 8\rHex Addr: 31 31 32 32 39 39\rAxis Props: 10 10 0 0 0 0")
 
 
     def readline(self):

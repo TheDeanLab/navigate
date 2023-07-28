@@ -529,7 +529,7 @@ def verify_experiment_config(manager, configuration):
         "step_size": 20.0,
         "number_z_steps": 5,
         "timepoints": 1,
-        "stack_pause": "0.0",
+        "stack_pause": 0.0,
         "is_save": False,
         "stack_acq_time": 1.0,
         "timepoint_interval": 0,
@@ -568,6 +568,11 @@ def verify_experiment_config(manager, configuration):
             if type(microscope_state_dict_sample[k]) == float:
                 try:
                     microscope_setting_dict[k] = float(microscope_setting_dict[k])
+                except ValueError:
+                    microscope_setting_dict[k] = microscope_state_dict_sample[k]
+            elif type(microscope_state_dict_sample[k]) == int:
+                try:
+                    microscope_setting_dict[k] = int(microscope_setting_dict[k])
                 except ValueError:
                     microscope_setting_dict[k] = microscope_state_dict_sample[k]
             else:
@@ -640,16 +645,22 @@ def verify_experiment_config(manager, configuration):
         if channel_value["is_selected"]:
             selected_channel_num += 1
         # camera_exposure_time and defoucus should be float
-        try:
-            channel_value["camera_exposure_time"] = float(
-                channel_value["camera_exposure_time"]
-            )
-        except ValueError:
-            channel_value["camera_exposure_time"] = 200.0
-        try:
-            channel_value["defocus"] = float(channel_value["defocus"])
-        except ValueError:
-            channel_value["defocus"] = 0.0
+        temp = {
+            "laser_power": 20.0,
+            "camera_exposure_time": 200.0,
+            "interval_time": 0.0,
+            "defocus": 0.0
+        }
+        for k in temp:
+            try:
+                channel_value[k] = float(
+                    channel_value[k]
+                )
+            except ValueError:
+                channel_value[k] = temp[k]
+            if channel_value[k] < 0:
+                channel_value[k] = temp[k]
+        
     microscope_setting_dict["selected_channels"] = selected_channel_num
 
     # MultiPositions

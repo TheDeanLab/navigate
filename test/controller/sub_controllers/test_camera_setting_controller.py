@@ -188,7 +188,6 @@ class TestCameraSettingController:
         attrs = [
             "in_initialization",
             "resolution_value",
-            "number_of_pixels",
             "mode",
             "solvent",
             "mode_widgets",
@@ -361,7 +360,7 @@ class TestCameraSettingController:
             )
             assert (
                 int(self.camera_settings.mode_widgets["Pixels"].widget.get())
-                == self.camera_settings.number_of_pixels
+                == int(self.camera_settings.camera_setting_dict["number_of_pixels"])
             )
 
     def test_update_exposure_time(self):
@@ -556,14 +555,13 @@ class TestCameraSettingController:
         self.camera_settings.mode = mode
 
         self.camera_settings.mode_widgets["Pixels"].set("")
-        assert self.camera_settings.number_of_pixels != ""
         assert self.camera_settings.camera_setting_dict["number_of_pixels"] != ""
 
         n_pixels = random.randint(1, 100)
         self.camera_settings.mode_widgets["Pixels"].set(n_pixels)
 
         # Check
-        assert self.camera_settings.number_of_pixels == int(n_pixels)
+        assert self.camera_settings.camera_setting_dict["number_of_pixels"] == int(n_pixels)
         if mode != "live" and mode != "stop":
             assert (
                 self.camera_settings.camera_setting_dict["number_of_pixels"] == n_pixels

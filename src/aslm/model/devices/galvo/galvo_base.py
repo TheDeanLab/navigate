@@ -197,8 +197,6 @@ class GalvoBase:
                         offset=galvo_offset,
                         phase=(self.camera_delay_percent / 100) * exposure_time,
                     )
-                    print("sawtooth amplitude")
-                    print(galvo_amplitude)
                 elif self.galvo_waveform == "sine":
                     self.waveform_dict[channel_key] = sine_wave(
                         sample_rate=self.sample_rate,

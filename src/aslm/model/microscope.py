@@ -39,7 +39,6 @@ from aslm.model.device_startup_functions import (
 )
 from aslm.tools.common_functions import build_ref_name
 from aslm.model.devices.stages.stage_galvo import GalvoNIStage
-from aslm.controller.sub_controllers.waveform_popup_controller import WaveformPopupController
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
@@ -377,8 +376,6 @@ class Microscope:
         waveform : dict
             Dictionary of all the waveforms.
         """
-        print("calculate waveform adjust")
-        # waveform_dict = self.galvo_zero()
         readout_time = self.get_readout_time()
         exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
         camera_waveform = self.daq.calculate_all_waveforms(
@@ -394,7 +391,7 @@ class Microscope:
         for stage, axes in self.stages_list:
             if type(stage) == GalvoNIStage:
                 stage.calculate_waveform(exposure_times, sweep_times)
-        # waveform_dict = self.galvo_zero
+       
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,

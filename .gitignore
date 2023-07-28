@@ -292,3 +292,5 @@ src/aslm/log_files/LOGS
 *.tiff
 *.ipynb
 *.tif
+test.n5
+test_dir

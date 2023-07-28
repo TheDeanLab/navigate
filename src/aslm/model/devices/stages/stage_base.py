@@ -227,3 +227,6 @@ class StageBase:
     def stop(self):
         """Stop all stage movement abruptly."""
         pass
+
+    def close(self):
+        pass

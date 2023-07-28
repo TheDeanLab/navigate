@@ -172,7 +172,7 @@ class ASIStage(StageBase):
 
         # Axes mapping: {'x': 'V', 'y': 'X', 'z': 'Z', 'f': 'Y', 'theta': 'T'}
         # ASI axes: {'V': 'x', 'X': 'y', 'Z': 'z', 'Y': 'f', 'T': 'theta'}
-        # self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
+        self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
         self.tiger_controller = device_connection
         # set default speed
@@ -221,19 +221,13 @@ class ASIStage(StageBase):
         position dictionary."""
         try:
             # positions from the device are in microns
-            # print("reporting...")
-            # axes = list(self.axes_mapping.values())
-            # print(axes)
-            # positions = self.tiger_controller.get_position(axes)
-            # print(positions)
-            # if len(positions) != len(self.axes_mapping):
-            #      print("Failed to report ASI Stage Position")
-            #      logger.exception(f"ASI Stage -- Recievied {positions} for {axes}")
-            # for axis, pos in zip(list(self.axes_mapping.keys()), positions):
-            for axis, asi_axis in self.axes_mapping.items():
-                pos = self.tiger_controller.get_axis_position(asi_axis)
-                # print(f"ASI axis {asi_axis} = {pos}")
-                setattr(self, f"{axis}_pos", float(pos) / 10.0)
+            pos_dict = self.tiger_controller.get_position(list(self.asi_axes.keys()))
+            for axis, pos in pos_dict.items():
+                setattr(self, f"{self.asi_axes[axis]}_pos", float(pos) / 10.0)
+            # for axis, asi_axis in self.axes_mapping.items():
+            #     pos = self.tiger_controller.get_axis_position(asi_axis)
+            #     # print(f"ASI axis {asi_axis} = {pos}")
+            #     setattr(self, f"{axis}_pos", float(pos) / 10.0)
         except TigerException as e:
             print("Failed to report ASI Stage Position")
             logger.exception(e)

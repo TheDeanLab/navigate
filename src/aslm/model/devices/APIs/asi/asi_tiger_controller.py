@@ -55,7 +55,7 @@ class TigerController:
         self.com_port = com_port
         self.baud_rate = baud_rate
         self.verbose = verbose
-        # self.default_axes_sequence = ["X", "Y", "Z", "F", "M", "N"]
+        self.default_axes_sequence = None
         self.safe_to_write = threading.Event()
         self.safe_to_write.set()
 
@@ -107,6 +107,16 @@ class TigerController:
             # report connection status to user
             self.report_to_console("Connected to the serial port.")
             self.report_to_console(f"Serial port = {self.com_port} :: Baud rate = {self.baud_rate}")
+
+            # get default motor axes sequenc
+            self.send_command("BU X")
+            response = self.read_response()
+            lines = response.split("\r")
+            for line in lines:
+                if line.startswith("Motor Axes:"):
+                    self.default_axes_sequence = line[line.index(":")+2:].split(" ")
+                    self.report_to_console("Get the default axes sequence from the ASI device successfully!")
+                    break
 
     def disconnect_from_serial(self) -> None:
         """
@@ -210,7 +220,10 @@ class TigerController:
     def get_position(self, axes) -> dict:
         """Return current stage position in ASI units.
 
-        DO NOT USE UNLESS YOU KNOW WHAT YOU ARE DOING!!
+        If default axes sequence has gotten from the ASI device, 
+        then it will ask the device all the position in one command,
+        else it will ask each axis position one by one. 
+
         WATCH OUT! This will return the positions in the order
         of the underlying hardware no matter what order the axes
         are passed in.
@@ -223,11 +236,21 @@ class TigerController:
              {axis: position}
         """
 
-        cmd = f"WHERE {' '.join(axes)}\r"
-        self.send_command(cmd)
-        response = self.read_response()
+        if self.default_axes_sequence:
+            cmd = f"WHERE {' '.join(axes)}\r"
+            self.send_command(cmd)
+            response = self.read_response()
 
-        return response.split(" ")[1:-1]
+            # return response.split(" ")[1:-1]
+            pos = response.split(" ")
+            axes_seq = list(filter(lambda axis: axis if axis in axes else False, self.default_axes_sequence))
+            return {axis: float(pos[1+i]) for i, axis in enumerate(axes_seq)}
+        else:
+            result = {}
+            for axis in axes:
+                result[axis] = self.get_axis_position(axis)
+            return result
+
 
     # Utility Functions
 

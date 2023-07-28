@@ -101,15 +101,16 @@ class DataSource:
     @property
     def size(self) -> int:
         """Return the size of this data source in bytes."""
-        return (
-            self.shape_x
-            * self.shape_y
-            * self.shape_z
-            * self.shape_t
-            * self.shape_c
-            * self.positions
-            * self.bits
-        )
+        total_bits = (self.shape_x
+                      * self.shape_y
+                      * self.shape_z
+                      * self.shape_t
+                      * self.shape_c
+                      * self.positions
+                      * self.bits
+                      )
+        total_bytes = total_bits // 8
+        return total_bytes
 
     @property
     def mode(self) -> str:

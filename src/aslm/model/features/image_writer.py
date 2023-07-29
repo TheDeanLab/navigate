@@ -35,7 +35,7 @@
 import os
 import logging
 
-# import shutil
+import shutil
 
 # Third Party Imports
 import numpy as np
@@ -345,12 +345,15 @@ class ImageWriter:
         Assumes 16-bit image type, without compression."""
 
         # Return disk usage statistics in bytes
-        # _, _, free = shutil.disk_usage(self.save_directory)
+        _, _, free = shutil.disk_usage(self.save_directory)
+        print("Free disk space", free)
 
-        # # Calculate the size in bytes.
-        # image_size = self.data_source.size
+        # Calculate the size in bytes.
+        image_size = self.data_source.size
+        print("image size", image_size)
 
         # # Confirm that there is enough disk space to save the data.
-        # if free < image_size:
+        if free < image_size:
+            print("WARNING: INSUFFICIENT DISK SPACE ESTIMATED")
         #     raise Warning("Insufficient disk space to save data.")
         pass

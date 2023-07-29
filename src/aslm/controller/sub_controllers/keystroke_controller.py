@@ -101,6 +101,7 @@ class KeystrokeController(GUIController):
         self.main_view.bind("s", self.stage_controller.stage_key_press)
         self.main_view.bind("a", self.stage_controller.stage_key_press)
         self.main_view.bind("d", self.stage_controller.stage_key_press)
+        self.main_view.bind("<Control-KeyRelease-j>", self.stage_controller.joystick_button_handler)
         self.main_view.bind("<Control-Key-1>", self.switch_tab)
         self.main_view.bind("<Control-Key-2>", self.switch_tab)
         self.main_view.bind("<Control-Key-3>", self.switch_tab)

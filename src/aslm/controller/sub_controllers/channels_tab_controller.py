@@ -324,6 +324,10 @@ class ChannelsTabController(GUIController):
         self.set_info(self.conpro_acq_vals, self.microscope_state_dict)
         self.set_info(self.timepoint_vals, self.microscope_state_dict)
 
+        # check configuration for multiposition settings
+        self.is_multiposition_val.set(self.microscope_state_dict["is_multiposition"])
+        self.toggle_multiposition()
+
         # validate
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()

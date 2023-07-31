@@ -126,11 +126,12 @@ class GalvoNI(GalvoBase):
         self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
 
     def __del__(self):
-        """Deletes the task.
-        This method deletes the task.
+        """Delete the task.
+
         Parameters
         ----------
         None
+
         Returns
         -------
         None

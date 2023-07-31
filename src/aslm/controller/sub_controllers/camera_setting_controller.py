@@ -91,14 +91,7 @@ class CameraSettingController(GUIController):
         if camera_config_dict is None:
             return
 
-        self.default_pixel_size = camera_config_dict["pixel_size_in_microns"]
-        (
-            self.default_width,
-            self.default_height,
-        ) = self.parent_controller.configuration_controller.camera_pixels
-        self.trigger_source = camera_config_dict["trigger_source"]
-        self.trigger_active = camera_config_dict["trigger_active"]
-        self.readout_speed = camera_config_dict["readout_speed"]
+        self.update_camera_device_related_setting()
 
         # Camera Mode
         self.mode_widgets["Sensor"].widget["values"] = ["Normal", "Light-Sheet"]
@@ -123,22 +116,13 @@ class CameraSettingController(GUIController):
         )  # max value
         self.mode_widgets["Pixels"].widget.config(increment=1)  # step value
 
-        # framerate_widgets
-        self.framerate_widgets["exposure_time"].widget.min = camera_config_dict[
-            "exposure_time_range"
-        ]["min"]
-        self.framerate_widgets["exposure_time"].widget.max = camera_config_dict[
-            "exposure_time_range"
-        ]["max"]
         self.framerate_widgets["exposure_time"].widget["state"] = "disabled"
         self.framerate_widgets["readout_time"].widget["state"] = "disabled"
         self.framerate_widgets["max_framerate"].widget["state"] = "disabled"
 
         # Set range value
-        self.roi_widgets["Width"].widget.config(to=self.default_width)
         self.roi_widgets["Width"].widget.config(from_=2)
         self.roi_widgets["Width"].widget.config(increment=2)
-        self.roi_widgets["Height"].widget.config(to=self.default_height)
         self.roi_widgets["Height"].widget.config(from_=2)
         self.roi_widgets["Height"].widget.config(increment=2)
 
@@ -147,10 +131,6 @@ class CameraSettingController(GUIController):
             "{}x{}".format(i, i) for i in [1, 2, 4]
         ]
         self.roi_widgets["Binning"].widget["state"] = "readonly"
-
-        # Center position
-        self.roi_widgets["Center_X"].set(self.default_width / 2)
-        self.roi_widgets["Center_Y"].set(self.default_height / 2)
 
         # This should not be edited for now
         # Center position
@@ -190,6 +170,10 @@ class CameraSettingController(GUIController):
             )
 
         # ROI Settings
+        if self.camera_setting_dict["x_pixels"] > self.default_width:
+            self.camera_setting_dict["x_pixels"] = self.default_width
+        if self.camera_setting_dict["y_pixels"] > self.default_height:
+            self.camera_setting_dict["y_pixels"] = self.default_height
         self.roi_widgets["Width"].set(self.camera_setting_dict["x_pixels"])
         self.roi_widgets["Height"].set(self.camera_setting_dict["y_pixels"])
 
@@ -313,17 +297,20 @@ class CameraSettingController(GUIController):
         self.framerate_widgets["exposure_time"].set(exposure_time)
         self.calculate_readout_time()
 
-    def update_roi(self, width):
+    def update_roi(self, btn_name):
         """Update ROI width and height.
 
         Parameters
         ----------
-        width : int
-            width of roi in pixels
+        btn_name : roi button name
+            width of roi in pixels: "All", 1600, 1024, 512
         """
-        width = self.default_width if width == "All" else float(width)
 
         def handler(*args):
+            if btn_name == "All":
+                width = self.default_width
+            else:
+                width = float(btn_name)
             self.roi_widgets["Width"].set(width)
             self.roi_widgets["Height"].set(width)
             self.show_verbose_info("ROI width and height are changed to", width, width)
@@ -501,3 +488,43 @@ class CameraSettingController(GUIController):
                 "update_setting", "number_of_pixels"
             ),
         )
+
+    def update_camera_device_related_setting(self):
+        """Update caramera device related parameters.
+
+        This function will update default width and height according to microscope name.
+
+        """
+        camera_config_dict = (
+            self.parent_controller.configuration_controller.camera_config_dict
+        )
+        if camera_config_dict is None:
+            return
+
+        self.default_pixel_size = camera_config_dict["pixel_size_in_microns"]
+        (
+            self.default_width,
+            self.default_height,
+        ) = self.parent_controller.configuration_controller.camera_pixels
+        self.trigger_source = camera_config_dict["trigger_source"]
+        self.trigger_active = camera_config_dict["trigger_active"]
+        self.readout_speed = camera_config_dict["readout_speed"]
+        # framerate_widgets
+        self.framerate_widgets["exposure_time"].widget.min = camera_config_dict[
+            "exposure_time_range"
+        ]["min"]
+        self.framerate_widgets["exposure_time"].widget.max = camera_config_dict[
+            "exposure_time_range"
+        ]["max"]
+
+        # roi max width and height
+        self.roi_widgets["Width"].widget.config(to=self.default_width)
+        self.roi_widgets["Height"].widget.config(to=self.default_height)
+        if self.roi_widgets["Width"].get() > self.default_width:
+            self.roi_widgets["Width"].set(self.default_width)
+        if self.roi_widgets["Height"].get() > self.default_height:
+            self.roi_widgets["Height"].set(self.default_height)
+
+        # Center position
+        self.roi_widgets["Center_X"].set(self.default_width / 2)
+        self.roi_widgets["Center_Y"].set(self.default_height / 2)

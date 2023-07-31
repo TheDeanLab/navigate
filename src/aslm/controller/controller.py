@@ -293,6 +293,14 @@ class Controller:
             # update widgets
             self.stage_controller.initialize()
             self.channels_tab_controller.initialize()
+            self.camera_setting_controller.update_camera_device_related_setting()
+            self.camera_setting_controller.calculate_physical_dimensions()
+            if (
+                hasattr(self, "waveform_popup_controller")
+                and self.waveform_popup_controller
+            ):
+                self.waveform_popup_controller.populate_experiment_values()
+            self.camera_view_controller.update_snr()
 
     def initialize_cam_view(self):
         """Populate view tab.
@@ -554,13 +562,6 @@ class Controller:
                 "model", lambda: self.model.run_command("update_setting", "resolution")
             )
             work_thread.join()
-            self.camera_setting_controller.calculate_physical_dimensions()
-            if (
-                hasattr(self, "waveform_popup_controller")
-                and self.waveform_popup_controller
-            ):
-                self.waveform_popup_controller.populate_experiment_values()
-            self.camera_view_controller.update_snr()
 
         elif command == "set_save":
             """Set whether the image will be saved.

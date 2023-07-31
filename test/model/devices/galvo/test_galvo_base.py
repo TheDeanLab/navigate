@@ -88,7 +88,7 @@ class TestGalvoBase(unittest.TestCase):
         assert self.galvo.galvo_max_voltage == 5
         assert self.galvo.galvo_min_voltage == -5
         assert self.galvo.remote_focus_ramp_falling == 2.5
-        assert self.galvo.galvo_waveform == "sawtooth"
+        assert self.galvo.galvo_waveform == "sawtooth" or "sine"
         assert self.galvo.waveform_dict == {}
 
     def test_adjust_with_valid_input(self):

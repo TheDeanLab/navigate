@@ -122,9 +122,7 @@ class GalvoBase:
 
         # Galvo Waveform Information
         self.galvo_waveform = self.device_config.get("waveform", "sawtooth")
-
         self.samples = int(self.sample_rate * self.sweep_time)
-
         self.waveform_dict = {}
 
     def __del__(self):
@@ -136,19 +134,19 @@ class GalvoBase:
 
         Parameters
         ----------
-        readout_time : float
-            Camera readout time in seconds.
+        exposure_times : dict
+            Dictionary of camera exposure time in seconds on a per-channel basis.
+            e.g., exposure_times = {"channel_1": 0.1, "channel_2": 0.2}
+        sweep_times : dict
+            Dictionary of acquisition sweep time in seconds on a per-channel basis.
+            e.g., sweep_times = {"channel_1": 0.1, "channel_2": 0.2}
 
         Returns
         -------
-        None
-
-        Examples
-        --------
-        >>> galvo.adjust(exposure_times, sweep_times)
+        waveform_dict : dict
+            Dictionary that includes the galvo waveforms on a per-channel basis.
         """
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
-        # calculate waveform
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         microscope_name = microscope_state["microscope_name"]
         zoom_value = microscope_state["zoom"]
@@ -170,7 +168,6 @@ class GalvoBase:
                 # Should Assert.
                 exposure_time = exposure_times[channel_key]
                 self.sweep_time = sweep_times[channel_key]
-
                 self.samples = int(self.sample_rate * self.sweep_time)
 
                 # galvo Parameters
@@ -207,10 +204,7 @@ class GalvoBase:
                         phase=self.device_config["phase"],
                     )
                 else:
-                    print(
-                        "Mistakes were made. "
-                        "Unknown waveform specified in configuration file."
-                    )
+                    print("Unknown Galvo waveform specified in configuration file.")
                     self.waveform_dict[channel_key] = None
                     continue
                 self.waveform_dict[channel_key][
@@ -233,12 +227,7 @@ class GalvoBase:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.prepare_task('488')
         """
-
         pass
 
     def start_task(self):
@@ -251,10 +240,6 @@ class GalvoBase:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.start_task()
         """
         pass
 
@@ -268,10 +253,6 @@ class GalvoBase:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.stop_task()
         """
         pass
 
@@ -285,10 +266,6 @@ class GalvoBase:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> galvo.close_task()
         """
         pass
 

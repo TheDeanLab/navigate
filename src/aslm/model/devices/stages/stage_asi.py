@@ -31,7 +31,6 @@
 
 # Standard Imports
 import logging
-import time
 
 # Third Party Imports
 
@@ -176,13 +175,37 @@ class ASIStage(StageBase):
 
         self.tiger_controller = device_connection
         # set default speed
-        self.default_speed = 5.745760 #7.68 * 0.67
-        default_speeds = {axis: self.default_speed for axis in self.axes_mapping.values()}
-        if self.tiger_controller != None:
-            try:
-                self.tiger_controller.set_speed(default_speeds)
-            except TigerException:
-                logger.exception(f"Initialize ASI Stage with default speed failed!")
+        # self.default_speed = 1.920015 # 5.745760 #7.68 * 0.67
+        # default_speeds = {axis: self.default_speed for axis in self.asi_axes.keys()}
+        # default_speeds["X"] = 5.745760
+        # default_speeds["Y"] = 5.745760
+        # if self.tiger_controller != None:
+        #     try:
+        #         self.tiger_controller.set_speed(default_speeds)
+        #     except TigerException:
+        #         logger.exception(f"Initialize ASI Stage with default speed failed!")
+        
+        ### Speed optimizations
+        # Set speed to 90% of maximum on each axis
+        self.set_speed(percent=0.9)
+
+        # Set feedback alignment
+        # TODO: Grab this dictionary from configuration.yaml as it is per-stage
+        #       In the absence of such a dictionary, set all to 85 by default.
+        feedback_alignment = {'X': 91, 'Y': 91, 'Z': 91, 'T': 85, 'V': 88, 'W': 88}
+        for ax, aa in feedback_alignment.items():
+            self.tiger_controller.set_feedback_alignment(ax, aa)
+
+        # Set backlash to 0 (less accurate)
+        for ax in self.asi_axes.keys():
+            self.tiger_controller.set_backlash(ax, 0.0)
+
+        # Set finishing accuracy to half of the minimum pixel size we will use
+        # pixel size is in microns, finishing accuracy is in mm
+        # TODO: check this over all microscopes sharing this stage, not just the current one
+        finishing_accuracy = 0.001 * min(list(configuration["configuration"]["microscopes"][microscope_name]["zoom"]["pixel_size"].values())) / 2
+        for ax in self.asi_axes.keys():
+            self.tiger_controller.set_finishing_accuracy(ax, finishing_accuracy)
 
     def __del__(self):
         """Delete the ASI Stage connection."""
@@ -279,6 +302,16 @@ class ASIStage(StageBase):
             )
             logger.exception(e)
             return False
+        
+    def verify_move(self, move_dictionary):
+        """ Don't submit a move command for axes that aren't moving.
+        The Tiger controller wait time for each axis is additive. """
+        res_dict = {}
+        for axis, val in move_dictionary.items():
+            curr_pos = getattr(self, f"{axis}_pos", None)
+            if curr_pos != val:
+                res_dict[axis] = val
+        return res_dict
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """Move Absolute Method.
@@ -302,6 +335,7 @@ class ASIStage(StageBase):
         abs_pos_dict = self.verify_abs_position(move_dictionary)
         if not abs_pos_dict:
             return False
+        abs_pos_dict = self.verify_move(abs_pos_dict)
         
         # This is to account for the asi 1/10 of a micron units
         pos_dict = {self.axes_mapping[axis]: pos*10 for axis, pos in abs_pos_dict.items()}
@@ -327,7 +361,7 @@ class ASIStage(StageBase):
             print(f"ASI stage halt command failed: {e}")
             logger.exception(e)
 
-    def set_speed(self, velocity_dict):
+    def set_speed(self, velocity_dict=None, percent=None):
         """Set scan velocity.
 
         Parameters
@@ -335,20 +369,29 @@ class ASIStage(StageBase):
         velocity_dict: dict
             velocity for specific axis
             {'x': float, 'y': float, 'z': float}
+        percent : float
+            Percent of maximum speed
 
         Returns
         -------
         success: bool
             Was the setting successful?
         """
-        temp = dict(map(lambda k: (self.axes_mapping[k], velocity_dict[k]), velocity_dict))
-        try:
-            self.tiger_controller.set_speed(temp)
-        except TigerException:
-            return False
-        except KeyError as e:
-            logger.exception(f"KeyError in set_speed: {e}")
-            return False
+        # temp = dict(map(lambda k: (self.axes_mapping[k], velocity_dict[k]), velocity_dict))
+        if percent is not None:
+            try:
+                self.tiger_controller.set_speed_as_percent_max(percent)
+            except TigerException as e:
+                print(f"ASI Controller failed to set speed as a percent: {e}")
+                return False
+        else:
+            try:
+                self.tiger_controller.set_speed(velocity_dict)
+            except TigerException:
+                return False
+            except KeyError as e:
+                logger.exception(f"KeyError in set_speed: {e}")
+                return False
         return True
     
     def get_speed(self, axis):

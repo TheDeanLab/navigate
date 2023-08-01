@@ -309,11 +309,17 @@ class CameraSettingController(GUIController):
         def handler(*args):
             if btn_name == "All":
                 width = self.default_width
+                height = self.default_height
             else:
                 width = float(btn_name)
+                height = width
+                if width > self.default_width:
+                    width = self.default_width
+                if height > self.default_height:
+                    height = self.default_height
             self.roi_widgets["Width"].set(width)
-            self.roi_widgets["Height"].set(width)
-            self.show_verbose_info("ROI width and height are changed to", width, width)
+            self.roi_widgets["Height"].set(height)
+            self.show_verbose_info("ROI width and height are changed to", width, height)
 
         return handler
 

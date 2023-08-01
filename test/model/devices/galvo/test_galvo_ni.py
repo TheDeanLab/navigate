@@ -156,3 +156,19 @@ class TestGalvoNI(unittest.TestCase):
 
         assert type(waveforms) == dict
         self.device_connection.assert_not_called()
+        
+        for channel_key, channel_setting in self.configuration["experiment"][
+            "MicroscopeState"
+        ]["channels"].items():
+            if channel_setting["is_selected"]:
+                assert channel_key in waveforms.keys()
+
+        self.device_connection.analog_outputs.__setitem__.assert_called_with(
+            self.galvo.device_config["hardware"]["channel"],
+            {
+                "sample_rate": self.galvo.sample_rate,
+                "samples": self.galvo.samples,
+                "trigger_source": self.galvo.trigger_source,
+                "waveform": waveforms,
+            },
+        )

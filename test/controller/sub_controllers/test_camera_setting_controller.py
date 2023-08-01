@@ -317,11 +317,9 @@ class TestCameraSettingController:
     @pytest.mark.parametrize("mode", ["Normal", "Light-Sheet"])
     def test_update_sensor_mode(self, mode):
         self.camera_settings.populate_experiment_values()
-        camera_setting_dict = (
-            self.camera_settings.parent_controller.configuration["experiment"][
-                "CameraParameters"
-            ]
-        )
+        camera_setting_dict = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["CameraParameters"]
 
         # Set mode
         self.camera_settings.mode_widgets["Sensor"].widget.set(mode)
@@ -358,9 +356,8 @@ class TestCameraSettingController:
                 str(self.camera_settings.mode_widgets["Pixels"].widget["state"])
                 == "normal"
             )
-            assert (
-                int(self.camera_settings.mode_widgets["Pixels"].widget.get())
-                == int(self.camera_settings.camera_setting_dict["number_of_pixels"])
+            assert int(self.camera_settings.mode_widgets["Pixels"].widget.get()) == int(
+                self.camera_settings.camera_setting_dict["number_of_pixels"]
             )
 
     def test_update_exposure_time(self):
@@ -561,8 +558,41 @@ class TestCameraSettingController:
         self.camera_settings.mode_widgets["Pixels"].set(n_pixels)
 
         # Check
-        assert self.camera_settings.camera_setting_dict["number_of_pixels"] == int(n_pixels)
+        assert self.camera_settings.camera_setting_dict["number_of_pixels"] == int(
+            n_pixels
+        )
         if mode != "live" and mode != "stop":
             assert (
                 self.camera_settings.camera_setting_dict["number_of_pixels"] == n_pixels
             )
+
+    @pytest.mark.parametrize(
+        "x_pixels, y_pixels", [(512, 512), (4096, 4096), (2304, 1024), (1024, 2048)]
+    )
+    def test_update_camera_device_related_setting(self, x_pixels, y_pixels):
+        self.camera_settings.populate_experiment_values()
+
+        microscope_name = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["microscope_name"]
+        camera_config = self.camera_settings.parent_controller.configuration[
+            "configuration"
+        ]["microscopes"][microscope_name]["camera"]
+        default_x_pixels = camera_config["x_pixels"]
+        default_y_pixels = camera_config["y_pixels"]
+
+        camera_config["x_pixels"] = x_pixels
+        camera_config["y_pixels"] = y_pixels
+        self.camera_settings.update_camera_device_related_setting()
+
+        assert self.camera_settings.roi_widgets["Width"].get() == min(
+            self.camera_settings.camera_setting_dict["x_pixels"], x_pixels
+        )
+        assert self.camera_settings.roi_widgets["Height"].get() == min(
+            self.camera_settings.camera_setting_dict["y_pixels"], y_pixels
+        )
+        assert self.camera_settings.roi_widgets["Width"].widget["to"] == x_pixels
+        assert self.camera_settings.roi_widgets["Height"].widget["to"] == y_pixels
+
+        camera_config["x_pixels"] = default_x_pixels
+        camera_config["y_pixels"] = default_y_pixels

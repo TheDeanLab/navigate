@@ -99,17 +99,12 @@ class BigDataViewerDataSource(DataSource):
     def size(self) -> int:
         """Size in bytes. Overrides base class."""
         return (
-            np.prod(
-                (
-                    np.array([self.shape_z, self.shape_y, self.shape_x])[None, :]
-                    // self.resolutions[:, ::-1]
-                ),
-                axis=1,
-            )
+            np.prod(self.shapes, axis=1)
             * self.shape_t
             * self.shape_c
             * self.positions
             * self.bits
+            // 8
         ).sum()
 
     def set_metadata_from_configuration_experiment(

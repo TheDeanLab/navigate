@@ -117,7 +117,7 @@ class TigerController:
             self.default_axes_sequence = self.get_default_motor_axis_sequence()
 
     def get_default_motor_axis_sequence(self) -> None:
-        # get default motor axes sequenc
+        # get default motor axes sequence
         self.send_command("BU X")
         response = self.read_response()
         lines = response.split("\r")
@@ -333,7 +333,8 @@ class TigerController:
 
         self.send_command("HALT")
         self.read_response()
-        print("ASI Stages stopped successfully")
+        if self.verbose:
+            print("ASI Stages stopped successfully")
 
     def set_speed(self, speed_dict):
         """

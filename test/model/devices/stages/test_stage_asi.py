@@ -93,8 +93,9 @@ class MockASIStage:
         elif command == "SPEED":
             self.output_buffer.append(":A")
         elif command == "BU":
+            axes = " ".join(self.axes)
             self.output_buffer.append(
-                "TIGER_COMM\rMotor Axes: X Y Z F M N\rAxis Addr: 1 1 2 2 8 8\rHex "
+                f"TIGER_COMM\rMotor Axes: {axes} 0 1\rAxis Addr: 1 1 2 2 8 8\rHex "
                 "Addr: 31 31 32 32 39 39\rAxis Props: 10 10 0 0 0 0"
             )
         elif command == "AA":
@@ -258,8 +259,6 @@ class TestStageASI:
                     asi_stage.serial_port, f"{stage.axes_mapping[axis]}_abs", pos * 10.0
                 )
             temp_pos = stage.report_position()
-            print(temp_pos)
-            print(pos_dict)
             assert pos_dict == temp_pos
 
     @pytest.mark.parametrize(

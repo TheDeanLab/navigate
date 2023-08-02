@@ -148,7 +148,7 @@ class BigDataViewerDataSource(DataSource):
                 zs = np.minimum(
                     z // dz, self.shapes[i, 0] - 1
                 )  # TODO: Is this necessary?
-                self.image[dataset_name][zs, ...] = data[::dx, ::dy].T
+                self.image[dataset_name][zs, ...] = data[::dx, ::dy]
                 if (i == 0) and len(kw) > 0:
                     self._views.append(kw)
         self._current_frame += 1

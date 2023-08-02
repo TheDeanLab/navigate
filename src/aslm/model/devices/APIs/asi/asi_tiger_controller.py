@@ -322,7 +322,10 @@ class TigerController:
         """
         Set scan range.
         """
+        print("scan r started asi tiger controller")
         enc_divide_mm = self.get_encoder_counts_per_mm(axis)
+        print("encoder divide = ",enc_divide)
+        print("encoder divide mm = ",enc_divide_mm)
         if enc_divide == 0:
             enc_divide = enc_divide_mm
         else:
@@ -338,6 +341,7 @@ class TigerController:
         axis: 'X' or 'Y'
         is_single_axis_scan: True for single axis scan
         """
+        print("Scan started ASI tiger controller")
         fast_axis_id = 0 if axis == 'X' else 1
         slow_axis_id = 1 - fast_axis_id
         if is_single_axis_scan:

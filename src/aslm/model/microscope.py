@@ -760,11 +760,16 @@ class Microscope:
     def terminate(self):
         """Close hardware explicitly."""
         self.camera.close_camera()
+
+        for k in self.galvo:
+            self.galvo[k].turn_off()
+
         try:
             # Currently only for RemoteFocusEquipmentSolutions
             self.remote_focus_device.close_connection()
         except AttributeError:
             pass
+
         try:
             for stage, _ in self.stages_list:
                 stage.close()

@@ -268,3 +268,6 @@ class GalvoBase:
         None
         """
         pass
+
+    def turn_off(self):
+        pass

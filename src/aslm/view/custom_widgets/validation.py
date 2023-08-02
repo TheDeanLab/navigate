@@ -1031,7 +1031,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         ):
             return True
 
-        no_negative = int(min_val) >= 0
+        no_negative = min_val >= 0
         no_decimal = self.precision >= 0
 
         # Allow deletion

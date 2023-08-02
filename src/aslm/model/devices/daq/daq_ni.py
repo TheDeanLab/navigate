@@ -168,13 +168,13 @@ class NIDAQ(DAQBase):
         -------
         None
         """
-        print("external trigger initiated")
+        print("external trigger initiated nidaq")
         self.trigger_mode = "self-trigger" if external_trigger is None else "external-trigger"
         self.external_trigger = external_trigger
 
         # change trigger mode during acquisition in a feature
         if self.trigger_mode == "self-trigger":
-            print("self trigger initiated")
+            print("self trigger initiated nidaq")
             self.create_master_trigger_task()
             trigger_source = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -422,9 +422,11 @@ class NIDAQ(DAQBase):
         None
         """
         # wait if writing analog tasks
+        print("Run Acquisition started nidaq")
         if self.is_updating_analog_task:
             self.wait_to_run_lock.acquire()
             self.wait_to_run_lock.release()
+        print("Run Acquisition started nidaq acquire release")
 
         try:
             if self.camera_trigger_task.is_task_done():
@@ -436,6 +438,7 @@ class NIDAQ(DAQBase):
             # nidaqmx.errors.DaqError: Specified operation cannot be performed while the task is running.
             # Task Name: _unnamedTask<14>
             print("NIDAQ Error:", e)
+            logger.debug(f"NIDAQ Error: {e}")
             pass
         
         if self.trigger_mode == "self-trigger":
@@ -471,6 +474,7 @@ class NIDAQ(DAQBase):
         -------
         None
         """
+        print("Stop acquisition started nidaq")
         try:
             self.camera_trigger_task.stop()
             self.camera_trigger_task.close()

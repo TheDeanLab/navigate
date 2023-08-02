@@ -178,11 +178,11 @@ class ConstantVelocityAcquisition:
 
         # start scan won't start the scan, but when calling stop_scan it will start scan. So weird.
             self.asi_stage.stop_scan()
-            print("Stop Scan Ended")
-            self.model.active_microscope.daq.stop_acquisition()
+            print("Stop Scan Called")
+            # self.model.active_microscope.daq.stop_acquisition()
             print("signal acquisition stopped")
-            self.end_func_signal()
-            print("end func signal passed")
+            # self.end_func_signal()
+            # print("end func signal passed")
             # self.cleanup()
             # print("clean up called try")
         except: 
@@ -212,9 +212,9 @@ class ConstantVelocityAcquisition:
         """
         # Reset DAQ outputs
         print("Print Cleanup Started")
-        # self.model.active_microscope.daq.stop_acquisition()
-        # reset stage speed
-        # print("Print Active microscope daq stopped")
+        self.model.active_microscope.daq.stop_acquisition()
+        #reset stage speed
+        print("Print Active microscope daq stopped")
         # self.model.active_microscope.daq.set_external_trigger(None)
         self.asi_stage.set_speed({self.axis: self.default_speed})
         print("Set Speed Finished")

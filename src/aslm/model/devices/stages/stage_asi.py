@@ -64,7 +64,7 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200):
     """
 
     # wait until ASI device is ready
-    asi_stage = TigerController(com_port, baud_rate)
+    asi_stage = TigerController(com_port, baud_rate, True)
     asi_stage.connect_to_serial()
     if not asi_stage.is_open():
         raise Exception("ASI stage connection failed.")

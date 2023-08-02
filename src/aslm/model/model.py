@@ -697,7 +697,7 @@ class Model:
             Function to run on the acquired data.
         """
 
-        wait_num = 10  # this will let this thread wait 10 * 500 ms before it ends
+        wait_num = 100  # this will let this thread wait 10 * 500 ms before it ends
         acquired_frame_num = 0
 
         # whether acquire specific number of frames.
@@ -730,7 +730,7 @@ class Model:
             frames_per_second = acquired_frame_num / (stop_time - start_time)
             self.event_queue.put(("framerate", frames_per_second))
 
-            wait_num = 10
+            wait_num = 100
 
             # Leave it here for now to work with current ImageWriter workflow
             # Will move it feature container later

@@ -199,7 +199,11 @@ class WaveformPopupController(GUIController):
         -------
         None
         """
-        if self.resolution == "high" or self.resolution == "Nanoscale" or self.resolution == "CTASLMv1":
+        if (
+            self.resolution == "high"
+            or self.resolution == "Nanoscale"
+            or self.resolution == "CTASLMv1"
+        ):
             precision = -4
             increment = 0.0001
         else:
@@ -549,7 +553,6 @@ class WaveformPopupController(GUIController):
                 f"Galvo parameter {parameter} changed: "
                 f"{variable_value} pre if statement"
             )
-            
             if value != variable_value and variable_value != "":
                 self.galvo_setting[galvo_name][self.resolution][self.mag][
                     parameter

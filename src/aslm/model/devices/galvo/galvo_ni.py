@@ -152,10 +152,8 @@ class GalvoNI(GalvoBase):
 
         Returns
         -------
-
         waveform_dict
             Dictionary with the adjusted waveforms.
-
         """
         waveform_dict = super().adjust(exposure_times, sweep_times)
 
@@ -166,7 +164,7 @@ class GalvoNI(GalvoBase):
             "waveform": waveform_dict,
         }
         return waveform_dict
-    
+
     def turn_off(self):
         """
         Turns off the galvo. NOTE: This will only work if there isn't another task
@@ -174,7 +172,9 @@ class GalvoNI(GalvoBase):
         """
         try:
             task = nidaqmx.Task()
-            task.ao_channels.add_ao_voltage_chan(self.device_config["hardware"]["channel"])
+            task.ao_channels.add_ao_voltage_chan(
+                self.device_config["hardware"]["channel"]
+            )
             task.write([0], auto_start=True)
             task.stop()
             task.close()

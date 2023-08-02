@@ -215,7 +215,7 @@ class GalvoBase:
                 ] = self.galvo_min_voltage
 
         return self.waveform_dict
-    
+
     def prepare_task(self, channel_key):
         """Prepare the task for the given channel.
 

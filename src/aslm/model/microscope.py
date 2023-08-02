@@ -39,6 +39,7 @@ from aslm.model.device_startup_functions import (
 )
 from aslm.tools.common_functions import build_ref_name
 from aslm.model.devices.stages.stage_galvo import GalvoNIStage
+
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
@@ -391,14 +392,13 @@ class Microscope:
         for stage, axes in self.stages_list:
             if type(stage) == GalvoNIStage:
                 stage.calculate_waveform(exposure_times, sweep_times)
-       
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,
             "galvo_waveform": galvo_waveform,
         }
         return waveform_dict
-    
+
     def calculate_exposure_sweep_times(self, readout_time):
         """Get the exposure and sweep times for all channels.
 
@@ -759,21 +759,20 @@ class Microscope:
 
     def terminate(self):
         """Close hardware explicitly."""
+        self.camera.close_camera()
+
         for k in self.galvo:
             self.galvo[k].turn_off()
-        
+
         try:
             # Currently only for RemoteFocusEquipmentSolutions
             self.remote_focus_device.close_connection()
         except AttributeError:
             pass
 
-        self.camera.close_camera()
-        
         try:
             for stage, _ in self.stages_list:
                 stage.close()
         except Exception as e:
             print(f"Stage delete failure: {e}")
         pass
-

@@ -40,6 +40,7 @@ import random
 from aslm.model.devices.stages.stage_asi import ASIStage
 from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController
 
+
 class MockASIStage:
     def __init__(self, ignore_obj):
         self.axes = ["X", "Y", "Z", "M", "N"]
@@ -50,7 +51,7 @@ class MockASIStage:
 
         for axis in self.axes:
             setattr(self, f"{axis}_abs", 0)
-    
+
     def open(self):
         self.is_open = True
 
@@ -59,7 +60,7 @@ class MockASIStage:
 
     def reset_output_buffer(self):
         self.output_buffer = []
-        
+
     def write(self, command):
         command = command.decode(encoding="ascii")[:-1]
         temps = command.split()
@@ -92,34 +93,46 @@ class MockASIStage:
         elif command == "SPEED":
             self.output_buffer.append(":A")
         elif command == "BU":
-            self.output_buffer.append("TIGER_COMM\rMotor Axes: X Y Z F M N\rAxis Addr: 1 1 2 2 8 8\rHex Addr: 31 31 32 32 39 39\rAxis Props: 10 10 0 0 0 0")
-
+            self.output_buffer.append(
+                "TIGER_COMM\rMotor Axes: X Y Z F M N\rAxis Addr: 1 1 2 2 8 8\rHex "
+                "Addr: 31 31 32 32 39 39\rAxis Props: 10 10 0 0 0 0"
+            )
+        elif command == "AA":
+            self.output_buffer.append(":A")
+        elif command == "AZ":
+            self.output_buffer.append(":A")
+        elif command == "B":
+            self.output_buffer.append(":A")
+        elif command == "PC":
+            self.output_buffer.append(":A")
 
     def readline(self):
-        return bytes(self.output_buffer[0], encoding="ascii")
-
+        return bytes(self.output_buffer.pop(0), encoding="ascii")
 
     def __getattr__(self, __name: str):
         return self.ignore_obj
-    
+
 
 @pytest.fixture
 def asi_serial_device(ignore_obj):
     return MockASIStage(ignore_obj)
 
 
-
 class TestStageASI:
     """Unit Test for ASI Stage Class"""
 
     @pytest.fixture(autouse=True)
-    def setup_class(self, stage_configuration, asi_serial_device, random_single_axis_test, random_multiple_axes_test):
+    def setup_class(
+        self,
+        stage_configuration,
+        asi_serial_device,
+        random_single_axis_test,
+        random_multiple_axes_test,
+    ):
         self.microscope_name = "Mesoscale"
         self.configuration = {
             "configuration": {
-                "microscopes": {
-                    self.microscope_name: stage_configuration
-                }
+                "microscopes": {self.microscope_name: stage_configuration}
             }
         }
         self.stage_configuration = stage_configuration
@@ -186,8 +199,14 @@ class TestStageASI:
             assert hasattr(stage, f"{axis}_min")
             assert hasattr(stage, f"{axis}_max")
             assert getattr(stage, f"{axis}_pos") == 0
-            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
-            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
+            assert (
+                getattr(stage, f"{axis}_min")
+                == self.stage_configuration["stage"][f"{axis}_min"]
+            )
+            assert (
+                getattr(stage, f"{axis}_max")
+                == self.stage_configuration["stage"][f"{axis}_max"]
+            )
 
         if axes_mapping is None:
             # using default mapping which is hard coded in stage_pi.py
@@ -199,8 +218,7 @@ class TestStageASI:
             for i, axis in enumerate(axes):
                 assert stage.axes_mapping[axis] == axes_mapping[i]
 
-        assert stage.stage_limits == True
-
+        assert stage.stage_limits is True
 
     @pytest.mark.parametrize(
         "axes, axes_mapping",
@@ -222,6 +240,12 @@ class TestStageASI:
     def test_report_position(self, axes, axes_mapping):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
+        self.configuration["configuration"]["microscopes"][self.microscope_name][
+            "zoom"
+        ] = {}
+        self.configuration["configuration"]["microscopes"][self.microscope_name][
+            "zoom"
+        ]["pixel_size"] = {"5X": 1.3}
         asi_stage = self.build_device_connection()
         stage = ASIStage(self.microscope_name, asi_stage, self.configuration)
 
@@ -230,8 +254,12 @@ class TestStageASI:
             for axis in axes:
                 pos = random.randrange(-100, 500)
                 pos_dict[f"{axis}_pos"] = float(pos)
-                setattr(asi_stage.serial_port, f"{stage.axes_mapping[axis]}_abs", pos*10.0)
+                setattr(
+                    asi_stage.serial_port, f"{stage.axes_mapping[axis]}_abs", pos * 10.0
+                )
             temp_pos = stage.report_position()
+            print(temp_pos)
+            print(pos_dict)
             assert pos_dict == temp_pos
 
     @pytest.mark.parametrize(

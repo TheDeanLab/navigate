@@ -125,14 +125,14 @@ class TigerController:
             if line.startswith("Motor Axes:"):
                 default_axes_sequence = line[line.index(":") + 2 :].split(" ")[:-2]
                 self.report_to_console(
-                    "Get the default axes sequence from the ASI device "
-                    "successfully!"
+                    "Get the default axes sequence from the ASI device " "successfully!"
                 )
                 break
-        
+
         return default_axes_sequence
-    
-    ##### TODO: Modify these to accept dictionaries and send a single command for all axes
+
+    ##### TODO: Modify these to accept dictionaries and send a
+    #           single command for all axes
     def set_feedback_alignment(self, axis, aa):
         self.send_command(f"AA {axis}={aa}\r")
         self.read_response()
@@ -322,10 +322,10 @@ class TigerController:
                 break
             time.sleep(0.001)
             busy = self.is_device_busy()
-            
+
         if self.verbose:
             print(f"Waited {waiting_time:.2f} s")
-        
+
     def stop(self):
         """
         Stop all stage movement immediately
@@ -342,22 +342,30 @@ class TigerController:
         axes = " ".join([f"{x}={round(v, 6)}" for x, v in speed_dict.items()])
         self.send_command(f"S {axes}")
         self.read_response()
-        self.send_command(f"S X? Y?")
-        self.read_response()
 
     def set_speed_as_percent_max(self, pct):
+        if self.default_axes_sequence is None:
+            raise TigerException(
+                "Unable to query system for axis sequence. Cannot set speed."
+            )
         if self._max_speeds is None:
             # First, set the speed crazy high
-            self.send_command(f"SPEED {' '.join([f'{ax}=1000' for ax in self.default_axes_sequence])}\r")
+            self.send_command(
+                f"SPEED {' '.join([f'{ax}=1000' for ax in self.default_axes_sequence])}\r"  # noqa
+            )
             self.read_response()
 
             # Next query the maximum speed
-            self.send_command(f"SPEED {' '.join([f'{ax}?' for ax in self.default_axes_sequence])}\r")
+            self.send_command(
+                f"SPEED {' '.join([f'{ax}?' for ax in self.default_axes_sequence])}\r"
+            )
             res = self.read_response()
             self._max_speeds = [float(x.split("=")[1]) for x in res.split()[1:]]
 
         # Now set to pct
-        self.send_command(f"SPEED {' '.join([f'{ax}={pct*speed:.7f}' for ax, speed in zip(self.default_axes_sequence, self._max_speeds)])}\r")
+        self.send_command(
+            f"SPEED {' '.join([f'{ax}={pct*speed:.7f}' for ax, speed in zip(self.default_axes_sequence, self._max_speeds)])}\r"  # noqa
+        )
         self.read_response()
 
     def get_speed(self, axis: str):
@@ -426,7 +434,7 @@ class TigerController:
         """
         Send a serial command to the filter wheel.
         """
-        
+
         # send the serial command to the controller
         self.send_command(f"{cmd}\n")
         # print(f"Sent Command: {command.decode(encoding='ascii')}")

@@ -305,7 +305,7 @@ class TigerController:
         res = self.read_response()
         return "B" in res
 
-    def wait_for_device(self, timeout: float = 100) -> None:
+    def wait_for_device(self, timeout: float = 2) -> None:
         """Waits for the all motors to stop moving.
 
         timeout : float

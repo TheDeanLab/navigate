@@ -697,7 +697,7 @@ class Model:
             Function to run on the acquired data.
         """
 
-        wait_num = 100  # this will let this thread wait 10 * 500 ms before it ends
+        wait_num = 20  # this will let this thread wait 10 * 500 ms before it ends
         acquired_frame_num = 0
 
         # whether acquire specific number of frames.
@@ -730,7 +730,7 @@ class Model:
             frames_per_second = acquired_frame_num / (stop_time - start_time)
             self.event_queue.put(("framerate", frames_per_second))
 
-            wait_num = 100
+            wait_num = 20
 
             # Leave it here for now to work with current ImageWriter workflow
             # Will move it feature container later
@@ -784,7 +784,7 @@ class Model:
             self.pause_data_ready_lock.release()
 
     def simplified_data_process(self, microscope, show_img_pipe, data_func=None):
-        wait_num = 100  # this will let this thread wait 10 * 500 ms before it ends
+        wait_num = 20  # this will let this thread wait 10 * 500 ms before it ends
         acquired_frame_num = 0
 
         while not self.stop_acquisition:
@@ -805,7 +805,7 @@ class Model:
                     break
                 continue
 
-            wait_num = 100
+            wait_num = 20
 
             # Leave it here for now to work with current ImageWriter workflow
             # Will move it feature container later

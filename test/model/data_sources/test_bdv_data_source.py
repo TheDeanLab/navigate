@@ -53,10 +53,10 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early, ext):
     )
     # TODO: Why does 2**16 make ImageJ crash??? But 2**8 works???
     data = (np.random.rand(n_images, ds.shape_x, ds.shape_y) * 2**8).astype("uint16")
-    bytes = np.sum(
+    dbytes = np.sum(
         ds.shapes.prod(1) * ds.shape_t * ds.shape_c * ds.positions * 2
     )  # 16 bits, 8 bits per byte
-    assert bytes == ds.size
+    assert dbytes == ds.size
     data_positions = (np.random.rand(n_images, 5) * 50e3).astype(float)
     for i in range(n_images):
         ds.write(

@@ -55,7 +55,7 @@ def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack, stop_early):
 
     # Populate one image per channel per timepoint per position
     n_images = ds.shape_c * ds.shape_z * ds.shape_t * ds.positions
-    data = (np.random.rand(n_images, ds.shape_x, ds.shape_y) * 2**16).astype(
+    data = (np.random.rand(n_images, ds.shape_y, ds.shape_x) * 2**16).astype(
         np.uint16
     )
     file_names_raw = []

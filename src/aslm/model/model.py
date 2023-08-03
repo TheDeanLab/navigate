@@ -802,6 +802,8 @@ class Model:
                     # Camera timeout, abort acquisition.
                     break
                 continue
+            
+            wait_num = self.camera_wait_iterations
 
             # Leave it here for now to work with current ImageWriter workflow
             # Will move it feature container later

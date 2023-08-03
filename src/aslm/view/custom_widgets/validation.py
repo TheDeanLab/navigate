@@ -937,16 +937,16 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         """ Initialize the spinbox """
         self.resolution = str(kwargs.get("increment", "1.0"))  # Number put into spinbox
         self.precision = self._get_precision()
-        self.variable = kwargs.get("textvariable") or tk.DoubleVar
+        self.variable = kwargs.get("textvariable") or tk.DoubleVar()
         self.required = required
 
         # Dynamic range checker
         if min_var:
             self.min_var = min_var
-            self.min_var.trace_add("w", self._set_minimum)
+            self.min_var.trace_add("write", self._set_minimum)
         if max_var:
             self.max_var = max_var
-            self.max_var.trace_add("w", self._set_maximum)
+            self.max_var.trace_add("write", self._set_maximum)
         self.focus_update_var = focus_update_var
         self.bind("<FocusOut>", self._set_focus_update_var)
 
@@ -1031,7 +1031,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         ):
             return True
 
-        no_negative = int(min_val) >= 0
+        no_negative = min_val >= 0
         no_decimal = self.precision >= 0
 
         # Allow deletion

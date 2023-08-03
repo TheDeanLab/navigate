@@ -422,6 +422,13 @@ class ZStackAcquisition:
 
             # self.model.resume_data_thread()
 
+        return True
+
+    def signal_end(self):
+        # end this node
+        if self.model.stop_acquisition:
+            return True
+               
         if self.stack_cycling_mode != "per_stack":
             # update channel for each z position in 'per_slice'
             self.update_channel()
@@ -435,13 +442,6 @@ class ZStackAcquisition:
 
             # update z position moved time
             self.z_position_moved_time += 1
-
-        return True
-
-    def signal_end(self):
-        # end this node
-        if self.model.stop_acquisition:
-            return True
 
         # decide whether to move X,Y,Theta
         if self.z_position_moved_time >= self.number_z_steps:

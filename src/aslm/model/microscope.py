@@ -288,6 +288,7 @@ class Microscope:
             self.microscope_name
         ]["stage"]
         self.ask_stage_for_position = True
+        # print(self.stages)
         pos_dict = self.get_stage_position()
         for stage, axes in self.stages_list:
             pos = {
@@ -763,8 +764,19 @@ class Microscope:
     def terminate(self):
         """Close hardware explicitly."""
         self.camera.close_camera()
+
+        for k in self.galvo:
+            self.galvo[k].turn_off()
+
         try:
             # Currently only for RemoteFocusEquipmentSolutions
             self.remote_focus_device.close_connection()
         except AttributeError:
             pass
+
+        try:
+            for stage, _ in self.stages_list:
+                stage.close()
+        except Exception as e:
+            print(f"Stage delete failure: {e}")
+        pass

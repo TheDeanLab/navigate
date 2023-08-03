@@ -345,6 +345,7 @@ class Controller:
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
+        self.configuration_controller.change_microscope()
         self.menu_controller.resolution_value.set(
             f"{microscope_name} "
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
@@ -367,6 +368,7 @@ class Controller:
 
         # set widget modes
         self.set_mode_of_sub("stop")
+        self.stage_controller.initialize()
 
     def update_experiment_setting(self):
         """Update model.experiment according to values in the GUI
@@ -474,7 +476,12 @@ class Controller:
         __________
         args* : function-specific passes.
         """
-        if command == "stage":
+
+        if command == "joystick_toggle":
+            if self.stage_controller.joystick_is_on:
+                self.execute("stop_stage")
+
+        elif command == "stage":
             """Creates a thread and uses it to call the model to move stage
 
             Parameters
@@ -686,6 +693,7 @@ class Controller:
                 and self.ilastik_controller.show_segmentation_flag
             )
 
+            self.stop_acquisition_flag = False
             self.launch_additional_microscopes()
 
             self.threads_pool.createThread(
@@ -815,11 +823,7 @@ class Controller:
                 self.execute("stop_acquire")
 
             # Display the Image in the View
-            self.camera_view_controller.display_image(
-                image=self.data_buffer[image_id],
-                microscope_state=self.configuration["experiment"]["MicroscopeState"],
-                images_received=images_received,
-            )
+            self.camera_view_controller.try_to_display_image(image_id=image_id)
             images_received += 1
 
             # Update progress bar.
@@ -830,10 +834,7 @@ class Controller:
                 stop=False,
             )
 
-        logger.info(
-            f"ASLM Controller - Captured {self.camera_view_controller.image_count}, "
-            f"{mode} Images"
-        )
+        logger.info(f"ASLM Controller - Captured {images_received}, " f"{mode} Images")
 
         # Stop Progress Bars
         self.acquire_bar_controller.progress_bar(
@@ -846,6 +847,11 @@ class Controller:
 
     def launch_additional_microscopes(self):
         def display_images(camera_view_controller, show_img_pipe, data_buffer):
+            camera_view_controller.initialize_non_live_display(
+                data_buffer,
+                self.configuration["experiment"]["MicroscopeState"],
+                self.configuration["experiment"]["CameraParameters"],
+            )
             images_received = 0
             while True:
                 if self.stop_acquisition_flag:
@@ -865,12 +871,8 @@ class Controller:
 
                 # Display the Image in the View
                 try:
-                    camera_view_controller.display_image(
-                        image=data_buffer[image_id],
-                        microscope_state=self.configuration["experiment"][
-                            "MicroscopeState"
-                        ],
-                        images_received=images_received,
+                    camera_view_controller.try_to_display_image(
+                        image_id=image_id,
                     )
                 except tkinter._tkinter.TclError:
                     print("Can't show images for the additional microscope!")
@@ -911,6 +913,9 @@ class Controller:
                 camera_view_controller = CameraViewController(
                     popup_window.camera_view, self
                 )
+                camera_view_controller.data_buffer = self.additional_microscopes[
+                    microscope_name
+                ]["data_buffer"]
                 popup_window.popup.bind("<Configure>", camera_view_controller.resize)
                 self.additional_microscopes[microscope_name][
                     "camera_view_controller"
@@ -941,7 +946,7 @@ class Controller:
                     self.additional_microscopes[microscope_name][
                         "camera_view_controller"
                     ],
-                    self.additional_microscopes[microscope_name]["show_img_pipe"],
+                    show_img_pipe,
                     self.additional_microscopes[microscope_name]["data_buffer"],
                 ),
             )
@@ -998,7 +1003,8 @@ class Controller:
                     table=self.view.settings.multiposition_tab.multipoint_list.get_table(),
                     pos=value,
                 )
-                self.view.settings.channels_tab.multipoint_frame.on_off.set(True)
+                self.channels_tab_controller.is_multiposition_val.set(True)
+                self.channels_tab_controller.toggle_multiposition()
 
             elif event == "ilastik_mask":
                 # Display the ilastik mask

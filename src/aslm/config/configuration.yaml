@@ -124,6 +124,7 @@ microscopes:
           max: None
           min: None
 
+      joystick_axes: [x, y, z]
       x_max: 100000
       x_min: -100000
       y_max: 100000
@@ -349,6 +350,7 @@ microscopes:
           max: None
           min: None
 
+      joystick_axes: [x, y, z]
       x_max: 100000
       x_min: -100000
       y_max: 100000

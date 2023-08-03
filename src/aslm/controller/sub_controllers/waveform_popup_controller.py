@@ -199,7 +199,11 @@ class WaveformPopupController(GUIController):
         -------
         None
         """
-        if self.resolution == "high" or self.resolution == "Nanoscale" or self.resolution == "CTASLMv1":
+        if (
+            self.resolution == "high"
+            or self.resolution == "Nanoscale"
+            or self.resolution == "CTASLMv1"
+        ):
             precision = -4
             increment = 0.0001
         else:

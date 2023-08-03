@@ -400,8 +400,8 @@ class TestCameraSettingController:
         # Reset
         self.camera_settings.roi_widgets["Width"].widget.set(2048)
         self.camera_settings.roi_widgets["Height"].widget.set(2048)
-        assert int(self.camera_settings.roi_widgets["FOV_X"].get()) == 13312
-        assert int(self.camera_settings.roi_widgets["FOV_Y"].get()) == 13312
+        assert int(self.camera_settings.roi_widgets["FOV_X"].get()) == 13066
+        assert int(self.camera_settings.roi_widgets["FOV_Y"].get()) == 13066
 
     @pytest.mark.parametrize("mode", ["live", "z-stack", "stop", "single"])
     @pytest.mark.parametrize("readout", ["Normal", "Light-Sheet"])
@@ -471,51 +471,30 @@ class TestCameraSettingController:
         for btn_name in self.camera_settings.roi_btns:
             assert str(self.camera_settings.roi_btns[btn_name]["state"]) == state
 
-    @pytest.mark.parametrize(
-        "zoom", ["N/A", "0.63x", "1x", "2x", "3x", "4x", "5x", "6x"]
-    )
-    @pytest.mark.parametrize(
-        "solvent", ["BABB", "Water", "CUBIC", "CLARITY", "uDISCO", "eFLASH"]
-    )
-    def test_calculate_physical_dimensions(self, zoom, solvent):
-
-        # Setting up
+    @pytest.mark.parametrize("zoom", ["0.63x", "1x", "2x", "3x", "4x", "5x", "6x"])
+    def test_calculate_physical_dimensions(self, zoom):
         self.camera_settings.parent_controller.configuration["experiment"][
             "MicroscopeState"
         ]["zoom"] = zoom
-        if zoom == "N/A":
-            self.camera_settings.solvent = solvent
 
         # Calling
         self.camera_settings.calculate_physical_dimensions()
-
-        # Checking
-        if zoom == "N/A":
-            pre_mag = 300 / 12.19
-            if self.camera_settings.solvent == "BABB":
-                mag = pre_mag * 1.56
-            elif self.camera_settings.solvent == "Water":
-                mag = pre_mag * 1.333
-            elif self.camera_settings.solvent == "CUBIC":
-                mag = pre_mag * 1.48
-            elif self.camera_settings.solvent == "CLARITY":
-                mag = pre_mag * 1.45
-            elif self.camera_settings.solvent == "uDISCO":
-                mag = pre_mag * 1.56
-            elif self.camera_settings.solvent == "eFLASH":
-                mag = pre_mag * 1.458
-            else:
-                # Default unknown value - Specified as mid-range.
-                mag = pre_mag * 1.45
-        else:
-            mag = float(zoom[:-1])
 
         pixel_size = self.camera_settings.default_pixel_size
         x_pixel = float(self.camera_settings.roi_widgets["Width"].get())
         y_pixel = float(self.camera_settings.roi_widgets["Height"].get())
 
-        dim_x = x_pixel * pixel_size / mag
-        dim_y = y_pixel * pixel_size / mag
+        microscope_state_dict = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]
+        zoom = microscope_state_dict["zoom"]
+        microscope_name = microscope_state_dict["microscope_name"]
+        pixel_size = self.camera_settings.parent_controller.configuration[
+            "configuration"
+        ]["microscopes"][microscope_name]["zoom"]["pixel_size"][zoom]
+
+        dim_x = x_pixel * pixel_size
+        dim_y = y_pixel * pixel_size
 
         assert float(self.camera_settings.roi_widgets["FOV_X"].get()) == float(
             int(dim_x)

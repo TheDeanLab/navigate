@@ -65,9 +65,16 @@ class TestZStack:
             if idx >= self.record_num:
                 assert False, "Some device movements are missed!"
         return idx
+    
+    def exist_rectord(self, record_prefix, idx_start, idx_end):
+        for i in range(idx_start, idx_end+1):
+            if self.model.signal_records[i][0] == record_prefix:
+                return True
+        return False
 
     def z_stack_verification(self):
         self.record_num = len(self.model.signal_records)
+        change_channel_func_str = "active_microscope.prepare_next_channel"
         # save all the selected channels
         selected_channels = []
         for channel_key in self.config["channels"].keys():
@@ -103,7 +110,18 @@ class TestZStack:
 
         frame_id = 0
         idx = -1
-        change_channel_func_str = "active_microscope.prepare_next_channel"
+
+        # prepare first channel in pre_signal_func
+        idx = self.get_next_record(change_channel_func_str, idx)
+        pre_change_channel_idx = idx
+        assert (
+            self.model.signal_records[idx][2]["__test_frame_id_completed"]
+            == -1
+        ), f"prepare first channel should happen before 0"
+        assert (
+            self.model.signal_records[idx][2]["__test_frame_id"]
+            == 0
+        ), f"prepare first channel should happen for frame: 0"
 
         for i, pos in enumerate(positions):
 
@@ -140,7 +158,17 @@ class TestZStack:
                         assert (
                             self.model.signal_records[idx][2]["__test_frame_id"]
                             == frame_id
-                        ), f"prepare next channel(change chanel) should happen at {frame_id}"
+                        ), f"prepare next channel(change channel) should happen after {frame_id}"
+
+                        assert (
+                            self.model.signal_records[idx][2]["__test_frame_id_completed"]
+                            == self.model.signal_records[idx][2]["__test_frame_id"]
+                        ), f"prepare next channel(change channel) should happen inside signal_end_func()"
+
+                        assert(
+                            self.exist_rectord(change_channel_func_str, pre_change_channel_idx+1, idx-1) == False
+                        ), f"prepare next channel(change channel) should not happen more than once"
+                        pre_change_channel_idx = idx
                         frame_id += 1
 
             else:  # per_stack

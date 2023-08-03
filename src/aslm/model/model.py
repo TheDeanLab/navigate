@@ -143,6 +143,7 @@ class Model:
         self.current_exposure_time = 0  # milliseconds
         self.pre_exposure_time = 0  # milliseconds
         self.camera_line_interval = 9.7e-6  # s
+        self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
         self.start_time = None
         self.data_buffer = None
         self.img_width = int(
@@ -697,7 +698,7 @@ class Model:
             Function to run on the acquired data.
         """
 
-        wait_num = 20  # this will let this thread wait 10 * 500 ms before it ends
+        wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
         # whether acquire specific number of frames.
@@ -710,7 +711,6 @@ class Model:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
-            # This is the 500 ms wait for Hamamatsu
             frame_ids = self.active_microscope.camera.get_new_frame()
             self.logger.info(
                 f"ASLM Model - Running data process, get frames {frame_ids}"
@@ -720,8 +720,7 @@ class Model:
                 self.logger.info(f"ASLM Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
-                    # it has waited for wait_num * 500 ms, it's sure there won't be any
-                    # frame coming
+                    # Camera timeout, abort acquisition.
                     break
                 continue
 
@@ -730,7 +729,7 @@ class Model:
             frames_per_second = acquired_frame_num / (stop_time - start_time)
             self.event_queue.put(("framerate", frames_per_second))
 
-            wait_num = 20
+            wait_num = self.camera_wait_iterations
 
             # Leave it here for now to work with current ImageWriter workflow
             # Will move it feature container later
@@ -784,7 +783,7 @@ class Model:
             self.pause_data_ready_lock.release()
 
     def simplified_data_process(self, microscope, show_img_pipe, data_func=None):
-        wait_num = 20  # this will let this thread wait 10 * 500 ms before it ends
+        wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
         while not self.stop_acquisition:
@@ -800,12 +799,11 @@ class Model:
                 self.logger.info(f"ASLM Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
-                    # it has waited for wait_num * 500 ms, it's sure there won't be any
-                    # frame coming
+                    # Camera timeout, abort acquisition.
                     break
                 continue
-
-            wait_num = 20
+            
+            wait_num = self.camera_wait_iterations
 
             # Leave it here for now to work with current ImageWriter workflow
             # Will move it feature container later
@@ -818,7 +816,6 @@ class Model:
                 f"{microscope.microscope_name}"
             )
             show_img_pipe.send(frame_ids[-1])
-
             acquired_frame_num += len(frame_ids)
 
         show_img_pipe.send("stop")

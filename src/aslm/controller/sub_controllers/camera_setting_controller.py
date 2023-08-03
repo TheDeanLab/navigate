@@ -374,40 +374,40 @@ class CameraSettingController(GUIController):
         dictionary structure.
         """
         # magnification == 'N/A' is a proxy for resolution == 'high'
-        if (
-            self.parent_controller.configuration["experiment"]["MicroscopeState"][
-                "zoom"
-            ]
-            == "N/A"
-        ):
-            # 54-12-8 - EFLobj = 12.19 mm / RI
-            tube_lens_focal_length = 300
-            extended_focal_length = 12.19
-            if self.solvent == "BABB":
-                refractive_index = 1.56
-            elif self.solvent == "Water":
-                refractive_index = 1.333
-            elif self.solvent == "CUBIC":
-                refractive_index = 1.48
-            elif self.solvent == "CLARITY":
-                refractive_index = 1.45
-            elif self.solvent == "uDISCO":
-                refractive_index = 1.56
-            elif self.solvent == "eFLASH":
-                refractive_index = 1.458
-            else:
-                # Default unknown value - Specified as mid-range.
-                refractive_index = 1.45
+        # if (
+        #     self.parent_controller.configuration["experiment"]["MicroscopeState"][
+        #         "zoom"
+        #     ]
+        #     == "N/A"
+        # ):
+        #     # 54-12-8 - EFLobj = 12.19 mm / RI
+        #     tube_lens_focal_length = 300
+        #     extended_focal_length = 12.19
+        #     if self.solvent == "BABB":
+        #         refractive_index = 1.56
+        #     elif self.solvent == "Water":
+        #         refractive_index = 1.333
+        #     elif self.solvent == "CUBIC":
+        #         refractive_index = 1.48
+        #     elif self.solvent == "CLARITY":
+        #         refractive_index = 1.45
+        #     elif self.solvent == "uDISCO":
+        #         refractive_index = 1.56
+        #     elif self.solvent == "eFLASH":
+        #         refractive_index = 1.458
+        #     else:
+        #         # Default unknown value - Specified as mid-range.
+        #         refractive_index = 1.45
 
-            multi_immersion_focal_length = extended_focal_length / refractive_index
-            magnification = tube_lens_focal_length / multi_immersion_focal_length
-        else:
-            magnification = self.parent_controller.configuration["experiment"][
-                "MicroscopeState"
-            ]["zoom"]
-            magnification = float(magnification[:-1])
+        #     multi_immersion_focal_length = extended_focal_length / refractive_index
+        #     magnification = tube_lens_focal_length / multi_immersion_focal_length
+        # else:
+        #     magnification = self.parent_controller.configuration["experiment"][
+        #         "MicroscopeState"
+        #     ]["zoom"]
+        #     magnification = float(magnification[:-1])
 
-        pixel_size = self.default_pixel_size
+        # pixel_size = self.default_pixel_size
         try:
             x_pixel = float(self.roi_widgets["Width"].get())
             y_pixel = float(self.roi_widgets["Height"].get())
@@ -415,8 +415,20 @@ class CameraSettingController(GUIController):
             logger.error(f"{e} similar to TclError")
             return
 
-        physical_dimensions_x = x_pixel * pixel_size / magnification
-        physical_dimensions_y = y_pixel * pixel_size / magnification
+        # physical_dimensions_x = x_pixel * pixel_size / magnification
+        # physical_dimensions_y = y_pixel * pixel_size / magnification
+
+        microscope_state_dict = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]
+        zoom = microscope_state_dict["zoom"]
+        microscope_name = microscope_state_dict["microscope_name"]
+        pixel_size = self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ][microscope_name]["zoom"]["pixel_size"][zoom]
+
+        physical_dimensions_x = x_pixel * pixel_size
+        physical_dimensions_y = y_pixel * pixel_size
 
         self.roi_widgets["FOV_X"].set(physical_dimensions_x)
         self.roi_widgets["FOV_Y"].set(physical_dimensions_y)

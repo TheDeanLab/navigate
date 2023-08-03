@@ -82,6 +82,10 @@ class StageController(GUIController):
         The joystick on/off boolean
     joystick_axes : list
         The joystick axes
+    stage_limits: bool
+        The flag to turn on/off stage position limits
+    flip_flags: dict
+        A flag dictionary to indicate whether an axis is flipped
 
     Methods
     -------
@@ -162,6 +166,7 @@ class StageController(GUIController):
         self.position_callbacks_bound = False
         self.bind_position_callbacks()
         self.stage_limits = True
+        self.flip_flags = None
         self.initialize()
 
     def stage_key_press(self, event):
@@ -251,6 +256,7 @@ class StageController(GUIController):
             self.new_joystick_axes
 
         self.joystick_axes = self.new_joystick_axes
+        self.flip_flags = config.stage_flip_flags
 
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can
@@ -398,10 +404,10 @@ class StageController(GUIController):
             step_val = self.widget_vals[axis + "_step"]
 
         def handler():
-
+            stage_direction = -1 if self.flip_flags[axis] else 1
             try:
-                temp = position_val.get() + step_val.get()
-            except AttributeError:
+                temp = position_val.get() + step_val.get() * stage_direction
+            except tk._tkinter.TclError:
                 return
             if self.stage_limits is True:
                 if temp > self.position_max[axis]:
@@ -436,10 +442,10 @@ class StageController(GUIController):
             step_val = self.widget_vals[axis + "_step"]
 
         def handler():
-
+            stage_direction = -1 if self.flip_flags[axis] else 1
             try:
-                temp = position_val.get() - step_val.get()
-            except AttributeError:
+                temp = position_val.get() - step_val.get() * stage_direction
+            except tk._tkinter.TclError:
                 return
             if self.stage_limits is True:
                 if temp < self.position_min[axis]:

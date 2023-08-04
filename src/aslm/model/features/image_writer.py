@@ -141,6 +141,9 @@ class ImageWriter:
             "data": {"main": self.save_image, "cleanup": self.close},
         }
 
+        # 32 vs 64-bit file format.
+        self.big_tiff = False
+
         # create the save directory if it doesn't already exist
         self.save_directory = os.path.join(
             self.model.configuration["experiment"]["Saving"]["save_directory"],
@@ -158,7 +161,8 @@ class ImageWriter:
             )
             logger.exception(e)
 
-        # create the maximum intensity projection directory if it doesn't already exist
+        # create the maximum intensity projection directory if it doesn't
+        # already exist
         self.mip = None
         self.mip_directory = os.path.join(self.save_directory, "MIP")
         try:
@@ -182,7 +186,9 @@ class ImageWriter:
         file_name = os.path.join(self.save_directory, image_name)
 
         # Initialize data source, pointing to the new file name
-        self.data_source = data_sources.get_data_source(self.file_type)(file_name)
+        self.data_source = data_sources.get_data_source(self.file_type)(
+            file_name=file_name
+        )
 
         # Pass experiment and configuration to metadata
         self.data_source.set_metadata_from_configuration_experiment(
@@ -203,10 +209,6 @@ class ImageWriter:
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> self.save_image(0)
         """
 
         for idx in frame_ids:
@@ -284,13 +286,6 @@ class ImageWriter:
         str
             File name, e.g., CH00_000000.tif
 
-        Examples
-        --------
-        >>> model = aslm.model.model.Model()
-        >>> image_writer = aslm.model.image_writer.ImageWriter(model)
-        >>> image_writer.generate_image_name(current_channel=0)
-        'CH00_000000.tif'
-
         """
         image_name = (
             "CH0"
@@ -312,11 +307,6 @@ class ImageWriter:
         dict
             Meta data for the image.
 
-        Examples
-        --------
-        >>> model = aslm.model.model.Model()
-        >>> image_writer = aslm.model.image_writer.ImageWriter(model)
-        >>> image_writer.generate_meta_data()
         """
         print("meta data: write", self.model.frame_id)
         return True
@@ -340,20 +330,25 @@ class ImageWriter:
 
     def calculate_and_check_disk_space(self):
         """Estimate the size of the data that will be written to disk, and confirm
-        that sufficient disk space is available.
+        that sufficient disk space is available. Also evaluates whether or not
+        big-tiff or tiff is needed. Tiff file formats were designed for 32-bit
+        operating systems, whereas big-tiff was designed for 64-bit operating systems.
 
         Assumes 16-bit image type, without compression."""
 
         # Return disk usage statistics in bytes
         _, _, free = shutil.disk_usage(self.save_directory)
-        print("Free disk space", free)
 
         # Calculate the size in bytes.
         image_size = self.data_source.size
-        print("image size", image_size)
 
-        # # Confirm that there is enough disk space to save the data.
+        # Confirm that there is enough disk space to save the data.
         if free < image_size:
             print("WARNING: INSUFFICIENT DISK SPACE ESTIMATED")
-        #     raise Warning("Insufficient disk space to save data.")
-        pass
+
+        # TIFF vs Big-TIFF Comparison
+        if (self.file_type == "TIFF") or (self.file_type == "OME-TIFF"):
+            if image_size > 2**32:
+                self.data_source.set_bigtiff(True)
+            else:
+                self.data_source.set_bigtiff(False)

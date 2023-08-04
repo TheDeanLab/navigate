@@ -8,6 +8,7 @@ from serial.tools import list_ports
 import threading
 
 import time
+import logging
 
 
 class TigerException(Exception):
@@ -322,11 +323,17 @@ class TigerController:
         """
         Set scan range.
         """
+        print("scan r started asi tiger controller")
+        print("axis =",axis)
         enc_divide_mm = self.get_encoder_counts_per_mm(axis)
+        print("encoder divide = ",enc_divide)
+        print("encoder divide mm = ",enc_divide_mm)
         if enc_divide == 0:
             enc_divide = enc_divide_mm
         else:
             enc_divide = enc_divide * enc_divide_mm
+            print("encoder divide updated = ",enc_divide)
+
         command = f"SCANR X={round(start_position_mm, 6)} Y={round(end_position_mm, 6)} Z={round(enc_divide)}"
         self.send_command(command)
         response = self.read_response()
@@ -338,12 +345,14 @@ class TigerController:
         axis: 'X' or 'Y'
         is_single_axis_scan: True for single axis scan
         """
+        print("Scan started ASI tiger controller")
         fast_axis_id = 0 if axis == 'X' else 1
         slow_axis_id = 1 - fast_axis_id
         if is_single_axis_scan:
             slow_axis_id = 9
         self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
         response = self.read_response()
+       
 
     def stop_scan(self):
         """

@@ -366,6 +366,9 @@ class ASIStage(StageBase):
         """
         try:
             velocity = self.tiger_controller.get_speed(self.axes_mapping[axis])
+            # logger.performance(f"Stage velocity = {velocity}")
+            # print(f"Stage velocity = {velocity}")
+
         except TigerException:
             return 0
         except KeyError as e:

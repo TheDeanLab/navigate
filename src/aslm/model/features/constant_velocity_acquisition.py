@@ -88,6 +88,13 @@ class ConstantVelocityAcquisition:
         self.asi_stage = self.model.active_microscope.stages[self.axis]
 
         # get the current exposure time for that channel.
+        readout_time = self.model.active_microscope.get_readout_time()
+        _, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
+        current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
+
+        # Provide just a bit of breathing room for the sweep time...
+        current_sweep_time = current_sweep_time * 1.05
+
         exposure_time = float(
             self.model.configuration["experiment"][
                 "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
@@ -101,7 +108,10 @@ class ConstantVelocityAcquisition:
 
         # Get step size from the GUI. For now, assume 160 nm.
         # Default units should probably be microns I believe. Confirm.
-        desired_sampling = 160  # nm
+        # desired_sampling = 160  # nm
+        desired_sampling = float(
+            self.model.configuration[
+                "experiment"]["MicroscopeState"]["step_size"]) * 1000.0
 
         # The stage is at 45 degrees relative to the optical axes.
         step_size = (desired_sampling * 2) / np.sqrt(2)  # 45 degrees, 226 nm
@@ -112,6 +122,8 @@ class ConstantVelocityAcquisition:
         # minimum_encoder_divide. 2.6 encoder divides, round up to 3.
         # *** WHY IS THIS DIVIDE BY 2? TO CORRECT STEP SIZE ABOVE?
         desired_encoder_divide = np.ceil(step_size / minimum_encoder_divide)
+        # print("*** desired encoder divide")
+        print("*** desired encoder divide:", desired_encoder_divide)
 
         # Calculate the actual step size in nanometers. 264 nm.
         step_size_nm = desired_encoder_divide * minimum_encoder_divide
@@ -132,7 +144,14 @@ class ConstantVelocityAcquisition:
                 "experiment"]["MicroscopeState"]["abs_z_end"]) / 1000.0
         
         # move to start position:
+        position_temp = self.asi_stage.get_axis_position(self.axis)
+        print("current position = ",position_temp)
+        print("move stage started")
         self.asi_stage.move_axis_absolute(self.axis, start_position * 1000.0, wait_until_done=True)
+        print("move stage ended")
+        position_temp = self.asi_stage.get_axis_position(self.axis)
+        print("current position = ",position_temp)
+
 
         # Set the x-axis of the ASI stage to operate at that velocity.
 
@@ -148,18 +167,25 @@ class ConstantVelocityAcquisition:
         # Calculate the stage velocity in mm/seconds. 5.28 * 10^-3 s
         # stage_velocity = step_size_mm / (exposure_time * 1.15)
         step_size = float(self.model.configuration["experiment"]["MicroscopeState"]["step_size"]) * np.sqrt(2) / 1000.0
+        print("step size old cva = ",step_size)
+        print("step size sweep time cva = ",step_size_mm)
         # get exposure time
-        expected_speed = step_size / exposure_time
+        expected_speed = step_size_mm / current_sweep_time
+        print("Expected velocity = ",expected_speed)
 
         self.asi_stage.set_speed({self.axis: expected_speed})
         stage_velocity = self.asi_stage.get_speed(self.axis)
-        print("Weird stage velocity, final (mm/s):", stage_velocity)
+        print("Final stage velocity, (mm/s):", stage_velocity)
+        print("Encoder divide step size = ",step_size_mm)
+        # print("Encoder divide step size = ",step_size)
+
 
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(
             start_position_mm=start_position,
             end_position_mm=self.stop_position,
-            enc_divide=step_size,
+            enc_divide=step_size_mm,
+            # enc_divide=step_size,
             # round(
             #     float(
             #         self.model.configuration[
@@ -173,10 +199,19 @@ class ConstantVelocityAcquisition:
         # self.model.active_microscope.daq.run_acquisition()
 
         # Start the stage scan.  Also get this functionality into the ASI stage class.
+        print("stage scan started")
+        position_temp = self.asi_stage.get_axis_position(self.axis)
+        print("current position = ",position_temp)
         self.asi_stage.start_scan(self.axis)
+        print("stage moving")
+        position_temp = self.asi_stage.get_axis_position(self.axis)
+        print("current position = ",position_temp)
 
         # start scan won't start the scan, but when calling stop_scan it will start scan. So weird.
         self.asi_stage.stop_scan()
+        print("stage scan stopped")
+        position_temp = self.asi_stage.get_axis_position(self.axis)
+        print("current position = ",position_temp)
 
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?

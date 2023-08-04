@@ -102,21 +102,21 @@ class MecademicRobot:
 
     Parameters
     ----------
-    # microscope_name : str
-    #     Name of the microscope
+    microscope_name : str
+        Name of the microscope
     device_connection : Robot
         Mecademic Robot device connection
-    # configuration : dict
-    #     Configuration dictionary for the microscope
+    configuration : dict
+        Configuration dictionary for the microscope
 
     Attributes
     ----------
     robot : Robot
         Mecademic Robot device connection
-    # microscope_name : str
-    #     Name of the microscope
-    # configuration : dict
-    #     Configuration dictionary for the microscope
+    microscope_name : str
+        Name of the microscope
+    configuration : dict
+        Configuration dictionary for the microscope
 
     Methods
     -------
@@ -246,6 +246,200 @@ class MecademicRobot:
         self.robot.MovePose(190, 0, 308, 0, 90, 0)
 
 
+class DummyRobot():
+
+    def __init__(
+        self,
+        # microscope_name,
+        # configuration
+    ):
+        self.pilot = "Dummy"
+    def ActivateAndHome(self, *args, **kwargs):
+        pass
+    def WaitHomed(self, *args, **kwargs):
+        pass
+    def SetSynchronousMode(self, *args, **kwargs):
+        pass
+    def SetCheckpoint(self, *args, **kwargs):
+        pass
+    def MoveLin(self, *args, **kwargs):
+        pass
+    def MovePose(self, *args, **kwargs):
+        pass
+    def GetRtTargetCartPos(self, *args, **kwargs):
+        pass
+    def Delay(self, *args, **kwargs):
+        pass
+    def ClearMotion(self, *args, **kwargs):
+        pass
+    def PauseMotion(self, *args, **kwargs):
+        pass
+    def ResumeMotion(self, *args, **kwargs):
+        pass
+    def ResetError(self, *args, **kwargs):
+        pass
+    def MoveLinRelWrf(self, *args, **kwargs):
+        pass
+    def GetJoints(self, *args, **kwargs):
+        pass
+
+class DummyMecademicRobot:
+    """Mecademic Robot Class
+
+    Child class for controlling Mecademic Meca500 robots.
+
+    Parameters
+    ----------
+    microscope_name : str
+        Name of the microscope
+    device_connection : Robot
+        Mecademic Robot device connection
+    configuration : dict
+        Configuration dictionary for the microscope
+
+    Attributes
+    ----------
+    robot : Robot
+        Mecademic Robot device connection
+    microscope_name : str
+        Name of the microscope
+    configuration : dict
+        Configuration dictionary for the microscope
+
+    Methods
+    -------
+    move_to_home()
+
+    """
+
+
+    def __init__(
+        self,
+        # microscope_name,
+        device_connection = None,
+        # configuration
+    ):
+        # super().__init__(microscope_name, device_connection, configuration)
+
+        
+        # self.microscope_name = microscope_name
+        # self.configuration = configuration
+
+        self.robot = DummyRobot()
+
+        # Home the robot
+        self.robot.ActivateAndHome()
+        self.robot.WaitHomed()
+        self.robot.SetSynchronousMode(False)
+
+        self.pose_matrix = [[1,0,0],
+                    [0,1,0],
+                    [0,0,1]
+                    ]
+        
+        self.CAROUSEL_MAX = 30
+
+        #v probably get this from a yaml
+
+        self.omnidict = {"Cartesian": {"axes_list": ["X","Y","Z","Rx","Ry","Rz"],
+                                       "xyz_axis_limits": ["unimplemented"],
+                                       "jog_weights": {"X": 10,
+                                                       "Y": 10,
+                                                       "Z": 10,
+                                                       "Rx": .25,
+                                                       "Ry": .25,
+                                                       "Rz": .25}},
+                         "Joints": {"joints_list": ["J1",
+                                                    "J2",
+                                                    "J3",
+                                                    "J4",
+                                                    "J5",
+                                                    "J6"],
+                                    "joint_limits":
+                                    {"J1": [[-175,175], [tk.Variable(value=-175),
+                                                         tk.Variable(value=175)]],
+                                    "J2": [[-70, 90],[tk.Variable(value=-70),
+                                                      tk.Variable(value=90)]],
+                                    "J3": [[-135, 70], [tk.Variable(value=-135),
+                                                        tk.Variable(value=70)]],
+                                    "J4": [[-170,170], [tk.Variable(value=-170),
+                                                        tk.Variable(value=170)]],
+                                    "J5": [[-115,115], [tk.Variable(value=-115),
+                                                        tk.Variable(value=115)]],
+                                    "J6": [[-420, 420], [tk.Variable(value=-420),
+                                                         tk.Variable(value=420)]]},
+                                    "jog_weights": {"J1": 2,
+                                                    "J2": 2,
+                                                    "J3": 2,
+                                                    "J4": 2,
+                                                    "J5": 2,
+                                                    "J6": 2}
+                                    }
+
+                         }
+        
+    
+
+        
+
+
+    def get_joint_limit(self, joint):
+        return self.omnidict["Joints"]["joint_limits"][f"{joint}"]
+
+    def move_to_home(self):
+        self.robot.MoveJoints(0,0,0,0,0,0)
+
+    def go_to_gravity_safe_pos(self):
+        self.robot.MovePose(-21.29581, 0, 462.58891, 0, 5, 0)
+
+    def run_path_test(self):
+        """Moves the robot to and from a sample holder assembly,
+        as discussed in the packet.
+
+        Parameters
+        ----------
+        self : object
+            MecademicRobot instance
+
+        Returns
+        -------
+        None
+        """
+
+        # Commands to move from "Home" to the end point and back
+        self.robot.MoveLin(190, 0, 308, 0, 90, 0)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MovePose(0, 189.21334, 308, -90, 0, 90)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(0, 189.21334, 158, -90, 0, 90)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(0, 189.21334, 158, 0, 90, 0)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(74, 189.21334, 157, 0, 90, 0)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(229.54733, 189.21334, 157, 0, 90, 0)
+        self.robot.Delay(1)
+        # We must deposit the sample holder
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(229.54733, 189.21334, 101, 0, 90, 0)
+        #
+        self.robot.Delay(2) # Wait 2s
+        # Reverse path to navigate back.... since there is no longer a sample holder,
+        # we can take a shortcut, as there is no risk of dropping/ spillage
+        # ^^^^^ NO, we CANNOT, it is wayyyyy to close to colliding.
+        #Just backtrack, it is safer T-T.
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(74, 187.345986751, 159.752456842, 0, 90, 0)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(0, 189.21334, 158, 0, 90, 0)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(0, 189.21334, 158, -90, 0, 90)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(0, 189.21334, 308, -90, 0, 90)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MovePose(190, 0, 308, 0, 90, 0)
+
+
 if __name__ == "__main__":
     import tkinter as tk
     from tkinter import messagebox
@@ -253,8 +447,8 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.title("Robot Control")
 
-    Meca = MecademicRobot("192.168.0.100")
-
+    # Meca = MecademicRobot("192.168.0.100")
+    Meca = DummyMecademicRobot()
 
     root.geometry("%dx%d" % (500, 500))
     notebook = DockableNotebook.DockableNotebook(root, root)
@@ -303,6 +497,10 @@ if __name__ == "__main__":
         Meca.robot.ResumeMotion()
         set_current_motion_cart_linvel_angvel_acc()
 
+    def home_pressed(event):
+        Meca.robot.SetSynchronousMode(False)
+        Meca.move_to_home()
+
     def bind_pseudo_button(frame, label, action):
         for pseudo_button_part in label, frame:
             pseudo_button_part.bind("<Button-1>", action)
@@ -326,7 +524,13 @@ if __name__ == "__main__":
                                            text="Buttons",
                                            font= ("DEFAULT_FONT", "10"),
                                            labelanchor="nw")
-        universal_button_frame.grid(row=0, column = 1)
+        universal_button_frame.grid(row=1, column = 1, columnspan=3)
+
+        path_button_frame = tk.LabelFrame(frm_1,
+                                           text="Paths",
+                                           font= ("DEFAULT_FONT", "10"),
+                                           labelanchor="nw")
+        path_button_frame.grid(row=2, column = 1, columnspan=3)
 
         def run_trials_pressed(event):
             run_frame["relief"] = tk.SUNKEN
@@ -345,6 +549,7 @@ if __name__ == "__main__":
                     messagebox.showinfo(title="Information:", message=msg)
 
             except ValueError:
+                trials_var_temp = 0
                 try:
                     trials_var_temp = float(trials_var.get())
                     messagebox.showinfo(
@@ -360,7 +565,6 @@ if __name__ == "__main__":
 
         def gsp_pressed(event):
             Meca.go_to_gravity_safe_pos()
-
 
         def pause_pressed(event):
             if pause_frame["relief"] == tk.SUNKEN:
@@ -386,40 +590,46 @@ if __name__ == "__main__":
         run_frame.grid(column=0, row=0, padx=5, pady=5)
         run_label.grid(padx=5, pady=5)
 
-        swivel_frame = tk.Frame(frm_1, relief=tk.RAISED, bd=2)
-        swivel_label = tk.Label(swivel_frame, text="GSP")
-        bind_pseudo_button(swivel_frame, swivel_label, gsp_pressed)
-        swivel_frame.grid(column=4, row=1, padx=5, pady=5)
-        swivel_label.grid(padx=5, pady=5)
+        gsp_frame = tk.Frame(universal_button_frame, relief=tk.RAISED, bd=2)
+        gsp_label = tk.Label(gsp_frame, text="GSP")
+        bind_pseudo_button(gsp_frame, gsp_label, gsp_pressed)
+        gsp_frame.grid(column=2, row=0, padx=5, pady=5)
+        gsp_label.grid(padx=5, pady=5)
 
-        pause_frame = tk.Frame(frm_1, relief=tk.RAISED, bd=2)
+        home_frame = tk.Frame(universal_button_frame, relief=tk.RAISED, bd=2)
+        home_label = tk.Label(home_frame, text="Go Home")
+        bind_pseudo_button(home_frame, home_label, home_pressed)
+        home_frame.grid(column=2, row=1, padx=5, pady=5)
+        home_label.grid(padx=5, pady=5)
+
+        pause_frame = tk.Frame(universal_button_frame, relief=tk.RAISED, bd=2)
         pause_label = tk.Label(pause_frame, text="Pause")
         bind_pseudo_button(pause_frame, pause_label, pause_pressed)
-        pause_frame.grid(column=4, row=2, padx=5, pady=5)
+        pause_frame.grid(column=0, row=1, padx=5, pady=5)
         pause_label.grid(padx=5, pady=5)
 
-        clear_frame = tk.Frame(frm_1, bd=2)
+        clear_frame = tk.Frame(universal_button_frame, bd=2)
         clear_button = tk.Button(clear_frame, text="Clear")
         clear_button.bind("<Button-1>", clear_pressed)
-        clear_frame.grid(column=4, row=3, padx=5, pady=5)
+        clear_frame.grid(column=0, row=0, padx=5, pady=5)
         clear_button.grid(padx=5, pady=5)
 
-        get_pose_frame = tk.Frame(frm_1, bd=2)
-        get_pose_button = tk.Button(clear_frame, text="Get Pose")
+        get_pose_frame = tk.Frame(universal_button_frame, bd=2)
+        get_pose_button = tk.Button(get_pose_frame, text="Get Pose")
         get_pose_button.bind("<Button-1>", pose_pressed)
-        get_pose_frame.grid(column=4, row=4, padx=5, pady=5)
+        get_pose_frame.grid(column=3, row=0, padx=5, pady=5)
         get_pose_button.grid(padx=5, pady=5)
 
-        tmm_frame = tk.Frame(frm_1, bd=2)
+        tmm_frame = tk.Frame(path_button_frame, bd=2)
         tmm_button = tk.Button(tmm_frame, text="Mount")
         tmm_button.bind("<Button-1>", do_nothing)
-        tmm_frame.grid(column=3, row=1, padx=5, pady=5)
+        tmm_frame.grid(column=0, row=0, padx=5, pady=5)
         tmm_button.grid(padx=5, pady=5)
 
-        run_path_test_frame = tk.Frame(frm_1, bd=2)
-        run_path_test_button = tk.Button(clear_frame, text="Run Path Test")
-        run_path_test_button.bind("<Button-1>", do_nothing)
-        run_path_test_frame.grid(column=5, row=1, padx=5, pady=5)
+        run_path_test_frame = tk.Frame(path_button_frame, bd=2)
+        run_path_test_button = tk.Button(run_path_test_frame, text="Run Path Test")
+        run_path_test_button.bind("<Button-1>", run_path_test)
+        run_path_test_frame.grid(column=0, row=1, padx=5, pady=5)
         run_path_test_button.grid(padx=5, pady=5)
 
         def start_cart_jog(event,type_of_jog, amount,direction = 1):
@@ -468,7 +678,6 @@ if __name__ == "__main__":
                                 direction
                                 )
 
-
         def start_joint_jog(event,joint, jog_weight = 2,direction = 1):
             global job_id
             # print(type_of_jog,amount,direction)
@@ -516,10 +725,6 @@ if __name__ == "__main__":
                 jangles[0], jangles[1], jangles[2], jangles[3], jangles[4], jangles[5]
             )
             job_id = root.after(10, start_joint_jog, event, joint, jog_weight, direction)
-
-
-        
-
 
         def stop_jog(event):
             global job_id
@@ -595,19 +800,6 @@ if __name__ == "__main__":
                                                             stop_jog)
 
         set_up_cart_jog_btns()
-
-        
-
-
-        
-
-
-        
-
-            
-
-        
-       
 
         def set_up_joint_jog_btns():
 
@@ -693,15 +885,13 @@ if __name__ == "__main__":
                 joint_jog_btns[f"{joint}"]["Widgets"][2].bind("<ButtonRelease-1>",
                                                               stop_jog)
             
-            
-
         set_up_joint_jog_btns()
 
     def go_to_gravity_safe_pose():
         Meca.go_to_gravity_safe_pos()
         
 
-    def do_nothing():
+    def do_nothing(*args):
         pass
 
     def set_current_motion_cart_linvel_angvel_acc(linvel=150, angvel=45, acc=50):
@@ -722,10 +912,7 @@ def run_path_test(event):
     Meca.robot.SetSynchronousMode(False)
     Meca.run_path_test()
 
-
-
-
-### Backwards facing
+### noqa Backwards facing cartesian coords (most recent successful RoboDK run, starting from sample holder location)
 """
 1: -116.897,200.999,276.586,0,-90,180
 2: -106.897,200.999,276.586,0,-90,180
@@ -746,8 +933,6 @@ def run_path_test(event):
 """
 
 ##Retrieve, Relocate, Retreat, Remove, Retrace, Replace, Reset (big brain)
-
-
 
 def singularity_check_back_facing_on_multiscale(event):
     pose_1 = [-116.897, 200.999, 276.586, 0, -90, 180]

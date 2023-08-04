@@ -187,7 +187,8 @@ class ImageWriter:
 
         # Initialize data source, pointing to the new file name
         self.data_source = data_sources.get_data_source(self.file_type)(
-            file_name=file_name)
+            file_name=file_name
+        )
 
         # Pass experiment and configuration to metadata
         self.data_source.set_metadata_from_configuration_experiment(
@@ -329,7 +330,9 @@ class ImageWriter:
 
     def calculate_and_check_disk_space(self):
         """Estimate the size of the data that will be written to disk, and confirm
-        that sufficient disk space is available.
+        that sufficient disk space is available. Also evaluates whether or not
+        big-tiff or tiff is needed. Tiff file formats were designed for 32-bit
+        operating systems, whereas big-tiff was designed for 64-bit operating systems.
 
         Assumes 16-bit image type, without compression."""
 
@@ -345,7 +348,7 @@ class ImageWriter:
 
         # TIFF vs Big-TIFF Comparison
         if (self.file_type == "TIFF") or (self.file_type == "OME-TIFF"):
-            if image_size > 2 ** 32:
+            if image_size > 2**32:
                 self.data_source.set_bigtiff(True)
             else:
                 self.data_source.set_bigtiff(False)

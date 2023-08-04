@@ -33,10 +33,12 @@
 #  Standard Library Imports
 import logging
 import time
+import tkinter as tk
 
-# MacGyvering
-import sys
-print(sys.path)
+import numpy as np
+from numpy import sin as sin, cos as cos, tan as tan
+import functools
+
 # import arm_gui_attempt_4
 
 # Local Imports
@@ -44,8 +46,16 @@ import aslm
 from aslm.model.devices.APIs.mecademic.robot import Robot
 from aslm.model.devices.robots.robots_base import RobotsBase
 import aslm
-from aslm.view.custom_widgets import DockableNotebook, hover, hoverbar, hovermixin, LabelInputWidgetFactory, popup, scrollbars, validation
-
+from aslm.view.custom_widgets import (
+    DockableNotebook,
+    hover,
+    hoverbar,
+    hovermixin,
+    LabelInputWidgetFactory,
+    popup,
+    scrollbars,
+    validation,
+)
 
 
 # Logger Setup
@@ -54,20 +64,20 @@ from aslm.view.custom_widgets import DockableNotebook, hover, hoverbar, hovermix
 
 
 def build_robot_connection(robot_address, timeout=0.25):
-#     """Build MecademicRobot device connection
+    #     """Build MecademicRobot device connection
 
-#     Parameters
-#     ----------
-#     robot_address : str
-#         IP address of the robot
-#     timeout : float
-#         Timeout for connecting to the robot
+    #     Parameters
+    #     ----------
+    #     robot_address : str
+    #         IP address of the robot
+    #     timeout : float
+    #         Timeout for connecting to the robot
 
-#     Returns
-#     -------
-#     robot : Robot
-#         Mecademic Robot device connection
-#     """
+    #     Returns
+    #     -------
+    #     robot : Robot
+    #         Mecademic Robot device connection
+    #     """
 
     block_flag = True
     wait_start = time.time()
@@ -114,6 +124,7 @@ class MecademicRobot:
 
     """
 
+
     def __init__(
         self,
         # microscope_name,
@@ -130,279 +141,633 @@ class MecademicRobot:
         self.robot.ActivateAndHome()
         self.robot.WaitHomed()
         self.robot.SetSynchronousMode(False)
-        
-    def forklift_grab_mock_sample_holder(self):
-        self.go_to_gravity_safe_pos()
-        self.robot.SetCartLinVel(150)
-        self.robot.MoveJoints(0, 60, 30, -90, -90, 0)
-        self.robot.MoveJoints(90, 60, 30, -90, -90, 0)
-        self.robot.MoveLin(
-            -92.07303, 137.35033, 109.50408, -161.00945, -89.95403, 19.06194
-        )
-        self.robot.MoveLin(
-            -194.25064, 137.35033, 109.50408, -161.00945, -89.95403, 19.06194
-        )
-        self.robot.SetCartLinVel(50)
-        self.robot.MoveLin(
-            -194.25064, 137.35033, 140.50408, -161.00945, -89.95403, 19.06194
-        )
-        self.robot.SetCartLinVel(20)
-        self.robot.MoveLin(
-            -174.25064, 137.35033, 150.50408, -161.00945, -89.95403, 19.06194
-        )
-        self.robot.SetCartLinVel(50)
-        self.robot.MoveLin(
-            -92.07303, 137.35033, 109.50408, -161.00945, -89.95403, 19.06194
-        )
-        self.robot.MoveLin(-83.43991, 119.21656, 308, 90, -89.97672, -90)
-        self.robot.SetJointVel(5)
-        self.robot.MoveJoints(96.431, 0, 0, -90, 83.593, 90)
-        self.robot.MoveJoints(0, 0, 0, -90, -83.593, 90)
-        self.robot.SetJointVel(25)
-        self.robot.MoveLin(146.00102, -54.63446, 116.66917, -90, 77.162, 90)
-        self.robot.MoveLin(
-            146.26919, -54.87656, 137.52685, -70.46068, 76.12708, 64.4133
-        )
-        self.robot.MovePose(74.59977, -144.59977, 131.91343, 90, 0, -90)
-        self.robot.MoveLin(74.59977, -144.59977, 160.91343, 90, 0, -90)
-        self.robot.MoveLin(119.89491, -186.17773, 173.31124, 90, 0, -90)
-        self.robot.MoveLin(119.89491, -186.17773, 118.18298, 90, 0, -90)
-        self.robot.MoveLin(119.89491, -186.17773, 108.18298, 90, 0, -90)
-        self.robot.MoveLin(119.89491, -130.17773, 108.18298, 90, 0, -90)
-        self.robot.MovePose(-21.29581, 0, 462.58891, 0, 5, 0)
+
+        self.pose_matrix = [[1,0,0],
+                    [0,1,0],
+                    [0,0,1]
+                    ]
+
+        self.CAROUSEL_MAX = 30
+
+        #v probably get this from a yaml
+
+        self.omnidict = {"Cartesian": {"axes_list": ["X","Y","Z","Rx","Ry","Rz"],
+                                       "xyz_axis_limits": ["unimplemented"],
+                                       "jog_weights": {"X": 10,
+                                                       "Y": 10,
+                                                       "Z": 10,
+                                                       "Rx": .25,
+                                                       "Ry": .25,
+                                                       "Rz": .25}},
+                         "Joints": {"joints_list": ["J1",
+                                                    "J2",
+                                                    "J3",
+                                                    "J4",
+                                                    "J5",
+                                                    "J6"],
+                                    "joint_limits":
+                                    {"J1": [[-175,175], [tk.Variable(value=-175),
+                                                         tk.Variable(value=175)]],
+                                    "J2": [[-70, 90],[tk.Variable(value=-70),
+                                                      tk.Variable(value=90)]],
+                                    "J3": [[-135, 70], [tk.Variable(value=-135),
+                                                        tk.Variable(value=70)]],
+                                    "J4": [[-170,170], [tk.Variable(value=-170),
+                                                        tk.Variable(value=170)]],
+                                    "J5": [[-115,115], [tk.Variable(value=-115),
+                                                        tk.Variable(value=115)]],
+                                    "J6": [[-420, 420], [tk.Variable(value=-420),
+                                                         tk.Variable(value=420)]]},
+                                    "jog_weights": {"J1": 2,
+                                                    "J2": 2,
+                                                    "J3": 2,
+                                                    "J4": 2,
+                                                    "J5": 2,
+                                                    "J6": 2}
+                                    }
+
+                         }
+
+
+    def get_joint_limit(self, joint):
+        return self.omnidict["Joints"]["joint_limits"][f"{joint}"]
+
+    def move_to_home(self):
+        self.robot.MoveJoints(0,0,0,0,0,0)
 
     def go_to_gravity_safe_pos(self):
         self.robot.MovePose(-21.29581, 0, 462.58891, 0, 5, 0)
-    
-    
 
-    def nod(self):
-        self.robot.MoveJoints(-135,  30,  -30,  0,  15,  0)
-        self.robot.SetJointVel(50)
-        for i in range(3):
-            self.robot.MoveJoints(-135,  30,  -15,  0,  15,  0)
-            self.robot.MoveJoints(-135,  30,  -30,  0,  15,  0)
-        self.robot.SetJointVel(25)
-    def shake(self):
-        # self.robot.set
-        self.robot.MoveJoints(-135,  30,  -30,  90,  0,  -90)
-        self.robot.SetJointVel(50)
-        for i in range(3):
-            self.robot.MoveJoints(-135,  30,  -15,  90,  45,  -90)
-            self.robot.MoveJoints(-135,  30,  -15,  90,  -45,  -90)
-        self.robot.MoveJoints(-135,  30,  -15,  90,  15,  -90)
-        self.robot.MoveJoints(-135,  30,  -30,  0,  15,  0)
+    def run_path_test(self):
+        """Moves the robot to and from a sample holder assembly,
+        as discussed in the packet.
 
-        self.robot.SetJointVel(25)
+        Parameters
+        ----------
+        self : object
+            MecademicRobot instance
 
-    def chuckle(self):
-        self.robot.MoveJoints(-135,  30,  -30,  90,  0,  -90)
-        self.robot.SetJointVel(50)
-        for i in range(12):
-            self.robot.MoveJoints(-135,  30,  -45, 0,  -45,  0)
-            self.robot.MoveJoints(-135,  30,  0,  0,  -90,  0)
-        self.robot.MoveJoints(-135,  30,  -30,  90,  0,  -90)
-        self.robot.SetJointVel(50)
+        Returns
+        -------
+        None
+        """
+
+        # Commands to move from "Home" to the end point and back
+        self.robot.MoveLin(190, 0, 308, 0, 90, 0)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MovePose(0, 189.21334, 308, -90, 0, 90)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(0, 189.21334, 158, -90, 0, 90)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(0, 189.21334, 158, 0, 90, 0)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(74, 189.21334, 157, 0, 90, 0)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(229.54733, 189.21334, 157, 0, 90, 0)
+        self.robot.Delay(1)
+        # We must deposit the sample holder
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(229.54733, 189.21334, 101, 0, 90, 0)
+        #
+        self.robot.Delay(2) # Wait 2s
+        # Reverse path to navigate back.... since there is no longer a sample holder,
+        # we can take a shortcut, as there is no risk of dropping/ spillage
+        # ^^^^^ NO, we CANNOT, it is wayyyyy to close to colliding.
+        #Just backtrack, it is safer T-T.
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(74, 187.345986751, 159.752456842, 0, 90, 0)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(0, 189.21334, 158, 0, 90, 0)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(0, 189.21334, 158, -90, 0, 90)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MoveLin(0, 189.21334, 308, -90, 0, 90)
+        Meca.robot.SetCheckpoint(1)
+        self.robot.MovePose(190, 0, 308, 0, 90, 0)
+
 
 if __name__ == "__main__":
     import tkinter as tk
     from tkinter import messagebox
 
     root = tk.Tk()
-    root.title(f"Robot Control")
+    root.title("Robot Control")
 
-    Meca = MecademicRobot('192.168.0.100')
+    Meca = MecademicRobot("192.168.0.100")
+
 
     root.geometry("%dx%d" % (500, 500))
-    notebook = DockableNotebook.DockableNotebook(root,root)
-    frm_1=tk.Frame(width=500,height=500)
-    frm_2=tk.Frame(width=500,height=500)
+    notebook = DockableNotebook.DockableNotebook(root, root)
+    frm_1 = tk.Frame(width=500, height=500)
+    frm_2 = tk.Frame(width=500, height=500)
     frm_1.grid()
 
     frm_2.grid()
-    
-    notebook.add(frm_1,text="Robot")
-    notebook.add(frm_2,text="Not Robot")
-    notebook.set_tablist([frm_1,frm_2])
+
+    notebook.add(frm_1, text="Robot")
+    notebook.add(frm_2, text="Not Robot")
+    notebook.set_tablist([frm_1, frm_2])
     notebook.grid()
-    # notebook.bind('<Destroy>', pass)
-
-    
-    def step():
-        dir = int(pause_label.cget("text"))
-        print(dir)
-        joint_pos = Meca.robot.GetJoints()
-        if abs(joint_pos[0]) >= 150:
-            pause_label.config(text=str(-1*dir))
-        Meca.robot.MoveJoints(joint_pos[0]+10*int(pause_label.cget("text")),0,0,0,0,0)
-        root.after(1000,step())
+    frm_1.bind('<Destroy>', notebook.add(frm_1))
 
 
-    CAROUSEL_MAX = 30
-
+#TODO: replace entry with validatedentry
     def color_update(var, indx, mode):
         try:
-            trials_var_temp = (int(trials_var.get()))
-            if trials_var_temp > CAROUSEL_MAX or trials_var_temp <= 0:
-                Entry2["foreground"]="maroon"
-                
+            trials_var_temp = int(trials_var.get())
+            if trials_var_temp > Meca.CAROUSEL_MAX or trials_var_temp <= 0:
+                Entry2["foreground"] = "maroon"
+
             else:
-                Entry2["foreground"]="limegreen"
-                
-        except ValueError:
-            try:
-                trials_var_temp = (float(trials_var.get()))
-                Entry2["foreground"]="maroon"
-            except ValueError:
-                Entry2["foreground"]="red"
-        
-    trials_var = tk.StringVar()
-    frm_entry = tk.Frame(frm_1,width=500,height=250)
-    frm_entry.grid(column=3,row=0)
-    Entry2 = tk.Entry(frm_entry,textvariable=trials_var, fg="black")
-    Entry2.grid(padx=5,pady=5)
+                Entry2["foreground"] = "limegreen"
 
-    trials_var.trace_add('write',color_update)
-
-    def swivel_pressed(event):
-        if swivel_frame["relief"] == tk.SUNKEN:
-            swivel_frame["relief"] = tk.RAISED
-            Meca.robot.MoveJoints(150,0,0,0,5,0)
-        elif swivel_frame["relief"] == tk.RAISED:
-            swivel_frame["relief"] = tk.SUNKEN
-            Meca.robot.MoveJoints(-150,0,0,0,5,0)
-
-    def pause_pressed(event):
-        if pause_frame["relief"] == tk.SUNKEN:
-            pause_frame["relief"] = tk.RAISED
-            pause_label.config(text="Pause")
-            Meca.robot.ResumeMotion()
-        elif pause_frame["relief"] == tk.RAISED:
-            pause_frame["relief"] = tk.SUNKEN
-            pause_label.config(text="Resume")
-            Meca.robot.PauseMotion()
-
-    def clear_pressed(event):
-        # clear_frame["relief"] = tk.SUNKEN
-        Meca.robot.ClearMotion()
-        # clear_frame["relief"] = tk.RAISED
-        Meca.robot.ResumeMotion()
-
-
-    def run_trials_pressed(event):
-        run_frame["relief"] = tk.SUNKEN
-        try:
-            trials_var_temp = (int(trials_var.get()))
-            if trials_var_temp > CAROUSEL_MAX or trials_var_temp <= 0:
-
-                messagebox.showinfo(
-
-                    title = "Information:",
-                    message = f"Please enter a number between 1 and {CAROUSEL_MAX}."
-                )
-            else:
-                
-                msg = f"{trials_var_temp} trial(s) will be ran."
-                messagebox.showinfo(
-
-                    title = "Information:",
-                    message = msg
-                )
         except ValueError:
             try:
                 trials_var_temp = float(trials_var.get())
-                messagebox.showinfo(
-
-                    title = "Error:",
-                    message = "Please input an integer."
-                )
+                Entry2["foreground"] = "maroon"
             except ValueError:
+                Entry2["foreground"] = "red"
 
+    trials_var = tk.StringVar()
+    frm_entry = tk.Frame(frm_1, width=500, height=250)
+    frm_entry.grid(column=3, row=0)
+    Entry2 = tk.Entry(frm_entry, textvariable=trials_var, fg="black")
+    Entry2.grid(padx=5, pady=5, row=0, column=1)
+
+    trials_var.trace_add("write", color_update)
+
+    def clear_pressed(event):
+        Meca.robot.SetSynchronousMode(False)
+        Meca.robot.ClearMotion()
+        Meca.robot.ResetError()
+        Meca.robot.ResumeMotion()
+        set_current_motion_cart_linvel_angvel_acc()
+
+    def bind_pseudo_button(frame, label, action):
+        for pseudo_button_part in label, frame:
+            pseudo_button_part.bind("<Button-1>", action)
+
+    def run_command_x_times(event, command= None,n_runs=1):
+        for i in range(n_runs):
+            try:
+                command(event)
+            except:
+                pass
+
+    def set_up_all_other_widgets():
+        """Creates buttons for jogging and robot motion
+
+        DO NOT USE SETBLENDING(), LEST THE JOG BUTTONS LOSE FUNCTION
+        ----------
+        :(
+        """
+
+        universal_button_frame = tk.LabelFrame(frm_1,
+                                           text="Buttons",
+                                           font= ("DEFAULT_FONT", "10"),
+                                           labelanchor="nw")
+        universal_button_frame.grid(row=0, column = 1)
+
+        def run_trials_pressed(event):
+            run_frame["relief"] = tk.SUNKEN
+            try:
+                trials_var_temp = int(trials_var.get())
+                if trials_var_temp > Meca.CAROUSEL_MAX or trials_var_temp <= 0:
+
+                    messagebox.showinfo(
+                        title="Information:",
+                        message= \
+                            f"Please enter a number between 1 and {Meca.CAROUSEL_MAX}.",
+                    )
+                else:
+
+                    msg = f"{trials_var_temp} trial(s) will be ran."
+                    messagebox.showinfo(title="Information:", message=msg)
+
+            except ValueError:
+                try:
+                    trials_var_temp = float(trials_var.get())
+                    messagebox.showinfo(
+                        title="Error:", message="Please input an integer."
+                    )
+                except ValueError:
+
+                    messagebox.showinfo(
+                        title="Error:", message="Please input a valid number."
+                    )
+            run_frame["relief"] = tk.RAISED
+            run_command_x_times(event,do_nothing, trials_var_temp)
+
+        def gsp_pressed(event):
+            Meca.go_to_gravity_safe_pos()
+
+
+        def pause_pressed(event):
+            if pause_frame["relief"] == tk.SUNKEN:
+                pause_frame["relief"] = tk.RAISED
+                pause_label.config(text="Pause ")
+                Meca.robot.ResumeMotion()
+            elif pause_frame["relief"] == tk.RAISED:
+                pause_frame["relief"] = tk.SUNKEN
+                pause_label.config(text="Resume")
+                Meca.robot.PauseMotion()
+
+# 88.80724, -64.40776, -58.47414, -0.05246, 49.82388, -264.80905 handshake joints
+
+        def pose_pressed(event):
+            joints = Meca.robot.GetRtTargetJointPos()
+            carts = Meca.robot.GetRtTargetCartPos()
+            print(f"Joint positions: {joints}")
+            print(f"Cartesian position: {carts}")
+
+        run_frame = tk.Frame(frm_entry, relief=tk.RAISED, bd=2)
+        run_label = tk.Label(run_frame, text="Run Trial(s):")
+        bind_pseudo_button(run_frame, run_label, run_trials_pressed)
+        run_frame.grid(column=0, row=0, padx=5, pady=5)
+        run_label.grid(padx=5, pady=5)
+
+        swivel_frame = tk.Frame(frm_1, relief=tk.RAISED, bd=2)
+        swivel_label = tk.Label(swivel_frame, text="GSP")
+        bind_pseudo_button(swivel_frame, swivel_label, gsp_pressed)
+        swivel_frame.grid(column=4, row=1, padx=5, pady=5)
+        swivel_label.grid(padx=5, pady=5)
+
+        pause_frame = tk.Frame(frm_1, relief=tk.RAISED, bd=2)
+        pause_label = tk.Label(pause_frame, text="Pause")
+        bind_pseudo_button(pause_frame, pause_label, pause_pressed)
+        pause_frame.grid(column=4, row=2, padx=5, pady=5)
+        pause_label.grid(padx=5, pady=5)
+
+        clear_frame = tk.Frame(frm_1, bd=2)
+        clear_button = tk.Button(clear_frame, text="Clear")
+        clear_button.bind("<Button-1>", clear_pressed)
+        clear_frame.grid(column=4, row=3, padx=5, pady=5)
+        clear_button.grid(padx=5, pady=5)
+
+        get_pose_frame = tk.Frame(frm_1, bd=2)
+        get_pose_button = tk.Button(clear_frame, text="Get Pose")
+        get_pose_button.bind("<Button-1>", pose_pressed)
+        get_pose_frame.grid(column=4, row=4, padx=5, pady=5)
+        get_pose_button.grid(padx=5, pady=5)
+
+        tmm_frame = tk.Frame(frm_1, bd=2)
+        tmm_button = tk.Button(tmm_frame, text="Mount")
+        tmm_button.bind("<Button-1>", do_nothing)
+        tmm_frame.grid(column=3, row=1, padx=5, pady=5)
+        tmm_button.grid(padx=5, pady=5)
+
+        run_path_test_frame = tk.Frame(frm_1, bd=2)
+        run_path_test_button = tk.Button(clear_frame, text="Run Path Test")
+        run_path_test_button.bind("<Button-1>", do_nothing)
+        run_path_test_frame.grid(column=5, row=1, padx=5, pady=5)
+        run_path_test_button.grid(padx=5, pady=5)
+
+        def start_cart_jog(event,type_of_jog, amount,direction = 1):
+            global job_id
+            # print(type_of_jog,amount,direction)
+            index = 0
+
+            try:
+                index = ["X", "Y", "Z", "RX", "RY", "RZ"].index(type_of_jog.upper())
+
+            except Exception:
                 messagebox.showinfo(
-
-                    title = "Error:",
-                    message = "Please input a valid number."
+                    title="CoordinateError:",
+                    message="A jogging Coordinate is not properly configured.",
                 )
-        run_frame["relief"] = tk.RAISED
+                Meca.robot.ClearMotion()
+                root.after_cancel(job_id)
+                job_id = None
 
-    run_frame = tk.Frame(frm_1,relief=tk.RAISED, bd=2)
-    run_label = tk.Label(run_frame, text = "Run Trial(s)")
-    for pseudo_button_part in run_label,run_frame:
-        pseudo_button_part.bind("<Button-1>", run_trials_pressed)
-    run_frame.grid(column=4,row=0,padx=5,pady=5)
-    run_label.grid(padx=5,pady=5)
-
-    swivel_frame = tk.Frame(frm_1,relief=tk.RAISED, bd=2)
-    swivel_label = tk.Label(swivel_frame, text = "Swivel")
-    for pseudo_button_part in swivel_frame,swivel_label:
-        pseudo_button_part.bind("<Button-1>", swivel_pressed)
-    swivel_frame.grid(column=4,row=1,padx=5,pady=5)
-    swivel_label.grid(padx=5,pady=5)
-
-    pause_frame = tk.Frame(frm_1,relief=tk.RAISED, bd=2)
-    pause_label = tk.Label(pause_frame, text = "Pause")
-    for pseudo_button_part in pause_frame,pause_label:
-        pseudo_button_part.bind("<Button-1>", pause_pressed)
-    pause_frame.grid(column=4,row=2,padx=5,pady=5)
-    pause_label.grid(padx=5,pady=5)
-
-    clear_frame = tk.Frame(frm_1, bd=2)
-    clear_button = tk.Button(clear_frame, text = "Clear")
-    clear_button.bind("<Button-1>", clear_pressed)
-    clear_frame.grid(column=4,row=3,padx=5,pady=5)
-    clear_button.grid(padx=5,pady=5)
+            empty = [0,0,0,0,0,0]
+            empty[index] = amount*direction
+            if index > 2:
+                Meca.robot.MoveLinRelWrf(empty[0],
+                                         empty[1],
+                                         empty[2],
+                                         empty[3],
+                                         empty[4],
+                                         empty[5])
+            else:
+                current_pose = Meca.robot.GetRtTargetCartPos()
+                # print(Meca.robot.GetStatusRobot(True,))
+                Meca.robot.MoveLin(empty[0]+current_pose[0],
+                                    empty[1]+current_pose[1],
+                                    empty[2]+current_pose[2],
+                                    empty[3]+current_pose[3],
+                                    empty[4]+current_pose[4],
+                                    empty[5]+current_pose[5])
+                # print(Meca.robot.GetStatusRobot(True).error_status)
 
 
-
-    frm_jogging = tk.Frame(frm_1)
-    frm_jogging.grid(column=1,row=0)
-    lbl_jog_x=tk.Label(frm_jogging,text="X Position")
-    lbl_jog_x.grid(column=1,row=0)
-    btn_jog_negative_x = tk.Button(frm_jogging, text="  <  ")
-    btn_jog_negative_x.grid(column=0,row=1)
-    btn_jog_positive_x = tk.Button(frm_jogging, text="  >  ")
-    btn_jog_positive_x.grid(column=2,row=1)
-
-    lbl_jog_y=tk.Label(frm_jogging,text="X Position")
-    lbl_jog_y.grid(column=1,row=2)
-    btn_jog_negative_y = tk.Button(frm_jogging, text="  <  ")
-    btn_jog_negative_y.grid(column=0,row=3)
-    btn_jog_positive_y = tk.Button(frm_jogging, text="  >  ")
-    btn_jog_positive_y.grid(column=2,row=3)
+            job_id = root.after(5,
+                                start_cart_jog,
+                                event,
+                                type_of_jog,
+                                amount,
+                                direction
+                                )
 
 
+        def start_joint_jog(event,joint, jog_weight = 2,direction = 1):
+            global job_id
+            # print(type_of_jog,amount,direction)
+            joint_pos_index = 0
+
+            try:
+                joint_pos_index = Meca.omnidict[
+                    "Joints"][
+                        "joints_list"].index(joint)
+                joint = joint
+
+            except:
+
+                try:
+                    joint_pos_index = Meca.omnidict[
+                        "Joints"][
+                            "joints_list"].index(f"J{joint}")
+                    joint = f"J{joint}"
+
+
+                except:
+                    print("Error:",
+                          "A jogging Coordinate is not properly configured.")
+                    Meca.robot.ClearMotion()
+                    try:
+                        root.after_cancel(job_id)
+                        job_id = None
+                    except:
+                        pass
+
+            # print(Meca.omnidict["Joints"]["joints_list"],"type:", joint)
+            jangles = Meca.robot.GetJoints()
+            print(joint, jangles[joint_pos_index], jog_weight, direction)
+
+            jangles[joint_pos_index] += (float(jog_weight) * float(direction))
+            # print("pre:", Meca.robot.GetJoints(), "post:", jangles)
+
+            if jangles[joint_pos_index] >= Meca.get_joint_limit(f"{joint}")[0][1]-5:
+                jangles[joint_pos_index] = Meca.get_joint_limit(f"{joint}")[0][1]-5
+            elif jangles[joint_pos_index] <= \
+                Meca.get_joint_limit(f"{joint}")[0][0]+5:
+                jangles[joint_pos_index] = Meca.get_joint_limit(f"{joint}")[0][0]+5
+
+            Meca.robot.MoveJoints(
+                jangles[0], jangles[1], jangles[2], jangles[3], jangles[4], jangles[5]
+            )
+            job_id = root.after(10, start_joint_jog, event, joint, jog_weight, direction)
+
+
+        
+
+
+        def stop_jog(event):
+            global job_id
+            try:
+                root.after_cancel(job_id)
+            except:
+                pass
+
+        jogging_labelframe = tk.LabelFrame(frm_1,
+                                           text="Jogging",
+                                           font= ("DEFAULT_FONT", "10"),
+                                           labelanchor="n")
+
+        jogging_notebook = tk.ttk.Notebook(jogging_labelframe)
+
+        jogging_notebook.grid(pady= 5, column=0,row=0)
+
+        cartesian_jog_frame = tk.Frame()
+        cartesian_jog_frame.grid(column=0,row=0)
+        joint_jog_frame = tk.Frame()
+        joint_jog_frame.grid()
+
+        jogging_notebook.add(cartesian_jog_frame,text= "Cartesian")
+        jogging_notebook.add(joint_jog_frame,text = "Joint")
+        jogging_labelframe.grid(padx=5, pady=5, row=0, column=0, rowspan=8)
+
+        def set_up_cart_jog_btns():
+
+            cart_jog_btns = {}
+
+
+            def make_lambda(type_of_jog,weight,direction):
+                return lambda event: start_cart_jog(event,type_of_jog,
+                                                              weight,
+                                                              direction)
+
+            for i in range(6):
+                axis = Meca.omnidict["Cartesian"]["axes_list"][i]
+                # print(axis)
+                weight = Meca.omnidict["Cartesian"]["jog_weights"][axis]
+
+                lbl_jog = tk.Label(cartesian_jog_frame, text=f"{axis}")
+                lbl_jog.grid(column=1, row=0+2*i)
+                btn_jog_negative = tk.Button(cartesian_jog_frame, text="  <- ")
+                btn_jog_negative.grid(column=0, row=1+2*i)
+                btn_jog_positive = tk.Button(cartesian_jog_frame, text=" +>  ")
+                btn_jog_positive.grid(column=2, row=1+2*i)
+                cart_jog_btns[f"{axis}"] = {"Widgets":
+                                            [lbl_jog,
+                                             btn_jog_negative,
+                                             btn_jog_positive],
+                                             "Axis": axis,
+                                             "Weight": weight}
+                Lambda = [
+                    make_lambda(
+                    cart_jog_btns[f"{axis}"]["Axis"],
+                    cart_jog_btns[f"{axis}"]["Weight"],
+                    -1),
+                    make_lambda(
+                    cart_jog_btns[f"{axis}"]["Axis"],
+                    cart_jog_btns[f"{axis}"]["Weight"],
+                    1)
+                        ]
+                cart_jog_btns[f"{axis}"]["Lambda"] = Lambda
+            for axis in Meca.omnidict["Cartesian"]["axes_list"]:
+                cart_jog_btns[f"{axis}"]["Widgets"][1].bind("<ButtonPress-1>",
+                                       cart_jog_btns[f"{axis}"]["Lambda"][0])
+                cart_jog_btns[f"{axis}"]["Widgets"][1].bind("<ButtonRelease-1>",
+                                                            stop_jog)
+                cart_jog_btns[f"{axis}"]["Widgets"][2].bind("<ButtonPress-1>",
+                                       cart_jog_btns[f"{axis}"]["Lambda"][1])
+                cart_jog_btns[f"{axis}"]["Widgets"][2].bind("<ButtonRelease-1>",
+                                                            stop_jog)
+
+        set_up_cart_jog_btns()
+
+        
+
+
+        
+
+
+        
+
+            
+
+        
+       
+
+        def set_up_joint_jog_btns():
+
+            joint_jog_btns = {}
+            joint_jog_spinbox_dict = {}
+
+            def make_lambda(type_of_jog,direction):
+                return lambda event: start_joint_jog(event,type_of_jog,
+                                                              get_weight(joint),
+                                                              direction)
+            
+
+            # noqa This setup circumvents the error v
+        # noqa "<lambda>() takes exactly 1 positional argument but 3 were given"... I dunno why I was having said issue in the 1st place
+            def make_jjs_lambda(joint,a = None, b = None):
+                return lambda event, a, b: sub_lambda(joint_jog_spinbox_dict[f"{joint}"].get())
+            
+            def sub_lambda(variable):
+                Meca.omnidict[
+                    "Joints"][
+                        "jog_weights"][
+                            f"{joint}"] = variable
+
+            def get_weight(joint):
+                return Meca.omnidict["Joints"]["jog_weights"][f"{joint}"]
+
+            for i in range(6):
+
+                joint = Meca.omnidict["Joints"]["joints_list"][i]
+
+                
+
+                lbl_jog = tk.Label(joint_jog_frame, text=f"{joint}")
+                lbl_jog.grid(column=1, row=0+2*i)
+                btn_jog_negative = tk.Button(joint_jog_frame, text="  <- ")
+                btn_jog_negative.grid(column=0, row=1+2*i)
+                btn_jog_positive = tk.Button(joint_jog_frame, text=" +>  ")
+                btn_jog_positive.grid(column=2, row=1+2*i)
+                joint_jog_btns[f"{joint}"] = {"Widgets":
+                                              [lbl_jog,
+                                               btn_jog_negative,
+                                               btn_jog_positive],
+                                               "Joint": joint,
+                                               "Weight": get_weight(joint)}
+                Lambda = [
+                    make_lambda(
+                    joint_jog_btns[f"{joint}"]["Joint"],
+                    -1),
+                    make_lambda(
+                    joint_jog_btns[f"{joint}"]["Joint"],
+                    1)
+                        ]
+                joint_jog_btns[f"{joint}"]["Lambda"] = Lambda
+
+                joint_jog_spinbox_dict[f"{joint} textvariable"] = tk.DoubleVar()
+
+
+                joint_jog_spinbox_dict[joint] = \
+                validation.ValidatedSpinbox(
+                                            joint_jog_frame,
+                                            from_=.5,
+                                            to=25.00,
+                                            increment=.5,
+                                            width=6,
+                                            textvariable= joint_jog_spinbox_dict[
+                                                f"{joint} textvariable"]
+                                            )
+                joint_jog_spinbox_dict[joint].variable.set(Meca.omnidict["Joints"]["jog_weights"][joint])
+
+                joint_jog_spinbox_dict[joint].variable.trace_add("write",
+                                                                make_jjs_lambda(f"{joint}"))
+                joint_jog_spinbox_dict[joint].grid(row=1+2*i, column = 1)
+
+
+
+            for joint in Meca.omnidict["Joints"]["joints_list"]:
+                joint_jog_btns[f"{joint}"]["Widgets"][1].bind("<ButtonPress-1>",
+                                       joint_jog_btns[f"{joint}"]["Lambda"][0])
+                joint_jog_btns[f"{joint}"]["Widgets"][1].bind("<ButtonRelease-1>",
+                                                              stop_jog)
+                joint_jog_btns[f"{joint}"]["Widgets"][2].bind("<ButtonPress-1>",
+                                       joint_jog_btns[f"{joint}"]["Lambda"][1])
+                joint_jog_btns[f"{joint}"]["Widgets"][2].bind("<ButtonRelease-1>",
+                                                              stop_jog)
+            
+            
+
+        set_up_joint_jog_btns()
 
     def go_to_gravity_safe_pose():
-        # Meca.go_to_gravity_safe_pos()
-        pass
+        Meca.go_to_gravity_safe_pos()
+        
 
     def do_nothing():
         pass
 
-    """
-    right_frame= tk.Frame(root)
-    gravity_safe_button = tk.Button(right_frame,text= "Gravity Safe Pose", command=go_to_gravity_safe_pose)
-    right_frame.grid(padx=5,pady=5)
-    gravity_safe_button.grid(padx=5,pady=5)
+    def set_current_motion_cart_linvel_angvel_acc(linvel=150, angvel=45, acc=50):
+        global current_motion_cart_linvel
+        global current_motion_cart_angvel
+        global current_motion_cart_acc
 
-    puppet_lg_frame = tk.Frame(root)
-    puppet_lg_frame.rowconfigure(0, minsize=50, weight=1)
-    puppet_lg_frame.columnconfigure([0, 1, 2], minsize=50, weight=1)
+        current_motion_cart_linvel = linvel
+        current_motion_cart_angvel = angvel
+        current_motion_cart_acc = acc
 
-    puppet_nod_button = tk.Button(puppet_lg_frame, text = "Nod", command = do_nothing)
-    #Meca.nod
-    puppet_lg_frame.grid(padx=5,pady=5)
-    puppet_nod_button.grid(row=0, column=0,padx=5,pady=5)
+        Meca.robot.SetCartLinVel(current_motion_cart_linvel)
+        Meca.robot.SetCartAngVel(current_motion_cart_angvel)
+        Meca.robot.SetCartAcc(current_motion_cart_acc)
 
-    puppet_shake_button = tk.Button(puppet_lg_frame, text = "Shake", command = do_nothing)
-    # Meca.shake
-    puppet_shake_button.grid(row=0, column=1,padx=5,pady=5)
 
-    puppet_chuckle_button = tk.Button(puppet_lg_frame, text = "Laugh", command = do_nothing)
-    # Meca.chuckle
-    puppet_chuckle_button.grid(row=0, column=2,padx=5,pady=5)
-    """
+def run_path_test(event):
+    Meca.robot.SetSynchronousMode(False)
+    Meca.run_path_test()
 
+
+
+
+### Backwards facing
+"""
+1: -116.897,200.999,276.586,0,-90,180
+2: -106.897,200.999,276.586,0,-90,180
+3: -93.603,213.615,277.203,0,-90,180
+4: -95.757,209.324,265.340,0,-51.879,-180
+5: -78.231,209.324,287.675,0,-51.879,-180
+6: -57.159,209.324,271.140,0,51.879,-180
+7: -57.159,209.324,271.140,0,-51.879,-180
+8: -57.159,209.324,271.140,0,-30.683,-180
+9: -36.309,209.324,269.273,0,-45.340,-180
+10: -37.683,194.062,260.826,90,-90,-90
+11: -11.828,192.341,260.826,-90,33.664,90
+12: 54.334, 110.992,260.826,-90,60.511,90
+13: 153.569, 59.149, 260.826,-90,86.853,90
+14: 217.236, 11.028, 260.826, 86.853, 90
+15: 218.592, -55.456, 87.455, 90,62.568,-90
+
+"""
+
+##Retrieve, Relocate, Retreat, Remove, Retrace, Replace, Reset (big brain)
+
+
+
+def singularity_check_back_facing_on_multiscale(event):
+    pose_1 = [-116.897, 200.999, 276.586, 0, -90, 180]
+    pose_2 = [-106.897, 200.999, 276.586, 0, -90, 180]
+    pose_3 = [-93.603, 213.615, 277.203, 0, -90, 180]
+    pose_4 = [-95.757, 209.324, 265.340, 0, -51.879, -180]
+    pose_5 = [-78.231, 209.324, 287.675, 0, -51.879, -180]
+    pose_6 = [-57.159, 209.324, 271.140, 0, 51.879, -180]
+    pose_7 = [-57.159, 209.324, 271.140, 0, -51.879, -180]
+    pose_8 = [-57.159, 209.324, 271.140, 0, -30.683, -180]
+    pose_9 = [-36.309, 209.324, 269.273, 0, -45.340, -180]
+    pose_10 = [-37.683, 194.062, 260.826, 90, -90, -90]
+    pose_11 = [-11.828, 192.341, 260.826, -90, 33.664, 90]
+    pose_12 = [54.334, 110.992, 260.826, -90, 60.511, 90]
+    pose_13 = [153.569, 59.149, 260.826, -90, 86.853, 90]
+    pose_14 = [217.236, 11.028, 260.826, 86.853, 90]
+    pose_15 = [218.592, -55.456, 87.455, 90, 62.568, -90]
+    # 5,7,12 Joint
+
+
+set_up_all_other_widgets()
 print(Meca.robot.GetJoints())
-# root.after(100,step())
 root.mainloop()

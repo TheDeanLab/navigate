@@ -319,10 +319,12 @@ class ZStackAcquisition:
         self.start_z_position = float(microscope_state["start_position"])
         # end_z_position = float(microscope_state["end_position"])
         self.z_step_size = float(microscope_state["step_size"])
+        self.z_stack_distance = abs(self.start_z_position - float(microscope_state["end_position"]))
 
         self.start_focus = float(microscope_state["start_focus"])
         end_focus = float(microscope_state["end_focus"])
         self.focus_step_size = (end_focus - self.start_focus) / self.number_z_steps
+        self.f_stack_distance = abs(end_focus - self.start_focus)
 
         # restore z, f
         pos_dict = self.model.get_stage_position()
@@ -371,21 +373,15 @@ class ZStackAcquisition:
     def signal_func(self):
         if self.model.stop_acquisition:
             return False
+        should_pause_data_thread = False
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
 
             # calculate first z, f position
-            # delta_z = abs(
-            #     self.positions[self.current_position_idx]["z"] - self.start_z_position
-            # )
             self.current_z_position = (
                 self.start_z_position + self.positions[self.current_position_idx]["z"]
             )
-
-            # delta_f = abs(
-            #     self.positions[self.current_position_idx]["f"] - self.start_focus
-            # )
             self.current_focus_position = (
                 self.start_focus + self.positions[self.current_position_idx]["f"]
             )
@@ -402,13 +398,27 @@ class ZStackAcquisition:
                 )
             )
 
+            if self.current_position_idx > 0:
+                delta_x = self.positions[self.current_position_idx]["x"] - self.positions[self.current_position_idx-1]["x"]
+                delta_y = self.positions[self.current_position_idx]["y"] - self.positions[self.current_position_idx-1]["y"]
+                delta_z = self.positions[self.current_position_idx]["z"] - self.positions[self.current_position_idx-1]["z"] + self.z_stack_distance
+                delta_f = self.positions[self.current_position_idx]["f"] - self.positions[self.current_position_idx-1]["f"] + self.f_stack_distance
+            else:
+                delta_x = 0
+                delta_y = 0
+                delta_z = 0
+                delta_f = 0
+
             # displacement = [delta_z, delta_f, delta_x, delta_y]
-            # Check the distance between current position and next position,
+            # Check the distance between current position and previous position,
             # if it is too far, then we can call self.model.pause_data_thread() and
             # self.model.resume_data_thread() after the stage has completed the move
             # to the next position.
-            # if any(displacement >= 1000):
-            #     self.model.pause_data_thread()
+
+            # TODO: distance > 1000 should not be hardcoded and somehow related to different kinds of stage devices.
+            should_pause_data_thread = any(distance > 1000 for distance in [delta_x, delta_y, delta_z, delta_f])
+            if should_pause_data_thread:
+                self.model.pause_data_thread()
 
             self.model.move_stage(pos_dict, wait_until_done=True)
             self.model.logger.debug(f"*** ZStack move stage: {pos_dict}")
@@ -430,8 +440,8 @@ class ZStackAcquisition:
                 wait_until_done=True,
             )
 
-        # if any(displacement >= 1000):
-        #   self.model.resume_data_thread()
+        if should_pause_data_thread:
+          self.model.resume_data_thread()
         return True
 
     def signal_end(self):

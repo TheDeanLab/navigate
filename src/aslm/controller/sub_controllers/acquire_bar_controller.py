@@ -110,12 +110,15 @@ class AcquireBarController(GUIController):
                 self.view.OvrAcq["value"] = 0
 
         # Calculate the number of images anticipated.
-        number_of_channels = len(
-            [channel[-1] for channel in microscope_state["channels"].keys()]
-        )
+        number_of_channels = 0
+        for channel in microscope_state["channels"].keys():
+            if microscope_state["channels"][channel]["is_selected"] is True:
+                number_of_channels += 1
+
+        # Time-lapse acquisition
         number_of_timepoints = int(microscope_state["timepoints"])
 
-        # Multiposition
+        # Multi-Position Acquisition
         if microscope_state["is_multiposition"] is False:
             number_of_positions = 1
         else:
@@ -136,9 +139,7 @@ class AcquireBarController(GUIController):
         elif mode == "z-stack":
             number_of_slices = microscope_state["number_z_steps"]
         elif mode == "ConstantVelocityAcquisition":
-            # TODO: should be the same as "z-stack" when using "step_size" as
-            # a real step size.
-            number_of_slices = 100
+            number_of_slices = microscope_state["number_z_steps"]
 
         top_anticipated_images = number_of_slices
         bottom_anticipated_images = (

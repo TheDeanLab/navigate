@@ -885,8 +885,14 @@ class Model:
         self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
 
         # Run the acquisition
-        self.active_microscope.daq.run_acquisition()
-        # self.active_microscope.daq.stop_acquisition()
+        try:
+            self.active_microscope.daq.run_acquisition()
+        except:
+            self.active_microscope.daq.stop_acquisition()
+            self.active_microscope.daq.prepare_acquisition(
+                f"channel_{self.active_microscope.current_channel}",
+                self.active_microscope.current_exposure_time,
+            )
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)

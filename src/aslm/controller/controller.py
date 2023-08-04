@@ -462,7 +462,7 @@ class Controller:
         if mode == "stop":
             # GUI Failsafe
             self.acquire_bar_controller.stop_acquire()
-            self.menu_controller.feature_id_val.set(0)
+            # self.menu_controller.feature_id_val.set(0)
 
     def execute(self, command, *args):
         """Functions listens to the Sub_Gui_Controllers.
@@ -711,6 +711,7 @@ class Controller:
 
             # self.model.run_command('stop')
             self.sloppy_stop()
+            self.menu_controller.feature_id_val.set(0)
 
             # clear show_img_pipe
             while self.show_img_pipe.poll():
@@ -722,6 +723,7 @@ class Controller:
             """Exit the program."""
             # Save current GUI settings to .ASLM/config/experiment.yml file.
             self.sloppy_stop()
+            # self.menu_controller.feature_id_val.set(0)
 
             self.update_experiment_setting()
             file_directory = os.path.join(get_aslm_path(), "config")

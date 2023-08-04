@@ -341,6 +341,9 @@ class TestConfiguration(unittest.TestCase):
             "theta_offset",
             "f_offset",
             "joystick_axes",
+            "flip_x",
+            "flip_y",
+            "flip_z"
         ]
         type_keys = [
             "name",

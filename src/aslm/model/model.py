@@ -893,6 +893,7 @@ class Model:
                 f"channel_{self.active_microscope.current_channel}",
                 self.active_microscope.current_exposure_time,
             )
+            self.active_microscope.daq.run_acquisition()
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)

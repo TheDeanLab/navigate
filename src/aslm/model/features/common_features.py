@@ -319,7 +319,9 @@ class ZStackAcquisition:
         self.start_z_position = float(microscope_state["start_position"])
         # end_z_position = float(microscope_state["end_position"])
         self.z_step_size = float(microscope_state["step_size"])
-        self.z_stack_distance = abs(self.start_z_position - float(microscope_state["end_position"]))
+        self.z_stack_distance = abs(
+            self.start_z_position - float(microscope_state["end_position"])
+        )
 
         self.start_focus = float(microscope_state["start_focus"])
         end_focus = float(microscope_state["end_focus"])
@@ -369,11 +371,14 @@ class ZStackAcquisition:
         self.z_position_moved_time = 0
         self.need_to_move_new_position = True
         self.need_to_move_z_position = True
+        self.should_pause_data_thread = False
+        # TODO: distance > 1000 should not be hardcoded and somehow related to different kinds of stage devices.
+        self.stage_distance_threshold = 1000
 
     def signal_func(self):
         if self.model.stop_acquisition:
             return False
-        should_pause_data_thread = False
+        data_thread_is_paused = False
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
@@ -399,10 +404,24 @@ class ZStackAcquisition:
             )
 
             if self.current_position_idx > 0:
-                delta_x = self.positions[self.current_position_idx]["x"] - self.positions[self.current_position_idx-1]["x"]
-                delta_y = self.positions[self.current_position_idx]["y"] - self.positions[self.current_position_idx-1]["y"]
-                delta_z = self.positions[self.current_position_idx]["z"] - self.positions[self.current_position_idx-1]["z"] + self.z_stack_distance
-                delta_f = self.positions[self.current_position_idx]["f"] - self.positions[self.current_position_idx-1]["f"] + self.f_stack_distance
+                delta_x = (
+                    self.positions[self.current_position_idx]["x"]
+                    - self.positions[self.current_position_idx - 1]["x"]
+                )
+                delta_y = (
+                    self.positions[self.current_position_idx]["y"]
+                    - self.positions[self.current_position_idx - 1]["y"]
+                )
+                delta_z = (
+                    self.positions[self.current_position_idx]["z"]
+                    - self.positions[self.current_position_idx - 1]["z"]
+                    + self.z_stack_distance
+                )
+                delta_f = (
+                    self.positions[self.current_position_idx]["f"]
+                    - self.positions[self.current_position_idx - 1]["f"]
+                    + self.f_stack_distance
+                )
             else:
                 delta_x = 0
                 delta_y = 0
@@ -415,10 +434,13 @@ class ZStackAcquisition:
             # self.model.resume_data_thread() after the stage has completed the move
             # to the next position.
 
-            # TODO: distance > 1000 should not be hardcoded and somehow related to different kinds of stage devices.
-            should_pause_data_thread = any(distance > 1000 for distance in [delta_x, delta_y, delta_z, delta_f])
-            if should_pause_data_thread:
+            self.should_pause_data_thread = any(
+                distance > self.stage_distance_threshold
+                for distance in [delta_x, delta_y, delta_z, delta_f]
+            )
+            if self.should_pause_data_thread:
                 self.model.pause_data_thread()
+                data_thread_is_paused = True
 
             self.model.move_stage(pos_dict, wait_until_done=True)
             self.model.logger.debug(f"*** ZStack move stage: {pos_dict}")
@@ -431,6 +453,8 @@ class ZStackAcquisition:
                 f"*** Zstack move stage: (z: {self.current_z_position}), "
                 f"(f: {self.current_focus_position})"
             )
+            if self.should_pause_data_thread and not data_thread_is_paused:
+                self.model.pause_data_thread()
 
             self.model.move_stage(
                 {
@@ -440,8 +464,9 @@ class ZStackAcquisition:
                 wait_until_done=True,
             )
 
-        if should_pause_data_thread:
-          self.model.resume_data_thread()
+        if self.should_pause_data_thread:
+            self.model.resume_data_thread()
+            self.should_pause_data_thread = False
         return True
 
     def signal_end(self):
@@ -473,6 +498,11 @@ class ZStackAcquisition:
             self.current_focus_position = (
                 self.start_focus + self.positions[self.current_position_idx]["f"]
             )
+            if (
+                self.z_stack_distance > self.stage_distance_threshold
+                or self.f_stack_distance > self.stage_distance_threshold
+            ):
+                self.should_pause_data_thread = True
 
             # after running through a z-stack, update channel
             if self.stack_cycling_mode == "per_stack":

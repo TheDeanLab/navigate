@@ -106,7 +106,7 @@ class Metadata:
         )
         self.dx, self.dy = pixel_size, pixel_size
         self.dz = float(
-            self.configuration["experiment"]["MicroscopeState"]["step_size"]
+            abs(self.configuration["experiment"]["MicroscopeState"]["step_size"])
         )
         self.dt = float(
             self.configuration["experiment"]["MicroscopeState"]["timepoint_interval"]

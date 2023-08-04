@@ -320,6 +320,8 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
         ]
+        if self.microscope_state_dict["step_size"] < 0:
+            self.microscope_state_dict["step_size"] = -self.microscope_state_dict["step_size"]
         self.set_info(self.stack_acq_vals, self.microscope_state_dict)
         self.set_info(self.conpro_acq_vals, self.microscope_state_dict)
         self.set_info(self.timepoint_vals, self.microscope_state_dict)

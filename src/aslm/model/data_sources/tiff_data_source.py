@@ -47,7 +47,10 @@ from ..metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
 class TiffDataSource(DataSource):
     def __init__(
-        self, file_name: str = "", mode: str = "w", is_bigtiff: bool = False
+            self,
+            file_name: str = "",
+            mode: str = "w",
+            is_bigtiff: bool = False
     ) -> None:
         self.image = None
         self._write_mode = None
@@ -88,6 +91,9 @@ class TiffDataSource(DataSource):
             return self._is_bigtiff
         else:
             return self.image.is_bigtiff
+
+    def set_bigtiff(self, is_bigtiff: bool) -> None:
+        self._is_bigtiff = is_bigtiff
 
     @property
     def is_ome(self) -> bool:

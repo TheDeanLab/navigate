@@ -33,11 +33,12 @@
 # Standard Library Imports
 import os
 import sys
+import time
 import shutil
 import platform
 from pathlib import Path
 from os.path import isfile
-from multiprocessing.managers import ListProxy
+from multiprocessing.managers import ListProxy, DictProxy
 
 # Third Party Imports
 import yaml
@@ -231,8 +232,9 @@ def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
         Dictionary we are adding to
     config_name : str
         Name of subdictionary to replace
-    new_config : dict
-        Dictionary values
+    new_config : dict or str
+        Dictionary values or
+        yaml file name
 
     Returns
     -------
@@ -257,7 +259,19 @@ def update_config_dict(manager, parent_dict, config_name, new_config) -> bool:
     return True
 
 
-def verify_configuration(manager, configuration):
+def verify_experiment_config(manager, configuration):
+    """Verify configuration (configuration, experiment, waveform_constants) yaml files
+
+    Parameters
+    ----------
+    manager : multiprocessing.Manager
+        Shares objects (e.g., dict) between processes
+    configuration: configuration object
+        contains all the yaml files
+    """
+    if type(configuration["experiment"]) is not DictProxy:
+        update_config_dict(manager, configuration, "experiment", {})
+
     # verify/build autofocus parameter setting
     # get autofocus supported devices(stages, remote_focus) from configuration.yaml file
     device_dict = {}
@@ -266,7 +280,10 @@ def verify_configuration(manager, configuration):
     for microscope_name in device_config.keys():
         microscope_config = device_config[microscope_name]
         device_dict[microscope_name] = {}
-        if "remote_focus_device" in microscope_config.keys() and microscope_config["remote_focus_device"]["hardware"]["type"] == "NI":
+        if (
+            "remote_focus_device" in microscope_config.keys()
+            and microscope_config["remote_focus_device"]["hardware"]["type"] == "NI"
+        ):
             device_dict[microscope_name]["remote_focus"] = {}
             device_ref = microscope_config["remote_focus_device"]["hardware"]["channel"]
             device_dict[microscope_name]["remote_focus"][device_ref] = True
@@ -287,18 +304,20 @@ def verify_configuration(manager, configuration):
         "fine_range": 50,
         "fine_step_size": 5,
         "fine_selected": True,
-        "robust_fit": False
+        "robust_fit": False,
     }
+    if (
+        "AutoFocusParameters" not in configuration["experiment"]
+        or type(configuration["experiment"]["AutoFocusParameters"]) is not DictProxy
+    ):
+        update_config_dict(
+            manager, configuration["experiment"], "AutoFocusParameters", {}
+        )
     autofocus_setting_dict = configuration["experiment"]["AutoFocusParameters"]
     # verify if all the devices have been added to the autofocus parameter dict
     for microscope_name in device_dict:
         if microscope_name not in autofocus_setting_dict.keys():
-            update_config_dict(
-                manager,
-                autofocus_setting_dict,
-                microscope_name,
-                {}
-            )
+            update_config_dict(manager, autofocus_setting_dict, microscope_name, {})
         for device in device_dict[microscope_name]:
             if device not in autofocus_setting_dict[microscope_name].keys():
                 update_config_dict(
@@ -308,12 +327,15 @@ def verify_configuration(manager, configuration):
                     {},
                 )
             for device_ref in device_dict[microscope_name][device]:
-                if device_ref not in autofocus_setting_dict[microscope_name][device].keys():
+                if (
+                    device_ref
+                    not in autofocus_setting_dict[microscope_name][device].keys()
+                ):
                     update_config_dict(
                         manager,
                         autofocus_setting_dict[microscope_name][device],
                         device_ref,
-                        autofocus_sample_setting
+                        autofocus_sample_setting,
                     )
 
     # remove non-consistent autofocus parameter
@@ -325,6 +347,538 @@ def verify_configuration(manager, configuration):
                 if device not in device_dict[microscope_name]:
                     autofocus_setting_dict[microscope_name].pop(device)
                 else:
-                    for device_ref in autofocus_setting_dict[microscope_name][device].keys():
-                        if device_ref not in autofocus_setting_dict[microscope_name][device]:
-                            autofocus_setting_dict[microscope_name][device].pop(device_ref)
+                    for device_ref in autofocus_setting_dict[microscope_name][
+                        device
+                    ].keys():
+                        if (
+                            device_ref
+                            not in autofocus_setting_dict[microscope_name][device]
+                        ):
+                            autofocus_setting_dict[microscope_name][device].pop(
+                                device_ref
+                            )
+
+    # saving info
+    saving_dict_sample = {
+        "root_directory": get_aslm_path(),
+        "save_directory": get_aslm_path(),
+        "user": "Kevin",
+        "tissue": "Lung",
+        "celltype": "MV3",
+        "label": "GFP",
+        "file_type": "TIFF",
+        "date": time.strftime("%Y-%m-%d"),
+        "solvent": "BABB",
+    }
+    if (
+        "Saving" not in configuration["experiment"]
+        or type(configuration["experiment"]["Saving"]) is not DictProxy
+    ):
+        update_config_dict(
+            manager, configuration["experiment"], "Saving", saving_dict_sample
+        )
+    saving_setting_dict = configuration["experiment"]["Saving"]
+    for k in saving_dict_sample:
+        if k not in saving_setting_dict:
+            saving_setting_dict[k] = saving_dict_sample[k]
+
+    # if root directory/saving direcotry doesn't exist
+    if not os.path.exists(saving_setting_dict["root_directory"]):
+        saving_setting_dict["root_directory"] = saving_dict_sample["root_directory"]
+    if not os.path.exists(saving_setting_dict["save_directory"]):
+        saving_setting_dict["save_directory"] = saving_dict_sample["save_directory"]
+
+    # camera parameters
+    camera_parameters_dict_sample = {
+        "x_pixels": 2048,
+        "y_pixels": 2048,
+        "img_x_pixels": 2048,
+        "img_y_pixels": 2048,
+        "sensor_mode": "Normal",
+        "readout_direction": "Top to Bottom",
+        "number_of_pixels": 10,
+        "binning": "1x1",
+        "frames_to_average": 1,
+        "databuffer_size": 100,
+    }
+    if (
+        "CameraParameters" not in configuration["experiment"]
+        or type(configuration["experiment"]["CameraParameters"]) is not DictProxy
+    ):
+        update_config_dict(
+            manager,
+            configuration["experiment"],
+            "CameraParameters",
+            camera_parameters_dict_sample,
+        )
+    camera_setting_dict = configuration["experiment"]["CameraParameters"]
+    for k in camera_parameters_dict_sample:
+        if k not in camera_setting_dict.keys():
+            camera_setting_dict[k] = camera_parameters_dict_sample[k]
+    # binning
+    if camera_setting_dict["binning"] not in ["1x1", "2x2", "4x4"]:
+        camera_setting_dict["binning"] = "1x1"
+    # x_pixels and y_pixels
+    try:
+        camera_setting_dict["x_pixels"] = int(camera_setting_dict["x_pixels"])
+    except ValueError:
+        camera_setting_dict["x_pixels"] = camera_parameters_dict_sample["x_pixels"]
+
+    try:
+        camera_setting_dict["y_pixels"] = int(camera_setting_dict["y_pixels"])
+    except ValueError:
+        camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
+
+    # image width and height
+    if camera_setting_dict["x_pixels"] <= 0:
+        camera_setting_dict["x_pixels"] = camera_parameters_dict_sample["x_pixels"]
+    if camera_setting_dict["y_pixels"] <= 0:
+        camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
+    x_binning = int(camera_setting_dict["binning"][0])
+    y_binning = int(camera_setting_dict["binning"][2])
+    img_x_pixels = camera_setting_dict["x_pixels"] // x_binning
+    img_y_pixels = camera_setting_dict["y_pixels"] // y_binning
+    camera_setting_dict["img_x_pixels"] = img_x_pixels
+    camera_setting_dict["img_y_pixels"] = img_y_pixels
+
+    # sensor mode
+    if camera_setting_dict["sensor_mode"] not in ["Normal", "Light-Sheet"]:
+        camera_setting_dict["sensor_mode"] = "Normal"
+    if camera_setting_dict["readout_direction"] not in [
+        "",
+        "Top to Bottom",
+        "Bottom to Top",
+    ]:
+        camera_setting_dict["readout_direction"] = "Top to Bottom"
+
+    # databuffer_size, number_of_pixels
+    for k in ["databuffer_size", "number_of_pixels", "frames_to_average"]:
+        try:
+            camera_setting_dict[k] = int(camera_setting_dict[k])
+        except ValueError:
+            camera_setting_dict[k] = camera_parameters_dict_sample[k]
+        if camera_setting_dict[k] < 1:
+            camera_setting_dict[k] = camera_parameters_dict_sample[k]
+
+    # stage parameters
+    stage_dict_sample = {}
+    device_config = configuration["configuration"]["microscopes"]
+    for microscope_name in device_config.keys():
+        stage_dict_sample[microscope_name] = {}
+        for k in ["z_step", "f_step", "theta_step"]:
+            stage_dict_sample[microscope_name][k] = int(
+                device_config[microscope_name]["stage"].get(k, 30)
+            )
+        stage_dict_sample[microscope_name]["xy_step"] = min(
+            device_config[microscope_name]["stage"].get("x_step", 500),
+            device_config[microscope_name]["stage"].get("y_step", 500),
+        )
+
+    if (
+        "StageParameters" not in configuration["experiment"]
+        or type(configuration["experiment"]["StageParameters"]) is not DictProxy
+    ):
+        update_config_dict(
+            manager, configuration["experiment"], "StageParameters", stage_dict_sample
+        )
+    stage_setting_dict = configuration["experiment"]["StageParameters"]
+    if "limits" not in stage_setting_dict.keys():
+        stage_setting_dict["limits"] = True
+    elif type(stage_setting_dict["limits"]) is not bool:
+        stage_setting_dict["limits"] = True
+
+    for microscope_name in stage_dict_sample:
+        if (
+            microscope_name not in stage_setting_dict.keys()
+            or type(stage_setting_dict[microscope_name]) is not DictProxy
+        ):
+            update_config_dict(
+                manager,
+                stage_setting_dict,
+                microscope_name,
+                stage_dict_sample[microscope_name],
+            )
+        else:
+            for k in stage_dict_sample[microscope_name]:
+                if k not in stage_setting_dict[microscope_name].keys():
+                    stage_setting_dict[microscope_name][k] = stage_dict_sample[
+                        microscope_name
+                    ][k]
+                else:
+                    try:
+                        stage_setting_dict[microscope_name][k] = int(
+                            stage_setting_dict[microscope_name][k]
+                        )
+                    except ValueError:
+                        stage_setting_dict[microscope_name][k] = stage_dict_sample[
+                            microscope_name
+                        ][k]
+
+    # microscope state parameters
+    microscope_name = configuration["configuration"]["microscopes"].keys()[0]
+    zoom = configuration["configuration"]["microscopes"][microscope_name]["zoom"][
+        "position"
+    ].keys()[0]
+    microscope_state_dict_sample = {
+        "microscope_name": microscope_name,
+        "image_mode": "live",
+        "zoom": zoom,
+        "stack_cycling_mode": "per_stack",
+        "start_position": 0.0,
+        "end_position": 100.0,
+        "step_size": 20.0,
+        "number_z_steps": 5,
+        "timepoints": 1,
+        "stack_pause": 0.0,
+        "is_save": False,
+        "stack_acq_time": 1.0,
+        "timepoint_interval": 0,
+        "experiment_duration": 1.03,
+        "is_multiposition": False,
+        "multiposition_count": 1,
+        "selected_channels": 0,
+        "stack_z_origin": 0,
+        "stack_focus_origin": 0,
+        "start_focus": 0.0,
+        "end_focus": 0.0,
+        "abs_z_start": 0.0,
+        "abs_z_end": 100.0,
+        "scanrange": 500.0,
+        "n_plane": 1.0,
+        "offset_start": 0.0,
+        "offset_end": 9.8,
+        "conpro_cycling_mode": "per_stack",
+        "waveform_template": "Default",
+    }
+    if (
+        "MicroscopeState" not in configuration["experiment"]
+        or type(configuration["experiment"]["MicroscopeState"]) is not DictProxy
+    ):
+        update_config_dict(
+            manager,
+            configuration["experiment"],
+            "MicroscopeState",
+            microscope_state_dict_sample,
+        )
+    microscope_setting_dict = configuration["experiment"]["MicroscopeState"]
+    for k in microscope_state_dict_sample:
+        if k not in microscope_setting_dict.keys():
+            microscope_setting_dict[k] = microscope_state_dict_sample[k]
+        elif type(microscope_setting_dict[k]) != type(microscope_state_dict_sample[k]):
+            if type(microscope_state_dict_sample[k]) == float:
+                try:
+                    microscope_setting_dict[k] = float(microscope_setting_dict[k])
+                except ValueError:
+                    microscope_setting_dict[k] = microscope_state_dict_sample[k]
+            elif type(microscope_state_dict_sample[k]) == int:
+                try:
+                    microscope_setting_dict[k] = int(microscope_setting_dict[k])
+                except ValueError:
+                    microscope_setting_dict[k] = microscope_state_dict_sample[k]
+            else:
+                microscope_setting_dict[k] = microscope_state_dict_sample[k]
+
+    # verify microscope name
+    if (
+        microscope_setting_dict["microscope_name"]
+        not in configuration["configuration"]["microscopes"].keys()
+    ):
+        microscope_setting_dict["microscope_name"] = microscope_name
+    microscope_name = microscope_setting_dict["microscope_name"]
+    # zoom
+    if (
+        microscope_setting_dict["zoom"]
+        not in configuration["configuration"]["microscopes"][microscope_name]["zoom"][
+            "position"
+        ].keys()
+    ):
+        microscope_setting_dict["zoom"] = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["zoom"]["position"].keys()[0]
+    # channels
+    if (
+        "channels" not in microscope_setting_dict
+        or type(microscope_setting_dict["channels"]) is not DictProxy
+    ):
+        update_config_dict(manager, microscope_setting_dict, "channels", {})
+    laser_list = [
+        f"{laser['wavelength']}nm"
+        for laser in configuration["configuration"]["microscopes"][microscope_name][
+            "lasers"
+        ]
+    ]
+    filterwheel_list = list(
+        configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"][
+            "available_filters"
+        ].keys()
+    )
+    prefix = "channel_"
+    channel_nums = configuration["configuration"]["gui"]["channels"]["count"]
+    channel_setting_dict = microscope_setting_dict["channels"]
+    selected_channel_num = 0
+    for channel in channel_setting_dict.keys():
+        if not channel.startswith(prefix):
+            del channel_setting_dict[channel]
+            continue
+        channel_id = int(channel[len(prefix) :]) - 1
+        if channel_id < 0 or channel_id >= channel_nums:
+            del channel_setting_dict[channel]
+            continue
+        channel_value = channel_setting_dict[channel]
+        # make sure channel values are right
+        # laser
+        if channel_value["laser"] not in laser_list:
+            channel_value["laser"] = laser_list[0]
+        channel_value["laser_index"] = laser_list.index(channel_value["laser"])
+        # filter wheel
+        if channel_value["filter"] not in filterwheel_list:
+            channel_value["filter"] = filterwheel_list[0]
+        channel_value["filter_position"] = filterwheel_list.index(
+            channel_value["filter"]
+        )
+        # is_selected
+        if (
+            "is_selected" not in channel_value.keys()
+            or type(channel_value["is_selected"]) != bool
+        ):
+            channel_value["is_selected"] = False
+        if channel_value["is_selected"]:
+            selected_channel_num += 1
+        # camera_exposure_time and defoucus should be float
+        temp = {
+            "laser_power": 20.0,
+            "camera_exposure_time": 200.0,
+            "interval_time": 0.0,
+            "defocus": 0.0
+        }
+        for k in temp:
+            try:
+                channel_value[k] = float(
+                    channel_value[k]
+                )
+            except ValueError:
+                channel_value[k] = temp[k]
+            if channel_value[k] < 0:
+                channel_value[k] = temp[k]
+        
+    microscope_setting_dict["selected_channels"] = selected_channel_num
+
+    # MultiPositions
+    if (
+        "MultiPositions" not in microscope_setting_dict
+        or type(microscope_setting_dict["MultiPositions"]) is not ListProxy
+    ):
+        update_config_dict(manager, configuration["experiment"], "MultiPositions", [])
+    position_ids = []
+    multipositions = configuration["experiment"]["MultiPositions"]
+    for i, position in enumerate(multipositions):
+        for axis in ["x", "y", "z", "theta", "f"]:
+            try:
+                position[axis] = float(position[axis])
+            except ValueError:
+                position_ids.append(i)
+                break
+    for idx in position_ids[::-1]:
+        del multipositions[idx]
+    if len(multipositions) < 1:
+        multipositions.append(None)
+        update_config_dict(
+            manager,
+            multipositions,
+            0,
+            {"x": 10.0, "y": 10.0, "z": 10.0, "f": 10.0, "theta": 10.0},
+        )
+    microscope_setting_dict["multiposition_count"] = len(multipositions)
+
+
+def verify_waveform_constants(manager, configuration):
+    if type(configuration["waveform_constants"]) is not DictProxy:
+        update_config_dict(manager, configuration, "waveform_constants", {})
+    waveform_dict = configuration["waveform_constants"]
+
+    # remote_focus_constants
+    if (
+        "remote_focus_constants" not in waveform_dict.keys()
+        or type(waveform_dict["remote_focus_constants"]) is not DictProxy
+    ):
+        update_config_dict(manager, waveform_dict, "remote_focus_constants", {})
+
+    waveform_dict = waveform_dict["remote_focus_constants"]
+    for microscope_name in configuration["configuration"]["microscopes"].keys():
+        config_dict = configuration["configuration"]["microscopes"][microscope_name]
+        if (
+            microscope_name not in waveform_dict.keys()
+            or type(waveform_dict[microscope_name]) is not DictProxy
+        ):
+            update_config_dict(manager, waveform_dict, microscope_name, {})
+
+        # get lasers
+        lasers = []
+        for laser in config_dict["lasers"]:
+            laser_wavelength = f"{laser['wavelength']}nm"
+            lasers.append(laser_wavelength)
+
+        for zoom in config_dict["zoom"]["position"].keys():
+            if (
+                zoom not in waveform_dict[microscope_name].keys()
+                or type(waveform_dict[microscope_name][zoom]) is not DictProxy
+            ):
+                update_config_dict(manager, waveform_dict[microscope_name], zoom, {})
+
+            for laser in lasers:
+                if (
+                    laser not in waveform_dict[microscope_name][zoom].keys()
+                    or type(waveform_dict[microscope_name][zoom][laser])
+                    is not DictProxy
+                ):
+                    update_config_dict(
+                        manager,
+                        waveform_dict[microscope_name][zoom],
+                        laser,
+                        {
+                            "amplitude": config_dict["remote_focus_device"][
+                                "amplitude"
+                            ],
+                            "offset": config_dict["remote_focus_device"]["offset"],
+                            "percent_smoothing": "0",
+                            "percent_delay": config_dict["remote_focus_device"][
+                                "delay_percent"
+                            ],
+                        },
+                    )
+                else:
+                    for k in [
+                        "amplitude",
+                        "offset",
+                        "percent_smoothing",
+                        "percent_delay",
+                    ]:
+                        if k not in waveform_dict[microscope_name][zoom][laser].keys():
+                            waveform_dict[microscope_name][zoom][laser][
+                                k
+                            ] = config_dict["remote_focus_device"].get(k, "0")
+                        else:
+                            try:
+                                float(waveform_dict[microscope_name][zoom][laser][k])
+                            except ValueError:
+                                waveform_dict[microscope_name][zoom][laser][
+                                    k
+                                ] = config_dict["remote_focus_device"].get(k, "0")
+
+            # delete non-exist lasers
+            for k in waveform_dict[microscope_name][zoom].keys():
+                if k not in lasers:
+                    waveform_dict[microscope_name][zoom].pop(k)
+
+        # delete non-exist zoom
+        for k in waveform_dict[microscope_name].keys():
+            if k not in config_dict["zoom"]["position"].keys():
+                waveform_dict[microscope_name].pop(k)
+
+    # delete non-exist microscope
+    for k in waveform_dict.keys():
+        if k not in configuration["configuration"]["microscopes"].keys():
+            waveform_dict.pop(k)
+
+    # galvo_constants
+    waveform_dict = configuration["waveform_constants"]
+    if (
+        "galvo_constants" not in waveform_dict.keys()
+        or type(waveform_dict["galvo_constants"]) is not DictProxy
+    ):
+        update_config_dict(manager, waveform_dict, "galvo_constants", {})
+
+    waveform_dict = waveform_dict["galvo_constants"]
+
+    # get galvo num
+    galvo_num = 0
+    for microscope_name in configuration["configuration"]["microscopes"].keys():
+        galvo_num = max(
+            galvo_num,
+            len(
+                configuration["configuration"]["microscopes"][microscope_name]["galvo"]
+            ),
+        )
+
+    for i in range(galvo_num):
+        waveform_dict = configuration["waveform_constants"]["galvo_constants"]
+        galvo_ref = f"Galvo {i}"
+        if (
+            galvo_ref not in waveform_dict.keys()
+            or type(waveform_dict[galvo_ref]) is not DictProxy
+        ):
+            update_config_dict(manager, waveform_dict, galvo_ref, {})
+        waveform_dict = waveform_dict[galvo_ref]
+        for microscope_name in configuration["configuration"]["microscopes"].keys():
+            if (
+                len(
+                    configuration["configuration"]["microscopes"][microscope_name][
+                        "galvo"
+                    ]
+                )
+                <= i
+            ):
+                continue
+            config_dict = configuration["configuration"]["microscopes"][microscope_name]
+            if (
+                microscope_name not in waveform_dict.keys()
+                or type(waveform_dict[microscope_name]) is not DictProxy
+            ):
+                update_config_dict(manager, waveform_dict, microscope_name, {})
+
+            for zoom in config_dict["zoom"]["position"].keys():
+                if (
+                    zoom not in waveform_dict[microscope_name].keys()
+                    or type(waveform_dict[microscope_name][zoom]) is not DictProxy
+                ):
+                    update_config_dict(
+                        manager,
+                        waveform_dict[microscope_name],
+                        zoom,
+                        {
+                            "amplitude": "0.11",
+                            "offset": config_dict["galvo"][i]["offset"],
+                            "frequency": config_dict["galvo"][i]["frequency"],
+                        },
+                    )
+                else:
+                    for k in ["amplitude", "offset", "frequency"]:
+                        if k not in waveform_dict[microscope_name][zoom].keys():
+                            waveform_dict[microscope_name][zoom][k] = config_dict[
+                                "galvo"
+                            ][i].get(k, "0")
+                        else:
+                            try:
+                                float(waveform_dict[microscope_name][zoom][k])
+                            except ValueError:
+                                waveform_dict[microscope_name][zoom][k] = config_dict[
+                                    "galvo"
+                                ][i].get(k, "0")
+            # delete non-exist zoom
+            for k in waveform_dict[microscope_name].keys():
+                if k not in config_dict["zoom"]["position"].keys():
+                    waveform_dict[microscope_name].pop(k)
+        # delete non-exist microscope
+        for k in waveform_dict.keys():
+            if k not in configuration["configuration"]["microscopes"].keys():
+                waveform_dict.pop(k)
+
+    # other_constants
+    waveform_dict = configuration["waveform_constants"]
+    if (
+        "other_constants" not in waveform_dict.keys()
+        or type(waveform_dict["other_constants"]) is not DictProxy
+    ):
+        update_config_dict(
+            manager,
+            waveform_dict,
+            "other_constants",
+            {"remote_focus_settle_duration": "0"},
+        )
+    if "remote_focus_settle_duration" not in waveform_dict["other_constants"].keys():
+        waveform_dict["other_constants"]["remote_focus_settle_duration"] = "0"
+    else:
+        try:
+            float(waveform_dict["other_constants"]["remote_focus_settle_duration"])
+        except ValueError:
+            waveform_dict["other_constants"]["remote_focus_settle_duration"] = "0"

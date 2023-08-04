@@ -332,11 +332,15 @@ class ChannelsTabController(GUIController):
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
 
+        if self.microscope_state_dict["stack_cycling_mode"] not in ["per_z", "per_stack"]:
+            self.microscope_state_dict["stack_cycling_mode"] = "per_stack"
         self.stack_acq_vals["cycling"].set(
             "Per Z"
             if self.microscope_state_dict["stack_cycling_mode"] == "per_z"
             else "Per Stack"
         )
+        if self.microscope_state_dict["conpro_cycling_mode"] not in ["per_plane", "per_stack"]:
+            self.microscope_state_dict["conpro_cycling_mode"] = "per_plane"
         self.conpro_acq_vals["cycling"].set(
             "Per Plane"
             if self.microscope_state_dict["conpro_cycling_mode"] == "per_plane"

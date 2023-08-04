@@ -40,7 +40,7 @@ import numpy as np
 import random
 
 # Local Imports
-from aslm.config.config import load_configs, verify_configuration
+from aslm.config.config import load_configs, verify_experiment_config, verify_waveform_constants
 from aslm.model.devices.camera.camera_synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
@@ -196,7 +196,8 @@ class DummyModel:
             waveform_constants=waveform_constants,
         )
 
-        verify_configuration(self.manager, self.configuration)
+        verify_experiment_config(self.manager, self.configuration)
+        verify_waveform_constants(self.manager, self.configuration)
 
         self.device = DummyDevice()
         self.signal_pipe, self.data_pipe = None, None

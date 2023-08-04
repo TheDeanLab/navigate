@@ -183,7 +183,7 @@ class MoveToNextPositionInMultiPostionTable:
         self.current_idx = 0
         self.multipostion_table = self.model.configuration["experiment"][
             "MultiPositions"
-        ]["stage_positions"]
+        ]
         self.postion_count = self.model.configuration["experiment"]["MicroscopeState"][
             "multiposition_count"
         ]
@@ -331,9 +331,7 @@ class ZStackAcquisition:
         self.restore_f = pos_dict["f_pos"]
 
         if bool(microscope_state["is_multiposition"]):
-            self.positions = self.model.configuration["experiment"]["MultiPositions"][
-                "stage_positions"
-            ]
+            self.positions = self.model.configuration["experiment"]["MultiPositions"]
         else:
             self.positions = [
                 {

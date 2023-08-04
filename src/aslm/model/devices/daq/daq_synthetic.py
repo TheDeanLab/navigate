@@ -60,7 +60,7 @@ class SyntheticDAQ(DAQBase):
         self.wait_to_run_lock = Lock()
         self.analog_outputs = {}
         self.is_updating_analog_task = False
-        self.mode = 0
+        self.trigger_mode = "self-trigger"
 
     def create_camera_task(self):
         """Set up the camera trigger task."""
@@ -114,7 +114,7 @@ class SyntheticDAQ(DAQBase):
             self.wait_to_run_lock.acquire()
             self.wait_to_run_lock.release()
         time.sleep(0.01)
-        if self.mode == 0:
+        if self.trigger_mode == "self-trigger":
             for microscope_name in self.camera:
                 self.camera[microscope_name].generate_new_frame()
 
@@ -138,10 +138,8 @@ class SyntheticDAQ(DAQBase):
         self.wait_to_run_lock.acquire()
         self.is_updating_analog_task = True
 
-        print("*** is updating analog task!")
-
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()
 
-    def set_trigger_mode(self, mode, external_trigger=None):
-        self.mode = mode
+    def set_external_trigger(self, external_trigger=None):
+        self.trigger_mode = "self-trigger" if external_trigger is None else "external-trigger"

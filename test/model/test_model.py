@@ -41,7 +41,7 @@ def model():
 
     from aslm.model.model import Model
     from multiprocessing import Manager, Queue
-    from aslm.config.config import load_configs
+    from aslm.config.config import load_configs, verify_experiment_config, verify_waveform_constants
 
     # Use configuration files that ship with the code base
     configuration_directory = Path.joinpath(
@@ -65,6 +65,9 @@ def model():
         waveform_constants=waveform_constants_path,
         rest_api_config=rest_api_path,
     )
+    verify_experiment_config(manager, configuration)
+    verify_waveform_constants(manager, configuration)
+    
     model = Model(
         USE_GPU=False,
         args=SimpleNamespace(synthetic_hardware=True),

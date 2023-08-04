@@ -337,6 +337,10 @@ class Microscope:
                     "readout_direction"
                 ]
             )
+        # set binning
+        self.camera.set_binning(
+            self.configuration["experiment"]["CameraParameters"]["binning"]
+        )
         # Initialize Image Series - Attaches camera buffer and start imaging
         self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
 
@@ -431,7 +435,7 @@ class Microscope:
         for channel_key in microscope_state["channels"].keys():
             channel = microscope_state["channels"][channel_key]
             if channel["is_selected"] is True:
-                exposure_time = channel["camera_exposure_time"] / 1000
+                exposure_time = float(channel["camera_exposure_time"]) / 1000
 
                 sweep_time = (
                     exposure_time
@@ -494,14 +498,14 @@ class Microscope:
         self.filter_wheel.set_filter(channel["filter"])
 
         # Camera Settings
-        self.current_exposure_time = channel["camera_exposure_time"]
+        self.current_exposure_time = float(channel["camera_exposure_time"])
         if (
             self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
             == "Light-Sheet"
         ):
             (
                 self.current_exposure_time,
-                self.camera_line_interval,
+                camera_line_interval,
             ) = self.camera.calculate_light_sheet_exposure_time(
                 self.current_exposure_time,
                 int(
@@ -510,7 +514,7 @@ class Microscope:
                     ]
                 ),
             )
-            self.camera.set_line_interval(self.camera_line_interval)
+            self.camera.set_line_interval(camera_line_interval)
         self.camera.set_exposure_time(self.current_exposure_time)
 
         # Laser Settings

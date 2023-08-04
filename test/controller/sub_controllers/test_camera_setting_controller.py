@@ -87,10 +87,6 @@ class TestCameraSettingController:
             str(self.camera_settings.mode_widgets["Sensor"].widget["state"])
             == "readonly"
         )
-        assert (
-            self.camera_settings.mode_widgets["Sensor"].widget.get()
-            == camera_config_dict["sensor_mode"]
-        )
 
         # Readout Mode
         assert list(self.camera_settings.mode_widgets["Readout"].widget["values"]) == [
@@ -126,10 +122,6 @@ class TestCameraSettingController:
             == camera_config_dict["exposure_time_range"]["max"]
         )
         assert (
-            self.camera_settings.framerate_widgets["exposure_time"].get()
-            == camera_config_dict["exposure_time"]
-        )
-        assert (
             str(self.camera_settings.framerate_widgets["exposure_time"].widget["state"])
             == "disabled"
         )
@@ -158,7 +150,7 @@ class TestCameraSettingController:
 
         # Set binning options
         assert list(self.camera_settings.roi_widgets["Binning"].widget["values"]) == [
-            "{}x{}".format(i, i) for i in range(1, 5)
+            "{}x{}".format(i, i) for i in [1, 2, 4]
         ]
         assert (
             str(self.camera_settings.roi_widgets["Binning"].widget["state"])
@@ -196,7 +188,6 @@ class TestCameraSettingController:
         attrs = [
             "in_initialization",
             "resolution_value",
-            "number_of_pixels",
             "mode",
             "solvent",
             "mode_widgets",
@@ -287,10 +278,11 @@ class TestCameraSettingController:
 
         # Setting up new values in widgets
         self.camera_settings.mode_widgets["Sensor"].set(mode)
+        self.camera_settings.roi_widgets["Binning"].set("4x4")
         if mode == "Light-Sheet":
             self.camera_settings.mode_widgets["Readout"].set("Bottom-to-Top")
             self.camera_settings.mode_widgets["Pixels"].set(15)
-        self.camera_settings.roi_widgets["Binning"].set("4x4")
+            self.camera_settings.roi_widgets["Binning"].set("1x1")
         self.camera_settings.roi_widgets["Width"].set(1600)
         self.camera_settings.roi_widgets["Height"].set(1600)
         self.camera_settings.framerate_widgets["frames_to_average"].set(5)
@@ -306,11 +298,16 @@ class TestCameraSettingController:
             assert (
                 int(self.camera_settings.camera_setting_dict["number_of_pixels"]) == 15
             )
-
-        assert self.camera_settings.camera_setting_dict["binning"] == "4x4"
+        if mode == "Light-Sheet":
+            assert self.camera_settings.camera_setting_dict["binning"] == "1x1"
+            assert self.camera_settings.camera_setting_dict["img_x_pixels"] == 1600
+            assert self.camera_settings.camera_setting_dict["img_y_pixels"] == 1600
+        else:
+            assert self.camera_settings.camera_setting_dict["binning"] == "4x4"
+            assert self.camera_settings.camera_setting_dict["img_x_pixels"] == 400
+            assert self.camera_settings.camera_setting_dict["img_y_pixels"] == 400
         assert self.camera_settings.camera_setting_dict["x_pixels"] == 1600
         assert self.camera_settings.camera_setting_dict["y_pixels"] == 1600
-        assert self.camera_settings.camera_setting_dict["number_of_cameras"] == 1
         assert (
             self.camera_settings.camera_setting_dict["pixel_size"]
             == self.camera_settings.default_pixel_size
@@ -319,6 +316,10 @@ class TestCameraSettingController:
 
     @pytest.mark.parametrize("mode", ["Normal", "Light-Sheet"])
     def test_update_sensor_mode(self, mode):
+        self.camera_settings.populate_experiment_values()
+        camera_setting_dict = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["CameraParameters"]
 
         # Set mode
         self.camera_settings.mode_widgets["Sensor"].widget.set(mode)
@@ -345,7 +346,7 @@ class TestCameraSettingController:
         if mode == "Light-Sheet":
             assert (
                 str(self.camera_settings.mode_widgets["Readout"].get())
-                == "Top-to-Bottom"
+                == camera_setting_dict["readout_direction"]
             )
             assert (
                 str(self.camera_settings.mode_widgets["Readout"].widget["state"])
@@ -355,9 +356,8 @@ class TestCameraSettingController:
                 str(self.camera_settings.mode_widgets["Pixels"].widget["state"])
                 == "normal"
             )
-            assert (
-                int(self.camera_settings.mode_widgets["Pixels"].widget.get())
-                == self.camera_settings.number_of_pixels
+            assert int(self.camera_settings.mode_widgets["Pixels"].widget.get()) == int(
+                self.camera_settings.camera_setting_dict["number_of_pixels"]
             )
 
     def test_update_exposure_time(self):
@@ -531,15 +531,47 @@ class TestCameraSettingController:
         self.camera_settings.mode = mode
 
         self.camera_settings.mode_widgets["Pixels"].set("")
-        assert self.camera_settings.number_of_pixels != ""
         assert self.camera_settings.camera_setting_dict["number_of_pixels"] != ""
 
         n_pixels = random.randint(1, 100)
         self.camera_settings.mode_widgets["Pixels"].set(n_pixels)
 
         # Check
-        assert self.camera_settings.number_of_pixels == int(n_pixels)
+        assert self.camera_settings.camera_setting_dict["number_of_pixels"] == int(
+            n_pixels
+        )
         if mode != "live" and mode != "stop":
             assert (
                 self.camera_settings.camera_setting_dict["number_of_pixels"] == n_pixels
             )
+
+    @pytest.mark.parametrize(
+        "x_pixels, y_pixels", [(512, 512), (4096, 4096), (2304, 1024), (1024, 2048)]
+    )
+    def test_update_camera_device_related_setting(self, x_pixels, y_pixels):
+        self.camera_settings.populate_experiment_values()
+
+        microscope_name = self.camera_settings.parent_controller.configuration[
+            "experiment"
+        ]["MicroscopeState"]["microscope_name"]
+        camera_config = self.camera_settings.parent_controller.configuration[
+            "configuration"
+        ]["microscopes"][microscope_name]["camera"]
+        default_x_pixels = camera_config["x_pixels"]
+        default_y_pixels = camera_config["y_pixels"]
+
+        camera_config["x_pixels"] = x_pixels
+        camera_config["y_pixels"] = y_pixels
+        self.camera_settings.update_camera_device_related_setting()
+
+        assert self.camera_settings.roi_widgets["Width"].get() == min(
+            self.camera_settings.camera_setting_dict["x_pixels"], x_pixels
+        )
+        assert self.camera_settings.roi_widgets["Height"].get() == min(
+            self.camera_settings.camera_setting_dict["y_pixels"], y_pixels
+        )
+        assert self.camera_settings.roi_widgets["Width"].widget["to"] == x_pixels
+        assert self.camera_settings.roi_widgets["Height"].widget["to"] == y_pixels
+
+        camera_config["x_pixels"] = default_x_pixels
+        camera_config["y_pixels"] = default_y_pixels

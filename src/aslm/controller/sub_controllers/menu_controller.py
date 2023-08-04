@@ -298,8 +298,6 @@ class MenuController(GUIController):
             command=self.toggle_stage_limits,
             variable=self.disable_stage_limits,
         )
-        self.disable_stage_limits.set(1)
-        self.toggle_stage_limits()
 
         # autofocus menu
         autofocus_menu = {
@@ -660,9 +658,15 @@ class MenuController(GUIController):
     def toggle_stage_limits(self, *args):
         """Toggle stage limits."""
         if self.disable_stage_limits.get() == 1:
+            self.parent_controller.configuration["experiment"]["StageParameters"][
+                "limits"
+            ] = False
             logger.debug("Disabling stage limits")
             self.parent_controller.execute("stage_limits", False)
         else:
+            self.parent_controller.configuration["experiment"]["StageParameters"][
+                "limits"
+            ] = True
             logger.debug("Enabling stage limits")
             self.parent_controller.execute("stage_limits", True)
 

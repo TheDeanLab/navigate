@@ -147,15 +147,12 @@ class Model:
         self.start_time = None
         self.data_buffer = None
         self.img_width = int(
-            self.configuration["configuration"]["microscopes"][
-                self.active_microscope_name
-            ]["camera"]["x_pixels"]
+            self.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
         )
         self.img_height = int(
-            self.configuration["configuration"]["microscopes"][
-                self.active_microscope_name
-            ]["camera"]["y_pixels"]
+            self.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
         )
+        self.binning =  "1x1"
         self.data_buffer_positions = None
         self.is_acquiring = False
 
@@ -314,18 +311,18 @@ class Model:
         img_height : int
             Number of active pixels in the y-dimension.
         """
+        self.img_width = img_width
+        self.img_height = img_height
         self.data_buffer = [
             SharedNDArray(shape=(img_height, img_width), dtype="uint16")
             for i in range(self.number_of_frames)
         ]
-        self.img_width = img_width
-        self.img_height = img_height
         self.data_buffer_positions = SharedNDArray(
             shape=(self.number_of_frames, 5), dtype=float
         )  # z-index, x, y, z, theta, f
         for microscope_name in self.microscopes:
             self.microscopes[microscope_name].update_data_buffer(
-                img_width, img_height, self.data_buffer, self.number_of_frames
+                self.configuration["experiment"]["CameraParameters"]["x_pixels"], self.configuration["experiment"]["CameraParameters"]["y_pixels"], self.data_buffer, self.number_of_frames
             )
 
     def get_data_buffer(self, img_width=512, img_height=512):
@@ -346,7 +343,7 @@ class Model:
         data_buffer : SharedNDArray
             Shared memory object.
         """
-        if img_width != self.img_width or img_height != self.img_height:
+        if img_width != self.img_width or img_height != self.img_height or self.configuration["experiment"]["CameraParameters"]["binning"] != self.binning:
             self.update_data_buffer(img_width, img_height)
         return self.data_buffer
 
@@ -867,12 +864,6 @@ class Model:
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()
-
-        #  Initialize, run, and stop the acquisition.
-        #  Consider putting below to not block thread.
-        # self.active_microscope.daq.prepare_acquisition(
-        #     channel_key, self.current_exposure_time
-        # )
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is

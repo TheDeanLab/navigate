@@ -123,9 +123,7 @@ class AcquireBarController(GUIController):
             number_of_positions = 1
         else:
             number_of_positions = len(
-                self.parent_controller.configuration["experiment"]["MultiPositions"][
-                    "stage_positions"
-                ]
+                self.parent_controller.configuration["experiment"]["MultiPositions"]
             )
 
         if mode == "single":
@@ -136,9 +134,7 @@ class AcquireBarController(GUIController):
             number_of_slices = 1
         elif mode == "confocal-projection":
             number_of_slices = microscope_state["n_plane"]
-        elif mode == "z-stack":
-            number_of_slices = microscope_state["number_z_steps"]
-        elif mode == "ConstantVelocityAcquisition":
+        elif mode == "z-stack" or "ConstantVelocityAcquisition":
             number_of_slices = microscope_state["number_z_steps"]
 
         top_anticipated_images = number_of_slices
@@ -160,7 +156,7 @@ class AcquireBarController(GUIController):
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )
-                    self.view.CurAcq["value"] = top_percent_complete % 100
+                    self.view.CurAcq["value"] = top_percent_complete % 100 if top_percent_complete > 100.0 else top_percent_complete
                     bottom_anticipated_images = 100 * (
                         images_received / bottom_anticipated_images
                     )
@@ -201,9 +197,11 @@ class AcquireBarController(GUIController):
         --------
         >>> set_mode('live')
         """
-        self.mode = mode
         # update pull down combobox
         reverse_dict = dict(map(lambda v: (v[1], v[0]), self.mode_dict.items()))
+        if mode not in reverse_dict:
+            mode = list(reverse_dict.keys())[0]
+        self.mode = mode
         self.view.pull_down.set(reverse_dict[mode])
         self.show_verbose_info("Image mode is set to", mode)
 

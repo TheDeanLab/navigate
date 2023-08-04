@@ -101,21 +101,8 @@ class TextExperimentFile(unittest.TestCase):
 
         self.parse_entries(section="Saving", expected_values=expected_values)
 
-    def test_devices(self):
-        expected_values = {
-            "daq": str,
-            "camera": str,
-            "etl": str,
-            "filter_wheel": str,
-            "stage": str,
-            "zoom": str,
-        }
-
-        self.parse_entries(section="Devices", expected_values=expected_values)
-
     def test_camera_parameters(self):
         expected_values = {
-            "number_of_cameras": int,
             "x_pixels": int,
             "y_pixels": int,
             "sensor_mode": str,
@@ -156,6 +143,7 @@ class TextExperimentFile(unittest.TestCase):
             "z": float,
             "theta": float,
             "f": float,
+            "limits": bool,
         }
 
         self.parse_entries(section="StageParameters", expected_values=expected_values)
@@ -229,7 +217,7 @@ class TextExperimentFile(unittest.TestCase):
             "theta": float,
             "f": float,
         }
-        positions = self.data["MultiPositions"]["stage_positions"]
+        positions = self.data["MultiPositions"]
         for position in positions:
             for key in position.keys():
                 self.assertIn(key, expected_values)

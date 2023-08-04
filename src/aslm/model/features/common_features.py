@@ -376,17 +376,22 @@ class ZStackAcquisition:
             self.need_to_move_new_position = False
 
             # calculate first z, f position
+            # delta_z = abs(
+            #     self.positions[self.current_position_idx]["z"] - self.start_z_position
+            # )
             self.current_z_position = (
                 self.start_z_position + self.positions[self.current_position_idx]["z"]
             )
+
+            # delta_f = abs(
+            #     self.positions[self.current_position_idx]["f"] - self.start_focus
+            # )
             self.current_focus_position = (
                 self.start_focus + self.positions[self.current_position_idx]["f"]
             )
 
-            # self.model.pause_data_ready_lock.acquire()
-            # self.model.ask_to_pause_data_thread = True
-            # self.model.pause_data_ready_lock.acquire()
-
+            # calculate delta_x, delta_y
+            # TODO: Here.
             pos_dict = dict(
                 map(
                     lambda ax: (
@@ -396,14 +401,17 @@ class ZStackAcquisition:
                     ["x", "y", "theta"],
                 )
             )
+
+            # displacement = [delta_z, delta_f, delta_x, delta_y]
+            # Check the distance between current position and next position,
+            # if it is too far, then we can call self.model.pause_data_thread() and
+            # self.model.resume_data_thread() after the stage has completed the move
+            # to the next position.
+            # if any(displacement >= 1000):
+            #     self.model.pause_data_thread()
+
             self.model.move_stage(pos_dict, wait_until_done=True)
-
             self.model.logger.debug(f"*** ZStack move stage: {pos_dict}")
-            # self.model.ask_to_pause_data_thread = False
-            # self.model.pause_data_event.set()
-            # self.model.pause_data_ready_lock.release()
-
-            # self.z_position_moved_time = 0
 
         if self.need_to_move_z_position:
             # move z, f
@@ -422,15 +430,15 @@ class ZStackAcquisition:
                 wait_until_done=True,
             )
 
-            # self.model.resume_data_thread()
-
+        # if any(displacement >= 1000):
+        #   self.model.resume_data_thread()
         return True
 
     def signal_end(self):
         # end this node
         if self.model.stop_acquisition:
             return True
-               
+
         if self.stack_cycling_mode != "per_stack":
             # update channel for each z position in 'per_slice'
             self.update_channel()

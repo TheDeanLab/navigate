@@ -79,13 +79,10 @@ class TilingWizardPopup:
     """
 
     def __init__(self, root, *args, **kwargs):
-        # Creating popup window with this name and size/placement, PopUp is a
-        # Toplevel window #300x200 pixels, first +320 means 320 pixels from left edge,
-        # +180 means 180 pixels from top edge
         self.popup = PopUp(
             root,
-            "Multiposition Tiling Wizard",
-            "505x550+330+330",
+            "Multi-Position Tiling Wizard",
+            "630x420+330+330",
             top=False,
             transient=False,
         )
@@ -108,7 +105,7 @@ class TilingWizardPopup:
         pos_grid = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
         data = ttk.Frame(content_frame, padding=(0, 5, 0, 0))
 
-        action_buttons.grid(row=0, sticky=(tk.NSEW))
+        action_buttons.grid(row=0, sticky=tk.NSEW)
         pos_grid.grid(row=1, sticky=tk.NSEW)
         data.grid(row=2, sticky=tk.NSEW)
 
@@ -118,7 +115,6 @@ class TilingWizardPopup:
         self.buttons = {}
 
         names = [
-            "save",
             "set_table",
             "x_start",
             "x_end",
@@ -141,8 +137,7 @@ class TilingWizardPopup:
 
         # Action buttons
         btn_labels = [
-            "Save to Disk",
-            "Populate Multiposition Table",
+            "Populate Multi-Position Table",
             "Set X Start",
             "Set X End",
             "Set Y Start",
@@ -151,30 +146,27 @@ class TilingWizardPopup:
             "Set Z End",
         ]
 
-        for i in range(2):
-            self.buttons[names[i]] = ttk.Button(action_buttons, text=btn_labels[i])
-            self.buttons[names[i]].grid(
-                row=0, column=i, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
-            )
-
         # Position buttons
         for i in range(len(names)):
-            if i > 1:
+            if i == 0:
+                self.buttons[names[i]] = ttk.Button(action_buttons, text=btn_labels[i])
+                self.buttons[names[i]].grid(
+                    row=0, column=i, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
+                )
+            if i > 0:
                 self.buttons[names[i]] = ttk.Button(pos_grid, text=btn_labels[i])
                 self.buttons[names[i]].grid(
-                    row=i - 2, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
+                    row=i - 1, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
                 )
 
-        # Position Spinboxes
-        for i in range(len(names)):
-            if i > 1:
+                # Validated Spinbox
                 self.inputs[names[i]] = LabelInput(
                     parent=pos_grid,
                     input_class=ValidatedSpinbox,
                     input_var=tk.StringVar(),
                 )
                 self.inputs[names[i]].grid(
-                    row=i - 2, column=1, sticky=(tk.NSEW), pady=(20, 0), padx=5
+                    row=i - 1, column=1, sticky=tk.NSEW, pady=(20, 0), padx=5
                 )
                 self.inputs[names[i]].widget.state(["disabled"])
 
@@ -191,11 +183,6 @@ class TilingWizardPopup:
             )
             self.inputs[entry_names[i]].widget.state(["disabled"])
 
-        # Data widgets
-        # data_labels = ["Percent Overlay", "Total Tiles"]
-
-        # data_names = ["percent_overlay", "total_tiles"]
-
         self.inputs["percent_overlay"] = LabelInput(
             parent=data,
             label="Percent Overlay",
@@ -204,7 +191,7 @@ class TilingWizardPopup:
             input_args={"width": 5, "increment": 5, "from_": 0, "to": 100},
         )
         self.inputs["percent_overlay"].grid(
-            row=1, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
+            row=0, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
         )
 
         self.inputs["total_tiles"] = LabelInput(
@@ -215,11 +202,11 @@ class TilingWizardPopup:
         )
         self.inputs["total_tiles"].widget.state(["disabled"])
         self.inputs["total_tiles"].grid(
-            row=0, column=1, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
+            row=0, column=2, sticky=tk.NSEW, padx=5, pady=(5, 0)
         )
 
         # Formatting
-        self.inputs["total_tiles"].grid(padx=(110, 0))
+        self.inputs["total_tiles"].grid(padx=(160, 0))
 
     # Getters
     def get_variables(self):

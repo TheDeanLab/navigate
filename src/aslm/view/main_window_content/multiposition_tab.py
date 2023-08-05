@@ -84,10 +84,16 @@ class MultiPositionTab(tk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
+        # Tiling Buttons
+        self.tiling_buttons = MultiPointFrame(self)
+        self.tiling_buttons.grid(
+            row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
+        )
+
         # Multipoint List
         self.multipoint_list = MultiPointList(self)
         self.multipoint_list.grid(
-            row=5, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
+            row=6, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
 
@@ -108,12 +114,9 @@ class MultiPointFrame(ttk.Labelframe):
 
     Attributes
     ----------
-    laser_label : ttk.Label
-        The label for the laser checkbox.
-    on_off : tk.BooleanVar
-        The variable that holds the state of the laser checkbox.
-    save_check : ttk.Checkbutton
-        The checkbox that enables or disables the laser.
+    buttons : dict
+        A dictionary of all the buttons that are tied to each widget name.
+        The key is the widget name, value is the button associated.
 
     Methods
     -------
@@ -137,14 +140,16 @@ class MultiPointFrame(ttk.Labelframe):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Save Data Label
-        self.laser_label = ttk.Label(self, text="Enable")
-        self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6))
-
-        # Save Data Checkbox
-        self.on_off = tk.BooleanVar()
-        self.save_check = ttk.Checkbutton(self, text="", variable=self.on_off)
-        self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 6))
+        # Tiling Wizard Button
+        self.buttons = {
+            "tiling": ttk.Button(self, text="Launch Tiling Wizard"),
+            "save_data": ttk.Button(self, text="Save Positions to Disk"),
+            "load_data": ttk.Button(self, text="Load Positions from Disk"),
+        }
+        column = 0
+        for key, button in self.buttons.items():
+            button.grid(row=0, column=column, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6))
+            column += 1
 
     def get_variables(self):
         """Returns a dictionary of all the variables that are tied to each widget name.

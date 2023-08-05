@@ -760,8 +760,6 @@ class MultiPointFrame(ttk.Labelframe):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Dict
-
         # Save Data Label
         self.laser_label = ttk.Label(self, text="Enable")
         self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6))

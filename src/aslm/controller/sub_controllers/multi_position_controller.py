@@ -59,6 +59,28 @@ class MultiPositionController(GUIController):
         self.table.generatePositions = self.generate_positions
         self.table.addStagePosition = self.add_stage_position
 
+        self.view.master.tiling_buttons.buttons["tiling"].config(
+            command=self.parent_controller.channels_tab_controller.launch_tiling_wizard
+        )
+
+        self.view.master.tiling_buttons.buttons["save_data"].config(
+            command=self.export_positions
+        )
+
+        self.view.master.tiling_buttons.buttons["load_data"].config(
+            command=self.load_positions
+        )
+
+        self.view.master.tiling_buttons.buttons["eliminate_tiles"].config(
+            command=self.eliminate_tiles
+        )
+
+    def eliminate_tiles(self):
+        print(
+            "TODO: Implement feature that goes to the middle position of each tile, "
+            "evaluates whether or not it consists of tissue, and if not, remove it."
+        )
+
     def set_positions(self, positions):
         """Set positions to multi-position's table
 

@@ -145,11 +145,23 @@ class MultiPointFrame(ttk.Labelframe):
             "tiling": ttk.Button(self, text="Launch Tiling Wizard"),
             "save_data": ttk.Button(self, text="Save Positions to Disk"),
             "load_data": ttk.Button(self, text="Load Positions from Disk"),
+            "eliminate_tiles": ttk.Button(self, text="Eliminate Empty Positions"),
         }
-        column = 0
+        counter = 0
         for key, button in self.buttons.items():
-            button.grid(row=0, column=column, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6))
-            column += 1
+            if counter == 0:
+                row, column = 0, 0
+            elif counter == 1:
+                row, column = 1, 0
+            elif counter == 2:
+                row, column = 1, 1
+            elif counter == 3:
+                row, column = 0, 1
+
+            button.grid(
+                row=row, column=column, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6)
+            )
+            counter += 1
 
     def get_variables(self):
         """Returns a dictionary of all the variables that are tied to each widget name.
@@ -376,34 +388,34 @@ class MultiPositionColumnHeader(ColumnHeader):
 
 class MultiPositionTable(Table):
     """MultiPositionTable
+    MultiPositionTable
+        MultiPositionTable is a class that inherits from Table. It is used to
+        customize the table for the multipoint table.
 
-    MultiPositionTable is a class that inherits from Table. It is used to
-    customize the table for the multipoint table.
+        Parameters
+        ----------
+        parent : tk.Frame
+            The frame that contains the settings tab.
+        **kwargs : dict
+            Keyword arguments for the Table class.
 
-    Parameters
-    ----------
-    parent : tk.Frame
-        The frame that contains the settings tab.
-    **kwargs : dict
-        Keyword arguments for the Table class.
+        Attributes
+        ----------
+        loadCSV : tk.Button
+            The button that loads a CSV file.
+        exportCSV : tk.Button
+            The button that exports the table to a CSV file.
+        insertRow : tk.Button
+            The button that inserts a new row.
+        generatePositions : tk.Button
+            The button that generates positions.
+        addStagePosition : tk.Button
+            The button that adds the current stage position.
 
-    Attributes
-    ----------
-    loadCSV : tk.Button
-        The button that loads a CSV file.
-    exportCSV : tk.Button
-        The button that exports the table to a CSV file.
-    insertRow : tk.Button
-        The button that inserts a new row.
-    generatePositions : tk.Button
-        The button that generates positions.
-    addStagePosition : tk.Button
-        The button that adds the current stage position.
-
-    Methods
-    -------
-    show(callback=None)
-        This function shows the table.
+        Methods
+        -------
+        show(callback=None)
+            This function shows the table.
     """
 
     def __init__(self, parent=None, **kwargs):
@@ -465,8 +477,8 @@ class MultiPositionTable(Table):
         def popupFocusOut(event):
             popupmenu.unpost()
 
-        popupmenu.add_command(label="Import Text/csv", command=self.loadCSV)
-        popupmenu.add_command(label="Export", command=self.exportCSV)
+        popupmenu.add_command(label="Load Positions from Disk", command=self.loadCSV)
+        popupmenu.add_command(label="Save Positions to Disk", command=self.exportCSV)
         popupmenu.add_command(label="Generate Position", command=self.generatePositions)
         popupmenu.bind("<FocusOut>", popupFocusOut)
         popupmenu.focus_set()

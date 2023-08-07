@@ -174,13 +174,12 @@ class ASIStage(StageBase):
 
         # Set feedback alignment values - Default to 85 if not specified
         # BT-Mesospim Defaults: {"X": 91, "Y": 91, "Z": 91, "T": 85, "V": 88, "W": 88}
-        stage_feedback = self.stage_configuration.get("feedback_alignment", None)
-        if stage_feedback is None:
+        if self.stage_feedback is None:
             feedback_alignment = {axis: 85 for axis in self.asi_axes}
         else:
             feedback_alignment = {
-                axis: stage_feedback
-                for axis, stage_feedback in zip(self.asi_axes, stage_feedback)
+                axis: self.stage_feedback
+                for axis, self.stage_feedback in zip(self.asi_axes, self.stage_feedback)
             }
 
         self.tiger_controller = device_connection
@@ -191,9 +190,7 @@ class ASIStage(StageBase):
             # Set feedback alignment values
             for ax, aa in feedback_alignment.items():
                 self.tiger_controller.set_feedback_alignment(ax, aa)
-                logger.debug(
-                    "ASI Stage Feedback Alignment Settings:", feedback_alignment
-                )
+            logger.debug("ASI Stage Feedback Alignment Settings:", feedback_alignment)
 
             # Set backlash to 0 (less accurate)
             for ax in self.asi_axes.keys():

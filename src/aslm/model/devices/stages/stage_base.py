@@ -102,17 +102,23 @@ class StageBase:
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
 
-        self.stage_configuration = configuration["configuration"]["microscopes"][
+        stage_configuration = configuration["configuration"]["microscopes"][
             microscope_name
         ]["stage"]
-        if type(self.stage_configuration["hardware"]) == ListProxy:
-            self.axes = list(self.stage_configuration["hardware"][device_id]["axes"])
-            device_axes = self.stage_configuration["hardware"][device_id].get(
+        if type(stage_configuration["hardware"]) == ListProxy:
+            self.axes = list(stage_configuration["hardware"][device_id]["axes"])
+            device_axes = stage_configuration["hardware"][device_id].get(
                 "axes_mapping", []
             )
+            self.stage_feedback = stage_configuration["hardware"][device_id].get(
+                "feedback_alignment", None
+            )
         else:
-            self.axes = list(self.stage_configuration["hardware"]["axes"])
-            device_axes = self.stage_configuration["hardware"].get("axes_mapping", [])
+            self.axes = list(stage_configuration["hardware"]["axes"])
+            device_axes = stage_configuration["hardware"].get("axes_mapping", [])
+            self.stage_feedback = stage_configuration["hardware"].get(
+                "feedback_alignment", None
+            )
 
         if device_axes is None:
             device_axes = []
@@ -133,8 +139,8 @@ class StageBase:
         """
         for ax in self.axes:
             setattr(self, f"{ax}_pos", 0)
-            setattr(self, f"{ax}_min", self.stage_configuration[f"{ax}_min"])
-            setattr(self, f"{ax}_max", self.stage_configuration[f"{ax}_max"])
+            setattr(self, f"{ax}_min", stage_configuration[f"{ax}_min"])
+            setattr(self, f"{ax}_max", stage_configuration[f"{ax}_max"])
         self.stage_limits = True
 
     def get_position_dict(self):

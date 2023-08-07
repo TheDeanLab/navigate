@@ -102,21 +102,31 @@ class StageBase:
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
 
-        stage = configuration["configuration"]["microscopes"][microscope_name]["stage"]
-        if type(stage["hardware"]) == ListProxy:
-            self.axes = list(stage["hardware"][device_id]["axes"])
-            device_axes = stage["hardware"][device_id].get("axes_mapping", [])
+        stage_configuration = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["stage"]
+        if type(stage_configuration["hardware"]) == ListProxy:
+            self.axes = list(stage_configuration["hardware"][device_id]["axes"])
+            device_axes = stage_configuration["hardware"][device_id].get(
+                "axes_mapping", []
+            )
+            self.stage_feedback = stage_configuration["hardware"][device_id].get(
+                "feedback_alignment", None
+            )
         else:
-            self.axes = list(stage["hardware"]["axes"])
-            device_axes = stage["hardware"].get("axes_mapping", [])
+            self.axes = list(stage_configuration["hardware"]["axes"])
+            device_axes = stage_configuration["hardware"].get("axes_mapping", [])
+            self.stage_feedback = stage_configuration["hardware"].get(
+                "feedback_alignment", None
+            )
 
         if device_axes is None:
             device_axes = []
 
         if len(self.axes) > len(device_axes):
             log_string = (
-                f"{microscope_name}: stage axes mapping is not specified in "
-                "the configuration file, will use the default one in the code!"
+                f"{microscope_name}: Stage axes mapping is not specified in "
+                "the configuration file, will use default settings!"
             )
             logger.debug(log_string)
             print(log_string)
@@ -125,12 +135,12 @@ class StageBase:
 
         """Initial setting for all positions
         self.x_pos, self.y_pos etc are the true axis positions, no matter whether
-        the stages are zeroed or not.
+        the stages are zeroed or not. All units are in microns.
         """
         for ax in self.axes:
             setattr(self, f"{ax}_pos", 0)
-            setattr(self, f"{ax}_min", stage[f"{ax}_min"])  # Units are in microns
-            setattr(self, f"{ax}_max", stage[f"{ax}_max"])  # Units are in microns
+            setattr(self, f"{ax}_min", stage_configuration[f"{ax}_min"])
+            setattr(self, f"{ax}_max", stage_configuration[f"{ax}_max"])
         self.stage_limits = True
 
     def get_position_dict(self):

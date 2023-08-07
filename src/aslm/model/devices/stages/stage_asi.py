@@ -173,7 +173,6 @@ class ASIStage(StageBase):
         self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
         # Set feedback alignment values - Default to 85 if not specified
-        # BT-Mesospim Defaults: {"X": 91, "Y": 91, "Z": 91, "T": 85, "V": 88, "W": 88}
         if self.stage_feedback is None:
             feedback_alignment = {axis: 85 for axis in self.asi_axes}
         else:

@@ -16,18 +16,20 @@ class TigerException(Exception):
 
     Atrributes:
         - command: error code received from Tiger Console
-
-"""
+    """
 
     def __init__(self, code: str):
 
         self.error_codes = {
             ":N-1": "Unknown Command (Not Issued in TG-1000)",
-            ":N-2": "Unrecognized Axis Parameter (valid axes are dependent on the controller)",
-            ":N-3": "Missing parameters (command received requires an axis parameter such as x=1234)",
+            ":N-2": "Unrecognized Axis Parameter (valid axes are dependent on the "
+            "controller)",
+            ":N-3": "Missing parameters (command received requires an axis parameter "
+            "such as x=1234)",
             ":N-4": "Parameter Out of Range",
             ":N-5": "Operation failed",
-            ":N-6": "Undefined Error (command is incorrect, but the controller does not know exactly why.",
+            ":N-6": "Undefined Error (command is incorrect, but the controller does "
+            "not know exactly why.",
             ":N-7": "Invalid Card Address",
             ":N-21": "Serial Command halted by the HALT command",
         }
@@ -41,7 +43,8 @@ class TigerException(Exception):
         )  # Sends message to base exception constructor for python purposes
 
     def __str__(self):
-        return f"{self.code} -> {self.message}"  # Overrides base Exception string to be displayed in traceback
+        # Overrides base Exception string to be displayed in traceback
+        return f"{self.code} -> {self.message}"
 
 
 class TigerController:
@@ -55,7 +58,8 @@ class TigerController:
         self.com_port = com_port
         self.baud_rate = baud_rate
         self.verbose = verbose
-        # self.default_axes_sequence = ["X", "Y", "Z", "F", "M", "N"]
+        self.default_axes_sequence = None
+        self._max_speeds = None
         self.safe_to_write = threading.Event()
         self.safe_to_write.set()
 
@@ -97,7 +101,8 @@ class TigerController:
             self.serial_port.open()
         except SerialException:
             self.report_to_console(
-                f"SerialException: can't connect to {self.com_port} at {self.baud_rate}!"
+                f"SerialException: can't connect to {self.com_port} at "
+                f"{self.baud_rate}!"
             )
 
         if self.is_open():
@@ -106,7 +111,43 @@ class TigerController:
             self.serial_port.reset_output_buffer()
             # report connection status to user
             self.report_to_console("Connected to the serial port.")
-            self.report_to_console(f"Serial port = {self.com_port} :: Baud rate = {self.baud_rate}")
+            self.report_to_console(
+                f"Serial port = {self.com_port} :: Baud rate = {self.baud_rate}"
+            )
+            self.default_axes_sequence = self.get_default_motor_axis_sequence()
+
+    def get_default_motor_axis_sequence(self) -> None:
+        # get default motor axes sequence
+        self.send_command("BU X")
+        response = self.read_response()
+        lines = response.split("\r")
+        for line in lines:
+            if line.startswith("Motor Axes:"):
+                default_axes_sequence = line[line.index(":") + 2 :].split(" ")[:-2]
+                self.report_to_console(
+                    "Get the default axes sequence from the ASI device " "successfully!"
+                )
+                break
+
+        return default_axes_sequence
+
+    ##### TODO: Modify these to accept dictionaries and send a
+    #           single command for all axes
+    def set_feedback_alignment(self, axis, aa):
+        self.send_command(f"AA {axis}={aa}\r")
+        self.read_response()
+        self.send_command(f"AZ {axis}\r")
+        self.read_response()
+
+    def set_backlash(self, axis, val):
+        self.send_command(f"B {axis}={val:.7f}\r")
+        self.read_response()
+
+    def set_finishing_accuracy(self, axis, ac):
+        self.send_command(f"PC {axis}={ac:.7f}\r")
+        self.read_response()
+
+    ##### END TODO #####
 
     def disconnect_from_serial(self) -> None:
         """
@@ -127,7 +168,8 @@ class TigerController:
         """
         Print message to the output device, usually the console.
         """
-        # useful if we want to output data to something other than the console (ui element etc)
+        # useful if we want to output data to something other than the console
+        # (ui element etc)
         if self.verbose:
             print(message)
 
@@ -138,6 +180,7 @@ class TigerController:
         # always reset the buffers before a new command is sent
         self.safe_to_write.wait()
         self.safe_to_write.clear()
+        self.serial_port.read_all()
         self.serial_port.reset_input_buffer()
         self.serial_port.reset_output_buffer()
 
@@ -160,7 +203,7 @@ class TigerController:
         self.report_to_console(f"Received Response: {response.strip()}")
         if response.startswith(":N"):
             raise TigerException(response)
-        
+
         return response  # in case we want to read the response
 
     # Basic Serial Commands for the Stage
@@ -168,28 +211,30 @@ class TigerController:
     def moverel(self, x: int = 0, y: int = 0, z: int = 0) -> None:
         """Move the stage with a relative move on multiple axes"""
         self.send_command(f"MOVREL X={x} Y={y} Z={z}\r")
-        res = self.read_response()
+        self.read_response()
 
     def moverel_axis(self, axis: str, distance: float) -> None:
         """Move the stage with a relative move on one axis"""
         self.send_command(f"MOVREL {axis}={round(distance, 6)}\r")
-        res = self.read_response()
+        self.read_response()
 
     def move(self, pos_dict) -> None:
         """Move the stage with an absolute move on multiple axes"""
-        pos_str = " ".join([f"{axis}={round(pos, 6)}" for axis, pos in pos_dict.items()])
+        pos_str = " ".join(
+            [f"{axis}={round(pos, 6)}" for axis, pos in pos_dict.items()]
+        )
         self.send_command(f"MOVE {pos_str}\r")
-        res = self.read_response()
+        self.read_response()
 
     def move_axis(self, axis: str, distance: float) -> None:
         """Move the stage with an absolute move on one axis"""
         self.send_command(f"MOVE {axis}={round(distance, 6)}\r")
-        res = self.read_response()
+        self.read_response()
 
     def set_max_speed(self, axis: str, speed: float) -> None:
         """Set the speed on a specific axis. Speed is in mm/s."""
         self.send_command(f"SPEED {axis}={speed}\r")
-        res = self.read_response()
+        self.read_response()
 
     def get_axis_position(self, axis: str) -> int:
         """Return the position of the stage in ASI units (tenths of microns)."""
@@ -206,28 +251,45 @@ class TigerController:
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
         return float(response.split(" ")[1]) / 10.0
-        
+
     def get_position(self, axes) -> dict:
         """Return current stage position in ASI units.
 
-        DO NOT USE UNLESS YOU KNOW WHAT YOU ARE DOING!!
+        If default axes sequence has gotten from the ASI device,
+        then it will ask the device all the position in one command,
+        else it will ask each axis position one by one.
+
         WATCH OUT! This will return the positions in the order
         of the underlying hardware no matter what order the axes
         are passed in.
 
         See https://asiimaging.com/docs/products/serial_commands#commandwhere_w
-        
+
         Returns
         -------
         dictionary:
              {axis: position}
         """
 
-        cmd = f"WHERE {' '.join(axes)}\r"
-        self.send_command(cmd)
-        response = self.read_response()
+        if self.default_axes_sequence:
+            cmd = f"WHERE {' '.join(axes)}\r"
+            self.send_command(cmd)
+            response = self.read_response()
 
-        return response.split(" ")[1:-1]
+            # return response.split(" ")[1:-1]
+            pos = response.split(" ")
+            axes_seq = list(
+                filter(
+                    lambda axis: axis if axis in axes else False,
+                    self.default_axes_sequence,
+                )
+            )
+            return {axis: float(pos[1 + i]) for i, axis in enumerate(axes_seq)}
+        else:
+            result = {}
+            for axis in axes:
+                result[axis] = self.get_axis_position(axis)
+            return result
 
     # Utility Functions
 
@@ -243,23 +305,26 @@ class TigerController:
         res = self.read_response()
         return "B" in res
 
-    def wait_for_device(self, report: bool = False, timeout: float = 100) -> None:
-        """Waits for the all motors to stop moving."""
-        if not report:
+    def wait_for_device(self, timeout: float = 2) -> None:
+        """Waits for the all motors to stop moving.
+
+        timeout : float
+            Timeout in seconds.
+        """
+        if self.verbose:
             print("Waiting for device...")
-        temp = self.verbose
-        self.verbose = report
-        busy = True
+        busy = self.is_device_busy()
         waiting_time = 0.0
-        
+
         while busy:
+            waiting_time += 0.001
             if waiting_time >= timeout:
                 break
+            time.sleep(0.001)
             busy = self.is_device_busy()
-            waiting_time += 0.01
-            time.sleep(0.01)
 
-        self.verbose = temp
+        if self.verbose:
+            print(f"Waited {waiting_time:.2f} s")
 
     def stop(self):
         """
@@ -267,16 +332,42 @@ class TigerController:
         """
 
         self.send_command("HALT")
-        response = self.read_response()
-        print("ASI Stages stopped successfully")
+        self.read_response()
+        if self.verbose:
+            print("ASI Stages stopped successfully")
 
     def set_speed(self, speed_dict):
         """
         Set speed
         """
-        axes = " ".join([f"{x}={round(v, 6)}" for x,v in speed_dict.items()])
-        self.send_command(f"SPEED {axes}")
-        response = self.read_response()
+        axes = " ".join([f"{x}={round(v, 6)}" for x, v in speed_dict.items()])
+        self.send_command(f"S {axes}")
+        self.read_response()
+
+    def set_speed_as_percent_max(self, pct):
+        if self.default_axes_sequence is None:
+            raise TigerException(
+                "Unable to query system for axis sequence. Cannot set speed."
+            )
+        if self._max_speeds is None:
+            # First, set the speed crazy high
+            self.send_command(
+                f"SPEED {' '.join([f'{ax}=1000' for ax in self.default_axes_sequence])}\r"  # noqa
+            )
+            self.read_response()
+
+            # Next query the maximum speed
+            self.send_command(
+                f"SPEED {' '.join([f'{ax}?' for ax in self.default_axes_sequence])}\r"
+            )
+            res = self.read_response()
+            self._max_speeds = [float(x.split("=")[1]) for x in res.split()[1:]]
+
+        # Now set to pct
+        self.send_command(
+            f"SPEED {' '.join([f'{ax}={pct*speed:.7f}' for ax, speed in zip(self.default_axes_sequence, self._max_speeds)])}\r"  # noqa
+        )
+        self.read_response()
 
     def get_speed(self, axis: str):
         """
@@ -294,8 +385,14 @@ class TigerController:
         self.send_command(f"CNTS {axis}?")
         response = self.read_response()
         return float(response.split("=")[1].split()[0])
-        
-    def scanr(self, start_position_mm: float, end_position_mm: float, enc_divide: float=0, axis: str='X'):
+
+    def scanr(
+        self,
+        start_position_mm: float,
+        end_position_mm: float,
+        enc_divide: float = 0,
+        axis: str = "X",
+    ):
         """
         Set scan range.
         """
@@ -304,52 +401,53 @@ class TigerController:
             enc_divide = enc_divide_mm
         else:
             enc_divide = enc_divide * enc_divide_mm
-        command = f"SCANR X={round(start_position_mm, 6)} Y={round(end_position_mm, 6)} Z={round(enc_divide)}"
+        command = (
+            f"SCANR X={round(start_position_mm, 6)} "
+            f"Y={round(end_position_mm, 6)} Z={round(enc_divide)}"
+        )
         self.send_command(command)
-        response = self.read_response()
-        
-    def start_scan(self, axis: str, is_single_axis_scan: bool=True):
+        self.read_response()
+
+    def start_scan(self, axis: str, is_single_axis_scan: bool = True):
         """
         Start scan
 
         axis: 'X' or 'Y'
         is_single_axis_scan: True for single axis scan
         """
-        fast_axis_id = 0 if axis == 'X' else 1
+        fast_axis_id = 0 if axis == "X" else 1
         slow_axis_id = 1 - fast_axis_id
         if is_single_axis_scan:
             slow_axis_id = 9
         self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
-        response = self.read_response()
+        self.read_response()
 
     def stop_scan(self):
         """
         Stop scan.
         """
         self.send_command("SCAN P")
-        response = self.read_response()
+        self.read_response()
 
     # Basic Serial Commands for Filter Wheels
 
-    def send_filter_wheel_command(self, cmd: bytes) -> None:
+    def send_filter_wheel_command(self, cmd) -> None:
         """
         Send a serial command to the filter wheel.
         """
-        # always reset the buffers before a new command is sent
-        self.serial_port.reset_input_buffer()
-        self.serial_port.reset_output_buffer()
 
         # send the serial command to the controller
-        command = bytes(f"{cmd}\n\r", encoding="ascii")
-        self.serial_port.write(command)
-        self.read_response()
+        self.send_command(f"{cmd}\n")
         # print(f"Sent Command: {command.decode(encoding='ascii')}")
 
     def select_filter_wheel(self, filter_wheel_number=0):
         """
         Select the filter wheel, e.g., 0, 1...
 
-        Sets the current filter wheel for subsequent commands. Prompt shows currently selected wheel, e.g., 0> is result of FW 0 command. If the selected wheel is HOMED and ready to go, the FW command returns the selected wheel as normal. If the wheel is not ready for any reason, the response ERR is returned. Example:
+        Sets the current filter wheel for subsequent commands. Prompt shows currently
+        selected wheel, e.g., 0> is result of FW 0 command. If the selected wheel is
+        HOMED and ready to go, the FW command returns the selected wheel as normal. If
+        the wheel is not ready for any reason, the response ERR is returned. Example:
 
         0> FW 1 1 Normal – switch to FW 1
         1> FW 0 ERR FW 0 not ready
@@ -357,7 +455,7 @@ class TigerController:
         """
         assert filter_wheel_number in range(2)
         self.send_filter_wheel_command(f"FW {filter_wheel_number}")
-        response = self.read_response()
+        self.read_response()
 
     def move_filter_wheel(self, filter_wheel_position=0):
         """
@@ -365,14 +463,14 @@ class TigerController:
         """
         assert filter_wheel_position in range(8)
         self.send_filter_wheel_command(f"MP {filter_wheel_position}")
-        response = self.read_response()
+        self.read_response()
 
     def move_filter_wheel_to_home(self):
         """
         Causes current wheel to seek its home position.
         """
         self.send_filter_wheel_command("HO")
-        response = self.read_response()
+        self.read_response()
 
     def change_filter_wheel_speed(self, speed=0):
         """
@@ -385,11 +483,11 @@ class TigerController:
         9	Fastest and but least reliable switching speed.
         """
         self.send_filter_wheel_command(f"SV {speed}")
-        response = self.read_response()
+        self.read_response()
 
     def halt_filter_wheel(self):
         """
         Halt filter wheel
         """
         self.send_filter_wheel_command("HA")
-        response = self.read_response()
+        self.read_response()

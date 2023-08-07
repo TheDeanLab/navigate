@@ -195,7 +195,7 @@ class BigDataViewerMetadata(XMLMetadata):
         """Convert stage positions to an affine matrix. Ignore focus for now."""
         arr = np.eye(3, 4)
 
-        # Translation
+        # Translation into pixels
         arr[:, 3] = [x / self.dx, y / self.dy, z / self.dz]
 
         # Rotation (theta pivots in the xz plane, about the y axis)

@@ -58,27 +58,10 @@ microscopes:
         name: camera
         type: HamamatsuOrca
         serial_number: 302352
-      x_pixels: 2048.0
-      y_pixels: 2048.0
-      pixel_size_in_microns: 6.5
-      subsampling: [1, 2, 4]
-      sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
-      readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
       lightsheet_rolling_shutter_width: 608
-      defect_correct_mode: 2.0
-      binning: 1x1
-      readout_speed: 1.0
-      trigger_active: 1.0
-      trigger_mode: 1.0 # external light-sheet mode
-      trigger_polarity: 2.0  # positive pulse
-      trigger_source: 2.0  # 2 = external, 3 = software.
-      exposure_time: 20 # Use milliseconds throughout.
+      defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
       delay_percent: 10
       pulse_percent: 1
-      line_interval: 0.000075
-      display_acquisition_subsampling: 4
-      average_frame_rate: 4.969
-      frames_to_average: 1
       exposure_time_range:
         min: 1
         max: 1000
@@ -165,6 +148,10 @@ microscopes:
       z_offset: 0
       theta_offset: 0
       f_offset: 0
+
+      flip_x: False
+      flip_y: False
+      flip_z: False
 
     zoom:
       hardware:
@@ -291,27 +278,10 @@ microscopes:
         name: camera
         type: HamamatsuOrca
         serial_number: 302158
-      x_pixels: 2048.0
-      y_pixels: 2048.0
-      pixel_size_in_microns: 6.5
-      subsampling: [1, 2, 4]
-      sensor_mode: Normal  # 12 for progressive, 1 for normal.
-      readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
       lightsheet_rolling_shutter_width: 100
-      defect_correct_mode: 2.0
-      binning: 1x1
-      readout_speed: 1.0
-      trigger_active: 1.0
-      trigger_mode: 1.0 # external light-sheet mode
-      trigger_polarity: 2.0  # positive pulse
-      trigger_source: 2.0  # 2 = external, 3 = software.
-      exposure_time: 20 # Use milliseconds throughout.
+      defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
       delay_percent: 10
       pulse_percent: 1
-      line_interval: 0.000075
-      display_acquisition_subsampling: 4
-      average_frame_rate: 4.969
-      frames_to_average: 1
       exposure_time_range:
         min: 1
         max: 1000

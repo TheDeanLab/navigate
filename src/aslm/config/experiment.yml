@@ -10,22 +10,13 @@ Saving:
   file_type: TIFF
   date: 2022-06-07
   solvent: BABB
-Devices:
-  daq: NI
-  camera: HamamatsuOrca
-  etl: ETL
-  filter_wheel: Sutter
-  stage: PI
-  zoom: Dynamixel
 CameraParameters:
-  number_of_cameras: 1
   x_pixels: 2048
   y_pixels: 2048
   sensor_mode: Normal
   readout_direction: Top to Bottom
   number_of_pixels: 10
   binning: 1x1
-  pixel_size: 6.5
   frames_to_average: 1.0
   databuffer_size: 100
 AutoFocusParameters:
@@ -46,6 +37,7 @@ StageParameters:
   z: 47100.0
   theta: 55.00006
   f: 66122.8
+  limits: True
 MicroscopeState:
   microscope_name: Mesoscale
   image_mode: live
@@ -78,4 +70,4 @@ MicroscopeState:
   conpro_cycling_mode: Per Stack
   waveform_template: Default
 MultiPositions:
-  stage_positions: [{'x': 15000.0, 'y': 12000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}, {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}]
+  [{'x': 15000.0, 'y': 12000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}, {'x': 35000.0, 'y': 42000.0, 'z': 15500.0, 'theta': 0.0, 'f': 70000.0}]

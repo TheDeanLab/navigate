@@ -63,8 +63,8 @@ class SelfLockThread(threading.Thread):
             try:
                 self._target(*self._args, **self._kwargs)
             except Exception as e:
-                print(f"{self.name} thread ended because of exception!: {e}")
-                logger.debug(f"{self.name} thread ended because of exception!: {e}")
+                print(f"{self.name} thread ended because of exception!: {e}", traceback.format_exc())
+                logger.debug(f"{self.name} thread ended because of exception!: {e}", traceback.format_exc())
             finally:
                 pass
 

@@ -40,7 +40,7 @@ import numpy as np
 import random
 
 # Local Imports
-from aslm.config.config import load_configs, verify_configuration
+from aslm.config.config import load_configs, verify_experiment_config, verify_waveform_constants
 from aslm.model.devices.camera.camera_synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
@@ -131,10 +131,9 @@ class DummyController:
             return self.commands.pop(0)
         else:
             return "Empty command list"
-        
+
     def clear(self):
-        """Clear command list
-        """
+        """Clear command list"""
         self.commands = []
 
 
@@ -197,13 +196,14 @@ class DummyModel:
             waveform_constants=waveform_constants,
         )
 
-        verify_configuration(self.manager, self.configuration)
+        verify_experiment_config(self.manager, self.configuration)
+        verify_waveform_constants(self.manager, self.configuration)
 
         self.device = DummyDevice()
         self.signal_pipe, self.data_pipe = None, None
 
         self.active_microscope = DummyMicroscope(
-            "dummy", self.configuration, devices_dict={}, is_synthetic=True
+            "Mesoscale", self.configuration, devices_dict={}, is_synthetic=True
         )
 
         self.signal_container = None
@@ -516,3 +516,67 @@ class DummyMicroscope:
         self.galvo = {}
         self.daq = devices_dict.get("daq", None)
         self.current_channel = 0
+
+    def calculate_exposure_sweep_times(self, readout_time=0):
+        """Get the exposure and sweep times for all channels.
+
+        Parameters
+        ----------
+        readout_time : float
+            Readout time of the camera (seconds) if we are operating the camera in
+            Normal mode, otherwise -1.
+        """
+        exposure_times = {}
+        sweep_times = {}
+        microscope_state = self.configuration["experiment"]["MicroscopeState"]
+        zoom = microscope_state["zoom"]
+        waveform_constants = self.configuration["waveform_constants"]
+        camera_delay_percent = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["camera"]["delay_percent"]
+        remote_focus_ramp_falling = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["remote_focus_device"]["ramp_falling_percent"]
+
+        duty_cycle_wait_duration = (
+            float(
+                self.configuration["waveform_constants"]
+                .get("other_constants", {})
+                .get("remote_focus_settle_duration", 0)
+            )
+            / 1000
+        )
+        for channel_key in microscope_state["channels"].keys():
+            channel = microscope_state["channels"][channel_key]
+            if channel["is_selected"] is True:
+                exposure_time = channel["camera_exposure_time"] / 1000
+
+                sweep_time = (
+                    exposure_time
+                    + exposure_time
+                    * (camera_delay_percent + remote_focus_ramp_falling)
+                    / 100
+                )
+                if readout_time > 0:
+                    # This addresses the dovetail nature of the camera readout in normal
+                    # mode. The camera reads middle out, and the delay in start of the
+                    # last lines compared to the first lines causes the exposure to be
+                    # net longer than exposure_time. This helps the galvo keep sweeping
+                    # for the full camera exposure time.
+                    sweep_time += readout_time  # we could set it to 0.14 instead of
+                    # 0.16384 according to the test
+
+                ps = float(
+                    waveform_constants["remote_focus_constants"][self.microscope_name][
+                        zoom
+                    ][channel["laser"]].get("percent_smoothing", 0.0)
+                )
+                if ps > 0:
+                    sweep_time = (1 + ps / 100) * sweep_time
+
+                sweep_time += duty_cycle_wait_duration
+
+                exposure_times[channel_key] = exposure_time
+                sweep_times[channel_key] = sweep_time
+
+        return exposure_times, sweep_times

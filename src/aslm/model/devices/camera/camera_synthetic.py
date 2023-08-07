@@ -99,6 +99,7 @@ class SyntheticCamera(CameraBase):
         self.pre_frame_idx = None
         self.random_image = True
         self.serial_number = "synthetic"
+        self.camera_exposure_time = 0.2
 
         logger.info("SyntheticCamera Class Initialized")
 

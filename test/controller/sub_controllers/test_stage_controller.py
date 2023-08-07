@@ -143,8 +143,24 @@ def test_get_position(stage_controller):
     position = stage_controller.get_position()
     assert position is None
 
-
-def test_up_btn_handler(stage_controller):
+@pytest.mark.parametrize(
+    "flip_x, flip_y, flip_z",
+    [
+        (False, False, False),
+        (True, False, False),
+        (True, True, False),
+        (False, True, True),
+        (True, True, True)
+    ],
+)
+def test_up_btn_handler(stage_controller, flip_x, flip_y, flip_z):
+    microscope_name = stage_controller.parent_controller.configuration_controller.microscope_name
+    stage_config = stage_controller.parent_controller.configuration["configuration"]["microscopes"][microscope_name]["stage"]
+    stage_config["flip_x"] = flip_x
+    stage_config["flip_y"] = flip_y
+    stage_config["flip_z"] = flip_z
+    stage_controller.initialize()
+    flip_flags = stage_controller.parent_controller.configuration_controller.stage_flip_flags
 
     vals = {}
     for axis in AXES:
@@ -168,7 +184,7 @@ def test_up_btn_handler(stage_controller):
             step = stage_controller.widget_vals["xy_step"].get()
         else:
             step = stage_controller.widget_vals[axis + "_step"].get()
-        temp = pos + step
+        temp = pos + step * (-1 if flip_flags[axis] else 1)
         if temp > stage_controller.position_max[axis]:
             temp = stage_controller.position_max[axis]
         stage_controller.up_btn_handler(axis)()
@@ -179,11 +195,31 @@ def test_up_btn_handler(stage_controller):
         stage_controller.widget_vals[axis].set.reset_mock()
         stage_controller.widget_vals[axis].get.return_value = 10
         stage_controller.up_btn_handler(axis)()
-        stage_controller.widget_vals[axis].set.assert_not_called()
+        if flip_flags[axis] is False:
+            stage_controller.widget_vals[axis].set.assert_not_called()
 
+    stage_config["flip_x"] = False
+    stage_config["flip_y"] = False
+    stage_config["flip_z"] = False
 
-def test_down_btn_handler(stage_controller):
-
+@pytest.mark.parametrize(
+    "flip_x, flip_y, flip_z",
+    [
+        (False, False, False),
+        (True, False, False),
+        (True, True, False),
+        (False, True, True),
+        (True, True, True)
+    ],
+)
+def test_down_btn_handler(stage_controller, flip_x, flip_y, flip_z):
+    microscope_name = stage_controller.parent_controller.configuration_controller.microscope_name
+    stage_config = stage_controller.parent_controller.configuration["configuration"]["microscopes"][microscope_name]["stage"]
+    stage_config["flip_x"] = flip_x
+    stage_config["flip_y"] = flip_y
+    stage_config["flip_z"] = flip_z
+    stage_controller.initialize()
+    flip_flags = stage_controller.parent_controller.configuration_controller.stage_flip_flags
     vals = {}
     for axis in AXES:
         vals[axis] = np.random.randint(1, 9)
@@ -206,7 +242,7 @@ def test_down_btn_handler(stage_controller):
             step = stage_controller.widget_vals["xy_step"].get()
         else:
             step = stage_controller.widget_vals[axis + "_step"].get()
-        temp = pos - step
+        temp = pos - step * (-1 if flip_flags[axis] else 1)
         if temp < stage_controller.position_min[axis]:
             temp = stage_controller.position_min[axis] 
         stage_controller.down_btn_handler(axis)()
@@ -217,8 +253,12 @@ def test_down_btn_handler(stage_controller):
         stage_controller.widget_vals[axis].set.reset_mock()
         stage_controller.widget_vals[axis].get.return_value = 0
         stage_controller.down_btn_handler(axis)()
-        stage_controller.widget_vals[axis].set.assert_not_called()
+        if flip_flags[axis] is False:
+            stage_controller.widget_vals[axis].set.assert_not_called()
 
+    stage_config["flip_x"] = False
+    stage_config["flip_y"] = False
+    stage_config["flip_z"] = False
 
 def test_zero_btn_handler(stage_controller):
 

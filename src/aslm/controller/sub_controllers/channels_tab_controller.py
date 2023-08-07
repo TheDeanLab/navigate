@@ -320,6 +320,8 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
         ]
+        if self.microscope_state_dict["step_size"] < 0:
+            self.microscope_state_dict["step_size"] = -self.microscope_state_dict["step_size"]
         self.set_info(self.stack_acq_vals, self.microscope_state_dict)
         self.set_info(self.conpro_acq_vals, self.microscope_state_dict)
         self.set_info(self.timepoint_vals, self.microscope_state_dict)
@@ -332,11 +334,15 @@ class ChannelsTabController(GUIController):
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
 
+        if self.microscope_state_dict["stack_cycling_mode"] not in ["per_z", "per_stack"]:
+            self.microscope_state_dict["stack_cycling_mode"] = "per_stack"
         self.stack_acq_vals["cycling"].set(
             "Per Z"
             if self.microscope_state_dict["stack_cycling_mode"] == "per_z"
             else "Per Stack"
         )
+        if self.microscope_state_dict["conpro_cycling_mode"] not in ["per_plane", "per_stack"]:
+            self.microscope_state_dict["conpro_cycling_mode"] = "per_plane"
         self.conpro_acq_vals["cycling"].set(
             "Per Plane"
             if self.microscope_state_dict["conpro_cycling_mode"] == "per_plane"
@@ -483,13 +489,18 @@ class ChannelsTabController(GUIController):
         self.stack_acq_vals["number_z_steps"].set(number_z_steps)
 
         # Shift the start/stop positions by the relative position
-        self.stack_acq_vals["abs_z_start"].set(self.z_origin + start_position)
-        self.stack_acq_vals["abs_z_end"].set(self.z_origin + end_position)
+        flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
+        if flip_flags["z"]:
+            self.stack_acq_vals["abs_z_start"].set(self.z_origin + end_position)
+            self.stack_acq_vals["abs_z_end"].set(self.z_origin + start_position)
+        else:
+            self.stack_acq_vals["abs_z_start"].set(self.z_origin + start_position)
+            self.stack_acq_vals["abs_z_end"].set(self.z_origin + end_position)
 
         # update experiment MicroscopeState dict
         self.microscope_state_dict["start_position"] = start_position
         self.microscope_state_dict["end_position"] = end_position
-        self.microscope_state_dict["step_size"] = step_size
+        self.microscope_state_dict["step_size"] = step_size * (-1 if flip_flags["z"] else 1)
         self.microscope_state_dict["number_z_steps"] = number_z_steps
         self.microscope_state_dict["abs_z_start"] = self.stack_acq_vals[
             "abs_z_start"
@@ -536,8 +547,14 @@ class ChannelsTabController(GUIController):
         self.focus_origin = self.parent_controller.configuration["experiment"][
             "StageParameters"
         ]["f"]
-        self.stack_acq_vals["start_position"].set(0)
-        self.stack_acq_vals["start_focus"].set(0)
+
+        flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
+        if flip_flags["z"]:
+            self.stack_acq_vals["end_position"].set(0)
+            self.stack_acq_vals["end_focus"].set(0)
+        else:
+            self.stack_acq_vals["start_position"].set(0)
+            self.stack_acq_vals["start_focus"].set(0)
 
         # Propagate parameter changes to the GUI
         self.update_z_steps()
@@ -572,22 +589,26 @@ class ChannelsTabController(GUIController):
 
         if z_end < z_start:
             # Sort so we are always going low to high
-            tmp = z_start
-            tmp_f = focus_start
-            z_start = z_end
-            focus_start = focus_end
-            z_end = tmp
-            focus_end = tmp_f
+            z_start, z_end = z_end, z_start
+            focus_start, focus_end = focus_end, focus_start
 
         # set origin to be in the middle of start and end
         self.z_origin = (z_start + z_end) / 2
         self.focus_origin = (focus_start + focus_end) / 2
 
         # Propagate parameter changes to the GUI
-        self.stack_acq_vals["start_position"].set(z_start - self.z_origin)
-        self.stack_acq_vals["start_focus"].set(focus_start - self.focus_origin)
-        self.stack_acq_vals["end_position"].set(z_end - self.z_origin)
-        self.stack_acq_vals["end_focus"].set(focus_end - self.focus_origin)
+        flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
+        start_pos = z_start - self.z_origin
+        end_pos = z_end - self.z_origin
+        start_focus = focus_start - self.focus_origin
+        end_focus = focus_end - self.focus_origin
+        if flip_flags["z"]:
+            start_pos, end_pos = end_pos, start_pos
+            start_focus, end_focus = end_focus, start_focus
+        self.stack_acq_vals["start_position"].set(start_pos)
+        self.stack_acq_vals["start_focus"].set(start_focus)
+        self.stack_acq_vals["end_position"].set(end_pos)
+        self.stack_acq_vals["end_focus"].set(end_focus)
         self.update_z_steps()
 
     def update_cycling_setting(self, *args):

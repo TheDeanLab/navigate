@@ -319,11 +319,6 @@ class PhotometricsKinetix(CameraBase):
 
         return ASLM_lineExposure, ASLM_line_delay
 
-
-        self.camera_line_interval = (full_chip_exposure_time / 1000)/(shutter_width + self.y_pixels + 10)
-        exposure_time = self.camera_line_interval*shutter_width*1000
-        return ASLM_lineExposure, self.camera_line_interval
-
     def _calculate_ASLMparameters(self, desired_exposuretime):
         """
         calculate the parameters for an ASLM acquisition

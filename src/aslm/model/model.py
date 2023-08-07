@@ -143,18 +143,16 @@ class Model:
         self.current_exposure_time = 0  # milliseconds
         self.pre_exposure_time = 0  # milliseconds
         self.camera_line_interval = 9.7e-6  # s
+        self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
         self.start_time = None
         self.data_buffer = None
         self.img_width = int(
-            self.configuration["configuration"]["microscopes"][
-                self.active_microscope_name
-            ]["camera"]["x_pixels"]
+            self.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
         )
         self.img_height = int(
-            self.configuration["configuration"]["microscopes"][
-                self.active_microscope_name
-            ]["camera"]["y_pixels"]
+            self.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
         )
+        self.binning =  "1x1"
         self.data_buffer_positions = None
         self.is_acquiring = False
 
@@ -313,18 +311,18 @@ class Model:
         img_height : int
             Number of active pixels in the y-dimension.
         """
+        self.img_width = img_width
+        self.img_height = img_height
         self.data_buffer = [
             SharedNDArray(shape=(img_height, img_width), dtype="uint16")
             for i in range(self.number_of_frames)
         ]
-        self.img_width = img_width
-        self.img_height = img_height
         self.data_buffer_positions = SharedNDArray(
             shape=(self.number_of_frames, 5), dtype=float
         )  # z-index, x, y, z, theta, f
         for microscope_name in self.microscopes:
             self.microscopes[microscope_name].update_data_buffer(
-                img_width, img_height, self.data_buffer, self.number_of_frames
+                self.configuration["experiment"]["CameraParameters"]["x_pixels"], self.configuration["experiment"]["CameraParameters"]["y_pixels"], self.data_buffer, self.number_of_frames
             )
 
     def get_data_buffer(self, img_width=512, img_height=512):
@@ -345,7 +343,7 @@ class Model:
         data_buffer : SharedNDArray
             Shared memory object.
         """
-        if img_width != self.img_width or img_height != self.img_height:
+        if img_width != self.img_width or img_height != self.img_height or self.configuration["experiment"]["CameraParameters"]["binning"] != self.binning:
             self.update_data_buffer(img_width, img_height)
         return self.data_buffer
 
@@ -697,7 +695,7 @@ class Model:
             Function to run on the acquired data.
         """
 
-        wait_num = 10  # this will let this thread wait 10 * 500 ms before it ends
+        wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
         # whether acquire specific number of frames.
@@ -710,7 +708,6 @@ class Model:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
-            # This is the 500 ms wait for Hamamatsu
             frame_ids = self.active_microscope.camera.get_new_frame()
             self.logger.info(
                 f"ASLM Model - Running data process, get frames {frame_ids}"
@@ -720,8 +717,7 @@ class Model:
                 self.logger.info(f"ASLM Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
-                    # it has waited for wait_num * 500 ms, it's sure there won't be any
-                    # frame coming
+                    # Camera timeout, abort acquisition.
                     break
                 continue
 
@@ -730,7 +726,7 @@ class Model:
             frames_per_second = acquired_frame_num / (stop_time - start_time)
             self.event_queue.put(("framerate", frames_per_second))
 
-            wait_num = 10
+            wait_num = self.camera_wait_iterations
 
             # Leave it here for now to work with current ImageWriter workflow
             # Will move it feature container later
@@ -784,7 +780,7 @@ class Model:
             self.pause_data_ready_lock.release()
 
     def simplified_data_process(self, microscope, show_img_pipe, data_func=None):
-        wait_num = 10  # this will let this thread wait 10 * 500 ms before it ends
+        wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
         while not self.stop_acquisition:
@@ -800,12 +796,11 @@ class Model:
                 self.logger.info(f"ASLM Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
-                    # it has waited for wait_num * 500 ms, it's sure there won't be any
-                    # frame coming
+                    # Camera timeout, abort acquisition.
                     break
                 continue
-
-            wait_num = 10
+            
+            wait_num = self.camera_wait_iterations
 
             # Leave it here for now to work with current ImageWriter workflow
             # Will move it feature container later
@@ -818,7 +813,6 @@ class Model:
                 f"{microscope.microscope_name}"
             )
             show_img_pipe.send(frame_ids[-1])
-
             acquired_frame_num += len(frame_ids)
 
         show_img_pipe.send("stop")
@@ -871,12 +865,6 @@ class Model:
         if hasattr(self, "signal_container"):
             self.signal_container.run()
 
-        #  Initialize, run, and stop the acquisition.
-        #  Consider putting below to not block thread.
-        # self.active_microscope.daq.prepare_acquisition(
-        #     channel_key, self.current_exposure_time
-        # )
-
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
@@ -888,8 +876,15 @@ class Model:
         self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
 
         # Run the acquisition
-        self.active_microscope.daq.run_acquisition()
-        # self.active_microscope.daq.stop_acquisition()
+        try:
+            self.active_microscope.daq.run_acquisition()
+        except:
+            self.active_microscope.daq.stop_acquisition()
+            self.active_microscope.daq.prepare_acquisition(
+                f"channel_{self.active_microscope.current_channel}",
+                self.active_microscope.current_exposure_time,
+            )
+            self.active_microscope.daq.run_acquisition()
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)

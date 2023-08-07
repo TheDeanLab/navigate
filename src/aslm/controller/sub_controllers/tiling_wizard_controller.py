@@ -286,10 +286,12 @@ class TilingWizardController(GUIController):
         y_tiles = int(self.variables["y_tiles"].get())
 
         # shift z by coordinate origin of local z-stack
-        z_start = float(self.variables["z_start"].get()) + float(
+        z_start = float(self.variables["z_start"].get()) - float(
             self.stack_acq_widgets["start_position"].get()
         )
-        z_stop = float(self.variables["z_end"].get())
+        z_stop = float(self.variables["z_end"].get()) - float(
+            self.stack_acq_widgets["end_position"].get()
+        )
         z_tiles = int(self.variables["z_tiles"].get())
 
         # Default to fixed theta

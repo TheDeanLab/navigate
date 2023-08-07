@@ -485,9 +485,9 @@ class StackAcquisitionFrame(ttk.Labelframe):
             self.inputs[slice_names[i]] = LabelInput(
                 parent=self.pos_slice,
                 label=slice_labels[i],
-                input_class=ValidatedSpinbox,
+                input_class=ttk.Spinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"from_": 0.0, "increment": 0.5, "width": 6},
+                input_args={"increment": 0.5, "width": 6},
             )
             self.inputs[slice_names[i]].widget.configure(state="disabled")
             self.inputs[slice_names[i]].grid(
@@ -759,8 +759,6 @@ class MultiPointFrame(ttk.Labelframe):
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
-
-        # Dict
 
         # Save Data Label
         self.laser_label = ttk.Label(self, text="Enable")

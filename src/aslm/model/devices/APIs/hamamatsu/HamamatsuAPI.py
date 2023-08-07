@@ -645,6 +645,8 @@ property_dict = {
     "cyclic_trigger_period": 4206624,  # 0x00403020, R/O, sec,	"TIMING CYCLIC TRIGGER PERIOD"
     "minimum_trigger_blank": 4206640,  # 0x00403030, R/O, sec,	"TIMING MINIMUM TRIGGER BLANKING"
     "minimum_trigger_interval": 4206672,  # 0x00403050, R/O, sec,	"TIMING MINIMUM TRIGGER INTERVAL"
+    "pixel_width": 4327440, # 0x00420810, R/O, micro-meter, "IMAGE DETECTOR PIXEL WIDTH"
+    "pixel_height": 4327456, # 0x00420820, R/O, micro-meter, "IMAGE DETECTOR PIXEL HEIGHT"
 }
 
 
@@ -925,10 +927,21 @@ class DCAM:
 
         return cDouble.value
 
-    def get_property_range(self, idprop):
+    def get_property_range(self, name):
         """
         # Returns the range of appropriate values
         """
+        if name not in property_dict:
+            print(
+                "could not set value for",
+                name,
+                "please make sure the property name is correct and is added to property_dict!",
+            )
+            return [None, None]
+
+        # get property code setPropertyValue
+        idprop = property_dict[name]
+
         property_attribute = self.prop_getattr(idprop)
         if property_attribute != None:
             return [
@@ -953,7 +966,7 @@ class DCAM:
         idprop = property_dict[name]
 
         # Find property limits and correct value if necessary
-        r = self.get_property_range(idprop)
+        r = self.get_property_range(name)
 
         [property_value_min, property_value_max] = r  # self.get_property_range(idprop)
         if property_value_min is None:

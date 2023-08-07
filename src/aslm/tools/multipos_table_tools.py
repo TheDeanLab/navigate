@@ -164,9 +164,11 @@ def compute_tiles_from_bounding_box(
     x, y, z, t = np.meshgrid(xs, ys, zs, thetas)
 
     # we need to make f vary the same as z, for now, since focus changes with z
-    f = np.repeat(
-        fs, int(len(t.ravel()) / len(fs))
-    )  # This only works if len(fs) = len(zs)
+    lz = len(z.ravel())
+    f = np.repeat(fs, np.ceil(lz / len(fs)))[
+        :lz
+    ]  # This only works if len(fs) = len(zs)
+    # TODO: Don't clip f. Practically fine for now.
 
     return np.vstack([x.ravel(), y.ravel(), z.ravel(), t.ravel(), f]).T
 
@@ -226,7 +228,7 @@ def update_table(table, pos, append=False):
     """
     frame = pd.DataFrame(pos, columns=list("XYZRF"))
     if append:
-        table.model.df.append(frame, ignore_index=True)
+        table.model.df = table.model.df.append(frame, ignore_index=True)
     else:
         table.model.df = frame
     table.currentrow = table.model.df.shape[0] - 1

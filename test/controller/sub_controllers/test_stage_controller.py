@@ -75,10 +75,14 @@ def test_stage_key_press(stage_controller, flip_x, flip_y):
     x = round(np.random.random(), 1)
     y = round(np.random.random(), 1)
     increment = round(np.random.random(), 1)
-    stage_controller.get_position = MagicMock(return_value={"x": x, "y": y})
-    stage_controller.set_position = MagicMock()
     stage_controller.widget_vals["xy_step"].get = MagicMock(return_value=increment)
+    stage_controller.widget_vals["x"].get = MagicMock(return_value=x)
+    stage_controller.widget_vals["x"].set = MagicMock()
+    stage_controller.widget_vals["y"].get = MagicMock(return_value=y)
+    stage_controller.widget_vals["y"].set = MagicMock()
     event = MagicMock()
+
+    axes_map = {"w": "y", "a": "x", "s": "y", "d": "x"}
 
     for char, xs, ys in zip(
         ["w", "a", "s", "d"],
@@ -88,13 +92,15 @@ def test_stage_key_press(stage_controller, flip_x, flip_y):
         event.char = char
         # <a> instead of <Control+a>
         event.state = 0
-        x += xs * (-1 if flip_x else 1)
-        y += ys * (-1 if flip_y else 1)
+        axis = axes_map[char]
+        if axis == "x":
+            temp = x + xs * (-1 if flip_x else 1)
+        else:
+            temp = y + ys * (-1 if flip_y else 1)
         stage_controller.stage_key_press(event)
-        stage_controller.get_position.assert_called_once()
-        stage_controller.set_position.assert_called_with({"x": x, "y": y})
-        stage_controller.get_position.reset_mock()
-        stage_controller.set_position.reset_mock()
+        stage_controller.widget_vals[axis].set.assert_called_once_with(temp)
+        stage_controller.widget_vals[axis].set.reset_mock()
+        stage_controller.widget_vals[axis].get.reset_mock()
         stage_controller.widget_vals["xy_step"].get.reset_mock()
 
     stage_config["flip_x"] = False

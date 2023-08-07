@@ -195,13 +195,21 @@ class StageController(GUIController):
         xy_increment = self.widget_vals["xy_step"].get()
         if not self.joystick_is_on:
             if char == "w":
-                current_position["y"] += xy_increment
+                current_position["y"] += xy_increment * (
+                    -1 if self.flip_flags["y"] else 1
+                )
             elif char == "a":
-                current_position["x"] -= xy_increment
+                current_position["x"] -= xy_increment * (
+                    -1 if self.flip_flags["x"] else 1
+                )
             elif char == "s":
-                current_position["y"] -= xy_increment
+                current_position["y"] -= xy_increment * (
+                    -1 if self.flip_flags["y"] else 1
+                )
             elif char == "d":
-                current_position["x"] += xy_increment
+                current_position["x"] += xy_increment * (
+                    -1 if self.flip_flags["x"] else 1
+                )
         self.set_position(current_position)
 
     def initialize(self):

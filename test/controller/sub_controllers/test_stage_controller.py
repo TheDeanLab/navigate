@@ -55,8 +55,23 @@ def stage_controller(dummy_controller):
         dummy_controller,
     )
 
-
-def test_stage_key_press(stage_controller):
+@pytest.mark.parametrize(
+    "flip_x, flip_y",
+    [
+        (False, False),
+        (True, False),
+        (True, True),
+        (False, True),
+        (True, True)
+    ],
+)
+def test_stage_key_press(stage_controller, flip_x, flip_y):
+    microscope_name = stage_controller.parent_controller.configuration_controller.microscope_name
+    stage_config = stage_controller.parent_controller.configuration["configuration"]["microscopes"][microscope_name]["stage"]
+    stage_config["flip_x"] = flip_x
+    stage_config["flip_y"] = flip_y
+    stage_controller.initialize()
+    flip_flags = stage_controller.parent_controller.configuration_controller.stage_flip_flags
     x = round(np.random.random(), 1)
     y = round(np.random.random(), 1)
     increment = round(np.random.random(), 1)
@@ -73,8 +88,8 @@ def test_stage_key_press(stage_controller):
         event.char = char
         # <a> instead of <Control+a>
         event.state = 0
-        x += xs
-        y += ys
+        x += xs * (-1 if flip_x else 1)
+        y += ys * (-1 if flip_y else 1)
         stage_controller.stage_key_press(event)
         stage_controller.get_position.assert_called_once()
         stage_controller.set_position.assert_called_with({"x": x, "y": y})
@@ -82,6 +97,8 @@ def test_stage_key_press(stage_controller):
         stage_controller.set_position.reset_mock()
         stage_controller.widget_vals["xy_step"].get.reset_mock()
 
+    stage_config["flip_x"] = False
+    stage_config["flip_y"] = False
 
 def test_set_position(stage_controller):
 

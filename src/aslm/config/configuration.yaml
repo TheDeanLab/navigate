@@ -149,6 +149,10 @@ microscopes:
       theta_offset: 0
       f_offset: 0
 
+      flip_x: False
+      flip_y: False
+      flip_z: False
+
     zoom:
       hardware:
         name: zoom

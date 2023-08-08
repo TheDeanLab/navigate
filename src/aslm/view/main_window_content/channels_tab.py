@@ -485,14 +485,19 @@ class StackAcquisitionFrame(ttk.Labelframe):
             self.inputs[slice_names[i]] = LabelInput(
                 parent=self.pos_slice,
                 label=slice_labels[i],
-                input_class=ttk.Spinbox,
+                input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"increment": 0.5, "width": 6},
+                input_args={"increment": 1,
+                            "width": 6,
+                            "from_": 0.0,
+                            "to": 10000},
             )
-            self.inputs[slice_names[i]].widget.configure(state="disabled")
+
             self.inputs[slice_names[i]].grid(
                 row=i + 1, column=3, sticky="NSEW", pady=2, padx=(6, 0)
             )
+
+            self.inputs[slice_names[i]].widget.tk.state(["disabled"])
 
         # Laser Cycling Settings
         self.inputs["cycling"] = LabelInput(

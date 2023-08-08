@@ -395,7 +395,7 @@ def verify_experiment_config(manager, configuration):
         "img_x_pixels": 2048,
         "img_y_pixels": 2048,
         "sensor_mode": "Normal",
-        "readout_direction": "Top to Bottom",
+        "readout_direction": "Top-to-Bottom",
         "number_of_pixels": 10,
         "binning": "1x1",
         "frames_to_average": 1,

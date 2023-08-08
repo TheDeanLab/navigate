@@ -446,10 +446,10 @@ def verify_experiment_config(manager, configuration):
         camera_setting_dict["sensor_mode"] = "Normal"
     if camera_setting_dict["readout_direction"] not in [
         "",
-        "Top to Bottom",
-        "Bottom to Top",
+        "Top-to-Bottom",
+        "Bottom-to-Top",
     ]:
-        camera_setting_dict["readout_direction"] = "Top to Bottom"
+        camera_setting_dict["readout_direction"] = "Top-to-Bottom"
 
     # databuffer_size, number_of_pixels
     for k in ["databuffer_size", "number_of_pixels", "frames_to_average"]:

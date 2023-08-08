@@ -101,13 +101,35 @@ class KeystrokeController(GUIController):
         self.main_view.bind("s", self.stage_controller.stage_key_press)
         self.main_view.bind("a", self.stage_controller.stage_key_press)
         self.main_view.bind("d", self.stage_controller.stage_key_press)
-        self.main_view.bind("<Control-KeyRelease-j>", self.stage_controller.joystick_button_handler)
+        self.main_view.bind("<Control-KeyRelease-j>",
+                            self.stage_controller.joystick_button_handler)
         self.main_view.bind("<Control-Key-1>", self.switch_tab)
         self.main_view.bind("<Control-Key-2>", self.switch_tab)
         self.main_view.bind("<Control-Key-3>", self.switch_tab)
         self.main_view.bind("<Control-Key-4>", self.switch_tab)
         self.main_view.bind_all("<Control-Key-z>", self.widget_undo)
         self.main_view.bind_all("<Control-Key-y>", self.widget_redo)
+        self.main_view.bind_all("<Control-Key-s>", self.toggle_save)
+
+    def toggle_save(self, event):
+        """Toggle save button
+
+        Parameters
+        ----------
+        event : tkinter event
+            Key press event
+
+        Returns
+        -------
+        None
+
+        """
+        save_data = self.parent_controller.timepoint_vals["is_save"].get()
+        if save_data:
+            self.parent_controller.timepoint_vals["is_save"].set(False)
+        else:
+            self.parent_controller.timepoint_vals["is_save"].set(True)
+        self.parent_controller.channels_tab_controller.update_save_setting()
 
     def camera_controller_mouse_wheel_enter(self, event):
         """Mouse wheel binding for camera view

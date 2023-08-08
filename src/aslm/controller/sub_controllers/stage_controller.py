@@ -188,21 +188,16 @@ class StageController(GUIController):
         """
         if event.state != 0:
             return
-        char = event.char.lower()
-        current_position = self.get_position()
-        if current_position is None:
-            return
-        xy_increment = self.widget_vals["xy_step"].get()
         if not self.joystick_is_on:
+            char = event.char.lower()
             if char == "w":
-                current_position["y"] += xy_increment
+                self.up_btn_handler("y")()
             elif char == "a":
-                current_position["x"] -= xy_increment
+                self.down_btn_handler("x")()
             elif char == "s":
-                current_position["y"] -= xy_increment
+                self.down_btn_handler("y")()
             elif char == "d":
-                current_position["x"] += xy_increment
-        self.set_position(current_position)
+                self.up_btn_handler("x")()
 
     def initialize(self):
         """Initialize the Stage limits of steps and positions

@@ -445,7 +445,6 @@ def verify_experiment_config(manager, configuration):
     if camera_setting_dict["sensor_mode"] not in ["Normal", "Light-Sheet"]:
         camera_setting_dict["sensor_mode"] = "Normal"
     if camera_setting_dict["readout_direction"] not in [
-        "",
         "Top-to-Bottom",
         "Bottom-to-Top",
     ]:

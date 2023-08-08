@@ -226,6 +226,8 @@ class TestConfiguration(unittest.TestCase):
             "average_frame_rate",
             "frames_to_average",
             "exposure_time_range",
+            "flip_x",
+            "flip_y"
         ]
         type_keys = ["name", "type"]
 

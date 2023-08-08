@@ -198,6 +198,16 @@ class ImageWriter:
         # Make sure that there is enough disk space to save the data.
         self.calculate_and_check_disk_space()
 
+        # camera flip flags
+        microscope_name = self.model.active_microscope_name
+        camera_config = self.model.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"]
+        self.flip_flags = {
+            "x": camera_config.get("flip_x", False),
+            "y": camera_config.get("flip_y", False),
+        }
+
     def save_image(self, frame_ids):
         """Save the data to disk.
 
@@ -227,10 +237,19 @@ class ImageWriter:
                     )
                 ).astype(np.uint16)
 
+            # flip image if necessary
+            if self.flip_flags["x"] and self.flip_flags["y"]:
+                image = self.data_buffer[idx][::-1, ::-1]
+            elif self.flip_flags["x"]:
+                image = self.data_buffer[idx][:, ::-1]
+            elif self.flip_flags["y"]:
+                image = self.data_buffer[idx][::-1, :]
+            else:
+                image = self.data_buffer[idx]
             # Save data to disk
             try:
                 self.data_source.write(
-                    self.data_buffer[idx],
+                    image,
                     x=self.model.data_buffer_positions[idx][0],
                     y=self.model.data_buffer_positions[idx][1],
                     z=self.model.data_buffer_positions[idx][2],
@@ -239,9 +258,7 @@ class ImageWriter:
                 )
 
                 # Update MIP
-                self.mip[c_idx, :, :] = np.maximum(
-                    self.mip[c_idx, :, :], self.model.data_buffer[idx]
-                )
+                self.mip[c_idx, :, :] = np.maximum(self.mip[c_idx, :, :], image)
 
                 # Save the MIP
                 if (c_idx == self.data_source.shape_c - 1) and (

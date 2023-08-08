@@ -113,11 +113,17 @@ class StageBase:
             self.stage_feedback = stage_configuration["hardware"][device_id].get(
                 "feedback_alignment", None
             )
+            self.triggered_acquisition = stage_configuration["hardware"][device_id].get(
+                "triggered_acquisition", False
+            )
         else:
             self.axes = list(stage_configuration["hardware"]["axes"])
             device_axes = stage_configuration["hardware"].get("axes_mapping", [])
             self.stage_feedback = stage_configuration["hardware"].get(
                 "feedback_alignment", None
+            )
+            self.triggered_acquisition = stage_configuration["hardware"].get(
+                "triggered_acquisition", False
             )
 
         if device_axes is None:

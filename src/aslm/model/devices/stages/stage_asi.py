@@ -181,6 +181,7 @@ class ASIStage(StageBase):
                 for axis, self.stage_feedback in zip(self.asi_axes, self.stage_feedback)
             }
 
+        # Serial Device Connection
         self.tiger_controller = device_connection
         if device_connection is not None:
             # Speed optimizations - Set speed to 90% of maximum on each axis
@@ -356,19 +357,25 @@ class ASIStage(StageBase):
         pos_dict = {
             self.axes_mapping[axis]: pos * 10 for axis, pos in abs_pos_dict.items()
         }
-        try:
-            self.tiger_controller.move(pos_dict)
-        except TigerException as e:
-            print(
-                f"ASI stage move axis absolute failed or is trying to move out of "
-                f"range: {e}"
-            )
-            logger.exception("ASI Stage Exception", e)
-            return False
-        if wait_until_done:
-            self.tiger_controller.wait_for_device()
 
-        return True
+        if self.triggered_acquisition:
+            # Would somehow need to have already initialized the state to
+            # receive TTL signals, and then generate those TTL signals here.
+            pass
+        else:
+            try:
+                self.tiger_controller.move(pos_dict)
+            except TigerException as e:
+                print(
+                    f"ASI stage move axis absolute failed or is trying to move out of "
+                    f"range: {e}"
+                )
+                logger.exception("ASI Stage Exception", e)
+                return False
+            if wait_until_done:
+                self.tiger_controller.wait_for_device()
+
+            return True
 
     def stop(self):
         """Stop all stage movement abruptly."""

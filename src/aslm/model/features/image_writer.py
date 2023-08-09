@@ -260,7 +260,7 @@ class ImageWriter:
                         )
                         imsave(
                             os.path.join(self.mip_directory, mip_name),
-                            self.mip[c_idx, :, :],
+                            self.mip[c_save_idx, :, :],
                         )
             except OSError as e:
                 self.close()

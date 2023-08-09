@@ -212,7 +212,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "img_x_pixels": 2048,
             "img_y_pixels": 2048,
             "sensor_mode": "Normal",
-            "readout_direction": "Top to Bottom",
+            "readout_direction": "Top-to-Bottom",
             "number_of_pixels": 10,
             "binning": "1x1",
             "frames_to_average": 1,
@@ -501,12 +501,12 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             experiment["CameraParameters"]["readout_direction"] = v
             config.verify_experiment_config(self.manager, configuration)
             assert (
-                experiment["CameraParameters"]["readout_direction"] == "Top to Bottom"
+                experiment["CameraParameters"]["readout_direction"] == "Top-to-Bottom"
             )
 
-        experiment["CameraParameters"]["readout_direction"] = "Bottom to Top"
+        experiment["CameraParameters"]["readout_direction"] = "Bottom-to-Top"
         config.verify_experiment_config(self.manager, configuration)
-        assert experiment["CameraParameters"]["readout_direction"] == "Bottom to Top"
+        assert experiment["CameraParameters"]["readout_direction"] == "Bottom-to-Top"
 
         # other parameters should be int
         for k in ["number_of_pixels", "databuffer_size", "frames_to_average"]:

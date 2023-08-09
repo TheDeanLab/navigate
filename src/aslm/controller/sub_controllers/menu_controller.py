@@ -480,14 +480,14 @@ class MenuController(GUIController):
             self.feature_list_names.append(feature["feature_list_name"])
             self.feature_list_count += 1
 
-    def toggle_save(self, event):
+    def toggle_save(self, *args):
         """Toggle save button
 
         Parameters
         ----------
-        event : tkinter event
-            Key press event
-
+        args:
+            could be tkinter event(Key press event)
+            
         Returns
         -------
         None
@@ -496,12 +496,8 @@ class MenuController(GUIController):
         save_data = self.view.settings.channels_tab.stack_timepoint_frame\
             .save_data.get()
 
-        if save_data:
-            self.parent_controller.channels_tab_controller.timepoint_vals[
-                "is_save"].set(False)
-        else:
-            self.parent_controller.channels_tab_controller.timepoint_vals[
-                "is_save"].set(True)
+        self.parent_controller.channels_tab_controller.timepoint_vals[
+            "is_save"].set(not save_data)
         self.parent_controller.channels_tab_controller.update_save_setting()
 
     def open_folder(self, path):

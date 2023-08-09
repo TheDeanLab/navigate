@@ -579,7 +579,6 @@ class Controller:
                 is_save = True/False
             """
             self.acquire_bar_controller.set_save_option(args[0])
-            self.view.settings.channels_tab.stack_timepoint_frame.save_data.set(args[0])
 
         elif command == "update_setting":
             """Called by the Waveform Constants Popup Controller

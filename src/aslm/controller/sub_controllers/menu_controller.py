@@ -87,7 +87,6 @@ class MenuController(GUIController):
         self.resolution_value = tk.StringVar()
         self.feature_id_val = tk.IntVar()
         self.disable_stage_limits = tk.IntVar()
-        self.save_data = False
         self.fake_event = None
         self.feature_list_names = []
         self.system_feature_list_count = 0
@@ -152,7 +151,7 @@ class MenuController(GUIController):
                     "<Control_L-S>",
                 ],
                 "add_separator": [None],
-                "Save Data": [
+                "Toggle Save Data": [
                     "standard",
                     self.toggle_save,
                     "Ctrl+s",
@@ -339,7 +338,7 @@ class MenuController(GUIController):
                 ],
                 "Stage Control": [
                     "standard",
-                    lambda event: self.switch_tabs(2),
+                    lambda event: self.switch_tabs(3),
                     "Ctrl+3",
                     "<Control-Key-3>",
                     "<Control_L-Key-3",
@@ -480,6 +479,26 @@ class MenuController(GUIController):
             )
             self.feature_list_names.append(feature["feature_list_name"])
             self.feature_list_count += 1
+
+    def toggle_save(self, *args):
+        """Toggle save button
+
+        Parameters
+        ----------
+        args:
+            could be tkinter event(Key press event)
+            
+        Returns
+        -------
+        None
+
+        """
+        save_data = self.view.settings.channels_tab.stack_timepoint_frame\
+            .save_data.get()
+
+        self.parent_controller.channels_tab_controller.timepoint_vals[
+            "is_save"].set(not save_data)
+        self.parent_controller.channels_tab_controller.update_save_setting()
 
     def open_folder(self, path):
         """Open folder in file explorer.
@@ -713,11 +732,6 @@ class MenuController(GUIController):
         self.parent_controller.microscope_popup_controller = MicroscopePopupController(
             self.view, self.parent_controller, microscope_info
         )
-
-    def toggle_save(self, *args):
-        """Save the data."""
-        self.save_data = not self.save_data
-        self.parent_controller.execute("set_save", self.save_data)
 
     def acquire_data(self, *args):
         """Acquire data/Stop acquiring data."""

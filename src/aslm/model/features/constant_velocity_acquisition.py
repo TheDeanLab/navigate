@@ -32,9 +32,12 @@
 
 # Standard Library Imports
 import time
-
+import logging
 # Third Party Imports
 import numpy as np
+
+p = __name__.split(".")[1]
+logger = logging.getLogger(p)
 
 # Local imports
 
@@ -129,6 +132,7 @@ class ConstantVelocityAcquisition:
 
         # Calculate the actual step size in millimeters. 264 * 10^-6 mm
         step_size_mm = step_size_nm / 1 * 10**-6  # 264 * 10^-6 mm
+        #TODO set max speed in configuration file
         max_speed = 4.288497*2
 
         # Set the start and end position of the scan in millimeters.
@@ -149,7 +153,7 @@ class ConstantVelocityAcquisition:
 
         # TODO: stage name and stage controller!
         # self.default_speed = self.asi_stage.default_speed
-        self.default_speed = 3.745760
+        # self.default_speed = 3.745760
 
         # basic speed - essentially the minimum speed value permitted by the
         # stage, of which subsequent values are multiples of.

@@ -75,7 +75,14 @@ class ConfigurationController:
         self.change_microscope()
 
         microscopes_config = configuration["configuration"]["microscopes"]
-        self.galvo_num = max(map(lambda microscope_name: len(microscopes_config[microscope_name]["galvo"]), microscopes_config.keys()))
+        self.galvo_num = max(
+            map(
+                lambda microscope_name: len(
+                    microscopes_config[microscope_name]["galvo"]
+                ),
+                microscopes_config.keys(),
+            )
+        )
 
     def change_microscope(self) -> bool:
         """Get the new microscope configuration dict according to the name
@@ -257,7 +264,7 @@ class ConfigurationController:
             for a in axis:
                 position_limits[a] = 0 if suffix == "_min" else 100
         return position_limits
-    
+
     @property
     def stage_flip_flags(self):
         """Return the flip flags of the stage
@@ -275,6 +282,25 @@ class ConfigurationController:
         flip_flags = {}
         for axis in ["x", "y", "z", "theta", "f"]:
             flip_flags[axis] = stage_dict.get(f"flip_{axis}", False)
+        return flip_flags
+
+    @property
+    def camera_flip_flags(self):
+        """Return the flip flags of the camera
+
+        Returns
+        -------
+        flip_flags : dict
+            {'x': bool, 'y': bool}.
+        """
+        if self.microscope_config is not None:
+            camera_dict = self.microscope_config["camera"]
+        else:
+            camera_dict = {}
+        flip_flags = {
+            "x": camera_dict.get("flip_x", False),
+            "y": camera_dict.get("flip_y", False),
+        }
         return flip_flags
 
     @property

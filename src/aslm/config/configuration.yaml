@@ -66,6 +66,8 @@ microscopes:
         min: 1
         max: 1000
         step: 1
+      flip_x: False
+      flip_y: False
     remote_focus_device:
       hardware:
         name: daq

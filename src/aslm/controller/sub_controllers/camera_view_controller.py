@@ -357,8 +357,11 @@ class CameraViewController(GUIController):
         offset_x, offset_y = self.calculate_offset()
         stage_position = self.parent_controller.execute("get_stage_position")
         if stage_position is not None:
-            stage_position["x"] += offset_x
-            stage_position["y"] -= offset_y
+            stage_flip_flags = (
+                self.parent_controller.configuration_controller.stage_flip_flags
+            )
+            stage_position["x"] += offset_x * (-1 if stage_flip_flags["x"] else 1)
+            stage_position["y"] -= offset_y * (-1 if stage_flip_flags["y"] else 1)
 
             # Place the stage position in the multi-position table.
             self.parent_controller.execute("mark_position", stage_position)

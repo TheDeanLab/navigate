@@ -157,6 +157,7 @@ class NIDAQ(DAQBase):
             self.stop_acquisition()
 
     def set_external_trigger(self, external_trigger=None):
+    # def set_external_trigger(self, external_trigger=None,asi_stage=None):
         """Set trigger mode.
 
         Parameters
@@ -170,6 +171,7 @@ class NIDAQ(DAQBase):
         """
         self.trigger_mode = "self-trigger" if external_trigger is None else "external-trigger"
         self.external_trigger = external_trigger
+        # self.asi_stage = self.model.active_microscope.stages[self.axis]
 
         # change trigger mode during acquisition in a feature
         if self.trigger_mode == "self-trigger":
@@ -205,8 +207,10 @@ class NIDAQ(DAQBase):
                 task.triggers.start_trigger.cfg_dig_edge_start_trig(self.external_trigger)
                 task.register_done_event(None)
                 task.register_done_event(self.restart_analog_task_callback_func(task))
+                # task.register_done_event(self.restart_analog_task_callback_func(task,asi_stage))
 
     @staticmethod
+    # def restart_analog_task_callback_func(task,asi_stage):
     def restart_analog_task_callback_func(task):
         """Restart analog task callback function.
 
@@ -220,8 +224,12 @@ class NIDAQ(DAQBase):
         callback_func : function
             Callback function
         """
+        # self.asi_stage = self.model.active_microscope.stages[self.axis]
         def callback_func(task_handle, status, callback_data):
             try:
+                logger.info("daq recieved trigger")
+                # pos = asi_stage.get_axis_position("X")
+                # print(pos)
                 task.stop()
                 task.start()
             except:
@@ -305,6 +313,7 @@ class NIDAQ(DAQBase):
         -------
         None
         """
+        print("create analog camera task")
         n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
         if len(n_samples) > 1:
             logger.debug(
@@ -423,6 +432,7 @@ class NIDAQ(DAQBase):
         if self.is_updating_analog_task:
             self.wait_to_run_lock.acquire()
             self.wait_to_run_lock.release()
+            # print("acquring run acquisition")
 
         if self.camera_trigger_task.is_task_done():
             self.camera_trigger_task.start()

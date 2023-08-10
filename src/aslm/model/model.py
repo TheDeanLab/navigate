@@ -738,7 +738,14 @@ class Model:
                     self.logger.info("ASLM Model - Data container is closed.")
                     self.stop_acquisition = True
                     break
+                # If not constant_velocity_acquisition_mode
                 self.data_container.run(frame_ids)
+                # if constant_velocity_acquisition mode
+                    # if self.number_triggers = 0
+                        # Throw away the frame.
+                        # self.number_triggers += 1
+                    # else:
+                        # Pass frame through data container.
 
             # show image
             self.logger.info(f"ASLM Model - Sent through pipe{frame_ids[0]}")

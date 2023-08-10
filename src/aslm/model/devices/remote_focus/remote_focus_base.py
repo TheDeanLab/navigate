@@ -177,10 +177,10 @@ class RemoteFocusBase:
                         zoom
                     ][channel["laser"]].get("percent_smoothing", 0.0)
                 )
-                if ps > 0:
-                    self.sweep_time = (self.sweep_time - duty_cycle_wait_duration) / (
-                        1 + ps / 100
-                    ) + duty_cycle_wait_duration
+                # if ps > 0:
+                #     self.sweep_time = (self.sweep_time - duty_cycle_wait_duration) / (
+                #         1 + ps / 100
+                #     ) + duty_cycle_wait_duration
 
                 # Remote Focus Parameters
                 temp = waveform_constants["remote_focus_constants"][imaging_mode][zoom][

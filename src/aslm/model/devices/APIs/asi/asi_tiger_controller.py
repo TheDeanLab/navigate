@@ -188,7 +188,7 @@ class TigerController:
         self.report_to_console(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
         self.serial_port.write(command)
-        # print(f"Sent Command: {command.decode(encoding='ascii')}")
+        print(f"Sent Command: {command.decode(encoding='ascii')}")
 
     def read_response(self) -> str:
         """
@@ -201,6 +201,7 @@ class TigerController:
 
         # Remove leading and trailing empty spaces
         self.report_to_console(f"Received Response: {response.strip()}")
+        print(f"Received Response: {response.strip()}")
         if response.startswith(":N"):
             raise TigerException(response)
 

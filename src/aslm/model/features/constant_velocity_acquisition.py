@@ -102,7 +102,7 @@ class ConstantVelocityAcquisition:
         current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
 
         # Provide just a bit of breathing room for the sweep time...
-        current_sweep_time = current_sweep_time * 1.2
+        current_sweep_time = current_sweep_time * 1.05
         
         print("*** current sweep time:", current_sweep_time)
         logger.info(f"*** current sweep time: {current_sweep_time}")

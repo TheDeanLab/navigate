@@ -81,6 +81,7 @@ class DataSource:
         self.metadata = None  # Expect a metadata object
         self._mode = None
         self._closed = True
+        self.bits = 16
 
         self.dx, self.dy, self.dz = 1, 1, 1  # pixel sizes (um)
         self.dt = 1  # time displacement (s)
@@ -96,6 +97,20 @@ class DataSource:
         self.positions = 1
         self.mode = mode
         self._current_frame = 0
+
+    @property
+    def size(self) -> int:
+        """Return the size of this data source in bytes."""
+        total_bits = (self.shape_x
+                      * self.shape_y
+                      * self.shape_z
+                      * self.shape_t
+                      * self.shape_c
+                      * self.positions
+                      * self.bits
+                      )
+        total_bytes = total_bits // 8
+        return total_bytes
 
     @property
     def mode(self) -> str:

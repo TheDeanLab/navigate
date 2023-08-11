@@ -257,6 +257,25 @@ class ConfigurationController:
             for a in axis:
                 position_limits[a] = 0 if suffix == "_min" else 100
         return position_limits
+    
+    @property
+    def stage_flip_flags(self):
+        """Return the flip flags of the stage
+
+        Returns
+        -------
+        flip_flags : dict
+            {'x': bool, 'y': bool, 'z': bool, 'theta': bool, 'f': bool}.
+
+        """
+        if self.microscope_config is not None:
+            stage_dict = self.microscope_config["stage"]
+        else:
+            stage_dict = {}
+        flip_flags = {}
+        for axis in ["x", "y", "z", "theta", "f"]:
+            flip_flags[axis] = stage_dict.get(f"flip_{axis}", False)
+        return flip_flags
 
     @property
     def remote_focus_dict(self):

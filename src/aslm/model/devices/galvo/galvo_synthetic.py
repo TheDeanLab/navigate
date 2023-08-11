@@ -28,7 +28,7 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
+
 
 #  Standard Library Imports
 import logging
@@ -74,18 +74,6 @@ class SyntheticGalvo(GalvoBase):
         Stop the task
     close_task()
         Close the task
-
-    Examples
-    --------
-    >>> from aslm.model.devices.galvo.galvo_synthetic
-    >>> import SyntheticGalvo
-    >>> galvo = SyntheticGalvo("microscope_name",
-    >>> "device_connection", "configuration", 0)
-    >>> galvo.prepare_task("channel_key")
-    >>> galvo.start_task()
-    >>> galvo.stop_task()
-    >>> galvo.close_task()
-
     """
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
@@ -102,10 +90,6 @@ class SyntheticGalvo(GalvoBase):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> del galvo task
         """
 
         self.stop_task()
@@ -123,11 +107,7 @@ class SyntheticGalvo(GalvoBase):
         -------
         None
 
-        Examples
-        --------
-        >>> prepare_task("488")
         """
-        # write waveform
         logger.debug(f"galvo writes the waveform for {channel_key}")
 
     def start_task(self):
@@ -140,10 +120,6 @@ class SyntheticGalvo(GalvoBase):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> start_task()
         """
         logger.debug("galvo started task!")
 
@@ -158,9 +134,6 @@ class SyntheticGalvo(GalvoBase):
         -------
         None
 
-        Examples
-        --------
-        >>> stop_task()
         """
         logger.debug("galvo stopped task!")
 
@@ -175,8 +148,5 @@ class SyntheticGalvo(GalvoBase):
         -------
         None
 
-        Examples
-        --------
-        >>> close_task()
         """
         logger.debug("galvo closed task!")

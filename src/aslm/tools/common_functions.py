@@ -31,6 +31,7 @@
 #
 
 import importlib
+from threading import Lock
 
 def combine_funcs(*funclist):
     """this function will combine a list of functions to a new function
@@ -121,3 +122,15 @@ def load_module_from_file(module_name, file_path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+class VariableWithLock:
+    def __init__(self, VariableType):
+        self.lock = Lock()
+        self.value = VariableType()
+
+    def __enter__(self):
+        self.lock.acquire()
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.lock.release()

@@ -221,8 +221,8 @@ class TestWaveforms(unittest.TestCase):
         assert waveform[-1] == smoothed_waveform[-1]
         assert np.max(waveform) >= np.max(smoothed_waveform)
 
-    def test_smoothing_low_sampling(self):
-        waveform_smoothing_pct = 10
+    def test_smoothing_zero_pct(self):
+        waveform_smoothing_pct = 0
         waveform = waveforms.remote_focus_ramp(sample_rate=16)
         smoothed_waveform = waveforms.smooth_waveform(waveform, waveform_smoothing_pct)
         assert len(waveform) * waveform_smoothing_pct / 100 < 1

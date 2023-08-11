@@ -73,7 +73,8 @@ from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
 from aslm.config.config import (
     load_configs,
     update_config_dict,
-    verify_configuration,
+    verify_experiment_config,
+    verify_waveform_constants,
     get_aslm_path,
 )
 from aslm.tools.file_functions import create_save_path, save_yaml_file
@@ -150,7 +151,8 @@ class Controller:
             waveform_templates=waveform_templates_path,
         )
 
-        verify_configuration(self.manager, self.configuration)
+        verify_experiment_config(self.manager, self.configuration)
+        verify_waveform_constants(self.manager, self.configuration)
 
         # Initialize the Model
         self.model = ObjectInSubprocess(
@@ -258,10 +260,10 @@ class Controller:
             configuration file.
         """
         img_width = int(
-            self.configuration["experiment"]["CameraParameters"]["x_pixels"]
+            self.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
         )
         img_height = int(
-            self.configuration["experiment"]["CameraParameters"]["y_pixels"]
+            self.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
         )
         if img_width == self.img_width and img_height == self.img_height:
             return
@@ -291,6 +293,14 @@ class Controller:
             # update widgets
             self.stage_controller.initialize()
             self.channels_tab_controller.initialize()
+            self.camera_setting_controller.update_camera_device_related_setting()
+            self.camera_setting_controller.calculate_physical_dimensions()
+            if (
+                hasattr(self, "waveform_popup_controller")
+                and self.waveform_popup_controller
+            ):
+                self.waveform_popup_controller.populate_experiment_values()
+            self.camera_view_controller.update_snr()
 
     def initialize_cam_view(self):
         """Populate view tab.
@@ -324,8 +334,11 @@ class Controller:
 
         """
         # read the new file and update info of the configuration dict
-        update_config_dict(self.manager, self.configuration, "experiment", file_name)
-        verify_configuration(self.manager, self.configuration)
+        if not in_initialize:
+            update_config_dict(
+                self.manager, self.configuration, "experiment", file_name
+            )
+            verify_experiment_config(self.manager, self.configuration)
 
         # update buffer
         self.update_buffer()
@@ -334,15 +347,19 @@ class Controller:
         microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
+        self.configuration_controller.change_microscope()
         self.menu_controller.resolution_value.set(
             f"{microscope_name} "
             f"{self.configuration['experiment']['MicroscopeState']['zoom']}"
+        )
+        self.menu_controller.disable_stage_limits.set(
+            0 if self.configuration["experiment"]["StageParameters"]["limits"] else 1
         )
 
         self.acquire_bar_controller.populate_experiment_values()
         # self.stage_controller.populate_experiment_values()
         self.multiposition_tab_controller.set_positions(
-            self.configuration["experiment"]["MultiPositions"]["stage_positions"]
+            self.configuration["experiment"]["MultiPositions"]
         )
         self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
@@ -353,6 +370,7 @@ class Controller:
 
         # set widget modes
         self.set_mode_of_sub("stop")
+        self.stage_controller.initialize()
 
     def update_experiment_setting(self):
         """Update model.experiment according to values in the GUI
@@ -369,6 +387,8 @@ class Controller:
 
         # TODO: validate experiment dict
         if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
+            return False
+        if self.configuration["experiment"]["MicroscopeState"]["number_z_steps"] < 1:
             return False
         return True
 
@@ -406,8 +426,8 @@ class Controller:
         positions = self.multiposition_tab_controller.get_positions()
         update_config_dict(
             self.manager,
-            self.configuration["experiment"]["MultiPositions"],
-            "stage_positions",
+            self.configuration["experiment"],
+            "MultiPositions",
             positions,
         )
         self.configuration["experiment"]["MicroscopeState"][
@@ -424,6 +444,7 @@ class Controller:
                 "waveform_template"
             ] = "Default"
 
+        # update real image width and height
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
         self.update_buffer()
         return True
@@ -443,7 +464,7 @@ class Controller:
         if mode == "stop":
             # GUI Failsafe
             self.acquire_bar_controller.stop_acquire()
-            self.menu_controller.feature_id_val.set(0)
+            # self.menu_controller.feature_id_val.set(0)
 
     def execute(self, command, *args):
         """Functions listens to the Sub_Gui_Controllers.
@@ -457,7 +478,12 @@ class Controller:
         __________
         args* : function-specific passes.
         """
-        if command == "stage":
+
+        if command == "joystick_toggle":
+            if self.stage_controller.joystick_is_on:
+                self.execute("stop_stage")
+
+        elif command == "stage":
             """Creates a thread and uses it to call the model to move stage
 
             Parameters
@@ -545,13 +571,6 @@ class Controller:
                 "model", lambda: self.model.run_command("update_setting", "resolution")
             )
             work_thread.join()
-            self.camera_setting_controller.calculate_physical_dimensions()
-            if (
-                hasattr(self, "waveform_popup_controller")
-                and self.waveform_popup_controller
-            ):
-                self.waveform_popup_controller.populate_experiment_values()
-            self.camera_view_controller.update_snr()
 
         elif command == "set_save":
             """Set whether the image will be saved.
@@ -676,6 +695,7 @@ class Controller:
                 and self.ilastik_controller.show_segmentation_flag
             )
 
+            self.stop_acquisition_flag = False
             self.launch_additional_microscopes()
 
             self.threads_pool.createThread(
@@ -693,15 +713,19 @@ class Controller:
 
             # self.model.run_command('stop')
             self.sloppy_stop()
+            self.menu_controller.feature_id_val.set(0)
 
             # clear show_img_pipe
             while self.show_img_pipe.poll():
-                image_id = self.show_img_pipe.recv()  # noqa
+                # TODO: image_id never called.
+                self.show_img_pipe.recv()
+                # image_id = self.show_img_pipe.recv()
 
         elif command == "exit":
             """Exit the program."""
             # Save current GUI settings to .ASLM/config/experiment.yml file.
             self.sloppy_stop()
+            # self.menu_controller.feature_id_val.set(0)
 
             self.update_experiment_setting()
             file_directory = os.path.join(get_aslm_path(), "config")
@@ -770,8 +794,8 @@ class Controller:
             self.model.run_command(command, *args)
         except Exception as e:
             messagebox.showerror(
-                title="Warning",
-                message=f"There are something wrong! Cannot start acquisition!\n{e}",
+                title="Error:",
+                message=f"WARNING:\n{e}",
             )
             self.set_mode_of_sub("stop")
             return
@@ -803,11 +827,7 @@ class Controller:
                 self.execute("stop_acquire")
 
             # Display the Image in the View
-            self.camera_view_controller.display_image(
-                image=self.data_buffer[image_id],
-                microscope_state=self.configuration["experiment"]["MicroscopeState"],
-                images_received=images_received,
-            )
+            self.camera_view_controller.try_to_display_image(image_id=image_id)
             images_received += 1
 
             # Update progress bar.
@@ -818,10 +838,7 @@ class Controller:
                 stop=False,
             )
 
-        logger.info(
-            f"ASLM Controller - Captured {self.camera_view_controller.image_count}, "
-            f"{mode} Images"
-        )
+        logger.info(f"ASLM Controller - Captured {images_received}, " f"{mode} Images")
 
         # Stop Progress Bars
         self.acquire_bar_controller.progress_bar(
@@ -834,6 +851,11 @@ class Controller:
 
     def launch_additional_microscopes(self):
         def display_images(camera_view_controller, show_img_pipe, data_buffer):
+            camera_view_controller.initialize_non_live_display(
+                data_buffer,
+                self.configuration["experiment"]["MicroscopeState"],
+                self.configuration["experiment"]["CameraParameters"],
+            )
             images_received = 0
             while True:
                 if self.stop_acquisition_flag:
@@ -853,12 +875,8 @@ class Controller:
 
                 # Display the Image in the View
                 try:
-                    camera_view_controller.display_image(
-                        image=data_buffer[image_id],
-                        microscope_state=self.configuration["experiment"][
-                            "MicroscopeState"
-                        ],
-                        images_received=images_received,
+                    camera_view_controller.try_to_display_image(
+                        image_id=image_id,
                     )
                 except tkinter._tkinter.TclError:
                     print("Can't show images for the additional microscope!")
@@ -899,6 +917,9 @@ class Controller:
                 camera_view_controller = CameraViewController(
                     popup_window.camera_view, self
                 )
+                camera_view_controller.data_buffer = self.additional_microscopes[
+                    microscope_name
+                ]["data_buffer"]
                 popup_window.popup.bind("<Configure>", camera_view_controller.resize)
                 self.additional_microscopes[microscope_name][
                     "camera_view_controller"
@@ -929,7 +950,7 @@ class Controller:
                     self.additional_microscopes[microscope_name][
                         "camera_view_controller"
                     ],
-                    self.additional_microscopes[microscope_name]["show_img_pipe"],
+                    show_img_pipe,
                     self.additional_microscopes[microscope_name]["data_buffer"],
                 ),
             )
@@ -986,7 +1007,8 @@ class Controller:
                     table=self.view.settings.multiposition_tab.multipoint_list.get_table(),
                     pos=value,
                 )
-                self.view.settings.channels_tab.multipoint_frame.on_off.set(True)
+                self.channels_tab_controller.is_multiposition_val.set(True)
+                self.channels_tab_controller.toggle_multiposition()
 
             elif event == "ilastik_mask":
                 # Display the ilastik mask

@@ -106,7 +106,7 @@ class Metadata:
         )
         self.dx, self.dy = pixel_size, pixel_size
         self.dz = float(
-            self.configuration["experiment"]["MicroscopeState"]["step_size"]
+            abs(self.configuration["experiment"]["MicroscopeState"]["step_size"])
         )
         self.dt = float(
             self.configuration["experiment"]["MicroscopeState"]["timepoint_interval"]
@@ -162,7 +162,7 @@ class Metadata:
 
         # if bool(self._multiposition):
         #     self.positions = len(
-        #         self.configuration["experiment"]["MultiPositions"]["stage_positions"]
+        #         self.configuration["experiment"]["MultiPositions"]
         #     )
         # else:
         #     self.positions = 1
@@ -170,7 +170,7 @@ class Metadata:
         # let the data sources have the ability to save more frames
         self._multiposition = True
         self.positions = len(
-            self.configuration["experiment"]["MultiPositions"]["stage_positions"]
+            self.configuration["experiment"]["MultiPositions"]
         )
 
     def set_stack_order_from_configuration_experiment(self) -> None:

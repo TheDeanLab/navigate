@@ -148,12 +148,21 @@ def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):
     bool
         True if file was saved successfully, False otherwise.
     """
+    if file_directory != "" and not os.path.exists(file_directory):
+        return False
 
     try:
         file_name = os.path.join(file_directory, filename)
+        if os.path.exists(file_name):
+            with open(file_name, "r") as f:
+                file_content = f.read()
+        else:
+            file_content = ""
         with open(file_name, "w") as f:
             f.write(json.dumps(copy_proxy_object(content_dict), indent=4))
     except BaseException:
+        with open(file_name, "w") as f:
+            f.write(file_content)
         return False
     return True
 

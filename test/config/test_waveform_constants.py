@@ -101,7 +101,7 @@ class TestWaveformConstants(unittest.TestCase):
                         )
 
         other_constants = data["other_constants"].keys()
-        assert "duty_wait_duration" in other_constants
+        assert "remote_focus_settle_duration" in other_constants
 
-    if __name__ == "__main__":
-        unittest.main()
+if __name__ == "__main__":
+    unittest.main()

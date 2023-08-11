@@ -85,8 +85,8 @@ class MenuController(GUIController):
         self.parent_controller = parent_controller
         self.view = view
         self.resolution_value = tk.StringVar()
-        self.feature_id_val = tk.IntVar(0)
-        self.disable_stage_limits = tk.IntVar(0)
+        self.feature_id_val = tk.IntVar()
+        self.disable_stage_limits = tk.IntVar()
         self.save_data = False
         self.fake_event = None
         self.feature_list_names = []
@@ -288,17 +288,16 @@ class MenuController(GUIController):
         self.populate_menu(stage_control_menu)
         self.view.menubar.menu_multi_positions.add_radiobutton(
             label="Disable Stage Limits",
-            value=0,
+            value=1,
             command=self.toggle_stage_limits,
             variable=self.disable_stage_limits,
         )
         self.view.menubar.menu_multi_positions.add_radiobutton(
             label="Enable Stage Limits",
-            value=1,
+            value=0,
             command=self.toggle_stage_limits,
             variable=self.disable_stage_limits,
         )
-        self.disable_stage_limits.set(1)
 
         # autofocus menu
         autofocus_menu = {
@@ -326,31 +325,31 @@ class MenuController(GUIController):
             self.view.menubar.menu_window: {
                 "Channel Settings": [
                     "standard",
-                    lambda: self.switch_tabs(1),
+                    lambda event: self.switch_tabs(1),
                     "Ctrl+1",
-                    "<Control-1>",
-                    "<Control_L-1",
+                    "<Control-Key-1>",
+                    "<Control_L-Key-1",
                 ],
                 "Camera Settings": [
                     "standard",
-                    lambda: self.switch_tabs(2),
+                    lambda event: self.switch_tabs(2),
                     "Ctrl+2",
-                    "<Control-2>",
-                    "<Control_L-2",
+                    "<Control-Key-2>",
+                    "<Control_L-Key-2",
                 ],
                 "Stage Control": [
                     "standard",
-                    lambda: self.switch_tabs(2),
+                    lambda event: self.switch_tabs(2),
                     "Ctrl+3",
-                    "<Control-3>",
-                    "<Control_L-3",
+                    "<Control-Key-3>",
+                    "<Control_L-Key-3",
                 ],
                 "Multiposition Table": [
                     "standard",
-                    lambda: self.switch_tabs(4),
+                    lambda event: self.switch_tabs(4),
                     "Ctrl+4",
-                    "<Control-4>",
-                    "<Control_L-4",
+                    "<Control-Key-4>",
+                    "<Control_L-Key-4",
                 ],
                 "add_separator": ["standard", None, None, None, None],
                 "Popout Camera Display": [
@@ -659,11 +658,17 @@ class MenuController(GUIController):
     def toggle_stage_limits(self, *args):
         """Toggle stage limits."""
         if self.disable_stage_limits.get() == 1:
+            self.parent_controller.configuration["experiment"]["StageParameters"][
+                "limits"
+            ] = False
             logger.debug("Disabling stage limits")
-            self.parent_controller.execute("stage_limits", True)
-        else:
-            logger.debug("Enabling stage limits")
             self.parent_controller.execute("stage_limits", False)
+        else:
+            self.parent_controller.configuration["experiment"]["StageParameters"][
+                "limits"
+            ] = True
+            logger.debug("Enabling stage limits")
+            self.parent_controller.execute("stage_limits", True)
 
     def popup_autofocus_setting(self, *args):
         """Pop up the Autofocus setting window."""

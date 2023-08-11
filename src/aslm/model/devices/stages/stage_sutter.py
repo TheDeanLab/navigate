@@ -155,13 +155,7 @@ class SutterStage(StageBase):
         UserWarning
             Error while closing the SutterStage Serial Port.
         """
-        try:
-            self.stop()
-            self.stage.close()
-            logger.debug("MP-285 stage connection closed")
-        except (AttributeError, BaseException) as e:
-            print("Error while closing the MP-285 stage connection", e)
-            logger.debug("Error while disconnecting the MP-285 stage", e)
+        self.close()
 
     def report_position(self):
         """Reports the position for all axes, and creates a position dictionary.
@@ -183,7 +177,7 @@ class SutterStage(StageBase):
             position = self.get_position_dict()
             logger.debug(f"MP-285 - Position: {position}")
         except SerialException as e:
-            print("MP-285: Failed to report position.")
+            print("MP-285: Failed to report position: {e}")
             logger.debug(f"MP-285 - Error: {e}")
             time.sleep(0.01)
 
@@ -236,19 +230,29 @@ class SutterStage(StageBase):
         # rely on cached positions
         # if len(pos_dict.keys()) < 3:
         #     self.report_position()
-
-        for axis in pos_dict:
-            setattr(self, f"stage_{self.axes_mapping[axis]}_pos", pos_dict[axis])
-
         self.stage.wait_until_done = wait_until_done
-        try:
-            self.stage.move_to_specified_position(
-                x_pos=self.stage_x_pos, y_pos=self.stage_y_pos, z_pos=self.stage_z_pos
-            )
-        except SerialException as e:
-            logger.debug(f"MP285: move_axis_absolute failed - {e}")
-            return False
-        
+        move_stage = {}
+        for axis in pos_dict:
+            if abs(getattr(self, f"stage_{self.axes_mapping[axis]}_pos") - pos_dict[axis]) < 0.02:
+                move_stage[axis] = False
+            else:
+                move_stage[axis] = True
+                setattr(self, f"stage_{self.axes_mapping[axis]}_pos", pos_dict[axis])
+
+        move_stage = any(move_stage.values())
+        if move_stage is True:
+            try:
+                self.stage.move_to_specified_position(
+                    x_pos=self.stage_x_pos,
+                    y_pos=self.stage_y_pos,
+                    z_pos=self.stage_z_pos
+                )
+            except SerialException as e:
+                logger.debug(f"MP285: move_axis_absolute failed - {e}")
+                # make sure the cached positions are the "same" as device
+                self.report_position()
+                return False
+
         return True
 
     def stop(self):
@@ -263,3 +267,11 @@ class SutterStage(StageBase):
         except SerialException as error:
             logger.exception(f"MP-285 - Stage stop failed: {error}")
 
+    def close(self):
+        try:
+            self.stop()
+            self.stage.close()
+            logger.debug("MP-285 stage connection closed")
+        except (AttributeError, BaseException) as e:
+            print("Error while closing the MP-285 stage connection", e)
+            logger.debug("Error while disconnecting the MP-285 stage", e)

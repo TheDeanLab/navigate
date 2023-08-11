@@ -97,6 +97,8 @@ class Hover(object):
 
     Methods
     -------
+    getdescription()
+        Getter for description text
     get_type()
         Getter for the type
     hide()
@@ -146,6 +148,16 @@ class Hover(object):
         None
         """
         self.description = text
+
+    def getdescription(self):
+        """Getter for description text
+
+        Returns
+        -------
+        type    : str
+            The description text
+        """
+        return self.description
 
     # Event handlers
     def show(self, event):

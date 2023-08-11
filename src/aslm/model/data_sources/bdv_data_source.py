@@ -47,7 +47,7 @@ from multiprocessing.managers import DictProxy
 class BigDataViewerDataSource(DataSource):
     def __init__(self, file_name: str = None, mode: str = "w") -> None:
         self._resolutions = np.array(
-            [[1, 1, 1], [2, 2, 2], [4, 4, 4], [8, 8, 8]], dtype=int
+            [[1, 1, 1], [2, 2, 1], [4, 4, 1], [8, 8, 1]], dtype=int
         )
         self._subdivisions = None
         self._shapes = None
@@ -95,6 +95,18 @@ class BigDataViewerDataSource(DataSource):
             )
         return self._shapes
 
+    @property
+    def size(self) -> int:
+        """Size in bytes. Overrides base class."""
+        return (
+            np.prod(self.shapes, axis=1)
+            * self.shape_t
+            * self.shape_c
+            * self.positions
+            * self.bits
+            // 8
+        ).sum()
+
     def set_metadata_from_configuration_experiment(
         self, configuration: DictProxy
     ) -> None:
@@ -131,7 +143,7 @@ class BigDataViewerDataSource(DataSource):
                 zs = np.minimum(
                     z // dz, self.shapes[i, 0] - 1
                 )  # TODO: Is this necessary?
-                self.image[dataset_name][zs, ...] = data[::dx, ::dy].T
+                self.image[dataset_name][zs, ...] = data[::dx, ::dy]
                 if (i == 0) and len(kw) > 0:
                     self._views.append(kw)
         self._current_frame += 1

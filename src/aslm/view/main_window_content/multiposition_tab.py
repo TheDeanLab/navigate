@@ -84,10 +84,16 @@ class MultiPositionTab(tk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
+        # Tiling Buttons
+        self.tiling_buttons = MultiPointFrame(self)
+        self.tiling_buttons.grid(
+            row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
+        )
+
         # Multipoint List
         self.multipoint_list = MultiPointList(self)
         self.multipoint_list.grid(
-            row=5, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
+            row=6, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
 
@@ -108,12 +114,9 @@ class MultiPointFrame(ttk.Labelframe):
 
     Attributes
     ----------
-    laser_label : ttk.Label
-        The label for the laser checkbox.
-    on_off : tk.BooleanVar
-        The variable that holds the state of the laser checkbox.
-    save_check : ttk.Checkbutton
-        The checkbox that enables or disables the laser.
+    buttons : dict
+        A dictionary of all the buttons that are tied to each widget name.
+        The key is the widget name, value is the button associated.
 
     Methods
     -------
@@ -137,14 +140,28 @@ class MultiPointFrame(ttk.Labelframe):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Save Data Label
-        self.laser_label = ttk.Label(self, text="Enable")
-        self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6))
+        # Tiling Wizard Button
+        self.buttons = {
+            "tiling": ttk.Button(self, text="Launch Tiling Wizard"),
+            "save_data": ttk.Button(self, text="Save Positions to Disk"),
+            "load_data": ttk.Button(self, text="Load Positions from Disk"),
+            "eliminate_tiles": ttk.Button(self, text="Eliminate Empty Positions"),
+        }
+        counter = 0
+        for key, button in self.buttons.items():
+            if counter == 0:
+                row, column = 0, 0
+            elif counter == 1:
+                row, column = 1, 0
+            elif counter == 2:
+                row, column = 1, 1
+            elif counter == 3:
+                row, column = 0, 1
 
-        # Save Data Checkbox
-        self.on_off = tk.BooleanVar()
-        self.save_check = ttk.Checkbutton(self, text="", variable=self.on_off)
-        self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 6))
+            button.grid(
+                row=row, column=column, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6)
+            )
+            counter += 1
 
     def get_variables(self):
         """Returns a dictionary of all the variables that are tied to each widget name.
@@ -371,34 +388,34 @@ class MultiPositionColumnHeader(ColumnHeader):
 
 class MultiPositionTable(Table):
     """MultiPositionTable
+    MultiPositionTable
+        MultiPositionTable is a class that inherits from Table. It is used to
+        customize the table for the multipoint table.
 
-    MultiPositionTable is a class that inherits from Table. It is used to
-    customize the table for the multipoint table.
+        Parameters
+        ----------
+        parent : tk.Frame
+            The frame that contains the settings tab.
+        **kwargs : dict
+            Keyword arguments for the Table class.
 
-    Parameters
-    ----------
-    parent : tk.Frame
-        The frame that contains the settings tab.
-    **kwargs : dict
-        Keyword arguments for the Table class.
+        Attributes
+        ----------
+        loadCSV : tk.Button
+            The button that loads a CSV file.
+        exportCSV : tk.Button
+            The button that exports the table to a CSV file.
+        insertRow : tk.Button
+            The button that inserts a new row.
+        generatePositions : tk.Button
+            The button that generates positions.
+        addStagePosition : tk.Button
+            The button that adds the current stage position.
 
-    Attributes
-    ----------
-    loadCSV : tk.Button
-        The button that loads a CSV file.
-    exportCSV : tk.Button
-        The button that exports the table to a CSV file.
-    insertRow : tk.Button
-        The button that inserts a new row.
-    generatePositions : tk.Button
-        The button that generates positions.
-    addStagePosition : tk.Button
-        The button that adds the current stage position.
-
-    Methods
-    -------
-    show(callback=None)
-        This function shows the table.
+        Methods
+        -------
+        show(callback=None)
+            This function shows the table.
     """
 
     def __init__(self, parent=None, **kwargs):
@@ -460,8 +477,8 @@ class MultiPositionTable(Table):
         def popupFocusOut(event):
             popupmenu.unpost()
 
-        popupmenu.add_command(label="Import Text/csv", command=self.loadCSV)
-        popupmenu.add_command(label="Export", command=self.exportCSV)
+        popupmenu.add_command(label="Load Positions from Disk", command=self.loadCSV)
+        popupmenu.add_command(label="Save Positions to Disk", command=self.exportCSV)
         popupmenu.add_command(label="Generate Position", command=self.generatePositions)
         popupmenu.bind("<FocusOut>", popupFocusOut)
         popupmenu.focus_set()

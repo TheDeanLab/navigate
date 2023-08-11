@@ -50,7 +50,6 @@ class CameraSettingController(GUIController):
         # default values
         self.in_initialization = True
         self.resolution_value = "1x"
-        self.number_of_pixels = 10
         self.mode = "stop"
         self.solvent = "BABB"
 
@@ -92,24 +91,15 @@ class CameraSettingController(GUIController):
         if camera_config_dict is None:
             return
 
-        self.default_pixel_size = camera_config_dict["pixel_size_in_microns"]
-        (
-            self.default_width,
-            self.default_height,
-        ) = self.parent_controller.configuration_controller.camera_pixels
-        self.trigger_source = camera_config_dict["trigger_source"]
-        self.trigger_active = camera_config_dict["trigger_active"]
-        self.readout_speed = camera_config_dict["readout_speed"]
+        self.update_camera_device_related_setting()
 
         # Camera Mode
         self.mode_widgets["Sensor"].widget["values"] = ["Normal", "Light-Sheet"]
         self.mode_widgets["Sensor"].widget["state"] = "readonly"
-        self.mode_widgets["Sensor"].widget.set(camera_config_dict["sensor_mode"])
         self.mode_widgets["Sensor"].widget.selection_clear()
 
         # Readout Mode
         self.mode_widgets["Readout"].widget["values"] = [
-            " ",
             "Top-to-Bottom",
             "Bottom-to-Top",
         ]
@@ -125,35 +115,21 @@ class CameraSettingController(GUIController):
         )  # max value
         self.mode_widgets["Pixels"].widget.config(increment=1)  # step value
 
-        # framerate_widgets
-        self.framerate_widgets["exposure_time"].widget.min = camera_config_dict[
-            "exposure_time_range"
-        ]["min"]
-        self.framerate_widgets["exposure_time"].widget.max = camera_config_dict[
-            "exposure_time_range"
-        ]["max"]
-        self.framerate_widgets["exposure_time"].set(camera_config_dict["exposure_time"])
         self.framerate_widgets["exposure_time"].widget["state"] = "disabled"
         self.framerate_widgets["readout_time"].widget["state"] = "disabled"
         self.framerate_widgets["max_framerate"].widget["state"] = "disabled"
 
         # Set range value
-        self.roi_widgets["Width"].widget.config(to=self.default_width)
         self.roi_widgets["Width"].widget.config(from_=2)
         self.roi_widgets["Width"].widget.config(increment=2)
-        self.roi_widgets["Height"].widget.config(to=self.default_height)
         self.roi_widgets["Height"].widget.config(from_=2)
         self.roi_widgets["Height"].widget.config(increment=2)
 
         # set binning options
         self.roi_widgets["Binning"].widget["values"] = [
-            "{}x{}".format(i, i) for i in range(1, 5)
+            "{}x{}".format(i, i) for i in [1, 2, 4]
         ]
         self.roi_widgets["Binning"].widget["state"] = "readonly"
-
-        # Center position
-        self.roi_widgets["Center_X"].set(self.default_width / 2)
-        self.roi_widgets["Center_Y"].set(self.default_height / 2)
 
         # This should not be edited for now
         # Center position
@@ -193,6 +169,10 @@ class CameraSettingController(GUIController):
             )
 
         # ROI Settings
+        if self.camera_setting_dict["x_pixels"] > self.default_width:
+            self.camera_setting_dict["x_pixels"] = self.default_width
+        if self.camera_setting_dict["y_pixels"] > self.default_height:
+            self.camera_setting_dict["y_pixels"] = self.default_height
         self.roi_widgets["Width"].set(self.camera_setting_dict["x_pixels"])
         self.roi_widgets["Height"].set(self.camera_setting_dict["y_pixels"])
 
@@ -235,6 +215,8 @@ class CameraSettingController(GUIController):
             self.camera_setting_dict["number_of_pixels"] = self.mode_widgets[
                 "Pixels"
             ].get()
+            # light-sheet doesn't support binning
+            self.roi_widgets["Binning"].set("1x1")
 
         # Camera Binning
         self.camera_setting_dict["binning"] = self.roi_widgets["Binning"].get()
@@ -243,12 +225,22 @@ class CameraSettingController(GUIController):
         self.camera_setting_dict["x_pixels"] = self.roi_widgets["Width"].get()
         self.camera_setting_dict["y_pixels"] = self.roi_widgets["Height"].get()
 
-        self.camera_setting_dict["number_of_cameras"] = 1
         self.camera_setting_dict["pixel_size"] = self.default_pixel_size
         self.camera_setting_dict["frames_to_average"] = self.framerate_widgets[
             "frames_to_average"
         ].get()
 
+        width = int(self.camera_setting_dict["x_pixels"])
+        height = int(self.camera_setting_dict["y_pixels"])
+        binning = self.camera_setting_dict["binning"]
+        x_binning = int(binning[0])
+        y_binning = int(binning[2])
+        img_width = width // x_binning
+        img_height = height // y_binning
+
+        self.camera_setting_dict["img_x_pixels"] = img_width
+        self.camera_setting_dict["img_y_pixels"] = img_height
+        
         return True
 
     def update_sensor_mode(self, *args):
@@ -279,11 +271,12 @@ class CameraSettingController(GUIController):
             self.show_verbose_info("Normal Camera Readout Mode")
 
         elif sensor_value == "Light-Sheet":
-            self.mode_widgets["Readout"].widget.set("Top-to-Bottom")
+            # readout-direction from experiment
+            self.mode_widgets["Readout"].widget.set(self.camera_setting_dict["readout_direction"])
             self.mode_widgets["Readout"].widget["state"] = "readonly"
             self.mode_widgets["Pixels"].set(
-                self.number_of_pixels
-            )  # Default to 10 pixels
+                self.camera_setting_dict["number_of_pixels"]
+            )
             self.mode_widgets["Pixels"].widget.trigger_focusout_validation()
             self.mode_widgets["Pixels"].widget["state"] = "normal"
 
@@ -303,20 +296,29 @@ class CameraSettingController(GUIController):
         self.framerate_widgets["exposure_time"].set(exposure_time)
         self.calculate_readout_time()
 
-    def update_roi(self, width):
+    def update_roi(self, btn_name):
         """Update ROI width and height.
 
         Parameters
         ----------
-        width : int
-            width of roi in pixels
+        btn_name : roi button name
+            width of roi in pixels: "All", 1600, 1024, 512
         """
-        width = self.default_width if width == "All" else float(width)
 
         def handler(*args):
+            if btn_name == "All":
+                width = self.default_width
+                height = self.default_height
+            else:
+                width = float(btn_name)
+                height = width
+                if width > self.default_width:
+                    width = self.default_width
+                if height > self.default_height:
+                    height = self.default_height
             self.roi_widgets["Width"].set(width)
-            self.roi_widgets["Height"].set(width)
-            self.show_verbose_info("ROI width and height are changed to", width, width)
+            self.roi_widgets["Height"].set(height)
+            self.show_verbose_info("ROI width and height are changed to", width, height)
 
         return handler
 
@@ -374,40 +376,40 @@ class CameraSettingController(GUIController):
         dictionary structure.
         """
         # magnification == 'N/A' is a proxy for resolution == 'high'
-        if (
-            self.parent_controller.configuration["experiment"]["MicroscopeState"][
-                "zoom"
-            ]
-            == "N/A"
-        ):
-            # 54-12-8 - EFLobj = 12.19 mm / RI
-            tube_lens_focal_length = 300
-            extended_focal_length = 12.19
-            if self.solvent == "BABB":
-                refractive_index = 1.56
-            elif self.solvent == "Water":
-                refractive_index = 1.333
-            elif self.solvent == "CUBIC":
-                refractive_index = 1.48
-            elif self.solvent == "CLARITY":
-                refractive_index = 1.45
-            elif self.solvent == "uDISCO":
-                refractive_index = 1.56
-            elif self.solvent == "eFLASH":
-                refractive_index = 1.458
-            else:
-                # Default unknown value - Specified as mid-range.
-                refractive_index = 1.45
+        # if (
+        #     self.parent_controller.configuration["experiment"]["MicroscopeState"][
+        #         "zoom"
+        #     ]
+        #     == "N/A"
+        # ):
+        #     # 54-12-8 - EFLobj = 12.19 mm / RI
+        #     tube_lens_focal_length = 300
+        #     extended_focal_length = 12.19
+        #     if self.solvent == "BABB":
+        #         refractive_index = 1.56
+        #     elif self.solvent == "Water":
+        #         refractive_index = 1.333
+        #     elif self.solvent == "CUBIC":
+        #         refractive_index = 1.48
+        #     elif self.solvent == "CLARITY":
+        #         refractive_index = 1.45
+        #     elif self.solvent == "uDISCO":
+        #         refractive_index = 1.56
+        #     elif self.solvent == "eFLASH":
+        #         refractive_index = 1.458
+        #     else:
+        #         # Default unknown value - Specified as mid-range.
+        #         refractive_index = 1.45
 
-            multi_immersion_focal_length = extended_focal_length / refractive_index
-            magnification = tube_lens_focal_length / multi_immersion_focal_length
-        else:
-            magnification = self.parent_controller.configuration["experiment"][
-                "MicroscopeState"
-            ]["zoom"]
-            magnification = float(magnification[:-1])
+        #     multi_immersion_focal_length = extended_focal_length / refractive_index
+        #     magnification = tube_lens_focal_length / multi_immersion_focal_length
+        # else:
+        #     magnification = self.parent_controller.configuration["experiment"][
+        #         "MicroscopeState"
+        #     ]["zoom"]
+        #     magnification = float(magnification[:-1])
 
-        pixel_size = self.default_pixel_size
+        # pixel_size = self.default_pixel_size
         try:
             x_pixel = float(self.roi_widgets["Width"].get())
             y_pixel = float(self.roi_widgets["Height"].get())
@@ -415,8 +417,20 @@ class CameraSettingController(GUIController):
             logger.error(f"{e} similar to TclError")
             return
 
-        physical_dimensions_x = x_pixel * pixel_size / magnification
-        physical_dimensions_y = y_pixel * pixel_size / magnification
+        # physical_dimensions_x = x_pixel * pixel_size / magnification
+        # physical_dimensions_y = y_pixel * pixel_size / magnification
+
+        microscope_state_dict = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]
+        zoom = microscope_state_dict["zoom"]
+        microscope_name = microscope_state_dict["microscope_name"]
+        pixel_size = self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ][microscope_name]["zoom"]["pixel_size"][zoom]
+
+        physical_dimensions_x = x_pixel * pixel_size
+        physical_dimensions_y = y_pixel * pixel_size
 
         self.roi_widgets["FOV_X"].set(physical_dimensions_x)
         self.roi_widgets["FOV_Y"].set(physical_dimensions_y)
@@ -476,12 +490,11 @@ class CameraSettingController(GUIController):
         pixels = self.mode_widgets["Pixels"].get()
         if pixels == "":
             return
-        self.number_of_pixels = int(pixels)
 
         if self.mode != "live":
             return
 
-        self.camera_setting_dict["number_of_pixels"] = self.number_of_pixels
+        self.camera_setting_dict["number_of_pixels"] = int(pixels)
 
         # tell central controller to update model
         if self.pixel_event_id:
@@ -492,3 +505,43 @@ class CameraSettingController(GUIController):
                 "update_setting", "number_of_pixels"
             ),
         )
+
+    def update_camera_device_related_setting(self):
+        """Update caramera device related parameters.
+
+        This function will update default width and height according to microscope name.
+
+        """
+        camera_config_dict = (
+            self.parent_controller.configuration_controller.camera_config_dict
+        )
+        if camera_config_dict is None:
+            return
+
+        self.default_pixel_size = camera_config_dict["pixel_size_in_microns"]
+        (
+            self.default_width,
+            self.default_height,
+        ) = self.parent_controller.configuration_controller.camera_pixels
+        self.trigger_source = camera_config_dict["trigger_source"]
+        self.trigger_active = camera_config_dict["trigger_active"]
+        self.readout_speed = camera_config_dict["readout_speed"]
+        # framerate_widgets
+        self.framerate_widgets["exposure_time"].widget.min = camera_config_dict[
+            "exposure_time_range"
+        ]["min"]
+        self.framerate_widgets["exposure_time"].widget.max = camera_config_dict[
+            "exposure_time_range"
+        ]["max"]
+
+        # roi max width and height
+        self.roi_widgets["Width"].widget.config(to=self.default_width)
+        self.roi_widgets["Height"].widget.config(to=self.default_height)
+        if self.roi_widgets["Width"].get() > self.default_width:
+            self.roi_widgets["Width"].set(self.default_width)
+        if self.roi_widgets["Height"].get() > self.default_height:
+            self.roi_widgets["Height"].set(self.default_height)
+
+        # Center position
+        self.roi_widgets["Center_X"].set(self.default_width / 2)
+        self.roi_widgets["Center_Y"].set(self.default_height / 2)

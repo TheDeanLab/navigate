@@ -129,7 +129,7 @@ class TilingWizardController(GUIController):
         self._axes = ["x", "y", "z", "f"]
         self._percent_overlay = 0.0
         self._fov = dict([(ax, 0.0) for ax in self._axes])
-        self.variables["percent_overlay"].set(0.0)
+        self.variables["percent_overlay"].set(10.0)
         self.variables["total_tiles"].set(1)
 
         for ax in self._axes:
@@ -179,8 +179,6 @@ class TilingWizardController(GUIController):
         )
 
         # Calculate distances
-        # TODO: For reasons that make no sense to me at all,
-        #  these can't go in a for ax in self._axes loop?
         self.variables["x_start"].trace_add(
             "write", lambda *args: self.calculate_distance("x")
         )
@@ -199,6 +197,12 @@ class TilingWizardController(GUIController):
         self.variables["z_end"].trace_add(
             "write", lambda *args: self.calculate_distance("z")
         )
+        self.variables["f_start"].trace_add(
+            "write", lambda *args: self.calculate_distance("f")
+        )
+        self.variables["f_end"].trace_add(
+            "write", lambda *args: self.calculate_distance("f")
+        )
 
         self.variables["x_start"].trace_add("write", lambda *args: self.update_fov())
         self.variables["x_end"].trace_add("write", lambda *args: self.update_fov())
@@ -210,8 +214,6 @@ class TilingWizardController(GUIController):
         self.variables["f_end"].trace_add("write", lambda *args: self.update_fov())
 
         # Calculating Number of Tiles traces
-        # TODO: For reasons that make no sense to me at all,
-        #  these can't go in a for ax in self._axes loop?
         self.variables["x_dist"].trace_add(
             "write", lambda *args: self.calculate_tiles("x")
         )
@@ -243,7 +245,6 @@ class TilingWizardController(GUIController):
             )
 
         # Hidden focus variables for z-stacking
-        # TODO: Don't special case? Idk.
         self._f_start = self.stage_position_vars["f"].get()
         self._f_end = self.stage_position_vars["f"].get()
 
@@ -318,10 +319,12 @@ class TilingWizardController(GUIController):
         y_tiles = int(self.variables["y_tiles"].get())
 
         # shift z by coordinate origin of local z-stack
-        z_start = float(self.variables["z_start"].get()) + float(
+        z_start = float(self.variables["z_start"].get()) - float(
             self.stack_acq_widgets["start_position"].get()
         )
-        z_stop = float(self.variables["z_end"].get())
+        z_stop = float(self.variables["z_end"].get()) - float(
+            self.stack_acq_widgets["end_position"].get()
+        )
         z_tiles = int(self.variables["z_tiles"].get())
 
         f_start = float(self.variables["f_start"].get())
@@ -452,9 +455,7 @@ class TilingWizardController(GUIController):
         for ax in axis:
             dist = abs(float(self.variables[f"{ax}_dist"].get()))  # um
             fov = abs(float(self._fov[ax]))  # um
-
             num_tiles = calc_num_tiles(dist, overlay, fov)
-
             self.variables[f"{ax}_tiles"].set(num_tiles)
 
     def calculate_distance(self, axis):
@@ -479,6 +480,7 @@ class TilingWizardController(GUIController):
         --------
         >>> self.calculate_distance()
         """
+        print("calculate_distance")
 
         start = float(self.variables[axis + "_start"].get())
         end = float(self.variables[axis + "_end"].get())
@@ -565,6 +567,7 @@ class TilingWizardController(GUIController):
         --------
         >>> self.update_fov()
         """
+        print("update_fov")
 
         # Calculate signed fov
         x = float(self.cam_settings_widgets["FOV_X"].get()) * sign(

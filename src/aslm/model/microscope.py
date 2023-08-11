@@ -288,6 +288,7 @@ class Microscope:
             self.microscope_name
         ]["stage"]
         self.ask_stage_for_position = True
+        # print(self.stages)
         pos_dict = self.get_stage_position()
         for stage, axes in self.stages_list:
             pos = {
@@ -336,6 +337,10 @@ class Microscope:
                     "readout_direction"
                 ]
             )
+        # set binning
+        self.camera.set_binning(
+            self.configuration["experiment"]["CameraParameters"]["binning"]
+        )
         # Initialize Image Series - Attaches camera buffer and start imaging
         self.camera.initialize_image_series(self.data_buffer, self.number_of_frames)
 
@@ -430,7 +435,7 @@ class Microscope:
         for channel_key in microscope_state["channels"].keys():
             channel = microscope_state["channels"][channel_key]
             if channel["is_selected"] is True:
-                exposure_time = channel["camera_exposure_time"] / 1000
+                exposure_time = float(channel["camera_exposure_time"]) / 1000
 
                 sweep_time = (
                     exposure_time
@@ -493,14 +498,14 @@ class Microscope:
         self.filter_wheel.set_filter(channel["filter"])
 
         # Camera Settings
-        self.current_exposure_time = channel["camera_exposure_time"]
+        self.current_exposure_time = float(channel["camera_exposure_time"])
         if (
             self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
             == "Light-Sheet"
         ):
             (
                 self.current_exposure_time,
-                self.camera_line_interval,
+                camera_line_interval,
             ) = self.camera.calculate_light_sheet_exposure_time(
                 self.current_exposure_time,
                 int(
@@ -509,16 +514,16 @@ class Microscope:
                     ]
                 ),
             )
-            self.camera.set_line_interval(self.camera_line_interval)
+            self.camera.set_line_interval(camera_line_interval)
         self.camera.set_exposure_time(self.current_exposure_time)
 
         # Laser Settings
         current_laser_index = channel["laser_index"]
+        for k in self.lasers:
+            self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].set_power(
             channel["laser_power"]
         )
-        for k in self.lasers:
-            self.lasers[k].turn_off()
         self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
 
         # stop daq before writing new waveform
@@ -537,6 +542,7 @@ class Microscope:
         self.move_stage(
             {"f_abs": self.central_focus + float(channel["defocus"])},
             wait_until_done=True,
+            update_focus=False,
         )
 
     def get_readout_time(self):
@@ -563,7 +569,7 @@ class Microscope:
             readout_time, _ = self.camera.calculate_readout_time()
         return readout_time
 
-    def move_stage(self, pos_dict, wait_until_done=False):
+    def move_stage(self, pos_dict, wait_until_done=False, update_focus=True):
         """Move stage to a position.
 
         Parameters
@@ -572,6 +578,8 @@ class Microscope:
             Dictionary of stage positions.
         wait_until_done : bool, optional
             Wait until stage is done moving, by default False
+        update_focus : bool, optional
+            Update the central focus
 
         Returns
         -------
@@ -582,6 +590,8 @@ class Microscope:
         if len(pos_dict.keys()) == 1:
             axis_key = list(pos_dict.keys())[0]
             axis = axis_key[: axis_key.index("_")]
+            if update_focus and axis == "f":
+                self.central_focus = None
             return self.stages[axis].move_axis_absolute(
                 axis, pos_dict[axis_key], wait_until_done
             )
@@ -595,6 +605,9 @@ class Microscope:
             }
             if pos:
                 success = stage.move_absolute(pos, wait_until_done) and success
+
+        if update_focus and "f_abs" in pos_dict:
+            self.central_focus = None
 
         return success
 
@@ -751,8 +764,19 @@ class Microscope:
     def terminate(self):
         """Close hardware explicitly."""
         self.camera.close_camera()
+
+        for k in self.galvo:
+            self.galvo[k].turn_off()
+
         try:
             # Currently only for RemoteFocusEquipmentSolutions
             self.remote_focus_device.close_connection()
         except AttributeError:
             pass
+
+        try:
+            for stage, _ in self.stages_list:
+                stage.close()
+        except Exception as e:
+            print(f"Stage delete failure: {e}")
+        pass

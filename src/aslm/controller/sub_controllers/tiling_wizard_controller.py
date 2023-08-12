@@ -138,9 +138,6 @@ class TilingWizardController(GUIController):
             self.variables[f"{ax}_dist"].set(0.0)
             self.variables[f"{ax}_tiles"].set(1)
 
-        self.widgets["Tile Z&F"].widget.invoke()
-        self.variables["Tile Z&F"].trace_add("write", self.operating_mode)
-
         # Ref to widgets in other views
         # (Camera Settings, Stage Control Positions, Stack Acq Settings)
         main_view = self.parent_controller.parent_controller.view
@@ -156,6 +153,12 @@ class TilingWizardController(GUIController):
         self.multipoint_table = (
             main_view.settings.multiposition_tab.multipoint_list.get_table()
         )
+
+        # Setting up tiling mode - "Tile in Z" or "Tile in F"
+        self.tiling_mode = "Tile in Z"
+        self.widgets[self.tiling_mode].widget.invoke()
+        self.variables[self.tiling_mode].trace_add("write", self.operating_mode)
+        self.operating_mode()
 
         # Setting/Tracing Percent Overlay
         # Overlay change is also handled in update_overlay
@@ -279,12 +282,30 @@ class TilingWizardController(GUIController):
         None
         """
         # TODO: Needs to implement the logic for the different tiling modes.
-        tiling_mode = self.variables["Tile Z&F"].get()
-        if tiling_mode == "Tile F":
+        self.tiling_mode = self.variables["Tile in Z"].get()
+        print("Tiling mode: ", self.tiling_mode)
+        if self.tiling_mode == "Tile in F":
+            # Enable the F start and end buttons
+            self.buttons["f_start"].configure(state="normal")
+            self.buttons["f_end"].configure(state="normal")
             print("Operating in Tile F mode")
+
+        elif self.tiling_mode == "Tile in Z":
+            # Disable the F start and end buttons
+            self.buttons["f_start"].configure(state="disabled")
+            self.buttons["f_end"].configure(state="disabled")
+
+            # Set the focus start/end positions from the stack acquisition window
+            self._f_start = self.stack_acq_widgets["start_focus"].get()
+            self._f_end = self.stack_acq_widgets["end_focus"].get()
+
+            # Update the focus start/end positions in the tiling wizard
+            self.variables["f_start"].set(self._f_start)
+            self.variables["f_end"].set(self._f_end)
+
         else:
-            print("Operating in Tile Z&F mode")
-        pass
+            print("Invalid tiling mode selected")
+            pass
 
     def set_table(self):
         """Set the multipoint table to the values in the tiling wizard

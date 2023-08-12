@@ -163,8 +163,8 @@ class TilingWizardPopup:
         ]
 
         self.operating_modes = [
-            "Tile Z&F",
-            "Tile F",
+            "Tile in Z",
+            "Tile in F",
         ]
         """
         save to disk    populate table
@@ -197,15 +197,37 @@ class TilingWizardPopup:
                 row=0, column=i, sticky=tk.NSEW, pady=3
             )
 
+        # Add style to the buttons to signal to the user if they can be clicked.
+        # Mainly important for f_start and f_end
+        style = ttk.Style()
+
+        # Configure the style for the Button widget
+        style.configure(
+            "Custom.TButton",
+            foreground="white",
+            background="lightgray",
+            highlightthickness="20",
+        )
+
+        style.map(
+            "Custom.TButton",
+            foreground=[("disabled", "red"), ("pressed", "white"), ("active", "white")],
+        )
+
         # Position buttons
         for i in range(len(names)):
             if i == 0:
-                self.buttons[names[i]] = ttk.Button(action_buttons, text=btn_labels[i])
+                self.buttons[names[i]] = ttk.Button(
+                    action_buttons,
+                    text=btn_labels[i],
+                )
                 self.buttons[names[i]].grid(
                     row=0, column=i, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
                 )
             if i > 0:
-                self.buttons[names[i]] = ttk.Button(pos_grid, text=btn_labels[i])
+                self.buttons[names[i]] = ttk.Button(
+                    pos_grid, text=btn_labels[i], style="Custom.TButton"
+                )
                 self.buttons[names[i]].grid(
                     row=i - 1, column=0, sticky=tk.NSEW, padx=(5, 0), pady=(5, 0)
                 )

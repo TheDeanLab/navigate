@@ -119,26 +119,29 @@ class TilingWizardController(GUIController):
 
     def __init__(self, view, parent_controller):
         super().__init__(view, parent_controller)
+        self.parent_controller = parent_controller
+        self.view = view
 
         # Getting widgets and buttons and vars of widgets
         self.widgets = self.view.get_widgets()
         self.buttons = self.view.get_buttons()
         self.variables = self.view.get_variables()
 
-        # Init widgets to zero
+        # Initialize widgets
         self._axes = ["x", "y", "z", "f"]
         self._percent_overlay = 0.0
-        self._fov = dict([(ax, 0.0) for ax in self._axes])
         self.variables["percent_overlay"].set(10.0)
         self.variables["total_tiles"].set(1)
-
         for ax in self._axes:
             self.variables[f"{ax}_start"].set(0.0)
             self.variables[f"{ax}_end"].set(0.0)
             self.variables[f"{ax}_dist"].set(0.0)
             self.variables[f"{ax}_tiles"].set(1)
 
-        # Ref to widgets in other views
+        # self._fov - Total FOV in microns for final tiled volume for each axis
+        self._fov = dict([(ax, 0.0) for ax in self._axes])
+
+        # Reference to widgets in other views
         # (Camera Settings, Stage Control Positions, Stack Acq Settings)
         main_view = self.parent_controller.parent_controller.view
         self.cam_settings_widgets = (
@@ -158,6 +161,8 @@ class TilingWizardController(GUIController):
         self.tiling_mode = "Tile in Z"
         self.widgets[self.tiling_mode].widget.invoke()
         self.variables[self.tiling_mode].trace_add("write", self.operating_mode)
+
+        # Initialize self._f_start and self._f_end
         self.operating_mode()
 
         # Setting/Tracing Percent Overlay
@@ -183,38 +188,29 @@ class TilingWizardController(GUIController):
 
         # Calculate distances
         self.variables["x_start"].trace_add(
-            "write", lambda *args: self.calculate_distance("x")
+            "write", lambda *args: self.update_fov_and_calculate_tiles("x")
         )
         self.variables["x_end"].trace_add(
-            "write", lambda *args: self.calculate_distance("x")
+            "write", lambda *args: self.update_fov_and_calculate_tiles("x")
         )
         self.variables["y_start"].trace_add(
-            "write", lambda *args: self.calculate_distance("y")
+            "write", lambda *args: self.update_fov_and_calculate_tiles("y")
         )
         self.variables["y_end"].trace_add(
-            "write", lambda *args: self.calculate_distance("y")
+            "write", lambda *args: self.update_fov_and_calculate_tiles("y")
         )
         self.variables["z_start"].trace_add(
-            "write", lambda *args: self.calculate_distance("z")
+            "write", lambda *args: self.update_fov_and_calculate_tiles("z")
         )
         self.variables["z_end"].trace_add(
-            "write", lambda *args: self.calculate_distance("z")
+            "write", lambda *args: self.update_fov_and_calculate_tiles("z")
         )
         self.variables["f_start"].trace_add(
-            "write", lambda *args: self.calculate_distance("f")
+            "write", lambda *args: self.update_fov_and_calculate_tiles("f")
         )
         self.variables["f_end"].trace_add(
-            "write", lambda *args: self.calculate_distance("f")
+            "write", lambda *args: self.update_fov_and_calculate_tiles("f")
         )
-
-        self.variables["x_start"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["x_end"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["y_start"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["y_end"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["z_start"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["z_end"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["f_start"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["f_end"].trace_add("write", lambda *args: self.update_fov())
 
         # Calculating Number of Tiles traces
         self.variables["x_dist"].trace_add(
@@ -247,10 +243,6 @@ class TilingWizardController(GUIController):
                 "write", lambda *args: self.update_total_tiles()
             )
 
-        # Hidden focus variables for z-stacking
-        self._f_start = self.stage_position_vars["f"].get()
-        self._f_end = self.stage_position_vars["f"].get()
-
         # Update widgets to current values in other views
         self.update_fov()
 
@@ -262,6 +254,11 @@ class TilingWizardController(GUIController):
                 lambda: delattr(self.parent_controller, "tiling_wizard_controller"),
             ),
         )
+
+    def update_fov_and_calculate_tiles(self, axis):
+        """Gets the size of 1 tile, calculates the total size of the tiled volume,"""
+        self.update_fov()
+        self.calculate_distance(axis)
 
     def operating_mode(self, *args, **kwargs):
         """Handles toggling between tiling in Z&F, or just in Z.
@@ -281,23 +278,21 @@ class TilingWizardController(GUIController):
         -------
         None
         """
-        # TODO: Needs to implement the logic for the different tiling modes.
         self.tiling_mode = self.variables["Tile in Z"].get()
-        print("Tiling mode: ", self.tiling_mode)
+
+        # Get the focus start/end positions from the stack acquisition window
+        self._f_start = self.stack_acq_widgets["start_focus"].get()
+        self._f_end = self.stack_acq_widgets["end_focus"].get()
+
         if self.tiling_mode == "Tile in F":
             # Enable the F start and end buttons
             self.buttons["f_start"].configure(state="normal")
             self.buttons["f_end"].configure(state="normal")
-            print("Operating in Tile F mode")
 
         elif self.tiling_mode == "Tile in Z":
             # Disable the F start and end buttons
             self.buttons["f_start"].configure(state="disabled")
             self.buttons["f_end"].configure(state="disabled")
-
-            # Set the focus start/end positions from the stack acquisition window
-            self._f_start = self.stack_acq_widgets["start_focus"].get()
-            self._f_end = self.stack_acq_widgets["end_focus"].get()
 
             # Update the focus start/end positions in the tiling wizard
             self.variables["f_start"].set(self._f_start)
@@ -456,10 +451,6 @@ class TilingWizardController(GUIController):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> self.calculate_tiles()
         """
 
         if axis not in self._axes + [None]:
@@ -496,10 +487,6 @@ class TilingWizardController(GUIController):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> self.calculate_distance()
         """
         print("calculate_distance")
 
@@ -523,10 +510,6 @@ class TilingWizardController(GUIController):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> self.update_overlay()
         """
 
         try:
@@ -555,13 +538,13 @@ class TilingWizardController(GUIController):
         -------
         handler : func
             Function for setting positional spinbox based on parameters passed in
-
-        Examples
-        --------
-        >>> self.position_handler()
         """
 
+        # Query stage for position, and update GUI
+        self.parent_controller.parent_controller.stop_stage()
+
         def handler():
+            # Retrieve stage position from GUI and update Tiling Wizard
             pos = self.stage_position_vars[axis].get()
             self.widgets[axis + "_" + start_end].widget.set(pos)
             if axis == "z":
@@ -583,13 +566,7 @@ class TilingWizardController(GUIController):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> self.update_fov()
         """
-        print("update_fov")
-
         # Calculate signed fov
         x = float(self.cam_settings_widgets["FOV_X"].get()) * sign(
             float(self.variables["x_end"].get())
@@ -602,7 +579,11 @@ class TilingWizardController(GUIController):
         z = float(self.stack_acq_widgets["end_position"].get()) - float(
             self.stack_acq_widgets["start_position"].get()
         )
-        self._fov["x"], self._fov["y"], self._fov["z"] = x, y, z
+
+        f = float(self.stack_acq_widgets["start_focus"].get()) - float(
+            self.stack_acq_widgets["end_focus"].get()
+        )
+        self._fov["x"], self._fov["y"], self._fov["z"], self._fov["f"] = x, y, z, f
 
         self.calculate_tiles()
 
@@ -619,10 +600,6 @@ class TilingWizardController(GUIController):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> self.showup()
         """
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)

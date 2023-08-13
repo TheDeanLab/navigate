@@ -204,14 +204,14 @@ class TilingWizardPopup:
         # Configure the style for the Button widget
         style.configure(
             "Custom.TButton",
-            foreground="white",
-            background="lightgray",
+            foreground="black",
+            background="white",
             highlightthickness="20",
         )
 
         style.map(
             "Custom.TButton",
-            foreground=[("disabled", "red"), ("pressed", "white"), ("active", "white")],
+            foreground=[("disabled", "red"), ("pressed", "black"), ("active", "black")],
         )
 
         # Position buttons

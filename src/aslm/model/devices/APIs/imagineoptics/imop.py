@@ -12,7 +12,43 @@ basepath = 'D:\\WaveKitX64'
 imop_lib = ct.windll.LoadLibrary(os.path.join(basepath, 'C', 'Lib', 'c_interface_vc100_x64.dll'))
 # mode_names = ['x-tilt','y-tilt','defocus','obliq. asm.','vert. asm.','vert. coma','horiz. coma','vert. tre.','obliq. tre.','spherical','vert. 2nd asm.','horiz. 2nd asm.','vert. quad.','obliq. quad.']
 mode_names = ['piston', 'x-tilt','y-tilt','defocus','obliq. asm.','vert. asm.','vert. coma','horiz. coma','spherical','vert. tre.','obliq. tre.','vert. 2nd asm.','horiz. 2nd asm.','vert. quad.','obliq. quad.']
-        
+
+"""
+    MODE NAMES:
+    1   Vert. Tilt
+    2   Horz. Tilt
+    3   Defocus
+    4   Vert. Asm.
+    5   Oblq. Asm.
+    6   Vert. Coma
+    7   Horz. Coma
+    8   3rd Spherical
+    9   Vert. Tre.
+    10  Horz. Tre.
+    11  Vert. 5th Asm.
+    12  Oblq. 5th Asm.
+    13  Vert. 5th Coma
+    14  Horz. 5th Coma
+    15  5th Spherical
+    16  Vert. Tetra.
+    17  Oblq. Tetra.
+    18  Vert. 7th Tre.
+    19  Horz. 7th Tre.
+    20  Vert. 7th Asm.
+    21  Oblq. 7th Asm.
+    22  Vert. 7th Coma
+    23  Horz. 7th Coma
+    24  7th Spherical
+    25  Vert. Penta.
+    26  Horz. Penta.
+    27  Vert. 9th Tetra.
+    28  Oblq. 9th Tetra.
+    29  Vert. 9th Tre.
+    30  Horz. 9th Tre.
+    31  Vert. 9th Asm.
+    32  Oblq. 9th Asm.
+"""
+
 # ctypes utility functions:
 def char_p(s):    
     # return a C character pointer from python String
@@ -89,7 +125,7 @@ class IMOP_Mirror:
                  #positions_file_path=os.path.join(basepath, 'MirrorFiles', 'best.wcs'),
                  #interaction_matrix_file_path=os.path.join(basepath, 'MirrorFiles', 'OlympusJuly5.aoc'),
                  interaction_matrix_file_path=os.path.join(basepath, 'MirrorFiles', 'OlympusApril22.aoc'),
-                 n_modes=12
+                 n_modes=32
                  ):
         
         mirror_set = WavefrontCorrectorSet()

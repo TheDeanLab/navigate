@@ -52,27 +52,46 @@ class adaptiveoptics_popup():
         self.popup = PopUp(
             root,
             "Adaptive Optics",
-            '1050x580+320+180',
+            '1050x880+320+180',
             top=False,
             transient=False)
 
         self.mode_names = [
-            'x-tilt',
-            'y-tilt',
-            'defocus',
-            'vert. asm.',
-            'obliq. asm.',
-            'horiz. coma',
-            'vert. coma',
-            'spherical',
-            'vert. tre.',
-            'obliq. tre.',
-            'vert. 2nd asm.',
-            'obliq. 2nd asm.',
-            'vert. quad.',
-            'obliq. quad.']
+            "Vert. Tilt",
+            "Horz. Tilt",
+            "Defocus",
+            "Vert. Asm.",
+            "Oblq. Asm.",
+            "Vert. Coma",
+            "Horz. Coma",
+            "3rd Spherical",
+            "Vert. Tre.",
+            "Horz. Tre.",
+            "Vert. 5th Asm.",
+            "Oblq. 5th Asm.",
+            "Vert. 5th Coma",
+            "Horz. 5th Coma",
+            "5th Spherical",
+            "Vert. Tetra.",
+            "Oblq. Tetra.",
+            "Vert. 7th Tre.",
+            "Horz. 7th Tre.",
+            "Vert. 7th Asm.",
+            "Oblq. 7th Asm.",
+            "Vert. 7th Coma",
+            "Horz. 7th Coma",
+            "7th Spherical",
+            "Vert. Penta.",
+            "Horz. Penta.",
+            "Vert. 9th Tetra.",
+            "Oblq. 9th Tetra.",
+            "Vert. 9th Tre.",
+            "Horz. 9th Tre.",
+            "Vert. 9th Asm.",
+            "Oblq. 9th Asm."
+            ]
             
-        self.n_modes = 12 # TODO: Don't hardcode... Get from exp file!
+        self.n_modes = 32 # TODO: Don't hardcode... Get from exp file!
 
         content_frame = self.popup.get_frame()
 
@@ -124,25 +143,29 @@ class adaptiveoptics_popup():
         self.save_wcs_button.grid(row=3, column=0, pady=5)
         self.from_wcs_button = ttk.Button(button_frame, text='From WCS File', width=15)
         self.from_wcs_button.grid(row=4, column=0, pady=5)
+        self.select_all_modes = ttk.Button(button_frame, text='Select All', width=15)
+        self.select_all_modes.grid(row=5, column=0, pady=5)
 
-        self.mode_frame = ScrolledFrame(parent=content_frame)
-        self.mode_frame.grid(row=1, column=0, rowspan=10)
-
+        # self.mode_frame = ScrolledFrame(parent=content_frame)
+        self.mode_frame = ttk.Frame(master=content_frame, height=100)
+        self.mode_frame.grid(row=1, column=0, rowspan=10, padx=5, pady=5)
+        
         for i in range(self.n_modes):
             mode_name = self.mode_names[i]
 
-            self.mode_labels[mode_name] = ttk.Label(self.mode_frame.interior, text=self.mode_names[i])
+            self.mode_labels[mode_name] = ttk.Label(self.mode_frame, text=self.mode_names[i])
             self.mode_labels[mode_name].grid(row=i, column=0)
 
             mode_check_var = tk.BooleanVar()
             mode_check_var.set(False)
-            mode_check = ttk.Checkbutton(self.mode_frame.interior, variable=mode_check_var)
+            mode_check = ttk.Checkbutton(self.mode_frame, variable=mode_check_var)
             mode_check.grid(row=i, column=1)
             self.modes_armed[mode_name] = {'button': mode_check, 'variable': mode_check_var}
             
-            self.inputs[mode_name] = LabelInput(self.mode_frame.interior, input_args={'width': 10})
+            self.inputs[mode_name] = LabelInput(self.mode_frame, input_args={'width': 10})
             self.inputs[mode_name].set(0.0)
             self.inputs[mode_name].grid(row=i, column=2, padx=2, pady=5)
+        
 
         self.plot_frame = ttk.Frame(master=content_frame)
         self.plot_frame.grid(row=0, column=1, rowspan=2)

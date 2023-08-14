@@ -74,6 +74,7 @@ class AdaptiveOpticsPopupController(GUIController):
         self.view.zero_button.configure(command=self.zero_mirror)
         self.view.save_wcs_button.configure(command=self.save_wcs_file)
         self.view.from_wcs_button.configure(command=self.set_from_wcs_file)
+        self.view.select_all_modes.configure(command=self.select_all_modes)
         self.view.tony_wilson_button.configure(command=self.run_tony_wilson)
 
         for k in self.modes_armed.keys():
@@ -96,6 +97,10 @@ class AdaptiveOpticsPopupController(GUIController):
         evt.widget.config(background='red')
         self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['HighlightedMode'] = mode
         self.plot_tw_trace()
+
+    def select_all_modes(self):
+        for k in self.modes_armed.keys():
+            self.modes_armed[k]['variable'].set(True)
 
     def populate_experiment_values(self):
         coefs_dict = self.parent_controller.configuration['experiment']['MirrorParameters']['modes']

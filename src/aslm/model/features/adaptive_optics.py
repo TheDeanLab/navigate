@@ -326,9 +326,9 @@ class TonyWilson:
             # img = img[ny-roi:ny+roi, nx-roi:nx+roi]
             
             """ IMAGE METRICS """
-            new_data = img.max()
+            # new_data = img.max()
             # new_data = img.mean()
-            # new_data = img_contrast.fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)[0]
+            new_data = img_contrast.fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)[0]
             # new_data = img_contrast.image_intensity(self.model.data_buffer[self.f_frame_id], 3)[0]
             # new_data = self.model.data_buffer[self.f_frame_id].mean()
             # new_data = fourier_annulus(self.model.data_buffer[self.f_frame_id], radius_1=50, radius_2=100)[0]

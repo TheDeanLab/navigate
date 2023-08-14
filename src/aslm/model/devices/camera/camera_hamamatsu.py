@@ -67,14 +67,18 @@ class HamamatsuOrca(CameraBase):
         self.camera_parameters["y_pixels"] = self.max_image_height
 
         speed_range = self.camera_controller.get_property_range("readout_speed")
-        if speed_range[1] != None:
-            self.camera_controller.set_property_value("readout_speed", int(speed_range[1]))
+        if speed_range[1] is not None:
+            self.camera_controller.set_property_value(
+                "readout_speed", int(speed_range[1])
+            )
             self.camera_parameters["readout_speed"] = int(speed_range[1])
         else:
             self.camera_controller.set_property_value("readout_speed", 1)
             self.camera_parameters["readout_speed"] = 1
 
-        self.camera_parameters["pixel_size_in_microns"] = self.camera_controller.get_property_value("pixel_width")
+        self.camera_parameters[
+            "pixel_size_in_microns"
+        ] = self.camera_controller.get_property_value("pixel_width")
 
         # Values are pulled from the CameraParameters section of the configuration.yml
         # file. Exposure time converted here from milliseconds to seconds.
@@ -150,9 +154,6 @@ class HamamatsuOrca(CameraBase):
         else:
             print("Camera mode not supported")
             logger.info("Camera mode not supported")
-
-        # print("Camera Sensor Mode:",
-        #       self.camera_controller.get_property_value("sensor_mode"))
 
     def set_readout_direction(self, mode):
         """Set HamamatsuOrca readout direction.
@@ -262,6 +263,16 @@ class HamamatsuOrca(CameraBase):
         return self.camera_controller.set_property_value(
             "internal_line_interval", line_interval_time
         )
+
+    def get_line_interval(self):
+        """Get HamamatsuOrca line interval.
+
+        Returns
+        -------
+        line_interval_time : float
+            Line interval duration.
+        """
+        return self.camera_controller.get_property_value("internal_line_interval")
 
     def set_binning(self, binning_string):
         """Set HamamatsuOrca binning mode.

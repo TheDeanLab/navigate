@@ -224,7 +224,9 @@ class WaveformParameterPopupWindow:
             )
 
             galvo_freq = ttk.Label(
-                self.laser_frame, text=galvo_labels[i] + " Freq", padding=(2, 5, 0, 0)
+                self.laser_frame,
+                text=galvo_labels[i] + " Freq (Hz)",
+                padding=(2, 5, 0, 0),
             )
 
             galvo_freq.grid(row=prev + 2, column=0, sticky=tk.NSEW)
@@ -233,19 +235,27 @@ class WaveformParameterPopupWindow:
                 parent=self.laser_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
-                input_args={"from_": 0, "to": 1000, "increment": 0.1},
+                input_args={"from_": 0, "to": 200, "increment": 0.1},
             )
 
             self.inputs[galvo_labels[i] + " Freq"].grid(
                 row=prev + 2, column=1, sticky=tk.NSEW, pady=(20, 0)
             )
 
+            # Button for automatic estimate of galvo frequency
+            self.buttons[galvo_labels[i] + " Freq"] = ttk.Button(
+                self.laser_frame,
+                text="Estimate Frequency",
+            )
+
+            self.buttons[galvo_labels[i] + " Freq"].grid(
+                row=prev + 2, column=2, sticky=tk.NSEW, pady=(20, 0)
+            )
+
             prev = prev + 2
 
         # High/Low Resolution
-        hi_lo_labels = ["Percent Delay",
-                        "Percent Smoothing",
-                        "Remote Focus Settle Duration (ms)"]
+        hi_lo_labels = ["Percent Delay", "Percent Smoothing", "Settle Duration (ms)"]
         dict_labels = ["Delay", "Smoothing", "Duty"]
         for i in range(3):
             self.inputs[dict_labels[i]] = LabelInput(

@@ -66,7 +66,8 @@ class HamamatsuOrca(CameraBase):
         self.camera_parameters["x_pixels"] = self.max_image_width
         self.camera_parameters["y_pixels"] = self.max_image_height
 
-        speed_range = self.camera_controller.get_property_range("readout_speed")
+        speed_range = self.camera_controller.get_property_range(
+            "readout_speed")
         if speed_range[1] is not None:
             self.camera_controller.set_property_value(
                 "readout_speed", int(speed_range[1])
@@ -86,7 +87,6 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value(
             "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
         )
-
         self.camera_controller.set_property_value(
             "trigger_active", self.camera_parameters["trigger_active"]
         )
@@ -272,7 +272,8 @@ class HamamatsuOrca(CameraBase):
         line_interval_time : float
             Line interval duration.
         """
-        return self.camera_controller.get_property_value("internal_line_interval")
+        self.line_interval = self.camera_controller.get_property_value(
+            "internal_line_interval")
 
     def set_binning(self, binning_string):
         """Set HamamatsuOrca binning mode.

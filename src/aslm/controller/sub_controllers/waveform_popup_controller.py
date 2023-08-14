@@ -531,20 +531,27 @@ class WaveformPopupController(GUIController):
 
         galvo_name = args[0]
 
-        # line_interval = self.parent_controller.model.active_microscope.camera\
-        #     .get_line_interval()
-
         number_of_pixels = (
             self.parent_controller.camera_setting_controller.mode_widgets[
                 "Pixels"
             ].get()
         )
 
-        # frequency = 1 / (line_interval * number_of_pixels)
+        exposure_time = (
+            self.parent_controller.camera_setting_controller.framerate_widgets[
+                'exposure_time'].get()
+        )
+
+        _, line_interval = self.parent_controller.model.active_microscope\
+            .camera.calculate_light_sheet_exposure_time(
+                exposure_time,
+                number_of_pixels
+        )
+
+        frequency = 1 / (2 * line_interval * number_of_pixels)
 
         # Update the GUI
-        self.view.inputs[galvo_name].widget.set(number_of_pixels)
-        print("Did I do anything?")
+        self.view.inputs[galvo_name].widget.set(frequency)
 
     def update_galvo_setting(self, galvo_name, widget_name, parameter):
         """Update galvo settings in memory.

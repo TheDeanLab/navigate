@@ -6,12 +6,12 @@ hardware:
   camera:
     -
       type: HamamatsuOrca
-      serial_number: 302158
+      serial_number: 003209
     -
       type: HamamatsuOrca
-      serial_number: 302352
+      serial_number: 002961
   filter_wheel:
-    type: SutterFilterWheel
+    type: SyntheticFilterWheel
     port: COM19
     baudrate: 9600
     number_of_wheels: 2
@@ -45,12 +45,12 @@ microscopes:
       sweep_time: 0.2
 
       # triggers
-      master_trigger_out_line: PXI6259/port0/line1
-      camera_trigger_out_line: /PXI6259/ctr0
-      trigger_source: /PXI6259/PFI0
+      master_trigger_out_line: Dev5/port0/line1
+      camera_trigger_out_line: /Dev5/ctr0
+      trigger_source: /Dev5/PFI0
 
       # Digital Laser Outputs
-      laser_port_switcher: PXI6733/port0/line0
+      laser_port_switcher: Dev5/port0/line0
       laser_switch_state: False
 
     camera:
@@ -71,7 +71,7 @@ microscopes:
     remote_focus_device:
       hardware:
         name: daq
-        type: NI
+        type: SyntheticRemoteFocus
         channel: PXI6259/ao2
         min: 0
         max: 5
@@ -86,7 +86,7 @@ microscopes:
       -
         hardware:
           name: daq
-          type: NI
+          type: SyntheticGalvo
           channel: PXI6259/ao0
           min: -5
           max: 5
@@ -99,7 +99,7 @@ microscopes:
     filter_wheel:
       hardware:
         name: filter_wheel
-        type: SutterFilterWheel
+        type: SyntheticFilterWheel
         wheel_number: 1
       filter_wheel_delay: .030 # in seconds
       available_filters:
@@ -158,7 +158,7 @@ microscopes:
     zoom:
       hardware:
         name: zoom
-        type: DynamixelZoom
+        type: SyntheticZoom
         servo_id: 1
       position:
         0.63x: 0
@@ -319,7 +319,7 @@ microscopes:
     filter_wheel:
       hardware:
         name: filter_wheel
-        type: SutterFilterWheel
+        type: SyntheticFilterWheel
         wheel_number: 2
       filter_wheel_delay: .030 # in seconds
       available_filters:
@@ -393,7 +393,7 @@ microscopes:
     shutter:
       hardware:
         name: daq
-        type: NI
+        type: SyntheticShutter
         channel: PXI6259/port2/line0
       shutter_min_do: 0
       shutter_max_do: 5
@@ -407,14 +407,14 @@ microscopes:
           hardware:
             name: daq
             type: NI
-            channel: PXI6733/port0/line2
+            channel: Dev5/port0/line2
             min: 0
             max: 5
         power:
           hardware:
             name: daq
             type: NI
-            channel: PXI6733/ao0
+            channel: Dev5/ao0
             min: 0
             max: 5
         type: LuxX
@@ -426,14 +426,14 @@ microscopes:
           hardware:
             name: daq
             type: NI
-            channel: PXI6733/port0/line3
+            channel: Dev5/port0/line3
             min: 0
             max: 5
         power:
           hardware:
             name: daq
             type: NI
-            channel: PXI6733/ao1
+            channel: Dev5/ao1
             min: 0
             max: 5
         type: Obis
@@ -445,14 +445,14 @@ microscopes:
           hardware:
             name: daq
             type: NI
-            channel: PXI6733/port0/line4
+            channel: Dev5/port0/line4
             min: 0
             max: 5
         power:
           hardware:
             name: daq
             type: NI
-            channel: PXI6733/ao2
+            channel: Dev5/ao2
             min: 0
             max: 5
         type: LuxX

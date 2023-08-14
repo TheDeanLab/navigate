@@ -7,3 +7,4 @@ from .shutter.laser_shutter_synthetic import SyntheticShutter
 from .stages.stage_synthetic import SyntheticStage
 from .zoom.zoom_synthetic import SyntheticZoom
 from .lasers.laser_synthetic import SyntheticLaser
+from .mirrors.mirror_synthetic import SyntheticMirror

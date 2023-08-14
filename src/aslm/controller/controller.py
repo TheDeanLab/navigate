@@ -48,6 +48,13 @@ from aslm.view.main_application_window import MainApp as view
 from aslm.view.popups.camera_view_popup_window import CameraViewPopupWindow
 from aslm.view.popups.feature_list_popup import FeatureListPopup
 
+# These may not be needed anymore...
+from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
+from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
+from aslm.view.popups.adaptiveoptics_popup import adaptiveoptics_popup
+from aslm.view.popups.help_popup import HelpPopup
+from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
+
 # Local Sub-Controller Imports
 from aslm.controller.configuration_controller import ConfigurationController
 from aslm.controller.sub_controllers import (
@@ -61,6 +68,8 @@ from aslm.controller.sub_controllers import (
     AcquireBarController,
     FeaturePopupController,
     MenuController,
+    MicroscopePopupController,
+    AdaptiveOpticsPopupController,
 )
 
 from aslm.controller.thread_pool import SynchronizedThreadPool
@@ -609,6 +618,25 @@ class Controller:
 
         elif command == "autofocus":
             """Execute autofocus routine."""
+        # mirror commands:
+        elif command == 'flatten_mirror':
+            self.model.run_command('flatten_mirror', *args)
+        elif command == 'zero_mirror':
+            self.model.run_command('zero_mirror', *args)        
+        elif command == 'set_mirror':
+            self.model.run_command('set_mirror', *args)
+        elif command == 'set_mirror_from_wcs':
+            self.model.run_command('set_mirror_from_wcs', *args)
+        elif command == 'save_wcs_file':
+            self.model.run_command('save_wcs_file', *args)
+        elif command == 'tony_wilson':
+            self.threads_pool.createThread('camera', self.capture_image, args=('tony_wilson', 'live',))
+
+        elif command == 'change_camera':
+            self.model.run_command('change_camera', *args)
+
+        elif command == 'autofocus':
+            r"""Execute autofocus routine."""
             self.threads_pool.createThread(
                 "camera",
                 self.capture_image,
@@ -1019,6 +1047,18 @@ class Controller:
                         data=value[0], line_plot=value[1], clear_data=value[2]
                     )
 
+            elif event == 'tonywilson':
+                if hasattr(self, 'ao_popup_controller'):
+                    # self.ao_popup_controller.set_widgets_from_coef(value['coefs'])
+                    self.ao_popup_controller.plot_tonywilson(value)
+                    # self.ao_popup_controller.plot_mirror(value)
+                    if value['done']:
+                        print('Tony Wilson done! Updating expt...')
+                        self.ao_popup_controller.update_experiment_values()
+            elif event == 'mirror_update':
+                if hasattr(self, 'ao_popup_controller'):
+                    self.ao_popup_controller.set_widgets_from_coef(value['coefs'])
+                    self.ao_popup_controller.plot_mirror(value)
             elif event == "stop":
                 # Stop the software
                 break

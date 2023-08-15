@@ -100,14 +100,15 @@ class ConstantVelocityAcquisition:
         readout_time = self.model.active_microscope.get_readout_time()
         _, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
         current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
+        scaling_factor = 1.3
 
         # Provide just a bit of breathing room for the sweep time...
-        current_sweep_time = current_sweep_time * 1.05
+        current_sweep_time = current_sweep_time * scaling_factor
         
         print("*** current sweep time:", current_sweep_time)
         logger.info(f"*** current sweep time: {current_sweep_time}")
+        logger.info(f"*** sweep time scaling: {scaling_factor}")
         # logger.debug(f"running signal node: {self.curr_node.node_name}")
-        
 
         # print("*** current exposure time:", self.model.active_microscope.current_channel, exposure_time)
 

@@ -616,8 +616,6 @@ class Controller:
                 "model", lambda: self.model.run_command("stage_limits", *args)
             )
 
-        elif command == "autofocus":
-            """Execute autofocus routine."""
         # mirror commands:
         elif command == 'flatten_mirror':
             self.model.run_command('flatten_mirror', *args)

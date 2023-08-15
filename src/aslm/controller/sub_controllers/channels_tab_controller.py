@@ -532,9 +532,12 @@ class ChannelsTabController(GUIController):
             self.microscope_state_dict["start_focus"] = self.stack_acq_vals[
                 "start_focus"
             ].get()
-        except:  # noqa
+        except tk._tkinter.TclError:
             self.microscope_state_dict["start_focus"] = 0
-        self.microscope_state_dict["end_focus"] = self.stack_acq_vals["end_focus"].get()
+        try:
+            self.microscope_state_dict["end_focus"] = self.stack_acq_vals["end_focus"].get()
+        except tk._tkinter.TclError:
+            self.microscope_state_dict["end_focus"] = 0
         self.microscope_state_dict["stack_z_origin"] = self.z_origin
         self.microscope_state_dict["stack_focus_origin"] = self.focus_origin
 

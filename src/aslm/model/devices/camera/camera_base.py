@@ -148,9 +148,7 @@ class CameraBase:
             shutter_width + self.y_pixels - 1
         )
 
-        self.camera_parameters = self.camera_parameters["camera_line_interval"].set(
-            camera_line_interval
-        )
+        self.camera_parameters["line_interval"] = camera_line_interval
 
         exposure_time = camera_line_interval * shutter_width * 1000
         return exposure_time, camera_line_interval

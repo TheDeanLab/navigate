@@ -332,7 +332,7 @@ class PhotometricsKinetix(CameraBase):
             + (ASLM_line_delay + 1) * linedelay
         )
 
-        self.camera_parameters["camera_line_interval"].set(ASLM_lineExposure)
+        self.camera_parameters["line_interval"] = ASLM_lineExposure
 
         self._exposuretime = ASLM_lineExposure
         self._scandelay = ASLM_line_delay

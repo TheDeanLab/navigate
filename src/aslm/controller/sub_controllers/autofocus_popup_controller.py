@@ -136,19 +136,17 @@ class AutofocusPopupController(GUIController):
 
         # Default to stages, if they exist.
         if "stage" in setting_dict:
-            index = list(setting_dict.keys()).index("stage")
+            device = "stage"
         else:
-            index = 0
-        device = setting_dict.keys()[index]
+            device = setting_dict.keys()[0]
         self.widgets["device"].widget["values"] = setting_dict.keys()
         self.widgets["device"].set(device)
 
         # Default to the f axis, if it exists.
         if "f" in setting_dict[device]:
-            index = list(setting_dict[device].keys()).index("f")
+            device_ref = "f"
         else:
-            index = 0
-        device_ref = setting_dict[device].keys()[index]
+            device_ref = setting_dict[device].keys()[0]
         self.widgets["device_ref"].widget["values"] = setting_dict[device].keys()
         self.widgets["device_ref"].set(device_ref)
 

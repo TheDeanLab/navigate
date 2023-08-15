@@ -660,6 +660,13 @@ class MenuController(GUIController):
             CameraMapSettingPopupController(map_popup, self.parent_controller)
         )
 
+    def popup_adaptiveoptics(self):
+        if hasattr(self.parent_controller, 'adaptiveoptics_popup_controller'):
+            self.parent_controller.ao_popup_controller.showup()
+            return
+        ao_popup = AdaptiveOpticsPopup(self.view)
+        self.ao_popup_controller = AdaptiveOpticsPopupController(ao_popup, self)
+
     def popup_ilastik_setting(self):
         """Pop up the Ilastik setting window."""
         ilastik_popup_window = ilastik_setting_popup(self.view)

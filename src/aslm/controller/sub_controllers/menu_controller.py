@@ -665,7 +665,9 @@ class MenuController(GUIController):
             self.parent_controller.ao_popup_controller.showup()
             return
         ao_popup = AdaptiveOpticsPopup(self.view)
-        self.ao_popup_controller = AdaptiveOpticsPopupController(ao_popup, self)
+        self.parent_controller.ao_popup_controller = AdaptiveOpticsPopupController(
+            ao_popup, self.parent_controller
+        )
 
     def popup_ilastik_setting(self):
         """Pop up the Ilastik setting window."""

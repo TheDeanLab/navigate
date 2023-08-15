@@ -536,19 +536,19 @@ class WaveformPopupController(GUIController):
                 "Pixels"
             ].get()
         )
+        if number_of_pixels == "":
+            # If we are not in the light-sheet mode, widget returns an empty string.
+            return
 
-        exposure_time = (
-            self.parent_controller.camera_setting_controller.framerate_widgets[
-                'exposure_time'].get()
-        )
+        line_interval = self.parent_controller.configuration["configuration"][
+            "microscopes"
+        ][self.resolution]["camera"].get("line_interval", None)
 
-        _, line_interval = self.parent_controller.model.active_microscope\
-            .camera.calculate_light_sheet_exposure_time(
-                exposure_time,
-                number_of_pixels
-        )
+        if line_interval is None:
+            print("Line interval is not defined in the configuration file.")
+            return
 
-        frequency = 1 / (2 * line_interval * number_of_pixels)
+        frequency = 2 / (line_interval * float(number_of_pixels))
 
         # Update the GUI
         self.view.inputs[galvo_name].widget.set(frequency)

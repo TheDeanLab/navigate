@@ -66,8 +66,7 @@ class HamamatsuOrca(CameraBase):
         self.camera_parameters["x_pixels"] = self.max_image_width
         self.camera_parameters["y_pixels"] = self.max_image_height
 
-        speed_range = self.camera_controller.get_property_range(
-            "readout_speed")
+        speed_range = self.camera_controller.get_property_range("readout_speed")
         if speed_range[1] is not None:
             self.camera_controller.set_property_value(
                 "readout_speed", int(speed_range[1])
@@ -273,7 +272,8 @@ class HamamatsuOrca(CameraBase):
             Line interval duration.
         """
         self.line_interval = self.camera_controller.get_property_value(
-            "internal_line_interval")
+            "internal_line_interval"
+        )
 
     def set_binning(self, binning_string):
         """Set HamamatsuOrca binning mode.
@@ -424,8 +424,28 @@ class HamamatsuOrcaLightning(HamamatsuOrca):
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
     ):
+        """Calculate light sheet exposure time.
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Full chip exposure time.
+        shutter_width : int
+            Shutter width.
+
+        Returns
+        -------
+        exposure_time : float
+            Exposure time.
+        camera_line_interval : float
+            Camera line interval.
+        """
+
         camera_line_interval = (full_chip_exposure_time / 1000) / (
             (shutter_width + self.y_pixels - 1) / 4
         )
+
+        self.camera_parameters["camera_line_interval"].set(camera_line_interval)
+
         exposure_time = camera_line_interval * (shutter_width / 4) * 1000
         return exposure_time, camera_line_interval

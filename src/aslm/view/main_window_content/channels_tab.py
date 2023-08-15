@@ -769,6 +769,13 @@ class MultiPointFrame(ttk.Labelframe):
         self.save_check = ttk.Checkbutton(self, text="", variable=self.on_off)
         self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 6))
 
+        # Tiling Wizard Button
+        self.buttons = {}
+        self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
+        self.buttons["tiling"].grid(
+            row=0, column=2, sticky=tk.NSEW, padx=(10, 0), pady=(4, 6)
+        )
+
     def get_variables(self):
         """Returns a dictionary of all the variables that are tied to each widget name.
 
@@ -839,9 +846,12 @@ class QuickLaunchFrame(ttk.Labelframe):
 
         # Tiling Wizard Button
         self.buttons = {}
-        self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
-        self.buttons["tiling"].grid(
-            row=0, column=2, sticky=(tk.NSEW), padx=(10, 0), pady=(4, 6)
+        self.buttons["waveform_parameters"] = ttk.Button(
+            self, text="Waveform Parameters"
+        )
+
+        self.buttons["waveform_parameters"].grid(
+            row=0, column=2, sticky=tk.NSEW, padx=(10, 0), pady=(4, 6)
         )
 
 

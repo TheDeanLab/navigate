@@ -171,6 +171,11 @@ class ChannelsTabController(GUIController):
             command=self.launch_waveform_parameters
         )
 
+        # Autofocus Settings
+        self.view.quick_launch.buttons["autofocus_button"].configure(
+            command=self.launch_autofocus_settings
+        )
+
         # Get Widgets from confocal_projection_settings in view
         self.conpro_acq_widgets = self.view.conpro_acq_frame.get_widgets()
         self.conpro_acq_vals = self.view.conpro_acq_frame.get_variables()
@@ -863,8 +868,11 @@ class ChannelsTabController(GUIController):
 
     def launch_waveform_parameters(self):
         """Launches waveform parameters popup."""
-
         self.parent_controller.menu_controller.popup_waveform_setting()
+
+    def launch_autofocus_settings(self):
+        """Launches autofocus settings popup."""
+        self.parent_controller.menu_controller.popup_autofocus_setting()
 
     def launch_tiling_wizard(self):
         """Launches tiling wizard popup.

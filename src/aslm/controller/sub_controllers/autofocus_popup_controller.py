@@ -93,10 +93,8 @@ class AutofocusPopupController(GUIController):
         self.widgets = self.view.get_widgets()
         self.autofocus_fig = self.view.fig
         self.autofocus_coarse = self.view.coarse
-        # self.autofocus_fine = self.view.fine
         self.populate_experiment_values()
         self.coarse_plot = None
-        # self.fine_plot = None
 
         # add saving function to the function closing the window
         exit_func = combine_funcs(
@@ -127,16 +125,33 @@ class AutofocusPopupController(GUIController):
         -------
         None
         """
-        self.setting_dict = self.parent_controller.configuration["experiment"]["AutoFocusParameters"]
+        self.setting_dict = self.parent_controller.configuration["experiment"][
+            "AutoFocusParameters"
+        ]
         # show the value
-        self.microscope_name = self.parent_controller.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+        self.microscope_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
         setting_dict = self.setting_dict[self.microscope_name]
-        device = setting_dict.keys()[0]
-        device_ref = setting_dict[device].keys()[0]
+
+        # Default to stages, if they exist.
+        if "stage" in setting_dict:
+            index = list(setting_dict.keys()).index("stage")
+        else:
+            index = 0
+        device = setting_dict.keys()[index]
         self.widgets["device"].widget["values"] = setting_dict.keys()
         self.widgets["device"].set(device)
+
+        # Default to the f axis, if it exists.
+        if "f" in setting_dict[device]:
+            index = list(setting_dict[device].keys()).index("f")
+        else:
+            index = 0
+        device_ref = setting_dict[device].keys()[index]
         self.widgets["device_ref"].widget["values"] = setting_dict[device].keys()
         self.widgets["device_ref"].set(device_ref)
+
         for k in self.view.setting_vars:
             self.view.setting_vars[k].set(setting_dict[device][device_ref][k])
 
@@ -171,11 +186,11 @@ class AutofocusPopupController(GUIController):
 
     def update_device_ref(self, *args):
         """Update device reference name
-        
+
         Parameters
         ----------
         args: tk event arguments
-        
+
         Returns
         -------
         None
@@ -191,7 +206,7 @@ class AutofocusPopupController(GUIController):
         Parameters
         ----------
         args: tk event arguments
-        
+
         Returns
         -------
         None
@@ -208,15 +223,18 @@ class AutofocusPopupController(GUIController):
         Parameters
         ----------
         var: tk variable reference name
-        
+
         Returns
         -------
         None
         """
+
         def func(*args):
             device = self.widgets["device"].widget.get()
             device_ref = self.widgets["device_ref"].widget.get()
-            self.setting_dict[self.microscope_name][device][device_ref][parameter] = self.view.setting_vars[parameter].get()
+            self.setting_dict[self.microscope_name][device][device_ref][
+                parameter
+            ] = self.view.setting_vars[parameter].get()
 
         return func
 

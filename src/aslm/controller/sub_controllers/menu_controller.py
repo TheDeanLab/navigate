@@ -44,6 +44,7 @@ import subprocess
 from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
 from aslm.view.popups.help_popup import HelpPopup
 from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
+from aslm.view.popups.adaptiveoptics_popup import AdaptiveOpticsPopup
 from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
 from aslm.view.popups.waveform_parameter_popup_window import (
     WaveformParameterPopupWindow,
@@ -58,6 +59,7 @@ from aslm.controller.sub_controllers import (
     MicroscopePopupController,
     FeaturePopupController,
     HelpPopupController,
+    AdaptiveOpticsPopupController,
 )
 from aslm.tools.file_functions import save_yaml_file, load_yaml_file
 from aslm.tools.decorators import FeatureList
@@ -439,6 +441,13 @@ class MenuController(GUIController):
                 "load_feature", self.feature_id_val.get()
             ),
         )
+
+        # add adaptive optics as standalone pop-up for now
+        self.view.menubar.menu_features.add_separator()
+        self.view.menubar.menu_features.add_command(
+            label="Adaptive Optics", command=self.popup_adaptiveoptics
+        )
+
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(
             label="Ilastik Settings", command=self.popup_ilastik_setting

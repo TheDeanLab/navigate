@@ -45,7 +45,7 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-class adaptiveoptics_popup():
+class AdaptiveOpticsPopup():
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window

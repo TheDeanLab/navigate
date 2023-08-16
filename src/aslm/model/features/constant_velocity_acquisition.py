@@ -92,7 +92,7 @@ class ConstantVelocityAcquisition:
         self.asi_stage = self.model.active_microscope.stages[self.axis]
 
         # get the current exposure time for that channel.
-        # exposure_time = float(
+        # exposure_time = float( 
         #     self.model.configuration["experiment"][
         #         "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
         #         "camera_exposure_time"]) / 1000.0

@@ -98,7 +98,6 @@ class Microscope:
         self.is_synthetic = is_synthetic
         self.laser_wavelength = []
         self.ret_pos_dict = {}
-        self.camera_line_interval = None
 
         if is_virtual:
             return
@@ -338,8 +337,6 @@ class Microscope:
                     "readout_direction"
                 ]
             )
-            # Get the camera line interval
-            self.camera_line_interval = self.camera.get_line_interval()
         # set binning
         self.camera.set_binning(
             self.configuration["experiment"]["CameraParameters"]["binning"]
@@ -507,7 +504,7 @@ class Microscope:
             == "Light-Sheet"):
             (
                 self.current_exposure_time,
-                self.camera_line_interval,
+                camera_line_interval,
             ) = self.camera.calculate_light_sheet_exposure_time(
                 self.current_exposure_time,
                 int(
@@ -516,7 +513,7 @@ class Microscope:
                     ]
                 ),
             )
-            self.camera.set_line_interval(self.camera_line_interval)
+            self.camera.set_line_interval(camera_line_interval)
         self.camera.set_exposure_time(self.current_exposure_time)
 
         # Laser Settings

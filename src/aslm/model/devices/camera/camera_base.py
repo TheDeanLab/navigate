@@ -155,3 +155,13 @@ class CameraBase:
 
     def close_camera(self):
         pass
+
+    def get_line_interval(self):
+        """Return stored camera line interval.
+
+        Returns
+        -------
+        line_interval : float
+            line interval duration (s).
+        """
+        return self.camera_parameters.get("line_interval", None)

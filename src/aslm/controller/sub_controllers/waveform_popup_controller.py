@@ -540,18 +540,26 @@ class WaveformPopupController(GUIController):
             # If we are not in the light-sheet mode, widget returns an empty string.
             return
 
-        line_interval = self.parent_controller.configuration["configuration"][
-            "microscopes"
-        ][self.resolution]["camera"].get("line_interval", None)
+        exposure_time = (
+            self.parent_controller.camera_setting_controller.framerate_widgets[
+                "exposure_time"
+            ].get()
+        )
 
-        if line_interval is None:
-            print("Line interval is not defined in the configuration file.")
-            return
+        # The camera line interval won't be set until starting acquisition,
+        # we need to calculate it directly
+        # exposure_time and light_sheet_exposure_time are both ms
+        (
+            light_sheet_exposure_time,
+            _,
+        ) = self.parent_controller.model.get_camera_line_interval_and_exposure_time(
+            exposure_time, int(number_of_pixels)
+        )
 
-        frequency = 2 / (line_interval * float(number_of_pixels))
+        frequency = 2 / light_sheet_exposure_time * exposure_time
 
         # Update the GUI
-        self.view.inputs[galvo_name].widget.set(frequency)
+        self.view.inputs[galvo_name].widget.set(round(frequency, 3))
 
     def update_galvo_setting(self, galvo_name, widget_name, parameter):
         """Update galvo settings in memory.

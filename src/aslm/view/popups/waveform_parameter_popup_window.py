@@ -235,7 +235,7 @@ class WaveformParameterPopupWindow:
                 parent=self.laser_frame,
                 input_class=ValidatedSpinbox,
                 input_var=tk.StringVar(),
-                input_args={"from_": 0, "to": 200, "increment": 0.1},
+                input_args={"from_": 0, "to": 1000, "increment": 0.1},
             )
 
             self.inputs[galvo_labels[i] + " Freq"].grid(
@@ -273,7 +273,7 @@ class WaveformParameterPopupWindow:
         # Padding Entry Widgets
         self.inputs["Delay"].pad_input(60, 0, 0, 0)
         self.inputs["Smoothing"].pad_input(30, 0, 0, 0)
-        self.inputs["Duty"].pad_input(5, 0, 0, 0)
+        self.inputs["Duty"].pad_input(25, 0, 0, 0)
 
     # Getters
     def get_variables(self):

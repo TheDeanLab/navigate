@@ -83,7 +83,6 @@ class CameraBase:
         self.camera_parameters["trigger_mode"] = 1.0
         self.camera_parameters["trigger_polarity"] = 2.0
 
-
         # Initialize offset and variance maps, if present
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
@@ -148,8 +147,21 @@ class CameraBase:
         camera_line_interval = (full_chip_exposure_time / 1000) / (
             shutter_width + self.y_pixels - 1
         )
+
+        self.camera_parameters["line_interval"] = camera_line_interval
+
         exposure_time = camera_line_interval * shutter_width * 1000
         return exposure_time, camera_line_interval
 
     def close_camera(self):
         pass
+
+    def get_line_interval(self):
+        """Return stored camera line interval.
+
+        Returns
+        -------
+        line_interval : float
+            line interval duration (s).
+        """
+        return self.camera_parameters.get("line_interval", None)

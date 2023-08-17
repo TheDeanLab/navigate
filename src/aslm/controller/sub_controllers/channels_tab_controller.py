@@ -117,7 +117,9 @@ class ChannelsTabController(GUIController):
         self.stack_acq_vals["step_size"].trace_add("write", self.update_z_steps)
         self.stack_acq_vals["start_position"].trace_add("write", self.update_z_steps)
         self.stack_acq_vals["end_position"].trace_add("write", self.update_z_steps)
-        self.stack_acq_vals["start_focus"].trace_add("write", self.update_z_steps) # TODO: could be remove later
+        self.stack_acq_vals["start_focus"].trace_add(
+            "write", self.update_z_steps
+        )  # TODO: could be remove later
         self.stack_acq_buttons["set_start"].configure(
             command=self.update_start_position
         )
@@ -154,14 +156,24 @@ class ChannelsTabController(GUIController):
             "write", lambda *args: self.update_timepoint_setting(True)
         )
 
-        # multiposition
+        # Multi Position Acquisition
         self.is_multiposition = False
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(
             command=self.toggle_multiposition
         )
-        self.view.quick_launch.buttons["tiling"].configure(
+        self.view.multipoint_frame.buttons["tiling"].configure(
             command=self.launch_tiling_wizard
+        )
+
+        # Waveform Parameters
+        self.view.quick_launch.buttons["waveform_parameters"].configure(
+            command=self.launch_waveform_parameters
+        )
+
+        # Autofocus Settings
+        self.view.quick_launch.buttons["autofocus_button"].configure(
+            command=self.launch_autofocus_settings
         )
 
         # Get Widgets from confocal_projection_settings in view
@@ -321,7 +333,9 @@ class ChannelsTabController(GUIController):
             "MicroscopeState"
         ]
         if self.microscope_state_dict["step_size"] < 0:
-            self.microscope_state_dict["step_size"] = -self.microscope_state_dict["step_size"]
+            self.microscope_state_dict["step_size"] = -self.microscope_state_dict[
+                "step_size"
+            ]
         self.set_info(self.stack_acq_vals, self.microscope_state_dict)
         self.set_info(self.conpro_acq_vals, self.microscope_state_dict)
         self.set_info(self.timepoint_vals, self.microscope_state_dict)
@@ -334,14 +348,20 @@ class ChannelsTabController(GUIController):
         self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
         self.view.stack_timepoint_frame.exp_time_spinbox.validate()
 
-        if self.microscope_state_dict["stack_cycling_mode"] not in ["per_z", "per_stack"]:
+        if self.microscope_state_dict["stack_cycling_mode"] not in [
+            "per_z",
+            "per_stack",
+        ]:
             self.microscope_state_dict["stack_cycling_mode"] = "per_stack"
         self.stack_acq_vals["cycling"].set(
             "Per Z"
             if self.microscope_state_dict["stack_cycling_mode"] == "per_z"
             else "Per Stack"
         )
-        if self.microscope_state_dict["conpro_cycling_mode"] not in ["per_plane", "per_stack"]:
+        if self.microscope_state_dict["conpro_cycling_mode"] not in [
+            "per_plane",
+            "per_stack",
+        ]:
             self.microscope_state_dict["conpro_cycling_mode"] = "per_plane"
         self.conpro_acq_vals["cycling"].set(
             "Per Plane"
@@ -500,7 +520,9 @@ class ChannelsTabController(GUIController):
         # update experiment MicroscopeState dict
         self.microscope_state_dict["start_position"] = start_position
         self.microscope_state_dict["end_position"] = end_position
-        self.microscope_state_dict["step_size"] = step_size * (-1 if flip_flags["z"] else 1)
+        self.microscope_state_dict["step_size"] = step_size * (
+            -1 if flip_flags["z"] else 1
+        )
         self.microscope_state_dict["number_z_steps"] = number_z_steps
         self.microscope_state_dict["abs_z_start"] = self.stack_acq_vals[
             "abs_z_start"
@@ -510,9 +532,12 @@ class ChannelsTabController(GUIController):
             self.microscope_state_dict["start_focus"] = self.stack_acq_vals[
                 "start_focus"
             ].get()
-        except:
+        except tk._tkinter.TclError:
             self.microscope_state_dict["start_focus"] = 0
-        self.microscope_state_dict["end_focus"] = self.stack_acq_vals["end_focus"].get()
+        try:
+            self.microscope_state_dict["end_focus"] = self.stack_acq_vals["end_focus"].get()
+        except tk._tkinter.TclError:
+            self.microscope_state_dict["end_focus"] = 0
         self.microscope_state_dict["stack_z_origin"] = self.z_origin
         self.microscope_state_dict["stack_focus_origin"] = self.focus_origin
 
@@ -843,6 +868,14 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict["is_multiposition"] = self.is_multiposition
         self.update_timepoint_setting()
         self.show_verbose_info("Multi-position:", self.is_multiposition)
+
+    def launch_waveform_parameters(self):
+        """Launches waveform parameters popup."""
+        self.parent_controller.menu_controller.popup_waveform_setting()
+
+    def launch_autofocus_settings(self):
+        """Launches autofocus settings popup."""
+        self.parent_controller.menu_controller.popup_autofocus_setting()
 
     def launch_tiling_wizard(self):
         """Launches tiling wizard popup.

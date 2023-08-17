@@ -501,8 +501,7 @@ class Microscope:
         self.current_exposure_time = float(channel["camera_exposure_time"])
         if (
             self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
-            == "Light-Sheet"
-        ):
+            == "Light-Sheet"):
             (
                 self.current_exposure_time,
                 camera_line_interval,

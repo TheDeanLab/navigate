@@ -11,7 +11,42 @@ basepath = 'D:\\WaveKitX64'
 
 imop_lib = ct.windll.LoadLibrary(os.path.join(basepath, 'C', 'Lib', 'c_interface_vc100_x64.dll'))
 # mode_names = ['x-tilt','y-tilt','defocus','obliq. asm.','vert. asm.','vert. coma','horiz. coma','vert. tre.','obliq. tre.','spherical','vert. 2nd asm.','horiz. 2nd asm.','vert. quad.','obliq. quad.']
-mode_names = ['piston', 'x-tilt','y-tilt','defocus','obliq. asm.','vert. asm.','vert. coma','horiz. coma','spherical','vert. tre.','obliq. tre.','vert. 2nd asm.','horiz. 2nd asm.','vert. quad.','obliq. quad.']
+# mode_names = ['piston', 'x-tilt','y-tilt','defocus','obliq. asm.','vert. asm.','vert. coma','horiz. coma','spherical','vert. tre.','obliq. tre.','vert. 2nd asm.','horiz. 2nd asm.','vert. quad.','obliq. quad.']
+
+mode_names = [
+    "Vert. Tilt",
+    "Horz. Tilt",
+    "Defocus",
+    "Vert. Asm.",
+    "Oblq. Asm.",
+    "Vert. Coma",
+    "Horz. Coma",
+    "3rd Spherical",
+    "Vert. Tre.",
+    "Horz. Tre.",
+    "Vert. 5th Asm.",
+    "Oblq. 5th Asm.",
+    "Vert. 5th Coma",
+    "Horz. 5th Coma",
+    "5th Spherical",
+    "Vert. Tetra.",
+    "Oblq. Tetra.",
+    "Vert. 7th Tre.",
+    "Horz. 7th Tre.",
+    "Vert. 7th Asm.",
+    "Oblq. 7th Asm.",
+    "Vert. 7th Coma",
+    "Horz. 7th Coma",
+    "7th Spherical",
+    "Vert. Penta.",
+    "Horz. Penta.",
+    "Vert. 9th Tetra.",
+    "Oblq. 9th Tetra.",
+    "Vert. 9th Tre.",
+    "Horz. 9th Tre.",
+    "Vert. 9th Asm.",
+    "Oblq. 9th Asm."
+    ]
 
 """
     MODE NAMES:
@@ -277,8 +312,9 @@ class IMOP_Mirror:
             mode_save_path = wcs_save_path.split('.')[0] + '.json'
             coefs, coef_inds = self.get_modal_coefs()
             mode_dict = {}
-            for i, c_idx in enumerate(coef_inds):
-                mode_dict[mode_names[c_idx]] = f'{coefs[i]:.4f}'
+            # for i, c_idx in enumerate(coef_inds):
+            for c in coef_inds:
+                mode_dict[mode_names[c-1]] = f'{coefs[c-1]:.4f}'
  
             import json
             with open(mode_save_path, 'w') as f:

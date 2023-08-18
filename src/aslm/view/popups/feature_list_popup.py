@@ -77,7 +77,7 @@ class FeatureConfigPopup:
         self.parameter_frame = ttk.Frame(content_frame)
         self.parameter_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=30, pady=30)
         
-        self.build_widgets(args_name, args_value, kwargs["parameter_config"])
+        self.build_widgets(args_name, args_value, kwargs.get("parameter_config", {}))
 
     def build_widgets(self, args_name, args_value, parameter_config=None):
         self.inputs = []

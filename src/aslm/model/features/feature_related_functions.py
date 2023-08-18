@@ -131,12 +131,10 @@ def convert_feature_list_to_str(feature_list):
                             result += "None,"
                         elif callable(temp):
                             result += f'"{temp.__name__}",'
-                        elif type(temp) is dict:
-                            result += f"{temp},"
-                        elif type(temp) is SharedList:
-                            result += f"{temp},"
-                        else:
+                        elif type(temp) is str:
                             result += f'"{temp}",'
+                        else:
+                            result += f"{temp},"
                     result += ")"
                 result += '},'
             elif type(item) is tuple:

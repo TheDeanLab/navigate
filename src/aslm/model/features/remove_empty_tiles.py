@@ -30,12 +30,20 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-from aslm.model.analysis.boundary_detect import has_tissue
+from math import ceil
 
-def detect_tissue(image_data):
-    return has_tissue(image_data, 0, 0, image_data.shape[0], image_data.shape[1])
+from aslm.model.analysis.boundary_detect import find_tissue_boundary_2d
 
-def detect_tissue2(image_data):
+def detect_tissue(image_data, percentage=0.0):
+    width = 50
+    boundary = find_tissue_boundary_2d(image_data, width)
+    tissue_squares = 0
+    for row in boundary:
+        if row:
+            tissue_squares += row[1] - row[0] + 1
+    return tissue_squares / (ceil(image_data.shape[0]/width) * ceil(image_data.shape[1]/width)) > percentage
+
+def detect_tissue2(image_data, percentage=0.0):
     return False
 
 class DetectTissueInStack:
@@ -100,28 +108,20 @@ class DetectTissueInStack:
         return False
 
     def pre_func_data(self):
-        # calculate non-tissue ratio
-        self.non_tissue_ratio = 1 - self.percentage
         self.received_frames = 0
-        self.non_tissue_num = 0
         self.has_tissue_flag = False
 
     def in_func_data(self, frame_ids):
         if not self.stop_flag:
-            for i, frame_id in enumerate(frame_ids):
+            for frame_id in frame_ids:
                 # check if the frame has tissue
-                r = self.detect_func(self.model.data_buffer[frame_id])
-                if not r:
-                    self.non_tissue_num += 1
-                if (self.non_tissue_num / self.planes > self.non_tissue_ratio):
-                    self.stop_flag = True
-                    break
-                elif (self.received_frames+i+1-self.non_tissue_num)/self.planes >= self.percentage:
-                    self.stop_flag = True
+                r = self.detect_func(self.model.data_buffer[frame_id], self.percentage)
+                if r:
                     self.has_tissue_flag = True
+                    self.stop_flag = True
                     break
         self.received_frames += len(frame_ids)
-        return not self.stop_flag
+        return self.has_tissue_flag
 
     def end_func_data(self):
         return self.stop_signal_flag and self.received_frames >= self.scan_num

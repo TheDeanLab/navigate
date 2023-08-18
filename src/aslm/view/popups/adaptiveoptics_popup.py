@@ -35,8 +35,6 @@ import tkinter as tk
 from tkinter import ttk
 from aslm.view.custom_widgets.popup import PopUp
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from aslm.view.custom_widgets.scrollbars import ScrolledFrame
-from aslm.view.custom_widgets import DockableNotebook
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -45,6 +43,26 @@ import logging
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
+class ScrollFrame(ttk.Frame):
+    def __init__(self, parent):
+
+        tk.Frame.__init__(self, parent)
+        self.canvas = tk.Canvas(self, borderwidth=1)
+        self.frame = tk.Frame(self.canvas)
+        self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.vsb.set, width=200)
+        
+        self.vsb.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="y", expand=False)
+        self.canvas.create_window(0, 0, window=self.frame, anchor="nw",
+                                  tags="self.frame")
+        
+        self.frame.bind("<Configure>", self.onFrameConfigure)
+
+    def onFrameConfigure(self, event):
+        '''Reset the scroll region to encompass the inner frame'''
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
 class AdaptiveOpticsPopup():
     def __init__(self, root, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
@@ -52,7 +70,7 @@ class AdaptiveOpticsPopup():
         self.popup = PopUp(
             root,
             "Adaptive Optics",
-            '1050x880+320+180',
+            '1100x550+320+180',
             top=False,
             transient=False)
 
@@ -129,8 +147,11 @@ class AdaptiveOpticsPopup():
         tw_start_from_combo.current(0)
         self.inputs['from'] = {'button': tw_start_from_combo, 'variable': tw_start_from_var}
 
+        control_frame = ttk.Frame(content_frame)
+        control_frame.grid(row=0, column=0)
+
         # Buttons
-        button_frame = ttk.Frame(master=content_frame)
+        button_frame = ttk.Frame(control_frame)
         button_frame.grid(row=0, column=0)
 
         self.set_button = ttk.Button(button_frame, text='Set', width=15)
@@ -140,32 +161,31 @@ class AdaptiveOpticsPopup():
         self.zero_button = ttk.Button(button_frame, text='Zero', width=15)
         self.zero_button.grid(row=2, column=0, pady=5)
         self.save_wcs_button = ttk.Button(button_frame, text='Save WCS File', width=15)
-        self.save_wcs_button.grid(row=3, column=0, pady=5)
+        self.save_wcs_button.grid(row=0, column=1, pady=5)
         self.from_wcs_button = ttk.Button(button_frame, text='From WCS File', width=15)
-        self.from_wcs_button.grid(row=4, column=0, pady=5)
+        self.from_wcs_button.grid(row=1, column=1, pady=5)
         self.select_all_modes = ttk.Button(button_frame, text='Select All', width=15)
-        self.select_all_modes.grid(row=5, column=0, pady=5)
+        self.select_all_modes.grid(row=2, column=1, pady=5)
 
-        # self.mode_frame = ScrolledFrame(parent=content_frame)
-        self.mode_frame = ttk.Frame(master=content_frame, height=100)
-        self.mode_frame.grid(row=1, column=0, rowspan=10, padx=5, pady=5)
+        scroll = ScrollFrame(control_frame)
         
         for i in range(self.n_modes):
             mode_name = self.mode_names[i]
 
-            self.mode_labels[mode_name] = ttk.Label(self.mode_frame, text=self.mode_names[i])
+            self.mode_labels[mode_name] = ttk.Label(scroll.frame, text=self.mode_names[i])
             self.mode_labels[mode_name].grid(row=i, column=0)
 
             mode_check_var = tk.BooleanVar()
             mode_check_var.set(False)
-            mode_check = ttk.Checkbutton(self.mode_frame, variable=mode_check_var)
+            mode_check = ttk.Checkbutton(scroll.frame, variable=mode_check_var)
             mode_check.grid(row=i, column=1)
             self.modes_armed[mode_name] = {'button': mode_check, 'variable': mode_check_var}
             
-            self.inputs[mode_name] = LabelInput(self.mode_frame, input_args={'width': 10})
+            self.inputs[mode_name] = LabelInput(scroll.frame, input_args={'width': 10})
             self.inputs[mode_name].set(0.0)
-            self.inputs[mode_name].grid(row=i, column=2, padx=2, pady=5)
-        
+            self.inputs[mode_name].grid(row=i, column=2)
+
+        scroll.grid(row=1, column=0)
 
         self.plot_frame = ttk.Frame(master=content_frame)
         self.plot_frame.grid(row=0, column=1, rowspan=2)
@@ -193,6 +213,9 @@ class AdaptiveOpticsPopup():
         self.camera_list['values'] = ('cam_0', 'cam_1')
         self.camera_list.grid(row=0, column=0, padx=10, pady=10)
         self.camera_list.current(0)
+
+    def onFrameConfigure(self, event):
+        self.canvas.configure(scrollregion=self.canvas.bbox('all'))
 
     def get_widgets(self):
         return self.inputs

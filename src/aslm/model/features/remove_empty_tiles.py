@@ -35,6 +35,9 @@ from aslm.model.analysis.boundary_detect import has_tissue
 def detect_tissue(image_data):
     return has_tissue(image_data, 0, 0, image_data.shape[0], image_data.shape[1])
 
+def detect_tissue2(image_data):
+    return False
+
 class DetectTissueInStack:
     def __init__(self, model, planes=1, percentage=0.75, detect_func=None):
         self.model = model

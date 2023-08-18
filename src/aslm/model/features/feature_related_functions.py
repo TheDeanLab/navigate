@@ -127,7 +127,9 @@ def convert_feature_list_to_str(feature_list):
                 if "args" in item:
                     result += '"args": ('
                     for temp in item["args"]:
-                        if callable(temp):
+                        if temp is None:
+                            result += "None,"
+                        elif callable(temp):
                             result += f'"{temp.__name__}",'
                         elif type(temp) is dict:
                             result += f"{temp},"
@@ -149,3 +151,41 @@ def convert_feature_list_to_str(feature_list):
     f(feature_list)
     result += ']'
     return result
+
+
+def load_dynamic_parameter_functions(feature_list: list, feature_parameter_setting_path: str):
+    import os
+    import inspect
+    import importlib
+    from aslm.tools.file_functions import load_yaml_file
+    from aslm.tools.common_functions import load_module_from_file
+
+    for item in feature_list:
+        if type(item) is dict:
+            if "args" in item:
+                feature = item["name"]
+                if not hasattr(feature, "__parameter_config"):
+                    config_path = f"{feature_parameter_setting_path}/{feature.__name__}.yml"
+                    parameter_config = None
+                    if os.path.exists(config_path):
+                        parameter_config = load_yaml_file(config_path)
+                    feature.__parameter_config = parameter_config
+                else:
+                    parameter_config = feature.__parameter_config
+                if parameter_config:
+                    args = list(item["args"])
+                    spec = inspect.getfullargspec(feature)
+                    for parameter in parameter_config:
+                        args_names = list(spec.args[2:])
+                        idx = args_names.index(parameter)
+                        ref_lib = parameter_config[parameter][args[idx]]
+                        if ref_lib is None or ref_lib == "None":
+                            args[idx] = None
+                        elif os.path.exists(ref_lib):
+                            args[idx] = load_module_from_file(args[idx], ref_lib)
+                        else:
+                            module = importlib.import_module(ref_lib)
+                            args[idx] = getattr(module, args[idx])
+                    item["args"] = tuple(args)
+        else:
+            load_dynamic_parameter_functions(item, feature_parameter_setting_path)

@@ -70,6 +70,7 @@ from aslm.model.features.feature_related_functions import (
     convert_str_to_feature_list,
     convert_feature_list_to_str,
     SharedList,
+    load_dynamic_parameter_functions,
 )
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_stage_dict
@@ -606,6 +607,7 @@ class Model:
                         )
 
                     self.addon_feature = self.feature_list[args[0] - 1]
+                    load_dynamic_parameter_functions(self.addon_feature, f"{get_aslm_path()}/config/feature_parameter_setting")
                     self.signal_container, self.data_container = load_features(
                         self, self.addon_feature
                     )

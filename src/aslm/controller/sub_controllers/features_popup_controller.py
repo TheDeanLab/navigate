@@ -34,14 +34,16 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import inspect
 import json
+import os
 
 from aslm.view.popups.feature_list_popup import FeatureIcon, FeatureConfigPopup
 from aslm.view.custom_widgets.ArrowLabel import ArrowLabel
 from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.tools.common_functions import combine_funcs
 from aslm.tools.image import create_arrow_image
+from aslm.tools.file_functions import load_yaml_file
 from aslm.model.features.feature_related_functions import convert_str_to_feature_list
 from aslm.model.features import feature_related_functions
+from aslm.config.config import get_aslm_path
 
 class FeaturePopupController(GUIController):
     def __init__(self, view, parent_controller, feature_list_id=0):
@@ -220,6 +222,11 @@ class FeaturePopupController(GUIController):
         feature = self.features[idx]
 
         def func(event):
+            # load feature parameter setting
+            feature_config_path = f"{get_aslm_path()}/config/feature_parameter_setting/{feature['name'].__name__}.yml"
+            feature_parameter_config = None
+            if os.path.exists(feature_config_path):
+                feature_parameter_config = load_yaml_file(feature_config_path)
             spec = inspect.getfullargspec(feature["name"])
             if spec.defaults:
                 args_value = list(spec.defaults)
@@ -230,7 +237,7 @@ class FeaturePopupController(GUIController):
                     args_value[i] = a
             popup = FeatureConfigPopup(self.view.popup, features=self.feature_names,
                            feature_name=feature["name"].__name__, args_name=spec.args[2:],
-                           args_value=args_value, title="Feature Parameters")
+                           args_value=args_value, title="Feature Parameters", parameter_config=feature_parameter_config)
             popup.feature_name_widget.widget.bind("<<ComboboxSelected>>",
                     lambda event: refresh_parameters(popup))
             
@@ -238,8 +245,14 @@ class FeaturePopupController(GUIController):
             
         def refresh_parameters(popup):
             feature_name = popup.feature_name_widget.get()
-            spec = inspect.getfullargspec(getattr(feature_related_functions, feature_name))
-            popup.build_widgets(feature_name, spec.args[2:], spec.defaults)
+            new_feature = getattr(feature_related_functions, feature_name)
+            # load feature parameter setting
+            feature_config_path = f"{get_aslm_path()}/config/feature_parameter_setting/{new_feature.__name__}.yml"
+            feature_parameter_config = None
+            if os.path.exists(feature_config_path):
+                feature_parameter_config = load_yaml_file(feature_config_path)
+            spec = inspect.getfullargspec(new_feature)
+            popup.build_widgets(spec.args[2:], spec.defaults, feature_parameter_config)
 
         def update_feature_parameters(popup):
             widgets = popup.get_widgets()

@@ -77,9 +77,9 @@ class FeatureConfigPopup:
         self.parameter_frame = ttk.Frame(content_frame)
         self.parameter_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=30, pady=30)
         
-        self.build_widgets(feature_name, args_name, args_value)
+        self.build_widgets(args_name, args_value, kwargs["parameter_config"])
 
-    def build_widgets(self, feature_name, args_name, args_value):
+    def build_widgets(self, args_name, args_value, parameter_config=None):
         self.inputs = []
         self.inputs_type = []
 
@@ -91,6 +91,10 @@ class FeatureConfigPopup:
             arg_input_var = tk.StringVar
             if type(args_value[i]) is bool:
                 arg_input_class = ttk.Combobox
+                values = ["True", "False"]
+            elif parameter_config is not None and arg_name in parameter_config:
+                arg_input_class = ttk.Combobox
+                values = list(parameter_config[arg_name].keys())
 
             temp = LabelInput(
                 parent=self.parameter_frame,
@@ -105,7 +109,7 @@ class FeatureConfigPopup:
             self.inputs_type.append(type(args_value[i]))
             temp.grid(row=i+2, column=0, sticky=tk.NSEW, padx=30, pady=10)
             if arg_input_class is ttk.Combobox:
-                temp.set_values(["True", "False"])
+                temp.set_values(values)
             temp.set(str(args_value[i]))
 
     def get_widgets(self):

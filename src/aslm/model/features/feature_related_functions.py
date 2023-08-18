@@ -176,8 +176,9 @@ def load_dynamic_parameter_functions(feature_list: list, feature_parameter_setti
                     args = list(item["args"])
                     spec = inspect.getfullargspec(feature)
                     for parameter in parameter_config:
-                        args_names = list(spec.args[2:])
-                        idx = args_names.index(parameter)
+                        idx = spec.args[2:].index(parameter)
+                        if idx >= len(args):
+                            continue
                         ref_lib = parameter_config[parameter][args[idx]]
                         if ref_lib is None or ref_lib == "None":
                             args[idx] = None

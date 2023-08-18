@@ -271,6 +271,7 @@ class Model:
         records = SharedList([], "records")
         self.feature_list.append(
             [
+                {"name": PrepareNextChannel},
                 (
                     {"name": MoveToNextPositionInMultiPostionTable},
                     # {"name": CalculateFocusRange},

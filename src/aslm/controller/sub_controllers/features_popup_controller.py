@@ -33,6 +33,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import inspect
+import json
 
 from aslm.view.popups.feature_list_popup import FeatureIcon, FeatureConfigPopup
 from aslm.view.custom_widgets.ArrowLabel import ArrowLabel
@@ -49,14 +50,15 @@ class FeaturePopupController(GUIController):
         self.features = []
         self.feature_structure = []
 
-        self.view.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
-
         self.view.buttons["preview"].configure(command=self.draw_feature_list_graph)
         if "add" in self.view.buttons:
             self.view.buttons["add"].configure(command=self.add_feature_list)
+            self.view.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
+            self.view.buttons["cancel"].configure(command=self.exit_func)
         elif "confirm" in self.view.buttons:
             self.view.buttons["confirm"].configure(command=self.update_feature_list)
-        self.view.buttons["cancel"].configure(command=self.exit_func)
+            self.view.popup.protocol("WM_DELETE_WINDOW", self.cancel_acquisition)
+            self.view.buttons["cancel"].configure(command=self.cancel_acquisition)
 
         # get all feature names
         self.feature_names = []
@@ -199,11 +201,13 @@ class FeaturePopupController(GUIController):
                             arg_str += str(a)
                         elif type(a) is int or type(a) is float:
                             arg_str += str(a)
+                        elif type(a) is dict:
+                            arg_str += str(a)
                         else:
                             try:
                                 float(a)
                                 arg_str += a
-                            except ValueError:
+                            except (ValueError, TypeError) as e:
                                 arg_str += f'"{a}"'
                         arg_str += ","
                     content += f', "args": ({arg_str})'
@@ -248,6 +252,10 @@ class FeaturePopupController(GUIController):
                         feature["args"][i] = True
                     elif a == "False":
                         feature["args"][i] = False
+                    elif popup.inputs_type[i] is float:
+                        feature["args"][i] = float(a)
+                    elif popup.inputs_type[i] is dict:
+                        feature["args"][i] = json.loads(a.replace("'", '"'))
             # update text
             self.view.inputs["content"].delete("1.0", tk.END)
             self.view.inputs["content"].insert("1.0", self.build_feature_list_text())
@@ -368,7 +376,8 @@ class FeaturePopupController(GUIController):
         content = self.view.inputs["content"].get("1.0", "end-1c")
         feature_list_content = "".join(content.split("\n"))
         self.parent_controller.model.run_command("load_feature", self.feature_list_id, feature_list_content)
-        self.exit_func()
+        self.start_acquisiton_flag = True
+        self.view.popup.dismiss()
 
     def verify_feature_list(self):
         content = self.view.inputs["content"].get("1.0", "end-1c")
@@ -381,3 +390,7 @@ class FeaturePopupController(GUIController):
     def exit_func(self):
         self.view.popup.dismiss()
         delattr(self.parent_controller, "features_popup_controller")
+
+    def cancel_acquisition(self):
+        self.start_acquisiton_flag = False
+        self.view.popup.dismiss()

@@ -59,12 +59,17 @@ from aslm.model.features.common_features import (
     MoveToNextPositionInMultiPostionTable,
     WaitToContinue,
 )
+from aslm.model.features.remove_empty_tiles import (
+    DetectTissueInStackAndRecord,
+    RemoveEmptyPositions,
+)
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
 from aslm.model.features.volume_search import VolumeSearch
 from aslm.model.features.feature_related_functions import (
     convert_str_to_feature_list,
     convert_feature_list_to_str,
+    SharedList,
 )
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_stage_dict
@@ -152,7 +157,7 @@ class Model:
         self.img_height = int(
             self.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
         )
-        self.binning =  "1x1"
+        self.binning = "1x1"
         self.data_buffer_positions = None
         self.is_acquiring = False
 
@@ -263,6 +268,29 @@ class Model:
             ]
         )
 
+        records = SharedList([], "records")
+        self.feature_list.append(
+            [
+                (
+                    {"name": MoveToNextPositionInMultiPostionTable},
+                    # {"name": CalculateFocusRange},
+                    {
+                        "name": DetectTissueInStackAndRecord,
+                        "args": (
+                            5,
+                            0.75,
+                            records,
+                        ),
+                    },
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.multiposition_count",),
+                    },
+                ),
+                {"name": RemoveEmptyPositions, "args": (records,)},
+            ]
+        )
+
         self.acquisition_modes_feature_setting = {
             "single": [
                 (
@@ -322,7 +350,10 @@ class Model:
         )  # z-index, x, y, z, theta, f
         for microscope_name in self.microscopes:
             self.microscopes[microscope_name].update_data_buffer(
-                self.configuration["experiment"]["CameraParameters"]["x_pixels"], self.configuration["experiment"]["CameraParameters"]["y_pixels"], self.data_buffer, self.number_of_frames
+                self.configuration["experiment"]["CameraParameters"]["x_pixels"],
+                self.configuration["experiment"]["CameraParameters"]["y_pixels"],
+                self.data_buffer,
+                self.number_of_frames,
             )
 
     def get_data_buffer(self, img_width=512, img_height=512):
@@ -343,7 +374,12 @@ class Model:
         data_buffer : SharedNDArray
             Shared memory object.
         """
-        if img_width != self.img_width or img_height != self.img_height or self.configuration["experiment"]["CameraParameters"]["binning"] != self.binning:
+        if (
+            img_width != self.img_width
+            or img_height != self.img_height
+            or self.configuration["experiment"]["CameraParameters"]["binning"]
+            != self.binning
+        ):
             self.update_data_buffer(img_width, img_height)
         return self.data_buffer
 
@@ -799,7 +835,7 @@ class Model:
                     # Camera timeout, abort acquisition.
                     break
                 continue
-            
+
             wait_num = self.camera_wait_iterations
 
             # Leave it here for now to work with current ImageWriter workflow

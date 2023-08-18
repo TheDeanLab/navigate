@@ -46,6 +46,25 @@ from aslm.model.features.common_features import (
 from aslm.model.features.image_writer import ImageWriter # noqa
 from aslm.model.features.restful_features import IlastikSegmentation # noqa
 from aslm.model.features.volume_search import VolumeSearch # noqa
+from aslm.model.features.remove_empty_tiles import (
+    DetectTissueInStack, # noqa
+    DetectTissueInStackAndRecord, # noqa
+    RemoveEmptyPositions, # noqa
+)
+
+class SharedList(list):
+    def __init__(self, value, name=None):
+        super().__init__(value)
+        if name is None:
+            name = "shared_list__"
+        self.__name__ = name
+
+    def __str__(self):
+        return str({
+            "type": "shared_list", 
+            "name": self.__name__,
+            "value": self
+        })
 
 def convert_str_to_feature_list(content: str):
     """Convert string to a feature list
@@ -106,7 +125,17 @@ def convert_feature_list_to_str(feature_list):
             if type(item) is dict:
                 result += '{' + f'"name": {item["name"].__name__},'
                 if "args" in item:
-                    result += f'"args": {str(item["args"])}'
+                    result += '"args": ('
+                    for temp in item["args"]:
+                        if callable(temp):
+                            result += f'"{temp.__name__}",'
+                        elif type(temp) is dict:
+                            result += f"{temp},"
+                        elif type(temp) is SharedList:
+                            result += f"{temp},"
+                        else:
+                            result += f'"{temp}",'
+                    result += ")"
                 result += '},'
             elif type(item) is tuple:
                 result += '('

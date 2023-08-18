@@ -81,6 +81,7 @@ class FeatureConfigPopup:
 
     def build_widgets(self, feature_name, args_name, args_value):
         self.inputs = []
+        self.inputs_type = []
 
         for child in self.parameter_frame.winfo_children():
             child.destroy()
@@ -101,6 +102,7 @@ class FeatureConfigPopup:
             )
 
             self.inputs.append(temp)
+            self.inputs_type.append(type(args_value[i]))
             temp.grid(row=i+2, column=0, sticky=tk.NSEW, padx=30, pady=10)
             if arg_input_class is ttk.Combobox:
                 temp.set_values(["True", "False"])

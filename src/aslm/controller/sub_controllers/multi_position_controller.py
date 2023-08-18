@@ -337,3 +337,16 @@ class MultiPositionController(GUIController):
         self.table.redraw()
         self.table.tableChanged()
         self.show_verbose_info("add current stage position to position list")
+
+    def remove_positions(self, position_flag_list):
+        """Remove positions according to position_flag_list
+
+        Parameters
+        ----------
+        position_flag_list : list[bool]
+            False: the position should be removed
+            True: the position should be kept
+        """
+        positions = self.get_positions()
+        new_positions = [p for i, p in enumerate(positions) if position_flag_list[i]]
+        self.set_positions(new_positions)

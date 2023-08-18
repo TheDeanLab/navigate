@@ -105,7 +105,7 @@ class AutofocusPopup:
 
         self.inputs["device"] = LabelInput(
             parent=device_frame,
-            label="Device",
+            label="Device Type",
             input_class=ttk.Combobox,
             input_var=tk.StringVar(),
             input_args={"width": 20},

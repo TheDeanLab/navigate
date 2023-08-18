@@ -100,7 +100,6 @@ class CameraSettingController(GUIController):
 
         # Readout Mode
         self.mode_widgets["Readout"].widget["values"] = [
-            " ",
             "Top-to-Bottom",
             "Bottom-to-Top",
         ]
@@ -277,7 +276,7 @@ class CameraSettingController(GUIController):
             self.mode_widgets["Readout"].widget["state"] = "readonly"
             self.mode_widgets["Pixels"].set(
                 self.camera_setting_dict["number_of_pixels"]
-            )  # Default to 10 pixels
+            )
             self.mode_widgets["Pixels"].widget.trigger_focusout_validation()
             self.mode_widgets["Pixels"].widget["state"] = "normal"
 

@@ -96,37 +96,37 @@ class ChannelsTab(tk.Frame):
         # Channel Settings
         self.channel_widgets_frame = ChannelCreator(self)
         self.channel_widgets_frame.grid(
-            row=0, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10
+            row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
         # Stack Acquisition Settings
         self.stack_acq_frame = StackAcquisitionFrame(self)
         self.stack_acq_frame.grid(
-            row=1, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10
+            row=1, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
         # Time Settings
         self.stack_timepoint_frame = StackTimePointFrame(self)
         self.stack_timepoint_frame.grid(
-            row=3, column=0, columnspan=3, sticky=(tk.NSEW), padx=10, pady=10
+            row=3, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
         # Multipoint Enable
         self.multipoint_frame = MultiPointFrame(self)
         self.multipoint_frame.grid(
-            row=4, column=0, columnspan=1, sticky=(tk.NSEW), padx=10, pady=10
+            row=4, column=0, columnspan=1, sticky=tk.NSEW, padx=10, pady=10
         )
 
         # Quick Launch Buttons
         self.quick_launch = QuickLaunchFrame(self)
         self.quick_launch.grid(
-            row=4, column=1, columnspan=2, sticky=(tk.NSEW), padx=10, pady=10
+            row=4, column=1, columnspan=2, sticky=tk.NSEW, padx=10, pady=10
         )
 
         # Confocal Projection Settings
         self.conpro_acq_frame = ConfocalProjectionFrame(self)
         self.conpro_acq_frame.grid(
-            row=5, column=0, columnspan=2, sticky=(tk.NSEW), padx=10, pady=10
+            row=5, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
 
@@ -612,21 +612,19 @@ class StackTimePointFrame(ttk.Labelframe):
 
         # Save Data Label
         self.laser_label = ttk.Label(self, text="Save Data")
-        self.laser_label.grid(
-            row=0, column=0, sticky=(tk.NSEW), padx=(4, 5), pady=(4, 0)
-        )
+        self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 5), pady=(4, 0))
 
         # Save Data Checkbox
         self.save_data = tk.BooleanVar()
         self.save_data.set(False)
         self.save_check = ttk.Checkbutton(self, text="", variable=self.save_data)
-        self.save_check.grid(row=0, column=1, sticky=(tk.NSEW), pady=(4, 0))
+        self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 0))
         self.inputs["save_check"] = self.save_check
 
         # Timepoints Label, spinbox defaults to 1.
         self.filterwheel_label = ttk.Label(self, text="Timepoints")
         self.filterwheel_label.grid(
-            row=1, column=0, sticky=(tk.NSEW), padx=(4, 5), pady=2
+            row=1, column=0, sticky=tk.NSEW, padx=(4, 5), pady=2
         )
         self.exp_time_spinval = tk.StringVar()
         self.exp_time_spinbox = ttk.Spinbox(
@@ -637,12 +635,12 @@ class StackTimePointFrame(ttk.Labelframe):
             increment=1,
             width=3,
         )
-        self.exp_time_spinbox.grid(row=1, column=1, sticky=(tk.NSEW), pady=2)
+        self.exp_time_spinbox.grid(row=1, column=1, sticky=tk.NSEW, pady=2)
         self.inputs["time_spin"] = self.exp_time_spinbox
 
         # Stack Acq. Time Label
         self.exp_time_label = ttk.Label(self, text="Stack Acq. Time")
-        self.exp_time_label.grid(row=2, column=0, sticky=(tk.NSEW), padx=(4, 5), pady=2)
+        self.exp_time_label.grid(row=2, column=0, sticky=tk.NSEW, padx=(4, 5), pady=2)
 
         # Stack Acq. Time Spinbox
         self.stack_acq_spinval = tk.StringVar()
@@ -654,12 +652,12 @@ class StackTimePointFrame(ttk.Labelframe):
             increment=25,
             width=6,
         )
-        self.stack_acq_spinbox.grid(row=2, column=1, sticky=(tk.NSEW), pady=2)
+        self.stack_acq_spinbox.grid(row=2, column=1, sticky=tk.NSEW, pady=2)
         self.stack_acq_spinbox.state(["disabled"])  # Starts it disabled
 
         # Stack Pause Label
         self.exp_time_label = ttk.Label(self, text="Stack Pause (s)")
-        self.exp_time_label.grid(row=0, column=2, sticky=(tk.NSEW), padx=(4, 5), pady=2)
+        self.exp_time_label.grid(row=0, column=2, sticky=tk.NSEW, padx=(4, 5), pady=2)
 
         # Stack Pause Spinbox
         self.stack_pause_spinval = tk.StringVar()
@@ -671,12 +669,12 @@ class StackTimePointFrame(ttk.Labelframe):
             increment=25,
             width=6,
         )
-        self.stack_pause_spinbox.grid(row=0, column=3, sticky=(tk.NSEW), pady=2)
+        self.stack_pause_spinbox.grid(row=0, column=3, sticky=tk.NSEW, pady=2)
         self.inputs["stack_pause"] = self.stack_pause_spinbox
 
         # Timepoint Interval Label
         self.exp_time_label = ttk.Label(self, text="Timepoint Interval (hh:mm:ss)")
-        self.exp_time_label.grid(row=1, column=2, sticky=(tk.NSEW), padx=(4, 5), pady=2)
+        self.exp_time_label.grid(row=1, column=2, sticky=tk.NSEW, padx=(4, 5), pady=2)
 
         # Timepoint Interval Spinbox
         self.timepoint_interval_spinval = tk.StringVar()
@@ -690,13 +688,13 @@ class StackTimePointFrame(ttk.Labelframe):
             increment=25,
             width=6,
         )
-        self.timepoint_interval_spinbox.grid(row=1, column=3, sticky=(tk.NSEW), pady=2)
+        self.timepoint_interval_spinbox.grid(row=1, column=3, sticky=tk.NSEW, pady=2)
         self.timepoint_interval_spinbox.state(["disabled"])  # Starts it disabled
 
         # Total Time Label
         self.exp_time_label = ttk.Label(self, text="Experiment Duration (hh:mm:ss)")
         self.exp_time_label.grid(
-            row=2, column=2, sticky=(tk.NSEW), padx=(4, 5), pady=(2, 6)
+            row=2, column=2, sticky=tk.NSEW, padx=(4, 5), pady=(2, 6)
         )
 
         # Total Time Spinbox
@@ -711,7 +709,7 @@ class StackTimePointFrame(ttk.Labelframe):
             increment=25,
             width=6,
         )
-        self.total_time_spinval.grid(row=2, column=3, sticky=(tk.NSEW), pady=(2, 6))
+        self.total_time_spinval.grid(row=2, column=3, sticky=tk.NSEW, pady=(2, 6))
         self.total_time_spinval.state(["disabled"])
 
     # Getters
@@ -762,12 +760,19 @@ class MultiPointFrame(ttk.Labelframe):
 
         # Save Data Label
         self.laser_label = ttk.Label(self, text="Enable")
-        self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6))
+        self.laser_label.grid(row=0, column=0, sticky=tk.NSEW, padx=(4, 4), pady=(4, 4))
 
         # Save Data Checkbox
         self.on_off = tk.BooleanVar()
         self.save_check = ttk.Checkbutton(self, text="", variable=self.on_off)
-        self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 6))
+        self.save_check.grid(row=0, column=1, sticky=tk.NSEW, pady=(4, 4))
+
+        # Tiling Wizard Button
+        self.buttons = {}
+        self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
+        self.buttons["tiling"].grid(
+            row=0, column=2, sticky=tk.NSEW, padx=(10, 0), pady=(4, 4)
+        )
 
     def get_variables(self):
         """Returns a dictionary of all the variables that are tied to each widget name.
@@ -838,10 +843,18 @@ class QuickLaunchFrame(ttk.Labelframe):
         tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Tiling Wizard Button
-        self.buttons = {}
-        self.buttons["tiling"] = ttk.Button(self, text="Launch Tiling Wizard")
-        self.buttons["tiling"].grid(
-            row=0, column=2, sticky=(tk.NSEW), padx=(10, 0), pady=(4, 6)
+        self.buttons = {
+            "waveform_parameters": ttk.Button(self, text="Waveform Parameters")
+        }
+
+        self.buttons["waveform_parameters"].grid(
+            row=0, column=2, sticky=tk.NSEW, padx=(4, 4), pady=(4, 4)
+        )
+
+        self.buttons["autofocus_button"] = ttk.Button(self, text="Autofocus Settings")
+
+        self.buttons["autofocus_button"].grid(
+            row=1, column=2, sticky=tk.NSEW, padx=(4, 4), pady=(4, 4)
         )
 
 
@@ -897,8 +910,8 @@ class ConfocalProjectionFrame(ttk.Labelframe):
         self.cycling = ttk.Frame(self)
 
         # Gridding Each Holder Frame
-        self.pos_slice.grid(row=0, column=0, sticky=(tk.NSEW))
-        self.cycling.grid(row=1, column=0, sticky=(tk.NSEW))
+        self.pos_slice.grid(row=0, column=0, sticky=tk.NSEW)
+        self.cycling.grid(row=1, column=0, sticky=tk.NSEW)
 
         # ScanRange Label, Spinbox
         self.scanrange_label = ttk.Label(self.pos_slice, text="Scan Range")

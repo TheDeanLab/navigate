@@ -353,6 +353,7 @@ class Controller:
         self.menu_controller.disable_stage_limits.set(
             0 if self.configuration["experiment"]["StageParameters"]["limits"] else 1
         )
+        self.execute("stage_limits", self.configuration["experiment"]["StageParameters"]["limits"])
 
         self.acquire_bar_controller.populate_experiment_values()
         # self.stage_controller.populate_experiment_values()
@@ -557,6 +558,7 @@ class Controller:
                 }
             """
             microscope_name, zoom = self.menu_controller.resolution_value.get().split()
+            self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
             if (
                 microscope_name
                 != self.configuration["experiment"]["MicroscopeState"][
@@ -564,7 +566,6 @@ class Controller:
                 ]
             ):
                 self.change_microscope(microscope_name)
-            self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
             work_thread = self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("update_setting", "resolution")
             )
@@ -579,7 +580,6 @@ class Controller:
                 is_save = True/False
             """
             self.acquire_bar_controller.set_save_option(args[0])
-            self.view.settings.channels_tab.stack_timepoint_frame.save_data.set(args[0])
 
         elif command == "update_setting":
             """Called by the Waveform Constants Popup Controller

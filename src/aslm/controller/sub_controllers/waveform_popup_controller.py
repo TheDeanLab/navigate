@@ -140,6 +140,9 @@ class WaveformPopupController(GUIController):
             self.variables[galvo + " Freq"].trace_add(
                 "write", self.update_galvo_setting(galvo, " Freq", "frequency")
             )
+            self.view.get_buttons()[galvo + " Freq"].configure(
+                command=lambda: self.estimate_galvo_setting(galvo + " Freq")
+            )
 
         # Changes in the delay, duty cycle, and smoothing waveform parameters
         # Delay, Duty, and Smoothing
@@ -518,6 +521,45 @@ class WaveformPopupController(GUIController):
                 "update_setting", "waveform_parameters"
             ),
         )
+
+    def estimate_galvo_setting(self, *args, **kwargs):
+        """Estimate galvo settings according to the acquisition parameters.
+
+        Will only work if all channels have the same exposure duration.
+        Gets the line interval from the camera, number of pixels from the light-sheet
+        mode, and estimates the frequency as 1 / (line interval * number of pixels)."""
+
+        galvo_name = args[0]
+
+        number_of_pixels = (
+            self.parent_controller.camera_setting_controller.mode_widgets[
+                "Pixels"
+            ].get()
+        )
+        if number_of_pixels == "":
+            # If we are not in the light-sheet mode, widget returns an empty string.
+            return
+
+        exposure_time = (
+            self.parent_controller.camera_setting_controller.framerate_widgets[
+                "exposure_time"
+            ].get()
+        )
+
+        # The camera line interval won't be set until starting acquisition,
+        # we need to calculate it directly
+        # exposure_time and light_sheet_exposure_time are both ms
+        (
+            light_sheet_exposure_time,
+            _,
+        ) = self.parent_controller.model.get_camera_line_interval_and_exposure_time(
+            exposure_time, int(number_of_pixels)
+        )
+
+        frequency = 2 / light_sheet_exposure_time * exposure_time
+
+        # Update the GUI
+        self.view.inputs[galvo_name].widget.set(round(frequency, 3))
 
     def update_galvo_setting(self, galvo_name, widget_name, parameter):
         """Update galvo settings in memory.

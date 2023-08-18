@@ -395,7 +395,7 @@ def verify_experiment_config(manager, configuration):
         "img_x_pixels": 2048,
         "img_y_pixels": 2048,
         "sensor_mode": "Normal",
-        "readout_direction": "Top to Bottom",
+        "readout_direction": "Top-to-Bottom",
         "number_of_pixels": 10,
         "binning": "1x1",
         "frames_to_average": 1,
@@ -445,11 +445,10 @@ def verify_experiment_config(manager, configuration):
     if camera_setting_dict["sensor_mode"] not in ["Normal", "Light-Sheet"]:
         camera_setting_dict["sensor_mode"] = "Normal"
     if camera_setting_dict["readout_direction"] not in [
-        "",
-        "Top to Bottom",
-        "Bottom to Top",
+        "Top-to-Bottom",
+        "Bottom-to-Top",
     ]:
-        camera_setting_dict["readout_direction"] = "Top to Bottom"
+        camera_setting_dict["readout_direction"] = "Top-to-Bottom"
 
     # databuffer_size, number_of_pixels
     for k in ["databuffer_size", "number_of_pixels", "frames_to_average"]:

@@ -93,6 +93,13 @@ class ConstantVelocityAcquisition:
                 "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
                 "camera_exposure_time"]) / 1000.0
         
+        readout_time = self.model.active_microscope.get_readout_time()
+        _, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
+        current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
+
+        # Provide just a bit of breathing room for the sweep time...
+        current_sweep_time = current_sweep_time * 1.05
+        
         print("*** current exposure time:", self.model.active_microscope.current_channel, exposure_time)
 
         # Calculate Stage Velocity
@@ -101,7 +108,10 @@ class ConstantVelocityAcquisition:
 
         # Get step size from the GUI. For now, assume 160 nm.
         # Default units should probably be microns I believe. Confirm.
-        desired_sampling = 160  # nm
+        # desired_sampling = 160  # nm
+        desired_sampling = float(
+            self.model.configuration[
+                "experiment"]["MicroscopeState"]["step_size"]) * 1000.0
 
         # The stage is at 45 degrees relative to the optical axes.
         step_size = (desired_sampling * 2) / np.sqrt(2)  # 45 degrees, 226 nm
@@ -112,13 +122,14 @@ class ConstantVelocityAcquisition:
         # minimum_encoder_divide. 2.6 encoder divides, round up to 3.
         # *** WHY IS THIS DIVIDE BY 2? TO CORRECT STEP SIZE ABOVE?
         desired_encoder_divide = np.ceil(step_size / minimum_encoder_divide)
-
+        print("*** desired encoder divide:", desired_encoder_divide)
         # Calculate the actual step size in nanometers. 264 nm.
         step_size_nm = desired_encoder_divide * minimum_encoder_divide
         print("Actual Step Size of Stage:", step_size_nm)
 
         # Calculate the actual step size in millimeters. 264 * 10^-6 mm
         step_size_mm = step_size_nm / 1 * 10**-6  # 264 * 10^-6 mm
+        max_speed = 4.288497*2
 
         # Set the start and end position of the scan in millimeters.
         # Retrieved from the GUI.
@@ -137,29 +148,34 @@ class ConstantVelocityAcquisition:
         # Set the x-axis of the ASI stage to operate at that velocity.
 
         # TODO: stage name and stage controller!
-        self.default_speed = self.asi_stage.default_speed
+        # self.default_speed = self.asi_stage.default_speed
+        self.default_speed = 3.745760
 
         # basic speed - essentially the minimum speed value permitted by the
         # stage, of which subsequent values are multiples of.
-        self.asi_stage.set_speed({self.axis: 0.0001})
+        self.asi_stage.set_speed(percent=0.0001/max_speed)
         basic_speed = self.asi_stage.get_speed(self.axis)  # mm/s
+        print("Basic Speed = ",basic_speed)
 
         # TODO: set the speed from GUI? step size?
         # Calculate the stage velocity in mm/seconds. 5.28 * 10^-3 s
         # stage_velocity = step_size_mm / (exposure_time * 1.15)
         step_size = float(self.model.configuration["experiment"]["MicroscopeState"]["step_size"]) * np.sqrt(2) / 1000.0
         # get exposure time
-        expected_speed = step_size / exposure_time
+        # expected_speed = step_size / exposure_time
+        expected_speed = step_size_mm / current_sweep_time
+        print("Expected velocity = ",expected_speed)
 
-        self.asi_stage.set_speed({self.axis: expected_speed})
+        self.asi_stage.set_speed(percent=expected_speed/max_speed)
         stage_velocity = self.asi_stage.get_speed(self.axis)
-        print("Weird stage velocity, final (mm/s):", stage_velocity)
+        print("Final stage velocity, (mm/s):", stage_velocity)
+        print("Encoder divide step size = ",step_size_mm)
 
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(
             start_position_mm=start_position,
             end_position_mm=self.stop_position,
-            enc_divide=step_size,
+            enc_divide=step_size_mm,
             # round(
             #     float(
             #         self.model.configuration[
@@ -198,12 +214,23 @@ class ConstantVelocityAcquisition:
 
         """
         # reset stage speed
-        self.asi_stage.set_speed({self.axis: self.default_speed})
+        4.288497*2
+        print("Clean up called")
+        # self.asi_stage.set_speed({self.axis: self.default_speed})
+        self.asi_stage.set_speed(percent=0.9)
+
+        # self.asi_stage.set_speed(0.9)
+        print("speed set")
+        end_speed = self.asi_stage.get_speed(self.axis)  # mm/s
+        print("end Speed = ",end_speed)
         self.asi_stage.stop()
+        print("stage stop")
         self.model.active_microscope.daq.set_external_trigger(None)
+        print("external trigger none")
         # return to start position
         start_position = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["abs_z_start"])
         self.asi_stage.move_absolute({f"{self.axis}_abs: {start_position}"})
+        print("stage moved to original position")
 

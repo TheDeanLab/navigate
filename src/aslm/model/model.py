@@ -147,7 +147,6 @@ class Model:
         self.total_image_count = None
         self.current_exposure_time = 0  # milliseconds
         self.pre_exposure_time = 0  # milliseconds
-        self.camera_line_interval = 9.7e-6  # s
         self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
         self.start_time = None
         self.data_buffer = None
@@ -1012,6 +1011,30 @@ class Model:
 
         self.active_microscope.ask_stage_for_position = True
 
+    def get_camera_line_interval_and_exposure_time(
+        self, exposure_time, number_of_pixel
+    ):
+        """Get camera line interval time and light sheet exposure time
+
+        Parameters
+        ----------
+        exposure_time : float
+            camera global exposure time
+        number_of_pixel: int
+            number of pixel in light sheet mode
+
+        Returns
+        -------
+        exposure_time : float
+            Light-sheet mode exposure time (ms).
+        camera_line_interval : float
+            line interval duration (s).
+
+        """
+        return self.active_microscope.camera.calculate_light_sheet_exposure_time(
+            exposure_time, number_of_pixel
+        )
+
     def load_images(self, filenames=None):
         """Load/Unload images to the Synthetic Camera
 
@@ -1218,8 +1241,8 @@ class Model:
         idx: int
             index of feature list
 
-        Return
-        ------
+        Returns
+        -------
         feature_list_str: str
             "" if not exist
             string of the feature list

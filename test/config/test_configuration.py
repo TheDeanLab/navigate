@@ -226,6 +226,8 @@ class TestConfiguration(unittest.TestCase):
             "average_frame_rate",
             "frames_to_average",
             "exposure_time_range",
+            "flip_x",
+            "flip_y"
         ]
         type_keys = ["name", "type"]
 
@@ -341,6 +343,9 @@ class TestConfiguration(unittest.TestCase):
             "theta_offset",
             "f_offset",
             "joystick_axes",
+            "flip_x",
+            "flip_y",
+            "flip_z"
         ]
         type_keys = [
             "name",

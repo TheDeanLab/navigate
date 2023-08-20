@@ -97,18 +97,20 @@ class DataSource:
         self.positions = 1
         self.mode = mode
         self._current_frame = 0
+        self._has_z = False
 
     @property
     def size(self) -> int:
         """Return the size of this data source in bytes."""
-        total_bits = (self.shape_x
-                      * self.shape_y
-                      * self.shape_z
-                      * self.shape_t
-                      * self.shape_c
-                      * self.positions
-                      * self.bits
-                      )
+        total_bits = (
+            self.shape_x
+            * self.shape_y
+            * self.shape_z
+            * self.shape_t
+            * self.shape_c
+            * self.positions
+            * self.bits
+        )
         total_bytes = total_bits // 8
         return total_bytes
 
@@ -244,6 +246,7 @@ class DataSource:
             self.shape_t,
         ) = self.metadata.shape
         self.positions = self.metadata.positions
+        self._has_z = self.shape_z > 1
 
     def _cztp_indices(self, frame_id: int, per_stack: bool = True) -> tuple:
         """Figure out where we are in the stack from the frame number.
@@ -276,7 +279,7 @@ class DataSource:
         (0, 0, 0, 0)
         """
         # If z-stacking, if multi-position
-        if self.shape_z > 1:
+        if self._has_z:
             # We're z-stacking, make z, c vary faster than t
             if per_stack:
                 c = (frame_id // self.shape_z) % self.shape_c

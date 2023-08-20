@@ -58,6 +58,12 @@ class BigDataViewerDataSource(DataSource):
         self.__file_type = os.path.splitext(os.path.basename(file_name))[-1][1:].lower()
         if self.__file_type not in ["h5", "n5"]:
             raise ValueError(f"Unknown file type {self.__file_type}.")
+        if self.__file_type == "h5":
+            self.setup = self._setup_h5
+            self.ds_name = self._h5_ds_name
+        elif self.__file_type == "n5":
+            self.setup = self._setup_n5
+            self.ds_name = self._n5_ds_name
         super().__init__(file_name, mode)
 
         # self._current_frame = 0
@@ -117,34 +123,26 @@ class BigDataViewerDataSource(DataSource):
     def write(self, data: npt.ArrayLike, **kw) -> None:
         self.mode = "w"
 
+        is_kw = len(kw) > 0
+
         c, z, t, p = self._cztp_indices(
             self._current_frame, self.metadata.per_stack
         )  # find current channel
-        if (z == 0) and (c == 0) and (t == 0) and (p == 0):
-            if self.__file_type == "h5":
-                self._setup_h5()
-            elif self.__file_type == "n5":
-                self._setup_n5()
+        if (z == 0) and (c == 0) and ((t >= self.shape_t) or (p >= self.positions)):
+            self.close()
+        if not (z or c or t or p):
+            self.setup()
 
-        if self.__file_type == "h5":
-            time_group_name = f"t{t:05}"
-            setup_group_name = f"s{(c*self.positions+p):02}"
-            ds_name = "/".join([time_group_name, setup_group_name, "???", "cells"])
-        elif self.__file_type == "n5":
-            time_group_name = f"timepoint{t}"
-            setup_group_name = f"setup{(c*self.positions+p)}"
-            ds_name = "/".join([setup_group_name, time_group_name, "s???"])
+        ds_name = self.ds_name(t, c, p)
         for i in range(self.subdivisions.shape[0]):
             dx, dy, dz = self.resolutions[i, ...]
             if z % dz == 0:
                 dataset_name = ds_name.replace("???", str(i))
                 # print(z, dz, dataset_name, self.image[dataset_name].shape,
                 #       data[::dx, ::dy].shape)
-                zs = np.minimum(
-                    z // dz, self.shapes[i, 0] - 1
-                )  # TODO: Is this necessary?
-                self.image[dataset_name][zs, ...] = data[::dx, ::dy]
-                if (i == 0) and len(kw) > 0:
+                zs = min(z // dz, self.shapes[i, 0] - 1)  # TODO: Is this necessary?
+                self.image[dataset_name][zs, ...] = data[::dy, ::dx]
+                if is_kw and (i == 0):
                     self._views.append(kw)
         self._current_frame += 1
 
@@ -152,6 +150,18 @@ class BigDataViewerDataSource(DataSource):
         c, z, t, p = self._cztp_indices(self._current_frame, self.metadata.per_stack)
         if (z == 0) and (c == 0) and ((t >= self.shape_t) or (p >= self.positions)):
             self.close()
+
+    def _h5_ds_name(self, t, c, p):
+        time_group_name = f"t{t:05}"
+        setup_group_name = f"s{(c*self.positions+p):02}"
+        ds_name = "/".join([time_group_name, setup_group_name, "???", "cells"])
+        return ds_name
+
+    def _n5_ds_name(self, t, c, p):
+        time_group_name = f"timepoint{t}"
+        setup_group_name = f"setup{(c*self.positions+p)}"
+        ds_name = "/".join([setup_group_name, time_group_name, "s???"])
+        return ds_name
 
     def read(self) -> None:
         self.mode = "r"
@@ -211,12 +221,12 @@ class BigDataViewerDataSource(DataSource):
                 for j in range(self.subdivisions.shape[0]):
                     s_group_name = f"s{j}"
                     shape = self.shapes[j, ...][::-1]
-                    chunks = self.subdivisions[j, ...]
+                    # chunks = self.subdivisions[j, ...]
                     sx = timepoint.zeros(
-                        s_group_name, shape=tuple(shape), chunks=tuple(chunks)
+                        s_group_name, shape=tuple(shape), chunks=(shape[0], shape[1], 1)
                     )
                     sx.attrs["dataType"] = "uint16"
-                    sx.attrs["blockSize"] = list(chunks)
+                    sx.attrs["blockSize"] = [shape[0], shape[1], 1]
                     sx.attrs["dimensions"] = list(shape)
         # print(self.image.tree())
 
@@ -226,10 +236,7 @@ class BigDataViewerDataSource(DataSource):
         if self._write_mode:
             self._current_frame = 0
             self._views = []
-            if self.__file_type == "h5":
-                self._setup_h5()
-            elif self.__file_type == "n5":
-                self._setup_n5()
+            self.setup()
         else:
             self.read()
         self._closed = False

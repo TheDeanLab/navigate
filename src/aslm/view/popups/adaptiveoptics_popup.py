@@ -136,16 +136,27 @@ class AdaptiveOpticsPopup():
         self.inputs['steps'].grid(row=1, column=1, pady=5)
         self.inputs['amplitude'] = LabelInput(tw_widget_frame, label='Amplitude:', label_pos='top', input_args={'width': 15})
         self.inputs['amplitude'].grid(row=2, column=1, pady=5)
-        self.tony_wilson_button = ttk.Button(tw_widget_frame, text='RUN', width=15)
-        self.tony_wilson_button.grid(row=4, column=1, pady=5)
 
         tw_start_from_var = tk.StringVar()
-        tw_start_from_combo = ttk.Combobox(tw_widget_frame, textvariable=tw_start_from_var, width=15)
+        ttk.Label(tw_widget_frame, text='Start from:').grid(row=3, column=1)
+        tw_start_from_combo = ttk.Combobox(tw_widget_frame, textvariable=tw_start_from_var, width=20)
         tw_start_from_combo['values'] = ('flat', 'current')
         tw_start_from_combo.state(['readonly'])
-        tw_start_from_combo.grid(row=5, column=1, pady=5)
+        tw_start_from_combo.grid(row=4, column=1, pady=5)
         tw_start_from_combo.current(0)
         self.inputs['from'] = {'button': tw_start_from_combo, 'variable': tw_start_from_var}
+
+        tw_metric_var = tk.StringVar()
+        ttk.Label(tw_widget_frame, text='Image metric:').grid(row=5, column=1)
+        tw_metric_combo = ttk.Combobox(tw_widget_frame, textvariable=tw_metric_var, width=20)
+        tw_metric_combo['values'] = ('Pixel Max', 'Pixel Average', 'DCT Shannon Entropy')
+        tw_metric_combo.state(['readonly'])
+        tw_metric_combo.grid(row=6, column=1, pady=5)
+        tw_metric_combo.current(0)
+        self.inputs['metric'] = {'button': tw_metric_combo, 'variable': tw_metric_var}
+
+        self.tony_wilson_button = ttk.Button(tw_widget_frame, text='RUN', width=15)
+        self.tony_wilson_button.grid(row=7, column=1, pady=5)
 
         control_frame = ttk.Frame(content_frame)
         control_frame.grid(row=0, column=0)
@@ -166,6 +177,8 @@ class AdaptiveOpticsPopup():
         self.from_wcs_button.grid(row=1, column=1, pady=5)
         self.select_all_modes = ttk.Button(button_frame, text='Select All', width=15)
         self.select_all_modes.grid(row=2, column=1, pady=5)
+        self.deselect_all_modes = ttk.Button(button_frame, text='Deselect All', width=15)
+        self.deselect_all_modes.grid(row=3, column=1, pady=5)
 
         scroll = ScrollFrame(control_frame)
         

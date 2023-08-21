@@ -75,6 +75,7 @@ class AdaptiveOpticsPopupController(GUIController):
         self.view.save_wcs_button.configure(command=self.save_wcs_file)
         self.view.from_wcs_button.configure(command=self.set_from_wcs_file)
         self.view.select_all_modes.configure(command=self.select_all_modes)
+        self.view.deselect_all_modes.configure(command=self.deselect_all_modes)
         self.view.tony_wilson_button.configure(command=self.run_tony_wilson)
 
         for k in self.modes_armed.keys():
@@ -101,6 +102,10 @@ class AdaptiveOpticsPopupController(GUIController):
     def select_all_modes(self):
         for k in self.modes_armed.keys():
             self.modes_armed[k]['variable'].set(True)
+
+    def deselect_all_modes(self):
+        for k in self.modes_armed.keys():
+            self.modes_armed[k]['variable'].set(False)
 
     def populate_experiment_values(self):
         coefs_dict = self.parent_controller.configuration['experiment']['MirrorParameters']['modes']
@@ -130,6 +135,7 @@ class AdaptiveOpticsPopupController(GUIController):
         self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['steps'] = int(self.widgets['steps'].get())
         self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['amplitude'] = float(self.widgets['amplitude'].get())
         self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['from'] = self.widgets['from']['variable'].get()        
+        self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['metric'] = self.widgets['metric']['variable'].get()        
 
         for k in self.modes_armed.keys():
             self.parent_controller.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['modes_armed'][k] = self.modes_armed[k]['variable'].get()
@@ -216,9 +222,9 @@ class AdaptiveOpticsPopupController(GUIController):
             # Plotting data
             self.peaks_plot.clear()
             self.peaks_plot.plot(data['peaks'])
-            self.peaks_plot.set_title('Image Intensity')
-            self.peaks_plot.set_xlabel('iter')
-            self.peaks_plot.set_ylabel('best peak')
+            self.peaks_plot.set_title('Image Metric')
+            self.peaks_plot.set_xlabel('iteration')
+            self.peaks_plot.set_ylabel(data['metric'])
         except KeyError:
             pass
         
@@ -244,7 +250,7 @@ class AdaptiveOpticsPopupController(GUIController):
                 self.trace_plot.plot(x_fit, y_fit, color='r')
                 self.trace_plot.set_title(f'Mode Fit: {mode}')
                 self.trace_plot.set_xlabel('coef')
-                self.trace_plot.set_ylabel('peak')
+                self.trace_plot.set_ylabel('metric')
             except:
                 pass
 

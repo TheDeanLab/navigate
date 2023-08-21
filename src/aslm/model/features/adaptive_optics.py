@@ -99,6 +99,8 @@ class TonyWilson:
             curr_expt_coefs = list(self.model.configuration['experiment']['MirrorParameters']['modes'].values())
             self.best_coefs = np.asarray(curr_expt_coefs, dtype=np.float32)
 
+        self.metric = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['metric']
+
         # self.best_coefs_overall = np.zeros(self.n_modes, dtype=np.float32)
         self.best_coefs_overall = deepcopy(self.best_coefs)
         self.best_metric = 0.0
@@ -326,9 +328,13 @@ class TonyWilson:
             # img = img[ny-roi:ny+roi, nx-roi:nx+roi]
             
             """ IMAGE METRICS """
-            # new_data = img.max()
-            # new_data = img.mean()
-            new_data = img_contrast.fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)[0]
+            if self.metric == 'Pixel Max':
+                new_data = img.max()
+            elif self.metric == 'Pixel Average':
+                new_data = img.mean()
+            elif self.metric == 'DCT Shannon Entropy':
+                new_data = img_contrast.fast_normalized_dct_shannon_entropy(self.model.data_buffer[self.f_frame_id], 3)[0]
+            
             # new_data = img_contrast.image_intensity(self.model.data_buffer[self.f_frame_id], 3)[0]
             # new_data = self.model.data_buffer[self.f_frame_id].mean()
             # new_data = fourier_annulus(self.model.data_buffer[self.f_frame_id], radius_1=50, radius_2=100)[0]
@@ -373,7 +379,8 @@ class TonyWilson:
                 self.model.event_queue.put(('tonywilson', {
                     'peaks': self.best_peaks,
                     'trace': self.trace_list,
-                    'done': self.done_all
+                    'done': self.done_all,
+                    'metric': self.metric
                     }))
         except Exception as e:
             print(e)

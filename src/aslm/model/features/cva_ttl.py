@@ -42,7 +42,7 @@ logger = logging.getLogger(p)
 # Local imports
 
 
-class ConstantVelocityAcquisition:
+class CVATTL:
     """Class for acquiring data using the ASI internal encoder."""
 
     def __init__(self, model, axis='z'):

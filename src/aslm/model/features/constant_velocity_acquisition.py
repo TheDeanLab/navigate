@@ -113,6 +113,7 @@ class ConstantVelocityAcquisition:
         # print("*** current exposure time:", self.model.active_microscope.current_channel, exposure_time)
 
         # Calculate Stage Velocity
+        encoder_resolution = 10 # nm
         minimum_encoder_divide = encoder_resolution*4 # nm
 
         # Get step size from the GUI. For now, assume 160 nm.

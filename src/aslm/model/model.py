@@ -283,6 +283,7 @@ class Model:
                             records,
                         ),
                     },
+                    {"name": WaitToContinue}, # to synchronize signal and data threads
                     {
                         "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.multiposition_count",),

@@ -199,7 +199,9 @@ class FeaturePopupController(GUIController):
                 if "args" in feature:
                     arg_str = ""
                     for a in feature["args"]:
-                        if type(a) is bool:
+                        if a is None:
+                            arg_str += "None"
+                        elif type(a) is bool:
                             arg_str += str(a)
                         elif type(a) is int or type(a) is float:
                             arg_str += str(a)
@@ -269,6 +271,8 @@ class FeaturePopupController(GUIController):
                         feature["args"][i] = float(a)
                     elif popup.inputs_type[i] is dict:
                         feature["args"][i] = json.loads(a.replace("'", '"'))
+                    elif a == "None":
+                        feature["args"][i] = None
             # update text
             self.view.inputs["content"].delete("1.0", tk.END)
             self.view.inputs["content"].insert("1.0", self.build_feature_list_text())

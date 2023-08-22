@@ -172,6 +172,7 @@ class NIDAQ(DAQBase):
         self.trigger_mode = "self-trigger" if external_trigger is None else "external-trigger"
         self.external_trigger = external_trigger
         # self.asi_stage = self.model.active_microscope.stages[self.axis]
+        print("External Trigger")
 
         # change trigger mode during acquisition in a feature
         if self.trigger_mode == "self-trigger":
@@ -228,6 +229,7 @@ class NIDAQ(DAQBase):
         def callback_func(task_handle, status, callback_data):
             try:
                 logger.info("daq recieved trigger")
+                print("daq recieved trigger")
                 # pos = asi_stage.get_axis_position("X")
                 # print(pos)
                 task.stop()
@@ -254,6 +256,7 @@ class NIDAQ(DAQBase):
         -------
         None
         """
+        print("Create TTL trigger task")
         self.camera_trigger_task = nidaqmx.Task()
         camera_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -273,6 +276,7 @@ class NIDAQ(DAQBase):
 
         # apply waveform templates
         camera_waveform_repeat_num = self.waveform_repeat_num * self.waveform_expand_num
+        print("camera waveform")
         self.camera_trigger_task.timing.cfg_implicit_timing(
             sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
             samps_per_chan=camera_waveform_repeat_num)
@@ -288,6 +292,7 @@ class NIDAQ(DAQBase):
         -------
         None
         """
+        print("create master trigger")
         self.master_trigger_task = nidaqmx.Task()
         master_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -296,6 +301,7 @@ class NIDAQ(DAQBase):
             master_trigger_out_line,
             line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
         )
+        print("master trigger finished")
 
     def create_analog_output_tasks(self, channel_key):
         """Create analog output tasks for each board.
@@ -396,6 +402,7 @@ class NIDAQ(DAQBase):
         -------
         None
         """
+        print("Prepare acquisition")
         waveform_template_name = self.configuration['experiment']['MicroscopeState']["waveform_template"]
         self.waveform_repeat_num, self.waveform_expand_num = get_waveform_template_parameters(
             waveform_template_name,
@@ -432,7 +439,7 @@ class NIDAQ(DAQBase):
         if self.is_updating_analog_task:
             self.wait_to_run_lock.acquire()
             self.wait_to_run_lock.release()
-            # print("acquring run acquisition")
+            print("acquring run acquisition")
 
         if self.camera_trigger_task.is_task_done():
             self.camera_trigger_task.start()

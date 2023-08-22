@@ -74,7 +74,7 @@ class ConstantVelocityAcquisition:
 
         Assumes stage motion is 45 degrees relative to the optical axis.
 
-        Parameters
+        Parameters 
         ----------
         None
 

@@ -575,11 +575,12 @@ class ConProAcquisition:  # don't have the multi-position part for now
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
-
-        self.model.move_stage({"z_abs": 0})
+ 
+        self.model.move_stage({"z_abs": 0 })
 
     def pre_signal_func(self):
         import copy
+        print("confocal projection started")
 
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
 
@@ -608,8 +609,9 @@ class ConProAcquisition:  # don't have the multi-position part for now
         # self.model.move_stage({'z_abs': 0})
 
     def signal_func(self):
-        # print(f"Signal with time {self.offset_update_time} and offset "
-        #       f"{self.current_offset}")
+        print("signal func started")
+        print(f"Signal with time {self.offset_update_time} and offset "
+               f"{self.current_offset}")
         if self.model.stop_acquisition:
             return False
 
@@ -617,11 +619,13 @@ class ConProAcquisition:  # don't have the multi-position part for now
             # update channel for each z position in 'per_slice'
             self.update_channel()
             self.need_update_offset = self.current_channel_in_list == 0
+            print("conpro per_stack")
 
         # in 'per_slice', update the offset if all the channels have been acquired
         if self.need_update_offset:
             # next z, f position
             # self.current_offset += self.offset_step_size
+            print("offset movement")
 
             # update offset moved time
             self.offset_update_time += 1
@@ -630,6 +634,7 @@ class ConProAcquisition:  # don't have the multi-position part for now
 
     def signal_end(self):
         # end this node
+        print("end signal started")
         if self.model.stop_acquisition:
             self.model.configuration["experiment"]["MicroscopeState"][
                 "offset_start"
@@ -667,6 +672,7 @@ class ConProAcquisition:  # don't have the multi-position part for now
         self.current_channel_in_list = (
             self.current_channel_in_list + 1
         ) % self.channels
+        print("Update Channel")
         self.model.active_microscope.prepare_next_channel()
 
 

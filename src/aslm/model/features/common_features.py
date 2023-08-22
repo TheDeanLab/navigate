@@ -32,9 +32,10 @@
 
 import time
 from functools import reduce
-from queue import Queue
+from threading import Lock
 
 from .image_writer import ImageWriter
+from aslm.tools.common_functions import VariableWithLock
 
 
 class ChangeResolution:
@@ -91,39 +92,78 @@ class Snap:
 
 
 class WaitToContinue:
+    """This feature is used to synchronize signal and data.
+
+    Let the faster one wait until the other one ends.
+    """
+
     def __init__(self, model):
         self.model = model
-        self.frame_id_queue = Queue()
+        self.pause_signal_lock = Lock()
+        self.pause_data_lock = Lock()
+        self.first_enter_node = VariableWithLock(str)
 
         self.config_table = {
-            "signal": {"main": self.signal_func},
-            "data": {"main": self.data_func, "end": self.end_data_func},
-            "node": {"node_type": "multi-step"},
+            "signal": {
+                "init": self.pre_signal_func,
+                "main": self.signal_func,
+                "cleanup": self.cleanup,
+            },
+            "data": {
+                "init": self.pre_data_func,
+                "main": self.data_func,
+                "cleanup": self.cleanup,
+            },
         }
 
+    def pre_signal_func(self):
+        with self.first_enter_node as first_enter_node:
+            if first_enter_node.value == "":
+                first_enter_node.value = "signal"
+                if not self.pause_signal_lock.locked():
+                    self.pause_signal_lock.acquire()
+
     def signal_func(self):
-        self.frame_id_queue.put(self.model.frame_id)
-        print("--wait to continue:", self.model.frame_id)
+        self.model.logger.debug(f"--wait to continue: {self.model.frame_id}")
+        if self.pause_signal_lock.locked():
+            self.pause_signal_lock.acquire()
+        elif self.pause_data_lock.locked():
+            self.pause_data_lock.release()
+        self.first_enter_node.value = ""
+        self.model.logger.debug(f"--wait to continue is done!: {self.model.frame_id}")
         return True
+
+    def pre_data_func(self):
+        with self.first_enter_node as first_enter_node:
+            if first_enter_node.value == "":
+                first_enter_node.value = "data"
+                if not self.pause_data_lock.locked():
+                    self.pause_data_lock.acquire()
 
     def data_func(self, frame_ids):
-        self.model.logger.debug("wait to continue?")
+        self.model.logger.debug(f"**wait to continue? {frame_ids}")
+        if self.pause_data_lock.locked():
+            self.pause_data_lock.acquire()
+        elif self.pause_signal_lock.locked():
+            self.pause_signal_lock.release()
+        self.first_enter_node.value = ""
+        self.model.logger.debug(f"**wait to continue is done! {frame_ids}")
         return True
 
-    def end_data_func(self):
-        try:
-            r = self.frame_id_queue.get_nowait()
-            self.model.logger.debug("wait to continue ends!")
-        except:  # noqa
-            r = None
-        return r is not None
+    def cleanup(self):
+        if self.pause_signal_lock.locked():
+            self.pause_signal_lock.release()
+        if self.pause_data_lock.locked():
+            self.pause_data_lock.release()
 
 
 class LoopByCount:
     def __init__(self, model, steps=1):
         self.model = model
+        self.step_by_frame = True
         self.steps = steps
         if type(steps) is str:
+            self.step_by_frame = False
             try:
                 parameters = steps.split(".")
                 config_ref = reduce((lambda pre, n: f"{pre}['{n}']"), parameters, "")
@@ -147,7 +187,10 @@ class LoopByCount:
         return True
 
     def data_func(self, frame_ids):
-        self.data_frames -= len(frame_ids)
+        if self.step_by_frame:
+            self.data_frames -= len(frame_ids)
+        else:
+            self.data_frames -= 1
         if self.data_frames <= 0:
             self.data_frames = self.steps
             return False

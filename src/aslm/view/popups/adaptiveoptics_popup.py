@@ -171,6 +171,8 @@ class AdaptiveOpticsPopup():
         self.flat_button.grid(row=1, column=0, pady=5)
         self.zero_button = ttk.Button(button_frame, text='Zero', width=15)
         self.zero_button.grid(row=2, column=0, pady=5)
+        self.clear_button = ttk.Button(button_frame, text='Clear All', width=15)
+        self.clear_button.grid(row=3, column=0, pady=5)
         self.save_wcs_button = ttk.Button(button_frame, text='Save WCS File', width=15)
         self.save_wcs_button.grid(row=0, column=1, pady=5)
         self.from_wcs_button = ttk.Button(button_frame, text='From WCS File', width=15)

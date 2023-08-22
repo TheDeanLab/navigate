@@ -72,6 +72,7 @@ class AdaptiveOpticsPopupController(GUIController):
         self.view.set_button.configure(command=self.set_mirror)
         self.view.flat_button.configure(command=self.flatten_mirror)
         self.view.zero_button.configure(command=self.zero_mirror)
+        self.view.clear_button.configure(command=self.clear_all_coefs)
         self.view.save_wcs_button.configure(command=self.save_wcs_file)
         self.view.from_wcs_button.configure(command=self.set_from_wcs_file)
         self.view.select_all_modes.configure(command=self.select_all_modes)
@@ -122,6 +123,12 @@ class AdaptiveOpticsPopupController(GUIController):
                     continue
 
                 self.widgets[k].set(tw_param_dict[k])
+
+    def clear_all_coefs(self):
+        coefs_dict = self.parent_controller.configuration['experiment']['MirrorParameters']['modes']
+        for k in coefs_dict.keys():
+            self.widgets[k].set(0.0)
+        self.update_experiment_values()
 
     def update_experiment_values(self):
         modes_dict = {}

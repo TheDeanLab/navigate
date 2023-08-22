@@ -196,7 +196,7 @@ class BigDataViewerMetadata(XMLMetadata):
         arr = np.eye(3, 4)
 
         # Translation into pixels
-        arr[:, 3] = [x / self.dx, y / self.dy, z / self.dz]
+        arr[:, 3] = [y / self.dy, x / self.dx, z / self.dz]
 
         # Rotation (theta pivots in the xz plane, about the y axis)
         # sin_theta, cos_theta = np.sin(theta), np.cos(theta)

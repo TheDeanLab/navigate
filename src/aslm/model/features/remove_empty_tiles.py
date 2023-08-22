@@ -88,7 +88,7 @@ class DetectTissueInStack:
 
     def in_func_signal(self):
         # move to Z anf F position
-        self.model.logger.debug(f"move to position (z, f): ({self.current_z_pos}, {self.current_f_pos}), {self.scan_num}")
+        self.model.logger.debug(f"move to position (z, f): ({self.current_z_pos}, {self.current_f_pos}), {self.scan_num}, {self.model.frame_id}")
         self.model.move_stage(
             {
                 "z_abs": self.current_z_pos,
@@ -99,7 +99,6 @@ class DetectTissueInStack:
         self.scan_num += 1
 
     def end_func_signal(self):
-        # check if scan all positions
         if self.stop_flag or self.scan_num >= self.planes:
             self.stop_signal_flag = True
             return True
@@ -117,6 +116,7 @@ class DetectTissueInStack:
                 # check if the frame has tissue
                 r = self.detect_func(self.model.data_buffer[frame_id], self.percentage)
                 if r:
+                    self.model.logger.debug(f"*** this frame has enough percentage of tissue!{frame_id}")
                     self.has_tissue_flag = True
                     self.stop_flag = True
                     break

@@ -128,8 +128,7 @@ class BigDataViewerDataSource(DataSource):
         c, z, t, p = self._cztp_indices(
             self._current_frame, self.metadata.per_stack
         )  # find current channel
-        if (z == 0) and (c == 0) and ((t >= self.shape_t) or (p >= self.positions)):
-            self.close()
+
         if not (z or c or t or p):
             self.setup()
 

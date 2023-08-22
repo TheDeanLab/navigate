@@ -1,14 +1,17 @@
 import os
 import numpy as np
 
+import pytest
 
-def test_bdv_metadata():
+
+@pytest.mark.parametrize("ext", ["h5", "n5", "tiff"])
+def test_bdv_metadata(ext):
     from aslm.model.metadata_sources.bdv_metadata import BigDataViewerMetadata
 
     md = BigDataViewerMetadata()
 
     views = []
-    for idx in range(10):
+    for _ in range(10):
         views.append(
             {
                 "x": np.random.randint(-1000, 1000),
@@ -25,6 +28,6 @@ def test_bdv_metadata():
         assert arr[1, 3] == view["x"] / md.dx
         assert arr[2, 3] == view["z"] / md.dz
 
-    md.write_xml("test_bdv.xml", views)
+    md.write_xml(f"test_bdv.{ext}", views)
 
     os.remove("test_bdv.xml")

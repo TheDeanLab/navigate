@@ -72,19 +72,25 @@ class DetectTissueInStack:
         }
 
     def pre_func_signal(self):
-        # calculate Z and F stage step sizes
-        # initialize place count
         microscope_config = self.model.configuration["experiment"]["MicroscopeState"]
-        self.z_step = (float(microscope_config["end_position"]) - float(microscope_config["start_position"])) / (self.planes - 1)
-        self.f_step = (float(microscope_config["end_focus"]) - float(microscope_config["start_focus"])) / (self.planes - 1)
-        self.scan_num = 0
-        # get current z position
+        # get current z and f position
         pos = self.model.get_stage_position()
         self.current_z_pos = pos["z_pos"] + float(microscope_config["start_position"])
         self.current_f_pos = pos["f_pos"] + float(microscope_config["start_focus"])
+        # calculate Z and F stage step sizes
+        # initialize place count
+        z_pos_range = float(microscope_config["end_position"]) - float(microscope_config["start_position"])
+        f_pos_range = float(microscope_config["end_focus"]) - float(microscope_config["start_focus"])
+        if self.planes == 1:
+            self.current_z_pos = self.current_z_pos + z_pos_range / 2
+            self.current_f_pos = self.current_f_pos + f_pos_range / 2
+        else:
+            self.z_step = (z_pos_range) / (self.planes - 1)
+            self.f_step = (f_pos_range) / (self.planes - 1)
         # stop scanning flag
         self.stop_flag = False
         self.stop_signal_flag = False
+        self.scan_num = 0
 
     def in_func_signal(self):
         # move to Z anf F position

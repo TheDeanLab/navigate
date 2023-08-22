@@ -230,6 +230,7 @@ class MoveToNextPositionInMultiPostionTable:
         self.postion_count = self.model.configuration["experiment"]["MicroscopeState"][
             "multiposition_count"
         ]
+        self.stage_distance_threshold = 1000
 
     def pre_signal_func(self):
         # let the daq be prepared to capture one image since this is a
@@ -244,14 +245,30 @@ class MoveToNextPositionInMultiPostionTable:
         if self.current_idx >= self.postion_count:
             return False
         pos_dict = self.multipostion_table[self.current_idx]
+        # pause data thread if necessary
+        if self.current_idx == 0:
+            temp = self.model.get_stage_position()
+            pre_stage_pos = dict(map(lambda k: (k, temp[f"{k}_pos"]), ["x", "y", "z", "f", "theta"]))
+        else:
+            pre_stage_pos = self.multipostion_table[self.current_idx-1]
+        delta_x = abs(pos_dict["x"] - pre_stage_pos["x"])
+        delta_y = abs(pos_dict["y"] - pre_stage_pos["y"])
+        delta_z = abs(pos_dict["z"] - pre_stage_pos["z"])
+        delta_f = abs(pos_dict["f"] - pre_stage_pos["f"])
+        should_pause_data_thread = any(
+            distance > self.stage_distance_threshold
+            for distance in [delta_x, delta_y, delta_z, delta_f]
+        )
+        if should_pause_data_thread:
+            self.model.pause_data_thread()
+
         self.current_idx += 1
-        # try:
-        #     pos_dict.pop("f")
-        # except KeyError:
-        #     pass
         abs_pos_dict = dict(map(lambda k: (f"{k}_abs", pos_dict[k]), pos_dict.keys()))
         self.model.logger.debug(f"*** move stage to {pos_dict}")
         self.model.move_stage(abs_pos_dict, wait_until_done=True)
+        # resume data thread
+        if should_pause_data_thread:
+            self.model.resume_data_thread()
         self.model.active_microscope.central_focus = None
         if self.pre_z != pos_dict["z"]:
             self.pre_z = pos_dict["z"]

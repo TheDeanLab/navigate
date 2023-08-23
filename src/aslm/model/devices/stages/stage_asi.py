@@ -301,7 +301,7 @@ class ASIStage(StageBase):
             return False
         
         if wait_until_done:
-                self.tiger_controller.wait_for_device()
+            self.tiger_controller.wait_for_device()
         return True
 
     def verify_move(self, move_dictionary):

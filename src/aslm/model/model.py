@@ -440,6 +440,8 @@ class Model:
             self.is_save = self.configuration["experiment"]["MicroscopeState"][
                 "is_save"
             ]
+
+            # Calculate waveforms, turn on lasers, etc.
             self.prepare_acquisition()
 
             # load features
@@ -885,7 +887,7 @@ class Model:
         # Run the acquisition
         try:
             self.active_microscope.daq.run_acquisition()
-        except:
+        except:  # noqa
             self.active_microscope.daq.stop_acquisition()
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}",
@@ -897,6 +899,7 @@ class Model:
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
+        self.active_microscope.turn_off_lasers()
 
     def run_live_acquisition(self):
         """Stream live image to the GUI.

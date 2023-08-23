@@ -91,6 +91,7 @@ class Microscope:
         self.tiger_controller = None
         self.info = {}
         self.current_channel = None
+        self.current_laser_index = 0
         self.channels = None
         self.available_channels = None
         self.number_of_frames = None
@@ -369,6 +370,19 @@ class Microscope:
         self.current_channel = 0
         self.central_focus = None
 
+    def turn_off_lasers(self):
+        """Turn off the lasers.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_off()
+
     def calculate_all_waveform(self):
         """Calculate all the waveforms.
 
@@ -501,7 +515,8 @@ class Microscope:
         self.current_exposure_time = float(channel["camera_exposure_time"])
         if (
             self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
-            == "Light-Sheet"):
+            == "Light-Sheet"
+        ):
             (
                 self.current_exposure_time,
                 camera_line_interval,
@@ -517,13 +532,13 @@ class Microscope:
         self.camera.set_exposure_time(self.current_exposure_time)
 
         # Laser Settings
-        current_laser_index = channel["laser_index"]
+        self.current_laser_index = channel["laser_index"]
         for k in self.lasers:
             self.lasers[k].turn_off()
-        self.lasers[str(self.laser_wavelength[current_laser_index])].set_power(
+        self.lasers[str(self.laser_wavelength[self.current_laser_index])].set_power(
             channel["laser_power"]
         )
-        self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
+        self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
         # stop daq before writing new waveform
         self.daq.stop_acquisition()

@@ -348,5 +348,6 @@ class MultiPositionController(GUIController):
             True: the position should be kept
         """
         positions = self.get_positions()
-        new_positions = [p for i, p in enumerate(positions) if position_flag_list[i]]
+        l = len(position_flag_list)
+        new_positions = [p for i, p in enumerate(positions) if (i >= l or position_flag_list[i])]
         self.set_positions(new_positions)

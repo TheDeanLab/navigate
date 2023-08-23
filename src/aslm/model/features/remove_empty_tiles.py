@@ -115,13 +115,14 @@ class DetectTissueInStack:
         self.has_tissue_flag = False
 
     def in_func_data(self, frame_ids):
-        for frame_id in frame_ids:
-            # check if the frame has tissue
-            r = self.detect_func(self.model.data_buffer[frame_id], self.percentage)
-            if r:
-                self.model.logger.debug(f"*** this frame has enough percentage of tissue!{frame_id}")
-                self.has_tissue_flag = True
-                break
+        if not self.has_tissue_flag:
+            for frame_id in frame_ids:
+                # check if the frame has tissue
+                r = self.detect_func(self.model.data_buffer[frame_id], self.percentage)
+                if r:
+                    self.model.logger.debug(f"*** this frame has enough percentage of tissue!{frame_id}")
+                    self.has_tissue_flag = True
+                    break
         self.received_frames += len(frame_ids)
         return self.has_tissue_flag
 

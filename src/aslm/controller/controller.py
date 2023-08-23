@@ -383,6 +383,17 @@ class Controller:
             "image_mode"
         ] = self.acquire_bar_controller.get_mode()
         self.camera_setting_controller.update_experiment_values()
+        # update multi-positions
+        positions = self.multiposition_tab_controller.get_positions()
+        update_config_dict(
+            self.manager,
+            self.configuration["experiment"],
+            "MultiPositions",
+            positions,
+        )
+        self.configuration["experiment"]["MicroscopeState"][
+            "multiposition_count"
+        ] = len(positions)
 
         # TODO: validate experiment dict
         if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
@@ -421,17 +432,6 @@ class Controller:
                 "Cannot start acquisition!",
             )
             return False
-        # update multi-positions
-        positions = self.multiposition_tab_controller.get_positions()
-        update_config_dict(
-            self.manager,
-            self.configuration["experiment"],
-            "MultiPositions",
-            positions,
-        )
-        self.configuration["experiment"]["MicroscopeState"][
-            "multiposition_count"
-        ] = len(positions)
 
         # set waveform template
         if self.acquire_bar_controller.mode == "confocal-projection":
@@ -683,6 +683,12 @@ class Controller:
                     self.features_popup_controller.populate_feature_list(feature_id)
                     # wait until close the popup windows
                     self.view.wait_window(feature_list_popup.popup)
+                    # do not run acquisition if "cancel" is selected
+                    temp = self.features_popup_controller.start_acquisiton_flag
+                    delattr(self, "features_popup_controller")
+                    if not temp:
+                        self.set_mode_of_sub("stop")
+                        return
 
             # if select 'ilastik segmentation',
             # 'show segmentation',
@@ -1037,6 +1043,8 @@ class Controller:
                 self.camera_setting_controller.framerate_widgets["max_framerate"].set(
                     value
                 )
+            elif event == "remove_positions":
+                self.multiposition_tab_controller.remove_positions(value)
 
     # def exit_program(self):
     #     """Exit the program.

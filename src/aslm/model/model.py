@@ -59,12 +59,18 @@ from aslm.model.features.common_features import (
     MoveToNextPositionInMultiPostionTable,
     WaitToContinue,
 )
+from aslm.model.features.remove_empty_tiles import (
+    DetectTissueInStackAndRecord,
+    RemoveEmptyPositions,
+)
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
 from aslm.model.features.volume_search import VolumeSearch
 from aslm.model.features.feature_related_functions import (
     convert_str_to_feature_list,
     convert_feature_list_to_str,
+    SharedList,
+    load_dynamic_parameter_functions,
 )
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_stage_dict
@@ -243,6 +249,7 @@ class Model:
             [
                 # {"name": MoveToNextPositionInMultiPostionTable},
                 # {"name": CalculateFocusRange},
+                {"name": PrepareNextChannel},
                 (
                     {"name": MoveToNextPositionInMultiPostionTable},
                     {"name": Autofocus},
@@ -259,6 +266,30 @@ class Model:
                         "args": ("experiment.MicroscopeState.multiposition_count",),
                     },
                 )
+            ]
+        )
+
+        records = SharedList([], "records")
+        self.feature_list.append(
+            [
+                {"name": PrepareNextChannel},
+                (
+                    {"name": MoveToNextPositionInMultiPostionTable},
+                    # {"name": CalculateFocusRange},
+                    {
+                        "name": DetectTissueInStackAndRecord,
+                        "args": (
+                            5,
+                            0.75,
+                            records,
+                        ),
+                    },
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.multiposition_count",),
+                    },
+                ),
+                {"name": RemoveEmptyPositions, "args": (records,)},
             ]
         )
 
@@ -578,6 +609,7 @@ class Model:
                         )
 
                     self.addon_feature = self.feature_list[args[0] - 1]
+                    load_dynamic_parameter_functions(self.addon_feature, f"{get_aslm_path()}/config/feature_parameter_setting")
                     self.signal_container, self.data_container = load_features(
                         self, self.addon_feature
                     )
@@ -886,6 +918,7 @@ class Model:
         try:
             self.active_microscope.daq.run_acquisition()
         except:
+            print("Acquisition Run Failed")
             self.active_microscope.daq.stop_acquisition()
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}",

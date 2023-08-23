@@ -32,9 +32,10 @@
 
 import time
 from functools import reduce
-from queue import Queue
+from threading import Lock
 
 from .image_writer import ImageWriter
+from aslm.tools.common_functions import VariableWithLock
 
 
 class ChangeResolution:
@@ -91,39 +92,86 @@ class Snap:
 
 
 class WaitToContinue:
+    """This feature is used to synchronize signal and data.
+
+    Let the faster one wait until the other one ends.
+    """
+
     def __init__(self, model):
         self.model = model
-        self.frame_id_queue = Queue()
+        self.pause_signal_lock = Lock()
+        self.pause_data_lock = Lock()
+        self.first_enter_node = VariableWithLock(str)
 
         self.config_table = {
-            "signal": {"main": self.signal_func},
-            "data": {"main": self.data_func, "end": self.end_data_func},
-            "node": {"node_type": "multi-step"},
+            "signal": {
+                "init": self.pre_signal_func,
+                "main": self.signal_func,
+                "cleanup": self.cleanup,
+            },
+            "data": {
+                "init": self.pre_data_func,
+                "main": self.data_func,
+                "cleanup": self.cleanup,
+            },
         }
 
+    def pre_signal_func(self):
+        with self.first_enter_node as first_enter_node:
+            if first_enter_node.value == "":
+                self.model.logger.debug("*** wait to continue enters signal "
+                                        "first!")
+                first_enter_node.value = "signal"
+                if not self.pause_signal_lock.locked():
+                    self.pause_signal_lock.acquire()
+                if self.pause_data_lock.locked():
+                    self.pause_data_lock.release()
+
     def signal_func(self):
-        self.frame_id_queue.put(self.model.frame_id)
-        print("--wait to continue:", self.model.frame_id)
+        self.model.logger.debug(f"--wait to continue: {self.model.frame_id}")
+        if self.pause_signal_lock.locked():
+            self.pause_signal_lock.acquire()
+        elif self.pause_data_lock.locked():
+            self.pause_data_lock.release()
+        self.first_enter_node.value = ""
+        self.model.logger.debug(f"--wait to continue is done!: {self.model.frame_id}")
         return True
+
+    def pre_data_func(self):
+        with self.first_enter_node as first_enter_node:
+            if first_enter_node.value == "":
+                self.model.logger.debug("*** wait to continue enters data "
+                                        "node first!")
+                first_enter_node.value = "data"
+                if not self.pause_data_lock.locked():
+                    self.pause_data_lock.acquire()
+                if self.pause_signal_lock.locked():
+                    self.pause_signal_lock.release()
 
     def data_func(self, frame_ids):
-        self.model.logger.debug("wait to continue?")
+        self.model.logger.debug(f"**wait to continue? {frame_ids}")
+        if self.pause_data_lock.locked():
+            self.pause_data_lock.acquire()
+        elif self.pause_signal_lock.locked():
+            self.pause_signal_lock.release()
+        self.first_enter_node.value = ""
+        self.model.logger.debug(f"**wait to continue is done! {frame_ids}")
         return True
 
-    def end_data_func(self):
-        try:
-            r = self.frame_id_queue.get_nowait()
-            self.model.logger.debug("wait to continue ends!")
-        except:  # noqa
-            r = None
-        return r is not None
+    def cleanup(self):
+        if self.pause_signal_lock.locked():
+            self.pause_signal_lock.release()
+        if self.pause_data_lock.locked():
+            self.pause_data_lock.release()
 
 
 class LoopByCount:
     def __init__(self, model, steps=1):
         self.model = model
+        self.step_by_frame = True
         self.steps = steps
         if type(steps) is str:
+            self.step_by_frame = False
             try:
                 parameters = steps.split(".")
                 config_ref = reduce((lambda pre, n: f"{pre}['{n}']"), parameters, "")
@@ -147,7 +195,10 @@ class LoopByCount:
         return True
 
     def data_func(self, frame_ids):
-        self.data_frames -= len(frame_ids)
+        if self.step_by_frame:
+            self.data_frames -= len(frame_ids)
+        else:
+            self.data_frames -= 1
         if self.data_frames <= 0:
             self.data_frames = self.steps
             return False
@@ -174,8 +225,8 @@ class MoveToNextPositionInMultiPostionTable:
         self.model = model
         self.config_table = {
             "signal": {
-                "init": self.pre_signal_func,
                 "main": self.signal_func,
+                "cleanup": self.cleanup,
             },
             "node": {"device_related": True},
         }
@@ -187,12 +238,7 @@ class MoveToNextPositionInMultiPostionTable:
         self.postion_count = self.model.configuration["experiment"]["MicroscopeState"][
             "multiposition_count"
         ]
-
-    def pre_signal_func(self):
-        # let the daq be prepared to capture one image since this is a
-        # device-related feature.
-        self.model.active_microscope.current_channel = 0
-        self.model.active_microscope.prepare_next_channel()
+        self.stage_distance_threshold = 1000
 
     def signal_func(self):
         self.model.logger.debug(
@@ -201,18 +247,40 @@ class MoveToNextPositionInMultiPostionTable:
         if self.current_idx >= self.postion_count:
             return False
         pos_dict = self.multipostion_table[self.current_idx]
+        # pause data thread if necessary
+        if self.current_idx == 0:
+            temp = self.model.get_stage_position()
+            pre_stage_pos = dict(map(lambda k: (k, temp[f"{k}_pos"]), ["x", "y", "z", "f", "theta"]))
+        else:
+            pre_stage_pos = self.multipostion_table[self.current_idx-1]
+        delta_x = abs(pos_dict["x"] - pre_stage_pos["x"])
+        delta_y = abs(pos_dict["y"] - pre_stage_pos["y"])
+        delta_z = abs(pos_dict["z"] - pre_stage_pos["z"])
+        delta_f = abs(pos_dict["f"] - pre_stage_pos["f"])
+        should_pause_data_thread = any(
+            distance > self.stage_distance_threshold
+            for distance in [delta_x, delta_y, delta_z, delta_f]
+        )
+        if should_pause_data_thread:
+            self.model.pause_data_thread()
+
         self.current_idx += 1
-        # try:
-        #     pos_dict.pop("f")
-        # except KeyError:
-        #     pass
         abs_pos_dict = dict(map(lambda k: (f"{k}_abs", pos_dict[k]), pos_dict.keys()))
-        self.model.logger.debug(f"*** move stage to {pos_dict}")
+        self.model.logger.debug(f"MoveToNextPositionInMultiPosition: "
+                                f"{pos_dict}")
         self.model.move_stage(abs_pos_dict, wait_until_done=True)
+
+        self.model.logger.debug("MoveToNextPositionInMultiPosition: move done")
+        # resume data thread
+        if should_pause_data_thread:
+            self.model.resume_data_thread()
         self.model.active_microscope.central_focus = None
         if self.pre_z != pos_dict["z"]:
             self.pre_z = pos_dict["z"]
             return True
+
+    def cleanup(self):
+        self.model.resume_data_thread()
 
 
 class StackPause:

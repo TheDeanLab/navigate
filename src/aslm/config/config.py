@@ -664,8 +664,8 @@ def verify_experiment_config(manager, configuration):
 
     # MultiPositions
     if (
-        "MultiPositions" not in microscope_setting_dict
-        or type(microscope_setting_dict["MultiPositions"]) is not ListProxy
+        "MultiPositions" not in configuration["experiment"]
+        or type(configuration["experiment"]["MultiPositions"]) is not ListProxy
     ):
         update_config_dict(manager, configuration["experiment"], "MultiPositions", [])
     position_ids = []

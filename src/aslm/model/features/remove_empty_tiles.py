@@ -87,9 +87,6 @@ class DetectTissueInStack:
         else:
             self.z_step = (z_pos_range) / (self.planes - 1)
             self.f_step = (f_pos_range) / (self.planes - 1)
-        # stop scanning flag
-        self.stop_flag = False
-        self.stop_signal_flag = False
         self.scan_num = 0
 
     def in_func_signal(self):
@@ -105,8 +102,9 @@ class DetectTissueInStack:
         self.scan_num += 1
 
     def end_func_signal(self):
-        if self.stop_flag or self.scan_num >= self.planes:
-            self.stop_signal_flag = True
+        self.model.logger.debug(f"*** detect tissue signal end function: "
+                                f"{self.scan_num}")
+        if self.scan_num >= self.planes:
             return True
         self.current_z_pos += self.z_step
         self.current_f_pos += self.f_step
@@ -117,20 +115,18 @@ class DetectTissueInStack:
         self.has_tissue_flag = False
 
     def in_func_data(self, frame_ids):
-        if not self.stop_flag:
-            for frame_id in frame_ids:
-                # check if the frame has tissue
-                r = self.detect_func(self.model.data_buffer[frame_id], self.percentage)
-                if r:
-                    self.model.logger.debug(f"*** this frame has enough percentage of tissue!{frame_id}")
-                    self.has_tissue_flag = True
-                    self.stop_flag = True
-                    break
+        for frame_id in frame_ids:
+            # check if the frame has tissue
+            r = self.detect_func(self.model.data_buffer[frame_id], self.percentage)
+            if r:
+                self.model.logger.debug(f"*** this frame has enough percentage of tissue!{frame_id}")
+                self.has_tissue_flag = True
+                break
         self.received_frames += len(frame_ids)
         return self.has_tissue_flag
 
     def end_func_data(self):
-        return self.stop_signal_flag and self.received_frames >= self.scan_num
+        return self.received_frames >= self.planes
 
 
 class DetectTissueInStackAndRecord(DetectTissueInStack):

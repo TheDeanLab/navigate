@@ -249,6 +249,7 @@ class Model:
             [
                 # {"name": MoveToNextPositionInMultiPostionTable},
                 # {"name": CalculateFocusRange},
+                {"name": PrepareNextChannel},
                 (
                     {"name": MoveToNextPositionInMultiPostionTable},
                     {"name": Autofocus},
@@ -283,7 +284,6 @@ class Model:
                             records,
                         ),
                     },
-                    {"name": WaitToContinue}, # to synchronize signal and data threads
                     {
                         "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.multiposition_count",),
@@ -918,6 +918,7 @@ class Model:
         try:
             self.active_microscope.daq.run_acquisition()
         except:
+            print("Acquisition Run Failed")
             self.active_microscope.daq.stop_acquisition()
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}",

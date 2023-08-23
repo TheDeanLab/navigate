@@ -119,9 +119,13 @@ class WaitToContinue:
     def pre_signal_func(self):
         with self.first_enter_node as first_enter_node:
             if first_enter_node.value == "":
+                self.model.logger.debug("*** wait to continue enters signal "
+                                        "first!")
                 first_enter_node.value = "signal"
                 if not self.pause_signal_lock.locked():
                     self.pause_signal_lock.acquire()
+                if self.pause_data_lock.locked():
+                    self.pause_data_lock.release()
 
     def signal_func(self):
         self.model.logger.debug(f"--wait to continue: {self.model.frame_id}")
@@ -136,9 +140,13 @@ class WaitToContinue:
     def pre_data_func(self):
         with self.first_enter_node as first_enter_node:
             if first_enter_node.value == "":
+                self.model.logger.debug("*** wait to continue enters data "
+                                        "node first!")
                 first_enter_node.value = "data"
                 if not self.pause_data_lock.locked():
                     self.pause_data_lock.acquire()
+                if self.pause_signal_lock.locked():
+                    self.pause_signal_lock.release()
 
     def data_func(self, frame_ids):
         self.model.logger.debug(f"**wait to continue? {frame_ids}")
@@ -217,8 +225,8 @@ class MoveToNextPositionInMultiPostionTable:
         self.model = model
         self.config_table = {
             "signal": {
-                "init": self.pre_signal_func,
                 "main": self.signal_func,
+                "cleanup": self.cleanup,
             },
             "node": {"device_related": True},
         }
@@ -231,12 +239,6 @@ class MoveToNextPositionInMultiPostionTable:
             "multiposition_count"
         ]
         self.stage_distance_threshold = 1000
-
-    def pre_signal_func(self):
-        # let the daq be prepared to capture one image since this is a
-        # device-related feature.
-        self.model.active_microscope.current_channel = 0
-        self.model.active_microscope.prepare_next_channel()
 
     def signal_func(self):
         self.model.logger.debug(
@@ -264,8 +266,11 @@ class MoveToNextPositionInMultiPostionTable:
 
         self.current_idx += 1
         abs_pos_dict = dict(map(lambda k: (f"{k}_abs", pos_dict[k]), pos_dict.keys()))
-        self.model.logger.debug(f"*** move stage to {pos_dict}")
+        self.model.logger.debug(f"MoveToNextPositionInMultiPosition: "
+                                f"{pos_dict}")
         self.model.move_stage(abs_pos_dict, wait_until_done=True)
+
+        self.model.logger.debug("MoveToNextPositionInMultiPosition: move done")
         # resume data thread
         if should_pause_data_thread:
             self.model.resume_data_thread()
@@ -273,6 +278,9 @@ class MoveToNextPositionInMultiPostionTable:
         if self.pre_z != pos_dict["z"]:
             self.pre_z = pos_dict["z"]
             return True
+
+    def cleanup(self):
+        self.model.resume_data_thread()
 
 
 class StackPause:

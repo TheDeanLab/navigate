@@ -129,6 +129,10 @@ class Metadata:
             )
             or (
                 self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVATTL"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                 == "customized"
             )
         ):

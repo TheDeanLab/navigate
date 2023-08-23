@@ -229,7 +229,7 @@ class NIDAQ(DAQBase):
         def callback_func(task_handle, status, callback_data):
             try:
                 logger.info("daq recieved trigger")
-                print("daq recieved trigger")
+                # print("daq recieved trigger")
                 # pos = asi_stage.get_axis_position("X")
                 # print(pos)
                 task.stop()

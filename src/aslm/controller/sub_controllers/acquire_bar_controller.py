@@ -67,7 +67,7 @@ class AcquireBarController(GUIController):
             "Confocal-Projection": "confocal-projection",
             "ConstantVelocityAcquisition": "ConstantVelocityAcquisition",
             "Customized": "customized",
-            "CVA-TTL":"cva_ttl"
+            "CVA-TTL":"CVATTL"
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
@@ -135,7 +135,7 @@ class AcquireBarController(GUIController):
             number_of_slices = 1
         elif mode == "confocal-projection":
             number_of_slices = microscope_state["n_plane"]
-        elif mode == "z-stack" or "ConstantVelocityAcquisition":
+        elif mode == "z-stack" or "ConstantVelocityAcquisition" or "CVATTL":
             number_of_slices = microscope_state["number_z_steps"]
 
         top_anticipated_images = number_of_slices
@@ -341,6 +341,7 @@ class AcquireBarController(GUIController):
             "z-stack",
             "projection",
             "ConstantVelocityAcquisition",
+            "CVATTL"
             "customized",
         ]:
             state = "normal"

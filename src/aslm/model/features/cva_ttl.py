@@ -84,10 +84,10 @@ class CVATTL:
         """
 
         # Inject new trigger source.
-        self.model.active_microscope.prepare_next_channel()
+        # self.model.active_microscope.prepare_next_channel()
         # TODO: retrieve this parameter from configuration file
 
-        self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
         # self.model.active_microscope.daq.number_triggers = 0
         self.asi_stage = self.model.active_microscope.stages[self.axis]
 
@@ -100,7 +100,7 @@ class CVATTL:
         readout_time = self.model.active_microscope.get_readout_time()
         _, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
         current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
-        scaling_factor = 1.3
+        scaling_factor = 1.05
 
         # Provide just a bit of breathing room for the sweep time...
         current_sweep_time = current_sweep_time * scaling_factor
@@ -108,12 +108,13 @@ class CVATTL:
         print("*** current sweep time:", current_sweep_time)
         logger.info(f"*** current sweep time: {current_sweep_time}")
         logger.info(f"*** sweep time scaling: {scaling_factor}")
+        # self.sweep_time = current_sweep_time
         # logger.debug(f"running signal node: {self.curr_node.node_name}")
 
         # print("*** current exposure time:", self.model.active_microscope.current_channel, exposure_time)
 
         # Calculate Stage Velocity
-        encoder_resolution = 22 # nm
+        encoder_resolution = 10 # nm
         minimum_encoder_divide = encoder_resolution*4 # nm
 
         # Get step size from the GUI. For now, assume 160 nm.
@@ -170,6 +171,8 @@ class CVATTL:
         logger.info(f"*** z start position: {start_position}")
         logger.info(f"*** z end position: {self.stop_position}")
         logger.info(f"*** Expected number of steps: {self.number_z_steps}")
+
+        
         
         # move to start position:
         self.asi_stage.move_axis_absolute(self.axis, start_position * 1000.0, wait_until_done=True)
@@ -202,6 +205,15 @@ class CVATTL:
         logger.info(f"*** Expected stage velocity, (mm/s): {expected_speed}")
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
 
+        expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
+        print(f"*** Expected Frames: {expected_frames}")
+        logger.info(f"*** Expected Frames: {expected_frames}")
+        self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVATTL"
+        self.model.configuration["waveform_templates"]["CVATTL"]["expand"] = expected_frames
+        self.model.active_microscope.current_channel = 0
+        # self.waveform_dict = self.model.active_microscope.calculate_all_waveforms(self)
+        self.model.active_microscope.prepare_next_channel()
+
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(
             start_position_mm=start_position,
@@ -222,11 +234,13 @@ class CVATTL:
         # Start the stage scan.  Also get this functionality into the ASI stage class.
         self.asi_stage.start_scan(self.axis)
 
+        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+
         # start scan won't start the scan, but when calling stop_scan it will start scan. So weird.
         self.asi_stage.stop_scan()
         # time.sleep(5) #seconds
         # # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1",self.asi_stage)
-        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+        
 
 
         # Stage starts to move and sends a trigger to the DAQ.

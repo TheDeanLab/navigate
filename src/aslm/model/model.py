@@ -45,6 +45,7 @@ from aslm.model.features.autofocus import Autofocus
 from aslm.model.features.constant_velocity_acquisition import (
     ConstantVelocityAcquisition,
 )
+from aslm.model.features.cva_ttl import CVATTL
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
@@ -297,6 +298,7 @@ class Model:
                 {"name": PrepareNextChannel},
             ],
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
+            "CVATTL": [{"name": CVATTL}],
             "customized": [],
         }
         self.load_feature_records()
@@ -604,6 +606,8 @@ class Model:
             if hasattr(self, "signal_container"):
                 self.signal_container.end_flag = True
             if self.imaging_mode == "ConstantVelocityAcquisition":
+                self.active_microscope.stages["z"].stop()
+            if self.imaging_mode == "CVATTL":
                 self.active_microscope.stages["z"].stop()
             if self.signal_thread:
                 self.signal_thread.join()

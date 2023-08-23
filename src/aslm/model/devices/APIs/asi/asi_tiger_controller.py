@@ -188,7 +188,7 @@ class TigerController:
         self.report_to_console(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
         self.serial_port.write(command)
-        print(f"Sent Command: {command.decode(encoding='ascii')}")
+        # print(f"Sent Command: {command.decode(encoding='ascii')}")
 
     def read_response(self) -> str:
         """
@@ -201,7 +201,7 @@ class TigerController:
 
         # Remove leading and trailing empty spaces
         self.report_to_console(f"Received Response: {response.strip()}")
-        print(f"Received Response: {response.strip()}")
+        # print(f"Received Response: {response.strip()}")
         if response.startswith(":N"):
             raise TigerException(response)
 
@@ -421,6 +421,7 @@ class TigerController:
         if is_single_axis_scan:
             slow_axis_id = 9
         self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
+        # print(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
         self.read_response()
 
     def stop_scan(self):

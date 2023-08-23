@@ -201,6 +201,10 @@ class ConstantVelocityAcquisition:
         print("Encoder divide step size = ",step_size_mm)
         logger.info(f"*** Expected stage velocity, (mm/s): {expected_speed}")
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
+        
+        expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
+        print(f"*** Expected Frames: {expected_frames}")
+        logger.info(f"*** Expected Frames: {expected_frames}")
 
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(

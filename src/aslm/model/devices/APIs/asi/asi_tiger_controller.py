@@ -305,7 +305,7 @@ class TigerController:
         res = self.read_response()
         return "B" in res
 
-    def wait_for_device(self, timeout: float = 2) -> None:
+    def wait_for_device(self, timeout: float = 1.75) -> None:
         """Waits for the all motors to stop moving.
 
         timeout : float
@@ -317,10 +317,10 @@ class TigerController:
         waiting_time = 0.0
 
         while busy:
-            waiting_time += 0.001
+            waiting_time += 0.01
             if waiting_time >= timeout:
                 break
-            time.sleep(0.001)
+            time.sleep(0.01)
             busy = self.is_device_busy()
 
         if self.verbose:

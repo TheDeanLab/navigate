@@ -292,9 +292,6 @@ class ASIStage(StageBase):
             # The 10 is to account for the ASI units, 1/10 of a micron
             self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
 
-            if wait_until_done:
-                self.tiger_controller.wait_for_device()
-            return True
         except TigerException as e:
             print(
                 f"ASI stage move axis absolute failed or is trying to move out of "
@@ -302,6 +299,10 @@ class ASIStage(StageBase):
             )
             logger.exception("ASI Stage Exception", e)
             return False
+        
+        if wait_until_done:
+                self.tiger_controller.wait_for_device()
+        return True
 
     def verify_move(self, move_dictionary):
         """Don't submit a move command for axes that aren't moving.

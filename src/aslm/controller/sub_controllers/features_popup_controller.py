@@ -33,14 +33,17 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import inspect
+import json
+import os
 
 from aslm.view.popups.feature_list_popup import FeatureIcon, FeatureConfigPopup
 from aslm.view.custom_widgets.ArrowLabel import ArrowLabel
 from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.tools.common_functions import combine_funcs
 from aslm.tools.image import create_arrow_image
+from aslm.tools.file_functions import load_yaml_file
 from aslm.model.features.feature_related_functions import convert_str_to_feature_list
 from aslm.model.features import feature_related_functions
+from aslm.config.config import get_aslm_path
 
 class FeaturePopupController(GUIController):
     def __init__(self, view, parent_controller, feature_list_id=0):
@@ -49,14 +52,15 @@ class FeaturePopupController(GUIController):
         self.features = []
         self.feature_structure = []
 
-        self.view.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
-
         self.view.buttons["preview"].configure(command=self.draw_feature_list_graph)
         if "add" in self.view.buttons:
             self.view.buttons["add"].configure(command=self.add_feature_list)
+            self.view.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
+            self.view.buttons["cancel"].configure(command=self.exit_func)
         elif "confirm" in self.view.buttons:
             self.view.buttons["confirm"].configure(command=self.update_feature_list)
-        self.view.buttons["cancel"].configure(command=self.exit_func)
+            self.view.popup.protocol("WM_DELETE_WINDOW", self.cancel_acquisition)
+            self.view.buttons["cancel"].configure(command=self.cancel_acquisition)
 
         # get all feature names
         self.feature_names = []
@@ -195,15 +199,19 @@ class FeaturePopupController(GUIController):
                 if "args" in feature:
                     arg_str = ""
                     for a in feature["args"]:
-                        if type(a) is bool:
+                        if a is None:
+                            arg_str += "None"
+                        elif type(a) is bool:
                             arg_str += str(a)
                         elif type(a) is int or type(a) is float:
+                            arg_str += str(a)
+                        elif type(a) is dict:
                             arg_str += str(a)
                         else:
                             try:
                                 float(a)
                                 arg_str += a
-                            except ValueError:
+                            except (ValueError, TypeError) as e:
                                 arg_str += f'"{a}"'
                         arg_str += ","
                     content += f', "args": ({arg_str})'
@@ -216,6 +224,11 @@ class FeaturePopupController(GUIController):
         feature = self.features[idx]
 
         def func(event):
+            # load feature parameter setting
+            feature_config_path = f"{get_aslm_path()}/config/feature_parameter_setting/{feature['name'].__name__}.yml"
+            feature_parameter_config = None
+            if os.path.exists(feature_config_path):
+                feature_parameter_config = load_yaml_file(feature_config_path)
             spec = inspect.getfullargspec(feature["name"])
             if spec.defaults:
                 args_value = list(spec.defaults)
@@ -226,7 +239,7 @@ class FeaturePopupController(GUIController):
                     args_value[i] = a
             popup = FeatureConfigPopup(self.view.popup, features=self.feature_names,
                            feature_name=feature["name"].__name__, args_name=spec.args[2:],
-                           args_value=args_value, title="Feature Parameters")
+                           args_value=args_value, title="Feature Parameters", parameter_config=feature_parameter_config)
             popup.feature_name_widget.widget.bind("<<ComboboxSelected>>",
                     lambda event: refresh_parameters(popup))
             
@@ -234,8 +247,14 @@ class FeaturePopupController(GUIController):
             
         def refresh_parameters(popup):
             feature_name = popup.feature_name_widget.get()
-            spec = inspect.getfullargspec(getattr(feature_related_functions, feature_name))
-            popup.build_widgets(feature_name, spec.args[2:], spec.defaults)
+            new_feature = getattr(feature_related_functions, feature_name)
+            # load feature parameter setting
+            feature_config_path = f"{get_aslm_path()}/config/feature_parameter_setting/{new_feature.__name__}.yml"
+            feature_parameter_config = None
+            if os.path.exists(feature_config_path):
+                feature_parameter_config = load_yaml_file(feature_config_path)
+            spec = inspect.getfullargspec(new_feature)
+            popup.build_widgets(spec.args[2:], spec.defaults, feature_parameter_config)
 
         def update_feature_parameters(popup):
             widgets = popup.get_widgets()
@@ -248,6 +267,12 @@ class FeaturePopupController(GUIController):
                         feature["args"][i] = True
                     elif a == "False":
                         feature["args"][i] = False
+                    elif popup.inputs_type[i] is float:
+                        feature["args"][i] = float(a)
+                    elif popup.inputs_type[i] is dict:
+                        feature["args"][i] = json.loads(a.replace("'", '"'))
+                    elif a == "None":
+                        feature["args"][i] = None
             # update text
             self.view.inputs["content"].delete("1.0", tk.END)
             self.view.inputs["content"].insert("1.0", self.build_feature_list_text())
@@ -368,7 +393,8 @@ class FeaturePopupController(GUIController):
         content = self.view.inputs["content"].get("1.0", "end-1c")
         feature_list_content = "".join(content.split("\n"))
         self.parent_controller.model.run_command("load_feature", self.feature_list_id, feature_list_content)
-        self.exit_func()
+        self.start_acquisiton_flag = True
+        self.view.popup.dismiss()
 
     def verify_feature_list(self):
         content = self.view.inputs["content"].get("1.0", "end-1c")
@@ -381,3 +407,7 @@ class FeaturePopupController(GUIController):
     def exit_func(self):
         self.view.popup.dismiss()
         delattr(self.parent_controller, "features_popup_controller")
+
+    def cancel_acquisition(self):
+        self.start_acquisiton_flag = False
+        self.view.popup.dismiss()

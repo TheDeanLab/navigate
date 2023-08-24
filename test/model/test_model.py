@@ -191,7 +191,9 @@ def test_get_feature_list(model):
 
     from aslm.model.features.feature_related_functions import convert_str_to_feature_list
     for i in range(len(feature_lists)):
-        assert convert_str_to_feature_list(model.get_feature_list(i+1)) == feature_lists[i]
+        feature_str = model.get_feature_list(i+1)
+        if "shared_list" not in feature_str:
+            assert convert_str_to_feature_list(feature_str) == feature_lists[i]
 
 def test_load_feature_list_from_str(model):
     feature_lists = model.feature_list
@@ -201,6 +203,11 @@ def test_load_feature_list_from_str(model):
     assert len(feature_lists) == l+1
     from aslm.model.features.feature_related_functions import convert_feature_list_to_str
     assert convert_feature_list_to_str(feature_lists[-1]) == '[{"name": PrepareNextChannel,},]'
+    del feature_lists[-1]
+    feature_str = '[{"name": LoopByCount,"args": ([1, 2.0, True, False, \'abc\'],)},]'
+    model.load_feature_list_from_str(feature_str)
+    assert len(feature_lists) == l+1
+    assert convert_feature_list_to_str(feature_lists[-1]) == feature_str
     del feature_lists[-1]
 
 

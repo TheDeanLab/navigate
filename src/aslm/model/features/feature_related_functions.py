@@ -46,6 +46,25 @@ from aslm.model.features.common_features import (
 from aslm.model.features.image_writer import ImageWriter # noqa
 from aslm.model.features.restful_features import IlastikSegmentation # noqa
 from aslm.model.features.volume_search import VolumeSearch # noqa
+from aslm.model.features.remove_empty_tiles import (
+    DetectTissueInStack, # noqa
+    DetectTissueInStackAndRecord, # noqa
+    RemoveEmptyPositions, # noqa
+)
+
+class SharedList(list):
+    def __init__(self, value, name=None):
+        super().__init__(value)
+        if name is None:
+            name = "shared_list__"
+        self.__name__ = name
+
+    def __str__(self):
+        return str({
+            "type": "shared_list", 
+            "name": self.__name__,
+            "value": self
+        })
 
 def convert_str_to_feature_list(content: str):
     """Convert string to a feature list
@@ -106,7 +125,17 @@ def convert_feature_list_to_str(feature_list):
             if type(item) is dict:
                 result += '{' + f'"name": {item["name"].__name__},'
                 if "args" in item:
-                    result += f'"args": {str(item["args"])}'
+                    result += '"args": ('
+                    for temp in item["args"]:
+                        if temp is None:
+                            result += "None,"
+                        elif callable(temp):
+                            result += f'"{temp.__name__}",'
+                        elif type(temp) is str:
+                            result += f'"{temp}",'
+                        else:
+                            result += f"{temp},"
+                    result += ")"
                 result += '},'
             elif type(item) is tuple:
                 result += '('
@@ -120,3 +149,44 @@ def convert_feature_list_to_str(feature_list):
     f(feature_list)
     result += ']'
     return result
+
+
+def load_dynamic_parameter_functions(feature_list: list, feature_parameter_setting_path: str):
+    import os
+    import inspect
+    import importlib
+    from aslm.tools.file_functions import load_yaml_file
+    from aslm.tools.common_functions import load_module_from_file
+
+    for item in feature_list:
+        if type(item) is dict:
+            if "args" in item:
+                feature = item["name"]
+                if not hasattr(feature, "__parameter_config"):
+                    config_path = f"{feature_parameter_setting_path}/{feature.__name__}.yml"
+                    parameter_config = None
+                    if os.path.exists(config_path):
+                        parameter_config = load_yaml_file(config_path)
+                    feature.__parameter_config = parameter_config
+                else:
+                    parameter_config = feature.__parameter_config
+                if parameter_config:
+                    args = list(item["args"])
+                    spec = inspect.getfullargspec(feature)
+                    for parameter in parameter_config:
+                        idx = spec.args[2:].index(parameter)
+                        if idx >= len(args):
+                            continue
+                        if args[idx] is None:
+                            args[idx] = "None"
+                        ref_lib = parameter_config[parameter][args[idx]]
+                        if ref_lib is None or ref_lib == "None":
+                            args[idx] = None
+                        elif os.path.exists(ref_lib):
+                            args[idx] = load_module_from_file(args[idx], ref_lib)
+                        else:
+                            module = importlib.import_module(ref_lib)
+                            args[idx] = getattr(module, args[idx])
+                    item["args"] = tuple(args)
+        else:
+            load_dynamic_parameter_functions(item, feature_parameter_setting_path)

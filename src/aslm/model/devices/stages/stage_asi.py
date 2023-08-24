@@ -210,8 +210,10 @@ class ASIStage(StageBase):
                 )
                 / 2
             )
+            # If this is changing, the stage must be power cycled for these changes to take effect.
             for ax in self.asi_axes.keys():
                 self.tiger_controller.set_finishing_accuracy(ax, finishing_accuracy)
+                self.tiger_controller.set_error(ax, 1.2*finishing_accuracy)
 
     def __del__(self):
         """Delete the ASI Stage connection."""
@@ -253,7 +255,11 @@ class ASIStage(StageBase):
             # positions from the device are in microns
             pos_dict = self.tiger_controller.get_position(list(self.asi_axes.keys()))
             for axis, pos in pos_dict.items():
-                setattr(self, f"{self.asi_axes[axis]}_pos", float(pos) / 10.0)
+                ax = self.asi_axes[axis]
+                if ax == "theta":
+                    setattr(self, f"{ax}_pos", float(pos) / 1000.0)
+                else:
+                    setattr(self, f"{ax}_pos", float(pos) / 10.0)
         except TigerException as e:
             print("Failed to report ASI Stage Position")
             logger.exception("ASI Stage Exception", e)
@@ -289,12 +295,12 @@ class ASIStage(StageBase):
 
         # Move stage
         try:
-            # The 10 is to account for the ASI units, 1/10 of a micron
-            self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
+            if axis == "theta":
+                self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 1000)
+            else:
+                # The 10 is to account for the ASI units, 1/10 of a micron
+                self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
 
-            if wait_until_done:
-                self.tiger_controller.wait_for_device()
-            return True
         except TigerException as e:
             print(
                 f"ASI stage move axis absolute failed or is trying to move out of "
@@ -302,6 +308,10 @@ class ASIStage(StageBase):
             )
             logger.exception("ASI Stage Exception", e)
             return False
+        
+        if wait_until_done:
+            self.tiger_controller.wait_for_device()
+        return True
 
     def verify_move(self, move_dictionary):
         """Don't submit a move command for axes that aren't moving.
@@ -354,7 +364,7 @@ class ASIStage(StageBase):
 
         # This is to account for the asi 1/10 of a micron units
         pos_dict = {
-            self.axes_mapping[axis]: pos * 10 for axis, pos in abs_pos_dict.items()
+            self.axes_mapping[axis]: pos * 1000 if axis == "theta" else pos * 10 for axis, pos in abs_pos_dict.items()
         }
         try:
             self.tiger_controller.move(pos_dict)

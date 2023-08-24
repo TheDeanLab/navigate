@@ -425,6 +425,7 @@ class MenuController(GUIController):
             "Volume Search",
             "Time Series",
             "Decoupled Focus Stage Multiposition",
+            "Remove Empty Tiles"
         ]
         self.feature_list_count = len(self.feature_list_names)
         self.system_feature_list_count = self.feature_list_count

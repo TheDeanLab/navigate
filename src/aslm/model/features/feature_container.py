@@ -306,11 +306,18 @@ def get_registered_funcs(feature_module, func_type="signal"):
 def load_features(model, feature_list):
     """turn list to child-sibling tree"""
     signal_cleanup_list, data_cleanup_list = [], []
+    shared_variables = {}
 
     def create_node(feature_dict):
         args = ()
         if "args" in feature_dict:
-            args = feature_dict["args"]
+            args = list(feature_dict["args"])
+            for i, arg in enumerate(args):
+                if type(arg) is dict and arg.get("type", None) == "shared_list":
+                    variable_name = arg.get("name", "temp")
+                    if variable_name not in shared_variables:
+                        shared_variables[variable_name] = list(arg["value"])
+                    args[i] = shared_variables[variable_name]
         feature = feature_dict["name"](model, *args)
 
         node_config = feature.config_table.get("node", {})

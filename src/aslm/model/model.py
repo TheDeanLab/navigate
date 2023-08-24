@@ -884,6 +884,7 @@ class Model:
         self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
         self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
 
+        self.active_microscope.turn_on_laser()
         # Run the acquisition
         try:
             self.active_microscope.daq.run_acquisition()
@@ -894,12 +895,12 @@ class Model:
                 self.active_microscope.current_exposure_time,
             )
             self.active_microscope.daq.run_acquisition()
+        self.active_microscope.turn_off_laser()
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
-        self.active_microscope.turn_off_lasers()
 
     def run_live_acquisition(self):
         """Stream live image to the GUI.

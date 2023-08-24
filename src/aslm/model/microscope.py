@@ -370,8 +370,21 @@ class Microscope:
         self.current_channel = 0
         self.central_focus = None
 
-    def turn_off_lasers(self):
-        """Turn off the lasers.
+    def turn_on_laser(self):
+        """Turn on the current laser
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
+
+    def turn_off_laser(self):
+        """Turn off the current laser.
 
         Parameters
         ----------
@@ -538,7 +551,7 @@ class Microscope:
         self.lasers[str(self.laser_wavelength[self.current_laser_index])].set_power(
             channel["laser_power"]
         )
-        self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
+        # self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
         # stop daq before writing new waveform
         self.daq.stop_acquisition()

@@ -384,7 +384,7 @@ class Microscope:
         self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
     def turn_off_lasers(self):
-        """Turn off lasers.
+        """Turn off current laser.
 
         Parameters
         ----------
@@ -394,8 +394,7 @@ class Microscope:
         -------
         None
         """
-        for k in self.lasers:
-            self.lasers[k].turn_off()
+        self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_off()
 
     def calculate_all_waveform(self):
         """Calculate all the waveforms.

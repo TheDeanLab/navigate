@@ -895,7 +895,7 @@ class Model:
                 self.active_microscope.current_exposure_time,
             )
             self.active_microscope.daq.run_acquisition()
-        self.active_microscope.turn_off_laser()
+        self.active_microscope.turn_off_lasers()
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)

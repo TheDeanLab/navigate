@@ -210,8 +210,10 @@ class ASIStage(StageBase):
                 )
                 / 2
             )
+            # If this is changing, the stage must be power cycled for these changes to take effect.
             for ax in self.asi_axes.keys():
                 self.tiger_controller.set_finishing_accuracy(ax, finishing_accuracy)
+                self.tiger_controller.set_error(ax, 1.2*finishing_accuracy)
 
     def __del__(self):
         """Delete the ASI Stage connection."""

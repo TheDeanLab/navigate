@@ -140,11 +140,45 @@ class TigerController:
         self.read_response()
 
     def set_backlash(self, axis, val):
+        """
+        Enable/disable stage backlash correction.
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        val : float
+            Distance of anti-backlash motion [mm]
+        """
         self.send_command(f"B {axis}={val:.7f}\r")
         self.read_response()
 
     def set_finishing_accuracy(self, axis, ac):
+        """
+        Set the stage finishing accuracy.
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        ac : float
+            Position error [mm]
+        """
         self.send_command(f"PC {axis}={ac:.7f}\r")
+        self.read_response()
+
+    def set_error(self, axis, ac):
+        """
+        Set the stage drift error
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        ac : float
+            Position error [mm]
+        """
+        self.send_command(f"E {axis}={ac:.7f}\r")
         self.read_response()
 
     ##### END TODO #####
@@ -317,10 +351,10 @@ class TigerController:
         waiting_time = 0.0
 
         while busy:
-            waiting_time += 0.01
+            waiting_time += 0.001
             if waiting_time >= timeout:
                 break
-            time.sleep(0.01)
+            time.sleep(0.001)
             busy = self.is_device_busy()
 
         if self.verbose:

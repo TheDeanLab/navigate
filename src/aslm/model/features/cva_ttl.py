@@ -85,21 +85,34 @@ class CVATTL:
 
         # Inject new trigger source.
         # self.model.active_microscope.prepare_next_channel()
-        # TODO: retrieve this parameter from configuration file
-
+        # # TODO: retrieve this parameter from configuration file
+ 
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
         # self.model.active_microscope.daq.number_triggers = 0
+        print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
+        print("self.asi stage")
 
         # get the current exposure time for that channel.
         # exposure_time = float( 
         #     self.model.configuration["experiment"][
         #         "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
         #         "camera_exposure_time"]) / 1000.0
-        
+        self.model.active_microscope.current_channel = 2
         readout_time = self.model.active_microscope.get_readout_time()
-        _, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
+        print("readout time calculated")
+        print(f"*** readout time = {readout_time} s")
+        exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
+        print("sweep times and exposure times calculated")
+        print(f"exposure time = {exposure_times}")
+        print(f"sweep time = {sweep_times}")
+        print(f"channel_{self.model.active_microscope.current_channel}")
         current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
+        current_expsure_time = exposure_times[f"channel_{self.model.active_microscope.current_channel}"]
+        self.current_sweep_time = current_sweep_time
+        self.current_exposure_time = current_expsure_time
+        self.readout_time = readout_time
+        print("sweep time calculated")
         scaling_factor = 1.05
 
         # Provide just a bit of breathing room for the sweep time...
@@ -210,9 +223,12 @@ class CVATTL:
         logger.info(f"*** Expected Frames: {expected_frames}")
         self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVATTL"
         self.model.configuration["waveform_templates"]["CVATTL"]["expand"] = expected_frames
-        self.model.active_microscope.current_channel = 0
-        # self.waveform_dict = self.model.active_microscope.calculate_all_waveforms(self)
+        print("waveforms obtained from config")
+        # self.model.active_microscope.current_channel = 0
+        self.waveform_dict = self.model.active_microscope.calculate_all_waveforms(self)
+        print("waveforms calculated v2")
         self.model.active_microscope.prepare_next_channel()
+        print("microscope channel prepared")
 
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(

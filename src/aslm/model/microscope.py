@@ -381,8 +381,12 @@ class Microscope:
         waveform : dict
             Dictionary of all the waveforms.
         """
+        print("calculate waveforms called")
         readout_time = self.get_readout_time()
+        print(f"readout_time = {readout_time}")
         exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
+        print(f"exposure_times = {exposure_times}")
+        print(f"sweep_times = {sweep_times}")
         camera_waveform = self.daq.calculate_all_waveforms(
             self.microscope_name, exposure_times, sweep_times
         )

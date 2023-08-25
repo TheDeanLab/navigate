@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from aslm.config import load_configs, get_configuration_paths
+from aslm.model.devices.lasers.laser_ni import LaserNI
 
 
 class TestLaserNI(unittest.TestCase):
@@ -12,7 +13,6 @@ class TestLaserNI(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up the configuration, experiment, etc."""
-        from aslm.model.devices.lasers.laser_ni import LaserNI
 
         self.manager = Manager()
         self.parent_dict = {}
@@ -34,16 +34,19 @@ class TestLaserNI(unittest.TestCase):
             waveform_templates=waveform_templates_path,
         )
 
-        self.microscope_name = "Mesoscale"
-        self.device_connection = MagicMock()
+        self.microscope_name = self.configuration["configuration"]["microscopes"].keys()[0]
+        self.device_connection = None
         laser_id = 0
 
-        self.laser = LaserNI(
-            microscope_name=self.microscope_name,
-            device_connection=self.device_connection,
-            configuration=self.configuration,
-            laser_id=laser_id,
-        )
+        with patch("nidaqmx.Task") as self.mock_task:
+            # self.mock_task_instance = MagicMock()
+            # self.mock_task.return_value = self.mock_task_instance
+            self.laser = LaserNI(
+                microscope_name=self.microscope_name,
+                device_connection=self.device_connection,
+                configuration=self.configuration,
+                laser_id=laser_id,
+            )
 
     def tearDown(self):
         """Tear down the multiprocessing manager."""
@@ -52,27 +55,39 @@ class TestLaserNI(unittest.TestCase):
     def test_set_power(self):
         self.current_intensity = random.randint(1, 100)
         scaled_intensity = (int(self.current_intensity) / 100) * self.laser.laser_max_ao
-        with patch("nidaqmx.Task") as mock_task:
-            mock_task_instance = MagicMock()
-            mock_task.return_value = mock_task_instance
-            self.laser.set_power(self.current_intensity)
+        self.laser.set_power(self.current_intensity)
 
-            mock_task.laser_ao_task.assert_called_once_with(
-                data=scaled_intensity, auto_start=True
-            )
-            assert self.laser._current_intensity == self.current_intensity
+        self.laser.laser_ao_task.write.assert_called_once_with(
+            scaled_intensity, auto_start=True
+        )
+        assert self.laser._current_intensity == self.current_intensity
 
     def test_turn_on(self):
-        with patch("nidaqmx.Task") as mock_task:
-            mock_task_instance = MagicMock()
-            mock_task.return_value = mock_task_instance
+        self.laser.on_off_type = "digital"
+        self.laser.turn_on()
+        self.laser.laser_do_task.write.assert_called_with(True, auto_start=True)
 
-            self.laser.on_off_type = "digital"
-            self.laser.turn_on()
-            mock_task.laser_do_task.assert_called_once_with(data=True, auto_start=True)
+        self.laser.on_off_type = "analog"
+        self.laser.turn_on()
+        self.laser.laser_do_task.write.assert_called_with(
+            self.laser.laser_max_do, auto_start=True
+        )
 
-            self.laser.on_off_type = "analog"
-            self.laser.turn_on()
-            mock_task.laser_do_task.assert_called_once_with(
-                data=self.laser.laser_max_do, auto_start=True
-            )
+    def test_turn_off(self):
+        self.current_intensity = random.randint(1, 100)
+        self.laser._current_intensity = self.current_intensity
+
+        self.laser.on_off_type = "digital"
+        self.laser.turn_off()
+        self.laser.laser_do_task.write.assert_called_with(False, auto_start=True)
+
+        assert self.laser._current_intensity == self.current_intensity
+
+        self.laser.on_off_type = "analog"
+        self.laser.turn_off()
+        self.laser.laser_do_task.write.assert_called_with(
+            self.laser.laser_min_do, auto_start=True
+        )
+
+        assert self.laser._current_intensity == self.current_intensity
+        

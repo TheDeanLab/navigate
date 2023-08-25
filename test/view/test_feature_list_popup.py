@@ -38,31 +38,56 @@ from tkinter import ttk
 import pytest
 
 # Local Imports
-from aslm.view.popups.feature_list_popup import FeatureIcon, FeatureConfigPopup, FeatureListPopup
+from aslm.view.popups.feature_list_popup import (
+    FeatureIcon,
+    FeatureConfigPopup,
+    FeatureListPopup,
+)
 
-def test_feature_icon():
+
+@pytest.fixture
+def tk_root():
     root = tk.Tk()
+    yield root
+    root.destroy()
 
-    feature_icon = FeatureIcon(root, "A Test Feature")
+
+def test_feature_icon(tk_root):
+    feature_icon = FeatureIcon(tk_root, "A Test Feature")
     assert isinstance(feature_icon, FeatureIcon)
     assert feature_icon["text"] == "A Test Feature"
 
-    root.destroy()
 
 @pytest.mark.parametrize(
     "feature_name, args_name, args_value",
-    [("PrepareNextChannel", [], []),
-     ("ZStackAcquisition", ["get_origin", "saving_flag", "saving_dir"], [False, False, "z-stack"]),
-     ("ChangeResolution", ["resolution_mode", "zoom_value"], ["high", "N/A"]),
-     ("LoopByCount", ["steps"], [1]),
-     ("LoopByCount", ["steps"], ["experiment.MicroscopeState.selected_channels"])
-    ]
+    [
+        ("PrepareNextChannel", [], []),
+        (
+            "ZStackAcquisition",
+            ["get_origin", "saving_flag", "saving_dir"],
+            [False, False, "z-stack"],
+        ),
+        ("ChangeResolution", ["resolution_mode", "zoom_value"], ["high", "N/A"]),
+        ("LoopByCount", ["steps"], [1]),
+        ("LoopByCount", ["steps"], ["experiment.MicroscopeState.selected_channels"]),
+    ],
 )
-def test_feature_config_popup(feature_name, args_name, args_value):
-    root = tk.Tk()
-    features = ["PrepareNextChannel", "ZStackAcquisition", "ChangeResolution", "LoopByCount"]
-    config_popup = FeatureConfigPopup(root, features, feature_name=feature_name, args_name=args_name, args_value=args_value, title="Test")
-    root.update()
+def test_feature_config_popup(feature_name, args_name, args_value, tk_root):
+    features = [
+        "PrepareNextChannel",
+        "ZStackAcquisition",
+        "ChangeResolution",
+        "LoopByCount",
+    ]
+    config_popup = FeatureConfigPopup(
+        tk_root,
+        features,
+        feature_name=feature_name,
+        args_name=args_name,
+        args_value=args_value,
+        title="Test",
+    )
+    tk_root.update()
     assert config_popup.feature_name_widget.get() == feature_name
     widgets = config_popup.get_widgets()
     assert len(widgets) == len(args_name)
@@ -76,19 +101,11 @@ def test_feature_config_popup(feature_name, args_name, args_value):
 
         assert w.get() == str(args_value[i])
 
-    root.destroy()
 
-@pytest.mark.parametrize(
-    "title",
-    [
-        ("Add Feature List"),
-        ("Edit Feature Parameters")
-    ]
-)
-def test_feature_list_popup(title):
-    root = tk.Tk()
-    feature_list_popup = FeatureListPopup(root, title=title)
-    root.update()
+@pytest.mark.parametrize("title", [("Add Feature List"), ("Edit Feature Parameters")])
+def test_feature_list_popup(title, tk_root):
+    feature_list_popup = FeatureListPopup(tk_root, title=title)
+    tk_root.update()
 
     assert len(feature_list_popup.inputs.keys()) == 2
     assert "feature_list_name" in feature_list_popup.inputs

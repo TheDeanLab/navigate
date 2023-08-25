@@ -84,7 +84,7 @@ class CVATTL:
         """
 
         # Inject new trigger source.
-        # self.model.active_microscope.prepare_next_channel()
+        self.model.active_microscope.prepare_next_channel()
         # # TODO: retrieve this parameter from configuration file
  
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
@@ -221,15 +221,18 @@ class CVATTL:
         expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
-        self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVATTL"
-        self.model.configuration["waveform_templates"]["CVATTL"]["expand"] = expected_frames
-        print("waveforms obtained from config")
+        # self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVATTL"
+        
+        # self.model.configuration["waveform_templates"]["CVATTL"]["expand"] = int(expected_frames)
+        # Expand_frames = float(self.model.configuration["waveform_templates"]["CVATTL"]["expand"])
+        # print("waveforms obtained from config")
+        # print(f"Expand Frames = {Expand_frames}")
+        # logger.info(f"Expand Frames = {Expand_frames}")
         # self.model.active_microscope.current_channel = 0
-        self.waveform_dict = self.model.active_microscope.calculate_all_waveforms(self)
-        print("waveforms calculated v2")
-        self.model.active_microscope.prepare_next_channel()
-        print("microscope channel prepared")
-
+        # self.waveform_dict = self.model.active_microscope.calculate_all_waveform(self)
+        # print("waveforms calculated v2")
+        # self.model.active_microscope.current_channel = 0
+        
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(
             start_position_mm=start_position,
@@ -245,7 +248,7 @@ class CVATTL:
 
         # Start the daq acquisition.  Basically places all of the waveforms in a ready
         # state so that they will be run one time when the trigger is received.
-        # self.model.active_microscope.daq.run_acquisition()
+        
 
         # Start the stage scan.  Also get this functionality into the ASI stage class.
         self.asi_stage.start_scan(self.axis)
@@ -254,22 +257,50 @@ class CVATTL:
 
         # start scan won't start the scan, but when calling stop_scan it will start scan. So weird.
         self.asi_stage.stop_scan()
+        if self.asi_stage.get_speed(self.axis) == stage_velocity:
+            self.model.active_microscope.daq.run_acquisition()
+            print("microscope running")
+        else:
+            # time.sleep(1)
+            self.model.active_microscope.daq.run_acquisition()
+            print("microscope running after sleep")
+
+        # self.model.active_microscope.prepare_next_channel()
+        # print("microscope channel prepared")
+
         # time.sleep(5) #seconds
         # # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1",self.asi_stage)
-        
+        pos = self.asi_stage.get_axis_position(self.axis)
+        # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
+        # if abs(pos - self.stop_position * 1000) < 1:
+        #     self.cleanup()
+        #     return True
+        # TODO: wait time to be more reasonable
+        # time.sleep(5)
 
 
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?
-
+    
     def end_func_signal(self):
+        pos_temp = []
+        lengthframes = 2
         pos = self.asi_stage.get_axis_position(self.axis)
+        pos_temp.append(pos)
+        print(f"Current Position = {pos}")
+        print(f"Stop position = {self.stop_position*1000}")
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
-        if abs(pos - self.stop_position * 1000) < 1:
+        if abs(pos - self.stop_position * 1000) < 4:
+            print("position met")
+            self.model.active_microscope.daq.stop_acquisition()
+            print("stop acquisition")
             self.cleanup()
+            print("clean up finished")
             return True
+        # elif pos_temp(2)-pos_temp(1): 
+        #     return True 
         # TODO: wait time to be more reasonable
-        time.sleep(5)
+        # time.sleep(5)
         return False
 
     def cleanup(self):
@@ -290,6 +321,7 @@ class CVATTL:
         print("end Speed = ",end_speed)
         self.asi_stage.stop()
         print("stage stop")
+        self.model.active_microscope.daq.stop_acquisition()
         self.model.active_microscope.daq.set_external_trigger(None)
         print("external trigger none")
         # return to start position

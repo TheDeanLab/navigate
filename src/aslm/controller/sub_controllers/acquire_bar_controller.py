@@ -67,7 +67,8 @@ class AcquireBarController(GUIController):
             "Confocal-Projection": "confocal-projection",
             "ConstantVelocityAcquisition": "ConstantVelocityAcquisition",
             "Customized": "customized",
-            "CVA-TTL":"CVATTL"
+            "CVA-TTL":"CVATTL",
+            "CVA-Conpro":"CVACONPRO"
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())

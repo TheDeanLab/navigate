@@ -403,12 +403,20 @@ class NIDAQ(DAQBase):
         None
         """
         print("Prepare acquisition")
+        logger.info("Prepare Acquisition")
         waveform_template_name = self.configuration['experiment']['MicroscopeState']["waveform_template"]
+        print(waveform_template_name)
+        logger.info(waveform_template_name)
         self.waveform_repeat_num, self.waveform_expand_num = get_waveform_template_parameters(
             waveform_template_name,
             self.configuration["waveform_templates"],
             self.configuration['experiment']['MicroscopeState']
         )
+        print(f"Waveform Expand Num = {self.waveform_expand_num}")
+        print(f"Waveform Repeat Num = {self.waveform_repeat_num}")
+        logger.info(f"Waveform Expand Num = {self.waveform_expand_num}")
+        logger.info(f"Waveform Repeat Num = {self.waveform_repeat_num}")
+
         self.create_camera_task(exposure_time)
         self.create_analog_output_tasks(channel_key)
 

@@ -46,6 +46,7 @@ from aslm.model.features.constant_velocity_acquisition import (
     ConstantVelocityAcquisition,
 )
 from aslm.model.features.cva_ttl import CVATTL
+from aslm.model.features.cva_conpro import CVACONPRO
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
@@ -299,6 +300,7 @@ class Model:
             ],
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "CVATTL": [{"name": CVATTL}],
+            "CVACONPRO": [{"name": CVACONPRO}],
             "customized": [],
         }
         self.load_feature_records()
@@ -609,6 +611,8 @@ class Model:
                 self.active_microscope.stages["z"].stop()
             if self.imaging_mode == "CVATTL":
                 self.active_microscope.stages["z"].stop()
+            if self.imaging_mode == "CVACONPRO":
+                self.active_microscope.stages["z"].stop()    
             if self.signal_thread:
                 self.signal_thread.join()
             if self.data_thread:
@@ -888,6 +892,8 @@ class Model:
 
         # Run the acquisition
         try:
+            # print("DAQ Trigger Sent")
+            self.logger.info("DAQ Trigger Sent")
             self.active_microscope.daq.run_acquisition()
         except:
             self.active_microscope.daq.stop_acquisition()

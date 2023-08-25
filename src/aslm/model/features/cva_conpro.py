@@ -42,7 +42,7 @@ logger = logging.getLogger(p)
 # Local imports
 
 
-class ConstantVelocityAcquisition:
+class CVACONPRO:
     """Class for acquiring data using the ASI internal encoder."""
 
     def __init__(self, model, axis='z'):
@@ -54,7 +54,7 @@ class ConstantVelocityAcquisition:
         self.config_table = {
             "signal": {
                 "init": self.pre_func_signal,
-                "end": self.end_func_signal,
+                # "end": self.end_func_signal,
                 "cleanup": self.cleanup,
             },
             "node": {"node_type": "multi-step", "device_related": True},
@@ -74,7 +74,7 @@ class ConstantVelocityAcquisition:
 
         Assumes stage motion is 45 degrees relative to the optical axis.
 
-        Parameters 
+        Parameters
         ----------
         None
 
@@ -84,26 +84,36 @@ class ConstantVelocityAcquisition:
         """
 
         # Inject new trigger source.
-        self.model.active_microscope.prepare_next_channel()
+        # self.model.active_microscope.prepare_next_channel()
         # # TODO: retrieve this parameter from configuration file
-
-        self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+ 
+        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
         # self.model.active_microscope.daq.number_triggers = 0
+        print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
+        print("self.asi stage")
 
         # get the current exposure time for that channel.
         # exposure_time = float( 
         #     self.model.configuration["experiment"][
         #         "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
         #         "camera_exposure_time"]) / 1000.0
-        
+        self.model.active_microscope.current_channel = 2
         readout_time = self.model.active_microscope.get_readout_time()
-        _, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
+        print("readout time calculated")
+        print(f"*** readout time = {readout_time} s")
+        exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
+        print("sweep times and exposure times calculated")
+        print(f"exposure time = {exposure_times}")
+        print(f"sweep time = {sweep_times}")
+        print(f"channel_{self.model.active_microscope.current_channel}")
         current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
-        scaling_factor = 1.05
-        # readout_time = self.model.active_microscope.get_readout_time()
-        # readout_time = self.model.active_microscope.get_readout_time()
+        current_expsure_time = exposure_times[f"channel_{self.model.active_microscope.current_channel}"]
+        self.current_sweep_time = current_sweep_time
+        self.current_exposure_time = current_expsure_time
         self.readout_time = readout_time
+        print("sweep time calculated")
+        scaling_factor = 1.05
 
         # Provide just a bit of breathing room for the sweep time...
         current_sweep_time = current_sweep_time * scaling_factor
@@ -111,6 +121,7 @@ class ConstantVelocityAcquisition:
         print("*** current sweep time:", current_sweep_time)
         logger.info(f"*** current sweep time: {current_sweep_time}")
         logger.info(f"*** sweep time scaling: {scaling_factor}")
+        # self.sweep_time = current_sweep_time
         # logger.debug(f"running signal node: {self.curr_node.node_name}")
 
         # print("*** current exposure time:", self.model.active_microscope.current_channel, exposure_time)
@@ -173,6 +184,8 @@ class ConstantVelocityAcquisition:
         logger.info(f"*** z start position: {start_position}")
         logger.info(f"*** z end position: {self.stop_position}")
         logger.info(f"*** Expected number of steps: {self.number_z_steps}")
+
+        
         
         # move to start position:
         self.asi_stage.move_axis_absolute(self.axis, start_position * 1000.0, wait_until_done=True)
@@ -204,11 +217,23 @@ class ConstantVelocityAcquisition:
         print("Encoder divide step size = ",step_size_mm)
         logger.info(f"*** Expected stage velocity, (mm/s): {expected_speed}")
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
-         
+
         expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
-
+        self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
+        Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
+        print("waveforms obtained from config")
+        print(f"Expand Frames = {Expand_frames}")
+        logger.info(f"Expand Frames = {Expand_frames}")
+        self.model.active_microscope.current_channel = 0
+        # self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
+        print("waveforms calculated v2")
+        self.model.active_microscope.prepare_next_channel()
+        print("microscope channel prepared")
+        # self.model.active_microscope.current_channel = 0
+        
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(
             start_position_mm=start_position,
@@ -224,29 +249,59 @@ class ConstantVelocityAcquisition:
 
         # Start the daq acquisition.  Basically places all of the waveforms in a ready
         # state so that they will be run one time when the trigger is received.
-        # self.model.active_microscope.daq.run_acquisition()
+        
 
         # Start the stage scan.  Also get this functionality into the ASI stage class.
         self.asi_stage.start_scan(self.axis)
 
+        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+
         # start scan won't start the scan, but when calling stop_scan it will start scan. So weird.
         self.asi_stage.stop_scan()
+        # if self.asi_stage.get_speed(self.axis) == stage_velocity:
+        #     self.model.active_microscope.daq.run_acquisition()
+        #     print("microscope running")
+        # else:
+        #     # time.sleep(1)
+        #     self.model.active_microscope.daq.run_acquisition()
+        #     print("microscope running after sleep")
+
+        
+
         # time.sleep(5) #seconds
         # # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1",self.asi_stage)
-        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+        pos = self.asi_stage.get_axis_position(self.axis)
+        # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
+        # if abs(pos - self.stop_position * 1000) < 1:
+        #     self.cleanup()
+        #     return True
+        # TODO: wait time to be more reasonable
+        # time.sleep(5)
 
 
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?
-
+    
     def end_func_signal(self):
+        # pos_temp = []
+        # lengthframes = 2
         pos = self.asi_stage.get_axis_position(self.axis)
+        # pos_temp.append(pos)
+        print(f"Current Position = {pos}")
+        print(f"Stop position = {self.stop_position*1000}")
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
-        if abs(pos - self.stop_position * 1000) < 1:
+        if abs(pos - self.stop_position * 1000) < 2:
+            print("position met")
+            self.model.active_microscope.daq.stop_acquisition()
+            print("stop acquisition")
             self.cleanup()
+            print("clean up finished")
             return True
+        # elif pos_temp(2)-pos_temp(1):
+        #     print("testdataset") 
+        #     return True 
         # TODO: wait time to be more reasonable
-        time.sleep(5)
+        # time.sleep(5)
         return False
 
     def cleanup(self):
@@ -267,6 +322,7 @@ class ConstantVelocityAcquisition:
         print("end Speed = ",end_speed)
         self.asi_stage.stop()
         print("stage stop")
+        self.model.active_microscope.daq.stop_acquisition()
         self.model.active_microscope.daq.set_external_trigger(None)
         print("external trigger none")
         # return to start position

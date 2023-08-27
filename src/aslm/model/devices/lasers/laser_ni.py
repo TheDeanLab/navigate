@@ -107,27 +107,25 @@ class LaserNI(LaserBase):
 
     def turn_on(self):
         try:
+            self.set_power(self._current_intensity)
             if self.laser_do_task is not None:
                 if self.on_off_type == "digital":
                     self.laser_do_task.write(True, auto_start=True)
                 elif self.on_off_type == "analog":
                     self.laser_do_task.write(self.laser_max_do, auto_start=True)
-            self.set_power(self._current_intensity)
         except DaqError as e:
             logger.exception(e)
 
     def turn_off(self):
         try:
-            if self.laser_do_task is None:
-                tmp = self._current_intensity
-                self.set_power(0)
-                self._current_intensity = tmp
-            else:
+            tmp = self._current_intensity
+            self.set_power(0)
+            self._current_intensity = tmp
+            if self.laser_do_task is not None:
                 if self.on_off_type == "digital":
                     self.laser_do_task.write(False, auto_start=True)
                 elif self.on_off_type == "analog":
                     self.laser_do_task.write(self.laser_min_do, auto_start=True)
-                self.set_power(0)
         except DaqError as e:
             logger.exception(e)
 

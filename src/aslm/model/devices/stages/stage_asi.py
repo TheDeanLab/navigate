@@ -183,17 +183,10 @@ class ASIStage(StageBase):
 
         self.tiger_controller = device_connection
         if device_connection is not None:
-            # Speed optimizations - Set speed to 90% of maximum on each axis
-            self.set_speed(percent=0.9)
-
             # Set feedback alignment values
             for ax, aa in feedback_alignment.items():
                 self.tiger_controller.set_feedback_alignment(ax, aa)
             logger.debug("ASI Stage Feedback Alignment Settings:", feedback_alignment)
-
-            # Set backlash to 0 (less accurate)
-            for ax in self.asi_axes.keys():
-                self.tiger_controller.set_backlash(ax, 0.0)
 
             # Set finishing accuracy to half of the minimum pixel size we will use
             # pixel size is in microns, finishing accuracy is in mm
@@ -212,8 +205,22 @@ class ASIStage(StageBase):
             )
             # If this is changing, the stage must be power cycled for these changes to take effect.
             for ax in self.asi_axes.keys():
-                self.tiger_controller.set_finishing_accuracy(ax, finishing_accuracy)
-                self.tiger_controller.set_error(ax, 1.2*finishing_accuracy)
+                if self.asi_axes[ax] == "theta":
+                    self.tiger_controller.set_finishing_accuracy(ax, 0.003013)
+                    self.tiger_controller.set_error(ax, 0.1)
+                else:
+                    self.tiger_controller.set_finishing_accuracy(ax, finishing_accuracy)
+                    self.tiger_controller.set_error(ax, 1.2*finishing_accuracy)
+
+            # Set backlash to 0 (less accurate)
+            for ax in self.asi_axes.keys():
+                if self.asi_axes[ax] == "theta":
+                    self.tiger_controller.set_backlash(ax, 0.1)
+                self.tiger_controller.set_backlash(ax, 0.0)
+
+            # Speed optimizations - Set speed to 90% of maximum on each axis
+            self.set_speed(percent=0.9)
+
 
     def __del__(self):
         """Delete the ASI Stage connection."""

@@ -84,6 +84,7 @@ class ConstantVelocityAcquisition:
         """
 
         # Inject new trigger source.
+        self.recieved_frames = 0
         self.model.active_microscope.prepare_next_channel()
         # # TODO: retrieve this parameter from configuration file
 
@@ -100,7 +101,7 @@ class ConstantVelocityAcquisition:
         readout_time = self.model.active_microscope.get_readout_time()
         _, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
         current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
-        scaling_factor = 1.05
+        scaling_factor = 1
         # readout_time = self.model.active_microscope.get_readout_time()
         # readout_time = self.model.active_microscope.get_readout_time()
         self.readout_time = readout_time
@@ -160,7 +161,7 @@ class ConstantVelocityAcquisition:
         # Retrieved from the GUI.
         # Set Stage Limits - Units in millimeters
         # microns to mm
-        start_position = float(
+        self.start_position = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["abs_z_start"]) / 1000.0
         self.stop_position = float(
@@ -170,12 +171,12 @@ class ConstantVelocityAcquisition:
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["number_z_steps"])
         
-        logger.info(f"*** z start position: {start_position}")
+        logger.info(f"*** z start position: {self.start_position}")
         logger.info(f"*** z end position: {self.stop_position}")
         logger.info(f"*** Expected number of steps: {self.number_z_steps}")
         
         # move to start position:
-        self.asi_stage.move_axis_absolute(self.axis, start_position * 1000.0, wait_until_done=True)
+        self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
 
         # Set the x-axis of the ASI stage to operate at that velocity.
 
@@ -206,12 +207,17 @@ class ConstantVelocityAcquisition:
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
          
         expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
+        expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
+        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time)
+        print(f"*** Expected Frames V1:{expected_frames_v1}")
+        print(f"*** Expected Frames: {expected_frames}")
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
+        self.expected_frames = expected_frames
 
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(
-            start_position_mm=start_position,
+            start_position_mm=self.start_position,
             end_position_mm=self.stop_position,
             enc_divide=step_size_mm,
             # round(
@@ -241,8 +247,13 @@ class ConstantVelocityAcquisition:
 
     def end_func_signal(self):
         pos = self.asi_stage.get_axis_position(self.axis)
+        self.recieved_frames =+ 1
+        print(pos)
+        print(f"stop position = {self.stop_position}")
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
         if abs(pos - self.stop_position * 1000) < 1:
+            print(f"Recieved Frames = {self.recieved_frames}")
+            print(f"Expected FRames = {self.expected_frames}")
             self.cleanup()
             return True
         # TODO: wait time to be more reasonable
@@ -270,9 +281,9 @@ class ConstantVelocityAcquisition:
         self.model.active_microscope.daq.set_external_trigger(None)
         print("external trigger none")
         # return to start position
-        start_position = float(
+        self.start_position = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["abs_z_start"])
-        self.asi_stage.move_absolute({f"{self.axis}_abs: {start_position}"})
+        self.asi_stage.move_absolute({f"{self.axis}_abs: {self.start_position}"})
         print("stage moved to original position")
 

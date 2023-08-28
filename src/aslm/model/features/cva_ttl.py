@@ -82,7 +82,7 @@ class CVATTL:
         -------
         None
         """
-
+        self.recieved_frames = 0
         # Inject new trigger source.
         self.model.active_microscope.prepare_next_channel()
         # # TODO: retrieve this parameter from configuration file
@@ -113,7 +113,7 @@ class CVATTL:
         self.current_exposure_time = current_expsure_time
         self.readout_time = readout_time
         print("sweep time calculated")
-        scaling_factor = 1.05
+        scaling_factor = 1
 
         # Provide just a bit of breathing room for the sweep time...
         current_sweep_time = current_sweep_time * scaling_factor
@@ -164,6 +164,7 @@ class CVATTL:
 
         # Calculate the actual step size in millimeters. 264 * 10^-6 mm
         step_size_mm = step_size_nm / 1 * 10**-6  # 264 * 10^-6 mm
+        self.step_size_um = step_size_mm*1000
         #TODO set max speed in configuration file
         max_speed = 4.288497*2
 
@@ -171,7 +172,7 @@ class CVATTL:
         # Retrieved from the GUI.
         # Set Stage Limits - Units in millimeters
         # microns to mm
-        start_position = float(
+        self.start_position = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["abs_z_start"]) / 1000.0
         self.stop_position = float(
@@ -181,14 +182,14 @@ class CVATTL:
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["number_z_steps"])
         
-        logger.info(f"*** z start position: {start_position}")
+        logger.info(f"*** z start position: {self.start_position}")
         logger.info(f"*** z end position: {self.stop_position}")
         logger.info(f"*** Expected number of steps: {self.number_z_steps}")
 
         
         
         # move to start position:
-        self.asi_stage.move_axis_absolute(self.axis, start_position * 1000.0, wait_until_done=True)
+        self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
 
         # Set the x-axis of the ASI stage to operate at that velocity.
 
@@ -218,9 +219,14 @@ class CVATTL:
         logger.info(f"*** Expected stage velocity, (mm/s): {expected_speed}")
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
 
-        expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
+        expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
+        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time)
+        print(f"*** Expected Frames V1:{expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
+        print(f"*** Expected Frames: {expected_frames}")
+        print
         logger.info(f"*** Expected Frames: {expected_frames}")
+        self.expected_frames = expected_frames
         # self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVATTL"
         
         # self.model.configuration["waveform_templates"]["CVATTL"]["expand"] = int(expected_frames)
@@ -235,7 +241,7 @@ class CVATTL:
         
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(
-            start_position_mm=start_position,
+            start_position_mm=self.start_position,
             end_position_mm=self.stop_position,
             enc_divide=step_size_mm,
             # round(
@@ -283,20 +289,49 @@ class CVATTL:
         # HOw do we know how many images to acquire?
     
     def end_func_signal(self):
-        pos_temp = []
+        # pos_temp = []
+        tol = self.step_size_um
         lengthframes = 2
         pos = self.asi_stage.get_axis_position(self.axis)
-        pos_temp.append(pos)
+        # pos_temp.append(pos)
         print(f"Current Position = {pos}")
         print(f"Stop position = {self.stop_position*1000}")
+        self.recieved_frames += 1
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
-        if abs(pos - self.stop_position * 1000) < 4:
+        if pos>=(self.stop_position*1000):
+            print("position exceeded")
+            self.model.active_microscope.daq.stop_acquisition()
+            print("stop acquisition")
+            # self.cleanup()
+            print("clean up finished")
+            print(f"Recieved frames = {self.recieved_frames}")
+            print(f"Expected frames = {self.expected_frames}")
+            self.logger.info(f"Recieved frames = {self.recieved_frames}")
+            self.logger.info(f"Expected frames = {self.expected_frames}")
+            return True
+        elif abs(pos - (self.stop_position * 1000)) < tol:
             print("position met")
             self.model.active_microscope.daq.stop_acquisition()
             print("stop acquisition")
-            self.cleanup()
+            # self.cleanup()
             print("clean up finished")
+            print(f"Recieved frames = {self.recieved_frames}")
+            print(f"Expected frames = {self.expected_frames}")
+            self.logger.info(f"Recieved frames = {self.recieved_frames}")
+            self.logger.info(f"Expected frames = {self.expected_frames}")
             return True
+        elif self.recieved_frames == self.expected_frames:
+            print("frames met")
+            self.model.active_microscope.daq.stop_acquisition()
+            print("stop acquisition")
+            # self.cleanup()
+            print("clean up finished")
+            print(f"Recieved frames = {self.recieved_frames}")
+            print(f"Expected frames = {self.expected_frames}")
+            self.logger.info(f"Recieved frames = {self.recieved_frames}")
+            self.logger.info(f"Expected frames = {self.expected_frames}")
+            return True
+
         # elif pos_temp(2)-pos_temp(1): 
         #     return True 
         # TODO: wait time to be more reasonable
@@ -325,9 +360,9 @@ class CVATTL:
         self.model.active_microscope.daq.set_external_trigger(None)
         print("external trigger none")
         # return to start position
-        start_position = float(
+        self.start_position = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["abs_z_start"])
-        self.asi_stage.move_absolute({f"{self.axis}_abs: {start_position}"})
+        self.asi_stage.move_absolute({f"{self.axis}_abs: {self.start_position}"})
         print("stage moved to original position")
 

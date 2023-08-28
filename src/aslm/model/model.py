@@ -47,6 +47,7 @@ from aslm.model.features.constant_velocity_acquisition import (
 )
 from aslm.model.features.cva_ttl import CVATTL
 from aslm.model.features.cva_conpro import CVACONPRO
+from aslm.model.features.cva_singlewave import CVASINGLEWAVE
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
@@ -301,6 +302,7 @@ class Model:
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "CVATTL": [{"name": CVATTL}],
             "CVACONPRO": [{"name": CVACONPRO}],
+            "CVASINGLEWAVE": [{"name": CVASINGLEWAVE}],
             "customized": [],
         }
         self.load_feature_records()
@@ -612,7 +614,9 @@ class Model:
             if self.imaging_mode == "CVATTL":
                 self.active_microscope.stages["z"].stop()
             if self.imaging_mode == "CVACONPRO":
-                self.active_microscope.stages["z"].stop()    
+                self.active_microscope.stages["z"].stop()
+            if self.imaging_mode == "CVASINGLEWAVE":
+                self.active_microscope.stages["z"].stop()
             if self.signal_thread:
                 self.signal_thread.join()
             if self.data_thread:
@@ -889,13 +893,15 @@ class Model:
         self.data_buffer_positions[self.frame_id][2] = stage_pos["z_pos"]
         self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
         self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
-
+        
         # Run the acquisition
         try:
             # print("DAQ Trigger Sent")
             self.logger.info("DAQ Trigger Sent")
             self.active_microscope.daq.run_acquisition()
         except:
+            print("DAQ Trigger Except")
+            self.logger.info("DAQ Trigger Except")
             self.active_microscope.daq.stop_acquisition()
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}",

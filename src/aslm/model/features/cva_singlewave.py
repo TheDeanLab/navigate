@@ -42,7 +42,7 @@ logger = logging.getLogger(p)
 # Local imports
 
 
-class CVACONPRO:
+class CVASINGLEWAVE:
     """Class for acquiring data using the ASI internal encoder."""
 
     def __init__(self, model, axis='z'):
@@ -54,7 +54,7 @@ class CVACONPRO:
         self.config_table = {
             "signal": {
                 "init": self.pre_func_signal,
-                # "end": self.end_func_signal,
+                "end": self.end_func_signal,
                 "cleanup": self.cleanup,
             },
             "node": {"node_type": "multi-step", "device_related": True},
@@ -89,11 +89,10 @@ class CVACONPRO:
  
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
         # self.model.active_microscope.daq.number_triggers = 0
-         
         print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
         print("self.asi stage")
-        self.received_frames = 0
+        self.recieved_frames = 0
 
         # get the current exposure time for that channel.
         # exposure_time = float( 
@@ -167,6 +166,7 @@ class CVACONPRO:
         # Calculate the actual step size in millimeters. 264 * 10^-6 mm
         step_size_mm = step_size_nm / 1 * 10**-6  # 264 * 10^-6 mm
         #TODO set max speed in configuration file
+        self.step_size_um = step_size_mm*1000
         max_speed = 4.288497*2
 
         # Set the start and end position of the scan in millimeters.
@@ -179,14 +179,16 @@ class CVACONPRO:
         self.stop_position = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["abs_z_end"]) / 1000.0
-        self.number_z_steps = float(
-            self.model.configuration[
-                "experiment"]["MicroscopeState"]["number_z_steps"])
-        
-        logger.info(f"*** z start position: {self.start_position}")
-        logger.info(f"*** z end position: {self.stop_position}")
+        # self.number_z_steps = float(
+        #     self.model.configuration[
+        #         "experiment"]["MicroscopeState"]["number_z_steps"])
+        self.number_z_steps = abs(self.stop_position-self.start_position)/step_size_mm
+        logger.info(f"*** z start position (mm): {self.start_position}")
+        logger.info(f"*** z end position (mm): {self.stop_position}")
         logger.info(f"*** Expected number of steps: {self.number_z_steps}")
-
+        print(f"*** z start position (mm): {self.start_position}")
+        print(f"*** z end position (mm): {self.stop_position}")
+        print(f"*** Expected number of steps: {self.number_z_steps}")
         
         
         # move to start position:
@@ -220,19 +222,18 @@ class CVACONPRO:
         logger.info(f"*** Expected stage velocity, (mm/s): {expected_speed}")
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
 
-        # expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
         expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
         expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time)
-        print(f"*** Expected Frames V1:{expected_frames_v1}")
+        print(f"*** Expected Frames V1: {expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
-        self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
-        Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
+        # self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
+        # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
+        # Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
         self.expected_frames = expected_frames
         print("waveforms obtained from config")
-        print(f"Expand Frames = {Expand_frames}")
-        logger.info(f"Expand Frames = {Expand_frames}")
+        # print(f"Expand Frames = {Expand_frames}")
+        # logger.info(f"Expand Frames = {Expand_frames}")
         
         self.model.active_microscope.current_channel = 0
         # self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
@@ -244,7 +245,7 @@ class CVACONPRO:
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(
             start_position_mm=self.start_position,
-            end_position_mm=self.stop_position,
+            end_position_mm=self.stop_position+.001,
             enc_divide=step_size_mm,
             # round(
             #     float(
@@ -290,33 +291,70 @@ class CVACONPRO:
         # HOw do we know how many images to acquire?
     
     def end_func_signal(self):
+        # self.received_frames += 1
+        # # print(self.received_frames)
+        # if self.received_frames == self.expected_frames:
+        #     print("end function called")
+        #     print(f"End Recieved Frames = {self.received_frames}")
+        #     print(f"End Expected Frames = {self.expected_frames}")
+        #     return True
+        tol = self.step_size_um/2
         pos = self.asi_stage.get_axis_position(self.axis)
+        # pos_temp.append(pos)
         print(f"Current Position = {pos}")
         print(f"Stop position = {self.stop_position*1000}")
-        self.received_frames += 1
-        print(f"Recieved Frames = {self.received_frames}")
-        if abs(pos - self.stop_position * 1000) < 1:
+        self.recieved_frames += 1
+        # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
+        if pos>=(self.stop_position*1000):
+            print("position exceeded")
+            # self.model.active_microscope.daq.stop_acquisition()
+            print("stop acquisition")
+            # self.cleanup()
+            print("clean up finished")
+            print(f"Recieved frames = {self.recieved_frames}")
+            print(f"Expected frames = {self.expected_frames}")
+            self.logger.info(f"Recieved frames = {self.recieved_frames}")
+            self.logger.info(f"Expected frames = {self.expected_frames}")
+            return True
+        elif abs(pos - self.stop_position * 1000) < tol:
             print("position met")
             # self.model.active_microscope.daq.stop_acquisition()
-            # print("stop acquisition")
+            print("stop acquisition")
             # self.cleanup()
-            # print("Clean up finished")
+            print("clean up finished")
+            print(f"Recieved frames = {self.recieved_frames}")
+            print(f"Expected frames = {self.expected_frames}")
+            self.logger.info(f"Recieved frames = {self.recieved_frames}")
+            self.logger.info(f"Expected frames = {self.expected_frames}")
             return True
-        elif self.received_frames == self.expected_frames:
-            print("end function called")
-            print(f"End Recieved Frames = {self.received_frames}")
-            print(f"End Expected Frames = {self.expected_frames}")
+        elif self.recieved_frames == self.expected_frames:
+            print("frames met")
+            # self.model.active_microscope.daq.stop_acquisition()
+            print("stop acquisition")
+            # self.cleanup()
+            print("clean up finished")
+            print(f"Recieved frames = {self.recieved_frames}")
+            print(f"Expected frames = {self.expected_frames}")
+            self.logger.info(f"Recieved frames = {self.recieved_frames}")
+            self.logger.info(f"Expected frames = {self.expected_frames}")
             return True
 
         
         # pos_temp = []
         # lengthframes = 2
+        # pos = self.asi_stage.get_axis_position(self.axis)
+        # # pos_temp.append(pos)
+        # print(f"Current Position = {pos}")
+        # print(f"Stop position = {self.stop_position*1000}")
+        # # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
         
-        # pos_temp.append(pos)
-        
-        # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
-        
-        
+        # if abs(pos - self.stop_position * 1000) < 1:
+        #     print("position met")
+        #     # self.model.active_microscope.daq.stop_acquisition()
+        #     # print("stop acquisition")
+        #     # self.cleanup()
+        #     # print("Clean up finished")
+        #     return True
        
             
         # elif pos_temp(2)-pos_temp(1):
@@ -334,6 +372,7 @@ class CVACONPRO:
         """
         # reset stage speed
         4.288497*2
+        
         print("Clean up called")
         # self.asi_stage.set_speed({self.axis: self.default_speed})
         self.asi_stage.set_speed(percent=0.9)

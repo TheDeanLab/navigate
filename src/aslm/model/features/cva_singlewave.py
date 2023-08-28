@@ -289,55 +289,56 @@ class CVASINGLEWAVE:
 
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?
+        self.recieved_frames = 0
     
     def end_func_signal(self):
-        # self.received_frames += 1
-        # # print(self.received_frames)
-        # if self.received_frames == self.expected_frames:
-        #     print("end function called")
-        #     print(f"End Recieved Frames = {self.received_frames}")
-        #     print(f"End Expected Frames = {self.expected_frames}")
-        #     return True
-        tol = self.step_size_um/2
-        pos = self.asi_stage.get_axis_position(self.axis)
-        # pos_temp.append(pos)
-        print(f"Current Position = {pos}")
-        print(f"Stop position = {self.stop_position*1000}")
         self.recieved_frames += 1
-        # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
-        if pos>=(self.stop_position*1000):
-            print("position exceeded")
-            # self.model.active_microscope.daq.stop_acquisition()
-            print("stop acquisition")
-            # self.cleanup()
-            print("clean up finished")
-            print(f"Recieved frames = {self.recieved_frames}")
-            print(f"Expected frames = {self.expected_frames}")
-            self.logger.info(f"Recieved frames = {self.recieved_frames}")
-            self.logger.info(f"Expected frames = {self.expected_frames}")
+        # print(self.received_frames)
+        if self.recieved_frames == self.expected_frames:
+            print("end function called")
+            print(f"End Recieved Frames = {self.recieved_frames}")
+            print(f"End Expected Frames = {self.expected_frames}")
             return True
-        elif abs(pos - self.stop_position * 1000) < tol:
-            print("position met")
-            # self.model.active_microscope.daq.stop_acquisition()
-            print("stop acquisition")
-            # self.cleanup()
-            print("clean up finished")
-            print(f"Recieved frames = {self.recieved_frames}")
-            print(f"Expected frames = {self.expected_frames}")
-            self.logger.info(f"Recieved frames = {self.recieved_frames}")
-            self.logger.info(f"Expected frames = {self.expected_frames}")
-            return True
-        elif self.recieved_frames == self.expected_frames:
-            print("frames met")
-            # self.model.active_microscope.daq.stop_acquisition()
-            print("stop acquisition")
-            # self.cleanup()
-            print("clean up finished")
-            print(f"Recieved frames = {self.recieved_frames}")
-            print(f"Expected frames = {self.expected_frames}")
-            self.logger.info(f"Recieved frames = {self.recieved_frames}")
-            self.logger.info(f"Expected frames = {self.expected_frames}")
-            return True
+        # tol = self.step_size_um/2
+        # pos = self.asi_stage.get_axis_position(self.axis)
+        # # pos_temp.append(pos)
+        # print(f"Current Position = {pos}")
+        # print(f"Stop position = {self.stop_position*1000}")
+        # self.recieved_frames += 1
+        # # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
+        # if pos>=(self.stop_position*1000):
+        #     print("position exceeded")
+        #     # self.model.active_microscope.daq.stop_acquisition()
+        #     print("stop acquisition")
+        #     # self.cleanup()
+        #     print("clean up finished")
+        #     print(f"Recieved frames = {self.recieved_frames}")
+        #     print(f"Expected frames = {self.expected_frames}")
+        #     logger.info(f"Recieved frames = {self.recieved_frames}")
+        #     logger.info(f"Expected frames = {self.expected_frames}")
+        #     return True
+        # elif abs(pos - self.stop_position * 1000) < tol:
+        #     print("position met")
+        #     # self.model.active_microscope.daq.stop_acquisition()
+        #     print("stop acquisition")
+        #     # self.cleanup()
+        #     print("clean up finished")
+        #     print(f"Recieved frames = {self.recieved_frames}")
+        #     print(f"Expected frames = {self.expected_frames}")
+        #     logger.info(f"Recieved frames = {self.recieved_frames}")
+        #     logger.info(f"Expected frames = {self.expected_frames}")
+        #     return True
+        # elif self.recieved_frames == self.expected_frames:
+        #     print("frames met")
+        #     # self.model.active_microscope.daq.stop_acquisition()
+        #     print("stop acquisition")
+        #     # self.cleanup()
+        #     print("clean up finished")
+        #     print(f"Recieved frames = {self.recieved_frames}")
+        #     print(f"Expected frames = {self.expected_frames}")
+        #     logger.info(f"Recieved frames = {self.recieved_frames}")
+        #     logger.info(f"Expected frames = {self.expected_frames}")
+        #     return True
 
         
         # pos_temp = []

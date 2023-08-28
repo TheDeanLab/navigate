@@ -306,8 +306,8 @@ class CVATTL:
             print("clean up finished")
             print(f"Recieved frames = {self.recieved_frames}")
             print(f"Expected frames = {self.expected_frames}")
-            self.logger.info(f"Recieved frames = {self.recieved_frames}")
-            self.logger.info(f"Expected frames = {self.expected_frames}")
+            logger.info(f"Recieved frames = {self.recieved_frames}")
+            logger.info(f"Expected frames = {self.expected_frames}")
             return True
         elif abs(pos - (self.stop_position * 1000)) < tol:
             print("position met")
@@ -317,8 +317,8 @@ class CVATTL:
             print("clean up finished")
             print(f"Recieved frames = {self.recieved_frames}")
             print(f"Expected frames = {self.expected_frames}")
-            self.logger.info(f"Recieved frames = {self.recieved_frames}")
-            self.logger.info(f"Expected frames = {self.expected_frames}")
+            logger.info(f"Recieved frames = {self.recieved_frames}")
+            logger.info(f"Expected frames = {self.expected_frames}")
             return True
         elif self.recieved_frames == self.expected_frames:
             print("frames met")
@@ -328,8 +328,8 @@ class CVATTL:
             print("clean up finished")
             print(f"Recieved frames = {self.recieved_frames}")
             print(f"Expected frames = {self.expected_frames}")
-            self.logger.info(f"Recieved frames = {self.recieved_frames}")
-            self.logger.info(f"Expected frames = {self.expected_frames}")
+            logger.info(f"Recieved frames = {self.recieved_frames}")
+            logger.info(f"Expected frames = {self.expected_frames}")
             return True
 
         # elif pos_temp(2)-pos_temp(1): 

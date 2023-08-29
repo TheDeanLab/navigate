@@ -54,7 +54,7 @@ class CVACONPRO:
         self.config_table = {
             "signal": {
                 "init": self.pre_func_signal,
-                # "end": self.end_func_signal,
+                 "end": self.end_func_signal,
                 "cleanup": self.cleanup,
             },
             "node": {"node_type": "multi-step", "device_related": True},
@@ -100,7 +100,7 @@ class CVACONPRO:
         #     self.model.configuration["experiment"][
         #         "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
         #         "camera_exposure_time"]) / 1000.0
-        self.model.active_microscope.current_channel = 2
+        self.model.active_microscope.current_channel = 4
         readout_time = self.model.active_microscope.get_readout_time()
         print("readout time calculated")
         print(f"*** readout time = {readout_time} s")
@@ -235,8 +235,8 @@ class CVACONPRO:
         logger.info(f"Expand Frames = {Expand_frames}")
         
         self.model.active_microscope.current_channel = 0
-        # self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
-        print("waveforms calculated v2")
+        self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
+        print(f"waveforms calculated v2 {self.waveform_dict}")
         self.model.active_microscope.prepare_next_channel()
         print("microscope channel prepared")
         # self.model.active_microscope.current_channel = 0

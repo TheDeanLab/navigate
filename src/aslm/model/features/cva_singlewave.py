@@ -91,7 +91,7 @@ class CVASINGLEWAVE:
         # self.model.active_microscope.daq.number_triggers = 0
         print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
-        print("self.asi stage")
+        # print("self.asi stage")
         self.recieved_frames = 0
 
         # get the current exposure time for that channel.
@@ -99,11 +99,12 @@ class CVASINGLEWAVE:
         #     self.model.configuration["experiment"][
         #         "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
         #         "camera_exposure_time"]) / 1000.0
-        self.model.active_microscope.current_channel = 2
+        self.model.active_microscope.current_channel = 4
         readout_time = self.model.active_microscope.get_readout_time()
         print("readout time calculated")
         print(f"*** readout time = {readout_time} s")
         exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
+        self.readout_time = readout_time
         print("sweep times and exposure times calculated")
         print(f"exposure time = {exposure_times}")
         print(f"sweep time = {sweep_times}")
@@ -182,6 +183,9 @@ class CVASINGLEWAVE:
         # self.number_z_steps = float(
         #     self.model.configuration[
         #         "experiment"]["MicroscopeState"]["number_z_steps"])
+        self.distance_traveled = abs(self.stop_position-self.start_position)
+        print(f"*** Distance = {self.distance_traveled}")
+        print(f"*** Step size = {step_size_mm}")
         self.number_z_steps = abs(self.stop_position-self.start_position)/step_size_mm
         logger.info(f"*** z start position (mm): {self.start_position}")
         logger.info(f"*** z end position (mm): {self.stop_position}")
@@ -227,8 +231,10 @@ class CVASINGLEWAVE:
         print(f"*** Expected Frames V1: {expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
+        expand_frame = 1
         # self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
-        # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expand_frame)
         # Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
         self.expected_frames = expected_frames
         print("waveforms obtained from config")
@@ -236,10 +242,16 @@ class CVASINGLEWAVE:
         # logger.info(f"Expand Frames = {Expand_frames}")
         
         self.model.active_microscope.current_channel = 0
-        # self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
+        self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
+        print(f"waveform dictionary test = {self.waveform_dict}")
+
         print("waveforms calculated v2")
         self.model.active_microscope.prepare_next_channel()
         print("microscope channel prepared")
+
+        readout_time_v2 = self.model.active_microscope.get_readout_time()
+        print(f"*** readout time before sweep time calc before scan == {readout_time}")
+        print(f"*** readout time after sweep time calc before scan == {readout_time_v2}")
         # self.model.active_microscope.current_channel = 0
         
         # Configure the encoder to operate in constant velocity mode.
@@ -278,33 +290,37 @@ class CVASINGLEWAVE:
 
         # time.sleep(5) #seconds
         # # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1",self.asi_stage)
-        pos = self.asi_stage.get_axis_position(self.axis)
+        # pos = self.asi_stage.get_axis_position(self.axis)
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
         # if abs(pos - self.stop_position * 1000) < 1:
         #     self.cleanup()
         #     return True
         # TODO: wait time to be more reasonable
         # time.sleep(5)
+        readout_time_v3 = self.model.active_microscope.get_readout_time()
+        print(f"*** readout time after sweep time calc during scan == {readout_time_v3}")
 
 
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?
-        self.recieved_frames = 0
-    
+        # self.recieved_frames = 0
+        self.tol = self.step_size_um/2
     def end_func_signal(self):
         self.recieved_frames += 1
-        # print(self.received_frames)
+        # print(self.recieved_frames)
         # if self.recieved_frames == self.expected_frames:
         #     print("end function called")
         #     print(f"End Recieved Frames = {self.recieved_frames}")
         #     print(f"End Expected Frames = {self.expected_frames}")
         #     return True
-        tol = self.step_size_um/2
+        # tol = self.step_size_um/2
         pos = self.asi_stage.get_axis_position(self.axis)
+        # readout_time_v4 = self.model.active_microscope.get_readout_time()
+        # print(f"*** readout time during end func == {readout_time_v4}")
         # pos_temp.append(pos)
-        print(f"Current Position = {pos}")
-        print(f"Stop position = {self.stop_position*1000}")
-        self.recieved_frames += 1
+        # print(f"Current Position = {pos}")
+        # print(f"Stop position = {self.stop_position*1000}")
+        # self.recieved_frames += 1
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
         if pos>=(self.stop_position*1000):
             print("position exceeded")
@@ -316,8 +332,13 @@ class CVASINGLEWAVE:
             print(f"Expected frames = {self.expected_frames}")
             logger.info(f"Recieved frames = {self.recieved_frames}")
             logger.info(f"Expected frames = {self.expected_frames}")
+            readout_time_v5 = self.model.active_microscope.get_readout_time()
+            print(f"*** readout time during end conditions met == {readout_time_v5}")
+            exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
+            print(f"*** end func exposure_times = f{exposure_times}")
+            print(f"*** end func exposure_times = f{sweep_times}")
             return True
-        elif abs(pos - self.stop_position * 1000) < tol:
+        elif abs(pos - self.stop_position * 1000) < self.tol:
             print("position met")
             # self.model.active_microscope.daq.stop_acquisition()
             print("stop acquisition")
@@ -327,6 +348,11 @@ class CVASINGLEWAVE:
             print(f"Expected frames = {self.expected_frames}")
             logger.info(f"Recieved frames = {self.recieved_frames}")
             logger.info(f"Expected frames = {self.expected_frames}")
+            readout_time_v5 = self.model.active_microscope.get_readout_time()
+            print(f"*** readout time during end conditions met == {readout_time_v5}")
+            exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
+            print(f"*** end func exposure_times = f{exposure_times}")
+            print(f"*** end func exposure_times = f{sweep_times}")
             return True
         elif self.recieved_frames == self.expected_frames:
             print("frames met")
@@ -338,6 +364,11 @@ class CVASINGLEWAVE:
             print(f"Expected frames = {self.expected_frames}")
             logger.info(f"Recieved frames = {self.recieved_frames}")
             logger.info(f"Expected frames = {self.expected_frames}")
+            readout_time_v5 = self.model.active_microscope.get_readout_time()
+            print(f"*** readout time during end conditions met == {readout_time_v5}")
+            exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
+            print(f"*** end func exposure_times = f{exposure_times}")
+            print(f"*** end func exposure_times = f{sweep_times}")
             return True
 
         

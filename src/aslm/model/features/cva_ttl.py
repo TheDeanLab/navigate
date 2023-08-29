@@ -98,7 +98,7 @@ class CVATTL:
         #     self.model.configuration["experiment"][
         #         "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
         #         "camera_exposure_time"]) / 1000.0
-        self.model.active_microscope.current_channel = 2
+        self.model.active_microscope.current_channel = 4
         readout_time = self.model.active_microscope.get_readout_time()
         print("readout time calculated")
         print(f"*** readout time = {readout_time} s")

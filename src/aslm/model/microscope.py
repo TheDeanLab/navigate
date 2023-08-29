@@ -385,17 +385,38 @@ class Microscope:
         readout_time = self.get_readout_time()
         print(f"readout_time = {readout_time}")
         exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
-        print(f"exposure_times = {exposure_times}")
-        print(f"sweep_times = {sweep_times}")
+        print(f"exposure_times microscope = {exposure_times}")
+        print(f"sweep_times microscope = {sweep_times}")
         camera_waveform = self.daq.calculate_all_waveforms(
             self.microscope_name, exposure_times, sweep_times
         )
+        print(f"camera waveform = f{camera_waveform}")
+        camera_waveform_array = camera_waveform[f"channel_{4}"]
+        len_camera_waveform_array = len(camera_waveform_array)
+        print(f"camera waveform array length = {len_camera_waveform_array}")
         remote_focus_waveform = self.remote_focus_device.adjust(
             exposure_times, sweep_times
         )
+        print(f"remote focus waveform = {remote_focus_waveform}")
+        remote_focus_waveform_array = remote_focus_waveform[f"channel_{4}"]
+        len_remote_focus_waveform_array = len(remote_focus_waveform_array)
+        print(f"remote focus waveform array length = {len_remote_focus_waveform_array}")
+        print(f"remote_waveform_type = {type(remote_focus_waveform)}")
+
         galvo_waveform = [
             self.galvo[k].adjust(exposure_times, sweep_times) for k in self.galvo
         ]
+        print(f"galvo waveform = {galvo_waveform}")
+        print(f"galo_waveform_type = {type(galvo_waveform)}")
+        galvo_waveform_temp_2 = str(galvo_waveform)[1:-1]
+        galvo_waveform_temp = my_dict = dict(zip(range(len(galvo_waveform_temp_2)), galvo_waveform_temp_2))
+        print(f"galvo_waveform_temp = {galvo_waveform_temp}")
+        galvo_waveform_array = galvo_waveform_temp[f"channel_{4}"]
+        print(f"galvo_waveform array = {galvo_waveform_array}")
+        # galvo_waveform_array = galvo_waveform[f"channel_{4}"]
+        # len_galvo_waveform_array = len(galvo_waveform_array)
+        # print(f"galvo waveform array length = {len_galvo_waveform_array}")
+
         # TODO: calculate waveform for galvo stage
         for stage, axes in self.stages_list:
             if type(stage) == GalvoNIStage:
@@ -405,6 +426,7 @@ class Microscope:
             "remote_focus_waveform": remote_focus_waveform,
             "galvo_waveform": galvo_waveform,
         }
+        print(waveform_dict)
         return waveform_dict
 
     def calculate_exposure_sweep_times(self, readout_time):
@@ -533,6 +555,7 @@ class Microscope:
         # stop daq before writing new waveform
         self.daq.stop_acquisition()
         # prepare daq: write waveform
+        print(f"*** microscope.py camera exposure time: f{self.current_exposure_time}")
         self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # Add Defocus term

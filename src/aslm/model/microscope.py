@@ -408,11 +408,11 @@ class Microscope:
         ]
         print(f"galvo waveform = {galvo_waveform}")
         print(f"galo_waveform_type = {type(galvo_waveform)}")
-        galvo_waveform_temp_2 = str(galvo_waveform)[1:-1]
-        galvo_waveform_temp = my_dict = dict(zip(range(len(galvo_waveform_temp_2)), galvo_waveform_temp_2))
-        print(f"galvo_waveform_temp = {galvo_waveform_temp}")
-        galvo_waveform_array = galvo_waveform_temp[f"channel_{4}"]
-        print(f"galvo_waveform array = {galvo_waveform_array}")
+        # galvo_waveform_temp_2 = str(galvo_waveform)[1:-1]
+        # galvo_waveform_temp = my_dict = dict(zip(range(len(galvo_waveform_temp_2)), galvo_waveform_temp_2))
+        # print(f"galvo_waveform_temp = {galvo_waveform_temp}")
+        # galvo_waveform_array = galvo_waveform_temp[f"channel_{4}"]
+        # print(f"galvo_waveform array = {galvo_waveform_array}")
         # galvo_waveform_array = galvo_waveform[f"channel_{4}"]
         # len_galvo_waveform_array = len(galvo_waveform_array)
         # print(f"galvo waveform array length = {len_galvo_waveform_array}")

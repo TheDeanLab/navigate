@@ -35,6 +35,7 @@ import time
 import logging
 # Third Party Imports
 import numpy as np
+import re
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -100,7 +101,7 @@ class CVACONPRO:
         #     self.model.configuration["experiment"][
         #         "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
         #         "camera_exposure_time"]) / 1000.0
-        self.model.active_microscope.current_channel = 4
+        # self.model.active_microscope.current_channel = 2
         readout_time = self.model.active_microscope.get_readout_time()
         print("readout time calculated")
         print(f"*** readout time = {readout_time} s")
@@ -108,6 +109,11 @@ class CVACONPRO:
         print("sweep times and exposure times calculated")
         print(f"exposure time = {exposure_times}")
         print(f"sweep time = {sweep_times}")
+        channel_name = next(iter(sweep_times))
+        channel_name = str(channel_name)
+        channel_num = re.findall(r'[\d.]+',channel_name)
+        channel_num = int(channel_num[0])
+        self.model.active_microscope.current_channel = channel_num
         print(f"channel_{self.model.active_microscope.current_channel}")
         current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
         current_expsure_time = exposure_times[f"channel_{self.model.active_microscope.current_channel}"]

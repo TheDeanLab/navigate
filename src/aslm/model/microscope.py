@@ -391,23 +391,23 @@ class Microscope:
             self.microscope_name, exposure_times, sweep_times
         )
         print(f"camera waveform = f{camera_waveform}")
-        camera_waveform_array = camera_waveform[f"channel_{4}"]
-        len_camera_waveform_array = len(camera_waveform_array)
-        print(f"camera waveform array length = {len_camera_waveform_array}")
+        # camera_waveform_array = camera_waveform[f"channel_{2}"]
+        # len_camera_waveform_array = len(camera_waveform_array)
+        # print(f"camera waveform array length = {len_camera_waveform_array}")
         remote_focus_waveform = self.remote_focus_device.adjust(
             exposure_times, sweep_times
         )
         print(f"remote focus waveform = {remote_focus_waveform}")
-        remote_focus_waveform_array = remote_focus_waveform[f"channel_{4}"]
-        len_remote_focus_waveform_array = len(remote_focus_waveform_array)
-        print(f"remote focus waveform array length = {len_remote_focus_waveform_array}")
-        print(f"remote_waveform_type = {type(remote_focus_waveform)}")
+        # remote_focus_waveform_array = remote_focus_waveform[f"channel_{2}"]
+        # len_remote_focus_waveform_array = len(remote_focus_waveform_array)
+        # print(f"remote focus waveform array length = {len_remote_focus_waveform_array}")
+        # print(f"remote_waveform_type = {type(remote_focus_waveform)}")
 
         galvo_waveform = [
             self.galvo[k].adjust(exposure_times, sweep_times) for k in self.galvo
         ]
-        print(f"galvo waveform = {galvo_waveform}")
-        print(f"galo_waveform_type = {type(galvo_waveform)}")
+        # print(f"galvo waveform = {galvo_waveform}")
+        # print(f"galo_waveform_type = {type(galvo_waveform)}")
         # galvo_waveform_temp_2 = str(galvo_waveform)[1:-1]
         # galvo_waveform_temp = my_dict = dict(zip(range(len(galvo_waveform_temp_2)), galvo_waveform_temp_2))
         # print(f"galvo_waveform_temp = {galvo_waveform_temp}")

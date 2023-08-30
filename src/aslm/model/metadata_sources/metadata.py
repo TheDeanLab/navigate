@@ -133,6 +133,14 @@ class Metadata:
             )
             or (
                 self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVASINGLEWAVE"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVACONPRO"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                 == "customized"
             )
         ):

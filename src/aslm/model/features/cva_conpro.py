@@ -233,7 +233,13 @@ class CVACONPRO:
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
         self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
+        # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(np.ceil(int(expected_frames)/2))
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = 50
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 2
+        self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"]
+        self.expand_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"]
+        print(f"repeat num = {self.repeat_waveform}")
+        print(f"expand num = {self.expand_waveform}")
         Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
         self.expected_frames = expected_frames
         print("waveforms obtained from config")
@@ -242,7 +248,7 @@ class CVACONPRO:
         
         self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
-        print(f"waveforms calculated v2 {self.waveform_dict}")
+        # print(f"waveforms calculated v2 {self.waveform_dict}")
         self.model.active_microscope.prepare_next_channel()
         print("microscope channel prepared")
         # self.model.active_microscope.current_channel = 0
@@ -301,18 +307,23 @@ class CVACONPRO:
         print(f"Stop position = {self.stop_position*1000}")
         self.received_frames += 1
         print(f"Recieved Frames = {self.received_frames}")
-        if abs(pos - self.stop_position * 1000) < 1:
-            print("position met")
-            # self.model.active_microscope.daq.stop_acquisition()
-            # print("stop acquisition")
-            # self.cleanup()
-            # print("Clean up finished")
-            return True
-        elif self.received_frames == self.expected_frames:
-            print("end function called")
-            print(f"End Recieved Frames = {self.received_frames}")
-            print(f"End Expected Frames = {self.expected_frames}")
-            return True
+        # if abs(pos - self.stop_position * 1000) < 1:
+        #     print("position met")
+        #     # self.model.active_microscope.daq.stop_acquisition()
+        #     # print("stop acquisition")
+        #     # self.cleanup()
+        #     # print("Clean up finished")
+        #     return True
+        # elif self.received_frames == self.expected_frames:
+        #     print("end function called")
+        #     print(f"End Recieved Frames = {self.received_frames}")
+        #     print(f"End Expected Frames = {self.expected_frames}")
+        #     return True
+        if self.received_frames == self.expected_frames:
+                print("end function called")
+                print(f"End Recieved Frames = {self.received_frames}")
+                print(f"End Expected Frames = {self.expected_frames}")
+                return True
 
         
         # pos_temp = []

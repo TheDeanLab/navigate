@@ -121,7 +121,7 @@ class CVASINGLEWAVE:
         self.current_exposure_time = current_expsure_time
         self.readout_time = readout_time
         print("sweep time calculated")
-        scaling_factor = 1
+        scaling_factor = 1.10
 
         # Provide just a bit of breathing room for the sweep time...
         current_sweep_time = current_sweep_time * scaling_factor

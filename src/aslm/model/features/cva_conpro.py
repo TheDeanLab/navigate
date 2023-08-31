@@ -55,7 +55,7 @@ class CVACONPRO:
         self.config_table = {
             "signal": {
                 "init": self.pre_func_signal,
-                 "end": self.end_func_signal,
+                #  "end": self.end_func_signal,
                 "cleanup": self.cleanup,
             },
             "node": {"node_type": "multi-step", "device_related": True},
@@ -234,8 +234,10 @@ class CVACONPRO:
         logger.info(f"*** Expected Frames: {expected_frames}")
         self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(np.ceil(int(expected_frames)/2))
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = 50
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 2
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
+
+        # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = 50
+        # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 2
         self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"]
         self.expand_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"]
         print(f"repeat num = {self.repeat_waveform}")

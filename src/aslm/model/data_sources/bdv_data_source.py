@@ -47,7 +47,7 @@ from multiprocessing.managers import DictProxy
 class BigDataViewerDataSource(DataSource):
     def __init__(self, file_name: str = None, mode: str = "w") -> None:
         self._resolutions = np.array(
-            [[1, 1, 1], [2, 2, 1], [4, 4, 1], [8, 8, 1]], dtype=int
+            [[1, 1, 1], [2, 2, 1], [4, 4, 1], [8, 8, 1]], dtype=np.float64
         )
         self._subdivisions = None
         self._shapes = None
@@ -140,7 +140,7 @@ class BigDataViewerDataSource(DataSource):
                 # print(z, dz, dataset_name, self.image[dataset_name].shape,
                 #       data[::dx, ::dy].shape)
                 zs = min(z // dz, self.shapes[i, 0] - 1)  # TODO: Is this necessary?
-                self.image[dataset_name][zs, ...] = data[::dy, ::dx]
+                self.image[dataset_name][zs, ...] = data[::dy, ::dx].astype(np.int16)
                 if is_kw and (i == 0):
                     self._views.append(kw)
         self._current_frame += 1
@@ -200,7 +200,7 @@ class BigDataViewerDataSource(DataSource):
                         dataset_name,
                         chunks=tuple(self.subdivisions[j, ...][::-1]),
                         shape=self.shapes[j, ...],
-                        dtype="uint16",
+                        dtype="int16",
                     )
 
     def _setup_n5(self):
@@ -213,7 +213,7 @@ class BigDataViewerDataSource(DataSource):
             setup_group_name = f"setup{i}"
             setup = self.image.create_group(setup_group_name)
             setup.attrs["downsamplingFactors"] = self.resolutions.tolist()
-            setup.attrs["dataType"] = "uint16"
+            setup.attrs["dataType"] = "int16"
             for t in range(self.shape_t):
                 time_group_name = f"timepoint{t}"
                 timepoint = setup.create_group(time_group_name)

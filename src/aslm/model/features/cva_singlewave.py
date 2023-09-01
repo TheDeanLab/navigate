@@ -125,8 +125,8 @@ class CVASINGLEWAVE:
 
         # Provide just a bit of breathing room for the sweep time...
         # current_sweep_time = current_sweep_time + scaling_factor
-        current_sweep_time = current_sweep_time + .013
-        old_sweep_time = current_sweep_time - 0.013
+        current_sweep_time = current_sweep_time
+        old_sweep_time = current_sweep_time
         self.current_sweep_time_v2 = current_sweep_time
         print("*** current sweep time:", current_sweep_time)
         print(f"*** old sweep time: {old_sweep_time}")
@@ -235,15 +235,16 @@ class CVASINGLEWAVE:
         logger.info(f"*** Expected stage velocity, (mm/s): {expected_speed}")
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
 
-        expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
-        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time)
-        print(f"*** Expected Frames V1: {expected_frames_v1}")
+        self.expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
+        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/(current_sweep_time))
+        print(f"*** Expected Frames V1: {self.expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
+        logger.info(f"*** Expected Frames no offset:{self.expected_frames_v1}")
         logger.info(f"*** Expected Frames: {expected_frames}")
         expand_frame = 1
         # self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expand_frame)
+        # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
+        # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expand_frame)
         # Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
         self.expected_frames = expected_frames
         print("waveforms obtained from config")
@@ -252,7 +253,7 @@ class CVASINGLEWAVE:
         
         self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
-        print(f"waveform dictionary test = {self.waveform_dict}")
+        # print(f"waveform dictionary test = {self.waveform_dict}")
 
         print("waveforms calculated v2")
         self.model.active_microscope.prepare_next_channel()
@@ -313,7 +314,7 @@ class CVASINGLEWAVE:
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?
         # self.recieved_frames = 0
-        self.tol = self.step_size_um/2
+        self.tol = self.step_size_um/4
     def end_func_signal(self):
         self.recieved_frames += 1
         # print(self.recieved_frames)
@@ -328,6 +329,7 @@ class CVASINGLEWAVE:
         # print(f"*** readout time during end func == {readout_time_v4}")
         # pos_temp.append(pos)
         print(f"Current Position = {pos}")
+        logger.info(  f"Current Position = {pos}")
         print(f"Stop position = {self.stop_position*1000}")
         # self.recieved_frames += 1
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
@@ -339,8 +341,10 @@ class CVASINGLEWAVE:
             print("clean up finished")
             print(f"Recieved frames = {self.recieved_frames}")
             print(f"Expected frames = {self.expected_frames}")
+            print(f"Expected frames no offset = {self.expected_frames_v1}")
             logger.info(f"Recieved frames = {self.recieved_frames}")
             logger.info(f"Expected frames = {self.expected_frames}")
+            logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
             readout_time_v5 = self.model.active_microscope.get_readout_time()
             print(f"*** readout time during end conditions met == {readout_time_v5}")
             exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
@@ -357,7 +361,8 @@ class CVASINGLEWAVE:
             print(f"Recieved frames = {self.recieved_frames}")
             print(f"Expected frames = {self.expected_frames}")
             logger.info(f"Recieved frames = {self.recieved_frames}")
-            logger.info(f"Expected frames = {self.expected_frames}")
+            logger.info(f"Expected frames with offset = {self.expected_frames}")
+            logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
             readout_time_v5 = self.model.active_microscope.get_readout_time()
             print(f"*** readout time during end conditions met == {readout_time_v5}")
             exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
@@ -373,8 +378,10 @@ class CVASINGLEWAVE:
             # print("clean up finished")
             print(f"Recieved frames = {self.recieved_frames}")
             print(f"Expected frames = {self.expected_frames}")
+            print(f"Expected frames no offset = {self.expected_frames_v1}")
             logger.info(f"Recieved frames = {self.recieved_frames}")
             logger.info(f"Expected frames = {self.expected_frames}")
+            logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
             readout_time_v5 = self.model.active_microscope.get_readout_time()
             print(f"*** readout time during end conditions met == {readout_time_v5}")
             exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)

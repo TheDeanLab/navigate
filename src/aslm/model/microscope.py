@@ -390,14 +390,14 @@ class Microscope:
         camera_waveform = self.daq.calculate_all_waveforms(
             self.microscope_name, exposure_times, sweep_times
         )
-        print(f"camera waveform = f{camera_waveform}")
+        # print(f"camera waveform = f{camera_waveform}")
         # camera_waveform_array = camera_waveform[f"channel_{2}"]
         # len_camera_waveform_array = len(camera_waveform_array)
         # print(f"camera waveform array length = {len_camera_waveform_array}")
         remote_focus_waveform = self.remote_focus_device.adjust(
             exposure_times, sweep_times
         )
-        print(f"remote focus waveform = {remote_focus_waveform}")
+        # print(f"remote focus waveform = {remote_focus_waveform}")
         # remote_focus_waveform_array = remote_focus_waveform[f"channel_{2}"]
         # len_remote_focus_waveform_array = len(remote_focus_waveform_array)
         # print(f"remote focus waveform array length = {len_remote_focus_waveform_array}")
@@ -426,7 +426,7 @@ class Microscope:
             "remote_focus_waveform": remote_focus_waveform,
             "galvo_waveform": galvo_waveform,
         }
-        print(waveform_dict)
+        # print(waveform_dict)
         return waveform_dict
 
     def calculate_exposure_sweep_times(self, readout_time):

@@ -321,6 +321,7 @@ class NIDAQ(DAQBase):
         """
         print("create analog camera task")
         n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
+        print(f"*** n_samples analog task = {n_samples} and length {len(n_samples)}")
         if len(n_samples) > 1:
             logger.debug(
                 "NI DAQ - Different number of samples provided for each analog"
@@ -330,6 +331,7 @@ class NIDAQ(DAQBase):
         self.n_sample = min(n_samples)
         max_sample = self.n_sample * self.waveform_expand_num
         # TODO: GalvoStage and remote_focus waveform are not calculated based on a same sweep time. There needs some fix.
+        print(f"number of max samples = {max_sample}")
 
         # Create one analog output task per board, grouping the channels
         boards = list(set([x.split("/")[0] for x in self.analog_outputs.keys()]))
@@ -345,6 +347,8 @@ class NIDAQ(DAQBase):
             sample_rates = list(
                 set([v["sample_rate"] for v in self.analog_outputs.values()])
             )
+            print(f"***sample_rates = {sample_rates}")
+            logger.info(f"***sample_rates = {sample_rates}")
             if len(sample_rates) > 1:
                 logger.debug(
                     "NI DAQ - Different sample rates provided for each analog channel."

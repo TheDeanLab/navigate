@@ -192,11 +192,15 @@ class CVACONPRO:
         logger.info(f"*** z start position: {self.start_position}")
         logger.info(f"*** z end position: {self.stop_position}")
         logger.info(f"*** Expected number of steps: {self.number_z_steps}")
-
-        
+        pos = self.asi_stage.get_axis_position(self.axis)
+        print(f"Current Position = {pos}")
+        print(f"Start position = {self.start_position*1000}")
         
         # move to start position:
         self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+        posw = self.asi_stage.get_axis_position(self.axis)
+        print(f"Current Position = {posw}")
+        print(f"Start position = {self.start_position*1000}")
 
         # Set the x-axis of the ASI stage to operate at that velocity.
 
@@ -250,11 +254,25 @@ class CVACONPRO:
         
         self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
-        # print(f"waveforms calculated v2 {self.waveform_dict}")
+        #   ms calculated v2 {self.waveform_dict}")
         self.model.active_microscope.prepare_next_channel()
         print("microscope channel prepared")
         # self.model.active_microscope.current_channel = 0
         
+        
+        # print("stage moving to stop position at speed")
+        # posw = self.asi_stage.get_axis_position(self.axis)
+        # print(f"before scan to stop Current Position = {posw}")
+        # print(f"Start position = {self.start_position*1000}")
+        # self.asi_stage.move_axis_absolute(self.axis, self.stop_position * 1000.0, wait_until_done=True)
+        # posw = self.asi_stage.get_axis_position(self.axis)
+        # print(f"stop position Current Position = {posw}")
+        # print(f"stop position = {self.stop_position*1000}")
+        # print("stage moving to stop position at speed")
+        # self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+        # posw = self.asi_stage.get_axis_position(self.axis)
+        # print(f"start position after scan to start Current Position = {posw}")
+        # print(f"Start position = {self.start_position*1000}")
         # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(
             start_position_mm=self.start_position,
@@ -352,7 +370,10 @@ class CVACONPRO:
 
         """
         # reset stage speed
-        4.288497*2
+        # 4.288497*2
+        pos = self.asi_stage.get_axis_position(self.axis)
+        print(f"Current Position = {pos}")
+        print(f"Stop position = {self.stop_position*1000}")
         print("Clean up called")
         # self.asi_stage.set_speed({self.axis: self.default_speed})
         self.asi_stage.set_speed(percent=0.9)
@@ -363,13 +384,18 @@ class CVACONPRO:
         print("end Speed = ",end_speed)
         self.asi_stage.stop()
         print("stage stop")
-        self.model.active_microscope.daq.stop_acquisition()
-        self.model.active_microscope.daq.set_external_trigger(None)
+        
         print("external trigger none")
         # return to start position
-        self.start_position = float(
-            self.model.configuration[
-                "experiment"]["MicroscopeState"]["abs_z_start"])
-        self.asi_stage.move_absolute({f"{self.axis}_abs: {self.start_position}"})
+        # self.start_position = float(
+        #     self.model.configuration[
+        #         "experiment"]["MicroscopeState"]["abs_z_start"])
+        # self.asi_stage.move_absolute({f"{self.axis}_abs: {self.start_position}"})
+        self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
         print("stage moved to original position")
+        pos = self.asi_stage.get_axis_position(self.axis)
+        print(f"Current Position = {pos}")
+        print(f"start position = {self.start_position*1000}")
+        self.model.active_microscope.daq.stop_acquisition()
+        self.model.active_microscope.daq.set_external_trigger(None)
 

@@ -119,7 +119,7 @@ class CVATTL:
         self.current_exposure_time = current_expsure_time
         self.readout_time = readout_time
         print("sweep time calculated")
-        scaling_factor = 1.05
+        scaling_factor = 1.0
 
         # Provide just a bit of breathing room for the sweep time...
         current_sweep_time = current_sweep_time * scaling_factor
@@ -184,9 +184,11 @@ class CVATTL:
         self.stop_position = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["abs_z_end"]) / 1000.0
-        self.number_z_steps = float(
-            self.model.configuration[
-                "experiment"]["MicroscopeState"]["number_z_steps"])
+        # self.number_z_steps = float(
+        #     self.model.configuration[
+        #         "experiment"]["MicroscopeState"]["number_z_steps"])
+        
+        self.number_z_steps = abs(self.stop_position-self.start_position)/step_size_mm
         
         logger.info(f"*** z start position: {self.start_position}")
         logger.info(f"*** z end position: {self.stop_position}")
@@ -226,11 +228,12 @@ class CVATTL:
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
 
         expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
-        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time)
-        print(f"*** Expected Frames V1:{expected_frames_v1}")
+        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/(current_sweep_time+0.013))
+        print(f"*** Expected Frames no offset:{expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
-        print(f"*** Expected Frames: {expected_frames}")
-        print
+        # print(f"*** Expected Frames: {expected_frames}")
+        # print
+        logger.info(f"*** Expected Frames no offset:{expected_frames_v1}")
         logger.info(f"*** Expected Frames: {expected_frames}")
         self.expected_frames = expected_frames
         # self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVATTL"
@@ -269,13 +272,17 @@ class CVATTL:
 
         # start scan won't start the scan, but when calling stop_scan it will start scan. So weird.
         self.asi_stage.stop_scan()
-        if self.asi_stage.get_speed(self.axis) == stage_velocity:
-            self.model.active_microscope.daq.run_acquisition()
-            print("microscope running")
-        else:
-            # time.sleep(1)
-            self.model.active_microscope.daq.run_acquisition()
-            print("microscope running after sleep")
+
+
+        # if self.asi_stage.get_speed(self.axis) == stage_velocity:
+        #     self.model.active_microscope.daq.run_acquisition()
+        #     # self.model.active_microscope.daq.run_live_acquisition()
+        #     print("microscope running")
+        # else:
+        #     # time.sleep(1)
+        #     self.model.active_microscope.daq.run_acquisition()
+        #     # self.model.active_microscope.daq.run_live_acquisition()
+        #     print("microscope running after sleep")
 
         # self.model.active_microscope.prepare_next_channel()
         # print("microscope channel prepared")
@@ -301,6 +308,7 @@ class CVATTL:
         pos = self.asi_stage.get_axis_position(self.axis)
         # pos_temp.append(pos)
         print(f"Current Position = {pos}")
+        logger.info(f"Current Position = {pos}")
         print(f"Stop position = {self.stop_position*1000}")
         self.recieved_frames += 1
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
@@ -315,17 +323,17 @@ class CVATTL:
             logger.info(f"Recieved frames = {self.recieved_frames}")
             logger.info(f"Expected frames = {self.expected_frames}")
             return True
-        elif abs(pos - (self.stop_position * 1000)) < tol:
-            print("position met")
-            self.model.active_microscope.daq.stop_acquisition()
-            print("stop acquisition")
-            # self.cleanup()
-            print("clean up finished")
-            print(f"Recieved frames = {self.recieved_frames}")
-            print(f"Expected frames = {self.expected_frames}")
-            logger.info(f"Recieved frames = {self.recieved_frames}")
-            logger.info(f"Expected frames = {self.expected_frames}")
-            return True
+        # elif abs(pos - (self.stop_position * 1000)) < tol:
+        #     print("position met")
+        #     self.model.active_microscope.daq.stop_acquisition()
+        #     print("stop acquisition")
+        #     # self.cleanup()
+        #     print("clean up finished")
+        #     print(f"Recieved frames = {self.recieved_frames}")
+        #     print(f"Expected frames = {self.expected_frames}")
+        #     logger.info(f"Recieved frames = {self.recieved_frames}")
+        #     logger.info(f"Expected frames = {self.expected_frames}")
+            # return True
         elif self.recieved_frames == self.expected_frames:
             print("frames met")
             self.model.active_microscope.daq.stop_acquisition()

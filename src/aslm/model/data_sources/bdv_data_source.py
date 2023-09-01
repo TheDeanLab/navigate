@@ -140,7 +140,7 @@ class BigDataViewerDataSource(DataSource):
                 # print(z, dz, dataset_name, self.image[dataset_name].shape,
                 #       data[::dx, ::dy].shape)
                 zs = min(z // dz, self.shapes[i, 0] - 1)  # TODO: Is this necessary?
-                self.image[dataset_name][zs, ...] = data[::dy, ::dx]
+                self.image[dataset_name][zs, ...] = data[::dy, ::dx].astype(np.int16)
                 if is_kw and (i == 0):
                     self._views.append(kw)
         self._current_frame += 1
@@ -178,7 +178,9 @@ class BigDataViewerDataSource(DataSource):
             if setup_group_name in self.image:
                 del self.image[setup_group_name]
             self.image.create_dataset(
-                f"{setup_group_name}/resolutions", data=self.resolutions
+                f"{setup_group_name}/resolutions",
+                data=self.resolutions,
+                dtype="float64",
             )
             self.image.create_dataset(
                 f"{setup_group_name}/subdivisions", data=self.subdivisions
@@ -200,7 +202,7 @@ class BigDataViewerDataSource(DataSource):
                         dataset_name,
                         chunks=tuple(self.subdivisions[j, ...][::-1]),
                         shape=self.shapes[j, ...],
-                        dtype="uint16",
+                        dtype="int16",
                     )
 
     def _setup_n5(self):
@@ -213,7 +215,7 @@ class BigDataViewerDataSource(DataSource):
             setup_group_name = f"setup{i}"
             setup = self.image.create_group(setup_group_name)
             setup.attrs["downsamplingFactors"] = self.resolutions.tolist()
-            setup.attrs["dataType"] = "uint16"
+            setup.attrs["dataType"] = "int16"
             for t in range(self.shape_t):
                 time_group_name = f"timepoint{t}"
                 timepoint = setup.create_group(time_group_name)
@@ -224,7 +226,7 @@ class BigDataViewerDataSource(DataSource):
                     sx = timepoint.zeros(
                         s_group_name, shape=tuple(shape), chunks=(shape[0], shape[1], 1)
                     )
-                    sx.attrs["dataType"] = "uint16"
+                    sx.attrs["dataType"] = "int16"
                     sx.attrs["blockSize"] = [shape[0], shape[1], 1]
                     sx.attrs["dimensions"] = list(shape)
         # print(self.image.tree())

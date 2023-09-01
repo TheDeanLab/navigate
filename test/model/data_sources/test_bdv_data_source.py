@@ -2,8 +2,25 @@ import os
 
 import pytest
 import numpy as np
+import h5py
 
 from aslm.tools.file_functions import delete_folder
+
+
+def recurse_dtype(group):
+    for key, subgroup in group.items():
+        subgroup_type = type(subgroup)
+        if subgroup_type == h5py._hl.group.Group:
+            recurse_dtype(subgroup)
+        elif subgroup_type == h5py._hl.dataset.Dataset:
+            if key == "resolutions":
+                assert subgroup.dtype == "float64"
+            elif key == "subdivisions":
+                assert subgroup.dtype == "int32"
+            elif key == "cells":
+                assert subgroup.dtype == "int16"
+        else:
+            print("Unknown how to handle:", key, subgroup_type)
 
 
 @pytest.mark.parametrize("multiposition", [True, False])
@@ -79,13 +96,24 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
             break
     ds.close()
 
+    file_name = ds.file_name
+
+    # check datatypes
+    # todo: extend to n5
+    if ext == "h5":
+        ds = h5py.File(f"test.{ext}", "r")
+        for key in ds.keys():
+            recurse_dtype(ds[key])
+    ds.close()
+
+    # Delete
     try:
-        xml_fn = os.path.splitext(ds.file_name)[0] + ".xml"
-        if os.path.isdir(ds.file_name):
+        xml_fn = os.path.splitext(file_name)[0] + ".xml"
+        if os.path.isdir(file_name):
             # n5 is a directory
-            delete_folder(ds.file_name)
+            delete_folder(file_name)
         else:
-            os.remove(ds.file_name)
+            os.remove(file_name)
         os.remove(xml_fn)
     except PermissionError:
         # Windows seems to think these files are still open

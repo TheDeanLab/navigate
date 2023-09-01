@@ -58,6 +58,7 @@ from aslm.controller.sub_controllers import (
     MicroscopePopupController,
     FeaturePopupController,
     HelpPopupController,
+    FeatureAdvancedSettingController,
 )
 from aslm.tools.file_functions import save_yaml_file, load_yaml_file
 from aslm.tools.decorators import FeatureList
@@ -461,6 +462,9 @@ class MenuController(GUIController):
         self.view.menubar.menu_features.add_command(
             label="Delete Selected Feature List", command=self.delete_feature_list
         )
+        self.view.menubar.menu_features.add_command(
+            label="Advanced Setting", command=self.popup_feature_advanced_setting
+        )
         self.view.menubar.menu_features.add_separator()
         # add feature lists from previous loaded ones
         feature_lists_path = get_aslm_path() + "/feature_lists"
@@ -793,7 +797,7 @@ class MenuController(GUIController):
         feature_list_files = [
             temp
             for temp in os.listdir(feature_lists_path)
-            if temp[temp.rindex(".") :] in (".yml", ".yaml")
+            if (temp.endswith(".yml") or temp.endswith(".yaml")) and os.path.isfile(os.path.join(feature_lists_path, temp))
         ]
         feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
         if not feature_records:
@@ -914,3 +918,10 @@ class MenuController(GUIController):
 
         del feature_records[feature_id - self.system_feature_list_count]
         save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
+
+    def popup_feature_advanced_setting(self):
+        """Show feature advanced setting window"""
+        self.parent_controller.feature_advanced_setting_controller = FeatureAdvancedSettingController(
+            self.view, self.parent_controller
+        )
+

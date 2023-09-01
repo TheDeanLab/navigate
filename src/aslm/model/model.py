@@ -611,7 +611,7 @@ class Model:
                         )
 
                     self.addon_feature = self.feature_list[args[0] - 1]
-                    load_dynamic_parameter_functions(self.addon_feature, f"{get_aslm_path()}/config/feature_parameter_setting")
+                    load_dynamic_parameter_functions(self.addon_feature, f"{get_aslm_path()}/feature_lists/feature_parameter_setting")
                     self.signal_container, self.data_container = load_features(
                         self, self.addon_feature
                     )
@@ -1201,7 +1201,7 @@ class Model:
         feature_list_files = [
             temp
             for temp in os.listdir(feature_lists_path)
-            if temp[temp.rindex(".") :] in (".yml", ".yaml")
+            if (temp.endswith(".yml") or temp.endswith(".yaml")) and os.path.isfile(os.path.join(feature_lists_path, temp))
         ]
         for item in feature_list_files:
             if item == "__sequence.yml":

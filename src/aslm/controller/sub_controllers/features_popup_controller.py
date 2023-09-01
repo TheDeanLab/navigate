@@ -225,7 +225,7 @@ class FeaturePopupController(GUIController):
 
         def func(event):
             # load feature parameter setting
-            feature_config_path = f"{get_aslm_path()}/config/feature_parameter_setting/{feature['name'].__name__}.yml"
+            feature_config_path = f"{get_aslm_path()}/feature_lists/feature_parameter_setting/{feature['name'].__name__}.yml"
             feature_parameter_config = None
             if os.path.exists(feature_config_path):
                 feature_parameter_config = load_yaml_file(feature_config_path)
@@ -249,7 +249,7 @@ class FeaturePopupController(GUIController):
             feature_name = popup.feature_name_widget.get()
             new_feature = getattr(feature_related_functions, feature_name)
             # load feature parameter setting
-            feature_config_path = f"{get_aslm_path()}/config/feature_parameter_setting/{new_feature.__name__}.yml"
+            feature_config_path = f"{get_aslm_path()}/feature_lists/feature_parameter_setting/{new_feature.__name__}.yml"
             feature_parameter_config = None
             if os.path.exists(feature_config_path):
                 feature_parameter_config = load_yaml_file(feature_config_path)

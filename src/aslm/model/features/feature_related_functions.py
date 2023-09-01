@@ -183,10 +183,11 @@ def load_dynamic_parameter_functions(feature_list: list, feature_parameter_setti
                         if ref_lib is None or ref_lib == "None":
                             args[idx] = None
                         elif os.path.exists(ref_lib):
-                            args[idx] = load_module_from_file(args[idx], ref_lib)
+                            module = load_module_from_file(args[idx], ref_lib)
+                            args[idx] = getattr(module, args[idx]) if module else None
                         else:
                             module = importlib.import_module(ref_lib)
-                            args[idx] = getattr(module, args[idx])
+                            args[idx] = getattr(module, args[idx]) if module else None
                     item["args"] = tuple(args)
         else:
             load_dynamic_parameter_functions(item, feature_parameter_setting_path)

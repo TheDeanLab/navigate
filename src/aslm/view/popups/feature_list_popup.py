@@ -57,7 +57,7 @@ class FeatureConfigPopup:
         # Creating content frame
         content_frame = self.popup.get_frame()
 
-        self.inputs = {}
+        self.inputs = []
 
         self.feature_name_widget = LabelInput(
             parent=content_frame,
@@ -185,3 +185,114 @@ class FeatureListPopup:
             self.buttons["confirm"].grid(row=0, column=1, padx=3, pady=3)
         self.buttons["cancel"] = ttk.Button(button_frame, text="Cancel")
         self.buttons["cancel"].grid(row=0, column=2, sticky=tk.SE, padx=3, pady=3)
+
+
+class FeatureAdvancedSettingPopup:
+    def __init__(self, root, *args, features=[], feature_name="", args_name=[], args_default_value=[], **kwargs):
+        # Creating popup window with this name and size/placement,
+        # PopUp is a Toplevel window
+        self.popup = PopUp(
+            root, kwargs["title"], "+320+180", top=False, transient=False
+        )
+        # Change background of popup window to white
+        self.popup.configure(bg="white")
+
+        # Creating content frame
+        content_frame = self.popup.get_frame()
+
+        self.inputs = {}
+        self.buttons = {}
+
+        self.feature_name_widget = LabelInput(
+            parent=content_frame,
+            label="Feature Name",
+            label_args={"width": 20},
+            input_class=ttk.Combobox,
+            input_var=tk.StringVar(),
+            input_args={"width": 30, "state": "readonly"},
+        )
+        self.feature_name_widget.grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
+        self.feature_name_widget.set(feature_name)
+        self.feature_name_widget.set_values(features)
+
+        separator = ttk.Separator(content_frame)
+        separator.grid(row=1, column=0, sticky=tk.NSEW, pady=10)
+
+        self.parameter_frame = ttk.Frame(content_frame)
+        self.parameter_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=30, pady=30)
+
+        self.arg_frames = {}
+
+    def build_widgets(self, args_name, parameter_config=None):
+        self.inputs = {}
+        self.buttons = {}
+        self.arg_frames = {}
+
+        for child in self.parameter_frame.winfo_children():
+            child.destroy()
+        self.save_button = None
+
+        row_id = 0
+        for _, arg_name in enumerate(args_name):
+            # ref_value, value, delete button, load button
+            self.inputs[arg_name] = []
+            arg_label = ttk.Label(self.parameter_frame, text=arg_name+":")
+            arg_label.grid(row=row_id, column=0, sticky=tk.NW)
+            row_id += 1
+            arg_frame = ttk.Frame(self.parameter_frame)
+            arg_frame.grid(row=row_id, column=0, sticky=tk.NSEW)
+            row_id += 1
+            self.arg_frames[arg_name] = arg_frame
+            if parameter_config is not None and arg_name in parameter_config:
+                for k, v in parameter_config[arg_name].items():
+                    self.add_new_row(arg_name, k, v)
+            add_button = ttk.Button(self.parameter_frame, text="Add")
+            add_button.grid(row=row_id, column=0, sticky=tk.NW, padx=3, pady=3)
+            self.buttons[arg_name] = add_button
+            row_id += 1
+            separator = ttk.Separator(self.parameter_frame)
+            separator.grid(row=row_id, column=0, sticky=tk.NSEW, pady=10)
+            row_id += 1
+
+        if len(args_name) > 1:
+            save_button = ttk.Button(self.parameter_frame, text="Save")
+            save_button.grid(row=row_id, column=0, sticky=tk.NE, padx=3, pady=3)
+            self.save_button = save_button
+
+
+    def add_new_row(self, arg_name, k="", v=""):
+        r = len(self.inputs[arg_name])
+        arg_frame = self.arg_frames[arg_name]
+        ref_value_entry = LabelInput(
+            parent=arg_frame,
+            label="Function Name",
+            input_class=ttk.Entry,
+            input_var=tk.StringVar(),
+            input_args={"width": 50},
+        )
+        ref_value_entry.grid(row=r, column=1, sticky=tk.NSEW, padx=3, pady=3)
+        ref_value_entry.set(k)
+        value_entry = LabelInput(
+            parent=arg_frame,
+            label="Value",
+            input_class=ttk.Entry,
+            input_var=tk.StringVar(),
+            input_args={"width": 50},
+        )
+        value_entry.grid(row=r, column=2, sticky=tk.NSEW, padx=3, pady=3)
+        value_entry.set(v)
+        load_button = ttk.Button(arg_frame, text="Load")
+        load_button.grid(row=r, column=3, sticky=tk.NSEW, padx=3, pady=3)
+        delete_button = ttk.Button(arg_frame, text="Delete")
+        delete_button.grid(row=r, column=4, sticky=tk.NSEW, padx=3, pady=3)
+        delete_button.config(command=self.delete_row(arg_name, r))
+        self.inputs[arg_name].append((ref_value_entry, value_entry, load_button, delete_button))
+    
+    def delete_row(self, arg_name, r):
+
+        def func():
+            for w in self.inputs[arg_name][r]:
+                w.grid_remove()
+            self.inputs[arg_name][r] = None
+
+        return func

@@ -183,7 +183,9 @@ class BigDataViewerDataSource(DataSource):
                 dtype="float64",
             )
             self.image.create_dataset(
-                f"{setup_group_name}/subdivisions", data=self.subdivisions
+                f"{setup_group_name}/subdivisions",
+                data=self.subdivisions,
+                dtype="int32",
             )
 
         # Create the datasets to populate

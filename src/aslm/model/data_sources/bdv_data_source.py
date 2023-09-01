@@ -47,7 +47,7 @@ from multiprocessing.managers import DictProxy
 class BigDataViewerDataSource(DataSource):
     def __init__(self, file_name: str = None, mode: str = "w") -> None:
         self._resolutions = np.array(
-            [[1, 1, 1], [2, 2, 1], [4, 4, 1], [8, 8, 1]], dtype=np.float64
+            [[1, 1, 1], [2, 2, 1], [4, 4, 1], [8, 8, 1]], dtype=int
         )
         self._subdivisions = None
         self._shapes = None
@@ -178,7 +178,9 @@ class BigDataViewerDataSource(DataSource):
             if setup_group_name in self.image:
                 del self.image[setup_group_name]
             self.image.create_dataset(
-                f"{setup_group_name}/resolutions", data=self.resolutions
+                f"{setup_group_name}/resolutions",
+                data=self.resolutions,
+                dtype="float64",
             )
             self.image.create_dataset(
                 f"{setup_group_name}/subdivisions", data=self.subdivisions
@@ -224,7 +226,7 @@ class BigDataViewerDataSource(DataSource):
                     sx = timepoint.zeros(
                         s_group_name, shape=tuple(shape), chunks=(shape[0], shape[1], 1)
                     )
-                    sx.attrs["dataType"] = "uint16"
+                    sx.attrs["dataType"] = "int16"
                     sx.attrs["blockSize"] = [shape[0], shape[1], 1]
                     sx.attrs["dimensions"] = list(shape)
         # print(self.image.tree())

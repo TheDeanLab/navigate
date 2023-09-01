@@ -121,7 +121,10 @@ class FeatureAdvancedSettingController:
                         feature_parameter_config[arg_name][row[0].get()] = row[1].get()
 
         # save to yaml file
-        save_yaml_file(get_aslm_path() + "/feature_lists/feature_parameter_setting", feature_parameter_config, self.popup.feature_name_widget.get() + ".yml")
+        parameter_config_path = get_aslm_path() + "/feature_lists/feature_parameter_setting"
+        if not os.path.exists(parameter_config_path):
+            os.mkdir(parameter_config_path)
+        save_yaml_file(parameter_config_path, feature_parameter_config, self.popup.feature_name_widget.get() + ".yml")
 
     def exit_func(self):
         self.save_parameters()

@@ -1099,6 +1099,10 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         else:
             self.error.set("")
 
+        if value == ".":
+            self.set("0.0")
+            return True
+
         # check if there are range limits
         if min_val == "-Infinity" or max_val == "Infinity":
             return True
@@ -1106,17 +1110,17 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         try:
             value = Decimal(value)
         except InvalidOperation:
-            self.error.set("Invalid number string: {}".format(value))
+            self.error.set("Invalid Number Provided: {}".format(value))
             return False
 
         # Checking if greater than minimum
         if value < min_val:
-            self.error.set(f"Value is too low (min {min_val:.3f})")
+            self.error.set(f"Minimum Value: {min_val:.3f}")
             valid = False
 
         # Checking if less than max
         if value > max_val:
-            self.error.set(f"Value is too high (max {max_val:.3f})")
+            self.error.set(f"Maximum Value: {max_val:.3f}")
             valid = False
 
         return valid

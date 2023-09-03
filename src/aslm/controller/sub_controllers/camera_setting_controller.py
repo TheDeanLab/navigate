@@ -240,7 +240,7 @@ class CameraSettingController(GUIController):
 
         self.camera_setting_dict["img_x_pixels"] = img_width
         self.camera_setting_dict["img_y_pixels"] = img_height
-        
+
         return True
 
     def update_sensor_mode(self, *args):
@@ -272,7 +272,9 @@ class CameraSettingController(GUIController):
 
         elif sensor_value == "Light-Sheet":
             # readout-direction from experiment
-            self.mode_widgets["Readout"].widget.set(self.camera_setting_dict["readout_direction"])
+            self.mode_widgets["Readout"].widget.set(
+                self.camera_setting_dict["readout_direction"]
+            )
             self.mode_widgets["Readout"].widget["state"] = "readonly"
             self.mode_widgets["Pixels"].set(
                 self.camera_setting_dict["number_of_pixels"]
@@ -375,50 +377,20 @@ class CameraSettingController(GUIController):
         Also can probably be done more elegantly in a configuration file and
         dictionary structure.
         """
-        # magnification == 'N/A' is a proxy for resolution == 'high'
-        # if (
-        #     self.parent_controller.configuration["experiment"]["MicroscopeState"][
-        #         "zoom"
-        #     ]
-        #     == "N/A"
-        # ):
-        #     # 54-12-8 - EFLobj = 12.19 mm / RI
-        #     tube_lens_focal_length = 300
-        #     extended_focal_length = 12.19
-        #     if self.solvent == "BABB":
-        #         refractive_index = 1.56
-        #     elif self.solvent == "Water":
-        #         refractive_index = 1.333
-        #     elif self.solvent == "CUBIC":
-        #         refractive_index = 1.48
-        #     elif self.solvent == "CLARITY":
-        #         refractive_index = 1.45
-        #     elif self.solvent == "uDISCO":
-        #         refractive_index = 1.56
-        #     elif self.solvent == "eFLASH":
-        #         refractive_index = 1.458
-        #     else:
-        #         # Default unknown value - Specified as mid-range.
-        #         refractive_index = 1.45
-
-        #     multi_immersion_focal_length = extended_focal_length / refractive_index
-        #     magnification = tube_lens_focal_length / multi_immersion_focal_length
-        # else:
-        #     magnification = self.parent_controller.configuration["experiment"][
-        #         "MicroscopeState"
-        #     ]["zoom"]
-        #     magnification = float(magnification[:-1])
 
         # pixel_size = self.default_pixel_size
+        if (
+            self.roi_widgets["Width"].get() == ""
+            or self.roi_widgets["Height"].get() == ""
+        ):
+            return
+
         try:
             x_pixel = float(self.roi_widgets["Width"].get())
             y_pixel = float(self.roi_widgets["Height"].get())
         except ValueError as e:
             logger.error(f"{e} similar to TclError")
             return
-
-        # physical_dimensions_x = x_pixel * pixel_size / magnification
-        # physical_dimensions_y = y_pixel * pixel_size / magnification
 
         microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"

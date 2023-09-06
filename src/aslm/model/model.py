@@ -48,6 +48,7 @@ from aslm.model.features.constant_velocity_acquisition import (
 from aslm.model.features.cva_ttl import CVATTL
 from aslm.model.features.cva_conpro import CVACONPRO
 from aslm.model.features.cva_singlewave import CVASINGLEWAVE
+from aslm.model.features.cva_cont import CVACONT
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
@@ -303,6 +304,7 @@ class Model:
             "CVATTL": [{"name": CVATTL}],
             "CVACONPRO": [{"name": CVACONPRO}],
             "CVASINGLEWAVE": [{"name": CVASINGLEWAVE}],
+            "CVACONT": [{"name": CVACONT}],
             "customized": [],
         }
         self.load_feature_records()
@@ -617,6 +619,8 @@ class Model:
                 self.active_microscope.stages["z"].stop()
             if self.imaging_mode == "CVASINGLEWAVE":
                 self.active_microscope.stages["z"].stop()
+            if self.imaging_mode == "CVACONT":
+                self.active_microscope.stages["z"].stop()    
             if self.signal_thread:
                 self.signal_thread.join()
             if self.data_thread:
@@ -712,6 +716,8 @@ class Model:
 
         # whether acquire specific number of frames.
         count_frame = num_of_frames > 0
+        print(f"***num_frames = {num_of_frames}")
+        print(f"**count_frames = {count_frame}")
 
         start_time = time.time()
 
@@ -734,6 +740,7 @@ class Model:
                 continue
 
             acquired_frame_num += len(frame_ids)
+            print(f"*** model acquired_frame_num = {acquired_frame_num}")
             stop_time = time.time()
             frames_per_second = acquired_frame_num / (stop_time - start_time)
             self.event_queue.put(("framerate", frames_per_second))
@@ -770,12 +777,15 @@ class Model:
         self.show_img_pipe.send("stop")
         self.logger.info("ASLM Model - Data thread stopped.")
         self.logger.info(f"ASLM Model - Received frames in total: {acquired_frame_num}")
+        # self.acquired_frame_num = acquired_frame_num
+        # return self.acquired_frame_num
 
         # release the lock when data thread ends
         if self.pause_data_ready_lock.locked():
             self.pause_data_ready_lock.release()
 
         self.end_acquisition()  # Need this to turn off the lasers/close the shutters
+        return acquired_frame_num
 
     def pause_data_thread(self):
         """Pause the data thread.
@@ -896,7 +906,7 @@ class Model:
         
         # Run the acquisition
         try:
-            # print("DAQ Trigger Sent")
+            print("DAQ Trigger Sent")
             self.logger.info("DAQ Trigger Sent")
             self.active_microscope.daq.run_acquisition()
         except:
@@ -913,6 +923,7 @@ class Model:
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
+        print(f"*** snap image frame id = {self.frame_id}")
 
     def run_live_acquisition(self):
         """Stream live image to the GUI.

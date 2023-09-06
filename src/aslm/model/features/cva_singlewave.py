@@ -235,17 +235,17 @@ class CVASINGLEWAVE:
         logger.info(f"*** Expected stage velocity, (mm/s): {expected_speed}")
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
 
-        self.expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
-        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/(current_sweep_time))
+        self.expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/(current_sweep_time))
+        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/(current_sweep_time*1.1))+1
         print(f"*** Expected Frames V1: {self.expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames no offset:{self.expected_frames_v1}")
         logger.info(f"*** Expected Frames: {expected_frames}")
         expand_frame = 1
-        # self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
-        # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
-        # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expand_frame)
-        # Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
+        self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 1
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expand_frame)
+        Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
         self.expected_frames = expected_frames
         print("waveforms obtained from config")
         # print(f"Expand Frames = {Expand_frames}")
@@ -352,23 +352,23 @@ class CVASINGLEWAVE:
             print(f"*** end func sweep_times = {sweep_times}")
             print(f"*** end func current_sweep_time_velocity = {self.current_sweep_time_v2}")
             return True
-        elif abs(pos - self.stop_position * 1000) < self.tol:
-            print("position met")
-            # self.model.active_microscope.daq.stop_acquisition()
-            print("stop acquisition")
-            # self.cleanup()
-            print("clean up finished")
-            print(f"Recieved frames = {self.recieved_frames}")
-            print(f"Expected frames = {self.expected_frames}")
-            logger.info(f"Recieved frames = {self.recieved_frames}")
-            logger.info(f"Expected frames with offset = {self.expected_frames}")
-            logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
-            readout_time_v5 = self.model.active_microscope.get_readout_time()
-            print(f"*** readout time during end conditions met == {readout_time_v5}")
-            exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
-            print(f"*** end func exposure_times = {exposure_times}")
-            print(f"*** end func sweep_times = {sweep_times}")
-            print(f"*** end func sweep_times_velocity = f{self.current_sweep_time_v2}")
+        # elif abs(pos - self.stop_position * 1000) < self.tol:
+        #     print("position met")
+        #     # self.model.active_microscope.daq.stop_acquisition()
+        #     print("stop acquisition")
+        #     # self.cleanup()
+        #     print("clean up finished")
+        #     print(f"Recieved frames = {self.recieved_frames}")
+        #     print(f"Expected frames = {self.expected_frames}")
+        #     logger.info(f"Recieved frames = {self.recieved_frames}")
+        #     logger.info(f"Expected frames with offset = {self.expected_frames}")
+        #     logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
+        #     readout_time_v5 = self.model.active_microscope.get_readout_time()
+        #     print(f"*** readout time during end conditions met == {readout_time_v5}")
+        #     exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
+        #     print(f"*** end func exposure_times = {exposure_times}")
+        #     print(f"*** end func sweep_times = {sweep_times}")
+        #     print(f"*** end func sweep_times_velocity = f{self.current_sweep_time_v2}")
             return True
         elif self.recieved_frames == self.expected_frames:
             print("frames met")

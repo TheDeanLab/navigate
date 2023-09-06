@@ -35,7 +35,7 @@ import time
 import logging
 # Third Party Imports
 import numpy as np
-import re
+import re 
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -55,7 +55,7 @@ class CVACONPRO:
         self.config_table = {
             "signal": {
                 "init": self.pre_func_signal,
-                #  "end": self.end_func_signal,
+                "end": self.end_func_signal,
                 "cleanup": self.cleanup,
             },
             "node": {"node_type": "multi-step", "device_related": True},
@@ -238,19 +238,21 @@ class CVACONPRO:
         logger.info(f"*** Expected Frames: {expected_frames}")
         self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(np.ceil(int(expected_frames)/2))
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
+        # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
 
-        # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = 50
-        # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 2
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = 3 
+        # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 10
+
         self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"]
         self.expand_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"]
         print(f"repeat num = {self.repeat_waveform}")
         print(f"expand num = {self.expand_waveform}")
         Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
-        self.expected_frames = expected_frames
+        self.expected_frames = np.ceil(expected_frames/(self.repeat_waveform*self.expand_waveform))
         print("waveforms obtained from config")
         print(f"Expand Frames = {Expand_frames}")
-        logger.info(f"Expand Frames = {Expand_frames}")
+        logger.info(f"Expand Frames = {Expand_frames}") 
         
         self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
@@ -320,11 +322,16 @@ class CVACONPRO:
 
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?
-    
+       
+       
+       # acquired_frame_num = self.model.active_microscope.run_data_process()
+        # print(f"frames run data process init = {acquired_frame_num}") 
     def end_func_signal(self):
+        # acquired_frame_num_v2 = self.model.active_microscope.run_data_process() 
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {pos}")
         print(f"Stop position = {self.stop_position*1000}")
+        # print(f"self.acquired_frame_num end func = {acquired_frame_num_v2}")
         self.received_frames += 1
         print(f"Recieved Frames = {self.received_frames}")
         # if abs(pos - self.stop_position * 1000) < 1:
@@ -334,16 +341,16 @@ class CVACONPRO:
         #     # self.cleanup()
         #     # print("Clean up finished")
         #     return True
-        # elif self.received_frames == self.expected_frames:
-        #     print("end function called")
-        #     print(f"End Recieved Frames = {self.received_frames}")
-        #     print(f"End Expected Frames = {self.expected_frames}")
-        #     return True
         if self.received_frames == self.expected_frames:
-                print("end function called")
-                print(f"End Recieved Frames = {self.received_frames}")
-                print(f"End Expected Frames = {self.expected_frames}")
-                return True
+            print("end function called")
+            print(f"End Recieved Frames = {self.received_frames}")
+            print(f"End Expected Frames = {self.expected_frames}")
+            return True
+        # if self.acquired_frame_num == self.expected_frames:
+        #         print("end function called")
+        #         print(f"End Recieved Frames = {self.received_frames}")
+        #         print(f"End Expected Frames = {self.expected_frames}")
+        #         return True
 
         
         # pos_temp = []

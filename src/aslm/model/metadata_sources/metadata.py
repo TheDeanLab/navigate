@@ -141,6 +141,10 @@ class Metadata:
             )
             or (
                 self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVACONT"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                 == "customized"
             )
         ):

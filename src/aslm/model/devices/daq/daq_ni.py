@@ -266,6 +266,7 @@ class NIDAQ(DAQBase):
         self.camera_delay = (self.camera_delay_percent / 100) * (
             exposure_time / 1000
         )
+        print(f"camera trigger out line = {camera_trigger_out_line}")
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
             camera_trigger_out_line,
@@ -279,6 +280,7 @@ class NIDAQ(DAQBase):
         print("camera waveform")
         self.camera_trigger_task.timing.cfg_implicit_timing(
             sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+            # sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
             samps_per_chan=camera_waveform_repeat_num)
 
     def create_master_trigger_task(self):
@@ -301,6 +303,8 @@ class NIDAQ(DAQBase):
             master_trigger_out_line,
             line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
         )
+        print(f"master trigger out line = {master_trigger_out_line}")
+        print(f"master trigger line grouping = {nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES}")
         print("master trigger finished")
 
     def create_analog_output_tasks(self, channel_key):
@@ -335,6 +339,7 @@ class NIDAQ(DAQBase):
 
         # Create one analog output task per board, grouping the channels
         boards = list(set([x.split("/")[0] for x in self.analog_outputs.keys()]))
+        print(f"boards = {boards}")
         for board in boards:
             channel = ", ".join(
                 list(
@@ -343,6 +348,7 @@ class NIDAQ(DAQBase):
             )
             self.analog_output_tasks[board] = nidaqmx.Task()
             self.analog_output_tasks[board].ao_channels.add_ao_voltage_chan(channel)
+            print(f"analog task channel = {channel}")
 
             sample_rates = list(
                 set([v["sample_rate"] for v in self.analog_outputs.values()])
@@ -359,8 +365,10 @@ class NIDAQ(DAQBase):
             self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
                 rate=sample_rates[0],
                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                # sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
                 samps_per_chan=max_sample * self.waveform_repeat_num,
             )
+            print(f"board task = {board}")
 
             # triggers = list(
             #     set([v["trigger_source"] for v in self.analog_outputs.values()])

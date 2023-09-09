@@ -426,7 +426,7 @@ class MenuController(GUIController):
             "Volume Search",
             "Time Series",
             "Decoupled Focus Stage Multiposition",
-            "Remove Empty Tiles"
+            "Remove Empty Tiles",
         ]
         self.feature_list_count = len(self.feature_list_names)
         self.system_feature_list_count = self.feature_list_count
@@ -492,17 +492,19 @@ class MenuController(GUIController):
         ----------
         args:
             could be tkinter event(Key press event)
-            
+
         Returns
         -------
         None
 
         """
-        save_data = self.view.settings.channels_tab.stack_timepoint_frame\
-            .save_data.get()
+        save_data = (
+            self.view.settings.channels_tab.stack_timepoint_frame.save_data.get()
+        )
 
-        self.parent_controller.channels_tab_controller.timepoint_vals[
-            "is_save"].set(not save_data)
+        self.parent_controller.channels_tab_controller.timepoint_vals["is_save"].set(
+            not save_data
+        )
         self.parent_controller.channels_tab_controller.update_save_setting()
 
     def open_folder(self, path):
@@ -759,11 +761,8 @@ class MenuController(GUIController):
         try:
             focus = self.parent_controller.view.focus_get()
             if hasattr(focus, "widgetName"):
-                if focus.widgetName == "ttk::entry":
-                    return
-                elif focus.widgetName == "ttk::combobox":
-                    return
-                elif focus.widgetName == "text":
+                freeze_in = ["ttk::entry", "ttk::combobox", "text", "ttk::spinbox"]
+                if focus.widgetName in freeze_in:
                     return
             self.fake_event = FakeEvent(char=char)
             self.parent_controller.stage_controller.stage_key_press(self.fake_event)
@@ -797,7 +796,8 @@ class MenuController(GUIController):
         feature_list_files = [
             temp
             for temp in os.listdir(feature_lists_path)
-            if (temp.endswith(".yml") or temp.endswith(".yaml")) and os.path.isfile(os.path.join(feature_lists_path, temp))
+            if (temp.endswith(".yml") or temp.endswith(".yaml"))
+            and os.path.isfile(os.path.join(feature_lists_path, temp))
         ]
         feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
         if not feature_records:
@@ -921,7 +921,6 @@ class MenuController(GUIController):
 
     def popup_feature_advanced_setting(self):
         """Show feature advanced setting window"""
-        self.parent_controller.feature_advanced_setting_controller = FeatureAdvancedSettingController(
-            self.view, self.parent_controller
+        self.parent_controller.feature_advanced_setting_controller = (
+            FeatureAdvancedSettingController(self.view, self.parent_controller)
         )
-

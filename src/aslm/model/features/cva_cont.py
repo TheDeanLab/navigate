@@ -308,6 +308,9 @@ class CVACONT:
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
 
         # start scan won't start the scan, but when calling stop_scan it will start scan. So weird.
+        pos = self.asi_stage.get_axis_position(self.axis)
+
+        logger(f"start position before scan = {pos}")
         
         self.asi_stage.stop_scan()
         
@@ -429,11 +432,14 @@ class CVACONT:
         # time.sleep(5)
         return False
     def update_channel(self):
+            print("update channel")
             print(f"channel before in update channel = {self.channels}")
+            print(f"channel before in update channel list = {self.current_channel_in_list}")
             self.current_channel_in_list = (
                 self.current_channel_in_list + 1
             ) % self.channels
             print(f"channel after in update channel = {self.channels}")
+            print(f"channel before in update channel list = {self.current_channel_in_list}")
             self.model.active_microscope.prepare_next_channel()
             # self.pre_func_signal(self)
             

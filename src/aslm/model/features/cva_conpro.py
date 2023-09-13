@@ -240,9 +240,9 @@ class CVACONPRO:
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(np.ceil(int(expected_frames)/2))
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
 
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = 3 
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = 1 
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 10
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 70
 
         self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"]
         self.expand_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"]
@@ -252,6 +252,8 @@ class CVACONPRO:
         self.expected_frames = np.ceil(expected_frames/(self.repeat_waveform*self.expand_waveform))
         print("waveforms obtained from config")
         print(f"Expand Frames = {Expand_frames}")
+        print(f"Self Expected Frames test = {self.expected_frames}")
+        logger.info(f"Self Expected Frames test = {self.expected_frames}")
         logger.info(f"Expand Frames = {Expand_frames}") 
         
         self.model.active_microscope.current_channel = 0
@@ -330,6 +332,7 @@ class CVACONPRO:
         # acquired_frame_num_v2 = self.model.active_microscope.run_data_process() 
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {pos}")
+        logger.info(f"Current Position = {pos}")
         print(f"Stop position = {self.stop_position*1000}")
         # print(f"self.acquired_frame_num end func = {acquired_frame_num_v2}")
         self.received_frames += 1

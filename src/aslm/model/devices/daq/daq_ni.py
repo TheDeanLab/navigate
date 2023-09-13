@@ -341,6 +341,7 @@ class NIDAQ(DAQBase):
         boards = list(set([x.split("/")[0] for x in self.analog_outputs.keys()]))
         print(f"boards = {boards}")
         for board in boards:
+            print(f"board in boards = {board}")
             channel = ", ".join(
                 list(
                     [x for x in self.analog_outputs.keys() if x.split("/")[0] == board]
@@ -431,6 +432,8 @@ class NIDAQ(DAQBase):
 
         self.create_camera_task(exposure_time)
         self.create_analog_output_tasks(channel_key)
+        print(f"exposure time = {exposure_time}")
+        print(f"channel key = {channel_key}")
 
         self.current_channel_key = channel_key
         self.is_updating_analog_task = False

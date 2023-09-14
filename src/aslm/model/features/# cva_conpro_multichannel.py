@@ -43,7 +43,7 @@ logger = logging.getLogger(p)
 # Local imports
 
 
-class CVACONPRO:
+class CVACONPROMULTICHANNEL:
     """Class for acquiring data using the ASI internal encoder."""
 
     def __init__(self, model, axis='z'):
@@ -242,19 +242,19 @@ class CVACONPRO:
         print(f"*** Expected Frames V1:{expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
-        self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
+        self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPROMULTICHANNEL" 
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(np.ceil(int(expected_frames)/2))
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
 
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = expected_frames
+        self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"]["expand"] = expected_frames
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 1
+        self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"]["repeat"] = 1
 
-        self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"]
-        self.expand_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"]
+        self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"]["repeat"]
+        self.expand_waveform = self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"]["expand"]
         print(f"repeat num = {self.repeat_waveform}")
         print(f"expand num = {self.expand_waveform}")
-        Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
+        Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"]["expand"])
         self.expected_frames = expected_frames  # np.ceil(expected_frames/(self.repeat_waveform*self.expand_waveform))
         print("waveforms obtained from config")
         print(f"Expand Frames = {Expand_frames}")

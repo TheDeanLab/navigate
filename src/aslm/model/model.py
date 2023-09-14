@@ -741,7 +741,7 @@ class Model:
                 continue
 
             acquired_frame_num += len(frame_ids)
-            print(f"*** model acquired_frame_num = {acquired_frame_num}")
+            # print(f"*** model acquired_frame_num = {acquired_frame_num}")
             stop_time = time.time()
             frames_per_second = acquired_frame_num / (stop_time - start_time)
             self.event_queue.put(("framerate", frames_per_second))

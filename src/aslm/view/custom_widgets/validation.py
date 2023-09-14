@@ -950,6 +950,9 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         self.focus_update_var = focus_update_var
         self.bind("<FocusOut>", self._set_focus_update_var)
 
+        # Remember Final Valid Value
+        self.last_value = None
+
     def set_precision(self, prec):
         """Set the precision of the spinbox
 
@@ -1099,9 +1102,11 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         else:
             self.error.set("")
 
-        if value == ".":
-            self.set("0.0")
-            return True
+        if value == "." or value == "-":
+            # Incorrect entry - revert to last valid value.
+            if self.last_value is not None:
+                self.set(self.last_value)
+                return True
 
         # check if there are range limits
         if min_val == "-Infinity" or max_val == "Infinity":
@@ -1123,6 +1128,8 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             self.error.set(f"Maximum Value: {max_val:.3f}")
             valid = False
 
+        if valid is True:
+            self.last_value = value
         return valid
 
     # Gets current value of widget and if focus_update_var is present it sets it to the

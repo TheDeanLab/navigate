@@ -59,7 +59,7 @@ class CVACONT:
                 "init": self.pre_func_signal,
                 # "main": self.in_func_signal,
                 "end": self.end_func_signal,
-                # "cleanup": self.cleanup,
+                "cleanup": self.cleanup,
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
@@ -96,7 +96,7 @@ class CVACONT:
          
         print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
-        # print("self.asi stage")
+        print(self.asi_stage)
         self.received_frames = 0
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
 
@@ -112,6 +112,7 @@ class CVACONT:
         #         "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
         #         "camera_exposure_time"]) / 1000.0
         # self.model.active_microscope.current_channel = 2
+        # self.model.active_microscope.prepare_next_channel()
         readout_time = self.model.active_microscope.get_readout_time()
         print("readout time calculated")
         print(f"*** readout time = {readout_time} s")
@@ -122,6 +123,7 @@ class CVACONT:
         channel_name = next(iter(sweep_times))
         channel_name = str(channel_name)
         channel_num = re.findall(r'[\d.]+',channel_name)
+        print(f"channel_num = {channel_num}")
         channel_num = int(channel_num[0])
         self.model.active_microscope.current_channel = channel_num
         print(f"channel_{self.model.active_microscope.current_channel}")
@@ -252,7 +254,7 @@ class CVACONT:
 
         self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = 1  
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 70
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 66
 
         self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"]
         self.expand_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"]
@@ -264,11 +266,14 @@ class CVACONT:
         print(f"Expand Frames = {Expand_frames}")
         logger.info(f"Expand Frames = {Expand_frames}") 
         
-        self.model.active_microscope.current_channel = 0
+        # self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
-        #   ms calculated v2 {self.waveform_dict}")
+        
         self.model.active_microscope.prepare_next_channel()
-        print("microscope channel prepared")
+        # print("microscope channel prepared")
+
+
+        #   ms calculated v2 {self.waveform_dict}")
         # self.model.active_microscope.current_channel = 0
         
         
@@ -309,10 +314,10 @@ class CVACONT:
 
         # start scan won't start the scan, but when calling stop_scan it will start scan. So weird.
         pos = self.asi_stage.get_axis_position(self.axis)
-
-        logger(f"start position before scan = {pos}")
-        
         self.asi_stage.stop_scan()
+        logger.info(f"start position before scan = {pos}")
+        
+        
         
         # if self.asi_stage.get_speed(self.axis) == stage_velocity:
         #     self.model.active_microscope.daq.run_acquisition()
@@ -337,33 +342,34 @@ class CVACONT:
 
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?
-    def in_func_signal(self):
-        # self.asi_stage.start_scan(self.axis)
-        # self.asi_stage.stop_scan() 
-        pos = self.asi_stage.get_axis_position(self.axis)
-        print(f"Current in function Position = {pos}")
-        logger.info(f"Current Position = {pos}")
-        print(f"Stop position = {self.stop_position*1000}")
-        # print(f"self.acquired_frame_num end func = {acquired_frame_num_v2}")
-        self.received_frames += 1
-        print(f"Recieved Frames = {self.received_frames}")
+    # def in_func_signal(self,frame_ids):
+    #     self.asi_stage.start_scan(self.axis)
+    #     self.asi_stage.stop_scan() 
+    #     pos = self.asi_stage.get_axis_position(self.axis)
+    #     print(f"Current in function Position = {pos}")
+    #     logger.info(f"Current Position = {pos}")
+    #     print(f"Stop position = {self.stop_position*1000}")
+    #     print(f"frame_ids = {frame_ids}")
+    #     # print(f"self.acquired_frame_num end func = {acquired_frame_num_v2}")
+    #     self.received_frames += frame_ids
+    #     print(f"Recieved Frames = {self.received_frames}")
 
-        if self.received_frames == self.expected_frames:
-                print("in function condition met")
-                print(f"End Recieved Frames = {self.received_frames}")
-                print(f"End Expected Frames = {self.expected_frames}")
-                print(f"cycling mode = {self.stack_cycling_mode}")
-                if self.stack_cycling_mode == "per_stack":
-            # update channel for each z position in 'per_slice'
-                    print("inside if statement stack cycling mode")
-                    self.update_channel()
-                    print("conpro per_stack update channel finished")
-                    return True
-                else:
-                     return True
+    #     if self.received_frames == self.expected_frames:
+    #             print("in function condition met")
+    #             print(f"End Recieved Frames = {self.received_frames}")
+    #             print(f"End Expected Frames = {self.expected_frames}")
+    #             print(f"cycling mode = {self.stack_cycling_mode}")
+    #             if self.stack_cycling_mode == "per_stack":
+    #         # update channel for each z position in 'per_slice'
+    #                 print("inside if statement stack cycling mode")
+    #                 self.update_channel()
+    #                 print("conpro per_stack update channel finished")
+    #                 return True
+    #             else:
+    #                  return True
                 
         
-        return False
+    #     return False
          
            
        
@@ -408,7 +414,7 @@ class CVACONT:
                     # self.need_update_offset = self.current_channel_in_list == 0
                     # print(f"update offset = {self.current_channel_in_list == 0}")
                     # print("conpro per_stack")
-                    return True
+                    # return True
                 else:  
                     return True
                 # return True
@@ -441,7 +447,10 @@ class CVACONT:
             print(f"channel after in update channel = {self.channels}")
             print(f"channel before in update channel list = {self.current_channel_in_list}")
             self.model.active_microscope.prepare_next_channel()
-            # self.pre_func_signal(self)
+
+            # self.model.active_microscope.prepare_next_channel(self)
+            # self.pre_func_signal()
+            print("pre function signal initiated")
             
 
     def cleanup(self):
@@ -477,6 +486,13 @@ class CVACONT:
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {pos}")
         print(f"start position = {self.start_position*1000}")
+
+        # if self.stack_cycling_mode == "per_stack":
+        #     # update channel for each z position in 'per_slice'
+        #         print("inside if statement stack cycling mode")
+        #         self.update_channel()
+        #         print("conpro per_stack update channel finished")
+        # else:
         self.model.active_microscope.daq.stop_acquisition()
         self.model.active_microscope.daq.set_external_trigger(None)
 

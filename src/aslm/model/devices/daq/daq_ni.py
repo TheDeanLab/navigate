@@ -33,6 +33,7 @@
 # Standard Imports
 import logging
 from threading import Lock
+import traceback
 
 # Third Party Imports
 import nidaqmx
@@ -181,22 +182,31 @@ class NIDAQ(DAQBase):
             self.microscope_name
             ]["daq"]["trigger_source"]
             # set camera task trigger source
-            self.camera_trigger_task.stop()
+            try:
+                self.camera_trigger_task.stop()
+            except:
+                print(traceback.format_exc())
             self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
                 trigger_source
             )
             self.camera_trigger_task.triggers.start_trigger.retriggerable = False
             # set analog task trigger source
             for board_name in self.analog_output_tasks.keys():
-                self.analog_output_tasks[board_name].stop()
+                try:
+                    self.analog_output_tasks[board_name].stop()
+                except:
+                    print(print(traceback.format_exc()))
                 self.analog_output_tasks[board_name].triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
                 self.analog_output_tasks[board_name].register_done_event(None)
 
         else:
             # close master trigger task
             if self.master_trigger_task:
-                self.master_trigger_task.stop()
-                self.master_trigger_task.close()
+                try:
+                    self.master_trigger_task.stop()
+                    self.master_trigger_task.close()
+                except:
+                    print(traceback.format_exc())
             self.master_trigger_task = None
             # camera task trigger source
             self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(self.external_trigger)
@@ -235,6 +245,7 @@ class NIDAQ(DAQBase):
                 task.stop()
                 task.start()
             except:
+                print(traceback.format_exc())
                 print("*** there is some error when restarting the analog task")
             return status
         return callback_func
@@ -458,6 +469,7 @@ class NIDAQ(DAQBase):
         -------
         None
         """
+        print("###### RUNNING DAQ ACQUISITION")
         # wait if writing analog tasks
         if self.is_updating_analog_task:
             self.wait_to_run_lock.acquire()
@@ -474,19 +486,26 @@ class NIDAQ(DAQBase):
                 [False, True, True, True, False], auto_start=True
             )
         try:
-            self.camera_trigger_task.wait_until_done()
+            print(f"Number of analog output_tasks: {len(self.analog_output_tasks)}")
+            self.camera_trigger_task.wait_until_done(timeout=10000)
             for task in self.analog_output_tasks.values():
                 task.wait_until_done()
                 if self.trigger_mode == "self-trigger":
-                    task.stop()
+                    try:
+                        task.stop()
+                    except:
+                        print(traceback.format_exc())
         except:
             # when triggered from external triggers, sometimes the camera trigger task is done but not actually done, there will a DAQ WARNING message
+            print("Didn't work!")
+            print(traceback.format_exc())
             pass
         if self.trigger_mode == "self-trigger":
             try:
                 self.camera_trigger_task.stop()
                 self.master_trigger_task.stop()
             except nidaqmx.DaqError:
+                print(traceback.format_exc())
                 pass
 
     def stop_acquisition(self):
@@ -515,6 +534,7 @@ class NIDAQ(DAQBase):
                 task.close()
 
         except (AttributeError, nidaqmx.errors.DaqError) as e:
+            print(traceback.format_exc())
             pass
 
         if self.wait_to_run_lock.locked():
@@ -600,9 +620,13 @@ class NIDAQ(DAQBase):
             ).squeeze()
             self.analog_output_tasks[board_name].write(waveforms)
         except Exception:
+            print(traceback.format_exc())
             for board in self.analog_output_tasks.keys():
-                self.analog_output_tasks[board].stop()
-                self.analog_output_tasks[board].close()
+                try:
+                    self.analog_output_tasks[board].stop()
+                    self.analog_output_tasks[board].close()
+                except:
+                    print(traceback.format_exc())
 
             self.create_analog_output_tasks(self.current_channel_key)
             print(f"create new daq analog output task because DAQmx Write failed!")

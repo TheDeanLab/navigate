@@ -504,7 +504,9 @@ class ZStackAcquisition:
 
             # after running through a z-stack, update channel
             if self.stack_cycling_mode == "per_stack":
+                print("per stack if statment called")
                 self.update_channel()
+                print("if statement update channel finished")
                 # if run through all the channels, move to next position
                 if self.current_channel_in_list == 0:
                     self.need_to_move_new_position = True
@@ -527,9 +529,14 @@ class ZStackAcquisition:
         return False
 
     def update_channel(self):
+        print("Update Channel Called")
+        print(f"channel list before update = {self.current_channel_in_list}")
+        print(f"channel num before update = {self.channels}")
         self.current_channel_in_list = (
             self.current_channel_in_list + 1
         ) % self.channels
+        print(f"channel list after update = {self.current_channel_in_list}")
+        print(f"channel num after update = {self.channels}")
         self.model.active_microscope.prepare_next_channel()
 
     def pre_data_func(self):

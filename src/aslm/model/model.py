@@ -36,6 +36,7 @@ import logging
 import multiprocessing as mp
 import time
 import os
+import traceback
 
 # Third Party Imports
 
@@ -912,6 +913,7 @@ class Model:
         except:
             print("DAQ Trigger Except")
             self.logger.info("DAQ Trigger Except")
+            print(traceback.format_exc())
             self.active_microscope.daq.stop_acquisition()
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}",

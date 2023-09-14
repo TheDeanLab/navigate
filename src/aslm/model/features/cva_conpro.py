@@ -58,6 +58,11 @@ class CVACONPRO:
                 "end": self.end_func_signal,
                 "cleanup": self.cleanup,
             },
+            "data": {
+                "init": self.pre_data_func,
+                "main": self.in_data_func,
+                "end": self.end_data_func,
+            },
             "node": {"node_type": "multi-step", "device_related": True},
         }
 
@@ -94,7 +99,8 @@ class CVACONPRO:
         print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
         print("self.asi stage")
-        self.received_frames = 0
+        # self.received_frames = 0
+        self.end_channel = False
 
         # get the current exposure time for that channel.
         # exposure_time = float( 
@@ -232,7 +238,7 @@ class CVACONPRO:
 
         # expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
         expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
-        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time)
+        expected_frames = int(np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time))
         print(f"*** Expected Frames V1:{expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
@@ -240,16 +246,16 @@ class CVACONPRO:
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(np.ceil(int(expected_frames)/2))
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
 
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = 1 
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = expected_frames
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 70
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 1
 
         self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"]
         self.expand_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"]
         print(f"repeat num = {self.repeat_waveform}")
         print(f"expand num = {self.expand_waveform}")
         Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
-        self.expected_frames = np.ceil(expected_frames/(self.repeat_waveform*self.expand_waveform))
+        self.expected_frames = expected_frames  # np.ceil(expected_frames/(self.repeat_waveform*self.expand_waveform))
         print("waveforms obtained from config")
         print(f"Expand Frames = {Expand_frames}")
         print(f"Self Expected Frames test = {self.expected_frames}")
@@ -258,9 +264,9 @@ class CVACONPRO:
         
         self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
-        #   ms calculated v2 {self.waveform_dict}")
+        # #   ms calculated v2 {self.waveform_dict}")
         self.model.active_microscope.prepare_next_channel()
-        print("microscope channel prepared")
+        # print("microscope channel prepared")
         # self.model.active_microscope.current_channel = 0
         
         
@@ -313,7 +319,7 @@ class CVACONPRO:
 
         # time.sleep(5) #seconds
         # # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1",self.asi_stage)
-        pos = self.asi_stage.get_axis_position(self.axis)
+        # pos = self.asi_stage.get_axis_position(self.axis)
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
         # if abs(pos - self.stop_position * 1000) < 1:
         #     self.cleanup()
@@ -328,27 +334,36 @@ class CVACONPRO:
        
        # acquired_frame_num = self.model.active_microscope.run_data_process()
         # print(f"frames run data process init = {acquired_frame_num}") 
+
     def end_func_signal(self):
-        # acquired_frame_num_v2 = self.model.active_microscope.run_data_process() 
-        pos = self.asi_stage.get_axis_position(self.axis)
-        print(f"Current Position = {pos}")
-        logger.info(f"Current Position = {pos}")
-        print(f"Stop position = {self.stop_position*1000}")
-        # print(f"self.acquired_frame_num end func = {acquired_frame_num_v2}")
-        self.received_frames += 1
-        print(f"Recieved Frames = {self.received_frames}")
-        # if abs(pos - self.stop_position * 1000) < 1:
-        #     print("position met")
-        #     # self.model.active_microscope.daq.stop_acquisition()
-        #     # print("stop acquisition")
-        #     # self.cleanup()
-        #     # print("Clean up finished")
-        #     return True
-        if self.received_frames == self.expected_frames:
-            print("end function called")
-            print(f"End Recieved Frames = {self.received_frames}")
-            print(f"End Expected Frames = {self.expected_frames}")
+        print("in end_func_signal")
+        if self.model.stop_acquisition:
+            print("returning True from end_func_signal")
             return True
+
+        if self.end_channel:
+            # Update channel
+            return True
+        # acquired_frame_num_v2 = self.model.active_microscope.run_data_process() 
+        # pos = self.asi_stage.get_axis_position(self.axis)
+        # print(f"Current Position = {pos}")
+        # logger.info(f"Current Position = {pos}")
+        # print(f"Stop position = {self.stop_position*1000}")
+        # # print(f"self.acquired_frame_num end func = {acquired_frame_num_v2}")
+        # self.received_frames += 1
+        # print(f"Recieved Frames = {self.received_frames}")
+        # # if abs(pos - self.stop_position * 1000) < 1:
+        # #     print("position met")
+        # #     # self.model.active_microscope.daq.stop_acquisition()
+        # #     # print("stop acquisition")
+        # #     # self.cleanup()
+        # #     # print("Clean up finished")
+        # #     return True
+        # if self.received_frames >= self.expected_frames:
+        #     print("end function called")
+        #     print(f"End Recieved Frames = {self.received_frames}")
+        #     print(f"End Expected Frames = {self.expected_frames}")
+        #     return True
         # if self.acquired_frame_num == self.expected_frames:
         #         print("end function called")
         #         print(f"End Recieved Frames = {self.received_frames}")
@@ -371,6 +386,7 @@ class CVACONPRO:
         #     return True 
         # TODO: wait time to be more reasonable
         # time.sleep(5)
+        print("returning False from end_func_signal")
         return False
 
     def cleanup(self):
@@ -406,6 +422,18 @@ class CVACONPRO:
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {pos}")
         print(f"start position = {self.start_position*1000}")
-        self.model.active_microscope.daq.stop_acquisition()
-        self.model.active_microscope.daq.set_external_trigger(None)
+        # self.model.active_microscope.daq.stop_acquisition()
+        # self.model.active_microscope.daq.set_external_trigger(None)
 
+    def pre_data_func(self):
+        self.received_frames = 0
+
+    def in_data_func(self, frame_ids):
+        self.received_frames += len(frame_ids)
+
+    def end_data_func(self):
+        print(f"Received: {self.received_frames} Expected: {self.expected_frames}")
+        self.end_channel = self.received_frames >= self.expected_frames
+        # If channel is ended, but there are more channels to go, return False
+        # If channel is ended and this was the last channel, return True  
+        return self.end_channel

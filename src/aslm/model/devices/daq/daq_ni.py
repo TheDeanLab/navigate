@@ -290,8 +290,8 @@ class NIDAQ(DAQBase):
         camera_waveform_repeat_num = self.waveform_repeat_num * self.waveform_expand_num
         print("camera waveform")
         self.camera_trigger_task.timing.cfg_implicit_timing(
-            sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-            # sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
+            # sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+            sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
             samps_per_chan=camera_waveform_repeat_num)
 
     def create_master_trigger_task(self):
@@ -376,8 +376,8 @@ class NIDAQ(DAQBase):
             # apply templates to analog tasks
             self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
                 rate=sample_rates[0],
-                sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                # sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
+                # sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
                 samps_per_chan=max_sample * self.waveform_repeat_num,
             )
             print(f"board task = {board}")
@@ -469,7 +469,7 @@ class NIDAQ(DAQBase):
         -------
         None
         """
-        print("###### RUNNING DAQ ACQUISITION")
+        # print("###### RUNNING DAQ ACQUISITION")
         # wait if writing analog tasks
         if self.is_updating_analog_task:
             self.wait_to_run_lock.acquire()
@@ -486,7 +486,7 @@ class NIDAQ(DAQBase):
                 [False, True, True, True, False], auto_start=True
             )
         try:
-            print(f"Number of analog output_tasks: {len(self.analog_output_tasks)}")
+            # print(f"Number of analog output_tasks: {len(self.analog_output_tasks)}")
             self.camera_trigger_task.wait_until_done(timeout=10000)
             for task in self.analog_output_tasks.values():
                 task.wait_until_done()

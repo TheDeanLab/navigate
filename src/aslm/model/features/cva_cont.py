@@ -61,6 +61,11 @@ class CVACONT:
                 "end": self.end_func_signal,
                 "cleanup": self.cleanup,
             },
+            "data": {
+                # "init": self.pre_data_func,
+                "main": self.in_data_func,
+                "end": self.end_data_func,
+            },
             "node": {"node_type": "multi-step", "device_related": True},
         }
 
@@ -96,7 +101,7 @@ class CVACONT:
          
         print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
-        print(self.asi_stage)
+        # print(self.asi_stage)
         self.received_frames = 0
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
 
@@ -128,16 +133,19 @@ class CVACONT:
         self.model.active_microscope.current_channel = channel_num
         print(f"channel_{self.model.active_microscope.current_channel}")
         current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
-        current_expsure_time = exposure_times[f"channel_{self.model.active_microscope.current_channel}"]
+        current_exposure_time = exposure_times[f"channel_{self.model.active_microscope.current_channel}"]
         self.current_sweep_time = current_sweep_time
-        self.current_exposure_time = current_expsure_time
+        self.current_exposure_time = current_exposure_time
+        # if self.model.configuration[]
+
+
         self.readout_time = readout_time
         print("sweep time calculated")
         scaling_factor = 1
 
         # Provide just a bit of breathing room for the sweep time...
         current_sweep_time = current_sweep_time * scaling_factor
-        
+        print(f"*** exposure time = {self.current_exposure_time}")
         print("*** current sweep time:", current_sweep_time)
         logger.info(f"*** current sweep time: {current_sweep_time}")
         logger.info(f"*** sweep time scaling: {scaling_factor}")
@@ -252,16 +260,17 @@ class CVACONT:
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(np.ceil(int(expected_frames)/2))
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
 
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = 1  
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)  
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
-        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 66
+        self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 1
 
         self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"]
         self.expand_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"]
         print(f"repeat num = {self.repeat_waveform}")
         print(f"expand num = {self.expand_waveform}")
         Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"])
-        self.expected_frames = np.ceil(expected_frames/(self.repeat_waveform*self.expand_waveform))
+        # self.expected_frames = np.ceil(expected_frames/(self.repeat_waveform*self.expand_waveform))
+        self.expected_frames = expected_frames
         print("waveforms obtained from config")
         print(f"Expand Frames = {Expand_frames}")
         logger.info(f"Expand Frames = {Expand_frames}") 
@@ -399,24 +408,35 @@ class CVACONT:
         #     print(f"End Recieved Frames = {self.received_frames}")
         #     print(f"End Expected Frames = {self.expected_frames}")
         #     return True
-        if self.received_frames == self.expected_frames:
+        if self.received_frames >= self.expected_frames:
                 print("end function condition met")
                 print(f"End Recieved Frames = {self.received_frames}")
                 print(f"End Expected Frames = {self.expected_frames}")
-                print(f"cycling mode = {self.stack_cycling_mode}")
+                # print(f"cycling mode = {self.stack_cycling_mode}")
                         # self.asi_stage.stop()
+                return True
+        
+        if self.received_frames < self.expected_frames:
+                frames_missing = self.expected_frames-self.received_frames
+                print(f"frames missing = {frames_missing}")
+                self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(frames_missing)
+                self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
+                # return False
 
-                if self.stack_cycling_mode == "per_stack":
-            # update channel for each z position in 'per_slice'
-                    print("inside if statement stack cycling mode")
-                    self.update_channel()
-                    print("conpro per_stack update channel finished")
+
+            #     if self.stack_cycling_mode == "per_stack":
+            # # update channel for each z position in 'per_slice'
+            #         print("inside if statement stack cycling mode")
+            #         self.update_channel()
+            #         print("conpro per_stack update channel finished")
+
+
                     # self.need_update_offset = self.current_channel_in_list == 0
                     # print(f"update offset = {self.current_channel_in_list == 0}")
                     # print("conpro per_stack")
                     # return True
-                else:  
-                    return True
+                # else:  
+                #     return True
                 # return True
 
 
@@ -493,6 +513,38 @@ class CVACONT:
         #         self.update_channel()
         #         print("conpro per_stack update channel finished")
         # else:
-        self.model.active_microscope.daq.stop_acquisition()
-        self.model.active_microscope.daq.set_external_trigger(None)
+        # self.model.active_microscope.daq.stop_acquisition()
+        # self.model.active_microscope.daq.set_external_trigger(None)
 
+    def in_data_func(self, frame_ids):
+        # print(f"frame_ids = {len(frame_ids)}")
+        self.received_frames += len(frame_ids)
+        # self.received_frames_v2 = self.received_frames
+        # self.recieved_frames_v2 += self.recieved_frames
+        # print(f"received_Frames v2: {self.recieved_frames_v2}")
+
+    def end_data_func(self):
+        # pos = self.asi_stage.get_axis_position(self.axis)
+        # self.received_frames_v2 += self.received_frames
+        # self.received_frames_v2 = 0
+        print(f"Received: {self.received_frames} Expected: {self.expected_frames}")
+        # print(f"Received V2: {self.received_frames_v2} Expected: {self.expected_frames}")
+        # print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
+        logger.info(f"Received: {self.received_frames} Expected: {self.expected_frames}")
+        # logger.info(f"Received V2: {self.recieved_frames_v2} Expected: {self.expected_frames}")
+
+        # logger.info(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
+        # self.end_acquisition = self.received_frames_v2 >= self.expected_frames
+        # self.end_acquisition = self.received_frames_v2 >= self.expected_frames or pos >= self.stop_position*1000
+        
+        # if self.received_frames >= self.expected_frames:
+        #    self.end_acquisition = self.received_frames >= self.expected_frames or pos >= self.stop_position*1000
+            # self.end_acquisition = self.received_frames >= self.expected_frames
+            # self.received_frames_v2 = self.received_frames + 1
+        self.end_acquisition = self.received_frames >= self.expected_frames
+        # print(f"end acquistion statement = {self.end_acquisition}")
+            # print(f"end acquistion in if statement = {self.end_acquisition}")
+        # If channel is ended, but there are more channels to go, return False
+        # If channel is ended and this was the last channel, return True  
+        # return self.end_channel
+        return self.end_acquisition

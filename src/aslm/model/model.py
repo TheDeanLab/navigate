@@ -741,7 +741,7 @@ class Model:
                 continue
 
             acquired_frame_num += len(frame_ids)
-            # print(f"*** model acquired_frame_num = {acquired_frame_num}")
+            print(f"*** model acquired_frame_num = {acquired_frame_num}")
             stop_time = time.time()
             frames_per_second = acquired_frame_num / (stop_time - start_time)
             self.event_queue.put(("framerate", frames_per_second))
@@ -925,7 +925,7 @@ class Model:
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
-        print(f"*** snap image frame id = {self.frame_id}")
+        # print(f"*** snap image frame id = {self.frame_id}")
 
     def run_live_acquisition(self):
         """Stream live image to the GUI.

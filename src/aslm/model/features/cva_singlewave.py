@@ -58,6 +58,11 @@ class CVASINGLEWAVE:
                 "end": self.end_func_signal,
                 "cleanup": self.cleanup,
             },
+            #  "data": {
+            #     "init": self.pre_data_func,
+            #     "main": self.in_data_func,
+            #     # "end": self.end_data_func,
+            # },
             "node": {"node_type": "multi-step", "device_related": True},
         }
 
@@ -94,6 +99,8 @@ class CVASINGLEWAVE:
         self.asi_stage = self.model.active_microscope.stages[self.axis]
         # print("self.asi stage")
         self.recieved_frames = 0
+        self.end_signal_temp = 0
+        self.received_frames_good = 0
 
         # get the current exposure time for that channel.
         # exposure_time = float( 
@@ -121,7 +128,7 @@ class CVASINGLEWAVE:
         self.current_exposure_time = current_expsure_time
         self.readout_time = readout_time
         print("sweep time calculated")
-        scaling_factor = 1.10
+        scaling_factor = 1.0
 
         # Provide just a bit of breathing room for the sweep time...
         # current_sweep_time = current_sweep_time + scaling_factor
@@ -236,12 +243,12 @@ class CVASINGLEWAVE:
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
 
         self.expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/(current_sweep_time))
-        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/(current_sweep_time*1.1))+1
+        expected_frames = np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/(current_sweep_time))
         print(f"*** Expected Frames V1: {self.expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames no offset:{self.expected_frames_v1}")
         logger.info(f"*** Expected Frames: {expected_frames}")
-        expand_frame = 1
+        expand_frame = expected_frames
         self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
         self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 1
         self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expand_frame)
@@ -316,123 +323,132 @@ class CVASINGLEWAVE:
         # self.recieved_frames = 0
         self.tol = self.step_size_um/4
     def end_func_signal(self):
-        self.recieved_frames += 1
-        # print(self.recieved_frames)
-        # if self.recieved_frames == self.expected_frames:
-        #     print("end function called")
-        #     print(f"End Recieved Frames = {self.recieved_frames}")
-        #     print(f"End Expected Frames = {self.expected_frames}")
-        #     return True
-        # tol = self.step_size_um/2
-        pos = self.asi_stage.get_axis_position(self.axis)
-        # readout_time_v4 = self.model.active_microscope.get_readout_time()
-        # print(f"*** readout time during end func == {readout_time_v4}")
-        # pos_temp.append(pos)
-        print(f"Current Position = {pos}")
-        # logger.info(f"Current Position = {pos}")
-        logger.info(f"Current Position = {pos}")
-        print(f"Stop position = {self.stop_position*1000}")
-        # self.recieved_frames += 1
-        # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
-        # if pos>=(self.stop_position*1000):
-        #     print("position exceeded")
-        #     # self.model.active_microscope.daq.stop_acquisition()
-        #     print("stop acquisition")
-        #     # self.cleanup()
-        #     print("clean up finished")
-        #     print(f"Recieved frames = {self.recieved_frames}")
-        #     print(f"Expected frames = {self.expected_frames}")
-        #     print(f"Expected frames no offset = {self.expected_frames_v1}")
-        #     logger.info(f"Recieved frames = {self.recieved_frames}")
-        #     logger.info(f"Expected frames = {self.expected_frames}")
-        #     logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
-        #     readout_time_v5 = self.model.active_microscope.get_readout_time()
-        #     print(f"*** readout time during end conditions met == {readout_time_v5}")
-        #     exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
-        #     print(f"*** end func exposure_times = {exposure_times}")
-        #     print(f"*** end func sweep_times = {sweep_times}")
-        #     print(f"*** end func current_sweep_time_velocity = {self.current_sweep_time_v2}")
-        #     return True
-        # # elif abs(pos - self.stop_position * 1000) < self.tol:
-        # #     print("position met")
-        # #     # self.model.active_microscope.daq.stop_acquisition()
-        # #     print("stop acquisition")
-        # #     # self.cleanup()
-        # #     print("clean up finished")
-        # #     print(f"Recieved frames = {self.recieved_frames}")
-        # #     print(f"Expected frames = {self.expected_frames}")
-        # #     logger.info(f"Recieved frames = {self.recieved_frames}")
-        # #     logger.info(f"Expected frames with offset = {self.expected_frames}")
-        # #     logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
-        # #     readout_time_v5 = self.model.active_microscope.get_readout_time()
-        # #     print(f"*** readout time during end conditions met == {readout_time_v5}")
-        # #     exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
-        # #     print(f"*** end func exposure_times = {exposure_times}")
-        # #     print(f"*** end func sweep_times = {sweep_times}")
-        # #     print(f"*** end func sweep_times_velocity = f{self.current_sweep_time_v2}")
-        #     return True
-        # elif self.recieved_frames == self.expected_frames:
-        #     print("frames met")
-        #     # self.model.active_microscope.daq.stop_acquisition()
-        #     print("stop acquisition")
-        #     # self.cleanup()
-        #     # print("clean up finished")
-        #     print(f"Recieved frames = {self.recieved_frames}")
-        #     print(f"Expected frames = {self.expected_frames}")
-        #     print(f"Expected frames no offset = {self.expected_frames_v1}")
-        #     logger.info(f"Recieved frames = {self.recieved_frames}")
-        #     logger.info(f"Expected frames = {self.expected_frames}")
-        #     logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
-        #     readout_time_v5 = self.model.active_microscope.get_readout_time()
-        #     print(f"*** readout time during end conditions met == {readout_time_v5}")
-        #     exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
-        #     print(f"*** end func exposure_times = {exposure_times}")
-        #     print(f"*** end func exposure_times = {sweep_times}")
-        #     print(f"*** end func sweep_times_velocity = {self.current_sweep_time_v2}")
-        #     return True
-        if self.recieved_frames == self.expected_frames:
-            print("frames met")
-            # self.model.active_microscope.daq.stop_acquisition()
-            print("stop acquisition")
-            # self.cleanup()
-            # print("clean up finished")
-            print(f"Recieved frames = {self.recieved_frames}")
-            print(f"Expected frames = {self.expected_frames}")
-            print(f"Expected frames no offset = {self.expected_frames_v1}")
-            logger.info(f"Recieved frames = {self.recieved_frames}")
-            logger.info(f"Expected frames = {self.expected_frames}")
-            logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
-            readout_time_v5 = self.model.active_microscope.get_readout_time()
-            print(f"*** readout time during end conditions met == {readout_time_v5}")
-            exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
-            print(f"*** end func exposure_times = {exposure_times}")
-            print(f"*** end func exposure_times = {sweep_times}")
-            print(f"*** end func sweep_times_velocity = {self.current_sweep_time_v2}")
+        print("end function called")
+        print(f"Recieved frames: {self.received_frames_good}, Expected Frames {self.expected_frames}")
+        self.end_signal_temp =+ 1
+        if self.end_signal_temp > 0:
             return True
+        return False 
+    # def end_func_signal(self):
+    #     # self.recieved_frames += 1
+    #     # self.received_frames_good += len(frame_ids)
+    #     print(f"recieved frames: {self.received_frames_good} expected frames:{self.expected_frames}")
+    #     # print(self.recieved_frames)
+    #     # if self.recieved_frames == self.expected_frames:
+    #     #     print("end function called")
+    #     #     print(f"End Recieved Frames = {self.recieved_frames}")
+    #     #     print(f"End Expected Frames = {self.expected_frames}")
+    #     #     return True
+    #     # tol = self.step_size_um/2
+    #     pos = self.asi_stage.get_axis_position(self.axis)
+    #     # readout_time_v4 = self.model.active_microscope.get_readout_time()
+    #     # print(f"*** readout time during end func == {readout_time_v4}")
+    #     # pos_temp.append(pos)
+    #     print(f"Current Position = {pos}")
+    #     # logger.info(f"Current Position = {pos}")
+    #     logger.info(f"Current Position = {pos}")
+    #     print(f"Stop position = {self.stop_position*1000}")
+    #     # self.recieved_frames += 1
+    #     # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
+    #     # if pos>=(self.stop_position*1000):
+    #     #     print("position exceeded")
+    #     #     # self.model.active_microscope.daq.stop_acquisition()
+    #     #     print("stop acquisition")
+    #     #     # self.cleanup()
+    #     #     print("clean up finished")
+    #     #     print(f"Recieved frames = {self.recieved_frames}")
+    #     #     print(f"Expected frames = {self.expected_frames}")
+    #     #     print(f"Expected frames no offset = {self.expected_frames_v1}")
+    #     #     logger.info(f"Recieved frames = {self.recieved_frames}")
+    #     #     logger.info(f"Expected frames = {self.expected_frames}")
+    #     #     logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
+    #     #     readout_time_v5 = self.model.active_microscope.get_readout_time()
+    #     #     print(f"*** readout time during end conditions met == {readout_time_v5}")
+    #     #     exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
+    #     #     print(f"*** end func exposure_times = {exposure_times}")
+    #     #     print(f"*** end func sweep_times = {sweep_times}")
+    #     #     print(f"*** end func current_sweep_time_velocity = {self.current_sweep_time_v2}")
+    #     #     return True
+    #     # # elif abs(pos - self.stop_position * 1000) < self.tol:
+    #     # #     print("position met")
+    #     # #     # self.model.active_microscope.daq.stop_acquisition()
+    #     # #     print("stop acquisition")
+    #     # #     # self.cleanup()
+    #     # #     print("clean up finished")
+    #     # #     print(f"Recieved frames = {self.recieved_frames}")
+    #     # #     print(f"Expected frames = {self.expected_frames}")
+    #     # #     logger.info(f"Recieved frames = {self.recieved_frames}")
+    #     # #     logger.info(f"Expected frames with offset = {self.expected_frames}")
+    #     # #     logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
+    #     # #     readout_time_v5 = self.model.active_microscope.get_readout_time()
+    #     # #     print(f"*** readout time during end conditions met == {readout_time_v5}")
+    #     # #     exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
+    #     # #     print(f"*** end func exposure_times = {exposure_times}")
+    #     # #     print(f"*** end func sweep_times = {sweep_times}")
+    #     # #     print(f"*** end func sweep_times_velocity = f{self.current_sweep_time_v2}")
+    #     #     return True
+    #     # elif self.recieved_frames == self.expected_frames:
+    #     #     print("frames met")
+    #     #     # self.model.active_microscope.daq.stop_acquisition()
+    #     #     print("stop acquisition")
+    #     #     # self.cleanup()
+    #     #     # print("clean up finished")
+    #     #     print(f"Recieved frames = {self.recieved_frames}")
+    #     #     print(f"Expected frames = {self.expected_frames}")
+    #     #     print(f"Expected frames no offset = {self.expected_frames_v1}")
+    #     #     logger.info(f"Recieved frames = {self.recieved_frames}")
+    #     #     logger.info(f"Expected frames = {self.expected_frames}")
+    #     #     logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
+    #     #     readout_time_v5 = self.model.active_microscope.get_readout_time()
+    #     #     print(f"*** readout time during end conditions met == {readout_time_v5}")
+    #     #     exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
+    #     #     print(f"*** end func exposure_times = {exposure_times}")
+    #     #     print(f"*** end func exposure_times = {sweep_times}")
+    #     #     print(f"*** end func sweep_times_velocity = {self.current_sweep_time_v2}")
+    #     #     return True
+    #     if self.received_frames_good == self.expected_frames:
+    #         print("frames met")
+    #         # self.model.active_microscope.daq.stop_acquisition()
+    #         print("stop acquisition")
+    #         # self.cleanup()
+    #         # print("clean up finished")
+    #         print(f"Recieved frames = {self.recieved_frames}")
+    #         print(f"Expected frames = {self.expected_frames}")
+    #         print(f"Expected frames no offset = {self.expected_frames_v1}")
+    #         logger.info(f"Recieved frames = {self.recieved_frames}")
+    #         logger.info(f"Expected frames = {self.expected_frames}")
+    #         logger.info(f"Expected frames no offset = {self.expected_frames_v1}")
+    #         readout_time_v5 = self.model.active_microscope.get_readout_time()
+    #         print(f"*** readout time during end conditions met == {readout_time_v5}")
+    #         exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time_v5)
+    #         print(f"*** end func exposure_times = {exposure_times}")
+    #         print(f"*** end func exposure_times = {sweep_times}")
+    #         print(f"*** end func sweep_times_velocity = {self.current_sweep_time_v2}")
+    #         return True
         
-        # pos_temp = []
-        # lengthframes = 2
-        # pos = self.asi_stage.get_axis_position(self.axis)
-        # # pos_temp.append(pos)
-        # print(f"Current Position = {pos}")
-        # print(f"Stop position = {self.stop_position*1000}")
-        # # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
+    #     # pos_temp = []
+    #     # lengthframes = 2
+    #     # pos = self.asi_stage.get_axis_position(self.axis)
+    #     # # pos_temp.append(pos)
+    #     # print(f"Current Position = {pos}")
+    #     # print(f"Stop position = {self.stop_position*1000}")
+    #     # # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
         
-        # if abs(pos - self.stop_position * 1000) < 1:
-        #     print("position met")
-        #     # self.model.active_microscope.daq.stop_acquisition()
-        #     # print("stop acquisition")
-        #     # self.cleanup()
-        #     # print("Clean up finished")
-        #     return True
+    #     # if abs(pos - self.stop_position * 1000) < 1:
+    #     #     print("position met")
+    #     #     # self.model.active_microscope.daq.stop_acquisition()
+    #     #     # print("stop acquisition")
+    #     #     # self.cleanup()
+    #     #     # print("Clean up finished")
+    #     #     return True
        
             
-        # elif pos_temp(2)-pos_temp(1):
-        #     print("testdataset") 
-        #     return True 
-        # TODO: wait time to be more reasonable
-        # time.sleep(5)
-        return False
+    #     # elif pos_temp(2)-pos_temp(1):
+    #     #     print("testdataset") 
+    #     #     return True 
+    #     # TODO: wait time to be more reasonable
+    #     # time.sleep(5)
+    #     return False
 
     def cleanup(self):
         """Clean up the constant velocity acquisition.
@@ -453,9 +469,9 @@ class CVASINGLEWAVE:
         print("end Speed = ",end_speed)
         self.asi_stage.stop()
         print("stage stop")
-        self.model.active_microscope.daq.stop_acquisition()
-        self.model.active_microscope.daq.set_external_trigger(None)
-        print("external trigger none")
+        # self.model.active_microscope.daq.stop_acquisition()
+        # self.model.active_microscope.daq.set_external_trigger(None)
+        # print("external trigger none")
         # return to start position
         self.start_position = float(
             self.model.configuration[
@@ -463,3 +479,10 @@ class CVASINGLEWAVE:
         self.asi_stage.move_absolute({f"{self.axis}_abs: {self.start_position}"})
         print("stage moved to original position")
 
+
+    # def pre_data_func(self):
+    #     self.received_frames_good = 0
+
+    def in_data_func(self, frame_ids):
+        self.received_frames_good += len(frame_ids)
+        return self.received_frames_good

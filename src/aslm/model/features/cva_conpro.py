@@ -100,7 +100,12 @@ class CVACONPRO:
         self.asi_stage = self.model.active_microscope.stages[self.axis]
         print("self.asi stage")
         # self.received_frames = 0
-        self.end_channel = False
+        # self.end_channel = False
+        self.end_acquisition = False
+        # self.recieved_frames_v2 = 0
+        self.received_frames = 1
+        self.end_signal_temp = 0
+
 
         # get the current exposure time for that channel.
         # exposure_time = float( 
@@ -238,7 +243,7 @@ class CVACONPRO:
 
         # expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
         expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
-        expected_frames = int(np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time))
+        expected_frames = int(np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time))-1
         print(f"*** Expected Frames V1:{expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
@@ -334,16 +339,31 @@ class CVACONPRO:
        
        # acquired_frame_num = self.model.active_microscope.run_data_process()
         # print(f"frames run data process init = {acquired_frame_num}") 
+        
 
     def end_func_signal(self):
         print("in end_func_signal")
-        if self.model.stop_acquisition:
-            print("returning True from end_func_signal")
+        print(f"self.recieved frames = {self.received_frames}")
+        print(f"model.stop_acquisition = {self.model.stop_acquisition}")
+        print(f"self.end_acquisition = {self.end_acquisition}")
+        pos = self.asi_stage.get_axis_position(self.axis)
+        print(f"pos = {pos} stop position:{self.stop_position*1000}")
+        self.end_signal_temp += 1
+        print(f"self.end_signal_temp = {self.end_signal_temp}")
+        print(f"DAQ Trigger SENT test = {self.end_signal_temp>0}")
+        # self.end_acquisition_v2 = self.
+        if self.model.stop_acquisition or self.end_acquisition or self.end_signal_temp>0:
+            print("returning True from stop or end acquisition end_func_signal")
             return True
+        
+        # elif 
+        #     print("returning True from stop acquisition end_func_signal")
+        #     return True
 
-        if self.end_channel:
-            # Update channel
-            return True
+        # if self.end_acquisition:
+        #     print("return True from end_func_signal")
+        #     # Update channel
+        #     return True
         # acquired_frame_num_v2 = self.model.active_microscope.run_data_process() 
         # pos = self.asi_stage.get_axis_position(self.axis)
         # print(f"Current Position = {pos}")
@@ -426,18 +446,39 @@ class CVACONPRO:
         # self.model.active_microscope.daq.set_external_trigger(None)
 
     def pre_data_func(self):
-        self.received_frames = 0
+        # self.received_frames = 
+        self.received_frames_v2 = self.received_frames
+        
 
     def in_data_func(self, frame_ids):
+        # print(f"frame_ids = {len(frame_ids)}")
         self.received_frames += len(frame_ids)
+        # self.received_frames_v2 = self.received_frames
+        # self.recieved_frames_v2 += self.recieved_frames
+        # print(f"received_Frames v2: {self.recieved_frames_v2}")
 
     def end_data_func(self):
         pos = self.asi_stage.get_axis_position(self.axis)
+        # self.received_frames_v2 += self.received_frames
+        # self.received_frames_v2 = 0
         print(f"Received: {self.received_frames} Expected: {self.expected_frames}")
+        # print(f"Received V2: {self.received_frames_v2} Expected: {self.expected_frames}")
         print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
         logger.info(f"Received: {self.received_frames} Expected: {self.expected_frames}")
+        # logger.info(f"Received V2: {self.recieved_frames_v2} Expected: {self.expected_frames}")
+
         logger.info(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
-        self.end_channel = self.received_frames >= self.expected_frames
+        # self.end_acquisition = self.received_frames_v2 >= self.expected_frames
+        # self.end_acquisition = self.received_frames_v2 >= self.expected_frames or pos >= self.stop_position*1000
+        
+        # if self.received_frames >= self.expected_frames:
+        #    self.end_acquisition = self.received_frames >= self.expected_frames or pos >= self.stop_position*1000
+            # self.end_acquisition = self.received_frames >= self.expected_frames
+            # self.received_frames_v2 = self.received_frames + 1
+        self.end_acquisition = self.received_frames >= self.expected_frames
+        print(f"end acquistion statement = {self.end_acquisition}")
+            # print(f"end acquistion in if statement = {self.end_acquisition}")
         # If channel is ended, but there are more channels to go, return False
         # If channel is ended and this was the last channel, return True  
-        return self.end_channel
+        # return self.end_channel
+        return self.end_acquisition

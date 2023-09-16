@@ -88,13 +88,7 @@ class DockableNotebook(ttk.Notebook):
     """
 
     def __init__(self, parent, root, *args, **kwargs):
-        """Constructor for DockableNotebook.
-
-        Formats the widget, creates right click menu and bindings for menu
-
-        """
         ttk.Notebook.__init__(self, parent, *args, **kwargs)
-
         self.root = root
         self.tab_list = []
 
@@ -127,11 +121,9 @@ class DockableNotebook(ttk.Notebook):
         self.tab_list = tab_list
 
     def get_absolute_position(self):
-        """This helps the popup menu appear where the mouse is right clicked.
+        """Get absolute position of mouse.
 
-        Parameters
-        ----------
-        None
+        This helps the popup menu appear where the mouse is right clicked.
 
         Returns
         -------
@@ -143,9 +135,11 @@ class DockableNotebook(ttk.Notebook):
         return x, y
 
     def find(self, event):
-        """Will check if the proper widget element in the event is what we expect.
+        """Find the widget that was clicked on.
 
-        In this case its checking that the the label in the tab has been selected.
+        Will check if the proper widget element in the event is what we expect.
+
+        In this case its checking that the label in the tab has been selected.
         It then gets the proper position and calls the popup.
 
         Parameters
@@ -167,7 +161,9 @@ class DockableNotebook(ttk.Notebook):
                 self.menu.grab_release()
 
     def popout(self):
-        """Gets the currently selected tab, the tabs name and checks if the tab name is
+        """Popout the currently selected tab.
+
+        Gets the currently selected tab, the tabs name and checks if the tab name is
         in the tab list. If the tab is in the list, its removed from the list,
         hidden, and then passed to a new Top Level window.
 

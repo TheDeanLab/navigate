@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,30 +30,60 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter.constants import *
 import platform
 
-# Based on
-#   https://web.archive.org/web/20170514022131id_/http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
+# Third Party Imports
+
+# Local Imports
 
 
 class ScrolledFrame(ttk.Frame):
-    """A pure Tkinter scrollable frame that actually works!
-    * Use the 'interior' attribute to place widgets inside the scrollable frame.
-    * Construct and pack/place/grid normally.
-    * This frame only allows vertical scrolling.
+    """A scrollable frame implemented in tkinter.
+
+    Based upon: https://web.archive.org/web/20170514022131id_/http://tkinter.unpythonic
+    .net/wiki/VerticalScrolledFrame
+
+    Parameters
+    ----------
+    root : Tk top-level widget
+        Tkinter GUI instance to which this ScrolledFrame belongs.
+    *args
+        Additional arguments to pass to the ttk.Frame constructor.
+    **kw
+        Additional keyword arguments to pass to the ttk.Frame constructor.
+
+    Attributes
+    ----------
+    interior : ttk.Frame
+        The frame inside the scrollable canvas where widgets can be placed.
+
+    Methods
+    -------
+    __init__(self, root, *args, **kw):
+        Initialize the ScrolledFrame.
+
+    mouse_wheel(self, event):
+        Handle the mouse wheel event for scrolling.
+
+    _configure_interior(event):
+        Configure the interior frame based on size changes.
     """
 
     def __init__(self, parent, *args, **kw):
         ttk.Frame.__init__(self, parent, *args, **kw)
 
         # Create a canvas object and a vertical scrollbar for scrolling it.
-        vscrollbar = ttk.Scrollbar(self, orient=VERTICAL)
-        vscrollbar.pack(fill=Y, side=RIGHT, expand=FALSE)
-        hscrollbar = ttk.Scrollbar(self, orient=HORIZONTAL)
-        hscrollbar.pack(fill=X, side=BOTTOM, expand=FALSE)
+        vscrollbar = ttk.Scrollbar(self, orient=tk.constants.VERTICAL)
+        vscrollbar.pack(
+            fill=tk.constants.Y, side=tk.constants.RIGHT, expand=tk.constants.FALSE
+        )
+        hscrollbar = ttk.Scrollbar(self, orient=tk.constants.HORIZONTAL)
+        hscrollbar.pack(
+            fill=tk.constants.X, side=tk.constants.BOTTOM, expand=tk.constants.FALSE
+        )
         self.canvas = tk.Canvas(
             self,
             bd=0,
@@ -61,7 +92,9 @@ class ScrolledFrame(ttk.Frame):
             xscrollcommand=hscrollbar.set,
             scrollregion=(0, 0, 100, 100),
         )
-        self.canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
+        self.canvas.pack(
+            side=tk.constants.LEFT, fill=tk.constants.BOTH, expand=tk.constants.TRUE
+        )
         vscrollbar.config(command=self.canvas.yview)
         hscrollbar.config(command=self.canvas.xview)
 
@@ -71,16 +104,24 @@ class ScrolledFrame(ttk.Frame):
 
         # Create a frame inside the canvas which will be scrolled with it.
         self.interior = interior = ttk.Frame(self.canvas)
-        interior_id = self.canvas.create_window(0, 0, window=interior, anchor=NW)
+        _ = self.canvas.create_window(0, 0, window=interior, anchor=tk.constants.NW)
 
         # Track changes to the canvas and frame width and sync them,
         # also updating the scrollbar.
         def _configure_interior(event):
-            # Update the scrollbars to match the size of the inner frame.
+            """Configure the interior frame based on size changes.
+
+            Updates the scrollbars to match the size of the inner frame, and updates
+            the canvas width to fit the inner frame.
+
+            Parameters
+            ----------
+            event : Tkinter Event
+                The event triggering the configuration.
+            """
             size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
             self.canvas.config(scrollregion="0 0 %s %s" % size)
             if interior.winfo_reqwidth() != self.canvas.winfo_width():
-                # Update the canvas's width to fit the inner frame.
                 self.canvas.config(width=interior.winfo_reqwidth())
             if interior.winfo_reqheight() != self.canvas.winfo_reqheight():
                 self.canvas.config(height=interior.winfo_reqheight())
@@ -88,6 +129,13 @@ class ScrolledFrame(ttk.Frame):
         interior.bind("<Configure>", _configure_interior)
 
     def mouse_wheel(self, event):
+        """Handle the mouse wheel event for scrolling.
+
+        Parameters
+        ----------
+        event : Tkinter Event
+            The mouse wheel event.
+        """
         delta = 120 if platform.system() != "Darwin" else 1
         shift = -1 * int(event.delta / delta)
         # TODO: event.state may only work on Mac (Darwin). Investigate for Windows.

@@ -392,6 +392,10 @@ def verify_experiment_config(manager, configuration):
     camera_parameters_dict_sample = {
         "x_pixels": 2048,
         "y_pixels": 2048,
+        "x_pixels_min": 4,
+        "y_pixels_min": 4,
+        "x_pixels_step": 4,
+        "y_pixels_step": 4,
         "img_x_pixels": 2048,
         "img_y_pixels": 2048,
         "sensor_mode": "Normal",
@@ -428,6 +432,34 @@ def verify_experiment_config(manager, configuration):
         camera_setting_dict["y_pixels"] = int(camera_setting_dict["y_pixels"])
     except ValueError:
         camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
+
+    try:
+        camera_setting_dict["x_pixels_min"] = int(camera_setting_dict["x_pixels_min"])
+    except ValueError:
+        camera_setting_dict["x_pixels_min"] = camera_parameters_dict_sample[
+            "x_pixels_min"
+        ]
+
+    try:
+        camera_setting_dict["y_pixels_min"] = int(camera_setting_dict["y_pixels_min"])
+    except ValueError:
+        camera_setting_dict["y_pixels_min"] = camera_parameters_dict_sample[
+            "y_pixels_min"
+        ]
+
+    try:
+        camera_setting_dict["x_pixels_step"] = int(camera_setting_dict["x_pixels_step"])
+    except ValueError:
+        camera_setting_dict["x_pixels_min"] = camera_parameters_dict_sample[
+            "x_pixels_step"
+        ]
+
+    try:
+        camera_setting_dict["y_pixels_step"] = int(camera_setting_dict["y_pixels_step"])
+    except ValueError:
+        camera_setting_dict["y_pixels_step"] = camera_parameters_dict_sample[
+            "y_pixels_step"
+        ]
 
     # image width and height
     if camera_setting_dict["x_pixels"] <= 0:
@@ -563,13 +595,15 @@ def verify_experiment_config(manager, configuration):
     for k in microscope_state_dict_sample:
         if k not in microscope_setting_dict.keys():
             microscope_setting_dict[k] = microscope_state_dict_sample[k]
-        elif type(microscope_setting_dict[k]) != type(microscope_state_dict_sample[k]):
-            if type(microscope_state_dict_sample[k]) == float:
+        elif not isinstance(
+            microscope_setting_dict[k], type(microscope_state_dict_sample[k])
+        ):
+            if isinstance(microscope_state_dict_sample[k], float):
                 try:
                     microscope_setting_dict[k] = float(microscope_setting_dict[k])
                 except ValueError:
                     microscope_setting_dict[k] = microscope_state_dict_sample[k]
-            elif type(microscope_state_dict_sample[k]) == int:
+            elif isinstance(microscope_state_dict_sample[k], int):
                 try:
                     microscope_setting_dict[k] = int(microscope_setting_dict[k])
                 except ValueError:
@@ -648,18 +682,16 @@ def verify_experiment_config(manager, configuration):
             "laser_power": 20.0,
             "camera_exposure_time": 200.0,
             "interval_time": 0.0,
-            "defocus": 0.0
+            "defocus": 0.0,
         }
         for k in temp:
             try:
-                channel_value[k] = float(
-                    channel_value[k]
-                )
+                channel_value[k] = float(channel_value[k])
             except ValueError:
                 channel_value[k] = temp[k]
             if channel_value[k] < 0:
                 channel_value[k] = temp[k]
-        
+
     microscope_setting_dict["selected_channels"] = selected_channel_num
 
     # MultiPositions

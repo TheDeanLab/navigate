@@ -72,6 +72,10 @@ class CameraBase:
         # Initialize Pixel Information
         self.max_image_width = 2048
         self.max_image_height = 2048
+        self.min_image_width = 4
+        self.min_image_height = 4
+        self.step_image_width = 4
+        self.step_image_height = 4
         self.x_pixels = self.max_image_width
         self.y_pixels = self.max_image_height
         self.camera_parameters["x_pixels"] = self.max_image_width

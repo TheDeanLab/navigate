@@ -420,7 +420,9 @@ class CameraViewController(GUIController):
         stage_position = self.parent_controller.execute("get_stage_position")
 
         if stage_position is not None:
-            # TODO: if show image as what the camera gets(flipped one), the stage moving direction should be decided by stage_flip_flags and camera_flip_flags
+            # TODO: if show image as what the camera gets(flipped one), the stage
+            # moving direction should be decided by stage_flip_flags
+            # and camera_flip_flags
             stage_flip_flags = (
                 self.parent_controller.configuration_controller.stage_flip_flags
             )
@@ -1109,9 +1111,9 @@ class CameraViewController(GUIController):
         self.ilastik_mask_ready_lock.release()
 
     def resize(self, event):
-        if self.view.is_popup == False and event.widget != self.view:
+        if self.view.is_popup is False and event.widget != self.view:
             return
-        if self.view.is_popup == True and event.widget.widgetName != "toplevel":
+        if self.view.is_popup is True and event.widget.widgetName != "toplevel":
             return
         if self.resizie_event_id:
             self.view.after_cancel(self.resizie_event_id)
@@ -1137,18 +1139,48 @@ class CameraViewController(GUIController):
         self.reset_display(False)
 
     def update_canvas_size(self):
-        r_canvas_width = int(self.view.canvas["width"])
-        r_canvas_height = int(self.view.canvas["height"])
+        camera_parameters = self.parent_controller.configuration["experiment"][
+            "CameraParameters"
+        ]
+        r_canvas_width_min = camera_parameters["x_pixels_min"]
+        r_canvas_height_min = camera_parameters["y_pixels_min"]
+        r_canvas_width = (
+            int(self.view.canvas["width"])
+            if self.view.canvas["width"] != ""
+            else r_canvas_width_min
+        )
+        r_canvas_height = (
+            int(self.view.canvas["height"])
+            if self.view.canvas["height"] != ""
+            else r_canvas_height_min
+        )
+
+        # Convert to multiple of step
+        r_canvas_width_step = int(camera_parameters["x_pixels_step"])
+        r_canvas_height_step = int(camera_parameters["y_pixels_step"])
+        r_canvas_width = (
+            int(r_canvas_width // r_canvas_width_step) * r_canvas_width_step
+        )
+        r_canvas_height = (
+            int(r_canvas_height // r_canvas_height_step) * r_canvas_height_step
+        )
+
         img_ratio = self.original_image_width / self.original_image_height
         canvas_ratio = r_canvas_width / r_canvas_height
 
+        # Max prevents zero values here
         if canvas_ratio > img_ratio:
-            self.canvas_height = r_canvas_height
-            self.canvas_width = int(r_canvas_height * img_ratio)
+            self.canvas_height = max(r_canvas_height, r_canvas_height_min)
+            self.canvas_width = max(
+                int(r_canvas_height * img_ratio), r_canvas_width_min
+            )
         else:
-            self.canvas_width = r_canvas_width
-            self.canvas_height = int(r_canvas_width / img_ratio)
+            self.canvas_width = max(r_canvas_width, r_canvas_width_min)
+            self.canvas_height = max(
+                int(r_canvas_width / img_ratio), r_canvas_height_min
+            )
 
+        # The +1 prevents division by zero
         self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
         self.canvas_height_scale = float(
             self.original_image_height / self.canvas_height

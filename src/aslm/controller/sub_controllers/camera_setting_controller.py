@@ -222,24 +222,39 @@ class CameraSettingController(GUIController):
         self.camera_setting_dict["binning"] = self.roi_widgets["Binning"].get()
 
         # Camera FOV Size.
-        self.camera_setting_dict["x_pixels"] = self.roi_widgets["Width"].get()
-        self.camera_setting_dict["y_pixels"] = self.roi_widgets["Height"].get()
+        x_pixel = self.roi_widgets["Width"].get(
+            self.camera_setting_dict["x_pixels_min"]
+        )
+        y_pixel = self.roi_widgets["Height"].get(
+            self.camera_setting_dict["y_pixels_min"]
+        )
+
+        x_step = int(self.camera_setting_dict["x_pixels_step"])
+        y_step = int(self.camera_setting_dict["y_pixels_step"])
+
+        # Round to nearest step
+        x_pixels = int(x_pixel // x_step) * x_step
+        y_pixels = int(y_pixel // y_step) * y_step
 
         self.camera_setting_dict["pixel_size"] = self.default_pixel_size
         self.camera_setting_dict["frames_to_average"] = self.framerate_widgets[
             "frames_to_average"
         ].get()
 
-        width = int(self.camera_setting_dict["x_pixels"])
-        height = int(self.camera_setting_dict["y_pixels"])
-        binning = self.camera_setting_dict["binning"]
-        x_binning = int(binning[0])
-        y_binning = int(binning[2])
-        img_width = width // x_binning
-        img_height = height // y_binning
+        binning = [
+            int(x) if x != "" else 1
+            for x in self.camera_setting_dict["binning"].split("x")
+        ]
+        img_width = x_pixels // binning[0]
+        img_height = y_pixels // binning[1]
 
+        self.camera_setting_dict["x_pixels"] = x_pixels
+        self.camera_setting_dict["y_pixels"] = y_pixels
         self.camera_setting_dict["img_x_pixels"] = img_width
         self.camera_setting_dict["img_y_pixels"] = img_height
+
+        self.roi_widgets["Width"].set(x_pixels)
+        self.roi_widgets["Height"].set(y_pixels)
 
         return True
 
@@ -379,18 +394,24 @@ class CameraSettingController(GUIController):
         """
 
         # pixel_size = self.default_pixel_size
-        if (
-            self.roi_widgets["Width"].get() == ""
-            or self.roi_widgets["Height"].get() == ""
-        ):
-            return
 
         try:
-            x_pixel = float(self.roi_widgets["Width"].get())
-            y_pixel = float(self.roi_widgets["Height"].get())
+            x_pixel = float(
+                self.roi_widgets["Width"].get(self.camera_setting_dict["x_pixels_min"])
+            )
+            y_pixel = float(
+                self.roi_widgets["Height"].get(self.camera_setting_dict["y_pixels_min"])
+            )
         except ValueError as e:
             logger.error(f"{e} similar to TclError")
             return
+
+        x_step = int(self.camera_setting_dict["x_pixels_step"])
+        y_step = int(self.camera_setting_dict["y_pixels_step"])
+
+        # Round to nearest step
+        x_pixel = int(x_pixel // x_step) * x_step
+        y_pixel = int(y_pixel // y_step) * y_step
 
         microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
@@ -406,6 +427,8 @@ class CameraSettingController(GUIController):
 
         self.roi_widgets["FOV_X"].set(physical_dimensions_x)
         self.roi_widgets["FOV_Y"].set(physical_dimensions_y)
+        self.roi_widgets["Width"].set(x_pixel)
+        self.roi_widgets["Height"].set(y_pixel)
 
     def calculate_readout_time(self):
         """Calculate camera readout time.

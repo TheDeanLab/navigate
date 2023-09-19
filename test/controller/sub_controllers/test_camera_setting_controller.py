@@ -479,6 +479,8 @@ class TestCameraSettingController:
             "MicroscopeState"
         ]["zoom"] = zoom
 
+        self.camera_settings.populate_experiment_values()
+
         # Calling
         self.camera_settings.calculate_physical_dimensions()
 

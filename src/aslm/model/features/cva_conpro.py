@@ -458,16 +458,16 @@ class CVACONPRO:
         # print(f"received_Frames v2: {self.recieved_frames_v2}")
 
     def end_data_func(self):
-        pos = self.asi_stage.get_axis_position(self.axis)
+        # pos = self.asi_stage.get_axis_position(self.axis)
         # self.received_frames_v2 += self.received_frames
         # self.received_frames_v2 = 0
         print(f"Received: {self.received_frames} Expected: {self.expected_frames}")
         # print(f"Received V2: {self.received_frames_v2} Expected: {self.expected_frames}")
-        print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
+        # print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
         logger.info(f"Received: {self.received_frames} Expected: {self.expected_frames}")
         # logger.info(f"Received V2: {self.recieved_frames_v2} Expected: {self.expected_frames}")
 
-        logger.info(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
+        # logger.info(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
         # self.end_acquisition = self.received_frames_v2 >= self.expected_frames
         # self.end_acquisition = self.received_frames_v2 >= self.expected_frames or pos >= self.stop_position*1000
         
@@ -476,7 +476,7 @@ class CVACONPRO:
             # self.end_acquisition = self.received_frames >= self.expected_frames
             # self.received_frames_v2 = self.received_frames + 1
         self.end_acquisition = self.received_frames >= self.expected_frames
-        print(f"end acquistion statement = {self.end_acquisition}")
+        # print(f"end acquistion statement = {self.end_acquisition}")
             # print(f"end acquistion in if statement = {self.end_acquisition}")
         # If channel is ended, but there are more channels to go, return False
         # If channel is ended and this was the last channel, return True  

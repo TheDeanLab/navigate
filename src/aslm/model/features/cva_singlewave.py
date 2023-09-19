@@ -321,7 +321,7 @@ class CVASINGLEWAVE:
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?
         # self.recieved_frames = 0
-        self.tol = self.step_size_um/4
+        # self.tol = self.step_size_um/4
     def end_func_signal(self):
         print("end function called")
         print(f"Recieved frames: {self.received_frames_good}, Expected Frames {self.expected_frames}")

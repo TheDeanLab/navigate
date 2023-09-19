@@ -43,7 +43,15 @@ from aslm.view.custom_widgets.hover import Hover
 class HoverMixin:
     """Adds hover attribute to widget
 
-    This class is meant to be mixed in with other widgets to add a hover attribute
+    This class is meant to be mixed in with other widgets to add a hover attribute.
+    Hover provides contextual information about the widget when the mouse is over it.
+
+    Parameters
+    ----------
+    *args
+        Additional arguments to pass to the ttk.Frame constructor.
+    **kwargs
+        Additional keyword arguments to pass to the ttk.Frame constructor.
 
     Methods
     -------
@@ -56,11 +64,7 @@ class HoverMixin:
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__(
-            *args, **kwargs
-        )  # Calls base class that is mixed in with this class
-
-        # Adds hover attribute
+        super().__init__(*args, **kwargs)
         self.hover = Hover(self, text=None, type="free")
 
 
@@ -68,6 +72,13 @@ class HoverButton(HoverMixin, ttk.Button):
     """Adds hover attribute to ttk.Button
 
     This class is meant to be mixed in with other widgets to add a hover attribute
+
+    Parameters
+    ----------
+    *args
+        Additional arguments to pass to the ttk.Frame constructor.
+    **kwargs
+        Additional keyword arguments to pass to the ttk.Frame constructor.
 
     Methods
     -------
@@ -88,6 +99,13 @@ class HoverTkButton(HoverMixin, tk.Button):
 
     This class is meant to be mixed in with other widgets to add a hover attribute
 
+    Parameters
+    ----------
+    *args
+        Additional arguments to pass to the ttk.Frame constructor.
+    **kwargs
+        Additional keyword arguments to pass to the ttk.Frame constructor.
+
     Methods
     -------
     None
@@ -107,6 +125,13 @@ class HoverRadioButton(HoverMixin, ttk.Radiobutton):
 
     This class is meant to be mixed in with other widgets to add a hover attribute
 
+    Parameters
+    ----------
+    *args
+        Additional arguments to pass to the ttk.Frame constructor.
+    **kwargs
+        Additional keyword arguments to pass to the ttk.Frame constructor.
+
     Methods
     -------
     None
@@ -124,7 +149,14 @@ class HoverRadioButton(HoverMixin, ttk.Radiobutton):
 class HoverCheckButton(HoverMixin, ttk.Checkbutton):
     """Adds hover attribute to ttk.Checkbutton
 
-    This class is meant to be mixed in with other widgets to add a hover attribute
+    This class is meant to be mixed in with other widgets to add a hover attribute.
+
+    Parameters
+    ----------
+    *args
+        Additional arguments to pass to the ttk.Frame constructor.
+    **kwargs
+        Additional keyword arguments to pass to the ttk.Frame constructor.
 
     Methods
     -------

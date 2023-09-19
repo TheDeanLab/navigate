@@ -950,9 +950,6 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         self.focus_update_var = focus_update_var
         self.bind("<FocusOut>", self._set_focus_update_var)
 
-        # Remember Final Valid Value
-        self.last_value = None
-
     def set_precision(self, prec):
         """Set the precision of the spinbox
 
@@ -1065,13 +1062,13 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         return valid
 
-    def _focusout_validate(self, **kwargs):
+    def _focusout_validate(self, event):
         """Validate the spinbox when it loses focus
 
         Parameters
         ----------
-        **kwargs
-            Additional keyword arguments
+        event : tk.Event
+            The event that triggered the validation
 
         Returns
         -------
@@ -1082,6 +1079,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         --------
         >>> spinbox._focusout_validate()
         """
+        self.add_history(event)
         valid = True
         value = self.get()
         max_val = self.cget("to")
@@ -1091,7 +1089,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             min_val = round(Decimal(min_val), 16)
         except InvalidOperation:
             print(
-                f"Either min_val or max_val couldn't be case to a Decimal. "
+                f"Either min_val or max_val couldn't be cast to a Decimal. "
                 f"min_val: {min_val} max_val: {max_val}"
             )
 
@@ -1104,9 +1102,8 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         if value == "." or value == "-":
             # Incorrect entry - revert to last valid value.
-            if self.last_value is not None:
-                self.set(self.last_value)
-                return True
+            self.undo(event)
+            return True
 
         # check if there are range limits
         if min_val == "-Infinity" or max_val == "Infinity":
@@ -1128,8 +1125,6 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             self.error.set(f"Maximum Value: {max_val:.3f}")
             valid = False
 
-        if valid is True:
-            self.last_value = value
         return valid
 
     # Gets current value of widget and if focus_update_var is present it sets it to the

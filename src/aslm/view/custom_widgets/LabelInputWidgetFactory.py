@@ -158,7 +158,7 @@ class LabelInput(ttk.Frame):
 
         Parameters
         ----------
-        object, optional
+        default: object, optional
             The default value to return if the get value doesn't work
 
         Returns

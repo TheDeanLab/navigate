@@ -70,7 +70,8 @@ class AcquireBarController(GUIController):
             "CVA-TTL":"CVATTL",
             "CVA-Conpro":"CVACONPRO",
             "CVA-SingleWave":"CVASINGLEWAVE",
-            "CVA-Continous":"CVACONT"
+            "CVA-Continous":"CVACONT",
+            "CVA-Conpro-multichannel":"CVACONPROMULTICHANNEL",
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
@@ -348,6 +349,7 @@ class AcquireBarController(GUIController):
             "CVACONPRO",
             "CVASINGLEWAVE",
             "CVACONT",
+            "CVAMULTICHANNEL",
             "customized",
         ]:
             state = "normal"

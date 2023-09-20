@@ -50,6 +50,7 @@ from aslm.model.features.cva_ttl import CVATTL
 from aslm.model.features.cva_conpro import CVACONPRO
 from aslm.model.features.cva_singlewave import CVASINGLEWAVE
 from aslm.model.features.cva_cont import CVACONT
+from aslm.model.features.cva_conpro_multichannel import CVACONPROMULTICHANNEL
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
@@ -306,6 +307,7 @@ class Model:
             "CVACONPRO": [{"name": CVACONPRO}],
             "CVASINGLEWAVE": [{"name": CVASINGLEWAVE}],
             "CVACONT": [{"name": CVACONT}],
+            "CVACONPROMULTICHANNEL":[{"name": CVACONPROMULTICHANNEL}],
             "customized": [],
         }
         self.load_feature_records()
@@ -621,7 +623,9 @@ class Model:
             if self.imaging_mode == "CVASINGLEWAVE":
                 self.active_microscope.stages["z"].stop()
             if self.imaging_mode == "CVACONT":
-                self.active_microscope.stages["z"].stop()    
+                self.active_microscope.stages["z"].stop() 
+            if self.imaging_mode == "CVACONPROMULTICHANNEL":
+                self.active_microscope.stages["z"].stop()
             if self.signal_thread:
                 self.signal_thread.join()
             if self.data_thread:

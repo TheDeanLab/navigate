@@ -145,6 +145,10 @@ class Metadata:
             )
             or (
                 self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVACONPROMULTICHANNEL"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                 == "customized"
             )
         ):

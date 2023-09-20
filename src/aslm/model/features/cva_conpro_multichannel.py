@@ -43,7 +43,7 @@ logger = logging.getLogger(p)
 # Local imports
 
 
-class CVACONPRO:
+class CVACONPROMULTICHANNEL:
     """Class for acquiring data using the ASI internal encoder."""
 
     def __init__(self, model, axis='z'):
@@ -100,6 +100,12 @@ class CVACONPRO:
         print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
         print("self.asi stage")
+        microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
+        self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
+        self.channels = microscope_state["selected_channels"]
+        self.current_channel_in_list = 0
+        print(f"current channel = {self.channels}")
+
         # self.received_frames = 0
         # self.end_channel = False
         self.end_acquisition = False
@@ -244,7 +250,7 @@ class CVACONPRO:
 
         # expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
         expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
-        expected_frames = int(np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time))-1
+        expected_frames = int(np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time))
         print(f"*** Expected Frames V1:{expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
@@ -353,8 +359,20 @@ class CVACONPRO:
         print(f"DAQ Trigger SENT test = {self.end_signal_temp>0}")
         # self.end_acquisition_v2 = self.
         if self.model.stop_acquisition or self.end_acquisition or self.end_signal_temp>0:
-            print("returning True from stop or end acquisition end_func_signal")
-            return True
+            print("returning true from stop or end acquisition end_func_signal")
+            if self.stack_cycling_mode == "per_stack":
+                print("per stack if statment called")
+                print(f"channel list: {self.current_channel_in_list}")
+                self.update_channel()
+                print("if statement update channel finished")
+                # if run through all the channels, move to next position
+                if self.current_channel_in_list == 0:
+                    print(f"in if channel list = 0 statement, channel = {self.current_channel_in_list}")
+                    self.cleanup()
+                    return True
+            else:
+                print("in else true statement")
+                return True
         
         # elif 
         #     print("returning True from stop acquisition end_func_signal")
@@ -409,6 +427,28 @@ class CVACONPRO:
         print("returning False from end_func_signal")
         return False
 
+    def update_channel(self):
+            print("update channel")
+            print(f"channel before in update channel = {self.channels}")
+            print(f"channel before in update channel list = {self.current_channel_in_list}")
+            self.current_channel_in_list = (
+                self.current_channel_in_list + 1
+            ) % self.channels
+            # self.end_signal_temp = 0
+            self.received_frames = 0
+            print(f"channel after in update channel = {self.channels}")
+            print(f"channel before in update channel list = {self.current_channel_in_list}")
+            # self.model.active_microscope.prepare_next_channel()
+            # pos1 = self.asi_stage.get_axis_position(self.axis)
+            self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+            # pos2 = self.asi_stage.get_axis_position(self.axis)
+            # print(f"Initial Position: {pos1} Current Position: {pos2} Start Position: {self.start_position*1000}")
+            self.model.active_microscope.prepare_next_channel()
+            self.asi_stage.start_scan(self.axis)
+            self.asi_stage.stop_scan()
+            # self.pre_func_signal()
+            print("pre function signal initiated")
+    
     def cleanup(self):
         """Clean up the constant velocity acquisition.
 
@@ -458,12 +498,12 @@ class CVACONPRO:
         # print(f"received_Frames v2: {self.recieved_frames_v2}")
 
     def end_data_func(self):
-        # pos = self.asi_stage.get_axis_position(self.axis)
+        pos = self.asi_stage.get_axis_position(self.axis)
         # self.received_frames_v2 += self.received_frames
         # self.received_frames_v2 = 0
         print(f"Received: {self.received_frames} Expected: {self.expected_frames}")
         # print(f"Received V2: {self.received_frames_v2} Expected: {self.expected_frames}")
-        # print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
+        print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
         logger.info(f"Received: {self.received_frames} Expected: {self.expected_frames}")
         # logger.info(f"Received V2: {self.recieved_frames_v2} Expected: {self.expected_frames}")
 

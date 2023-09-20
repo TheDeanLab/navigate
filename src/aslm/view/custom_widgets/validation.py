@@ -240,6 +240,10 @@ class ValidatedMixin:
         valid = True  # Again true means no error
         if event == "focusout":  # Leaving widget
             valid = self._focusout_validate(event=event)
+            if valid:
+                self.add_history(event)
+            else:
+                valid = self.undo(event)
         elif event == "key":  # Keystroke into widget
             valid = self._key_validate(
                 proposed=proposed,
@@ -408,15 +412,15 @@ class ValidatedMixin:
         >>> widget = ttk.Entry()
         >>> widget.add_history(tk.Event())
         """
-        if self.get() != "":
-            if not self.undo_history or self.get() != self.undo_history[-1]:
-                if len(self.undo_history) < 3:
-                    self.undo_history.append(self.get())
-                    self.redo_history.clear()
-                else:
-                    self.undo_history.append(self.get())
-                    self.undo_history.pop(0)
-                    self.redo_history.clear()
+        value = self.get()
+        if value != "":
+            # Don't add duplicates
+            if self.undo_history and self.undo_history[-1] == value:
+                pass
+            else:
+                self.undo_history.append(value)
+            if len(self.undo_history) > 3:
+                self.undo_history.pop(0)
 
     def undo(self, event):
         """Undo the last change
@@ -436,11 +440,21 @@ class ValidatedMixin:
         >>> widget.undo(tk.Event())
         """
         if self.undo_history:
-            if len(self.undo_history) > 1:
-                self.set(self.undo_history[-2])
-                self.redo_history.append(self.undo_history.pop())
-            elif len(self.undo_history) == 1:
-                self.redo_history.append(self.undo_history.pop())
+            # Get the redo value
+            value = self.undo_history.pop()
+            if self.redo_history and self.redo_history[-1] == value:
+                pass
+            else:
+                self.redo_history.append(value)
+            if len(self.redo_history) > 3:
+                self.redo_history.pop(0)
+
+            # Restore the undo value
+            if self.undo_history:
+                value = self.undo_history.pop()
+            self.set(value)
+            return True
+        return False
 
     def redo(self, event):
         """Redo the last change
@@ -460,12 +474,14 @@ class ValidatedMixin:
         >>> widget.redo(tk.Event())
         """
         if self.redo_history:
-            if not self.undo_history:
-                self.undo_history.append(self.redo_history.pop())
-                if not self.redo_history:
-                    return
-            self.set(self.redo_history[-1])
-            self.undo_history.append(self.redo_history.pop())
+            value = self.redo_history.pop()
+            self.set(value)
+            if self.undo_history and self.undo_history[-1] == value:
+                pass
+            else:
+                self.undo_history.append(value)
+            return True
+        return False
 
 
 class ValidatedEntry(ValidatedMixin, ttk.Entry):
@@ -544,9 +560,9 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         >>> widget = ValidatedEntry(parent)
         >>> widget.set('1')
         """
-        self.delete(0, tk.END)
+        # self.delete(0, tk.END)
         self.variable.set(value)
-        self.insert(0, value)
+        # self.insert(0, value)
 
     def set_precision(self, prec):
         """Set the precision of the entry
@@ -692,7 +708,6 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
 
         # check if there are range limits
         if min_val == "-Infinity" or max_val == "Infinity":
-            self.add_history(event)
             return True
 
         try:
@@ -711,8 +726,6 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             self.error.set("Value is too high (max {})".format(max_val))
 
         # If input is valid on focusout add to history of widget
-        if valid:
-            self.add_history(event)
         return valid
 
     def _set_focus_update_var(self, event):
@@ -1079,7 +1092,6 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         --------
         >>> spinbox._focusout_validate()
         """
-        self.add_history(event)
         valid = True
         value = self.get()
         max_val = self.cget("to")
@@ -1099,11 +1111,6 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             return False
         else:
             self.error.set("")
-
-        if value == "." or value == "-":
-            # Incorrect entry - revert to last valid value.
-            self.undo(event)
-            return True
 
         # check if there are range limits
         if min_val == "-Infinity" or max_val == "Infinity":

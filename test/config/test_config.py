@@ -209,6 +209,10 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         camera_parameters_dict_sample = {
             "x_pixels": 2048,
             "y_pixels": 2048,
+            "x_pixels_min": 4,
+            "y_pixels_min": 4,
+            "x_pixels_step": 4,
+            "y_pixels_step": 4,
             "img_x_pixels": 2048,
             "img_y_pixels": 2048,
             "sensor_mode": "Normal",
@@ -220,15 +224,15 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         }
 
         # Autofocus
-        autofocus_sample = {
-            "coarse_range": 500,
-            "coarse_step_size": 50,
-            "coarse_selected": True,
-            "fine_range": 50,
-            "fine_step_size": 5,
-            "fine_selected": True,
-            "robust_fit": False,
-        }
+        # autofocus_sample = {
+        #     "coarse_range": 500,
+        #     "coarse_step_size": 50,
+        #     "coarse_selected": True,
+        #     "fine_range": 50,
+        #     "fine_step_size": 5,
+        #     "fine_selected": True,
+        #     "robust_fit": False,
+        # }
 
         stage_parameters_dict_sample = {
             "limits": True,
@@ -521,14 +525,16 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         # StageParameters
         experiment["StageParameters"]["limits"] = "abc"
         config.verify_experiment_config(self.manager, configuration)
-        assert experiment["StageParameters"]["limits"] == True
+        assert experiment["StageParameters"]["limits"] is True
 
         microscope_names = list(configuration["configuration"]["microscopes"].keys())
         for microscope_name in microscope_names:
             for k in ["xy_step", "z_step", "f_step", "theta_step"]:
                 experiment["StageParameters"][microscope_name][k] = "abc"
                 config.verify_experiment_config(self.manager, configuration)
-                assert type(experiment["StageParameters"][microscope_name][k]) is int
+                assert isinstance(
+                    experiment["StageParameters"][microscope_name][k], int
+                )
 
         # MicroscopeState
         experiment["MicroscopeState"]["microscope_name"] = "nonexist_microscope"
@@ -568,60 +574,74 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         ]:
             experiment["MicroscopeState"][k] = "nonsense_value"
             config.verify_experiment_config(self.manager, configuration)
-            assert (
-                type(experiment["MicroscopeState"][k]) == int
-                or type(experiment["MicroscopeState"][k]) == float
+            assert isinstance(experiment["MicroscopeState"][k], int) or isinstance(
+                experiment["MicroscopeState"][k], float
             )
 
         # channels
-        experiment["MicroscopeState"]["channels"] = [{
-            "is_selected": True,
-            "laser": "488nm",
-            "laser_index": 0,
-            "filter": "Empty-Alignment",
-            "filter_position": 0,
-            "camera_exposure_time": 200.0,
-            "laser_power": 20.0,
-            "interval_time": 5.0,
-            "defocus": 0.0
-        }]
+        experiment["MicroscopeState"]["channels"] = [
+            {
+                "is_selected": True,
+                "laser": "488nm",
+                "laser_index": 0,
+                "filter": "Empty-Alignment",
+                "filter_position": 0,
+                "camera_exposure_time": 200.0,
+                "laser_power": 20.0,
+                "interval_time": 5.0,
+                "defocus": 0.0,
+            }
+        ]
         config.verify_experiment_config(self.manager, configuration)
         assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
         assert len(list(experiment["MicroscopeState"]["channels"].keys())) == 0
 
-        experiment["MicroscopeState"]["channels"] = {"channel_0": {
-            "is_selected": True,
-            "laser": "488nm",
-            "laser_index": 0,
-            "filter": "Empty-Alignment",
-            "filter_position": 0,
-            "camera_exposure_time": 200.0,
-            "laser_power": 20.0,
-            "interval_time": 5.0,
-            "defocus": 0.0
-        }}
+        experiment["MicroscopeState"]["channels"] = {
+            "channel_0": {
+                "is_selected": True,
+                "laser": "488nm",
+                "laser_index": 0,
+                "filter": "Empty-Alignment",
+                "filter_position": 0,
+                "camera_exposure_time": 200.0,
+                "laser_power": 20.0,
+                "interval_time": 5.0,
+                "defocus": 0.0,
+            }
+        }
         config.verify_experiment_config(self.manager, configuration)
         assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
         assert len(list(experiment["MicroscopeState"]["channels"].keys())) == 0
 
-        experiment["MicroscopeState"]["channels"] = {"channel_100": {
-            "is_selected": True,
-            "laser": "488nm",
-            "laser_index": 0,
-            "filter": "Empty-Alignment",
-            "filter_position": 0,
-            "camera_exposure_time": 200.0,
-            "laser_power": 20.0,
-            "interval_time": 5.0,
-            "defocus": 0.0
-        }}
+        experiment["MicroscopeState"]["channels"] = {
+            "channel_100": {
+                "is_selected": True,
+                "laser": "488nm",
+                "laser_index": 0,
+                "filter": "Empty-Alignment",
+                "filter_position": 0,
+                "camera_exposure_time": 200.0,
+                "laser_power": 20.0,
+                "interval_time": 5.0,
+                "defocus": 0.0,
+            }
+        }
         config.verify_experiment_config(self.manager, configuration)
         assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
         assert len(list(experiment["MicroscopeState"]["channels"].keys())) == 0
 
         microscope_name = experiment["MicroscopeState"]["microscope_name"]
-        lasers = [f"{laser['wavelength']}nm" for laser in configuration["configuration"]["microscopes"][microscope_name]["lasers"]]
-        filterwheels = list(configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"]["available_filters"].keys())
+        lasers = [
+            f"{laser['wavelength']}nm"
+            for laser in configuration["configuration"]["microscopes"][microscope_name][
+                "lasers"
+            ]
+        ]
+        filterwheels = list(
+            configuration["configuration"]["microscopes"][microscope_name][
+                "filter_wheel"
+            ]["available_filters"].keys()
+        )
         config.update_config_dict(
             self.manager,
             experiment["MicroscopeState"]["channels"],
@@ -635,8 +655,8 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 "camera_exposure_time": -200.0,
                 "laser_power": "a",
                 "interval_time": -3,
-                "defocus": "a"
-            }
+                "defocus": "a",
+            },
         )
         expected_value = {
             "is_selected": False,
@@ -647,13 +667,16 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "camera_exposure_time": 200.0,
             "laser_power": 20.0,
             "interval_time": 0.0,
-            "defocus": 0.0
+            "defocus": 0.0,
         }
         config.verify_experiment_config(self.manager, configuration)
         assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
         assert "channel_2" in experiment["MicroscopeState"]["channels"].keys()
         for k in expected_value:
-            assert experiment["MicroscopeState"]["channels"]["channel_2"][k] == expected_value[k]
+            assert (
+                experiment["MicroscopeState"]["channels"]["channel_2"][k]
+                == expected_value[k]
+            )
 
         config.update_config_dict(
             self.manager,
@@ -668,8 +691,8 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 "camera_exposure_time": -200.0,
                 "laser_power": "a",
                 "interval_time": -3,
-                "defocus": "a"
-            }
+                "defocus": "a",
+            },
         )
         expected_value = {
             "is_selected": False,
@@ -680,20 +703,22 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "camera_exposure_time": 200.0,
             "laser_power": 20.0,
             "interval_time": 0.0,
-            "defocus": 0.0
+            "defocus": 0.0,
         }
         config.verify_experiment_config(self.manager, configuration)
         assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
         assert "channel_2" in experiment["MicroscopeState"]["channels"].keys()
         for k in expected_value:
-            assert experiment["MicroscopeState"]["channels"]["channel_2"][k] == expected_value[k]
+            assert (
+                experiment["MicroscopeState"]["channels"]["channel_2"][k]
+                == expected_value[k]
+            )
 
         # selected_channels
         assert experiment["MicroscopeState"]["selected_channels"] == 0
         experiment["MicroscopeState"]["channels"]["channel_2"]["is_selected"] = True
         config.verify_experiment_config(self.manager, configuration)
         assert experiment["MicroscopeState"]["selected_channels"] == 1
-
 
     def select_random_entries_from_list(self, parameter_list):
         n = random.randint(1, len(parameter_list))

@@ -1180,7 +1180,6 @@ class CameraViewController(GUIController):
                 int(r_canvas_width / img_ratio), r_canvas_height_min
             )
 
-        # The +1 prevents division by zero
         self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
         self.canvas_height_scale = float(
             self.original_image_height / self.canvas_height

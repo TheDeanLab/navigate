@@ -75,8 +75,8 @@ class CameraSettingController(GUIController):
         self.mode_widgets["Pixels"].get_variable().trace_add(
             "write", self.update_number_of_pixels
         )
-        self.roi_widgets["Width"].get_variable().trace_add("write", self.update_fov)
-        self.roi_widgets["Height"].get_variable().trace_add("write", self.update_fov)
+        self.roi_widgets["Width"].get_variable().trace_add("read", self.update_fov)
+        self.roi_widgets["Height"].get_variable().trace_add("read", self.update_fov)
 
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name].config(command=self.update_roi(btn_name))

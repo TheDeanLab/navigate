@@ -397,8 +397,7 @@ class TestCameraSettingController:
         assert str(self.camera_settings.roi_widgets["Height"].get()) == name
 
     def test_update_fov(self):
-
-        # Invoke commands
+        self.camera_settings.populate_experiment_values()
 
         # Change invoke
         self.camera_settings.in_initialization = False
@@ -409,6 +408,10 @@ class TestCameraSettingController:
         self.camera_settings.roi_widgets["Width"].widget.set(1600)
         self.camera_settings.roi_widgets["Height"].widget.set(1600)
 
+        # need these since we switched to read events
+        self.camera_settings.roi_widgets["Width"].get_variable().get()
+        self.camera_settings.roi_widgets["Height"].get_variable().get()
+
         # Check
         assert xFov != int(self.camera_settings.roi_widgets["FOV_X"].get())
         assert yFov != int(self.camera_settings.roi_widgets["FOV_Y"].get())
@@ -416,6 +419,11 @@ class TestCameraSettingController:
         # Reset
         self.camera_settings.roi_widgets["Width"].widget.set(2048)
         self.camera_settings.roi_widgets["Height"].widget.set(2048)
+
+        # need these since we switched to read events
+        self.camera_settings.roi_widgets["Width"].get_variable().get()
+        self.camera_settings.roi_widgets["Height"].get_variable().get()
+
         assert int(self.camera_settings.roi_widgets["FOV_X"].get()) == 13066
         assert int(self.camera_settings.roi_widgets["FOV_Y"].get()) == 13066
 

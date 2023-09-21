@@ -459,7 +459,7 @@ class ValidatedMixin:
             else:
                 # Don't let the undo history drop to zero.
                 # This lets us restore values.
-                # We have to set the value before adding history.
+                # We have to set the value first to replace the invalid entry.
                 self.set(value)
                 self.redo_history.pop()
                 self.add_history(event)
@@ -484,12 +484,11 @@ class ValidatedMixin:
         >>> widget.redo(tk.Event())
         """
         if self.redo_history:
+            value = self.get()
+            self.add_history(event)
             value = self.redo_history.pop()
             self.set(value)
-            if self.undo_history and self.undo_history[-1] == value:
-                pass
-            else:
-                self.undo_history.append(value)
+            self.add_history(event)
             return True
         return False
 
@@ -548,7 +547,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         self.precision = (
             self.resolution.normalize().as_tuple().exponent
         )  # Precision of number as exponent
-        self.variable = kwargs.get("textvariable") or tk.StringVar
+        self.variable = kwargs.get("textvariable") or tk.StringVar()
         self.min = min
         self.max = max
         self.required = required

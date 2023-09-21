@@ -209,10 +209,6 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         camera_parameters_dict_sample = {
             "x_pixels": 2048,
             "y_pixels": 2048,
-            "x_pixels_min": 4,
-            "y_pixels_min": 4,
-            "x_pixels_step": 4,
-            "y_pixels_step": 4,
             "img_x_pixels": 2048,
             "img_y_pixels": 2048,
             "sensor_mode": "Normal",

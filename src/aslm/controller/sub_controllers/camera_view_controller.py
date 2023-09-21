@@ -1139,46 +1139,17 @@ class CameraViewController(GUIController):
         self.reset_display(False)
 
     def update_canvas_size(self):
-        camera_parameters = self.parent_controller.configuration["experiment"][
-            "CameraParameters"
-        ]
-        r_canvas_width_min = camera_parameters["x_pixels_min"]
-        r_canvas_height_min = camera_parameters["y_pixels_min"]
-        r_canvas_width = (
-            int(self.view.canvas["width"])
-            if self.view.canvas["width"] != ""
-            else r_canvas_width_min
-        )
-        r_canvas_height = (
-            int(self.view.canvas["height"])
-            if self.view.canvas["height"] != ""
-            else r_canvas_height_min
-        )
-
-        # Convert to multiple of step
-        r_canvas_width_step = int(camera_parameters["x_pixels_step"])
-        r_canvas_height_step = int(camera_parameters["y_pixels_step"])
-        r_canvas_width = (
-            int(r_canvas_width // r_canvas_width_step) * r_canvas_width_step
-        )
-        r_canvas_height = (
-            int(r_canvas_height // r_canvas_height_step) * r_canvas_height_step
-        )
-
+        r_canvas_width =int(self.view.canvas["width"])
+        r_canvas_height = int(self.view.canvas["height"])
         img_ratio = self.original_image_width / self.original_image_height
         canvas_ratio = r_canvas_width / r_canvas_height
 
-        # Max prevents zero values here
         if canvas_ratio > img_ratio:
-            self.canvas_height = max(r_canvas_height, r_canvas_height_min)
-            self.canvas_width = max(
-                int(r_canvas_height * img_ratio), r_canvas_width_min
-            )
+            self.canvas_height = r_canvas_height
+            self.canvas_width = int(r_canvas_height * img_ratio)
         else:
-            self.canvas_width = max(r_canvas_width, r_canvas_width_min)
-            self.canvas_height = max(
-                int(r_canvas_width / img_ratio), r_canvas_height_min
-            )
+            self.canvas_width = r_canvas_width
+            self.canvas_height = int(r_canvas_width / img_ratio)
 
         self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
         self.canvas_height_scale = float(

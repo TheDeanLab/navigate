@@ -302,8 +302,8 @@ class TestCameraSettingController:
             assert (
                 int(self.camera_settings.camera_setting_dict["number_of_pixels"]) == 15
             )
-        step_width = self.camera_settings.camera_setting_dict["x_pixels_step"]
-        step_height = self.camera_settings.camera_setting_dict["y_pixels_step"]
+        step_width = self.camera_settings.step_width
+        step_height = self.camera_settings.step_height
         set_width = int(width // step_width) * step_width
         set_height = int(height // step_height) * step_height
         if mode == "Light-Sheet":

@@ -65,6 +65,10 @@ class CameraSettingController(GUIController):
         self.trigger_source = None
         self.trigger_active = None
         self.readout_speed = None
+        self.step_width = 4
+        self.step_height = 4
+        self.min_width = 4
+        self.min_height = 4
         self.initialize()
 
         # Event binding
@@ -223,18 +227,15 @@ class CameraSettingController(GUIController):
 
         # Camera FOV Size.
         x_pixel = self.roi_widgets["Width"].get(
-            self.camera_setting_dict["x_pixels_min"]
+            self.min_width
         )
         y_pixel = self.roi_widgets["Height"].get(
-            self.camera_setting_dict["y_pixels_min"]
+            self.min_height
         )
 
-        x_step = int(self.camera_setting_dict["x_pixels_step"])
-        y_step = int(self.camera_setting_dict["y_pixels_step"])
-
         # Round to nearest step
-        x_pixels = int(x_pixel // x_step) * x_step
-        y_pixels = int(y_pixel // y_step) * y_step
+        x_pixels = int(x_pixel // self.step_width) * self.step_width
+        y_pixels = int(y_pixel // self.step_height) * self.step_height
 
         self.camera_setting_dict["pixel_size"] = self.default_pixel_size
         self.camera_setting_dict["frames_to_average"] = self.framerate_widgets[
@@ -397,21 +398,18 @@ class CameraSettingController(GUIController):
 
         try:
             x_pixel = float(
-                self.roi_widgets["Width"].get(self.camera_setting_dict["x_pixels_min"])
+                self.roi_widgets["Width"].get(self.min_width)
             )
             y_pixel = float(
-                self.roi_widgets["Height"].get(self.camera_setting_dict["y_pixels_min"])
+                self.roi_widgets["Height"].get(self.min_height)
             )
         except ValueError as e:
             logger.error(f"{e} similar to TclError")
             return
 
-        x_step = int(self.camera_setting_dict["x_pixels_step"])
-        y_step = int(self.camera_setting_dict["y_pixels_step"])
-
         # Round to nearest step
-        x_pixel = int(x_pixel // x_step) * x_step
-        y_pixel = int(y_pixel // y_step) * y_step
+        x_pixel = int(x_pixel // self.step_width) * self.step_width
+        y_pixel = int(y_pixel // self.step_height) * self.step_height
 
         microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
@@ -512,6 +510,11 @@ class CameraSettingController(GUIController):
         )
         if camera_config_dict is None:
             return
+        
+        self.step_width = camera_config_dict["x_pixels_step"]
+        self.step_height = camera_config_dict["y_pixels_step"]
+        self.min_width = camera_config_dict["x_pixels_min"]
+        self.min_height = camera_config_dict["y_pixels_min"]
 
         self.default_pixel_size = camera_config_dict["pixel_size_in_microns"]
         (

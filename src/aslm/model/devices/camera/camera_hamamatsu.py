@@ -65,6 +65,11 @@ class HamamatsuOrca(CameraBase):
         self.camera_parameters["y_pixels"] = self.max_image_height
         self.camera_parameters["x_pixels_min"] = self.min_image_width
         self.camera_parameters["y_pixels_min"] = self.min_image_height
+        self.camera_parameters["x_pixels_step"] = self.step_image_width
+        self.camera_parameters["y_pixels_step"] = self.step_image_height
+
+        print("steps")
+        print(self.step_image_width, self.step_image_height)
 
         _, speed_max, _ = self.camera_controller.get_property_range("readout_speed")
         if speed_max is not None:

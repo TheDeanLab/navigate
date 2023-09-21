@@ -743,12 +743,14 @@ class DCAM:
         self.prop_setvalue(property_dict["subarray_mode"], DCAMPROP_MODE__OFF)
         _, self.max_image_width, _ = self.get_property_range("image_width")
         _, self.max_image_height, _ = self.get_property_range("image_height")
-        self.min_image_width, _, self.step_image_height = self.get_property_range(
+        self.min_image_width, _, self.step_image_width = self.get_property_range(
             "subarray_hsize"
         )
         self.min_image_height, _, self.step_image_height = self.get_property_range(
             "subarray_vsize"
         )
+
+        print(f"steps {self.step_image_height} {self.step_image_width}")
 
         self._serial_number = self.get_string_value(
             c_int32(int("0x04000102", 0))

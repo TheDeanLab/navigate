@@ -786,16 +786,10 @@ class TestCameraViewController:
         assert not self.camera_view.ilastik_mask_ready_lock.locked()
 
     def test_update_canvas_size(self):
-        camera_parameters = self.camera_view.parent_controller.configuration[
-            "experiment"
-        ]["CameraParameters"]
-
         self.camera_view.view.canvas["width"] = random.randint(1, 2000)
         self.camera_view.view.canvas["height"] = random.randint(1, 2000)
 
         self.camera_view.update_canvas_size()
 
-        assert self.camera_view.canvas_width > camera_parameters["x_pixels_min"]
-        assert self.camera_view.canvas_height > camera_parameters["y_pixels_min"]
-        assert self.camera_view.canvas_width % camera_parameters["x_pixels_step"] == 0
-        assert self.camera_view.canvas_height % camera_parameters["y_pixels_step"] == 0
+        assert self.camera_view.canvas_width > 0
+        assert self.camera_view.canvas_height > 0

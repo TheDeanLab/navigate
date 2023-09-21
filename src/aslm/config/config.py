@@ -392,10 +392,6 @@ def verify_experiment_config(manager, configuration):
     camera_parameters_dict_sample = {
         "x_pixels": 2048,
         "y_pixels": 2048,
-        "x_pixels_min": 4,
-        "y_pixels_min": 4,
-        "x_pixels_step": 4,
-        "y_pixels_step": 4,
         "img_x_pixels": 2048,
         "img_y_pixels": 2048,
         "sensor_mode": "Normal",
@@ -432,34 +428,6 @@ def verify_experiment_config(manager, configuration):
         camera_setting_dict["y_pixels"] = int(camera_setting_dict["y_pixels"])
     except ValueError:
         camera_setting_dict["y_pixels"] = camera_parameters_dict_sample["y_pixels"]
-
-    try:
-        camera_setting_dict["x_pixels_min"] = int(camera_setting_dict["x_pixels_min"])
-    except ValueError:
-        camera_setting_dict["x_pixels_min"] = camera_parameters_dict_sample[
-            "x_pixels_min"
-        ]
-
-    try:
-        camera_setting_dict["y_pixels_min"] = int(camera_setting_dict["y_pixels_min"])
-    except ValueError:
-        camera_setting_dict["y_pixels_min"] = camera_parameters_dict_sample[
-            "y_pixels_min"
-        ]
-
-    try:
-        camera_setting_dict["x_pixels_step"] = int(camera_setting_dict["x_pixels_step"])
-    except ValueError:
-        camera_setting_dict["x_pixels_min"] = camera_parameters_dict_sample[
-            "x_pixels_step"
-        ]
-
-    try:
-        camera_setting_dict["y_pixels_step"] = int(camera_setting_dict["y_pixels_step"])
-    except ValueError:
-        camera_setting_dict["y_pixels_step"] = camera_parameters_dict_sample[
-            "y_pixels_step"
-        ]
 
     # image width and height
     if camera_setting_dict["x_pixels"] <= 0:

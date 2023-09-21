@@ -113,13 +113,14 @@ class HamamatsuOrca(CameraBase):
         """
         return self.camera_controller._serial_number
 
+    # The pass statements get around camera base calls
     @property
     def max_image_width(self):
         return self.camera_controller.max_image_width
 
     @max_image_width.setter
     def max_image_width(self, value):
-        self.camera_controller.max_image_width = value
+        pass
 
     @property
     def min_image_width(self):
@@ -127,7 +128,7 @@ class HamamatsuOrca(CameraBase):
 
     @min_image_width.setter
     def min_image_width(self, value):
-        self.camera_controller.min_image_width = value
+        pass
 
     @property
     def max_image_height(self):
@@ -135,7 +136,7 @@ class HamamatsuOrca(CameraBase):
 
     @max_image_height.setter
     def max_image_height(self, value):
-        self.camera_controller.max_image_height = value
+        pass
 
     @property
     def min_image_height(self):
@@ -143,7 +144,7 @@ class HamamatsuOrca(CameraBase):
 
     @min_image_height.setter
     def min_image_height(self, value):
-        self.camera_controller.min_image_height = value
+        pass
 
     @property
     def step_image_width(self):
@@ -151,7 +152,7 @@ class HamamatsuOrca(CameraBase):
 
     @step_image_width.setter
     def step_image_width(self, value):
-        self.camera_controller.step_image_width = value
+        pass
 
     @property
     def step_image_height(self):
@@ -159,7 +160,7 @@ class HamamatsuOrca(CameraBase):
 
     @step_image_height.setter
     def step_image_height(self, value):
-        self.camera_controller.step_image_height = value
+        pass
 
     def report_settings(self):
         """Print Camera Settings."""

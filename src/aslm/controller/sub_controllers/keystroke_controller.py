@@ -38,7 +38,7 @@ import platform
 
 # Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.view.custom_widgets.validation import ValidatedEntry
+from aslm.view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -201,8 +201,8 @@ class KeystrokeController(GUIController):
         -------
         >>> self.main_view.bind_all('<Control-Key-z>', self.widget_undo)
         """
-        if isinstance(
-            event.widget, ValidatedEntry
+        if isinstance(event.widget, ValidatedEntry) or isinstance(
+            event.widget, ValidatedSpinbox
         ):  # Add all widgets that you want to be able to undo here
             event.widget.undo(event)
 
@@ -223,7 +223,7 @@ class KeystrokeController(GUIController):
         >>> self.main_view.bind_all('<Control-Key-y>', self.widget_redo)
         """
 
-        if isinstance(
-            event.widget, ValidatedEntry
+        if isinstance(event.widget, ValidatedEntry) or isinstance(
+            event.widget, ValidatedSpinbox
         ):  # Add all widgets that you want to be able to undo here
             event.widget.redo(event)

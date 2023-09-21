@@ -243,6 +243,9 @@ class ValidatedMixin:
             if valid:
                 self.add_history(event)
             else:
+                if self.undo_history:
+                    # Only keep the most recent value in forced undo
+                    self.undo_history = [self.undo_history[-1]]
                 valid = self.undo(event)
         elif event == "key":  # Keystroke into widget
             valid = self._key_validate(
@@ -452,7 +455,14 @@ class ValidatedMixin:
             # Restore the undo value
             if self.undo_history:
                 value = self.undo_history.pop()
-            self.set(value)
+                self.set(value)
+            else:
+                # Don't let the undo history drop to zero.
+                # This lets us restore values.
+                # We have to set the value before adding history.
+                self.set(value)
+                self.redo_history.pop()
+                self.add_history(event)
             return True
         return False
 
@@ -1094,6 +1104,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         """
         valid = True
         value = self.get()
+
         max_val = self.cget("to")
         min_val = self.cget("from")
         try:

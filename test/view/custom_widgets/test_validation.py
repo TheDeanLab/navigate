@@ -6,14 +6,14 @@ import pytest
 from aslm.view.custom_widgets.validation import ValidatedEntry
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def tk_root():
     root = tk.Tk()
     yield root
     root.destroy()
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def entry(tk_root):
     entry = ValidatedEntry(tk_root, textvariable=tk.DoubleVar())
     tk_root.update()

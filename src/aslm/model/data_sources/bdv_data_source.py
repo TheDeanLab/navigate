@@ -208,6 +208,9 @@ class BigDataViewerDataSource(DataSource):
                     )
 
     def _setup_n5(self):
+        # TODO: Figure out discrepancy in calculated image size and actual image size.
+        # Strange behavior. When viewed in Windows, ~2x too small.
+        # When opened in ImageJ, calculated image size is approximately correct.
         self.__store = zarr.N5Store(self.file_name)
         self.image = zarr.group(store=self.__store, overwrite=True)
 

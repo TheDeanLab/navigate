@@ -999,7 +999,12 @@ class Controller:
     def update_event(self):
         while True:
             event, value = self.event_queue.get()
-            if event == "waveform":
+
+            if event == "warning":
+                # Display a warning that arises from the model as a top-level GUI popup
+                messagebox.showwarning(title="ASLM", message=value)
+
+            elif event == "waveform":
                 # Update the waveform plot.
                 self.waveform_tab_controller.update_waveforms(
                     waveform_dict=value,

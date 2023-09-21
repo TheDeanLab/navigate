@@ -173,7 +173,8 @@ class SutterFilterWheel(FilterWheelBase):
         old_position = self.wheel_position
         self.wheel_position = self.filter_dictionary[filter_name]
         delta_position = int(abs(old_position - self.wheel_position))
-        self.wait_until_done_delay = self.delay_matrix[self.speed, delta_position]
+            # TODO: Low priority - Move delay matrix to configuration YAML or account for different models
+
 
     def set_filter(self, filter_name, wait_until_done=True):
         """Change the filter wheel to the filter designated by the filter

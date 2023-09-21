@@ -21,6 +21,18 @@ def entry(tk_root):
     yield entry
 
 
+def test_set(entry):
+    entry.set("42")
+    assert entry.get() == "42"
+
+
+def test_set2(tk_root):
+    entry = ValidatedEntry(tk_root, textvariable=tk.DoubleVar())
+    tk_root.update()
+    entry.set("42")
+    assert entry.get() == "42"
+
+
 def test_add_history(entry):
     # TODO: Why does this not work with textvariable=tk.StringVar()??
     entry.set("42")

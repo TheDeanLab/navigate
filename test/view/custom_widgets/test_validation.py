@@ -73,3 +73,11 @@ def test_undo_redo(entry):
         assert entry.get() == vals[-1]
         assert entry.undo_history == vals[-3:]
         assert entry.redo_history == []
+
+
+def test_validate_undo(entry):
+    entry.set("42")
+    entry.add_history(0)
+    entry.set("")
+    entry._validate("", "", "", "focusout", "-1", "-1")
+    assert entry.get() == "42"

@@ -715,15 +715,15 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         else:
             self.error.set("")
 
-        # check if there are range limits
-        if min_val == "-Infinity" or max_val == "Infinity":
-            return True
-
         try:
             value = Decimal(value)
         except InvalidOperation:
             self.error.set("Invalid number string: {}".format(value))
             return False
+
+        # check if there are range limits
+        if min_val == "-Infinity" or max_val == "Infinity":
+            return True
 
         # Checking if greater than minimum
         if value < int(min_val):

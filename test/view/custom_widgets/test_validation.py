@@ -3,6 +3,8 @@ import tkinter as tk
 
 import pytest
 
+from aslm.view.custom_widgets.validation import ValidatedEntry
+
 
 @pytest.fixture
 def tk_root():
@@ -13,9 +15,8 @@ def tk_root():
 
 @pytest.fixture
 def entry(tk_root):
-    from aslm.view.custom_widgets.validation import ValidatedEntry
-
     entry = ValidatedEntry(tk_root, textvariable=tk.DoubleVar())
+    tk_root.update()
 
     yield entry
 

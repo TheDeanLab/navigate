@@ -6,17 +6,15 @@ import pytest
 
 from aslm.view.custom_widgets.validation import ValidatedEntry
 
-var = None  # make this a global reference
 
-
-@pytest.fixture(scope="module")
+@pytest.fixture
 def tk_root():
     root = tk.Tk()
     yield root
     root.destroy()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def entry(tk_root):
     var = tk.DoubleVar()
     entry = ValidatedEntry(tk_root, textvariable=var)
@@ -25,77 +23,45 @@ def entry(tk_root):
     yield entry
 
 
-def test_direct_set(tk_root):
-    var = tk.DoubleVar()
-    var.set("42")
-    assert float(var.get()) == 42
-
-
-def test_direct_set2(tk_root):
-    var = tk.DoubleVar()
-    entry = ttk.Entry(tk_root, textvariable=var)
-    var.set("42")
-    entry.validate()
-    assert float(entry.get()) == 42
-
-
-def test_direct_set3(tk_root):
-    entry = ttk.Entry(tk_root, textvariable=tk.DoubleVar())
-    entry.insert(0, "42")
-    assert float(entry.get()) == 42
-
-
-def test_set(entry):
-    entry.set("42")
-    assert entry.get() == "42"
-
-
-def test_set2(tk_root):
-    entry = ValidatedEntry(tk_root, textvariable=tk.DoubleVar())
-    tk_root.update()
-    entry.set("42")
-    assert entry.get() == "42"
-
-
 def test_add_history(entry):
     # TODO: Why does this not work with textvariable=tk.StringVar()??
-    entry.set("42")
+    entry.set(42.0)
     entry.add_history(0)
-    assert entry.undo_history.pop() == "42"
+    assert entry.undo_history.pop() == "42.0"
 
 
 def test_undo(entry):
     # base case
-    entry.set("42")
+    entry.set(42.0)
     entry.add_history(0)
     entry.undo(0)
-    assert entry.get() == "42"
+    assert entry.get() == "42.0"
 
     # regular undo
-    entry.set("42")
+    entry.set(42.0)
     entry.add_history(0)
-    entry.set("43")
+    entry.set(43.0)
     entry.add_history(0)
     entry.undo(0)
-    assert entry.get() == "42"
-    assert entry.redo_history.pop() == "43"
+    assert entry.get() == "42.0"
+    assert entry.redo_history.pop() == "43.0"
 
 
 def test_redo(entry):
-    entry.set("42")
+    entry.set(42.0)
     entry.add_history(0)
-    entry.set("43")
+    entry.set(43.0)
     entry.add_history(0)
     entry.undo(0)
-    assert entry.get() == "42"
+    assert entry.get() == "42.0"
     entry.redo(0)
-    assert entry.get() == "43"
-    assert entry.undo_history == ["42", "43"]
+    assert entry.get() == "43.0"
+    assert entry.undo_history == ["42.0", "43.0"]
 
 
 def test_undo_redo(entry):
     # Random number of entries
-    vals = [str(random.randint(1, 100)) for _ in range(random.randint(3, 5))]
+    vals = [random.randint(1, 100) for _ in range(random.randint(3, 5))]
     for val in vals:
         entry.set(val)
         entry.add_history(0)
@@ -103,18 +69,26 @@ def test_undo_redo(entry):
     n_tries = random.randint(1, 10)
     for _ in range(n_tries):
         entry.undo(0)
-        assert entry.redo_history == [vals[-1]]
-        assert entry.get() == vals[-2]
-        assert entry.undo_history == [vals[-3]]
+        assert entry.redo_history == [str(vals[-1])]
+        assert entry.get() == str(vals[-2])
+        assert entry.undo_history == [str(vals[-3])]
         entry.redo(0)
-        assert entry.get() == vals[-1]
-        assert entry.undo_history == vals[-3:]
+        assert entry.get() == str(vals[-1])
+        assert entry.undo_history == [str(x) for x in vals[-3:]]
         assert entry.redo_history == []
 
 
 def test_validate_undo(entry):
-    entry.set("42")
+    entry.set(42.0)
     entry.add_history(0)
     entry.set("")
     entry._validate("", "", "", "focusout", "-1", "-1")
-    assert entry.get() == "42"
+    assert entry.get() == "42.0"
+
+
+def test_direct_set2(tk_root):
+    var = tk.DoubleVar()
+    entry = ttk.Entry(tk_root, textvariable=var)
+    tk_root.update()
+    var.set(42.0)
+    assert entry.get() == "42.0"

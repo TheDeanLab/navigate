@@ -18,11 +18,20 @@ def entry():
     root.destroy()
 
 
-def test_add_history(entry):
+def test_add_history():
     # TODO: Why does this not work with textvariable=tk.StringVar()??
+    root = tk.Tk()
+
+    var = tk.DoubleVar()
+    entry = ValidatedEntry(root, textvariable=var)
+    root.update()
+
     entry.set(42.0)
     entry.add_history(0)
-    assert entry.undo_history.pop() == "42.0"
+    try:
+        assert entry.undo_history.pop() == "42.0"
+    finally:
+        root.destroy()
 
 
 def test_undo(entry):

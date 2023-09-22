@@ -294,3 +294,4 @@ src/aslm/log_files/LOGS
 *.tif
 test.n5
 test_dir
+test.xml

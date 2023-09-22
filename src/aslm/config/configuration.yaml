@@ -62,6 +62,10 @@ microscopes:
       defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
       delay_percent: 10
       pulse_percent: 1
+      x_pixels_step: 4
+      y_pixels_step: 4
+      x_pixels_min: 4
+      y_pixels_min: 4
       exposure_time_range:
         min: 1
         max: 1000
@@ -284,6 +288,10 @@ microscopes:
       defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
       delay_percent: 10
       pulse_percent: 1
+      x_pixels_step: 4
+      y_pixels_step: 4
+      x_pixels_min: 4
+      y_pixels_min: 4
       exposure_time_range:
         min: 1
         max: 1000

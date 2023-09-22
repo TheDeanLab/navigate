@@ -150,11 +150,16 @@ class LabelInput(ttk.Frame):
             self.widget.grid(row=0, column=1, sticky=(tk.W + tk.E))
             self.rowconfigure(0, weight=1)
 
-    def get(self):
+    def get(self, default=None):
         """Returns the value of the input widget
 
         Creating a generic get function to catch all types of widgets,
         this uses the try except block for instances when tkintervariables fails
+
+        Parameters
+        ----------
+        default: object, optional
+            The default value to return if the get value doesn't work
 
         Returns
         -------
@@ -178,6 +183,8 @@ class LabelInput(ttk.Frame):
         except (TypeError, tk.TclError):
             # Catches times when a numeric entry input has a blank, since this
             # cannot be converted into a numeric value
+            if default is not None:
+                return default
             return ""
 
     def get_variable(self):

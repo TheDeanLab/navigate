@@ -596,8 +596,6 @@ class TestCameraViewController:
     @pytest.mark.parametrize("transpose", [True, False])
     def test_display_image(self, transpose):
         images = np.random.rand(10, 100, 100)
-        microscope_state = {"stack_cycling_mode": "per_stack"}
-        images_received = 0
 
         self.camera_view.transpose = transpose
         count = np.random.randint(0, 10)
@@ -786,3 +784,12 @@ class TestCameraViewController:
         # Assert the output
         assert (self.camera_view.ilastik_seg_mask == mask).all()
         assert not self.camera_view.ilastik_mask_ready_lock.locked()
+
+    def test_update_canvas_size(self):
+        self.camera_view.view.canvas["width"] = random.randint(1, 2000)
+        self.camera_view.view.canvas["height"] = random.randint(1, 2000)
+
+        self.camera_view.update_canvas_size()
+
+        assert self.camera_view.canvas_width > 0
+        assert self.camera_view.canvas_height > 0

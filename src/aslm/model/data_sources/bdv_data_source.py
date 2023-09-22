@@ -334,11 +334,9 @@ class BigDataViewerDataSource(DataSource):
     def _setup_n5(self):
         """Set up the N5 file.
 
-        This function creates the file and the datasets to populate.
-
-        TODO: Figure out discrepancy in calculated image size and actual image size.
-        Strange behavior. When viewed in Windows, ~2x too small.
-        When opened in ImageJ, calculated image size is approximately correct.
+        This function creates the file and the datasets to populate. By default,
+        it appears to implement blosc compression. Consequently, the anticipated file
+        size, and the actual file size, do not match. This is not the case for HDF5.
 
         Note
         ----

@@ -154,10 +154,14 @@ class ImageWriter:
                     os.makedirs(self.save_directory)
                     logger.debug(f"Save Directory Created - {self.save_directory}")
                 except OSError:
-                    logger.debug(f"Unable to Create Save Directory - {self.save_directory}")
+                    logger.debug(
+                        f"Unable to Create Save Directory - {self.save_directory}"
+                    )
                     self.model.stop_acquisition = True
-                    self.model.event_queue.put("warning",
-                                               "Unable to Create Save Directory. Acquisition Terminated")
+                    self.model.event_queue.put(
+                        "warning",
+                        "Unable to Create Save Directory. Acquisition Terminated",
+                    )
                     return
         except FileNotFoundError as e:
             logger.debug(f"Unable to Create Save Directory - {self.save_directory}")
@@ -172,10 +176,14 @@ class ImageWriter:
                     os.makedirs(self.mip_directory)
                     logger.debug(f"MIP Directory Created - {self.mip_directory}")
                 except OSError:
-                    logger.debug(f"Unable to Create MIP Directory - {self.mip_directory}")
+                    logger.debug(
+                        f"Unable to Create MIP Directory - {self.mip_directory}"
+                    )
                     self.model.stop_acquisition = True
-                    self.model.event_queue.put("warning",
-                                               "Unable to create MIP Directory. Acquisition Terminated.")
+                    self.model.event_queue.put(
+                        "warning",
+                        "Unable to create MIP Directory. Acquisition Terminated.",
+                    )
                     return
         except FileNotFoundError as e:
             logger.debug("Image Writer: Unable to create MIP directory.")
@@ -365,14 +373,14 @@ class ImageWriter:
 
         # Calculate the size in bytes.
         image_size = self.data_source.size
-        print("Estimated file size:", image_size / 10**6)
 
         # Confirm that there is enough disk space to save the data.
         if free < image_size:
             logger.debug("Image Writer: Insufficient Disk Space Estimated.")
             self.model.stop_acquisition = True
-            self.model.event_queue.put(("warning",
-                                       "Insufficient Disk Space. Acquisition Terminated"))
+            self.model.event_queue.put(
+                ("warning", "Insufficient Disk Space. Acquisition Terminated")
+            )
             return
 
         # TIFF vs Big-TIFF Comparison

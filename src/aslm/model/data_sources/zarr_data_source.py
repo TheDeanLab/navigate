@@ -40,10 +40,38 @@ from .data_source import DataSource
 
 
 class ZarrDataSource(DataSource):
+    """Data source for Zarr files.
+
+    Parameters
+    ----------
+    file_name : str
+        Path to file.
+    mode : str
+        File mode. "r" for read, "w" for write.
+
+    Methods
+    -------
+    write(data: npt.ArrayLike, **kw) -> None
+        Write data to file.
+    copy_to_zarr(frame_ids)
+        Write data to Zarr.
+
+    """
+
     def __init__(self, file_name: str = None, mode: str = "w") -> None:
         super().__init__(file_name, mode)
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
+        """Write data to file.
+
+        Parameters
+        ----------
+        data : npt.ArrayLike
+            Data to write.
+        **kw
+            Keyword arguments.
+
+        """
         z = self.copy_to_zarr(data)
 
         zarr.save(self.file_name, z)
@@ -56,12 +84,22 @@ class ZarrDataSource(DataSource):
         For example, if there are 3 channels selected there should be three frames.
         Making the assumption there is only one frame per channel on a single
         acquisition
-        """
 
-        # Getting needed info, I am doing it in the function because i think if we do
-        # not reinit the class,
-        # save directory will be a stagnant var. If we just leave
-        # self.model = model then that ref will alwasy be up to date
+        Getting needed info, I am doing it in the function because i think if we do
+        not reinit the class, save directory will be a stagnant var. If we just leave
+        self.model = model then that ref will always be up to date
+
+        Parameters
+        ----------
+        frame_ids : list
+            List of frame ids to copy.
+
+        Returns
+        -------
+        z : zarr.core.Array
+            Zarr array.
+
+        """
         num_of_channels = len(
             self.model.configuration["experiment"]["MicroscopeState"]["channels"].keys()
         )

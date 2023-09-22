@@ -179,7 +179,7 @@ class SutterFilterWheel(FilterWheelBase):
             # Murdered by the hard coded delay matrix.
             # Guess a value
             # TODO: Low priority - Move delay matrix to configuration YAML or account for different models
-            self.wait_until_done = 0.01
+            self.wait_until_done_delay = 0.01
 
 
     def set_filter(self, filter_name, wait_until_done=True):

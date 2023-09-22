@@ -1,6 +1,5 @@
 import random
 import tkinter as tk
-from tkinter import ttk
 
 import pytest
 
@@ -8,19 +7,15 @@ from aslm.view.custom_widgets.validation import ValidatedEntry
 
 
 @pytest.fixture
-def tk_root():
+def entry():
     root = tk.Tk()
-    yield root
-    root.destroy()
 
-
-@pytest.fixture
-def entry(tk_root):
     var = tk.DoubleVar()
-    entry = ValidatedEntry(tk_root, textvariable=var)
-    tk_root.update()
+    entry = ValidatedEntry(root, textvariable=var)
+    root.update()
 
     yield entry
+    root.destroy()
 
 
 def test_add_history(entry):
@@ -83,12 +78,4 @@ def test_validate_undo(entry):
     entry.add_history(0)
     entry.set("")
     entry._validate("", "", "", "focusout", "-1", "-1")
-    assert entry.get() == "42.0"
-
-
-def test_direct_set2(tk_root):
-    var = tk.DoubleVar()
-    entry = ttk.Entry(tk_root, textvariable=var)
-    tk_root.update()
-    var.set(42.0)
     assert entry.get() == "42.0"

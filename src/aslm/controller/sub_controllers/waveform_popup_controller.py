@@ -223,6 +223,7 @@ class WaveformPopupController(GUIController):
             self.widgets[laser + " Amp"].widget.configure(to=laser_max)
             self.widgets[laser + " Amp"].widget.configure(increment=increment)
             self.widgets[laser + " Amp"].widget.set_precision(precision)
+            self.widgets[laser + " Amp"].widget.trigger_focusout_validation()
             # TODO: The offset bounds should adjust based on the amplitude bounds,
             #       so that amp + offset does not exceed the bounds. Can be done
             #       in update_remote_focus_settings()
@@ -230,6 +231,7 @@ class WaveformPopupController(GUIController):
             self.widgets[laser + " Off"].widget.configure(to=laser_max)
             self.widgets[laser + " Off"].widget.configure(increment=increment)
             self.widgets[laser + " Off"].widget.set_precision(precision)
+            self.widgets[laser + " Off"].widget.trigger_focusout_validation()
 
         for galvo, d in zip(self.galvos, self.galvo_dict):
             galvo_min = d["hardware"]["min"]
@@ -239,6 +241,7 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Amp"].widget.configure(increment=increment)
             self.widgets[galvo + " Amp"].widget.set_precision(precision)
             self.widgets[galvo + " Amp"].widget["state"] = "normal"
+            self.widgets[galvo + " Amp"].widget.trigger_focusout_validation()
             # TODO: The offset bounds should adjust based on the amplitude bounds,
             #       so that amp + offset does not exceed the bounds. Can be done
             #       in update_remote_focus_settings()
@@ -247,11 +250,13 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Off"].widget.configure(increment=increment)
             self.widgets[galvo + " Off"].widget.set_precision(precision)
             self.widgets[galvo + " Off"].widget["state"] = "normal"
+            self.widgets[galvo + " Off"].widget.trigger_focusout_validation()
 
             self.widgets[galvo + " Freq"].widget.configure(from_=0)
             self.widgets[galvo + " Freq"].widget.configure(increment=increment)
             self.widgets[galvo + " Freq"].widget.set_precision(precision)
             self.widgets[galvo + " Freq"].widget["state"] = "normal"
+            self.widgets[galvo + " Freq"].widget.trigger_focusout_validation()
 
         for i in range(len(self.galvos), self.configuration_controller.galvo_num):
             galvo_name = f"Galvo {i}"
@@ -393,7 +398,9 @@ class WaveformPopupController(GUIController):
         self.widgets["Smoothing"].set(
             waveform_configuration.get("percent_smoothing", 0)
         )
+        self.widgets["Smoothing"].widget.trigger_focusout_validation()
         self.widgets["Delay"].set(waveform_configuration.get("percent_delay", 7.5))
+        self.widgets["Delay"].widget.trigger_focusout_validation()
         if "other_constants" not in self.resolution_info:
             update_config_dict(
                 self.parent_controller.manager,
@@ -404,6 +411,7 @@ class WaveformPopupController(GUIController):
         self.widgets["Duty"].set(
             self.resolution_info["other_constants"]["remote_focus_settle_duration"]
         )
+        self.widgets["Duty"].widget.trigger_focusout_validation()
         self.update_waveform_parameters_flag = True
 
         # update resolution value in central controller (menu)

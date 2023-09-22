@@ -6,6 +6,8 @@ import pytest
 
 from aslm.view.custom_widgets.validation import ValidatedEntry
 
+var = None  # make this a global reference
+
 
 @pytest.fixture(scope="module")
 def tk_root():
@@ -16,7 +18,8 @@ def tk_root():
 
 @pytest.fixture(scope="module")
 def entry(tk_root):
-    entry = ValidatedEntry(tk_root, textvariable=tk.DoubleVar())
+    var = tk.DoubleVar()
+    entry = ValidatedEntry(tk_root, textvariable=var)
     tk_root.update()
 
     yield entry

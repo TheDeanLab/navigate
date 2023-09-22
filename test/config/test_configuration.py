@@ -227,7 +227,11 @@ class TestConfiguration(unittest.TestCase):
             "frames_to_average",
             "exposure_time_range",
             "flip_x",
-            "flip_y"
+            "flip_y",
+            "x_pixels_step",
+            "y_pixels_step",
+            "x_pixels_min",
+            "y_pixels_min",
         ]
         type_keys = ["name", "type"]
 
@@ -345,7 +349,7 @@ class TestConfiguration(unittest.TestCase):
             "joystick_axes",
             "flip_x",
             "flip_y",
-            "flip_z"
+            "flip_z",
         ]
         type_keys = [
             "name",

@@ -159,7 +159,7 @@ class IMOP_Mirror:
                  positions_file_path=os.path.join(basepath, 'MirrorFiles', 'OPMv3_SysCorr_517nm_20230324.wcs'),
                  #positions_file_path=os.path.join(basepath, 'MirrorFiles', 'best.wcs'),
                  #interaction_matrix_file_path=os.path.join(basepath, 'MirrorFiles', 'OlympusJuly5.aoc'),
-                 interaction_matrix_file_path=os.path.join(basepath, 'MirrorFiles', 'OlympusApril22.aoc'),
+                 interaction_matrix_file_path=os.path.join(basepath, 'MirrorFiles', 'VAST_Sept_2023_b.aoc'),
                  n_modes=32
                  ):
         

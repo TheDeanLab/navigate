@@ -1,5 +1,6 @@
 import random
 import tkinter as tk
+from tkinter import ttk
 
 import pytest
 
@@ -19,6 +20,25 @@ def entry(tk_root):
     tk_root.update()
 
     yield entry
+
+
+def test_direct_set(tk_root):
+    var = tk.DoubleVar()
+    var.set("42")
+    assert float(var.get()) == 42
+
+
+def test_direct_set2(tk_root):
+    var = tk.DoubleVar()
+    entry = ttk.Entry(tk_root, textvariable=var)
+    var.set("42")
+    assert float(entry.get()) == 42
+
+
+def test_direct_set3(tk_root):
+    entry = ttk.Entry(tk_root, textvariable=tk.DoubleVar())
+    entry.insert(0, "42")
+    assert float(entry.get()) == 42
 
 
 def test_set(entry):

@@ -31,6 +31,7 @@ def test_direct_set(tk_root):
 def test_direct_set2(tk_root):
     var = tk.DoubleVar()
     entry = ttk.Entry(tk_root, textvariable=var)
+    entry.validate()
     var.set("42")
     assert float(entry.get()) == 42
 

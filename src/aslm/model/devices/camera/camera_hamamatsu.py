@@ -259,7 +259,6 @@ class HamamatsuOrca(CameraBase):
               out the actual readout_time
               calculated here (i.e. we don't need to do the calculations).
         """
-        h = 9.74436 * 10**-6  # Readout timing constant
         h = self.camera_controller.get_property_value("readout_time")
         vn = self.camera_controller.get_property_value("subarray_vsize")
         sensor_mode = self.camera_controller.get_property_value("sensor_mode")

@@ -129,6 +129,26 @@ class Metadata:
             )
             or (
                 self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVATTL"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVASINGLEWAVE"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVACONPRO"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVACONT"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVACONPROMULTICHANNEL"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                 == "customized"
             )
         ):

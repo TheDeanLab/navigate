@@ -431,6 +431,7 @@ class TigerController:
         Set scan range.
         """
         enc_divide_mm = self.get_encoder_counts_per_mm(axis)
+        print("Encoder Divide in mm:", enc_divide_mm)
         if enc_divide == 0:
             enc_divide = enc_divide_mm
         else:

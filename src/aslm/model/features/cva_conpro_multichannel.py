@@ -256,7 +256,6 @@ class CVACONPROMULTICHANNEL:
         #
         # if self.model.stop_acquisition or self.end_acquisition:
         #     print("end_signal_function: Stop acquisition.")
-        #     self.asi_stage.stop_scan(self.axis)
         #     return True
         # else:
         #     print("end_signal_function: Continue acquisition.")

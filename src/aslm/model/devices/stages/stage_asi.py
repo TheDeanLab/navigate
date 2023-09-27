@@ -459,7 +459,7 @@ class ASIStage(StageBase):
         end_position_mm: float
             scan end position
         enc_divide: float
-            an output pulse will occur every enc_divide number of encoder counts
+            Step size desired.
         axis: str
             fast axis name
 
@@ -471,9 +471,14 @@ class ASIStage(StageBase):
         try:
             axis = self.axes_mapping[axis]
             self.tiger_controller.scanr(
-                start_position_mm, end_position_mm, enc_divide, axis
+                start_position_mm,
+                end_position_mm,
+                enc_divide,
+                axis
             )
-        except TigerException:
+        except TigerException as e:
+            logger.exception(f"TigerException: {e}")
+            print(logger.exception())
             return False
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in scanr: {e}")
@@ -497,7 +502,8 @@ class ASIStage(StageBase):
         try:
             axis = self.axes_mapping[axis]
             self.tiger_controller.start_scan(axis)
-        except TigerException:
+        except TigerException as e:
+            logger.exception(f"TigerException: {e}")
             return False
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in start_scan: {e}")
@@ -510,3 +516,8 @@ class ASIStage(StageBase):
             self.tiger_controller.stop_scan()
         except TigerException as e:
             logger.exception("ASI Stage Exception", e)
+
+    def wait_until_complete(self):
+        """ Wait until all axes have stopped moving."""
+        while self.tiger_controller.is_moving():
+            pass

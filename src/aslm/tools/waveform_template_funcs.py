@@ -58,8 +58,6 @@ def get_waveform_template_parameters(
     expand_num: int
         the number of expands
     """
-    print(f"Calling waveform template parameters with {waveform_template_name}")
-    print(f"Looking in {waveform_template_dict[waveform_template_name]}")
     try:
         waveform_template = waveform_template_dict[waveform_template_name]
     except KeyError:

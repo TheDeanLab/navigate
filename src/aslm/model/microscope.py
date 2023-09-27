@@ -555,9 +555,9 @@ class Microscope:
         # self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
         # stop daq before writing new waveform
+        # When called the first time, throws an error.
         self.daq.stop_acquisition()
-        # prepare daq: write waveform
-        print(f"*** microscope.py camera exposure time: f{self.current_exposure_time}")
+        print("CHANNEL KEY:", channel_key)
         self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # Add Defocus term

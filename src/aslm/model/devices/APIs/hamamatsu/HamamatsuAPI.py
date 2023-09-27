@@ -765,9 +765,13 @@ class DCAM:
         """
         if errvalue < 0:
             try:
-                print("error message: ", DCAMERR(errvalue))
+                pass
+                # self.logger.debug(f"error message: {DCAMERR(errvalue)}")
+                # print("error message: ", DCAMERR(errvalue))
             except:  # noqa
-                print("error message: ", errvalue)
+                pass
+                #self.logger.debug(f"error message: {errvalue}")
+                # print("error message: ", errvalue)
             return False
 
         return True
@@ -821,9 +825,7 @@ class DCAM:
             False:  if dcamdev_open() returned DCAMERR except SUCCESS.  lasterr()
                     returns the DCAMERR value.
         """
-        print("Opening Camera")
         if self.__hdcam:
-            print("Camera already open")
             return self.__result(
                 DCAMERR.ALREADYOPENED
             )  # instance is already opened. New Error.
@@ -841,7 +843,7 @@ class DCAM:
             print("Camera dev_open failed")
             return False
         else:
-            print("Camera Open")
+            pass
 
         self.__hdcam = c_void_p(paramopen.hdcam)
 

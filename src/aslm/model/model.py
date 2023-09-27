@@ -117,7 +117,6 @@ class Model:
     move_stage()
     end_acquisition()
     run_data_process()
-    get_readout_time()
     prepare_acquisition()
     run_single_channel_acquisition()
     run_single_acquisition()
@@ -154,7 +153,7 @@ class Model:
         self.total_image_count = None
         self.current_exposure_time = 0  # milliseconds
         self.pre_exposure_time = 0  # milliseconds
-        self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
+        self.camera_wait_iterations = 200  # Thread waits this * 500 ms before it ends
         self.start_time = None
         self.data_buffer = None
         self.img_width = int(
@@ -762,9 +761,6 @@ class Model:
 
         # whether acquire specific number of frames.
         count_frame = num_of_frames > 0
-        print(f"***num_frames = {num_of_frames}")
-        print(f"**count_frames = {count_frame}")
-
         start_time = time.time()
 
         while not self.stop_acquisition:
@@ -786,7 +782,6 @@ class Model:
                 continue
 
             acquired_frame_num += len(frame_ids)
-            print(f"*** model acquired_frame_num = {acquired_frame_num}")
             stop_time = time.time()
             frames_per_second = acquired_frame_num / (stop_time - start_time)
             self.event_queue.put(("framerate", frames_per_second))

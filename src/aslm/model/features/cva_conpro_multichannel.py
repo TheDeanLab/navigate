@@ -239,33 +239,39 @@ class CVACONPROMULTICHANNEL:
         )
 
         self.current_z_position_um = self.start_position_um
-        print("Pre signal function complete")
 
     def main_signal_function(self):
-        if self.model.stop_acquisition:
+        if self.end_acquisition:
             return False
-        else:
-            self.asi_stage.start_scan(self.axis)
-            return True
+
+        self.asi_stage.start_scan(self.axis)
+        return True
 
     def end_signal_function(self):
         print("End signal function Called.")
         print("Stop acquisition signal: ", self.model.stop_acquisition)
-        print("End acquisition signal: ", self.self.end_acquisition)
-        if self.model.stop_acquisition:
-            self.asi_stage.stop_scan(self.axis)
-            return True
-
-        # Should estimate the current position here.
-        self.current_z_position_um += self.actual_mechanical_step_size_um
-
-        if self.model.stop_acquisition or self.end_acquisition:
-            print("end_signal_function: Stop acquisition.")
-            self.asi_stage.stop_scan(self.axis)
-            return True
-        else:
-            print("end_signal_function: Continue acquisition.")
-            return False
+        print("End acquisition signal: ", self.end_acquisition)
+        # if self.model.stop_acquisition:
+        #     return True
+        #
+        # # Should estimate the current position here.
+        # self.current_z_position_um += self.actual_mechanical_step_size_um
+        #
+        # if self.model.stop_acquisition or self.end_acquisition:
+        #     print("end_signal_function: Stop acquisition.")
+        #     self.asi_stage.stop_scan(self.axis)
+        #     return True
+        # else:
+        #     print("end_signal_function: Continue acquisition.")
+        #     return False
+        # if done with all the channels,
+        # set the channel back to 0, run prepare next channel, set external trigger.
+        # Configure the constant velocity/confocal projection mode
+        self.model.configuration[
+            "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+        self.model.active_microscope.prepare_next_channel()
+        self.model.active_microscope.daq.set_external_trigger()
+        return self.end_acquisition
 
     def update_channel(self):
         self.current_channel_in_list = (
@@ -280,16 +286,16 @@ class CVACONPROMULTICHANNEL:
 
         """
         print("Clean up called")
-        self.asi_stage.set_speed(percent=0.7)
-        self.asi_stage.move_axis_absolute(
-            self.axis,
-            self.start_position_um,
-            wait_until_done=True
-        )
+        # self.asi_stage.set_speed(percent=0.7)
+        # self.asi_stage.move_axis_absolute(
+        #     self.axis,
+        #     self.start_position_um,
+        #     wait_until_done=True
+        # )
 
         # Reset the trigger source to the default.
-        self.model.active_microscope.daq.set_external_trigger()
-        # self.model.active_microscope.daq.set_external_trigger(None)
+        # self.model.active_microscope.daq.set_external_trigger()
+        return True
 
     def pre_data_function(self):
         """Prepare the constant velocity acquisition.
@@ -308,10 +314,10 @@ class CVACONPROMULTICHANNEL:
         frame_ids : list
             List of frame ids received from the camera.
         """
-        self.received_frames += len(frame_ids)
 
-        # if self.saving_flag:
-        #     self.image_writer.write_frames(frame_ids)
+        self.received_frames += len(frame_ids)
+        if self.saving_flag:
+            self.image_writer.write_frames(frame_ids)
 
     def end_data_function(self):
         """Evaluate end condition for constant velocity acquisition.
@@ -321,19 +327,25 @@ class CVACONPROMULTICHANNEL:
         bool
             True if the acquisition is complete, False otherwise.
         """
+        print("end_data_function called")
+        print("self.received_frames = ", self.received_frames)
+        print("number of z steps = ", self.number_z_steps)
         if self.received_frames >= self.number_z_steps:
             self.end_acquisition = True
+            self.model.stop_acquisition = True
             print(f"end acquisition = {self.end_acquisition}")
+            #self.model.event_queue.put("end_acquisition")
             return True
-        # else:as
-        #     self.end_acquisition = False
-        #     return False
-        # return True
+        return False
 
     def cleanup_data_function(self):
         """Clean up the constant velocity acquisition.
 
+        Designed to be called in the case of a failure.
+        Do not rely on this function being called.
+
         Cleans up the image writer.
         """
+        print("clean up data function called")
         if self.saving_flag:
             self.image_writer.cleanup()

@@ -194,7 +194,10 @@ class NIDAQ(DAQBase):
                     self.analog_output_tasks[board_name].stop()
                 except:
                     print(print(traceback.format_exc()))
-                self.analog_output_tasks[board_name].triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
+                self.analog_output_tasks[
+                    board_name].triggers.start_trigger.cfg_dig_edge_start_trig(
+                    trigger_source
+                )
                 self.analog_output_tasks[board_name].register_done_event(None)
 
         else:
@@ -212,7 +215,7 @@ class NIDAQ(DAQBase):
                 self.external_trigger)
 
             # change camera task to so that it can be triggered again.
-            self.camera_trigger_task.triggers.start_trigger.retriggerable = True
+            self.camera_trigger_task.triggers.start_trigger.retriggerable = False
 
             # add callback function to analog tasks
             for board_name in self.analog_output_tasks.keys():
@@ -221,7 +224,6 @@ class NIDAQ(DAQBase):
                     self.external_trigger)
                 task.register_done_event(None)
                 task.register_done_event(self.restart_analog_task_callback_func(task))
-                # task.register_done_event(self.restart_analog_task_callback_func(task,asi_stage))
 
     @staticmethod
     def restart_analog_task_callback_func(task):
@@ -240,7 +242,7 @@ class NIDAQ(DAQBase):
         # self.asi_stage = self.model.active_microscope.stages[self.axis]
         def callback_func(task_handle, status, callback_data):
             try:
-                logger.info("DAQ received trigger")
+                logger.info("Analog Tasks Restarted")
                 task.stop()
                 task.start()
             except:
@@ -459,26 +461,27 @@ class NIDAQ(DAQBase):
             self.master_trigger_task.write(
                 [False, True, True, True, False], auto_start=True
             )
+
         try:
             self.camera_trigger_task.wait_until_done(timeout=10000)
+            print("camera task finished")
             for task in self.analog_output_tasks.values():
-                task.wait_until_done()
                 if self.trigger_mode == "self-trigger":
-                    try:
-                        task.stop()
-                    except:
-                        print(traceback.format_exc())
+                    task.wait_until_done()
+                try:
+                    task.stop()
+                except:
+                    print(traceback.format_exc())
         except:
             # when triggered from external triggers, sometimes the camera trigger task is done but not actually done, there will a DAQ WARNING message
             print(traceback.format_exc())
             pass
-        if self.trigger_mode == "self-trigger":
-            try:
-                self.camera_trigger_task.stop()
-                self.master_trigger_task.stop()
-            except nidaqmx.DaqError:
-                print(traceback.format_exc())
-                pass
+        try:
+            self.camera_trigger_task.stop()
+            self.master_trigger_task.stop()
+        except nidaqmx.DaqError:
+            print(traceback.format_exc())
+            pass
 
     def stop_acquisition(self):
         """Stop Acquisition.

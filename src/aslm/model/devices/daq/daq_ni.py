@@ -158,7 +158,6 @@ class NIDAQ(DAQBase):
             self.stop_acquisition()
 
     def set_external_trigger(self, external_trigger=None):
-    # def set_external_trigger(self, external_trigger=None,asi_stage=None):
         """Set trigger mode.
 
         Parameters
@@ -207,20 +206,24 @@ class NIDAQ(DAQBase):
                 except:
                     print(traceback.format_exc())
             self.master_trigger_task = None
+
             # camera task trigger source
-            self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(self.external_trigger)
-            # change camera task to regeneratable.
+            self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
+                self.external_trigger)
+
+            # change camera task to so that it can be triggered again.
             self.camera_trigger_task.triggers.start_trigger.retriggerable = True
+
             # add callback function to analog tasks
             for board_name in self.analog_output_tasks.keys():
                 task = self.analog_output_tasks[board_name]
-                task.triggers.start_trigger.cfg_dig_edge_start_trig(self.external_trigger)
+                task.triggers.start_trigger.cfg_dig_edge_start_trig(
+                    self.external_trigger)
                 task.register_done_event(None)
                 task.register_done_event(self.restart_analog_task_callback_func(task))
                 # task.register_done_event(self.restart_analog_task_callback_func(task,asi_stage))
 
     @staticmethod
-    # def restart_analog_task_callback_func(task,asi_stage):
     def restart_analog_task_callback_func(task):
         """Restart analog task callback function.
 
@@ -237,10 +240,7 @@ class NIDAQ(DAQBase):
         # self.asi_stage = self.model.active_microscope.stages[self.axis]
         def callback_func(task_handle, status, callback_data):
             try:
-                logger.info("daq recieved trigger")
-                # print("daq recieved trigger")
-                # pos = asi_stage.get_axis_position("X")
-                # print(pos)
+                logger.info("DAQ received trigger")
                 task.stop()
                 task.start()
             except:

@@ -153,7 +153,7 @@ class Model:
         self.total_image_count = None
         self.current_exposure_time = 0  # milliseconds
         self.pre_exposure_time = 0  # milliseconds
-        self.camera_wait_iterations = 200  # Thread waits this * 500 ms before it ends
+        self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
         self.start_time = None
         self.data_buffer = None
         self.img_width = int(

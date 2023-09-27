@@ -33,9 +33,13 @@
 # Standard Library Imports
 import time
 import logging
+
 # Third Party Imports
 import numpy as np
-import re 
+import re
+
+# Local Imports
+from aslm.model.features.image_writer import ImageWriter
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -46,37 +50,62 @@ logger = logging.getLogger(p)
 class CVACONPROMULTICHANNEL:
     """Class for acquiring data using the ASI internal encoder."""
 
-    def __init__(self, model, axis='z'):
+    def __init__(self, model, axis='z', saving_flag=False, saving_dir="cva"):
+        # Microscope Parameters
         self.model = model
+        self.microscope_state = None
+
+        # Stage Parameters
         self.axis = axis
         self.default_speed = None
         self.asi_stage = None
+
+        # Acquisition Parameters
         self.stack_cycling_mode = None
-        self.channels = None
+        self.channels = 1
         self.current_channel_in_list = None
-        self.end_acquisition = None
-        self.received_frames = None
-        self.end_signal_temp = None
-        self.current_sweep_time = None
         self.readout_time = None
+        self.waveform_dict = None
+
+        # Scan Parameters
+        self.actual_mechanical_step_size_um = None
+        self.current_sweep_time = None
         self.start_position_mm = None
         self.start_position_um = None
         self.stop_position_mm = None
         self.stop_position_um = None
         self.number_z_steps = None
-        self.waveform_dict = None
-        logger.debug("Beginning Constant Velocity Acquisition Mode")
+        self.total_frames = None
+        self.current_z_position_um = None
+
+        # Flags
+        self.end_acquisition = None
+
+        # Counters
+        self.received_frames = None
+
+        # Saving Parameters
+        self.saving_flag = saving_flag
+        self.image_writer = None
+        if self.saving_flag:
+            self.image_writer = ImageWriter(
+                model=self.model,
+                sub_dir=saving_dir)
+
+        logger.debug("Constant Velocity Acquisition Mode Initialized.")
 
         self.config_table = {
             "signal": {
-                "init": self.pre_func_signal,
-                "end": self.end_func_signal,
-                "cleanup": self.cleanup,
+                "init": self.pre_signal_function,
+                "main": self.main_signal_function,
+                "end": self.end_signal_function,
+                "cleanup": self.cleanup_signal_function,
             },
             "data": {
-                "init": self.pre_data_func,
-                "main": self.in_data_func,
-                "end": self.end_data_func,
+                "init": self.pre_data_function,
+                "main": self.main_data_function,
+                "end": self.end_data_function,
+                "cleanup": self.cleanup_data_function,
             },
             "node": {
                 "node_type": "multi-step",
@@ -84,7 +113,7 @@ class CVACONPROMULTICHANNEL:
             },
         }
 
-    def pre_func_signal(self):
+    def pre_signal_function(self):
         """Prepare the constant velocity acquisition.
 
         Assumes stage motion is 45 degrees relative to the optical axis.
@@ -97,37 +126,37 @@ class CVACONPROMULTICHANNEL:
         -------
         None
         """
-
-        self.asi_stage = self.model.active_microscope.stages[self.axis]
-        microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
-        self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
-        self.channels = microscope_state["selected_channels"]
+        # Get Microscope State
+        self.microscope_state = self.model.configuration[
+            "experiment"]["MicroscopeState"]
+        self.stack_cycling_mode = self.microscope_state["stack_cycling_mode"]
+        self.channels = self.microscope_state["selected_channels"]
         self.current_channel_in_list = 0
+        self.model.active_microscope.current_channel = 0
+        self.asi_stage = self.model.active_microscope.stages[self.axis]
+
+        # Configure Flags and Counters
         self.end_acquisition = False
         self.received_frames = 0
-        self.end_signal_temp = 0
 
-        # GET PARAMETERS FROM GUI
+        # Configure Stage
         desired_optical_step_size_um = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["step_size"])
         logger.debug(f"Desired Optical Step Size (um) {desired_optical_step_size_um}")
 
-        # Start Position
         self.start_position_um = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["abs_z_start"])
         self.start_position_mm = self.start_position_um / 1000.0
         logger.debug(f"Scan Start Position (mm) {self.start_position_mm}")
 
-        # Stop Position
         self.stop_position_um = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["abs_z_end"])
         self.stop_position_mm = self.stop_position_um / 1000.0
         logger.debug(f"Scan Stop Position (mm) {self.stop_position_mm}")
 
-        # CALCULATE OBLIQUE SCAN PARAMETERS
         # The stage is at 45 degrees relative to the optical axes.
         desired_mechanical_step_size_um = (desired_optical_step_size_um * 2) / np.sqrt(2)
         desired_mechanical_step_size_mm = desired_mechanical_step_size_um / 1000
@@ -144,22 +173,21 @@ class CVACONPROMULTICHANNEL:
 
         # Get the maximum speed for the stage.
         self.asi_stage.set_speed(percent=1)
-        max_speed = self.asi_stage.get_speed(self.axis)
+        max_speed = self.asi_stage.get_speed(axis=self.axis)
         logger.debug(f"Axis {self.axis} Maximum Speed (mm/s): {max_speed}")
 
         # Get the minimum speed for the stage.
         self.asi_stage.set_speed(percent=0.0001)
-        minimum_speed = self.asi_stage.get_speed(self.axis)
+        minimum_speed = self.asi_stage.get_speed(axis=self.axis)
         logger.debug(f"Axis {self.axis} Minimum Speed (mm/s): {minimum_speed}")
 
         # Move to start position. Move axis absolute is in units microns.
         logger.debug(f"Moving Stage to Start Position (mm): {self.start_position_mm}")
         self.asi_stage.set_speed(percent=0.7)
         self.asi_stage.move_axis_absolute(
-            self.axis,
-            self.start_position_um,
-            wait_until_done=True
-        )
+            axis=self.axis,
+            abs_pos=self.start_position_um,
+            wait_until_done=True)
         logger.debug(f"Current Stage Position (mm) "
                      f"{self.asi_stage.get_axis_position(self.axis) / 1000.0}")
 
@@ -171,45 +199,36 @@ class CVACONPROMULTICHANNEL:
         self.model.configuration[
             "waveform_templates"]["CVACONPRO"]["repeat"] = int(1)
 
-        # Get Readout time,exposure time, and sweep time.
-
-        # Call prepare_acquisition in the model.
-        # Sets flags, stops the stage, and calls prepare_acquisition in
-        # the active microscope.
-        # self.model.prepare_acquisition()
-
-        # microscope.prepare_acquisition
-        # sets current channel to 0, initializes image series,
-        # calculates all waveforms.
-        self.model.active_microscope.current_channel = 0
-        self.model.active_microscope.calculate_all_waveform()
+        # Set filter, exposure time, and prepare acquisition in daq
         self.model.active_microscope.prepare_next_channel()
-        # prepare next channel should specify current channel as the first available.
-        # sets filter, exposure time, and calls prepare acquisition in daq
+        self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
 
+        # Calculate the readout time for the camera and microscope sweep time.
         self.readout_time = self.model.active_microscope.get_readout_time()
-        # calls the camera and gets the readout time
-
         _, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(
-            self.readout_time
-        )
-
+            self.readout_time)
         self.current_sweep_time = sweep_times[
-            f"channel_{self.model.active_microscope.current_channel}"
-        ]
+            f"channel_{self.model.active_microscope.current_channel}"]
 
         # Get the desired speed for the stage.
         desired_speed = desired_mechanical_step_size_mm / self.current_sweep_time
         logger.debug(f"Axis {self.axis} Desired Speed (mm/s): {desired_speed}")
 
         self.asi_stage.set_speed(velocity_dict={"X": desired_speed})
-        stage_velocity = self.asi_stage.get_speed(self.axis)
+        stage_velocity = self.asi_stage.get_speed(axis=self.axis)
         logger.debug(f"Axis {self.axis} Actual Speed (mm/s): {stage_velocity}")
 
         # Inaccurate velocity results in inaccurate step size.
-        # We should convert from mechanical dimensions to optical dimensions, and update
-        # the MicroscopeStateWe should record the actual step size
-        actual_mechanical_step_size_mm = stage_velocity / self.current_sweep_time
+        # Update the Microscope/Configuration to record the actual step size
+        actual_mechanical_step_size_mm = stage_velocity * self.current_sweep_time
+        self.actual_mechanical_step_size_um = actual_mechanical_step_size_mm * 1000
+
+        actual_optical_step_size_mm = actual_mechanical_step_size_mm * np.sqrt(2) / 2
+        actual_optical_step_size_um = actual_optical_step_size_mm * 1000
+        logger.debug(f"Axis {self.axis} Actual Mechanical Step Size (mm): "
+                     f"{actual_mechanical_step_size_mm}")
+        logger.debug(f"Axis {self.axis} Actual Optical Step Size (um): "
+                     f"{actual_optical_step_size_um}")
 
         # Configure the constant velocity scan.
         self.asi_stage.scanr(
@@ -219,60 +238,102 @@ class CVACONPROMULTICHANNEL:
             axis=self.axis
         )
 
-        # Start the stage scan.
-        self.asi_stage.start_scan(self.axis)
+        self.current_z_position_um = self.start_position_um
+        print("Pre signal function complete")
 
-        # Wait until complete
-        self.asi_stage.wait_until_complete()
+    def main_signal_function(self):
+        if self.model.stop_acquisition:
+            return False
+        else:
+            self.asi_stage.start_scan(self.axis)
+            return True
 
-    def end_func_signal(self):
-        self.end_signal_temp += 1
-        if self.model.stop_acquisition or self.end_acquisition or self.end_signal_temp>0:
-            if self.stack_cycling_mode == "per_stack":
-                self.update_channel()
-                if self.current_channel_in_list == 0:
-                    self.cleanup()
-                    return True
-            else:
-                return True
-        return False
+    def end_signal_function(self):
+        print("End signal function Called.")
+        print("Stop acquisition signal: ", self.model.stop_acquisition)
+        print("End acquisition signal: ", self.self.end_acquisition)
+        if self.model.stop_acquisition:
+            self.asi_stage.stop_scan(self.axis)
+            return True
+
+        # Should estimate the current position here.
+        self.current_z_position_um += self.actual_mechanical_step_size_um
+
+        if self.model.stop_acquisition or self.end_acquisition:
+            print("end_signal_function: Stop acquisition.")
+            self.asi_stage.stop_scan(self.axis)
+            return True
+        else:
+            print("end_signal_function: Continue acquisition.")
+            return False
 
     def update_channel(self):
-        self.current_channel_in_list = (self.current_channel_in_list + 1) % self.channels
-        self.received_frames = 0
-
-        # Move axis absolute - units in microns.
-        self.asi_stage.move_axis_absolute(
-            self.axis,
-            self.start_position_um,
-            wait_until_done=True
-        )
+        self.current_channel_in_list = (
+            self.current_channel_in_list + 1) % self.channels
         self.model.active_microscope.prepare_next_channel()
-        self.asi_stage.start_scan(self.axis)
-        self.asi_stage.stop_scan()
 
-    def cleanup(self):
+    def cleanup_signal_function(self):
         """Clean up the constant velocity acquisition.
 
-        Need to reset the trigger source to the default.
+        Moves the stage back to the start position and resets the trigger
+        source.
 
         """
-        self.asi_stage.set_speed(percent=0.9)
-        self.asi_stage.stop()
+        print("Clean up called")
+        self.asi_stage.set_speed(percent=0.7)
         self.asi_stage.move_axis_absolute(
             self.axis,
             self.start_position_um,
             wait_until_done=True
         )
 
-    def pre_data_func(self):
-        pass
-        #self.received_frames_v2 = self.received_frames
+        # Reset the trigger source to the default.
+        self.model.active_microscope.daq.set_external_trigger()
+        # self.model.active_microscope.daq.set_external_trigger(None)
 
-    def in_data_func(self, frame_ids):
+    def pre_data_function(self):
+        """Prepare the constant velocity acquisition.
+
+        Sets the number of frames to receive and the total number of frames.
+        """
+        self.total_frames = self.channels * self.number_z_steps
+
+    def main_data_function(self, frame_ids):
+        """Process the data from the constant velocity acquisition.
+
+        Writes data to disk.
+
+        Parameters
+        ----------
+        frame_ids : list
+            List of frame ids received from the camera.
+        """
         self.received_frames += len(frame_ids)
 
-    def end_data_func(self):
-        # pos = self.asi_stage.get_axis_position(self.axis)
-        self.end_acquisition = self.received_frames >= self.number_z_steps
-        return self.end_acquisition
+        # if self.saving_flag:
+        #     self.image_writer.write_frames(frame_ids)
+
+    def end_data_function(self):
+        """Evaluate end condition for constant velocity acquisition.
+
+        Returns
+        -------
+        bool
+            True if the acquisition is complete, False otherwise.
+        """
+        if self.received_frames >= self.number_z_steps:
+            self.end_acquisition = True
+            print(f"end acquisition = {self.end_acquisition}")
+            return True
+        # else:as
+        #     self.end_acquisition = False
+        #     return False
+        # return True
+
+    def cleanup_data_function(self):
+        """Clean up the constant velocity acquisition.
+
+        Cleans up the image writer.
+        """
+        if self.saving_flag:
+            self.image_writer.cleanup()

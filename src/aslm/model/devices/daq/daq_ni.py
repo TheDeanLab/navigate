@@ -177,8 +177,8 @@ class NIDAQ(DAQBase):
         if self.trigger_mode == "self-trigger":
             self.create_master_trigger_task()
             trigger_source = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-            ]["daq"]["trigger_source"]
+            self.microscope_name]["daq"]["trigger_source"]
+
             # set camera task trigger source
             try:
                 self.camera_trigger_task.stop()
@@ -353,7 +353,7 @@ class NIDAQ(DAQBase):
             sample_rates = list(
                 set([v["sample_rate"] for v in self.analog_outputs.values()])
             )
-            logger.info(f"***sample_rates = {sample_rates}")
+
             if len(sample_rates) > 1:
                 logger.debug(
                     "NI DAQ - Different sample rates provided for each analog channel."
@@ -412,8 +412,9 @@ class NIDAQ(DAQBase):
         -------
         None
         """
-        waveform_template_name = self.configuration['experiment']['MicroscopeState']["waveform_template"]
-        logger.info(waveform_template_name)
+        waveform_template_name = self.configuration['experiment']['MicroscopeState'][
+            "waveform_template"]
+        logger.info(f"Waveform Template Name: {waveform_template_name}")
         self.waveform_repeat_num, self.waveform_expand_num = get_waveform_template_parameters(
             waveform_template_name,
             self.configuration["waveform_templates"],
@@ -464,7 +465,6 @@ class NIDAQ(DAQBase):
 
         try:
             self.camera_trigger_task.wait_until_done(timeout=10000)
-            print("camera task finished")
             for task in self.analog_output_tasks.values():
                 if self.trigger_mode == "self-trigger":
                     task.wait_until_done()

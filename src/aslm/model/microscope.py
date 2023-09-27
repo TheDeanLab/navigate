@@ -557,7 +557,6 @@ class Microscope:
         # stop daq before writing new waveform
         # When called the first time, throws an error.
         self.daq.stop_acquisition()
-        print("CHANNEL KEY:", channel_key)
         self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # Add Defocus term

@@ -248,9 +248,6 @@ class CVACONPROMULTICHANNEL:
         return True
 
     def end_signal_function(self):
-        print("End signal function Called.")
-        print("Stop acquisition signal: ", self.model.stop_acquisition)
-        print("End acquisition signal: ", self.end_acquisition)
         # if self.model.stop_acquisition:
         #     return True
         #
@@ -267,10 +264,15 @@ class CVACONPROMULTICHANNEL:
         # if done with all the channels,
         # set the channel back to 0, run prepare next channel, set external trigger.
         # Configure the constant velocity/confocal projection mode
+
+        print("end signal function called")
+
+        # Reset the settings - This should only be done after the last channel.
         self.model.configuration[
             "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+        self.model.active_microscope.current_channel = 0
+        self.model.active_microscope.daq.external_trigger = None
         self.model.active_microscope.prepare_next_channel()
-        self.model.active_microscope.daq.set_external_trigger()
         return self.end_acquisition
 
     def update_channel(self):
@@ -285,16 +287,7 @@ class CVACONPROMULTICHANNEL:
         source.
 
         """
-        print("Clean up called")
-        # self.asi_stage.set_speed(percent=0.7)
-        # self.asi_stage.move_axis_absolute(
-        #     self.axis,
-        #     self.start_position_um,
-        #     wait_until_done=True
-        # )
-
-        # Reset the trigger source to the default.
-        # self.model.active_microscope.daq.set_external_trigger()
+        print("Clean up signal function called")
         return True
 
     def pre_data_function(self):
@@ -327,14 +320,11 @@ class CVACONPROMULTICHANNEL:
         bool
             True if the acquisition is complete, False otherwise.
         """
-        print("end_data_function called")
-        print("self.received_frames = ", self.received_frames)
-        print("number of z steps = ", self.number_z_steps)
         if self.received_frames >= self.number_z_steps:
             self.end_acquisition = True
             self.model.stop_acquisition = True
+            logger.debug("Constant Velocity Acquisition Complete")
             print(f"end acquisition = {self.end_acquisition}")
-            #self.model.event_queue.put("end_acquisition")
             return True
         return False
 

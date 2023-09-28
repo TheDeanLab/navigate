@@ -126,13 +126,7 @@ class CVACONPROMULTICHANNEL:
         -------
         None
         """
-        # Get Microscope State
-        self.microscope_state = self.model.configuration[
-            "experiment"]["MicroscopeState"]
-        self.stack_cycling_mode = self.microscope_state["stack_cycling_mode"]
-        self.channels = self.microscope_state["selected_channels"]
-        self.current_channel_in_list = 0
-        self.model.active_microscope.current_channel = 0
+
         self.asi_stage = self.model.active_microscope.stages[self.axis]
 
         # Configure Flags and Counters
@@ -140,10 +134,10 @@ class CVACONPROMULTICHANNEL:
         self.received_frames = 0
 
         # Configure Stage
-        desired_optical_step_size_um = float(
+        desired_mechanical_step_size_um = float(
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["step_size"])
-        logger.debug(f"Desired Optical Step Size (um) {desired_optical_step_size_um}")
+        desired_mechanical_step_size_mm = desired_mechanical_step_size_um / 1000.0
 
         self.start_position_um = float(
             self.model.configuration[
@@ -156,12 +150,6 @@ class CVACONPROMULTICHANNEL:
                 "experiment"]["MicroscopeState"]["abs_z_end"])
         self.stop_position_mm = self.stop_position_um / 1000.0
         logger.debug(f"Scan Stop Position (mm) {self.stop_position_mm}")
-
-        # The stage is at 45 degrees relative to the optical axes.
-        desired_mechanical_step_size_um = (desired_optical_step_size_um * 2) / np.sqrt(2)
-        desired_mechanical_step_size_mm = desired_mechanical_step_size_um / 1000
-        logger.debug(f"Desired Mechanical Step Size (um) "
-                     f"{desired_mechanical_step_size_um}")
 
         # Calculate Number of Z Steps.
         self.number_z_steps = np.floor(
@@ -182,7 +170,6 @@ class CVACONPROMULTICHANNEL:
         logger.debug(f"Axis {self.axis} Minimum Speed (mm/s): {minimum_speed}")
 
         # Move to start position. Move axis absolute is in units microns.
-        logger.debug(f"Moving Stage to Start Position (mm): {self.start_position_mm}")
         self.asi_stage.set_speed(percent=0.7)
         self.asi_stage.move_axis_absolute(
             axis=self.axis,
@@ -190,6 +177,14 @@ class CVACONPROMULTICHANNEL:
             wait_until_done=True)
         logger.debug(f"Current Stage Position (mm) "
                      f"{self.asi_stage.get_axis_position(self.axis) / 1000.0}")
+
+        # Get Microscope State
+        self.microscope_state = self.model.configuration[
+            "experiment"]["MicroscopeState"]
+        self.stack_cycling_mode = self.microscope_state["stack_cycling_mode"]
+        self.channels = self.microscope_state["selected_channels"]
+        self.current_channel_in_list = 0
+        self.model.active_microscope.current_channel = 0
 
         # Configure the constant velocity/confocal projection mode
         self.model.configuration[
@@ -222,13 +217,16 @@ class CVACONPROMULTICHANNEL:
         # Update the Microscope/Configuration to record the actual step size
         actual_mechanical_step_size_mm = stage_velocity * self.current_sweep_time
         self.actual_mechanical_step_size_um = actual_mechanical_step_size_mm * 1000
+        self.actual_number_z_steps = np.floor(
+            abs(
+                self.start_position_um - self.stop_position_um
+            ) / self.actual_mechanical_step_size_um
+        )
+        print("Original z steps:", self.number_z_steps,
+              "Actual z steps:", self.actual_number_z_steps)
 
-        actual_optical_step_size_mm = actual_mechanical_step_size_mm * np.sqrt(2) / 2
-        actual_optical_step_size_um = actual_optical_step_size_mm * 1000
         logger.debug(f"Axis {self.axis} Actual Mechanical Step Size (mm): "
                      f"{actual_mechanical_step_size_mm}")
-        logger.debug(f"Axis {self.axis} Actual Optical Step Size (um): "
-                     f"{actual_optical_step_size_um}")
 
         # Configure the constant velocity scan.
         self.asi_stage.scanr(
@@ -270,9 +268,11 @@ class CVACONPROMULTICHANNEL:
         self.model.configuration[
             "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
         self.model.active_microscope.current_channel = 0
-
+        self.model.active_microscope.daq.external_trigger = None
         self.model.active_microscope.prepare_next_channel()
-        self.model.active_microscope.daq.set_external_trigger()
+        # self.model.active_microscope.daq.set_external_trigger()
+        self.asi_stage.set_speed(percent=0.7)
+
         return self.end_acquisition
 
     def update_channel(self):

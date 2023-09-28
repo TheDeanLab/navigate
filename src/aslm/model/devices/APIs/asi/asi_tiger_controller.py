@@ -9,6 +9,7 @@ import threading
 
 import time
 
+import numpy as np
 
 class TigerException(Exception):
     """
@@ -436,7 +437,7 @@ class TigerController:
         if enc_divide == 0:
             enc_divide = enc_divide_mm
         else:
-            enc_divide = int(enc_divide * enc_divide_mm)
+            enc_divide = np.ceil(enc_divide * enc_divide_mm)
         print("Encoder Divide in mm:", enc_divide_mm)
         print("Set Encoder Divide:", enc_divide)
         command = (

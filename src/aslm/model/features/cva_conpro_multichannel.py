@@ -270,8 +270,9 @@ class CVACONPROMULTICHANNEL:
         self.model.configuration[
             "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
         self.model.active_microscope.current_channel = 0
-        self.model.active_microscope.daq.external_trigger = None
+
         self.model.active_microscope.prepare_next_channel()
+        self.model.active_microscope.daq.set_external_trigger()
         return self.end_acquisition
 
     def update_channel(self):

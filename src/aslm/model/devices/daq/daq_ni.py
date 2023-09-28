@@ -420,6 +420,9 @@ class NIDAQ(DAQBase):
             self.configuration["waveform_templates"],
             self.configuration['experiment']['MicroscopeState']
         )
+        print(f"Waveform Expand Num = {self.waveform_expand_num}")
+        print(f"Waveform Repeat Num = {self.waveform_repeat_num}")
+
         logger.info(f"Waveform Expand Num = {self.waveform_expand_num}")
         logger.info(f"Waveform Repeat Num = {self.waveform_repeat_num}")
 

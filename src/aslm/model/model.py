@@ -949,6 +949,8 @@ class Model:
 
         # Run the acquisition
         try:
+            print("DAQ Trigger Sent")
+            self.logger.info("DAQ Trigger Sent")
             self.active_microscope.daq.run_acquisition()
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()

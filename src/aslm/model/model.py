@@ -645,6 +645,7 @@ class Model:
             """
             self.logger.info("ASLM Model - Stopping with stop command.")
             self.stop_acquisition = True
+
             if hasattr(self, "signal_container"):
                 self.signal_container.end_flag = True
             if self.imaging_mode == "ConstantVelocityAcquisition":
@@ -653,8 +654,8 @@ class Model:
                 self.signal_thread.join()
             if self.data_thread:
                 self.data_thread.join()
-            else:
-                self.end_acquisition()
+
+            self.end_acquisition()
             self.stop_stage()
 
         elif command == "terminate":

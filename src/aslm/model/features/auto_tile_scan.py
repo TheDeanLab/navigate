@@ -30,14 +30,87 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Standard library imports
+
+# Third party imports
+
+# Local application imports
 from aslm.model.features.autofocus import Autofocus
 
+
 class CalculateFocusRange:
+    """CalculateFocusRange class for determining the focus range using autofocus.
+
+    This class provides functionality to calculate the focus range of a microscope
+    using autofocus measurements.
+
+    Parameters:
+    ----------
+    model : MicroscopeModel
+        The microscope model object used for focus range calculation.
+
+    Attributes:
+    ----------
+    model : MicroscopeModel
+        The microscope model associated with the focus range calculation.
+
+    autofocus : Autofocus
+        An Autofocus instance used for autofocus operations.
+
+    config_table : dict
+        A dictionary defining the configuration for various stages of focus range
+        calculation. It contains the following keys:
+        - "signal": Configuration for the signal acquisition stage.
+        - "data": Configuration for the data acquisition stage.
+        - "node": Configuration related to node type and device.
+
+    Methods:
+    --------
+    pre_func_signal():
+        Prepare for the signal acquisition stage, setting up initial values and
+        configurations.
+
+    in_func_signal():
+        Perform actions during the signal acquisition stage, such as autofocus
+        measurements.
+
+    end_func_signal():
+        Finalize the signal acquisition stage and check if additional steps are needed.
+
+    pre_func_data():
+        Prepare for the data acquisition stage, if applicable.
+
+    in_func_data(frame_ids=[]):
+        Perform actions during the data acquisition stage, possibly for specific
+        frame IDs.
+
+    end_func_data():
+        Finalize the data acquisition stage, if applicable.
+
+    Notes:
+    ------
+    - This class is used to calculate the focus range of a microscope by utilizing
+    autofocus measurements. It provides methods for different stages of the
+    calculation process.
+
+    - The `config_table` attribute is a dictionary that defines the configuration for
+    each stage of the calculation process, including initialization, main execution,
+    and finalization steps.
+
+    - The autofocus measurements are performed using an instance of the `Autofocus`
+    class, which is initialized with the same `model` object used for focus range
+    calculation.
+
+    - The focus range calculation involves signal acquisition and data acquisition
+    stages, which are controlled using the provided methods.
+
+    - The `CalculateFocusRange` class can be used to automate the process of
+    determining the optimal focus range for microscopy experiments.
+    """
+
     def __init__(self, model):
         self.model = model
-
         self.autofocus = Autofocus(model)
-
         self.config_table = {
             "signal": {
                 "init": self.pre_func_signal,
@@ -53,6 +126,19 @@ class CalculateFocusRange:
         }
 
     def pre_func_signal(self):
+        """Prepare for the signal acquisition stage.
+
+        This method sets up initial values and configurations before the signal
+        acquisition stage.
+
+        Parameters:
+        ----------
+        None
+
+        Returns:
+        -------
+        None
+        """
         self.model.active_microscope.current_channel = 0
         self.model.active_microscope.prepare_next_channel()
         self.autofocus.pre_func_signal()
@@ -63,9 +149,25 @@ class CalculateFocusRange:
         # get current z pos, calculate last z pos in a stack
         stage_pos = self.model.get_stage_position()
         self.current_z_pos = stage_pos["z_pos"]
-        self.last_z_pos = self.current_z_pos + float(self.model.configuration["experiment"]["MicroscopeState"]["end_position"])
+        self.last_z_pos = self.current_z_pos + float(
+            self.model.configuration["experiment"]["MicroscopeState"]["end_position"]
+        )
 
     def in_func_signal(self):
+        """Perform actions during the signal acquisition stage.
+
+        This method is responsible for carrying out actions during the signal
+        acquisition stage, such as performing autofocus measurements and calculating
+        focus-related parameters.
+
+        Parameters:
+        ----------
+        None
+
+        Returns:
+        -------
+        None
+        """
         if self.autofocus_count == 0:
             self.focus_start_pos = self.autofocus.in_func_signal()
         else:
@@ -73,10 +175,31 @@ class CalculateFocusRange:
 
             # calculate the slope and save it
             if self.focus_end_pos:
-                microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
-                microscope_state["end_focus"] = float(microscope_state["start_focus"]) + self.focus_end_pos - self.focus_start_pos
+                microscope_state = self.model.configuration["experiment"][
+                    "MicroscopeState"
+                ]
+                microscope_state["end_focus"] = (
+                    float(microscope_state["start_focus"])
+                    + self.focus_end_pos
+                    - self.focus_start_pos
+                )
 
     def end_func_signal(self):
+        """
+        Finalize the signal acquisition stage.
+
+        This method finalizes the signal acquisition stage and checks if additional
+        steps are needed based on the results of autofocus measurements.
+
+        Parameters:
+        ----------
+        None
+
+        Returns:
+        -------
+        bool
+            A boolean value indicating whether additional steps are required.
+        """
         r = self.autofocus.end_func_signal()
         if r:
             self.autofocus_count += 1
@@ -86,14 +209,62 @@ class CalculateFocusRange:
                 self.model.move_stage({"z_abs": self.last_z_pos}, wait_until_done=True)
                 self.autofocus.pre_func_signal()
         return self.autofocus_count >= 2
-    
+
     def pre_func_data(self):
+        """
+        Prepare for the data acquisition stage, if applicable.
+
+        This method prepares for the data acquisition stage, which may involve
+        setting up configurations or performing actions before data acquisition begins.
+
+        Parameters:
+        ----------
+        None
+
+        Returns:
+        -------
+        None
+        """
         self.autofocus.pre_func_data()
 
     def in_func_data(self, frame_ids=[]):
+        """
+        Perform actions during the data acquisition stage, possibly for specific
+        frame IDs.
+
+        This method performs actions during the data acquisition stage, which may
+        include data
+        acquisition for specific frame IDs if provided.
+
+        Parameters:
+        ----------
+        frame_ids : list, optional
+            A list of frame IDs for which data acquisition should be performed.
+            Default is an empty list.
+
+        Returns:
+        -------
+        None
+        """
         self.autofocus.in_func_data(frame_ids)
 
     def end_func_data(self):
+        """
+        Finalize the data acquisition stage, if applicable.
+
+        This method finalizes the data acquisition stage, and it may involve
+        additional actions or
+        checks.
+
+        Parameters:
+        ----------
+        None
+
+        Returns:
+        -------
+        bool
+            A boolean value indicating whether additional steps are required.
+        """
         r = self.autofocus.end_func_data()
         if r:
             self.autofocus.pre_func_data()

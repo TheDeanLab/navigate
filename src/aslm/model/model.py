@@ -56,7 +56,7 @@ from aslm.model.features.common_features import (
     LoopByCount,
     ConProAcquisition,  # noqa
     StackPause,
-    MoveToNextPositionInMultiPostionTable,
+    MoveToNextPositionInMultiPositionTable,
     WaitToContinue,
 )
 from aslm.model.features.remove_empty_tiles import (
@@ -247,11 +247,11 @@ class Model:
 
         self.feature_list.append(
             [
-                # {"name": MoveToNextPositionInMultiPostionTable},
+                # {"name": MoveToNextPositionInMultiPositionTable},
                 # {"name": CalculateFocusRange},
                 {"name": PrepareNextChannel},
                 (
-                    {"name": MoveToNextPositionInMultiPostionTable},
+                    {"name": MoveToNextPositionInMultiPositionTable},
                     {"name": Autofocus},
                     {
                         "name": ZStackAcquisition,
@@ -265,7 +265,7 @@ class Model:
                         "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.multiposition_count",),
                     },
-                )
+                ),
             ]
         )
 
@@ -274,7 +274,7 @@ class Model:
             [
                 {"name": PrepareNextChannel},
                 (
-                    {"name": MoveToNextPositionInMultiPostionTable},
+                    {"name": MoveToNextPositionInMultiPositionTable},
                     # {"name": CalculateFocusRange},
                     {
                         "name": DetectTissueInStackAndRecord,
@@ -611,7 +611,10 @@ class Model:
                         )
 
                     self.addon_feature = self.feature_list[args[0] - 1]
-                    load_dynamic_parameter_functions(self.addon_feature, f"{get_aslm_path()}/feature_lists/feature_parameter_setting")
+                    load_dynamic_parameter_functions(
+                        self.addon_feature,
+                        f"{get_aslm_path()}/feature_lists/feature_parameter_setting",
+                    )
                     self.signal_container, self.data_container = load_features(
                         self, self.addon_feature
                     )
@@ -1201,7 +1204,8 @@ class Model:
         feature_list_files = [
             temp
             for temp in os.listdir(feature_lists_path)
-            if (temp.endswith(".yml") or temp.endswith(".yaml")) and os.path.isfile(os.path.join(feature_lists_path, temp))
+            if (temp.endswith(".yml") or temp.endswith(".yaml"))
+            and os.path.isfile(os.path.join(feature_lists_path, temp))
         ]
         for item in feature_list_files:
             if item == "__sequence.yml":

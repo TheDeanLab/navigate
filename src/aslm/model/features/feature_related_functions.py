@@ -29,28 +29,29 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from aslm.model.features.auto_tile_scan import CalculateFocusRange # noqa
-from aslm.model.features.autofocus import Autofocus # noqa
+from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
+from aslm.model.features.autofocus import Autofocus  # noqa
 from aslm.model.features.common_features import (
-    ChangeResolution, # noqa
-    Snap, # noqa
-    WaitToContinue, # noqa
-    LoopByCount, # noqa
-    PrepareNextChannel, # noqa
-    MoveToNextPositionInMultiPostionTable, # noqa
-    StackPause, # noqa
-    ZStackAcquisition, # noqa
-    ConProAcquisition, # noqa
-    FindTissueSimple2D, # noqa
+    ChangeResolution,  # noqa
+    Snap,  # noqa
+    WaitToContinue,  # noqa
+    LoopByCount,  # noqa
+    PrepareNextChannel,  # noqa
+    MoveToNextPositionInMultiPositionTable,  # noqa
+    StackPause,  # noqa
+    ZStackAcquisition,  # noqa
+    ConProAcquisition,  # noqa
+    FindTissueSimple2D,  # noqa
 )
-from aslm.model.features.image_writer import ImageWriter # noqa
-from aslm.model.features.restful_features import IlastikSegmentation # noqa
-from aslm.model.features.volume_search import VolumeSearch # noqa
+from aslm.model.features.image_writer import ImageWriter  # noqa
+from aslm.model.features.restful_features import IlastikSegmentation  # noqa
+from aslm.model.features.volume_search import VolumeSearch  # noqa
 from aslm.model.features.remove_empty_tiles import (
-    DetectTissueInStack, # noqa
-    DetectTissueInStackAndRecord, # noqa
-    RemoveEmptyPositions, # noqa
+    DetectTissueInStack,  # noqa
+    DetectTissueInStackAndRecord,  # noqa
+    RemoveEmptyPositions,  # noqa
 )
+
 
 class SharedList(list):
     def __init__(self, value, name=None):
@@ -60,11 +61,8 @@ class SharedList(list):
         self.__name__ = name
 
     def __str__(self):
-        return str({
-            "type": "shared_list", 
-            "name": self.__name__,
-            "value": self
-        })
+        return str({"type": "shared_list", "name": self.__name__, "value": self})
+
 
 def convert_str_to_feature_list(content: str):
     """Convert string to a feature list
@@ -80,6 +78,7 @@ def convert_str_to_feature_list(content: str):
         A list: If the string value can be converted to a valid feature list
         None: If can not.
     """
+
     def convert_args_to_tuple(feature_list):
         if not feature_list:
             return
@@ -102,7 +101,8 @@ def convert_str_to_feature_list(content: str):
     except Exception as e:
         print("Can't build this feature list!", e)
         return None
-    
+
+
 def convert_feature_list_to_str(feature_list):
     """Convert a feature list to string
 
@@ -116,14 +116,15 @@ def convert_feature_list_to_str(feature_list):
     result : str
         The string of a valid feature list.
     """
-    result = '['
+    result = "["
+
     def f(feature_list):
         if not feature_list:
             return
         nonlocal result
         for item in feature_list:
             if type(item) is dict:
-                result += '{' + f'"name": {item["name"].__name__},'
+                result += "{" + f'"name": {item["name"].__name__},'
                 if "args" in item:
                     result += '"args": ('
                     for temp in item["args"]:
@@ -136,22 +137,24 @@ def convert_feature_list_to_str(feature_list):
                         else:
                             result += f"{temp},"
                     result += ")"
-                result += '},'
+                result += "},"
             elif type(item) is tuple:
-                result += '('
+                result += "("
                 f(item)
-                result += '),'
+                result += "),"
             elif type(item) is list:
-                result += '['
+                result += "["
                 f(item)
-                result += '],'
-    
+                result += "],"
+
     f(feature_list)
-    result += ']'
+    result += "]"
     return result
 
 
-def load_dynamic_parameter_functions(feature_list: list, feature_parameter_setting_path: str):
+def load_dynamic_parameter_functions(
+    feature_list: list, feature_parameter_setting_path: str
+):
     import os
     import inspect
     import importlib
@@ -163,7 +166,9 @@ def load_dynamic_parameter_functions(feature_list: list, feature_parameter_setti
             if "args" in item:
                 feature = item["name"]
                 if not hasattr(feature, "__parameter_config"):
-                    config_path = f"{feature_parameter_setting_path}/{feature.__name__}.yml"
+                    config_path = (
+                        f"{feature_parameter_setting_path}/{feature.__name__}.yml"
+                    )
                     parameter_config = None
                     if os.path.exists(config_path):
                         parameter_config = load_yaml_file(config_path)

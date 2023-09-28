@@ -35,7 +35,8 @@ import time
 import logging
 # Third Party Imports
 import numpy as np
-import re 
+import re
+from aslm.model.features.image_writer import ImageWriter
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)

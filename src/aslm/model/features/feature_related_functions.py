@@ -29,6 +29,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+
+# Standard library imports
+import os
+import inspect
+import importlib
+
+# Third-party imports
+
+# Local application imports
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.autofocus import Autofocus  # noqa
 from aslm.model.features.common_features import (
@@ -51,16 +60,76 @@ from aslm.model.features.remove_empty_tiles import (
     DetectTissueInStackAndRecord,  # noqa
     RemoveEmptyPositions,  # noqa
 )
+from aslm.tools.file_functions import load_yaml_file
+from aslm.tools.common_functions import load_module_from_file
 
 
 class SharedList(list):
+    """
+    Custom list class with a name attribute for sharing data.
+
+    This class extends the built-in list class to provide an additional attribute
+    called 'name' for identifying and sharing lists of data. It is particularly
+    useful when sharing data between different parts of a program.
+
+    Parameters:
+    ----------
+    value : iterable, optional
+        Initial values for the list (default is an empty list).
+    name : str, optional
+        A name to identify the shared list (default is 'shared_list__').
+
+    Attributes:
+    ----------
+    __name__ : str
+        A name to identify the shared list.
+
+    Methods:
+    --------
+    __str__():
+        Returns a string representation of the shared list, including its type,
+        name, and current values.
+
+    Notes:
+    ------
+    - This class is designed to be used when you need to pass and share lists of
+      data between different components of a program.
+    - The '__name__' attribute can be used to give the shared list a meaningful
+      name for easier identification.
+    """
+
     def __init__(self, value, name=None):
+        """
+        Initialize a SharedList object.
+
+        Parameters:
+        ----------
+        value : iterable, optional
+            Initial values for the list (default is an empty list).
+        name : str, optional
+            A name to identify the shared list (default is 'shared_list__').
+        """
         super().__init__(value)
         if name is None:
             name = "shared_list__"
         self.__name__ = name
 
     def __str__(self):
+        """
+        Return a string representation of the shared list.
+
+        Returns:
+        -------
+        str
+            A string containing the type, name, and current values of the shared
+            list.
+
+        Notes:
+        ------
+        The string representation is in the form of a dictionary with 'type',
+        'name', and 'value' keys.
+        """
+
         return str({"type": "shared_list", "name": self.__name__, "value": self})
 
 
@@ -80,6 +149,34 @@ def convert_str_to_feature_list(content: str):
     """
 
     def convert_args_to_tuple(feature_list):
+        """
+        Recursively convert 'args' within a feature list to tuples.
+
+        This function takes a feature list, which is typically used for specifying
+        configuration options, and ensures that all 'args' elements within the list
+        are converted to tuples. It operates recursively to handle nested feature
+        lists.
+
+        Parameters:
+        ----------
+        feature_list : list
+            The feature list to process. It can contain dictionaries with 'args'
+            elements that need to be converted to tuples.
+
+        Returns:
+        -------
+        None
+
+        Notes:
+        ------
+        - This function operates in-place and does not return a new list.
+        - It is useful for ensuring that 'args' elements within a feature list are
+          of tuple type, as required by certain functions or processes.
+        - The function does not modify elements that are not dictionaries or do not
+          have an 'args' key.
+        - It handles nested feature lists, converting 'args' in inner lists as well.
+        """
+
         if not feature_list:
             return
         for item in feature_list:
@@ -104,18 +201,61 @@ def convert_str_to_feature_list(content: str):
 
 
 def convert_feature_list_to_str(feature_list):
-    """Convert a feature list to string
+    """
+    Convert a feature list to its string representation.
 
-    Parameters
+    This function takes a feature list, which is typically used for specifying
+    configuration options, and converts it to its string representation. The
+    resulting string can be useful for saving, displaying, or transmitting
+    feature lists.
+
+    Parameters:
     ----------
-    feature_list : List
+    feature_list : list
         A valid feature list.
 
-    Returns
+    Returns:
     -------
     result : str
-        The string of a valid feature list.
+        The string representation of the feature list.
+
+    Notes:
+    ------
+    - The function recursively processes the input feature list, converting
+      dictionaries, tuples, and lists to their corresponding string
+      representations.
+    - Within the resulting string, dictionaries are represented with keys
+      "name" and "args" (if present), where "name" is the name of the feature
+      function and "args" contains the arguments as a tuple.
+    - Tuples and lists are represented using parentheses and square brackets,
+      respectively.
+    - This function is intended for converting feature lists to a format that
+      can be easily saved to a file, transmitted over a network, or displayed
+      to users.
+
+    Example:
+    --------
+    Given the following feature list:
+
+    ```
+    [
+        {"name": func1, "args": (arg1, arg2)},
+        {"name": func2},
+        [
+            {"name": func3, "args": (arg3,)},
+            {"name": func4}
+        ]
+    ]
+    ```
+
+    The function would return the string representation:
+
+    ```
+    "[{'name': 'func1', 'args': ('arg1', 'arg2')}, {'name': 'func2'},
+    [{'name': 'func3', 'args': ('arg3',)}, {'name': 'func4'}]]"
+    ```
     """
+
     result = "["
 
     def f(feature_list):
@@ -155,11 +295,70 @@ def convert_feature_list_to_str(feature_list):
 def load_dynamic_parameter_functions(
     feature_list: list, feature_parameter_setting_path: str
 ):
-    import os
-    import inspect
-    import importlib
-    from aslm.tools.file_functions import load_yaml_file
-    from aslm.tools.common_functions import load_module_from_file
+    """
+    Load dynamic parameter functions into a feature list.
+
+    This function takes a feature list and a path to the parameter setting files
+    and dynamically updates the feature list with parameter values specified in
+    the setting files. It searches for parameter values in the setting files
+    and replaces corresponding arguments in the feature list with the loaded
+    values. The function is designed to support dynamic configuration of
+    feature functions with external parameter files.
+
+    Parameters:
+    -----------
+    feature_list : list
+        A list of feature configurations, typically used for specifying
+        configuration options. It may contain dictionaries with "name" and "args"
+        keys, where "name" is the feature function and "args" is a tuple of
+        arguments. Arguments that match parameter names specified in the setting
+        files will be replaced with loaded values.
+
+    feature_parameter_setting_path : str
+        The path to the directory containing parameter setting files. These files
+        should be named based on the feature function names (e.g., function_name.yml).
+
+    Notes:
+    ------
+    - The function iterates through the feature list, inspecting each feature
+      dictionary for parameter values specified in the setting files.
+    - Parameters that match argument names in the feature list are replaced with
+      the loaded values from the setting files.
+    - The function supports loading parameter values from YAML files and
+      dynamically updating the feature list.
+
+    Example:
+    --------
+    Given a feature list and a parameter setting file:
+    - feature_list:
+      ```
+      [
+          {"name": func1, "args": (arg1, arg2)},
+          {"name": func2},
+          [
+              {"name": func3, "args": (arg3,)},
+              {"name": func4}
+          ]
+      ]
+      ```
+    - parameter setting file (func1.yml):
+      ```
+      arg1: value1
+      arg2: value2
+      ```
+
+    The function would update the feature list as follows:
+    ```
+    [
+        {"name": func1, "args": ("value1", "value2")},
+        {"name": func2},
+        [
+            {"name": func3, "args": (arg3,)},
+            {"name": func4}
+        ]
+    ]
+    ```
+    """
 
     for item in feature_list:
         if type(item) is dict:

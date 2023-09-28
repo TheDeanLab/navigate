@@ -265,7 +265,7 @@ class Model:
                         "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.multiposition_count",),
                     },
-                )
+                ),
             ]
         )
 
@@ -611,7 +611,10 @@ class Model:
                         )
 
                     self.addon_feature = self.feature_list[args[0] - 1]
-                    load_dynamic_parameter_functions(self.addon_feature, f"{get_aslm_path()}/feature_lists/feature_parameter_setting")
+                    load_dynamic_parameter_functions(
+                        self.addon_feature,
+                        f"{get_aslm_path()}/feature_lists/feature_parameter_setting",
+                    )
                     self.signal_container, self.data_container = load_features(
                         self, self.addon_feature
                     )
@@ -642,6 +645,7 @@ class Model:
             """
             self.logger.info("ASLM Model - Stopping with stop command.")
             self.stop_acquisition = True
+
             if hasattr(self, "signal_container"):
                 self.signal_container.end_flag = True
             if self.imaging_mode == "ConstantVelocityAcquisition":
@@ -650,8 +654,8 @@ class Model:
                 self.signal_thread.join()
             if self.data_thread:
                 self.data_thread.join()
-            else:
-                self.end_acquisition()
+
+            self.end_acquisition()
             self.stop_stage()
 
         elif command == "terminate":
@@ -927,6 +931,7 @@ class Model:
                 self.active_microscope.current_exposure_time,
             )
             self.active_microscope.daq.run_acquisition()
+
         self.active_microscope.turn_off_lasers()
 
         if hasattr(self, "signal_container"):
@@ -1201,7 +1206,8 @@ class Model:
         feature_list_files = [
             temp
             for temp in os.listdir(feature_lists_path)
-            if (temp.endswith(".yml") or temp.endswith(".yaml")) and os.path.isfile(os.path.join(feature_lists_path, temp))
+            if (temp.endswith(".yml") or temp.endswith(".yaml"))
+            and os.path.isfile(os.path.join(feature_lists_path, temp))
         ]
         for item in feature_list_files:
             if item == "__sequence.yml":

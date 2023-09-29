@@ -437,9 +437,13 @@ class TigerController:
         if enc_divide == 0:
             enc_divide = enc_divide_mm
         else:
-            enc_divide = np.ceil(enc_divide * enc_divide_mm)
+            enc_divide_v1 = int(enc_divide * enc_divide_mm)
+            enc_divide_v2 = np.ceil(enc_divide * enc_divide_mm)
+            enc_divide = enc_divide_v1
         print("Encoder Divide in mm:", enc_divide_mm)
-        print("Set Encoder Divide:", enc_divide)
+        print("Set Encoder Divide int:", enc_divide_v1)
+        print("Set Encoder Divide np.ceil:",enc_divide_v2)
+            # enc_divide = env_divide_v1
         command = (
             f"SCANR "
             f"X={round(start_position_mm, 6)} "

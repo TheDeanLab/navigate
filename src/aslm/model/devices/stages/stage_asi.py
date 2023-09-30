@@ -44,6 +44,7 @@ from aslm.model.devices.APIs.asi.asi_tiger_controller import (
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+import time
 
 
 def build_ASI_Stage_connection(com_port, baud_rate=115200):
@@ -517,7 +518,19 @@ class ASIStage(StageBase):
         except TigerException as e:
             logger.exception("ASI Stage Exception", e)
 
-    def wait_until_complete(self):
-        """ Wait until all axes have stopped moving."""
-        while self.tiger_controller.is_moving():
-            pass
+    # def get_axis_busy(self, axis):
+
+    def wait_until_complete(self, axis):
+        try:
+            while self.tiger_controller.is_axis_busy(axis):
+                print("Current Position:", self.get_axis_position(axis))
+                time.sleep(0.1)
+        except TigerException as e:
+            logger.exception(f"ASI Stage Exception {e}")
+            return False
+        return True
+
+    # def wait_until_complete(self):
+    #     """ Wait until all axes have stopped moving."""
+    #     while self.tiger_controller.is_moving():
+    #         pass

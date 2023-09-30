@@ -194,7 +194,7 @@ class CVACONPRO:
         self.asi_stage.set_speed(percent=0.7)
         self.asi_stage.move_axis_absolute(
             axis=self.axis,
-            abs_pos=self.start_position_um,
+            abs_pos=self.start_position_um-10,
             wait_until_done=True)
         logger.debug(f"Current Stage Position (mm) "
                      f"{self.asi_stage.get_axis_position(self.axis) / 1000.0}")
@@ -340,6 +340,15 @@ class CVACONPRO:
             pos = self.asi_stage.get_axis_position(self.axis)
             print(
                 f"end signal end pos = {pos}, stop position = {self.stop_position_um}, start position = {self.start_position_um}")
+            self.model.configuration[
+                "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+            print("emd signal config set to default")
+            self.model.active_microscope.current_channel = 0
+            print(
+                f"end signal self.model.active_microscope.current_channel = {self.model.active_microscope.current_channel})")
+            self.model.active_microscope.daq.external_trigger = None
+            print("end signal external trigger set to none")
+            self.model.active_microscope.prepare_next_channel()
             return True
         # if self.end_acquisition or self.model.stop_acquisition or self.end_signal_temp>0:
         #     print("end acquisition statements True")
@@ -475,6 +484,7 @@ class CVACONPRO:
             self.model.stop_acquisition = True
             logger.debug("Constant Velocity Acquisition Complete")
             print(f"end acquisition = {self.end_acquisition}")
+            # self.asi_stage.wait_until_complete()
             return True
         return False
 

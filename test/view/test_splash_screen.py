@@ -1,10 +1,9 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -33,29 +32,40 @@
 
 # Standard Library Imports
 import unittest
+import tkinter as tk
+from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
+from aslm.view.splash_screen import SplashScreen
 
 
-class TestTemplate(unittest.TestCase):
-    """
-    Template for Unit Tests
-    """
+class TestSplashScreen(unittest.TestCase):
+    def setUp(self):
+        # Create a root Tkinter window for testing
+        self.root = tk.Tk()
 
-    def test_1(self):
-        """
-        Proper Numpydoc for test
-        """
-        pass
+    def tearDown(self):
+        # Destroy the root window after each test
+        self.root.destroy()
 
-    def test_2(self):
-        """
-        Proper numpydoc for test
-        """
-        pass
+    def test_splash_screen_with_image(self):
+        # Create a SplashScreen instance with an image
+        main_directory = Path(__file__).resolve().parent.parent.parent
+        image_directory = Path.joinpath(
+            main_directory, "src", "aslm", "view", "icon", "splash_screen_image.png"
+        )
 
+        splash_screen = SplashScreen(self.root, imgDir=image_directory)
+        # Replace 'your_image.png' with a valid image path
 
-if __name__ == "__main__":
-    unittest.main()
+        # Check if the SplashScreen is an instance of tk.Toplevel
+        self.assertIsInstance(splash_screen, tk.Toplevel)
+
+    def test_splash_screen_without_image(self):
+        # Create a SplashScreen instance without an image
+        splash_screen = SplashScreen(self.root, "non_existent_image.png")
+
+        # Check if the SplashScreen is an instance of tk.Toplevel
+        self.assertIsInstance(splash_screen, tk.Toplevel)

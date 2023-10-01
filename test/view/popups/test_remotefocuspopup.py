@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -39,12 +37,16 @@ import time
 # Third Party Imports
 
 # Local Imports
-from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
+from aslm.view.popups.waveform_parameter_popup_window import (
+    WaveformParameterPopupWindow,
+)
+from aslm.model.dummy import DummyModel
+from aslm.controller.configuration_controller import ConfigurationController
 
 
-def test_autofocuspopup():
+def test_waveform_parameter_popup():
     """
-    Tests that the autofocus popup and all its widgets gets created and does not
+    Tests that the remote focus popup and all its widgets gets created and does not
     throw any exceptions. Test will fail if any exceptions.
 
     Parameters
@@ -56,10 +58,13 @@ def test_autofocuspopup():
     bool : bool
         True or False as to whether the test passed
     """
+    model = DummyModel()
+    config_control = ConfigurationController(model.configuration)
     root = tk.Tk()
-    auto_pop = AutofocusPopup(root)
+    r_pop = WaveformParameterPopupWindow(root, config_control)
     root.update()
     time.sleep(3)
-    bool = isinstance(auto_pop, AutofocusPopup)
+    bool = isinstance(r_pop, WaveformParameterPopupWindow)
     root.destroy()
+
     assert bool

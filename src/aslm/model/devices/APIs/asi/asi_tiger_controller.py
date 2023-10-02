@@ -413,7 +413,7 @@ class TigerController:
         self.send_command(f"SPEED {axis}?")
         response = self.read_response()
         return float(response.split("=")[1])
-
+    
     def get_encoder_counts_per_mm(self, axis: str):
         """
         Get encoder counts pre mm of axis
@@ -454,6 +454,27 @@ class TigerController:
         self.send_command(command)
         self.read_response()
 
+    def scanv(
+        self,
+        start_position_mm: float,
+        end_position_mm: float,
+        number_of_lines: float,
+        overshoot: float = 1.0,
+        axis: str = "X",
+    ):  
+        command = (
+            f"SCANV "
+            f"X={round(start_position_mm, 6)} "
+            f"Y={round(end_position_mm, 6)} "
+            f"Z={round(number_of_lines, 6)}"
+            f"F={round(overshoot, 6)}"
+        )
+
+        self.send_command(command)
+        self.read_response()
+        
+
+    
     def start_scan(self, axis: str, is_single_axis_scan: bool = True):
         """
         Start scan

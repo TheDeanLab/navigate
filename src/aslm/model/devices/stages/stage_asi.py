@@ -485,6 +485,45 @@ class ASIStage(StageBase):
             logger.exception(f"ASI Stage - KeyError in scanr: {e}")
             return False
         return True
+    
+    def scanv(self, start_position_mm, end_position_mm, number_of_lines, overshoot, axis="z"):
+        """Set scan range
+
+        Parameters
+        ----------
+        start_position_mm: float
+            scan start position
+        end_position_mm: float
+            scan end position
+        number of lines: int
+            number of steps.
+        overshoot: float
+            overshoot_time ms    
+        axis: str
+            fast axis name
+
+        Returns
+        -------
+        success: bool
+            Was the setting successful?
+        """
+        try:
+            axis = self.axes_mapping[axis]
+            self.tiger_controller.scanv(
+                start_position_mm,
+                end_position_mm,
+                number_of_lines,
+                overshoot,
+                axis
+            )
+        except TigerException as e:
+            logger.exception(f"TigerException: {e}")
+            print(logger.exception())
+            return False
+        except KeyError as e:
+            logger.exception(f"ASI Stage - KeyError in scanr: {e}")
+            return False
+        return True
 
     def start_scan(self, axis):
         """Start scan state machine

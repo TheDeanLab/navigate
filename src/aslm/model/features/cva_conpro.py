@@ -278,7 +278,7 @@ class CVACONPRO:
         print(f"current channel = {self.model.active_microscope.current_channel}")
         print(f"channel set to 0")
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
-        print(f"waveforms calculated = {self.waveform_dict}")
+        # print(f"waveforms calculated = {self.waveform_dict}")
         self.model.active_microscope.prepare_next_channel()
         print("channel prepared after model")
         self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
@@ -397,7 +397,7 @@ class CVACONPRO:
         self.model.configuration[
             "experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
         self.model.configuration[
-            "waveform_templates"]["CVACONPRO"]["expand"] = int(self.number_z_steps)
+            "waveform_templates"]["CVACONPRO"]["expand"] = int(self.new_z_steps)
         self.model.configuration[
             "waveform_templates"]["CVACONPRO"]["repeat"] = int(1)
         print("waveform template set")
@@ -425,7 +425,7 @@ class CVACONPRO:
         pos = self.asi_stage.get_axis_position(self.axis)
         print(
             f"cleanup end pos = {pos}, stop position = {self.stop_position_um}, start position = {self.start_position_um}")
-
+        self.asi_stage.set_speed(percent=0.7)
         self.model.configuration[
             "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
         print("config set to default")
@@ -479,6 +479,10 @@ class CVACONPRO:
         print(f"pos = {pos}, stop position = {self.stop_position_um}")
         print(
             f"self.received_frames = {self.received_frames}, self.number_z_steps = {self.new_z_steps}")
+        logger.info(f"pos = {pos}, stop position = {self.stop_position_um}")
+        logger.info(
+            f"self.received_frames = {self.received_frames}, self.number_z_steps = {self.new_z_steps}")
+        
         if self.received_frames >= self.new_z_steps:
             self.end_acquisition = True
             self.model.stop_acquisition = True

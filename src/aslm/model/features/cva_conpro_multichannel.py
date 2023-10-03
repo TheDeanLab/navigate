@@ -432,45 +432,51 @@ class CVACONPROMULTICHANNEL:
         print("update channel called")
         print(f"channel before in update channel list = {self.current_channel_in_list}")
         self.current_channel_in_list = (self.current_channel_in_list + 1) % self.channels
+        
         # self.received_frames = 0
         print(f"channel after in update channel = {self.channels}")
         print(f"channel after in update channel list = {self.current_channel_in_list}")
+        self.model.active_microscope.prepare_next_channel()
+        self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+        print("channel prepared")
         # self.pre_signal_function()
         # self.main_signal_function()
-        self.asi_stage.set_speed(percent=0.7)
-        self.asi_stage.move_axis_absolute(
-            axis=self.axis,
-            abs_pos=self.start_position_um,
-            wait_until_done=True)
-        self.received_frames = 0
-        self.model.stop_acquisition = False 
-        print("stage moved to start position")
-        self.model.configuration[
-            "experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
-        self.model.configuration[
-            "waveform_templates"]["CVACONPRO"]["expand"] = int(self.new_z_steps)
-        self.model.configuration[
-            "waveform_templates"]["CVACONPRO"]["repeat"] = int(1)
-        print("waveform template set")
-        self.model.active_microscope.prepare_next_channel()
-        print("channel prepared")
-        self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
-        print("external trigger set")
-        print(f"self.desired_speed = {self.desired_speed}")
-        self.asi_stage.set_speed(velocity_dict={"X": self.desired_speed})
-        print("stage speed set")
-        print(
-            f"self.desired_mechanical_step_size_mm = {self.desired_mechanical_step_size_mm}")
-        self.asi_stage.scanr(
-            start_position_mm=self.start_position_mm,
-            end_position_mm=self.stop_position_mm,
-            enc_divide=self.desired_mechanical_step_size_mm,
-            axis=self.axis
-        )
-        print("scanr set")
+
+        # self.asi_stage.set_speed(percent=0.7)
+        # self.asi_stage.move_axis_absolute(
+        #     axis=self.axis,
+        #     abs_pos=self.start_position_um,
+        #     wait_until_done=True)
+        # self.received_frames = 0
+        # self.model.stop_acquisition = False 
+        # print("stage moved to start position")
+        # self.model.configuration[
+        #     "experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
+        # self.model.configuration[
+        #     "waveform_templates"]["CVACONPRO"]["expand"] = int(self.new_z_steps)
+        # self.model.configuration[
+        #     "waveform_templates"]["CVACONPRO"]["repeat"] = int(1)
+        # print("waveform template set")
+        # self.model.active_microscope.prepare_next_channel()
+        # print("channel prepared")
+        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+        # print("external trigger set")
+        # print(f"self.desired_speed = {self.desired_speed}")
+        # self.asi_stage.set_speed(velocity_dict={"X": self.desired_speed})
+        # print("stage speed set")
+        # print(
+        #     f"self.desired_mechanical_step_size_mm = {self.desired_mechanical_step_size_mm}")
+        # self.asi_stage.scanr(
+        #     start_position_mm=self.start_position_mm,
+        #     end_position_mm=self.stop_position_mm,
+        #     enc_divide=self.desired_mechanical_step_size_mm,
+        #     axis=self.axis
+        # )
+        # print("scanr set")
         # self.main_signal_function()
-        self.asi_stage.start_scan(self.axis)
-        print("stage scan started updated channel")
+
+        # self.asi_stage.start_scan(self.axis)
+        # print("stage scan started updated channel")
 
     def cleanup_signal_function(self):
         print("Clean up signal function called")

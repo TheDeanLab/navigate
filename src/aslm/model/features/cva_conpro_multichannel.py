@@ -306,7 +306,8 @@ class CVACONPROMULTICHANNEL:
 
     def main_signal_function(self):
         print("main function called")
-        if self.end_acquisition:
+        print(f"self.end_acquisition = {self.model.stop_acquisition}")
+        if self.model.stop_acquisition:
             return False
 
         self.asi_stage.start_scan(self.axis)
@@ -331,6 +332,27 @@ class CVACONPROMULTICHANNEL:
         # set the channel back to 0, run prepare next channel, set external trigger.
         # Configure the constant velocity/confocal projection mode
 
+        # print("end signal function called")
+        # print(f"self.end_acquisition ={self.end_acquisition}")
+        # print(f"self.model.stop_acquisition = {self.model.stop_acquisition}")
+        # print(f"self.end_signal_temp = {self.end_signal_temp}")
+        # # pos = self.asi_stage.get_axis_position(self.axis)
+        # # print(f"end signal end pos = {pos}, stop position = {self.stop_position_um}, start position = {self.start_position_um}")
+
+        # if self.end_acquisition or self.model.stop_acquisition or self.end_signal_temp > 0:
+        #     pos = self.asi_stage.get_axis_position(self.axis)
+        #     print(
+        #         f"end signal end pos = {pos}, stop position = {self.stop_position_um}, start position = {self.start_position_um}")
+        #     self.model.configuration[
+        #         "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+        #     print("emd signal config set to default")
+        #     self.model.active_microscope.current_channel = 0
+        #     print(
+        #         f"end signal self.model.active_microscope.current_channel = {self.model.active_microscope.current_channel})")
+        #     self.model.active_microscope.daq.external_trigger = None
+        #     print("end signal external trigger set to none")
+        #     self.model.active_microscope.prepare_next_channel()
+        #     return True
         print("end signal function called")
         print(f"self.end_acquisition ={self.end_acquisition}")
         print(f"self.model.stop_acquisition = {self.model.stop_acquisition}")
@@ -342,16 +364,42 @@ class CVACONPROMULTICHANNEL:
             pos = self.asi_stage.get_axis_position(self.axis)
             print(
                 f"end signal end pos = {pos}, stop position = {self.stop_position_um}, start position = {self.start_position_um}")
-            self.model.configuration[
-                "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
-            print("emd signal config set to default")
-            self.model.active_microscope.current_channel = 0
-            print(
-                f"end signal self.model.active_microscope.current_channel = {self.model.active_microscope.current_channel})")
-            self.model.active_microscope.daq.external_trigger = None
-            print("end signal external trigger set to none")
-            self.model.active_microscope.prepare_next_channel()
-            return True
+            # self.model.configuration[
+            #     "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+            # print("emd signal config set to default")
+            # self.model.active_microscope.current_channel = 0
+            # print(
+            #     f"end signal self.model.active_microscope.current_channel = {self.model.active_microscope.current_channel})")
+            # self.model.active_microscope.daq.external_trigger = None
+            # print("end signal external trigger set to none")
+            # self.model.active_microscope.prepare_next_channel()
+            # print("returning true from stop or end acquisition end_func_signal")
+            if self.stack_cycling_mode == "per_stack":
+                print("per stack if statment called")
+                print(f"channel list: {self.current_channel_in_list}")
+                self.update_channel()
+                print("if statement update channel finished")
+                # if run through all the channels, move to next position
+                if self.current_channel_in_list == 0:
+                    print(f"in if channel list = 0 statement, channel = {self.current_channel_in_list}")
+                    self.cleanup()
+                    return True
+            else:
+                print("in else true statement")
+                print("end signal config set to default")
+                self.model.active_microscope.current_channel = 0
+                print(
+                    f"end signal self.model.active_microscope.current_channel = {self.model.active_microscope.current_channel})")
+                self.model.active_microscope.daq.external_trigger = None
+                print("end signal external trigger set to none")
+                self.model.active_microscope.prepare_next_channel()
+                print("returning true from stop or end acquisition end_func_signal")
+                return True
+            
+            
+            
+        # return True
+        
         # if self.end_acquisition or self.model.stop_acquisition or self.end_signal_temp>0:
         #     print("end acquisition statements True")
         #     if self.stack_cycling_mode == "per_stack":
@@ -383,8 +431,7 @@ class CVACONPROMULTICHANNEL:
     def update_channel(self):
         print("update channel called")
         print(f"channel before in update channel list = {self.current_channel_in_list}")
-        self.current_channel_in_list = (
-                                                   self.current_channel_in_list + 1) % self.channels
+        self.current_channel_in_list = (self.current_channel_in_list + 1) % self.channels
         # self.received_frames = 0
         print(f"channel after in update channel = {self.channels}")
         print(f"channel after in update channel list = {self.current_channel_in_list}")
@@ -395,6 +442,8 @@ class CVACONPROMULTICHANNEL:
             axis=self.axis,
             abs_pos=self.start_position_um,
             wait_until_done=True)
+        self.received_frames = 0
+        self.model.stop_acquisition = False 
         print("stage moved to start position")
         self.model.configuration[
             "experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
@@ -405,7 +454,7 @@ class CVACONPROMULTICHANNEL:
         print("waveform template set")
         self.model.active_microscope.prepare_next_channel()
         print("channel prepared")
-        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+        self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
         print("external trigger set")
         print(f"self.desired_speed = {self.desired_speed}")
         self.asi_stage.set_speed(velocity_dict={"X": self.desired_speed})
@@ -418,9 +467,10 @@ class CVACONPROMULTICHANNEL:
             enc_divide=self.desired_mechanical_step_size_mm,
             axis=self.axis
         )
+        print("scanr set")
         # self.main_signal_function()
         self.asi_stage.start_scan(self.axis)
-        print("stage scan started")
+        print("stage scan started updated channel")
 
     def cleanup_signal_function(self):
         print("Clean up signal function called")

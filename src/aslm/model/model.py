@@ -56,7 +56,7 @@ from aslm.model.features.common_features import (
     LoopByCount,
     ConProAcquisition,  # noqa
     StackPause,
-    MoveToNextPositionInMultiPostionTable,
+    MoveToNextPositionInMultiPositionTable,
     WaitToContinue,
 )
 from aslm.model.features.remove_empty_tiles import (
@@ -247,11 +247,11 @@ class Model:
 
         self.feature_list.append(
             [
-                # {"name": MoveToNextPositionInMultiPostionTable},
+                # {"name": MoveToNextPositionInMultiPositionTable},
                 # {"name": CalculateFocusRange},
                 {"name": PrepareNextChannel},
                 (
-                    {"name": MoveToNextPositionInMultiPostionTable},
+                    {"name": MoveToNextPositionInMultiPositionTable},
                     {"name": Autofocus},
                     {
                         "name": ZStackAcquisition,
@@ -274,7 +274,7 @@ class Model:
             [
                 {"name": PrepareNextChannel},
                 (
-                    {"name": MoveToNextPositionInMultiPostionTable},
+                    {"name": MoveToNextPositionInMultiPositionTable},
                     # {"name": CalculateFocusRange},
                     {
                         "name": DetectTissueInStackAndRecord,

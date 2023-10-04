@@ -17,6 +17,7 @@ aslm.model.devices.stages.stage\_sutter.SutterStage
    .. autosummary::
    
       ~SutterStage.__init__
+      ~SutterStage.close
       ~SutterStage.get_abs_position
       ~SutterStage.get_position_dict
       ~SutterStage.move_absolute

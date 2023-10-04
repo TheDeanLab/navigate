@@ -1,0 +1,40 @@
+aslm.view.custom\_widgets
+=========================
+
+.. automodule:: aslm.view.custom_widgets
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   aslm.view.custom_widgets.ArrowLabel
+   aslm.view.custom_widgets.DockableNotebook
+   aslm.view.custom_widgets.LabelInputWidgetFactory
+   aslm.view.custom_widgets.hover
+   aslm.view.custom_widgets.hoverbar
+   aslm.view.custom_widgets.hovermixin
+   aslm.view.custom_widgets.popup
+   aslm.view.custom_widgets.scrollbars
+   aslm.view.custom_widgets.validation
+

@@ -18,6 +18,7 @@ aslm.model.devices.stages.stage\_galvo.GalvoNIStage
    
       ~GalvoNIStage.__init__
       ~GalvoNIStage.calculate_waveform
+      ~GalvoNIStage.close
       ~GalvoNIStage.get_abs_position
       ~GalvoNIStage.get_position_dict
       ~GalvoNIStage.move_absolute

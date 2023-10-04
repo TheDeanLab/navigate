@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feature Container &mdash; ASLM 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Adding New Model Features" href="../contributing/contributing_model.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ASLM
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Feature Container</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#currently-implemented-features">Currently Implemented Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-feature-object">The Feature Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-custom-features">Creating Custom Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#combining-features">Combining Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loading-custom-functions">Loading Custom Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#editing-function-parameters">Editing Function Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deleting-features">Deleting Features</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ASLM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Feature Container</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/feature_container/feature_container_home.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="feature-container">
+<h1>Feature Container<a class="headerlink" href="#feature-container" title="Link to this heading"></a></h1>
+<p>To make ASLM as powerful as possible, we want to encourage users to contribute code and
+engage in the software collaboratively.</p>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h2>
+<p>The ASLM <strong>feature container</strong> allows for reconfigurable acquisition and
+analysis. The feature container runs a tree of <strong>features</strong>, where each
+feature may perform a <em>signal</em> operation, where it modifies the state of
+microscope hardware, a <em>data</em> operation, where it performs an analysis on
+acquired image data, or both.</p>
+<p>Once a feature is executed, any features dependent on this feature’s execution
+will execute (for example, move the stage, then snap a picture). Following
+this, the next set of features in sequence will be executed.</p>
+<p>Examples of some existing features include
+<code class="docutils literal notranslate"><span class="pre">aslm.model.features.common_features.ZStackAcquisition</span></code>, which acquires a
+z-stack, and <code class="docutils literal notranslate"><span class="pre">aslm.model.features.autofocus.Autofocus</span></code>, which finds the
+ideal plane of focus of a sample using a Discrete Cosine Transform.</p>
+</section>
+<section id="currently-implemented-features">
+<h2>Currently Implemented Features<a class="headerlink" href="#currently-implemented-features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>VolumeSearch</p></li>
+<li><p>IlastikSegmentation</p></li>
+<li><p>DetectTissueInStack</p></li>
+<li><p>DetectTissueInStackAndRecord</p></li>
+<li><p>RemoveEmptyPositions</p></li>
+<li><p>ImageWriter</p></li>
+<li><p>ConstantVelocityAcquisition</p></li>
+<li><p>ChangeResolution</p></li>
+<li><p>ConProAcquisition</p></li>
+<li><p>FindTissueSimple2D</p></li>
+<li><p>LoopByCount</p></li>
+<li><p>MoveToNextPositionInMultipositionTable</p></li>
+<li><p>PrepareNextChannel</p></li>
+<li><p>Snap</p></li>
+<li><p>StackPause</p></li>
+<li><p>WaitToContinue</p></li>
+<li><p>ZStackAcquisition</p></li>
+</ul>
+</section>
+<section id="the-feature-object">
+<h2>The Feature Object<a class="headerlink" href="#the-feature-object" title="Link to this heading"></a></h2>
+<p>Each feature is an object that accepts a pointer to <code class="docutils literal notranslate"><span class="pre">aslm.model.model</span></code> in its
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code>  arguments and contains a configuration dictionary that dictates
+feature behavior in its <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function. A complete configuration
+dictionary is shown below. As few or as many of these options can be specified
+as needed.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">config_table</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;signal&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;init&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_func_signal</span><span class="p">,</span>
+                                <span class="s1">&#39;main&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_func_signal</span><span class="p">,</span>
+                                <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_func_signal</span><span class="p">,</span>
+                                <span class="s1">&#39;cleanup&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleanup_func_signal</span><span class="p">},</span>
+                         <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;init&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_func_data</span><span class="p">,</span>
+                                  <span class="s1">&#39;main&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_func_data</span><span class="p">,</span>
+                                  <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_func_data</span><span class="p">,</span>
+                                  <span class="s1">&#39;cleanup&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleanup_func_data</span><span class="p">},</span>
+                         <span class="s1">&#39;node&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;node_type&#39;</span><span class="p">:</span> <span class="s1">&#39;multi-step&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;device_related&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                  <span class="s1">&#39;need_response&#39;</span><span class="p">:</span> <span class="kc">True</span> <span class="p">},</span>
+                        <span class="p">}</span>
+</pre></div>
+</div>
+<p>Both <code class="docutils literal notranslate"><span class="pre">signal</span></code> and <code class="docutils literal notranslate"><span class="pre">data</span></code> configuration entries are themselves
+dictionaries that can contain <code class="docutils literal notranslate"><span class="pre">init</span></code>, <code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">end</span></code> and/or
+<code class="docutils literal notranslate"><span class="pre">cleanup</span></code> entries.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">init</span></code> entries dictate pre-processing steps that must be run before the
+main function of the feature starts.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">main</span></code> entries dictate the primary operation of the feature, to be once per
+acqusition step</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">end</span></code> entries describe any closing operations that must be performed when
+exiting the node</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cleanup</span></code> entries dictate what happens if the node fails. This is for
+failsafe controls such as “turn off all lasers”</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">node</span></code> configuration dictionary contains general properties of feature
+nodes. <code class="docutils literal notranslate"><span class="pre">node_type</span></code> can be <code class="docutils literal notranslate"><span class="pre">one-step</span></code> or <code class="docutils literal notranslate"><span class="pre">multi-step</span></code>, the latter indicating
+we have an <code class="docutils literal notranslate"><span class="pre">init</span></code>, a <code class="docutils literal notranslate"><span class="pre">main</span></code> and an <code class="docutils literal notranslate"><span class="pre">end</span></code>. <code class="docutils literal notranslate"><span class="pre">device_related</span></code> is set to
+<code class="docutils literal notranslate"><span class="pre">True</span></code> if we have a <code class="docutils literal notranslate"><span class="pre">multi-step</span></code> signal container. <code class="docutils literal notranslate"><span class="pre">need_response</span></code> is set
+to true if the signal node waits on hardware (e.g. waits for a stage to confirm
+it has indeed moved) before proceeding.</p>
+<p>Each of the functions that are the value entries in <code class="docutils literal notranslate"><span class="pre">self.config_table</span></code>
+dictionaries are methods of the feature object.</p>
+</section>
+<section id="creating-custom-features">
+<h2>Creating Custom Features<a class="headerlink" href="#creating-custom-features" title="Link to this heading"></a></h2>
+<p>The ASLM Software allows you to build a custom feature that implements new
+functionality, or a new feature list that builds an intelligent acquisition workflow
+from existing features. This documentation explains how to create and load
+a customized feature list within the ASLM software. The first step is to create a
+Python function, and decorating it as a “FeatureList.” .</p>
+<p>To create a customized feature, follow these steps:</p>
+<ol class="arabic simple">
+<li><p>Import the necessary modules:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aslm.tools.decorators</span> <span class="kn">import</span> <span class="n">FeatureList</span>
+<span class="kn">from</span> <span class="nn">aslm.model.features.feature_related_functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="nd">@FeatureList</span>
+<span class="k">def</span> <span class="nf">feature_example</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">LoopByCount</span><span class="p">,</span>
+                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;experiment.MicroscopeState.selected_channels&quot;</span><span class="p">,),</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>Once you’ve created a feature, you can load it into the ASLM software using these steps:</p>
+<ol class="arabic simple" start="2">
+<li><p>Open ASLM.</p></li>
+<li><p>Navigate to the <cite>Features</cite> menu.</p></li>
+</ol>
+<img alt="../_images/step_1.png" src="../_images/step_1.png" />
+<p>4a. Import the customized feature. Select <cite>Add Custom Feature List</cite> from the
+<cite>Features</cite> menu. A dialog box will appear, allowing you to select the Python file
+containing your customized feature list function.</p>
+<img alt="../_images/step_2.png" src="../_images/step_2.png" />
+<p>5. Choose the Python file containing your customized feature list function. ASLM will
+load the specified feature list, making it available for use in your experiments and
+analyses. It will appear at the bottom of the <cite>Features</cite> menu.</p>
+</section>
+<section id="combining-features">
+<h2>Combining Features<a class="headerlink" href="#combining-features" title="Link to this heading"></a></h2>
+<p>Once you have loaded your feature, the next step is to use it in combination with
+other features to create an intelligent acquisition workflow. To do this, you will
+need to create a new feature list that combines your custom feature with other
+features:</p>
+<p>1. Navigate back to the <cite>Features</cite> menu, and select <cite>Add Customized Feature List</cite>.
+You could add a new feature list directly in the software, by selecting the menu
+“Features-&gt;Add Customized Feature List”. This will open a new dialog box that allows
+you to create a new feature list.</p>
+<p>2. Provide the feature list with a <cite>Feature List Name</cite> of your choice, and type the
+feature list content (which must be a list object). The feature list content could be
+the whole feature list or just a simple feature name. In this example, the feature
+list name is <cite>Feature Example 2</cite>, and the content is a simple feature name: [{“name”:
+PrepareNextChannel}]. Once you select <cite>Preview</cite>, the feature list will be displayed
+in the <cite>Preview</cite> window. If you are satisfied with the feature list, select <cite>OK</cite> to
+save it.</p>
+<img alt="../_images/step_3.png" src="../_images/step_3.png" />
+<p>3. You could edit the list of features directly by modifying the text, or through a
+popup menu that is available by right clicking the feature name. The popup menu
+allows you to add a new feature, delete a feature, or edit a feature. In this
+example, click “Insert After”, and a new feature “PrepareNextChannel”
+will be inserted by default.</p>
+<img alt="../_images/step_4.png" src="../_images/step_4.png" />
+<img alt="../_images/step_5.png" src="../_images/step_5.png" />
+<p>4. To change the identity of the inserted feature, you can select a different feature
+form the drop-down menu. For example, the feature can be changed from
+PrepareNextChannel to LoopByCount. The parameters of the feature can be changed
+automatically in the popup window.</p>
+<img alt="../_images/step_6.png" src="../_images/step_6.png" />
+<p>5. If you click the preview button, a graphical representation of the feature list will
+be displayed.</p>
+<img alt="../_images/step_7.png" src="../_images/step_7.png" />
+<p>6. If you want a loop structure, type a pair of parentheses around the features, then
+click “Preview”. Given this design, you can loop through arbitrary features in a
+user-selected format.</p>
+<img alt="How to create a custom feature list." src="../_images/step_8.png" />
+<p>7. After editing the feature list, click “Add”. The new feature list will show up
+under the “Features” menu.</p>
+</section>
+<section id="loading-custom-functions">
+<h2>Loading Custom Functions<a class="headerlink" href="#loading-custom-functions" title="Link to this heading"></a></h2>
+<p>1. You could load customized functions in the software by selecting the menu
+“Features-&gt;Advanced Setting”.</p>
+<img alt="../_images/step_10.png" src="../_images/step_10.png" />
+<p>2. In the popup window, choose the feature name with which you want to use the
+dynamic customized functions as feature parameters.</p>
+<img alt="../_images/step_11.png" src="../_images/step_11.png" />
+<img alt="../_images/step_12.png" src="../_images/step_12.png" />
+<p>3. Click “Add”, A new line will appear and allow you to edit the parameter options.
+Type the function name which is defined in your python file.</p>
+<img alt="../_images/step_13.png" src="../_images/step_13.png" />
+<ol class="arabic simple" start="4">
+<li><p>Then click “Load” to choose your python file.</p></li>
+</ol>
+<img alt="../_images/step_14.png" src="../_images/step_14.png" />
+<p>5. When you run a feature list containing the feature you just set, the new function
+name will appear and you can choose the one you just added.</p>
+<img alt="../_images/step_15.png" src="../_images/step_15.png" />
+</section>
+<section id="editing-function-parameters">
+<h2>Editing Function Parameters<a class="headerlink" href="#editing-function-parameters" title="Link to this heading"></a></h2>
+<p>1. Select the feature list you want to run, choose “Customized” acquisition mode, and
+then click “Acquire”. A feature edit popup window will show up. In this popup window,
+you can see the structure of the selected feature list.</p>
+<img alt="../_images/step_16.png" src="../_images/step_16.png" />
+<img alt="../_images/step_17.png" src="../_images/step_17.png" />
+<img alt="../_images/step_18.png" src="../_images/step_18.png" />
+<p>2. Click one feature in the preview window, a parameter window will show up. Then you
+could set the parameter you want. Close the parameter window.</p>
+<img alt="../_images/step_19.png" src="../_images/step_19.png" />
+<ol class="arabic simple" start="3">
+<li><p>Click “Confirm”. The feature list will start to run.</p></li>
+</ol>
+<img alt="../_images/step_20.png" src="../_images/step_20.png" />
+</section>
+<section id="deleting-features">
+<h2>Deleting Features<a class="headerlink" href="#deleting-features" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Select the feature list you want to delete in the <cite>Features</cite> menu.</p></li>
+</ol>
+<p>2. Then, navigate back to the <cite>Features</cite> menu and select <cite>Delete Selected Feature</cite>
+List”. The feature list will be removed from the menu and the software.</p>
+<img alt="../_images/step_9.png" src="../_images/step_9.png" />
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../contributing/contributing_model.html" class="btn btn-neutral float-left" title="Adding New Model Features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

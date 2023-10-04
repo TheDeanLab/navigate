@@ -22,6 +22,7 @@ aslm.model.model.Model
       ~Model.destroy_virtual_microscope
       ~Model.end_acquisition
       ~Model.get_active_microscope
+      ~Model.get_camera_line_interval_and_exposure_time
       ~Model.get_data_buffer
       ~Model.get_feature_list
       ~Model.get_microscope_info

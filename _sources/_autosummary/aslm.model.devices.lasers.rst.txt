@@ -28,11 +28,7 @@ aslm.model.devices.lasers
    :template: custom_module.rst
    :recursive:
 
-   aslm.model.devices.lasers.LaserTriggers
    aslm.model.devices.lasers.laser_base
    aslm.model.devices.lasers.laser_ni
    aslm.model.devices.lasers.laser_synthetic
-   aslm.model.devices.lasers.laser_trigger_base
-   aslm.model.devices.lasers.laser_trigger_ni
-   aslm.model.devices.lasers.laser_trigger_synthetic
 

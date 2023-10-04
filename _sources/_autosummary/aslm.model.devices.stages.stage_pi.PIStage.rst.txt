@@ -17,6 +17,7 @@ aslm.model.devices.stages.stage\_pi.PIStage
    .. autosummary::
    
       ~PIStage.__init__
+      ~PIStage.close
       ~PIStage.get_abs_position
       ~PIStage.get_position_dict
       ~PIStage.move_absolute

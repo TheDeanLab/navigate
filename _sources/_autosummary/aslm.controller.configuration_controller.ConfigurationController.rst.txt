@@ -30,6 +30,7 @@ aslm.controller.configuration\_controller.ConfigurationController
    .. autosummary::
    
       ~ConfigurationController.camera_config_dict
+      ~ConfigurationController.camera_flip_flags
       ~ConfigurationController.camera_pixels
       ~ConfigurationController.channels_info
       ~ConfigurationController.daq_sample_rate
@@ -39,6 +40,7 @@ aslm.controller.configuration\_controller.ConfigurationController
       ~ConfigurationController.number_of_channels
       ~ConfigurationController.remote_focus_dict
       ~ConfigurationController.stage_default_position
+      ~ConfigurationController.stage_flip_flags
       ~ConfigurationController.stage_setting_dict
       ~ConfigurationController.stage_step
    

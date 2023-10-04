@@ -11,16 +11,14 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="aslm.controller.thread_pool.ThreadWaitlist" href="aslm.controller.thread_pool.ThreadWaitlist.html" />
-    <link rel="prev" title="aslm.controller.thread_pool.SelfLockThread" href="aslm.controller.thread_pool.SelfLockThread.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,29 +41,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../contributing_home.html">Contributing to ASLM</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../contributing_guidelines.html">Contributing Guidelines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../contributing_hardware.html">Adding New Hardware</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../contributing_feature_container.html">ASLM Feature Container</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../contributing_model.html">Adding New Model Features</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
-<li class="toctree-l3"><a class="reference internal" href="aslm.model.html">aslm.model</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="aslm.controller.html">aslm.controller</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="aslm.controller.configuration_controller.html">aslm.controller.configuration_controller</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="aslm.controller.thread_pool.html">aslm.controller.thread_pool</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="aslm.view.html">aslm.view</a></li>
-<li class="toctree-l3"><a class="reference internal" href="aslm.tools.html">aslm.tools</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
 </ul>
 
         </div>
@@ -82,10 +64,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../contributing_home.html">Contributing to ASLM</a></li>
-          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
-          <li class="breadcrumb-item"><a href="aslm.controller.html">aslm.controller</a></li>
-          <li class="breadcrumb-item"><a href="aslm.controller.thread_pool.html">aslm.controller.thread_pool</a></li>
       <li class="breadcrumb-item active">aslm.controller.thread_pool.SynchronizedThreadPool</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/_autosummary/aslm.controller.thread_pool.SynchronizedThreadPool.rst.txt" rel="nofollow"> View page source</a>
@@ -97,14 +75,14 @@
            <div itemprop="articleBody">
              
   <section id="aslm-controller-thread-pool-synchronizedthreadpool">
-<h1>aslm.controller.thread_pool.SynchronizedThreadPool<a class="headerlink" href="#aslm-controller-thread-pool-synchronizedthreadpool" title="Permalink to this heading"></a></h1>
+<h1>aslm.controller.thread_pool.SynchronizedThreadPool<a class="headerlink" href="#aslm-controller-thread-pool-synchronizedthreadpool" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.controller.thread_pool.</span></span><span class="sig-name descname"><span class="pre">SynchronizedThreadPool</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.controller.thread_pool.</span></span><span class="sig-name descname"><span class="pre">SynchronizedThreadPool</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -147,13 +125,13 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.clear" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.clear" title="Link to this definition"></a></dt>
 <dd><p>Clear all the threads in the pool.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.createThread">
-<span class="sig-name descname"><span class="pre">createThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbArgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbKargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.createThread" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">createThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbArgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbKargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.createThread" title="Link to this definition"></a></dt>
 <dd><p>Create a thread and add it to the waitlist of the resource.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -172,7 +150,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.getRunningThread">
-<span class="sig-name descname"><span class="pre">getRunningThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.getRunningThread" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">getRunningThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.getRunningThread" title="Link to this definition"></a></dt>
 <dd><p>Get the running thread of the resource.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -183,7 +161,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.globaltrace">
-<span class="sig-name descname"><span class="pre">globaltrace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.globaltrace" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">globaltrace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.globaltrace" title="Link to this definition"></a></dt>
 <dd><p>Global trace function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -198,7 +176,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.killThreadInList">
-<span class="sig-name descname"><span class="pre">killThreadInList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threadList</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.killThreadInList" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">killThreadInList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threadList</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.killThreadInList" title="Link to this definition"></a></dt>
 <dd><p>Kill all the threads in the threadList.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -212,7 +190,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.localtrace">
-<span class="sig-name descname"><span class="pre">localtrace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.localtrace" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">localtrace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.localtrace" title="Link to this definition"></a></dt>
 <dd><p>Local trace function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -227,7 +205,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.moveToDelete">
-<span class="sig-name descname"><span class="pre">moveToDelete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taskThread</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.moveToDelete" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">moveToDelete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taskThread</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.moveToDelete" title="Link to this definition"></a></dt>
 <dd><p>Move a thread to the toDeleteList.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -241,7 +219,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.registerResource">
-<span class="sig-name descname"><span class="pre">registerResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.registerResource" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">registerResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.registerResource" title="Link to this definition"></a></dt>
 <dd><p>Register a resource to the pool.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -252,7 +230,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.removeThread">
-<span class="sig-name descname"><span class="pre">removeThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taskThread</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.removeThread" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">removeThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taskThread</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.removeThread" title="Link to this definition"></a></dt>
 <dd><p>Remove a thread from the waitlist of the resource.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -266,7 +244,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SynchronizedThreadPool.threadTaskWrapping">
-<span class="sig-name descname"><span class="pre">threadTaskWrapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbArgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbKargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.threadTaskWrapping" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">threadTaskWrapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resourceName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbArgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbKargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SynchronizedThreadPool.threadTaskWrapping" title="Link to this definition"></a></dt>
 <dd><p>Wrap the target function of the thread.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -288,10 +266,7 @@
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="aslm.controller.thread_pool.SelfLockThread.html" class="btn btn-neutral float-left" title="aslm.controller.thread_pool.SelfLockThread" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="aslm.controller.thread_pool.ThreadWaitlist.html" class="btn btn-neutral float-right" title="aslm.controller.thread_pool.ThreadWaitlist" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

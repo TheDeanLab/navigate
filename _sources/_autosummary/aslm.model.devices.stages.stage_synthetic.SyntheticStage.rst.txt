@@ -17,6 +17,7 @@ aslm.model.devices.stages.stage\_synthetic.SyntheticStage
    .. autosummary::
    
       ~SyntheticStage.__init__
+      ~SyntheticStage.close
       ~SyntheticStage.get_abs_position
       ~SyntheticStage.get_axis_position
       ~SyntheticStage.get_position_dict

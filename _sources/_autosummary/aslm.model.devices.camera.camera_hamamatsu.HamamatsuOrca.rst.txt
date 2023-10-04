@@ -21,6 +21,7 @@ aslm.model.devices.camera.camera\_hamamatsu.HamamatsuOrca
       ~HamamatsuOrca.calculate_readout_time
       ~HamamatsuOrca.close_camera
       ~HamamatsuOrca.close_image_series
+      ~HamamatsuOrca.get_line_interval
       ~HamamatsuOrca.get_minimum_waiting_time
       ~HamamatsuOrca.get_new_frame
       ~HamamatsuOrca.get_offset_variance_maps
@@ -41,8 +42,14 @@ aslm.model.devices.camera.camera\_hamamatsu.HamamatsuOrca
 
    .. autosummary::
    
+      ~HamamatsuOrca.max_image_height
+      ~HamamatsuOrca.max_image_width
+      ~HamamatsuOrca.min_image_height
+      ~HamamatsuOrca.min_image_width
       ~HamamatsuOrca.offset
       ~HamamatsuOrca.serial_number
+      ~HamamatsuOrca.step_image_height
+      ~HamamatsuOrca.step_image_width
       ~HamamatsuOrca.variance
    
    

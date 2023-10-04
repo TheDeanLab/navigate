@@ -21,6 +21,7 @@ aslm.model.devices.camera.camera\_photometrics.PhotometricsKinetix
       ~PhotometricsKinetix.calculate_readout_time
       ~PhotometricsKinetix.close_camera
       ~PhotometricsKinetix.close_image_series
+      ~PhotometricsKinetix.get_line_interval
       ~PhotometricsKinetix.get_minimum_waiting_time
       ~PhotometricsKinetix.get_new_frame
       ~PhotometricsKinetix.get_offset_variance_maps

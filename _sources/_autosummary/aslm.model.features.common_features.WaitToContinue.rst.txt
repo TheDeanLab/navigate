@@ -17,8 +17,10 @@ aslm.model.features.common\_features.WaitToContinue
    .. autosummary::
    
       ~WaitToContinue.__init__
+      ~WaitToContinue.cleanup
       ~WaitToContinue.data_func
-      ~WaitToContinue.end_data_func
+      ~WaitToContinue.pre_data_func
+      ~WaitToContinue.pre_signal_func
       ~WaitToContinue.signal_func
    
    

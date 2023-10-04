@@ -19,7 +19,8 @@ aslm.config.config
       get_configuration_paths
       load_configs
       update_config_dict
-      verify_configuration
+      verify_experiment_config
+      verify_waveform_constants
    
    
 

@@ -11,11 +11,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=2709fde1"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -43,9 +43,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Software Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
 </ul>
 
         </div>
@@ -73,13 +75,13 @@
            <div itemprop="articleBody">
              
   <section id="configuring-aslm">
-<h1>Configuring ASLM<a class="headerlink" href="#configuring-aslm" title="Permalink to this heading"></a></h1>
+<h1>Configuring ASLM<a class="headerlink" href="#configuring-aslm" title="Link to this heading"></a></h1>
 <p>In order to properly use the ASLM software you will need to configure the specifications of the various hardware that you will be using.
 This is done by updating the configuration.yaml file located in either <code class="docutils literal notranslate"><span class="pre">Users\name\AppData\Local\.ASLM</span></code> if on Windows or <code class="docutils literal notranslate"><span class="pre">~/.ASLM</span></code> if on Mac/Linux.</p>
 <section id="configuration-yaml">
-<h2>Configuration.yaml<a class="headerlink" href="#configuration-yaml" title="Permalink to this heading"></a></h2>
+<h2>Configuration.yaml<a class="headerlink" href="#configuration-yaml" title="Link to this heading"></a></h2>
 <section id="hardware-section">
-<h3>Hardware Section<a class="headerlink" href="#hardware-section" title="Permalink to this heading"></a></h3>
+<h3>Hardware Section<a class="headerlink" href="#hardware-section" title="Link to this heading"></a></h3>
 <p>The first section of the file is called hardware. It contains all the necessary information to find and connect each hardware device to the computer/software.</p>
 <p>Here is an example of what the section will look like:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration in YAML</span>
@@ -203,7 +205,7 @@ and then the information below that. This formats the stage field to behave like
 Another example would be replacing the zoom type with SyntheticZoom in the instance your microscope does not use that hardware. Your system will still run as you expect.</p>
 </section>
 <section id="microscope-section">
-<h3>Microscope Section<a class="headerlink" href="#microscope-section" title="Permalink to this heading"></a></h3>
+<h3>Microscope Section<a class="headerlink" href="#microscope-section" title="Link to this heading"></a></h3>
 <p>The second section contains the microscopes that you will be using with the software. Each is represented as a yaml dictionary similar
 to the hardware section. The GUI uses this dictionary to switch between the microscopes.</p>
 <p>Here is an abbreviated example, the full file contains field entries for all of the hardware specified:</p>
@@ -273,7 +275,7 @@ to the hardware section. The GUI uses this dictionary to switch between the micr
 </pre></div>
 </div>
 <section id="configuring-stages">
-<h4>Configuring stages<a class="headerlink" href="#configuring-stages" title="Permalink to this heading"></a></h4>
+<h4>Configuring stages<a class="headerlink" href="#configuring-stages" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">hardware</span></code> dictionary <code class="docutils literal notranslate"><span class="pre">type</span></code> should match one of the instruments the hardware section at the top of the</p></li>
 </ul>
@@ -301,7 +303,7 @@ stages in <code class="docutils literal notranslate"><span class="pre">configura
 </section>
 </section>
 <section id="gui-section">
-<h3>GUI Section<a class="headerlink" href="#gui-section" title="Permalink to this heading"></a></h3>
+<h3>GUI Section<a class="headerlink" href="#gui-section" title="Link to this heading"></a></h3>
 <p>The third and final section of the configuration file is the default GUI parameters.
 These allow you to specify the number of GUI entries (e.g., number of channels),
 spinbox intervals, and other GUI related parameters.</p>
@@ -311,7 +313,7 @@ spinbox intervals, and other GUI related parameters.</p>
 manner.</p>
 </div>
 <section id="channels">
-<h4>Channels<a class="headerlink" href="#channels" title="Permalink to this heading"></a></h4>
+<h4>Channels<a class="headerlink" href="#channels" title="Link to this heading"></a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">channels</span></code> section in the GUI configuration relates to the channels tab, where
 you define how you would like to acquire the data. <code class="docutils literal notranslate"><span class="pre">interval_time</span></code> is not yet
 implemented, but will eventually allow the user to specify how frequently that
@@ -343,7 +345,7 @@ be acquired every other time point.</p>
 </ul>
 </section>
 <section id="stack-acquisition">
-<h4>Stack Acquisition<a class="headerlink" href="#stack-acquisition" title="Permalink to this heading"></a></h4>
+<h4>Stack Acquisition<a class="headerlink" href="#stack-acquisition" title="Link to this heading"></a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">stack_acquisition</span></code> section in the GUI configuration allows you to specify
 settings related to stack acquisition parameters.</p>
 <ul class="simple">
@@ -371,7 +373,7 @@ settings related to stack acquisition parameters.</p>
 </ul>
 </section>
 <section id="timepoint">
-<h4>Timepoint<a class="headerlink" href="#timepoint" title="Permalink to this heading"></a></h4>
+<h4>Timepoint<a class="headerlink" href="#timepoint" title="Link to this heading"></a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">timepoint</span></code> section in the GUI configuration allows you to specify settings
 related to timepoints.</p>
 <ul class="simple">
@@ -389,7 +391,7 @@ related to timepoints.</p>
 </ul>
 </section>
 <section id="example-yaml-configuration">
-<h4>Example YAML Configuration<a class="headerlink" href="#example-yaml-configuration" title="Permalink to this heading"></a></h4>
+<h4>Example YAML Configuration<a class="headerlink" href="#example-yaml-configuration" title="Link to this heading"></a></h4>
 <p>Here is an example YAML configuration based on the provided settings:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">gui</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">channels</span><span class="p">:</span>

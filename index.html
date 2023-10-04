@@ -11,11 +11,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=2709fde1"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -44,9 +44,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Software Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
 </ul>
 
         </div>
@@ -74,7 +76,7 @@
            <div itemprop="articleBody">
              
   <section id="autonomous-software-for-light-microscopy">
-<span id="aslm-home"></span><h1><strong>Autonomous Software for Light Microscopy</strong><a class="headerlink" href="#autonomous-software-for-light-microscopy" title="Permalink to this heading"></a></h1>
+<span id="aslm-home"></span><h1><strong>Autonomous Software for Light Microscopy</strong><a class="headerlink" href="#autonomous-software-for-light-microscopy" title="Link to this heading"></a></h1>
 <p><strong>ASLM</strong> is a Python library to control microscopes in the UT Southwestern ecosystem.
 It aims to abstract hardware and allow for maximum customization. The library
 contains a feature list that acts as a recipe maker for automated microscope routines.</p>
@@ -83,7 +85,7 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 <p>This project is under active development. See our <a class="reference external" href="https://github.com/TheDeanLab/ASLM">GitHub repository for updates</a>.</p>
 </div>
 <section id="project-philosophy">
-<h2><strong>Project Philosophy</strong><a class="headerlink" href="#project-philosophy" title="Permalink to this heading"></a></h2>
+<h2><strong>Project Philosophy</strong><a class="headerlink" href="#project-philosophy" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Minimal number of dependencies. Prioritize standard library imports for maximum stability.</p></li>
 <li><p>Abstraction layer to drive different camera types, etc.</p></li>
@@ -94,7 +96,7 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 </ul>
 </section>
 <section id="contents">
-<h2><strong>Contents</strong><a class="headerlink" href="#contents" title="Permalink to this heading"></a></h2>
+<h2><strong>Contents</strong><a class="headerlink" href="#contents" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a><ul>
@@ -102,6 +104,15 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 <li class="toctree-l2"><a class="reference internal" href="software_installation.html#setup-your-python-environment">Setup your Python Environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="software_installation.html#gpu-dependencies">GPU Dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="software_installation.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="implementations.html#multiscale-microscope">Multiscale Microscope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations.html#expansion-aslm">Expansion ASLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations.html#opm-v2">OPM-V2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations.html#ct-aslm-v1">CT-ASLM-V1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations.html#ct-aslm-v2">CT-ASLM-V2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations.html#spectral-tirf">Spectral TIRF</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a><ul>
@@ -125,25 +136,34 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 <li class="toctree-l2"><a class="reference internal" href="software_configuration.html#rest-api-configuration-file">Rest API Configuration File</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="contributing_home.html">Contributing to ASLM</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contributing_guidelines.html">Contributing Guidelines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing_hardware.html">Adding New Hardware</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing_feature_container.html">ASLM Feature Container</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing_model.html">Adding New Model Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_hardware.html">Adding New Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_model.html">Adding New Model Features</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="feature_container/feature_container_home.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="feature_container/feature_container_home.html#currently-implemented-features">Currently Implemented Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="feature_container/feature_container_home.html#the-feature-object">The Feature Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="feature_container/feature_container_home.html#creating-custom-features">Creating Custom Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="feature_container/feature_container_home.html#combining-features">Combining Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="feature_container/feature_container_home.html#loading-custom-functions">Loading Custom Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="feature_container/feature_container_home.html#editing-function-parameters">Editing Function Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="feature_container/feature_container_home.html#deleting-features">Deleting Features</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </section>
 <section id="authors">
-<h2><strong>Authors</strong><a class="headerlink" href="#authors" title="Permalink to this heading"></a></h2>
+<h2><strong>Authors</strong><a class="headerlink" href="#authors" title="Link to this heading"></a></h2>
 <p><strong>ASLM</strong> includes key contributions from numerous individuals, including Zach Marin,
 Annie Wang, Dax Collison, Kevin Dean, Sampath Rapuri, Renil Gupta, Samir Mamtani,
 Andrew Jamieson, Andrew York, Nathaniel Thayer, and more.</p>
 </section>
 <section id="index-and-search">
-<h2><strong>Index and search</strong><a class="headerlink" href="#index-and-search" title="Permalink to this heading"></a></h2>
+<h2><strong>Index and search</strong><a class="headerlink" href="#index-and-search" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search</span></a></p></li>

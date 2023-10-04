@@ -17,6 +17,7 @@ aslm.model.devices.stages.stage\_mcl.MCLStage
    .. autosummary::
    
       ~MCLStage.__init__
+      ~MCLStage.close
       ~MCLStage.get_abs_position
       ~MCLStage.get_position_dict
       ~MCLStage.move_absolute

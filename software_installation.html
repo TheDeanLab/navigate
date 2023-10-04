@@ -11,15 +11,15 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=2709fde1"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Supported Hardware" href="supported_hardware.html" />
+    <link rel="next" title="Microscope Implementations" href="implementations.html" />
     <link rel="prev" title="Autonomous Software for Light Microscopy" href="index.html" /> 
 </head>
 
@@ -51,9 +51,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Software Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
 </ul>
 
         </div>
@@ -81,14 +83,14 @@
            <div itemprop="articleBody">
              
   <section id="software-installation">
-<h1>Software Installation<a class="headerlink" href="#software-installation" title="Permalink to this heading"></a></h1>
+<h1>Software Installation<a class="headerlink" href="#software-installation" title="Link to this heading"></a></h1>
 <section id="download-git">
-<h2>Download Git<a class="headerlink" href="#download-git" title="Permalink to this heading"></a></h2>
+<h2>Download Git<a class="headerlink" href="#download-git" title="Link to this heading"></a></h2>
 <p>If you do not have <a class="reference external" href="https://git-scm.com/downloads">Git already installed</a>, you will need to do so before downloading the repo.
 We also recommend installing <a class="reference external" href="https://desktop.github.com/">GitHub Desktop</a> for a more user-friendly experience.</p>
 </section>
 <section id="setup-your-python-environment">
-<h2>Setup your Python Environment<a class="headerlink" href="#setup-your-python-environment" title="Permalink to this heading"></a></h2>
+<h2>Setup your Python Environment<a class="headerlink" href="#setup-your-python-environment" title="Link to this heading"></a></h2>
 <p>Head over to the <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links">miniconda website</a>
 and install the appropriate version based on your operating system.</p>
 <div class="admonition tip">
@@ -100,7 +102,7 @@ and install the appropriate version based on your operating system.</p>
 <li><p>Linux/Mac: Search your computer for Terminal.</p></li>
 </ul>
 <p><strong>Create a python environment called ASLM with Python version 3.9.7</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda create -n ASLM python=3.9.7
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="n">MyComputer</span> <span class="o">~</span> <span class="err">$</span> <span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">ASLM</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.9.7</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -109,13 +111,13 @@ and install the appropriate version based on your operating system.</p>
 See the Troubleshooting section below for information on how to add the proxy address to your environment variables to circumvent this problem.</p>
 </div>
 <p><strong>Activate the ASLM environment</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate ASLM
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="n">MyComputer</span> <span class="o">~</span> <span class="err">$</span> <span class="n">conda</span> <span class="n">activate</span> <span class="n">ASLM</span>
 </pre></div>
 </div>
 <p>The active environment is shown in parentheses on the far-left.  Originally, we were in the miniconda base environment.
 After activatin the ASLM environment, it should now show (ASLM).</p>
 <p><strong>Update the pip python package manager</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ~ $ python -m pip install --upgrade pip
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">MyComputer</span> <span class="o">~</span> <span class="err">$</span> <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">pip</span>
 </pre></div>
 </div>
 <dl class="simple">
@@ -132,20 +134,20 @@ Once the folder is created, we will want to change that to our working directory
 </div>
 </li>
 <li><p>Linux/Mac:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ~ $ mkdir ~/Desktop/Code
-(ASLM) MyComputer ~ $ cd ~/Desktop/Code
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">MyComputer</span> <span class="o">~</span> <span class="err">$</span> <span class="n">mkdir</span> <span class="o">~/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">Code</span>
+<span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">MyComputer</span> <span class="o">~</span> <span class="err">$</span> <span class="n">cd</span> <span class="o">~/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">Code</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <p><strong>Clone the GitHub repository</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/ASLM.git
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">MyComputer</span> <span class="n">MyFolderName</span> <span class="err">$</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">TheDeanLab</span><span class="o">/</span><span class="n">ASLM</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
 <p><strong>Install the ASLM repository</strong></p>
 <p>The last step requires you to change into the ASLM directory and the install the repo as a package locally on your machine.:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer MyFolderName $ cd ASLM
-(ASLM) MyComputer ASLM $ pip install -e .
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">MyComputer</span> <span class="n">MyFolderName</span> <span class="err">$</span> <span class="n">cd</span> <span class="n">ASLM</span>
+<span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">MyComputer</span> <span class="n">ASLM</span> <span class="err">$</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
 </pre></div>
 </div>
 <dl class="simple">
@@ -160,8 +162,8 @@ Once the folder is created, we will want to change that to our working directory
 </div></blockquote>
 </div>
 <p>After completeting these steps you will only need to do the below to start the software upon opening the prompt:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate ASLM
-(ASLM) MyComputer ~ $ aslm
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="n">MyComputer</span> <span class="o">~</span> <span class="err">$</span> <span class="n">conda</span> <span class="n">activate</span> <span class="n">ASLM</span>
+<span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">MyComputer</span> <span class="o">~</span> <span class="err">$</span> <span class="n">aslm</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -170,7 +172,7 @@ Once the folder is created, we will want to change that to our working directory
 </div>
 </section>
 <section id="gpu-dependencies">
-<h2>GPU Dependencies<a class="headerlink" href="#gpu-dependencies" title="Permalink to this heading"></a></h2>
+<h2>GPU Dependencies<a class="headerlink" href="#gpu-dependencies" title="Link to this heading"></a></h2>
 <p>Some of the software routines for microscope feedback are accelerated using GPU computing.
 These require a CUDA GPU device that is compatible with TensorFlow (1.15), PyTorch (1.10.2), CuPy, …
 <a class="reference external" href="https://docs.cupy.dev/en/stable/install.html">Excellent directions can be found for CuPy</a>.</p>
@@ -185,7 +187,7 @@ These require a CUDA GPU device that is compatible with TensorFlow (1.15), PyTor
 </div></blockquote>
 </section>
 <section id="troubleshooting">
-<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading"></a></h2>
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>If running the software on campus at UTSW you may need to update some of your proxy settings to allow pip/conda to install the proper packages.</dt><dd><ul class="simple">
 <li><p>This can be done by going to Environment Variables for Windows, or another OS equivalent.</p></li>
@@ -225,7 +227,7 @@ These require a CUDA GPU device that is compatible with TensorFlow (1.15), PyTor
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Autonomous Software for Light Microscopy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="supported_hardware.html" class="btn btn-neutral float-right" title="Supported Hardware" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="implementations.html" class="btn btn-neutral float-right" title="Microscope Implementations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

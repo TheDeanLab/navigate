@@ -23,7 +23,7 @@ aslm.model.features.common\_features
       ConProAcquisition
       FindTissueSimple2D
       LoopByCount
-      MoveToNextPositionInMultiPostionTable
+      MoveToNextPositionInMultiPositionTable
       PrepareNextChannel
       Snap
       StackPause

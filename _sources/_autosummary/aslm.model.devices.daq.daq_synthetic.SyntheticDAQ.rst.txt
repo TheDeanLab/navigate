@@ -26,7 +26,7 @@ aslm.model.devices.daq.daq\_synthetic.SyntheticDAQ
       ~SyntheticDAQ.enable_microscope
       ~SyntheticDAQ.prepare_acquisition
       ~SyntheticDAQ.run_acquisition
-      ~SyntheticDAQ.set_trigger_mode
+      ~SyntheticDAQ.set_external_trigger
       ~SyntheticDAQ.start_tasks
       ~SyntheticDAQ.stop_acquisition
       ~SyntheticDAQ.stop_tasks

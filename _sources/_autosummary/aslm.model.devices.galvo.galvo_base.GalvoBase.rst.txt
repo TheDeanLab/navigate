@@ -22,6 +22,7 @@ aslm.model.devices.galvo.galvo\_base.GalvoBase
       ~GalvoBase.prepare_task
       ~GalvoBase.start_task
       ~GalvoBase.stop_task
+      ~GalvoBase.turn_off
    
    
 

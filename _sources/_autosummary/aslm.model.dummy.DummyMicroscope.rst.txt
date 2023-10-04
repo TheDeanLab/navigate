@@ -17,6 +17,7 @@ aslm.model.dummy.DummyMicroscope
    .. autosummary::
    
       ~DummyMicroscope.__init__
+      ~DummyMicroscope.calculate_exposure_sweep_times
    
    
 

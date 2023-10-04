@@ -17,6 +17,7 @@ aslm.model.devices.stages.stage\_tl\_kcube\_inertial.TLKIMStage
    .. autosummary::
    
       ~TLKIMStage.__init__
+      ~TLKIMStage.close
       ~TLKIMStage.get_abs_position
       ~TLKIMStage.get_position_dict
       ~TLKIMStage.move_absolute

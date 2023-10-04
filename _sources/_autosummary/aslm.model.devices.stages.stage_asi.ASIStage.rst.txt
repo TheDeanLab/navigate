@@ -17,6 +17,7 @@ aslm.model.devices.stages.stage\_asi.ASIStage
    .. autosummary::
    
       ~ASIStage.__init__
+      ~ASIStage.close
       ~ASIStage.get_abs_position
       ~ASIStage.get_axis_position
       ~ASIStage.get_position_dict
@@ -30,6 +31,7 @@ aslm.model.devices.stages.stage\_asi.ASIStage
       ~ASIStage.stop
       ~ASIStage.stop_scan
       ~ASIStage.verify_abs_position
+      ~ASIStage.verify_move
    
    
 

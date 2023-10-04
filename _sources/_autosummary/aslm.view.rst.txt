@@ -28,6 +28,7 @@
    :template: custom_module.rst
    :recursive:
 
+   aslm.view.custom_widgets
    aslm.view.main_application_window
    aslm.view.main_window_content
    aslm.view.popups

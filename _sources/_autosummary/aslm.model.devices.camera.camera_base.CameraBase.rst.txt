@@ -19,6 +19,7 @@ aslm.model.devices.camera.camera\_base.CameraBase
       ~CameraBase.__init__
       ~CameraBase.calculate_light_sheet_exposure_time
       ~CameraBase.close_camera
+      ~CameraBase.get_line_interval
       ~CameraBase.get_offset_variance_maps
       ~CameraBase.set_readout_direction
    

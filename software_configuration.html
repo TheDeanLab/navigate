@@ -11,15 +11,15 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=2709fde1"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Contributing to ASLM" href="contributing_home.html" />
+    <link rel="next" title="Contributing to ASLM" href="contributing/contributing_home.html" />
     <link rel="prev" title="Supported Hardware" href="supported_hardware.html" /> 
 </head>
 
@@ -45,6 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Software Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#configuration-file">Configuration File</a><ul>
@@ -76,7 +77,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#rest-api-configuration-file">Rest API Configuration File</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
 </ul>
 
         </div>
@@ -104,9 +106,9 @@
            <div itemprop="articleBody">
              
   <section id="software-configuration">
-<h1>Software Configuration<a class="headerlink" href="#software-configuration" title="Permalink to this heading"></a></h1>
+<h1>Software Configuration<a class="headerlink" href="#software-configuration" title="Link to this heading"></a></h1>
 <section id="configuration-file">
-<h2>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this heading"></a></h2>
+<h2>Configuration File<a class="headerlink" href="#configuration-file" title="Link to this heading"></a></h2>
 <p>In order for the ASLM software to function, you will need to configure the
 specifications of the various hardware that you will be using. The first time you
 launch the software, ASLM will evaluate the the hardware settings as provided in the
@@ -121,7 +123,7 @@ only modify the <code class="docutils literal notranslate"><span class="pre">con
 local copy avoids conflicts between different microscopes after pulling new
 changes on GitHub.</p>
 <section id="hardware-section">
-<h3>Hardware Section<a class="headerlink" href="#hardware-section" title="Permalink to this heading"></a></h3>
+<h3>Hardware Section<a class="headerlink" href="#hardware-section" title="Link to this heading"></a></h3>
 <p>The first section of the file is called hardware. It contains all the necessary
 information to find and connect each hardware device to the computer/software.</p>
 <p>Here is an example of what the section will look like:</p>
@@ -249,7 +251,7 @@ and then the information below that. This formats the stage field to behave like
 Another example would be replacing the zoom type with SyntheticZoom in the instance your microscope does not use that hardware. Your system will still run as you expect.</p>
 </section>
 <section id="microscope-section">
-<h3>Microscope Section<a class="headerlink" href="#microscope-section" title="Permalink to this heading"></a></h3>
+<h3>Microscope Section<a class="headerlink" href="#microscope-section" title="Link to this heading"></a></h3>
 <p>The second section contains the microscopes that you will be using with the software.
 Each is represented as a yaml dictionary similar to the hardware section. The GUI
 uses this dictionary to switch between the microscopes, each with their own hardware
@@ -265,7 +267,7 @@ and operating modes:</p>
 </div>
 </section>
 <section id="daq-section">
-<h3>DAQ Section<a class="headerlink" href="#daq-section" title="Permalink to this heading"></a></h3>
+<h3>DAQ Section<a class="headerlink" href="#daq-section" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name of microscope 1</span><span class="p">:</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">daq</span>
@@ -283,7 +285,7 @@ and operating modes:</p>
 </div>
 </section>
 <section id="camera-section">
-<h3>Camera Section<a class="headerlink" href="#camera-section" title="Permalink to this heading"></a></h3>
+<h3>Camera Section<a class="headerlink" href="#camera-section" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name of microscope 1</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">camera</span><span class="p">:</span>
@@ -320,7 +322,7 @@ and operating modes:</p>
 </div>
 </section>
 <section id="remote-focus-section">
-<h3>Remote Focus Section<a class="headerlink" href="#remote-focus-section" title="Permalink to this heading"></a></h3>
+<h3>Remote Focus Section<a class="headerlink" href="#remote-focus-section" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name of microscope 1</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">remote_focus_device</span><span class="p">:</span>
@@ -340,7 +342,7 @@ and operating modes:</p>
 </div>
 </section>
 <section id="galvo-section">
-<h3>Galvo Section<a class="headerlink" href="#galvo-section" title="Permalink to this heading"></a></h3>
+<h3>Galvo Section<a class="headerlink" href="#galvo-section" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name of microscope 1</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">galvo</span><span class="p">:</span>
@@ -361,7 +363,7 @@ and operating modes:</p>
 </div>
 </section>
 <section id="filter-wheel-section">
-<h3>Filter Wheel Section<a class="headerlink" href="#filter-wheel-section" title="Permalink to this heading"></a></h3>
+<h3>Filter Wheel Section<a class="headerlink" href="#filter-wheel-section" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name of microscope 1</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">filter_wheel</span><span class="p">:</span>
@@ -385,7 +387,7 @@ and operating modes:</p>
 </div>
 </section>
 <section id="stage-section">
-<h3>Stage Section<a class="headerlink" href="#stage-section" title="Permalink to this heading"></a></h3>
+<h3>Stage Section<a class="headerlink" href="#stage-section" title="Link to this heading"></a></h3>
 <p>The stage field has a hardware section that should reflect similar values to the hardware section at the top of the
 configuration file. The only difference is the axes entry that explicility states the axes that the stage will control.
 This lines up with earlier, we needed to add the SyntheticStage to control theta and f. The rest of the values in the
@@ -432,7 +434,7 @@ for stage movement. Most stages will have different values respectively.</p>
 </pre></div>
 </div>
 <section id="stage-axes-definition">
-<h4>Stage Axes Definition<a class="headerlink" href="#stage-axes-definition" title="Permalink to this heading"></a></h4>
+<h4>Stage Axes Definition<a class="headerlink" href="#stage-axes-definition" title="Link to this heading"></a></h4>
 <p>Many times, the coordinate system of the stage hardware do not agree with the optical
 definition of each axes identity. For example, many stages define their vertical
 dimension as <cite>z</cite>, whereas optically, we often define this axis as <cite>x</cite>. Thus, there is
@@ -452,7 +454,7 @@ and vice versa, you would then have to import the stages as following:</p>
 </div>
 </section>
 <section id="joystick-axes-definition">
-<h4>Joystick Axes Definition<a class="headerlink" href="#joystick-axes-definition" title="Permalink to this heading"></a></h4>
+<h4>Joystick Axes Definition<a class="headerlink" href="#joystick-axes-definition" title="Link to this heading"></a></h4>
 <p>If you are using a joystick, it is possible to disable GUI control of the stage axes
 that the joystick can interact with. The axes that the joystick can interact with
 appear in the stage field as following:</p>
@@ -469,7 +471,7 @@ the joystick axes brackets as following:</p>
 </section>
 </section>
 <section id="zoom-section">
-<h3>Zoom Section<a class="headerlink" href="#zoom-section" title="Permalink to this heading"></a></h3>
+<h3>Zoom Section<a class="headerlink" href="#zoom-section" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name of microscope 1</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">zoom</span><span class="p">:</span>
@@ -507,7 +509,7 @@ the joystick axes brackets as following:</p>
 </div>
 </section>
 <section id="shutter-section">
-<h3>Shutter Section<a class="headerlink" href="#shutter-section" title="Permalink to this heading"></a></h3>
+<h3>Shutter Section<a class="headerlink" href="#shutter-section" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name of microscope 1</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">shutter</span><span class="p">:</span>
@@ -521,7 +523,7 @@ the joystick axes brackets as following:</p>
 </div>
 </section>
 <section id="laser-section">
-<h3>Laser Section<a class="headerlink" href="#laser-section" title="Permalink to this heading"></a></h3>
+<h3>Laser Section<a class="headerlink" href="#laser-section" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name of microscope 1</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">lasers</span><span class="p">:</span>
@@ -550,7 +552,7 @@ the joystick axes brackets as following:</p>
 </section>
 </section>
 <section id="gui-section">
-<h2>GUI Section<a class="headerlink" href="#gui-section" title="Permalink to this heading"></a></h2>
+<h2>GUI Section<a class="headerlink" href="#gui-section" title="Link to this heading"></a></h2>
 <p>The third and final section of the configuration file is the GUI parameters.</p>
 <p>It will look something like the below:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">gui</span><span class="p">:</span>
@@ -601,95 +603,95 @@ manner.</p>
 </div>
 </section>
 <section id="waveform-constants-file">
-<h2>Waveform Constants File<a class="headerlink" href="#waveform-constants-file" title="Permalink to this heading"></a></h2>
+<h2>Waveform Constants File<a class="headerlink" href="#waveform-constants-file" title="Link to this heading"></a></h2>
 <p>In progress…</p>
 <section id="remote-constants-section">
-<h3>Remote Constants Section<a class="headerlink" href="#remote-constants-section" title="Permalink to this heading"></a></h3>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span>&quot;remote_focus_constants&quot;: {
-    &quot;microscope name 1&quot;: {
-        &quot;0.63x&quot;: {
-            &quot;488nm&quot;: {
-                &quot;amplitude&quot;: &quot;2.5&quot;,
-                &quot;offset&quot;: &quot;2.336&quot;,
-                &quot;percent_smoothing&quot;: &quot;0&quot;,
-                &quot;percent_delay&quot;: &quot;0&quot;
-            },
-            &quot;562nm&quot;: {
-                &quot;amplitude&quot;: &quot;2.5&quot;,
-                &quot;offset&quot;: &quot;2.336&quot;,
-                &quot;percent_smoothing&quot;: &quot;0&quot;,
-                &quot;percent_delay&quot;: &quot;0&quot;
-            },
-            &quot;642nm&quot;: {
-                &quot;amplitude&quot;: &quot;2.5&quot;,
-                &quot;offset&quot;: &quot;2.336&quot;,
-                &quot;percent_smoothing&quot;: &quot;0&quot;,
-                &quot;percent_delay&quot;: &quot;0&quot;
-            }
-        },
-        ...
-    }
-},
+<h3>Remote Constants Section<a class="headerlink" href="#remote-constants-section" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;remote_focus_constants&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">    </span><span class="s">&quot;microscope</span><span class="nv"> </span><span class="s">name</span><span class="nv"> </span><span class="s">1&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">        </span><span class="s">&quot;0.63x&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">            </span><span class="s">&quot;488nm&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;2.5&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;2.336&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;percent_smoothing&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;percent_delay&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">},</span>
+<span class="w">            </span><span class="s">&quot;562nm&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;2.5&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;2.336&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;percent_smoothing&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;percent_delay&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">},</span>
+<span class="w">            </span><span class="s">&quot;642nm&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;2.5&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;2.336&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;percent_smoothing&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;percent_delay&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">}</span>
+<span class="w">        </span><span class="p p-Indicator">},</span>
+<span class="w">        </span><span class="nv">...</span>
+<span class="w">    </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">}</span><span class="err">,</span>
 </pre></div>
 </div>
 </section>
 <section id="galvo-constants-section">
-<h3>Galvo Constants Section<a class="headerlink" href="#galvo-constants-section" title="Permalink to this heading"></a></h3>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span>...
-&quot;galvo_constants&quot;: {
-    &quot;Galvo 0&quot;: {
-        &quot;Nanoscale&quot;: {
-            &quot;N/A&quot;: {
-                &quot;amplitude&quot;: &quot;0.11&quot;,
-                &quot;offset&quot;: &quot;0.10&quot;,
-                &quot;frequency&quot;: &quot;99&quot;
-            }
-        },
-        &quot;Mesoscale&quot;: {
-            &quot;0.63x&quot;: {
-                &quot;amplitude&quot;: &quot;0.11&quot;,
-                &quot;offset&quot;: &quot;0.10&quot;,
-                &quot;frequency&quot;: &quot;99&quot;
-            },
-            &quot;1x&quot;: {
-                &quot;amplitude&quot;: &quot;0.11&quot;,
-                &quot;offset&quot;: &quot;0.10&quot;,
-                &quot;frequency&quot;: &quot;99&quot;
-            },
-            &quot;2x&quot;: {
-                &quot;amplitude&quot;: &quot;0.11&quot;,
-                &quot;offset&quot;: &quot;0.10&quot;,
-                &quot;frequency&quot;: &quot;99&quot;
-            },
-            &quot;3x&quot;: {
-                &quot;amplitude&quot;: &quot;0.11&quot;,
-                &quot;offset&quot;: &quot;0.10&quot;,
-                &quot;frequency&quot;: &quot;99&quot;
-            },
-            &quot;4x&quot;: {
-                &quot;amplitude&quot;: &quot;0.11&quot;,
-                &quot;offset&quot;: &quot;0.10&quot;,
-                &quot;frequency&quot;: &quot;99&quot;
-            },
-            &quot;5x&quot;: {
-                &quot;amplitude&quot;: &quot;0.11&quot;,
-                &quot;offset&quot;: &quot;0.10&quot;,
-                &quot;frequency&quot;: &quot;99&quot;
-            },
-            &quot;6x&quot;: {
-                &quot;amplitude&quot;: &quot;0.11&quot;,
-                &quot;offset&quot;: &quot;0.10&quot;,
-                &quot;frequency&quot;: &quot;99&quot;
-            }
-        }
-    }
-},
-...
+<h3>Galvo Constants Section<a class="headerlink" href="#galvo-constants-section" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">...</span>
+<span class="s">&quot;galvo_constants&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">    </span><span class="s">&quot;Galvo</span><span class="nv"> </span><span class="s">0&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">        </span><span class="s">&quot;Nanoscale&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">            </span><span class="s">&quot;N/A&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.11&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.10&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;frequency&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;99&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">}</span>
+<span class="w">        </span><span class="p p-Indicator">},</span>
+<span class="w">        </span><span class="s">&quot;Mesoscale&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">            </span><span class="s">&quot;0.63x&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.11&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.10&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;frequency&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;99&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">},</span>
+<span class="w">            </span><span class="s">&quot;1x&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.11&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.10&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;frequency&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;99&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">},</span>
+<span class="w">            </span><span class="s">&quot;2x&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.11&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.10&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;frequency&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;99&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">},</span>
+<span class="w">            </span><span class="s">&quot;3x&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.11&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.10&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;frequency&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;99&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">},</span>
+<span class="w">            </span><span class="s">&quot;4x&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.11&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.10&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;frequency&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;99&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">},</span>
+<span class="w">            </span><span class="s">&quot;5x&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.11&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.10&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;frequency&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;99&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">},</span>
+<span class="w">            </span><span class="s">&quot;6x&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">                </span><span class="s">&quot;amplitude&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.11&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;offset&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;0.10&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">                </span><span class="s">&quot;frequency&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;99&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">}</span>
+<span class="w">        </span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">}</span><span class="err">,</span>
+<span class="nn">...</span>
 </pre></div>
 </div>
 </section>
 <section id="other-constants-section">
-<h3>Other Constants Section<a class="headerlink" href="#other-constants-section" title="Permalink to this heading"></a></h3>
+<h3>Other Constants Section<a class="headerlink" href="#other-constants-section" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;other_constants&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
 <span class="w">    </span><span class="s">&quot;duty_wait_duration&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;10&quot;</span>
 <span class="p p-Indicator">}</span>
@@ -698,7 +700,7 @@ manner.</p>
 </section>
 </section>
 <section id="waveform-templates-file">
-<h2>Waveform Templates File<a class="headerlink" href="#waveform-templates-file" title="Permalink to this heading"></a></h2>
+<h2>Waveform Templates File<a class="headerlink" href="#waveform-templates-file" title="Link to this heading"></a></h2>
 <p>In progress…</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s2">&quot;Default&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -714,7 +716,7 @@ manner.</p>
 </div>
 </section>
 <section id="rest-api-configuration-file">
-<h2>Rest API Configuration File<a class="headerlink" href="#rest-api-configuration-file" title="Permalink to this heading"></a></h2>
+<h2>Rest API Configuration File<a class="headerlink" href="#rest-api-configuration-file" title="Link to this heading"></a></h2>
 <p>In progress…</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">YAML</span> <span class="mf">1.2</span>
 <span class="o">---</span>
@@ -730,7 +732,7 @@ manner.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="supported_hardware.html" class="btn btn-neutral float-left" title="Supported Hardware" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="contributing_home.html" class="btn btn-neutral float-right" title="Contributing to ASLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="contributing/contributing_home.html" class="btn btn-neutral float-right" title="Contributing to ASLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

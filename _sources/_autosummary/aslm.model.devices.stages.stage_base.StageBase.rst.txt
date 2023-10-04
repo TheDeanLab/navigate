@@ -17,6 +17,7 @@ aslm.model.devices.stages.stage\_base.StageBase
    .. autosummary::
    
       ~StageBase.__init__
+      ~StageBase.close
       ~StageBase.get_abs_position
       ~StageBase.get_position_dict
       ~StageBase.stop

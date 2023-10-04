@@ -1,0 +1,6 @@
+aslm.config.config.verify\_experiment\_config
+=============================================
+
+.. currentmodule:: aslm.config.config
+
+.. autofunction:: verify_experiment_config

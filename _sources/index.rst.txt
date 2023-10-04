@@ -33,9 +33,12 @@ contains a feature list that acts as a recipe maker for automated microscope rou
    :maxdepth: 2
 
    software_installation
+   implementations
    supported_hardware
    software_configuration
-   contributing_home
+   contributing/contributing_home
+   feature_container/feature_container_home
+
 
 
 **Authors**

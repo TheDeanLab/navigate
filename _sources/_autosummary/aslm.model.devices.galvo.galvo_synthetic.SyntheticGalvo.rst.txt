@@ -22,6 +22,7 @@ aslm.model.devices.galvo.galvo\_synthetic.SyntheticGalvo
       ~SyntheticGalvo.prepare_task
       ~SyntheticGalvo.start_task
       ~SyntheticGalvo.stop_task
+      ~SyntheticGalvo.turn_off
    
    
 

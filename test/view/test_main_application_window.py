@@ -92,7 +92,9 @@ class TestMainApplicationWindow(unittest.TestCase):
     ):
         # Create an instance of main_application_window
         MainApp(self.root)
+        self.root.update()
 
     def test_main_app_without_patched_joinpath(self):
         # Create an instance of main_application_window
         MainApp(self.root)
+        self.root.update()

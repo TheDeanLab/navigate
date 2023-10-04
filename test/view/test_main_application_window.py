@@ -82,6 +82,11 @@ class TestMainApplicationWindow(unittest.TestCase):
         # Destroy the root window after each test
         self.root.destroy()
 
+    def test_main_app_without_patched_joinpath(self):
+        # Create an instance of main_application_window
+        MainApp(self.root)
+        self.root.update()
+
     @patch(
         target="aslm.view.main_application_window.Path.joinpath",
         side_effect=tk.TclError,
@@ -90,11 +95,6 @@ class TestMainApplicationWindow(unittest.TestCase):
     def test_main_app_with_patched_joinpath(
         self, mock_settings_notebook, mock_joinpath
     ):
-        # Create an instance of main_application_window
-        MainApp(self.root)
-        self.root.update()
-
-    def test_main_app_without_patched_joinpath(self):
         # Create an instance of main_application_window
         MainApp(self.root)
         self.root.update()

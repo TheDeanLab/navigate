@@ -62,12 +62,12 @@ class CVACONPROMULTICHANNEL:
 
         # Acquisition Parameters
         self.stack_cycling_mode = None
-        # self.channels = 1
+        self.channels = 1
         self.current_channel_in_list = None
         self.readout_time = None
         self.waveform_dict = None
 
-        # Scan Parameters
+        # # Scan Parameters
         self.actual_mechanical_step_size_um = None
         self.current_sweep_time = None
         self.start_position_mm = None
@@ -78,10 +78,10 @@ class CVACONPROMULTICHANNEL:
         self.total_frames = None
         self.current_z_position_um = None
 
-        # Flags
+        # # Flags
         self.end_acquisition = None
 
-        # Counters
+        # # Counters
         self.received_frames = None
 
         # Saving Parameters
@@ -126,13 +126,14 @@ class CVACONPROMULTICHANNEL:
         -------
         None
         """
+        self.model.stop_acquisition = False
         # Get Microscope State
         self.microscope_state = self.model.configuration[
             "experiment"]["MicroscopeState"]
         self.stack_cycling_mode = self.microscope_state["stack_cycling_mode"]
         self.channels = self.microscope_state["selected_channels"]
         self.current_channel_in_list = 0
-        # self.model.active_microscope.current_channel = 0
+        self.model.active_microscope.current_channel = 0
         self.asi_stage = self.model.active_microscope.stages[self.axis]
 
         # Configure Flags and Counters
@@ -198,8 +199,8 @@ class CVACONPROMULTICHANNEL:
             axis=self.axis,
             abs_pos=self.start_position_um-10,
             wait_until_done=True)
-        logger.debug(f"Current Stage Position (mm) "
-                     f"{self.asi_stage.get_axis_position(self.axis) / 1000.0}")
+        # logger.debug(f"Current Stage Position (mm) "
+        #              f"{self.asi_stage.get_axis_position(self.axis) / 1000.0}")
         print(f"Current Stage Position after move (um) "
               f"{self.asi_stage.get_axis_position(self.axis)}, start position = {self.start_position_um}")
 
@@ -304,6 +305,8 @@ class CVACONPROMULTICHANNEL:
         self.current_z_position_um = self.start_position_um
         self.end_signal_temp = 0
 
+        # self.asi_stage.start_scan(self.axis)
+
     def main_signal_function(self):
         print("main function called")
         print(f"self.end_acquisition = {self.model.stop_acquisition}")
@@ -315,6 +318,9 @@ class CVACONPROMULTICHANNEL:
         return True
 
     def end_signal_function(self):
+        # print("end signal function called")
+        # if self.model.stop_acquisition:
+        #     return True
         self.end_signal_temp += 1
         # if self.model.stop_acquisition:
         #     return True
@@ -355,12 +361,13 @@ class CVACONPROMULTICHANNEL:
         #     return True
         print("end signal function called")
         print(f"self.end_acquisition ={self.end_acquisition}")
-        print(f"self.model.stop_acquisition = {self.model.stop_acquisition}")
+        # print(f"self.model.stop_acquisition = {self.model.stop_acquisition}")
         print(f"self.end_signal_temp = {self.end_signal_temp}")
         # pos = self.asi_stage.get_axis_position(self.axis)
         # print(f"end signal end pos = {pos}, stop position = {self.stop_position_um}, start position = {self.start_position_um}")
 
-        if self.end_acquisition or self.model.stop_acquisition or self.end_signal_temp > 0:
+        # if self.end_acquisition or self.model.stop_acquisition or self.end_signal_temp > 0:
+        if self.end_acquisition or self.end_signal_temp > 0:
             pos = self.asi_stage.get_axis_position(self.axis)
             print(
                 f"end signal end pos = {pos}, stop position = {self.stop_position_um}, start position = {self.start_position_um}")
@@ -378,14 +385,30 @@ class CVACONPROMULTICHANNEL:
                 print("per stack if statment called")
                 print(f"channel list: {self.current_channel_in_list}")
                 self.update_channel()
-                print("if statement update channel finished")
+                print("update channel finished")
+                    # print("if statement update channel finished")
+                
                 # if run through all the channels, move to next position
                 if self.current_channel_in_list == 0:
                     print(f"in if channel list = 0 statement, channel = {self.current_channel_in_list}")
-                    self.cleanup()
+                    print("in else true statement")
+                    self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+                    print("end signal config set to default")
+                    self.model.active_microscope.current_channel = 0
+                    print(f"end signal self.model.active_microscope.current_channel = {self.model.active_microscope.current_channel})")
+                    self.model.active_microscope.daq.external_trigger = None
+                    print("end signal external trigger set to none")
+                    self.model.active_microscope.prepare_next_channel()
+                    print("returning true from stop or end acquisition end_func_signal")
+                    
+                    # self.cleanup()
                     return True
+                # else:
+                #     self.update_channel()
+                #     print("if statement update channel finished")
             else:
                 print("in else true statement")
+                self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Default"
                 print("end signal config set to default")
                 self.model.active_microscope.current_channel = 0
                 print(
@@ -433,11 +456,46 @@ class CVACONPROMULTICHANNEL:
         print(f"channel before in update channel list = {self.current_channel_in_list}")
         self.current_channel_in_list = (self.current_channel_in_list + 1) % self.channels
         
-        # self.received_frames = 0
+        self.received_frames = 0
+        print(f"self.received_frames = {self.received_frames}")
         print(f"channel after in update channel = {self.channels}")
         print(f"channel after in update channel list = {self.current_channel_in_list}")
+        pos2 = self.asi_stage.get_axis_position(self.axis)
+        print(f"Current Stage Position before move (um) "
+              f"{pos2}, start position = {self.start_position_um}")
+        time.sleep(2)
+        print("sleep 1 finished")
+        self.asi_stage.set_speed(percent=0.7)
+        
+        print("move absolute speed set")
+
+        time.sleep(2)
+
+        print("sleep 2 finished")
+        self.asi_stage.move_axis_absolute(
+            axis=self.axis,
+            abs_pos=self.start_position_um-10,
+            wait_until_done=True)
+        
+        time.sleep(2)
+
+        print("sleep 3 finished")
+
+        pos3 = self.asi_stage.get_axis_position(self.axis)
+        print(f"Current Stage Position after move (um) "
+              f"{pos3}, start position = {self.start_position_um}")
+        time.sleep(2)
+        print("sleep 4 finished")
+        self.asi_stage.set_speed(velocity_dict={"X": self.desired_speed})
+        print("speed set update channel")
         self.model.active_microscope.prepare_next_channel()
+        print("updated channel prepared")
         self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+        print("external trigger set")
+        time.sleep(2)
+        print("sleep 5 finished")
+        self.asi_stage.start_scan(self.axis)
+        print("stage scan started updated channel")
         print("channel prepared")
         # self.pre_signal_function()
         # self.main_signal_function()
@@ -509,7 +567,8 @@ class CVACONPROMULTICHANNEL:
 
         Sets the number of frames to receive and the total number of frames.
         """
-        self.total_frames = self.channels * self.number_z_steps
+        self.total_frames = self.channels * self.new_z_steps
+        print(f"total frames pre data func = {self.total_frames}")
 
     def main_data_function(self, frame_ids):
         """Process the data from the constant velocity acquisition.
@@ -544,7 +603,10 @@ class CVACONPROMULTICHANNEL:
         
         if self.received_frames >= self.new_z_steps:
             self.end_acquisition = True
-            self.model.stop_acquisition = True
+            # print(f"self.model.stop_acquisition = {self.model.stop_acquisition}")
+            # self.model.stop_acquisition = True
+            # print(f"self.model.stop_acquisition = {self.model.stop_acquisition}")
+            print("Constant Velocity Acquisition Complete")
             logger.debug("Constant Velocity Acquisition Complete")
             print(f"end acquisition = {self.end_acquisition}")
             # self.asi_stage.wait_until_complete()

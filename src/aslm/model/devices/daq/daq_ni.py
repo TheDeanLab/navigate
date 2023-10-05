@@ -169,18 +169,22 @@ class NIDAQ(DAQBase):
         -------
         None
         """
+        print("external Trigger Task Setting")
         self.trigger_mode = "self-trigger" if external_trigger is None else "external-trigger"
         self.external_trigger = external_trigger
         # self.asi_stage = self.model.active_microscope.stages[self.axis]
 
         # change trigger mode during acquisition in a feature
         if self.trigger_mode == "self-trigger":
+            print("self trigger if statement")
             self.create_master_trigger_task()
             trigger_source = self.configuration["configuration"]["microscopes"][
             self.microscope_name]["daq"]["trigger_source"]
+            print(f"trigger source = {trigger_source}")
 
             # set camera task trigger source
             try:
+                print("set external trigger self trigger camera task stop")
                 self.camera_trigger_task.stop()
             except:
                 print(traceback.format_exc())
@@ -202,17 +206,23 @@ class NIDAQ(DAQBase):
 
         else:
             # close master trigger task
+            print("external trigger task else statement")
+            # print(f"self.master_trigger_task = {self.master_trigger_task}")
             if self.master_trigger_task:
                 try:
+                    print("external trigger task stop")
                     self.master_trigger_task.stop()
                     self.master_trigger_task.close()
                 except:
                     print(traceback.format_exc())
+            # print(f"self.master_trigger_task = {self.master_trigger_task}")
             self.master_trigger_task = None
-
+            print(f"self.master_trigger_task none = {self.master_trigger_task}")
+            print(f"self.external_trigger = {self.external_trigger}")
             # camera task trigger source
             self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
                 self.external_trigger)
+            print("self.external trigger set")
 
             # change camera task to so that it can be triggered again.
             self.camera_trigger_task.triggers.start_trigger.retriggerable = False
@@ -452,11 +462,14 @@ class NIDAQ(DAQBase):
         None
         """
         # wait if writing analog tasks
+        print("DAQ run acquisition")
         if self.is_updating_analog_task:
+            print(f"self.is_updating_analog task = {self.is_updating_analog_task}")
             self.wait_to_run_lock.acquire()
             self.wait_to_run_lock.release()
 
         if self.camera_trigger_task.is_task_done():
+            print(f"lf.camera_trigger_task.is_task_done() = {self.camera_trigger_task.is_task_done()}")
             self.camera_trigger_task.start()
             for task in self.analog_output_tasks.values():
                 task.start()
@@ -467,22 +480,37 @@ class NIDAQ(DAQBase):
             )
 
         try:
+            print("try camera trigger task wait until done timeout = 100000")
             self.camera_trigger_task.wait_until_done(timeout=10000)
+            print("try camera trigger task timeout done")
             for task in self.analog_output_tasks.values():
                 if self.trigger_mode == "self-trigger":
+                    print("if mode self trigger task wait until done")
                     task.wait_until_done()
+                    print("if mode self trigger task done")
                 try:
+                    print("try task stop")
                     task.stop()
+                    print("try task stopped")
                 except:
+                    print("if mode self trigger except traceback")
                     print(traceback.format_exc())
         except:
             # when triggered from external triggers, sometimes the camera trigger task is done but not actually done, there will a DAQ WARNING message
+            print("traceback for external triggers then passed")
             print(traceback.format_exc())
             pass
         try:
+            print("camera trigger task try statement")
             self.camera_trigger_task.stop()
-            self.master_trigger_task.stop()
+            print("camera trigger task stopped")
+            if self.trigger_mode == "self-trigger":
+                print("if self trigger try statement")
+                self.master_trigger_task.stop()
+                print("master trigger task stopped")
+            print("master trigger task passed")    
         except nidaqmx.DaqError:
+            print("try camera trigger task stop except")
             print(traceback.format_exc())
             pass
 
@@ -500,23 +528,36 @@ class NIDAQ(DAQBase):
         None
         """
         try:
+            print("try stop acquisition")
             self.camera_trigger_task.stop()
+            print("camera trigger task stopped")
             self.camera_trigger_task.close()
+            print("camera trigger task closed")
 
             if self.trigger_mode == "self-trigger":
+                print("if mode self trigger master trigger task stopped")
                 self.master_trigger_task.stop()
+                print("master trigger task stopped")
                 self.master_trigger_task.close()
+                print("master trigger task closed")
 
             for k, task in self.analog_output_tasks.items():
+                print(f"task = {task}")
+                print(f"k = {k}")
                 task.stop()
+                print(f"{task} stopped")
                 task.close()
+                print(f"{task} closed")
 
         except (AttributeError, nidaqmx.errors.DaqError) as e:
+            print("stop acquisition except error")
             print(traceback.format_exc())
             pass
 
         if self.wait_to_run_lock.locked():
+            print("stop acqusition wait until done locked")
             self.wait_to_run_lock.release()
+            print("stop acquistion wait until done released")
 
         self.analog_output_tasks = {}
 

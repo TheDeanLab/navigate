@@ -139,7 +139,7 @@ class AcquireBarController(GUIController):
             number_of_slices = 1
         elif mode == "confocal-projection":
             number_of_slices = microscope_state["n_plane"]
-        elif mode == "z-stack" or "ConstantVelocityAcquisition" or "CVATTL" or "CVACONPRO" or "CVASINGLEWAVE" or "CVACONT":
+        elif mode == "z-stack" or "ConstantVelocityAcquisition" or "CVATTL" or "CVACONPRO" or "CVASINGLEWAVE" or "CVACONT" or "CVACONPROMULTICHANNEL":
             number_of_slices = microscope_state["number_z_steps"]
 
         top_anticipated_images = number_of_slices
@@ -349,7 +349,7 @@ class AcquireBarController(GUIController):
             "CVACONPRO",
             "CVASINGLEWAVE",
             "CVACONT",
-            "CVAMULTICHANNEL",
+            "CVACONPROMULTICHANNEL",
             "customized",
         ]:
             state = "normal"

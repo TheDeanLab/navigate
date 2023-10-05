@@ -192,7 +192,7 @@ class CVACONT:
         self.asi_stage.set_speed(percent=0.7)
         self.asi_stage.move_axis_absolute(
             axis=self.axis,
-            abs_pos=self.start_position_um-10,
+            abs_pos=self.start_position_um,
             wait_until_done=True)
         logger.debug(f"Current Stage Position (mm) "
                      f"{self.asi_stage.get_axis_position(self.axis) / 1000.0}")
@@ -289,16 +289,28 @@ class CVACONT:
 
 
         # Configure the constant velocity scan.
-        self.asi_stage.scanv(
+        self.asi_stage.scanr(
             start_position_mm=self.start_position_mm,
             end_position_mm=self.stop_position_mm,
             # number_of_lines = 1.0,
-            number_of_lines = self.new_z_steps,
-            overshoot = 1.0,
-            # enc_divide=actual_mechanical_step_size_mm,
+            # number_of_lines = self.new_z_steps,
+            # overshoot = 1.0,
+            enc_divide=actual_mechanical_step_size_mm,
             # enc_divide=self.desired_mechanical_step_size_mm,
             axis=self.axis
         )
+        
+        
+        # self.asi_stage.scanv(
+        #     start_position_mm=self.start_position_mm,
+        #     end_position_mm=self.stop_position_mm,
+        #     # number_of_lines = 1.0,
+        #     number_of_lines = self.new_z_steps,
+        #     overshoot = 1.0,
+        #     # enc_divide=actual_mechanical_step_size_mm,
+        #     # enc_divide=self.desired_mechanical_step_size_mm,
+        #     axis=self.axis
+        # )
 
         self.current_z_position_um = self.start_position_um
         self.end_signal_temp = 0

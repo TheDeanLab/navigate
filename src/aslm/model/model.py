@@ -932,20 +932,24 @@ class Model:
 
         TODO: Cleanup.
         """
+        print("snap image beginning")
         if hasattr(self, "signal_container"):
+            print("hasstributes signal container")
             self.signal_container.run()
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
         stage_pos = self.get_stage_position()
+        print(f"got stage position = {stage_pos}")
         self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
         self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]
         self.data_buffer_positions[self.frame_id][2] = stage_pos["z_pos"]
         self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
         self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
-
+        print("get buffer positions")
         self.active_microscope.turn_on_laser()
+        print("laser turned on")
 
         # Run the acquisition
         try:
@@ -953,6 +957,7 @@ class Model:
             self.logger.info("DAQ Trigger Sent")
             self.active_microscope.daq.run_acquisition()
         except:  # noqa
+            print("DAQ trigger except")
             self.active_microscope.daq.stop_acquisition()
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}",
@@ -960,8 +965,10 @@ class Model:
             )
             self.active_microscope.daq.run_acquisition()
         self.active_microscope.turn_off_lasers()
+        print("lasers turned off")
 
         if hasattr(self, "signal_container"):
+            print("hasstributes signal container model snap image")
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
@@ -993,6 +1000,7 @@ class Model:
             and not self.stop_send_signal
             and not self.stop_acquisition
         ):
+            print(f"run acquisition signal container end flag: {self.signal_container.end_flag}")
             self.snap_image()
             if not hasattr(self, "signal_container"):
                 return

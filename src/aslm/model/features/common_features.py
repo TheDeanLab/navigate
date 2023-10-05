@@ -521,6 +521,12 @@ class ZStackAcquisition:
                 f"*** Zstack move stage: (z: {self.current_z_position}), "
                 f"(f: {self.current_focus_position})"
             )
+            print(
+                f"*** Zstack move stage: (z: {self.current_z_position}), "
+                f"(f: {self.current_focus_position})"
+            )
+
+
             if self.should_pause_data_thread and not data_thread_is_paused:
                 self.model.pause_data_thread()
 
@@ -539,16 +545,20 @@ class ZStackAcquisition:
 
     def signal_end(self):
         # end this node
+        print("end signal")
+        print(f"self.need_to_move_z_position = {self.need_to_move_z_position}")
         if self.model.stop_acquisition:
             return True
 
         if self.stack_cycling_mode != "per_stack":
             # update channel for each z position in 'per_slice'
+            print("in != stack cycling mode")
             self.update_channel()
             self.need_to_move_z_position = self.current_channel_in_list == 0
 
         # in 'per_slice', move to next z position if all the channels have been acquired
         if self.need_to_move_z_position:
+            print(f"self.need_to_move_z_position = {self.need_to_move_z_position}, if statement")
             # next z, f position
             self.current_z_position += self.z_step_size
             self.current_focus_position += self.focus_step_size
@@ -574,9 +584,13 @@ class ZStackAcquisition:
 
             # after running through a z-stack, update channel
             if self.stack_cycling_mode == "per_stack":
+                print("in per stack if statment")
+                print(f"self.current_channel_in_list = {self.current_channel_in_list}")
+                print(f"self.need_to_move_new_position = {self.need_to_move_new_position}")
                 self.update_channel()
                 # if run through all the channels, move to next position
                 if self.current_channel_in_list == 0:
+                    print(f"channel list = 0, {self.current_channel_in_list}")
                     self.need_to_move_new_position = True
             else:
                 self.need_to_move_new_position = True
@@ -597,8 +611,15 @@ class ZStackAcquisition:
         return False
 
     def update_channel(self):
+        print("in updated channel function")
+        print(f"self.channels before + = {self.channels}")
+        print(f"self.current_channel_in_list before + = {self.current_channel_in_list}")
+        print(f"(self.current_channel_in_list + 1) % self.channels = {(self.current_channel_in_list + 1) % self.channels}")
         self.current_channel_in_list = (self.current_channel_in_list + 1) % self.channels
+        print(f"self.channels after + = {self.channels}")
+        print(f"self.current_channel_in_list after + = {self.current_channel_in_list}")
         self.model.active_microscope.prepare_next_channel()
+        print("next channel prepared in update chanel")
 
     def pre_data_func(self):
         self.received_frames = 0

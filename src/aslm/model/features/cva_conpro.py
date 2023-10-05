@@ -194,7 +194,7 @@ class CVACONPRO:
         self.asi_stage.set_speed(percent=0.7)
         self.asi_stage.move_axis_absolute(
             axis=self.axis,
-            abs_pos=self.start_position_um-10,
+            abs_pos=self.start_position_um,
             wait_until_done=True)
         logger.debug(f"Current Stage Position (mm) "
                      f"{self.asi_stage.get_axis_position(self.axis) / 1000.0}")

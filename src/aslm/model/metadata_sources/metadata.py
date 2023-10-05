@@ -204,6 +204,10 @@ class Metadata:
             == "per_stack"
             and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
             == "confocal-projection"
+        ) or (self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
+            == "per_stack"
+            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "CVATTL"
         )
 
     @property

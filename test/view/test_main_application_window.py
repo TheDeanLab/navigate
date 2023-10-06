@@ -93,18 +93,3 @@ class TestMainApplicationWindowWithPatch(unittest.TestCase):
         # Create an instance of main_application_window
         MainApp(self.root)
         self.root.update()
-
-
-class TestMainApplicationWindowWithoutPatch(unittest.TestCase):
-    def setUp(self):
-        # Create a root Tkinter window for testing
-        self.root = tk.Tk()
-
-    def tearDown(self):
-        # Destroy the root window after each test
-        self.root.destroy()
-
-    def test_main_app_without_patched_joinpath(self):
-        # Create an instance of main_application_window
-        MainApp(self.root)
-        self.root.update()

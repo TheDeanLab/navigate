@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,8 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
 from pathlib import Path
+
+# Third Party Imports
+
+# Local Imports
 
 
 class SplashScreen(tk.Toplevel):
@@ -55,7 +61,7 @@ class SplashScreen(tk.Toplevel):
             img = tk.PhotoImage(file=img_dir)
             w, h = img.width(), img.height()  # width, height of the image
             loading_label = tk.Label(self, image=img)
-        except:
+        except tk.TclError:
             w, h = 300, 100
             loading_label = tk.Label(self, text="Loading ASLM Software ...")
         loading_label.pack()

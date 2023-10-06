@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -34,17 +32,20 @@
 
 # Standard Library Imports
 import tkinter as tk
-import time
+import unittest
+from unittest.mock import patch
 
 # Third Party Imports
+import pytest
 
 # Local Imports
-from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
+from aslm.view.main_application_window import MainApp
 
 
-def test_autofocuspopup():
+@pytest.mark.skip('_tkinter.TclError: image "pyimage43" doesn\'t exist')
+def test_mainapp():
     """
-    Tests that the autofocus popup and all its widgets gets created and does not
+    Tests that the main application and all its widgets gets created and does not
     throw any exceptions. Test will fail if any exceptions.
 
     Parameters
@@ -57,9 +58,38 @@ def test_autofocuspopup():
         True or False as to whether the test passed
     """
     root = tk.Tk()
-    auto_pop = AutofocusPopup(root)
+    main_app = MainApp(root)
     root.update()
-    time.sleep(3)
-    bool = isinstance(auto_pop, AutofocusPopup)
+    bool = isinstance(main_app, MainApp)
     root.destroy()
+
     assert bool
+
+
+class TestMainApplicationWindowWithPatch(unittest.TestCase):
+    """This was an elaborate attempt to get our code coverage for
+    the main application window to 100%. Was entirely pointless. I should use
+    my time more effectively.
+
+    Essentially making sure that our try/except call is working as expected.
+    """
+
+    def setUp(self):
+        # Create a root Tkinter window for testing
+        self.root = tk.Tk()
+
+    def tearDown(self):
+        # Destroy the root window after each test
+        self.root.destroy()
+
+    @patch(
+        target="aslm.view.main_application_window.Path.joinpath",
+        side_effect=tk.TclError,
+    )
+    @patch(target="aslm.view.main_application_window.SettingsNotebook", autospec=True)
+    def test_main_app_with_patched_joinpath(
+        self, mock_settings_notebook, mock_joinpath
+    ):
+        # Create an instance of main_application_window
+        MainApp(self.root)
+        self.root.update()

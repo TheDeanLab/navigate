@@ -48,12 +48,25 @@ logger = logging.getLogger(p)
 
 def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
     """Build SutterFilterWheel Serial Port connection
+
     Attributes
     ----------
     comport : str
         Comport for communicating with the filter wheel, e.g., COM1.
     baudrate : int
         Baud rate for communicating with the filter wheel, e.g., 9600.
+    timeout : float
+        Timeout for communicating with the filter wheel, e.g., 0.25.
+
+    Returns
+    -------
+    serial.Serial
+        Serial port connection to the filter wheel.
+
+    Raises
+    ------
+    UserWarning
+        Could not communicate with Sutter Lambda 10-B via COMPORT.
     """
     logging.debug(f"SutterFilterWheel - Opening Serial Port {comport}")
     try:
@@ -87,6 +100,14 @@ class SutterFilterWheel(FilterWheelBase):
         Matrix of duration in seconds needed to switch filter wheel positions
     speed = int
         Filter wheel movement speed.  0 = fastest, 8 = slowest.
+    init_finished = bool
+        Flag for confirming initialization is complete.
+    read_on_init = bool
+        Flag for reading serial port on initialization.
+    serial : serial.Serial
+        Serial port connection to the filter wheel.
+    microscope_name : str
+        Name of microscope.
 
     Methods
     -------
@@ -98,6 +119,9 @@ class SutterFilterWheel(FilterWheelBase):
         Read num_bytes of bytes from the serial port.
     close()
         Set the filter wheel to the empty position and close the communication port.
+    set_filter(filter_name, wait_until_done=True)
+        Change the filter wheel to the position occupied by filter_name
+
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
@@ -163,6 +187,8 @@ class SutterFilterWheel(FilterWheelBase):
         Detailed information on timing located on page 38:
         https://www.sutter.com/manuals/LB10-3_OpMan.pdf
 
+        TODO: Delay matrix should be model specific.
+
         Parameters
         ----------
         filter_name : str
@@ -173,7 +199,11 @@ class SutterFilterWheel(FilterWheelBase):
         old_position = self.wheel_position
         self.wheel_position = self.filter_dictionary[filter_name]
         delta_position = int(abs(old_position - self.wheel_position))
-        self.wait_until_done_delay = self.delay_matrix[self.speed, delta_position]
+        try:
+            self.wait_until_done_delay = self.delay_matrix[delta_position, self.speed]
+        except IndexError:
+            # Murdered by the hard coded delay matrix - Guess a value
+            self.wait_until_done_delay = 0.01
 
     def set_filter(self, filter_name, wait_until_done=True):
         """Change the filter wheel to the filter designated by the filter
@@ -228,6 +258,17 @@ class SutterFilterWheel(FilterWheelBase):
         ----------
         num_bytes : int
             Number of bytes to read from the serial port.
+
+        Returns
+        -------
+        bytes
+            Bytes read from the serial port.
+
+        Raises
+        ------
+        UserWarning
+            The serial port to the Sutter Lambda 10-B is on, but it isn't responding as
+            expected.
         """
         for i in range(100):
             num_waiting = self.serial.inWaiting()

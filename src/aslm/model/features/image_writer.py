@@ -34,7 +34,6 @@
 #  Standard Imports
 import os
 import logging
-
 import shutil
 
 # Third Party Imports
@@ -149,32 +148,45 @@ class ImageWriter:
             self.model.configuration["experiment"]["Saving"]["save_directory"],
             self.sub_dir,
         )
-
         try:
-            # create saving folder if it does not exist
             if not os.path.exists(self.save_directory):
-                os.makedirs(self.save_directory)
+                try:
+                    os.makedirs(self.save_directory)
+                    logger.debug(f"Save Directory Created - {self.save_directory}")
+                except OSError:
+                    logger.debug(
+                        f"Unable to Create Save Directory - {self.save_directory}"
+                    )
+                    self.model.stop_acquisition = True
+                    self.model.event_queue.put(
+                        "warning",
+                        "Unable to Create Save Directory. Acquisition Terminated",
+                    )
+                    return
         except FileNotFoundError as e:
-            logger.debug(
-                f"ASLM Image Writer - Cannot create directory {self.save_directory}. "
-                f"Maybe the drive does not exist?"
-            )
+            logger.debug(f"Unable to Create Save Directory - {self.save_directory}")
             logger.exception(e)
 
-        # create the maximum intensity projection directory if it doesn't
-        # already exist
+        # create the MIP directory if it doesn't already exist
         self.mip = None
         self.mip_directory = os.path.join(self.save_directory, "MIP")
         try:
-            # create saving folder if not exits
             if not os.path.exists(self.mip_directory):
-                os.makedirs(self.mip_directory)
+                try:
+                    os.makedirs(self.mip_directory)
+                    logger.debug(f"MIP Directory Created - {self.mip_directory}")
+                except OSError:
+                    logger.debug(
+                        f"Unable to Create MIP Directory - {self.mip_directory}"
+                    )
+                    self.model.stop_acquisition = True
+                    self.model.event_queue.put(
+                        "warning",
+                        "Unable to create MIP Directory. Acquisition Terminated.",
+                    )
+                    return
         except FileNotFoundError as e:
-            logger.debug(
-                f"ASLM Image Writer - "
-                f"Cannot create MIP directory {self.mip_directory}. "
-                f"Maybe the drive does not exist?"
-            )
+            logger.debug("Image Writer: Unable to create MIP directory.")
             logger.exception(e)
 
         # Set up the file name and path in the save directory
@@ -279,10 +291,13 @@ class ImageWriter:
                             os.path.join(self.mip_directory, mip_name),
                             self.mip[c_save_idx, :, :],
                         )
-            except OSError as e:
+            except Exception as e:
+                # Close the image, stop the acquisition, log error, and notify user.
                 self.close()
-                logger.debug(f"ASLM Image Writer: {e}")
-                raise Warning("Cannot save image. Check available disk space.")
+                self.model.stop_acquisition = True
+                self.model.event_queue.put(("warning", "Insufficient Disk Space. "))
+                logger.debug(f"Error - ImageWriter: {e}")
+                return
 
     def generate_image_name(self, current_channel, ext=".tif"):
         """
@@ -347,7 +362,7 @@ class ImageWriter:
 
     def calculate_and_check_disk_space(self):
         """Estimate the size of the data that will be written to disk, and confirm
-        that sufficient disk space is available. Also evaluates whether or not
+        that sufficient disk space is available. Also evaluates whether
         big-tiff or tiff is needed. Tiff file formats were designed for 32-bit
         operating systems, whereas big-tiff was designed for 64-bit operating systems.
 
@@ -361,7 +376,12 @@ class ImageWriter:
 
         # Confirm that there is enough disk space to save the data.
         if free < image_size:
-            print("WARNING: INSUFFICIENT DISK SPACE ESTIMATED")
+            logger.debug("Image Writer: Insufficient Disk Space Estimated.")
+            self.model.stop_acquisition = True
+            self.model.event_queue.put(
+                ("warning", "Insufficient Disk Space. Acquisition Terminated")
+            )
+            return
 
         # TIFF vs Big-TIFF Comparison
         if (self.file_type == "TIFF") or (self.file_type == "OME-TIFF"):

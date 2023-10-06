@@ -466,15 +466,19 @@ class NIDAQ(DAQBase):
         if self.is_updating_analog_task:
             print(f"self.is_updating_analog task = {self.is_updating_analog_task}")
             self.wait_to_run_lock.acquire()
+            print("wait to run task locked")
             self.wait_to_run_lock.release()
+            print("wait to run lock released")
 
         if self.camera_trigger_task.is_task_done():
-            print(f"lf.camera_trigger_task.is_task_done() = {self.camera_trigger_task.is_task_done()}")
+            print("self.camera_trigger_task.is_task_done()")
+            print(f"self.camera_trigger_task.is_task_done() = {self.camera_trigger_task.is_task_done()}")
             self.camera_trigger_task.start()
             for task in self.analog_output_tasks.values():
                 task.start()
         
         if self.trigger_mode == "self-trigger":
+            print("if self trigger write master task")
             self.master_trigger_task.write(
                 [False, True, True, True, False], auto_start=True
             )
@@ -547,7 +551,7 @@ class NIDAQ(DAQBase):
                 task.stop()
                 print(f"{task} stopped")
                 task.close()
-                print(f"{task} closed")
+                print("task closed")
 
         except (AttributeError, nidaqmx.errors.DaqError) as e:
             print("stop acquisition except error")

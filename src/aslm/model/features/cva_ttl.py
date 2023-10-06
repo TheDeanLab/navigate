@@ -49,6 +49,16 @@ class CVATTL:
     # def __init__(self, model, axis='z', saving_flag=False, saving_dir="cva"):
     def __init__(self, model, axis='z'):
         self.model = model
+
+        # Update stage position
+        # self.model.active_microscope.ask_stage_for_position = True
+        # stage_positions = self.model.active_microscope.get_stage_position()
+        # success = self.model.active_microscope.move_stage(
+        #     pos_dict=stage_positions,
+        #     wait_until_done=True,
+        #     update_focus=False)
+        # print("Moving stages successful:", success)
+
         self.axis = axis
         self.default_speed = None
         self.asi_stage = None
@@ -242,6 +252,10 @@ class CVATTL:
         expected_speed = step_size_mm / current_sweep_time
         print("Expected velocity = ",expected_speed)
 
+        self.expected_speed = expected_speed
+        self.max_speed = max_speed
+        self.percent_speed = self.expected_speed/self.max_speed
+
         self.asi_stage.set_speed(percent=expected_speed/max_speed)
         stage_velocity = self.asi_stage.get_speed(self.axis)
         print("Final stage velocity, (mm/s):", stage_velocity)
@@ -312,6 +326,7 @@ class CVATTL:
             #             "start_focus"])) / 45397.6,
             axis=self.axis
         )
+        print("scan r initalized")
 
         # Start the daq acquisition.  Basically places all of the waveforms in a ready
         # state so that they will be run one time when the trigger is received.
@@ -319,6 +334,7 @@ class CVATTL:
 
         # Start the stage scan.  Also get this functionality into the ASI stage class.
         self.asi_stage.start_scan(self.axis)
+        print("scan started")
 
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
 
@@ -374,6 +390,7 @@ class CVATTL:
                 if self.current_channel_in_list == 0:
                     print(f"in if channel list = 0 statement, channel = {self.current_channel_in_list}")
                     self.cleanup()
+                    print("clean up finished")
                     return True
             else:
                 print("in else true statement")
@@ -440,17 +457,31 @@ class CVATTL:
                 self.current_channel_in_list + 1
             ) % self.channels
             # self.end_signal_temp = 0
-            self.received_frames = 0
+            self.received_frames = 1
             print(f"channel after in update channel = {self.channels}")
             print(f"channel before in update channel list = {self.current_channel_in_list}")
             # self.model.active_microscope.prepare_next_channel()
-            # pos1 = self.asi_stage.get_axis_position(self.axis)
-            self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
-            # pos2 = self.asi_stage.get_axis_position(self.axis)
-            # print(f"Initial Position: {pos1} Current Position: {pos2} Start Position: {self.start_position*1000}")
-            # self.model.active_microscope.current_channel = 0
-            print(f"current channel = {self.model.active_microscope.current_channel}")
+            pos1 = self.asi_stage.get_axis_position(self.axis)
+            print(f"Current Position Before move to start position = {pos1}")
+            self.asi_stage.set_speed(percent=0.7)
+            print("Stage speed set")
 
+            # self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+            # print("stage moved to original position")
+            # self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+            # print("stage moved to start position")
+           
+            self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+            print("stage moved to start position")
+            posw = self.asi_stage.get_axis_position(self.axis)
+            print(f"Current Position update channel = {posw}")
+            print(f"Start position channel = {self.start_position*1000}")
+
+            # self.model.active_microscope.current_channel = 0
+            self.asi_stage.set_speed(percent=self.percent_speed)
+            print("original stage speed set")
+            
+            print(f"current channel = {self.model.active_microscope.current_channel}")
             self.model.active_microscope.prepare_next_channel()
             print("channel prepared after model")
             self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")

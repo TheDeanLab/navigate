@@ -33,6 +33,7 @@
 # Standard Library Imports
 import logging
 from multiprocessing.managers import ListProxy
+import time
 
 # Third Party Imports
 import numpy as np
@@ -147,30 +148,6 @@ class GalvoNIStage(StageBase):
 
                 self.samples = int(self.sample_rate * self.sweep_time)
 
-                # Calculate the Waveforms
-                # if (
-                #     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                #     == "z-stack"
-                # ):
-                #     z_start = self.configuration["experiment"]["MicroscopeState"][
-                #         "abs_z_start"
-                #     ]
-                #     z_end = self.configuration["experiment"]["MicroscopeState"][
-                #         "abs_z_end"
-                #     ]
-                #     amp = eval(self.volts_per_micron, {"x": 0.5 * (z_end - z_start)})
-                #     off = eval(self.volts_per_micron, {"x": 0.5 * (z_end + z_start)})
-                #     self.waveform_dict[channel_key] = remote_focus_ramp(
-                #         sample_rate=self.sample_rate,
-                #         exposure_time=exposure_time,
-                #         sweep_time=self.sweep_time,
-                #         remote_focus_delay=self.remote_focus_delay,
-                #         camera_delay=self.camera_delay_percent,
-                #         fall=self.remote_focus_ramp_falling,
-                #         amplitude=amp,
-                #         offset=off,
-                #     )
-                # elif (
                 if (
                     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                     == "confocal-projection"
@@ -267,6 +244,10 @@ class GalvoNIStage(StageBase):
         if axis_abs == -1e50:
             return False
 
+        # Keep track of step size.
+        current_position = getattr(self, f"{axis}_pos", axis_abs)
+        delta_position = np.abs(axis_abs - current_position)
+
         volts = eval(self.volts_per_micron, {"x": axis_abs})
 
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
@@ -326,6 +307,14 @@ class GalvoNIStage(StageBase):
         # update analog waveform
         self.daq.update_analog_task(self.axes_channels[0].split("/")[0])
 
+        if wait_until_done:
+            # Should only wait for large moves where a galvo or piezo might
+            # fail to keep up. 50 microns default hard-coded. Will move to
+            # configuration file if valuable.
+            if delta_position >= 50:
+                time.sleep(0.02)
+                print("paused"
+                      
         setattr(self, f"{axis}_pos", axis_abs)
 
         return True

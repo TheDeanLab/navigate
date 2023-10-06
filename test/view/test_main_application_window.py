@@ -66,7 +66,7 @@ def test_mainapp():
     assert bool
 
 
-class TestMainApplicationWindow(unittest.TestCase):
+class TestMainApplicationWindowWithPatch(unittest.TestCase):
     """This was an elaborate attempt to get our code coverage for
     the main application window to 100%. Was entirely pointless. I should use
     my time more effectively.
@@ -82,11 +82,6 @@ class TestMainApplicationWindow(unittest.TestCase):
         # Destroy the root window after each test
         self.root.destroy()
 
-    def test_main_app_without_patched_joinpath(self):
-        # Create an instance of main_application_window
-        MainApp(self.root)
-        self.root.update()
-
     @patch(
         target="aslm.view.main_application_window.Path.joinpath",
         side_effect=tk.TclError,
@@ -95,6 +90,21 @@ class TestMainApplicationWindow(unittest.TestCase):
     def test_main_app_with_patched_joinpath(
         self, mock_settings_notebook, mock_joinpath
     ):
+        # Create an instance of main_application_window
+        MainApp(self.root)
+        self.root.update()
+
+
+class TestMainApplicationWindowWithoutPatch(unittest.TestCase):
+    def setUp(self):
+        # Create a root Tkinter window for testing
+        self.root = tk.Tk()
+
+    def tearDown(self):
+        # Destroy the root window after each test
+        self.root.destroy()
+
+    def test_main_app_without_patched_joinpath(self):
         # Create an instance of main_application_window
         MainApp(self.root)
         self.root.update()

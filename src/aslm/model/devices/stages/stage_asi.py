@@ -562,7 +562,10 @@ class ASIStage(StageBase):
     def wait_until_complete(self, axis):
         try:
             while self.tiger_controller.is_axis_busy(axis):
-                print("Current Position:", self.get_axis_position(axis))
+                tempvar = self.tiger_controller.is_axis_busy(axis)
+                tempvar2 = self.get_axis_position(axis)
+                print(f"stage busy = {tempvar}")
+                print(f"Current Position:",{tempvar2})
                 time.sleep(0.1)
         except TigerException as e:
             logger.exception(f"ASI Stage Exception {e}")

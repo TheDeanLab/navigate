@@ -488,7 +488,7 @@ class TigerController:
             slow_axis_id = 9
 
         # Not sure if this requires an S
-        self.send_command(f"SCAN S")
+        self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
         self.read_response()
 
     def stop_scan(self):

@@ -430,20 +430,27 @@ class NIDAQ(DAQBase):
             self.configuration["waveform_templates"],
             self.configuration['experiment']['MicroscopeState']
         )
-        print(f"Waveform Expand Num = {self.waveform_expand_num}")
-        print(f"Waveform Repeat Num = {self.waveform_repeat_num}")
+        print(f"Prepare Acquisition Waveform Expand Num = {self.waveform_expand_num}")
+        print(f"Prepare Acquisition Waveform Repeat Num = {self.waveform_repeat_num}")
 
         logger.info(f"Waveform Expand Num = {self.waveform_expand_num}")
         logger.info(f"Waveform Repeat Num = {self.waveform_repeat_num}")
 
         self.create_camera_task(exposure_time)
+        print("camera task created prepare acquisition")
         self.create_analog_output_tasks(channel_key)
+        print("analog tasks created")
         self.current_channel_key = channel_key
+        print("self.current_channel_key set to channel_key")
         self.is_updating_analog_task = False
+        print(f"self.is_updating_analog_task = {self.is_updating_analog_task}")
         if self.wait_to_run_lock.locked():
+            print("if wait to run is locked")
             self.wait_to_run_lock.release()
+            print("wait to run released")
         # Specify ports, timing, and triggering
         self.set_external_trigger(self.external_trigger)
+        print("external trigger set prepare acquisition")
 
     def run_acquisition(self):
         """Run DAQ Acquisition.
@@ -474,8 +481,10 @@ class NIDAQ(DAQBase):
             print("self.camera_trigger_task.is_task_done()")
             print(f"self.camera_trigger_task.is_task_done() = {self.camera_trigger_task.is_task_done()}")
             self.camera_trigger_task.start()
+            print("self.camera_task started")
             for task in self.analog_output_tasks.values():
                 task.start()
+                print("task started")
         
         if self.trigger_mode == "self-trigger":
             print("if self trigger write master task")
@@ -484,7 +493,7 @@ class NIDAQ(DAQBase):
             )
 
         try:
-            print("try camera trigger task wait until done timeout = 100000")
+            print("try camera trigger task wait until done timeout = 10000")
             self.camera_trigger_task.wait_until_done(timeout=10000)
             print("try camera trigger task timeout done")
             for task in self.analog_output_tasks.values():
@@ -533,6 +542,7 @@ class NIDAQ(DAQBase):
         """
         try:
             print("try stop acquisition")
+            print(f"self.camera_trigger_task = {self.camera_trigger_task}")
             self.camera_trigger_task.stop()
             print("camera trigger task stopped")
             self.camera_trigger_task.close()

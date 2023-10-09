@@ -47,7 +47,7 @@ logger = logging.getLogger(p)
 
 class CVATTL:
     # def __init__(self, model, axis='z', saving_flag=False, saving_dir="cva"):
-    def __init__(self, model, axis='z'):
+    def __init__(self, model, axis='z', saving_flag=False, saving_dir="cva"):
         self.model = model
 
         # Update stage position
@@ -62,6 +62,15 @@ class CVATTL:
         self.axis = axis
         self.default_speed = None
         self.asi_stage = None
+        self.saving_flag = saving_flag
+        
+        self.image_writer = None
+        if self.saving_flag:
+            self.image_writer = ImageWriter(
+                model=self.model,
+                sub_dir=saving_dir)
+            
+            
 
         self.config_table = {
             "signal": {
@@ -73,6 +82,7 @@ class CVATTL:
                 "init": self.pre_data_func,
                 "main": self.in_data_func,
                 "end": self.end_data_func,
+                "cleanup":self.cleanup_data_function,
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
@@ -87,7 +97,7 @@ class CVATTL:
         step size, and minimum encoder divide.
 
         Rotary encoder has a resolution of 45,396 counts/mm, or 1 count per
-        22 nm. It is a quadrature device, so the minimum step size is 88 nm.
+        10 nm. It is a quadrature device, so the minimum step size is 40 nm.
 
         Assumes stage motion is 45 degrees relative to the optical axis.
 
@@ -107,7 +117,7 @@ class CVATTL:
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
         # self.model.active_microscope.daq.number_triggers = 0
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
-         
+        print("**** CVA TTL STARTED pre signal func****") 
         print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
         print("self.asi stage")
@@ -121,7 +131,7 @@ class CVATTL:
         # self.end_channel = False
         self.end_acquisition = False
         # self.recieved_frames_v2 = 0
-        self.received_frames = 1
+        self.received_frames = 0
         self.end_signal_temp = 0
 
 
@@ -150,12 +160,14 @@ class CVATTL:
         self.current_exposure_time = current_expsure_time
         self.readout_time = readout_time
         print("sweep time calculated")
-        scaling_factor = 1
+        scaling_factor = 1.05
+        print("*** current sweep time before scaling:", current_sweep_time)
 
         # Provide just a bit of breathing room for the sweep time...
         current_sweep_time = current_sweep_time * scaling_factor
         
-        print("*** current sweep time:", current_sweep_time)
+        print("*** current sweep time after scaling:", current_sweep_time)
+        print(f"*** Scaling Factor = {scaling_factor}")
         logger.info(f"*** current sweep time: {current_sweep_time}")
         logger.info(f"*** sweep time scaling: {scaling_factor}")
         # self.sweep_time = current_sweep_time
@@ -224,12 +236,21 @@ class CVATTL:
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {pos}")
         print(f"Start position = {self.start_position*1000}")
-        
+        # print(f"Stage position before scan = {pos}")
+        buffer = 1
+        stage_position_before_scan = ((self.start_position*1000)-buffer)
+        self.stage_position_before_scan = (stage_position_before_scan)
+        logger.info(f"stage_position_before_scan = {self.stage_position_before_scan}")
         # move to start position:
-        self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+        self.asi_stage.move_axis_absolute(self.axis,self.stage_position_before_scan, wait_until_done=True)
+        print("stage moved to start position before scan")
+        self.asi_stage.wait_until_complete(self.axis)
+        print("Stage wait until complete completed")
         posw = self.asi_stage.get_axis_position(self.axis)
-        print(f"Current Position = {posw}")
-        print(f"Start position = {self.start_position*1000}")
+        print(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+        logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+
+        # print(f"Start position = {self.start_position*1000}")
 
         # Set the x-axis of the ASI stage to operate at that velocity.
 
@@ -288,15 +309,19 @@ class CVATTL:
         print(f"Self Expected Frames test = {self.expected_frames}")
         logger.info(f"Self Expected Frames test = {self.expected_frames}")
         logger.info(f"Expand Frames = {Expand_frames}") 
+        self.model.configuration["experiment"]["MicroscopeState"]["number_z_steps"] = expected_frames
+        
         
         self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
         # #   ms calculated v2 {self.waveform_dict}")
+        self.model.active_microscope.daq.external_trigger = "/PXI6259/PFI1"
+        print(f"external trigger set to {self.model.active_microscope.daq.external_trigger}")
         self.model.active_microscope.prepare_next_channel()
         # print("microscope channel prepared")
         print("channel prepared after model")
-        self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
-        print(f"external trigger set to {self.model.active_microscope.daq.external_trigger}")
+        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+        # print(f"external trigger set to {self.model.active_microscope.daq.external_trigger}")
 
         # self.model.active_microscope.current_channel = 0
         
@@ -328,13 +353,21 @@ class CVATTL:
         )
         print("scan r initalized")
 
+        self.asi_stage.wait_until_complete(self.axis)
+        print("Stage wait until complete completed after scanr")
+
         # Start the daq acquisition.  Basically places all of the waveforms in a ready
         # state so that they will be run one time when the trigger is received.
         
 
         # Start the stage scan.  Also get this functionality into the ASI stage class.
         self.asi_stage.start_scan(self.axis)
+        self.asi_stage.stop_scan()
         print("scan started")
+
+        self.asi_stage.wait_until_complete(self.axis)
+        print("Stage wait until complete completed after scan")
+
 
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
 
@@ -370,6 +403,11 @@ class CVATTL:
 
     def end_func_signal(self):
         print("in end_func_signal")
+
+        if self.model.stop_acquisition:
+            print("PRESSED STOP BUTTON")
+            return True
+
         print(f"self.recieved frames = {self.received_frames}")
         print(f"model.stop_acquisition = {self.model.stop_acquisition}")
         print(f"self.end_acquisition = {self.end_acquisition}")
@@ -389,8 +427,8 @@ class CVATTL:
                 # if run through all the channels, move to next position
                 if self.current_channel_in_list == 0:
                     print(f"in if channel list = 0 statement, channel = {self.current_channel_in_list}")
-                    self.cleanup()
-                    print("clean up finished")
+                    # self.cleanup()
+                    # print("clean up finished")
                     return True
             else:
                 print("in else true statement")
@@ -457,7 +495,7 @@ class CVATTL:
                 self.current_channel_in_list + 1
             ) % self.channels
             # self.end_signal_temp = 0
-            self.received_frames = 1
+            # self.received_frames = 0
             print(f"channel after in update channel = {self.channels}")
             print(f"channel before in update channel list = {self.current_channel_in_list}")
             # self.model.active_microscope.prepare_next_channel()
@@ -471,7 +509,11 @@ class CVATTL:
             # self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
             # print("stage moved to start position")
            
-            self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+            self.asi_stage.move_axis_absolute(self.axis, self.stage_position_before_scan, wait_until_done=True)
+            print("stage moved to start position")
+
+            self.asi_stage.wait_until_complete(self.axis)
+            print("Stage wait until complete completed")
             print("stage moved to start position")
             posw = self.asi_stage.get_axis_position(self.axis)
             print(f"Current Position update channel = {posw}")
@@ -488,9 +530,13 @@ class CVATTL:
             print(f"external trigger set to {self.model.active_microscope.daq.external_trigger}")
 
             self.asi_stage.start_scan(self.axis)
+            self.asi_stage.stop_scan()
+            print("update channel scan started")
+            self.asi_stage.wait_until_complete(self.axis)
+            print("Stage wait until complete completed after update scan")
             # self.asi_stage.stop_scan()
             # self.pre_func_signal()
-            print("pre function signal initiated")
+            # print("pre function signal initiated")
     
     def cleanup(self):
         """Clean up the constant velocity acquisition.
@@ -505,7 +551,7 @@ class CVATTL:
         print(f"Stop position = {self.stop_position*1000}")
         print("Clean up called")
         # self.asi_stage.set_speed({self.axis: self.default_speed})
-        self.asi_stage.set_speed(percent=0.9)
+        self.asi_stage.set_speed(percent=0.5)
 
         # self.asi_stage.set_speed(0.9)
         print("speed set")
@@ -513,8 +559,7 @@ class CVATTL:
         print("end Speed = ",end_speed)
         self.asi_stage.stop()
         print("stage stop")
-        
-        print("external trigger none")
+        # print("external trigger none")
         # return to start position
         # self.start_position = float(
         #     self.model.configuration[
@@ -525,6 +570,10 @@ class CVATTL:
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {pos}")
         print(f"start position = {self.start_position*1000}")
+
+        # self.asi_stage.stop_scan()
+        # print("stage stop scan")
+
         self.model.active_microscope.daq.stop_acquisition()
         self.model.configuration[
             "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
@@ -536,17 +585,22 @@ class CVATTL:
         print("external trigger set to none")
         self.model.active_microscope.prepare_next_channel()
         print("clean up channel prepared")
-        self.model.active_microscope.daq.set_external_trigger(None)
+        self.model.active_microscope.daq.set_external_trigger()
         print("external trigger set to none v2")
 
     def pre_data_func(self):
         # self.received_frames = 
         self.received_frames_v2 = self.received_frames
         
+        self.total_frames = self.expected_frames * self.channels
+        print(f"total channels = {self.channels}")
+        print(f"total frames = {self.total_frames}")
 
     def in_data_func(self, frame_ids):
         # print(f"frame_ids = {len(frame_ids)}")
         self.received_frames += len(frame_ids)
+        if self.image_writer is not None:
+            self.image_writer.save_image(frame_ids)
         # self.received_frames_v2 = self.received_frames
         # self.recieved_frames_v2 += self.recieved_frames
         # print(f"received_Frames v2: {self.recieved_frames_v2}")
@@ -555,10 +609,13 @@ class CVATTL:
         pos = self.asi_stage.get_axis_position(self.axis)
         # self.received_frames_v2 += self.received_frames
         # self.received_frames_v2 = 0
-        print(f"Received: {self.received_frames} Expected: {self.expected_frames}")
+        expected_channel = self.expected_frames * (self.end_signal_temp + 1)
+        print(f"Received: {self.received_frames} Per Channel: {expected_channel} Expected Total: {self.total_frames}")
+        logger.info(f"Received: {self.received_frames} Per Channel: {expected_channel} Expected Total: {self.total_frames}")
         # print(f"Received V2: {self.received_frames_v2} Expected: {self.expected_frames}")
         print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
-        logger.info(f"Received: {self.received_frames} Expected: {self.expected_frames}")
+        logger.info(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
+        # logger.info(f"Received: {self.received_frames} Expected: {self.total_frames}")
         # logger.info(f"Received V2: {self.recieved_frames_v2} Expected: {self.expected_frames}")
 
         # logger.info(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
@@ -569,10 +626,22 @@ class CVATTL:
         #    self.end_acquisition = self.received_frames >= self.expected_frames or pos >= self.stop_position*1000
             # self.end_acquisition = self.received_frames >= self.expected_frames
             # self.received_frames_v2 = self.received_frames + 1
-        self.end_acquisition = self.received_frames >= self.expected_frames
+        self.end_acquisition = self.received_frames >= self.total_frames
         print(f"end acquistion statement = {self.end_acquisition}")
             # print(f"end acquistion in if statement = {self.end_acquisition}")
         # If channel is ended, but there are more channels to go, return False
         # If channel is ended and this was the last channel, return True  
         # return self.end_channel
         return self.end_acquisition
+    
+    def cleanup_data_function(self):
+        """Clean up the constant velocity acquisition.
+
+        Designed to be called in the case of a failure.
+        Do not rely on this function being called.
+
+        Cleans up the image writer.
+        """
+        print("clean up data function called")
+        if self.image_writer:
+            self.image_writer.cleanup()

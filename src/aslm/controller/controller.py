@@ -355,6 +355,10 @@ class Controller:
         self.menu_controller.disable_stage_limits.set(
             0 if self.configuration["experiment"]["StageParameters"]["limits"] else 1
         )
+        self.execute(
+            "stage_limits",
+            self.configuration["experiment"]["StageParameters"]["limits"],
+        )
 
         self.acquire_bar_controller.populate_experiment_values()
         # self.stage_controller.populate_experiment_values()
@@ -384,6 +388,17 @@ class Controller:
             "image_mode"
         ] = self.acquire_bar_controller.get_mode()
         self.camera_setting_controller.update_experiment_values()
+        # update multi-positions
+        positions = self.multiposition_tab_controller.get_positions()
+        update_config_dict(
+            self.manager,
+            self.configuration["experiment"],
+            "MultiPositions",
+            positions,
+        )
+        self.configuration["experiment"]["MicroscopeState"][
+            "multiposition_count"
+        ] = len(positions)
 
         # TODO: validate experiment dict
         if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
@@ -422,17 +437,6 @@ class Controller:
                 "Cannot start acquisition!",
             )
             return False
-        # update multi-positions
-        positions = self.multiposition_tab_controller.get_positions()
-        update_config_dict(
-            self.manager,
-            self.configuration["experiment"],
-            "MultiPositions",
-            positions,
-        )
-        self.configuration["experiment"]["MicroscopeState"][
-            "multiposition_count"
-        ] = len(positions)
 
         # set waveform template
         if self.acquire_bar_controller.mode == "confocal-projection":
@@ -559,6 +563,7 @@ class Controller:
                 }
             """
             microscope_name, zoom = self.menu_controller.resolution_value.get().split()
+            self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
             if (
                 microscope_name
                 != self.configuration["experiment"]["MicroscopeState"][
@@ -566,7 +571,6 @@ class Controller:
                 ]
             ):
                 self.change_microscope(microscope_name)
-            self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
             work_thread = self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("update_setting", "resolution")
             )
@@ -581,7 +585,6 @@ class Controller:
                 is_save = True/False
             """
             self.acquire_bar_controller.set_save_option(args[0])
-            self.view.settings.channels_tab.stack_timepoint_frame.save_data.set(args[0])
 
         elif command == "update_setting":
             """Called by the Waveform Constants Popup Controller
@@ -685,6 +688,12 @@ class Controller:
                     self.features_popup_controller.populate_feature_list(feature_id)
                     # wait until close the popup windows
                     self.view.wait_window(feature_list_popup.popup)
+                    # do not run acquisition if "cancel" is selected
+                    temp = self.features_popup_controller.start_acquisiton_flag
+                    delattr(self, "features_popup_controller")
+                    if not temp:
+                        self.set_mode_of_sub("stop")
+                        return
 
             # if select 'ilastik segmentation',
             # 'show segmentation',
@@ -995,7 +1004,12 @@ class Controller:
     def update_event(self):
         while True:
             event, value = self.event_queue.get()
-            if event == "waveform":
+
+            if event == "warning":
+                # Display a warning that arises from the model as a top-level GUI popup
+                messagebox.showwarning(title="ASLM", message=value)
+
+            elif event == "waveform":
                 # Update the waveform plot.
                 self.waveform_tab_controller.update_waveforms(
                     waveform_dict=value,
@@ -1038,6 +1052,8 @@ class Controller:
                 self.camera_setting_controller.framerate_widgets["max_framerate"].set(
                     value
                 )
+            elif event == "remove_positions":
+                self.multiposition_tab_controller.remove_positions(value)
 
     # def exit_program(self):
     #     """Exit the program.

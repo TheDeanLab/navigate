@@ -8,6 +8,5 @@ engage in the software collaboratively.
 
     contributing_guidelines
     contributing_hardware
-    contributing_feature_container
     contributing_model
     api

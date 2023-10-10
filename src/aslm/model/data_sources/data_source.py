@@ -62,18 +62,59 @@ class DataSource:
         mode : str
             Mode to open the file in. Can be 'r' or 'w'.
 
-        Returns
-        -------
-        None
-
         Attributes
         ----------
+        logger : logging.Logger
+            Logger for this class.
         file_name : str
             Name of the file to read/write from.
-        data : npt.ArrayLike
-            Pointer to the actual data in the data source.
         metadata : npt.ArrayLike
             Pointer to the metadata.
+        bits : int
+            Number of bits per pixel.
+        dx : float
+            Pixel size in x dimension (microns).
+        dy : float
+            Pixel size in y dimension (microns).
+        dz : float
+            Pixel size in z dimension (microns).
+        dt : float
+            Time displacement (seconds).
+        dc : float
+            Step size between channels (always 1)
+        shape_x : int
+            Size of the data source in x dimension.
+        shape_y : int
+            Size of the data source in y dimension.
+        shape_z : int
+            Size of the data source in z dimension.
+        shape_t : int
+            Size of the data source in t dimension.
+        shape_c : int
+            Size of the data source in c dimension.
+        positions : int
+            Number of positions in the data source.
+        mode : str
+            Mode to open the file in. Can be 'r' or 'w'.
+
+        Methods
+        -------
+        size()
+            Return the size of the data source in bytes.
+        mode()
+            Return the mode of the data source.
+        voxel_size()
+            Return the voxel size in x, y, z dimensions.
+        shape()
+            Return the shape of the data source in XYCZT format.
+        set_metadata_from_configuration_experiment(configuration)
+            Set the metadata from the microscope configuration.
+        read()
+            Read data from file.
+        write(data, **kw)
+            Write data to file.
+        close()
+            Clean up any leftover file pointers, etc.
 
         """
         self.logger = logging.getLogger(__name__.split(".")[1])
@@ -100,50 +141,42 @@ class DataSource:
 
     @property
     def size(self) -> int:
-        """Return the size of this data source in bytes."""
-        total_bits = (self.shape_x
-                      * self.shape_y
-                      * self.shape_z
-                      * self.shape_t
-                      * self.shape_c
-                      * self.positions
-                      * self.bits
-                      )
+        """Getter for the size of this data source in bytes."
+
+        Does not account for pyramidal data sources.
+        """
+        total_bits = (
+            self.shape_x
+            * self.shape_y
+            * self.shape_z
+            * self.shape_t
+            * self.shape_c
+            * self.positions
+            * self.bits
+        )
         total_bytes = total_bits // 8
         return total_bytes
 
     @property
     def mode(self) -> str:
-        """Get the mode of the data source.
+        """Getter for the mode of the data source.
 
         Returns
         -------
         str
             Mode of the data source.
-
-        Examples
-        --------
-        >>> data_source.mode
-        'r'
         """
         return self._mode
 
     @mode.setter
     def mode(self, mode_str) -> None:
-        """Set the mode of the data source.
+        """Setter for the mode of the data source.
 
         Parameters
         ----------
         mode_str : str
             Mode to set the data source to. Can be 'r' or 'w'.
 
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> data_source.mode = 'r'
         """
         if mode_str == self._mode:
             return
@@ -167,69 +200,48 @@ class DataSource:
         npt.ArrayLike
             Array representation of data stored in data source.
 
-        Examples
-        --------
-        >>> data_source.data
+        Raises
+        ------
+        NotImplementedError
+            If not implemented in a derived class.
+
         """
         raise NotImplementedError("Implemented in a derived class.")
 
     @property
     def voxel_size(self) -> tuple:
-        """Return voxel size
-
-        Parameters
-        ----------
-        None
+        """Getter for the voxel size
 
         Returns
         -------
         tuple
             Voxel size in x, y, z dimensions.
 
-        Examples
-        --------
-        >>> data_source.voxel_size
-        (1, 1, 1)
         """
         return (self.dx, self.dy, self.dz)
 
     @property
     def shape(self) -> tuple:
-        """Return shape as XYCZT.
-
-        Parameters
-        ----------
-        None
+        """Getter for the shape as XYCZT.
 
         Returns
         -------
         tuple
             Shape of the data source in XYCZT format.
 
-        Examples
-        --------
-        >>> data_source.shape
-        (1, 1, 1, 1, 1)
         """
         return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
 
     def set_metadata_from_configuration_experiment(
         self, configuration: DictProxy
     ) -> None:
-        """Set metadata from configuration experiment.
+        """Sets the metadata from according to the microscope configuration.
 
         Parameters
         ----------
         configuration : DictProxy
             Configuration experiment.
 
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> data_source.set_metadata_from_configuration_experiment(configuration)
         """
 
         self.metadata.configuration = configuration
@@ -270,10 +282,6 @@ class DataSource:
         p : int
             Index of multi-position position.
 
-        Examples
-        --------
-        >>> data_source._cztp_indices(frame_id)
-        (0, 0, 0, 0)
         """
         # If z-stacking, if multi-position
         if self.shape_z > 1:
@@ -331,19 +339,7 @@ class DataSource:
         # )
 
     def _mode_checks(self) -> None:
-        """Run additional checks after setting the mode.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> data_source._mode_checks()"""
+        """Run additional checks after setting the mode."""
         pass
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
@@ -356,46 +352,27 @@ class DataSource:
         **kw : dict
             Additional keyword arguments.
 
-        Returns
-        -------
-        None
+        Raises
+        ------
+        NotImplementedError
+            If not implemented in a derived class.
 
-        Examples
-        --------
-        >>> data_source.write(data)
         """
         raise NotImplementedError("Implemented in a derived class.")
 
     def read(self) -> None:
         """Read data from file.
 
-        Parameters
-        ----------
-        None
+        Raises
+        ------
+        NotImplementedError
+            If not implemented in a derived class.
 
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> data_source.read()"""
+        """
         raise NotImplementedError("Implemented in a derived class.")
 
     def close(self) -> None:
-        """Clean up any leftover file pointers, etc.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> data_source.close()"""
+        """Clean up any leftover file pointers, etc."""
         pass
 
     def __del__(self):

@@ -106,6 +106,8 @@ class MockASIStage:
             self.output_buffer.append(":A")
         elif command == "PC":
             self.output_buffer.append(":A")
+        elif command == "E":
+            self.output_buffer.append(":A")
 
     def readline(self):
         return bytes(self.output_buffer.pop(0), encoding="ascii")
@@ -255,9 +257,18 @@ class TestStageASI:
             for axis in axes:
                 pos = random.randrange(-100, 500)
                 pos_dict[f"{axis}_pos"] = float(pos)
-                setattr(
-                    asi_stage.serial_port, f"{stage.axes_mapping[axis]}_abs", pos * 10.0
-                )
+                if axis == "theta":
+                    setattr(
+                        asi_stage.serial_port,
+                        f"{stage.axes_mapping[axis]}_abs",
+                        pos * 1000.0,
+                    )
+                else:
+                    setattr(
+                        asi_stage.serial_port,
+                        f"{stage.axes_mapping[axis]}_abs",
+                        pos * 10.0,
+                    )
             temp_pos = stage.report_position()
             assert pos_dict == temp_pos
 

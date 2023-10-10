@@ -563,13 +563,15 @@ def verify_experiment_config(manager, configuration):
     for k in microscope_state_dict_sample:
         if k not in microscope_setting_dict.keys():
             microscope_setting_dict[k] = microscope_state_dict_sample[k]
-        elif type(microscope_setting_dict[k]) != type(microscope_state_dict_sample[k]):
-            if type(microscope_state_dict_sample[k]) == float:
+        elif not isinstance(
+            microscope_setting_dict[k], type(microscope_state_dict_sample[k])
+        ):
+            if isinstance(microscope_state_dict_sample[k], float):
                 try:
                     microscope_setting_dict[k] = float(microscope_setting_dict[k])
                 except ValueError:
                     microscope_setting_dict[k] = microscope_state_dict_sample[k]
-            elif type(microscope_state_dict_sample[k]) == int:
+            elif isinstance(microscope_state_dict_sample[k], int):
                 try:
                     microscope_setting_dict[k] = int(microscope_setting_dict[k])
                 except ValueError:
@@ -648,24 +650,22 @@ def verify_experiment_config(manager, configuration):
             "laser_power": 20.0,
             "camera_exposure_time": 200.0,
             "interval_time": 0.0,
-            "defocus": 0.0
+            "defocus": 0.0,
         }
         for k in temp:
             try:
-                channel_value[k] = float(
-                    channel_value[k]
-                )
+                channel_value[k] = float(channel_value[k])
             except ValueError:
                 channel_value[k] = temp[k]
             if channel_value[k] < 0:
                 channel_value[k] = temp[k]
-        
+
     microscope_setting_dict["selected_channels"] = selected_channel_num
 
     # MultiPositions
     if (
-        "MultiPositions" not in microscope_setting_dict
-        or type(microscope_setting_dict["MultiPositions"]) is not ListProxy
+        "MultiPositions" not in configuration["experiment"]
+        or type(configuration["experiment"]["MultiPositions"]) is not ListProxy
     ):
         update_config_dict(manager, configuration["experiment"], "MultiPositions", [])
     position_ids = []

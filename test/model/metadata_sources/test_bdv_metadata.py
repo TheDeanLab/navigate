@@ -1,23 +1,33 @@
 import os
+import numpy as np
+
+import pytest
 
 
-def test_bdv_metadata(dummy_model):
+@pytest.mark.parametrize("ext", ["h5", "n5", "tiff"])
+def test_bdv_metadata(ext):
     from aslm.model.metadata_sources.bdv_metadata import BigDataViewerMetadata
 
     md = BigDataViewerMetadata()
 
     views = []
-    for idx in range(10):
+    for _ in range(10):
         views.append(
             {
-                "x": dummy_model.data_buffer_positions[idx][0],
-                "y": dummy_model.data_buffer_positions[idx][1],
-                "z": dummy_model.data_buffer_positions[idx][2],
-                "theta": dummy_model.data_buffer_positions[idx][3],
-                "f": dummy_model.data_buffer_positions[idx][4],
+                "x": np.random.randint(-1000, 1000),
+                "y": np.random.randint(-1000, 1000),
+                "z": np.random.randint(-1000, 1000),
+                "theta": np.random.randint(-1000, 1000),
+                "f": np.random.randint(-1000, 1000),
             }
         )
 
-    md.write_xml("test_bdv.xml", views)
+    for view in views:
+        arr = md.stage_positions_to_affine_matrix(**view)
+        assert arr[0, 3] == view["y"] / md.dy
+        assert arr[1, 3] == view["x"] / md.dx
+        assert arr[2, 3] == view["z"] / md.dz
+
+    md.write_xml(f"test_bdv.{ext}", views)
 
     os.remove("test_bdv.xml")

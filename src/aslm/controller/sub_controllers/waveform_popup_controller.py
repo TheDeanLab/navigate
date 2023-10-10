@@ -140,6 +140,9 @@ class WaveformPopupController(GUIController):
             self.variables[galvo + " Freq"].trace_add(
                 "write", self.update_galvo_setting(galvo, " Freq", "frequency")
             )
+            self.view.get_buttons()[galvo + " Freq"].configure(
+                command=lambda: self.estimate_galvo_setting(galvo + " Freq")
+            )
 
         # Changes in the delay, duty cycle, and smoothing waveform parameters
         # Delay, Duty, and Smoothing
@@ -220,6 +223,7 @@ class WaveformPopupController(GUIController):
             self.widgets[laser + " Amp"].widget.configure(to=laser_max)
             self.widgets[laser + " Amp"].widget.configure(increment=increment)
             self.widgets[laser + " Amp"].widget.set_precision(precision)
+            self.widgets[laser + " Amp"].widget.trigger_focusout_validation()
             # TODO: The offset bounds should adjust based on the amplitude bounds,
             #       so that amp + offset does not exceed the bounds. Can be done
             #       in update_remote_focus_settings()
@@ -227,6 +231,7 @@ class WaveformPopupController(GUIController):
             self.widgets[laser + " Off"].widget.configure(to=laser_max)
             self.widgets[laser + " Off"].widget.configure(increment=increment)
             self.widgets[laser + " Off"].widget.set_precision(precision)
+            self.widgets[laser + " Off"].widget.trigger_focusout_validation()
 
         for galvo, d in zip(self.galvos, self.galvo_dict):
             galvo_min = d["hardware"]["min"]
@@ -236,6 +241,7 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Amp"].widget.configure(increment=increment)
             self.widgets[galvo + " Amp"].widget.set_precision(precision)
             self.widgets[galvo + " Amp"].widget["state"] = "normal"
+            self.widgets[galvo + " Amp"].widget.trigger_focusout_validation()
             # TODO: The offset bounds should adjust based on the amplitude bounds,
             #       so that amp + offset does not exceed the bounds. Can be done
             #       in update_remote_focus_settings()
@@ -244,11 +250,13 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Off"].widget.configure(increment=increment)
             self.widgets[galvo + " Off"].widget.set_precision(precision)
             self.widgets[galvo + " Off"].widget["state"] = "normal"
+            self.widgets[galvo + " Off"].widget.trigger_focusout_validation()
 
             self.widgets[galvo + " Freq"].widget.configure(from_=0)
             self.widgets[galvo + " Freq"].widget.configure(increment=increment)
             self.widgets[galvo + " Freq"].widget.set_precision(precision)
             self.widgets[galvo + " Freq"].widget["state"] = "normal"
+            self.widgets[galvo + " Freq"].widget.trigger_focusout_validation()
 
         for i in range(len(self.galvos), self.configuration_controller.galvo_num):
             galvo_name = f"Galvo {i}"
@@ -390,7 +398,9 @@ class WaveformPopupController(GUIController):
         self.widgets["Smoothing"].set(
             waveform_configuration.get("percent_smoothing", 0)
         )
+        self.widgets["Smoothing"].widget.trigger_focusout_validation()
         self.widgets["Delay"].set(waveform_configuration.get("percent_delay", 7.5))
+        self.widgets["Delay"].widget.trigger_focusout_validation()
         if "other_constants" not in self.resolution_info:
             update_config_dict(
                 self.parent_controller.manager,
@@ -401,6 +411,7 @@ class WaveformPopupController(GUIController):
         self.widgets["Duty"].set(
             self.resolution_info["other_constants"]["remote_focus_settle_duration"]
         )
+        self.widgets["Duty"].widget.trigger_focusout_validation()
         self.update_waveform_parameters_flag = True
 
         # update resolution value in central controller (menu)
@@ -518,6 +529,45 @@ class WaveformPopupController(GUIController):
                 "update_setting", "waveform_parameters"
             ),
         )
+
+    def estimate_galvo_setting(self, *args, **kwargs):
+        """Estimate galvo settings according to the acquisition parameters.
+
+        Will only work if all channels have the same exposure duration.
+        Gets the line interval from the camera, number of pixels from the light-sheet
+        mode, and estimates the frequency as 1 / (line interval * number of pixels)."""
+
+        galvo_name = args[0]
+
+        number_of_pixels = (
+            self.parent_controller.camera_setting_controller.mode_widgets[
+                "Pixels"
+            ].get()
+        )
+        if number_of_pixels == "":
+            # If we are not in the light-sheet mode, widget returns an empty string.
+            return
+
+        exposure_time = (
+            self.parent_controller.camera_setting_controller.framerate_widgets[
+                "exposure_time"
+            ].get()
+        )
+
+        # The camera line interval won't be set until starting acquisition,
+        # we need to calculate it directly
+        # exposure_time and light_sheet_exposure_time are both ms
+        (
+            light_sheet_exposure_time,
+            _,
+        ) = self.parent_controller.model.get_camera_line_interval_and_exposure_time(
+            exposure_time, int(number_of_pixels)
+        )
+
+        frequency = 2 / light_sheet_exposure_time * exposure_time
+
+        # Update the GUI
+        self.view.inputs[galvo_name].widget.set(round(frequency, 3))
 
     def update_galvo_setting(self, galvo_name, widget_name, parameter):
         """Update galvo settings in memory.

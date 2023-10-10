@@ -81,8 +81,8 @@ def create_save_path(saving_settings):
         label_string,
         date_string,
     )
-    os.makedirs(save_directory, exist_ok=True)
 
+    os.makedirs(save_directory, exist_ok=True)
     # Determine Number of Cells in Directory
     # Cell1/Position1/1_CH00_000000.tif
     cell_directories = list(

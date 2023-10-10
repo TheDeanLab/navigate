@@ -15,7 +15,8 @@ jobs:
       matrix:
         python-version: ["3.9"]
         operating-system: [windows-latest]  # [ubuntu-latest, windows-latest]
-
+    env:
+      MPLBACKEND: Agg  # https://github.com/microsoft/azure-pipelines-tasks/issues/16426
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -27,7 +28,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest
           pip install pytest-cov
-          pip install pytest-xvfb
           pip install -e .
       - name: Test with pytest
         run: |

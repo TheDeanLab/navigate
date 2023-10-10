@@ -72,6 +72,10 @@ class CameraBase:
         # Initialize Pixel Information
         self.max_image_width = 2048
         self.max_image_height = 2048
+        self.min_image_width = 4
+        self.min_image_height = 4
+        self.step_image_width = 4
+        self.step_image_height = 4
         self.x_pixels = self.max_image_width
         self.y_pixels = self.max_image_height
         self.camera_parameters["x_pixels"] = self.max_image_width
@@ -82,7 +86,6 @@ class CameraBase:
         self.camera_parameters["trigger_active"] = 1.0
         self.camera_parameters["trigger_mode"] = 1.0
         self.camera_parameters["trigger_polarity"] = 2.0
-
 
         # Initialize offset and variance maps, if present
         self._offset, self._variance = None, None
@@ -148,8 +151,21 @@ class CameraBase:
         camera_line_interval = (full_chip_exposure_time / 1000) / (
             shutter_width + self.y_pixels - 1
         )
+
+        self.camera_parameters["line_interval"] = camera_line_interval
+
         exposure_time = camera_line_interval * shutter_width * 1000
         return exposure_time, camera_line_interval
 
     def close_camera(self):
         pass
+
+    def get_line_interval(self):
+        """Return stored camera line interval.
+
+        Returns
+        -------
+        line_interval : float
+            line interval duration (s).
+        """
+        return self.camera_parameters.get("line_interval", None)

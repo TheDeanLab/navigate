@@ -1,10 +1,9 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -45,7 +44,7 @@ import pytest
 def box(size):
     x = np.linspace(0, 1, 100)
     X, Y = np.meshgrid(x, x)
-    l = (1 - size) / 2
+    l = (1 - size) / 2  # noqa
     u = l + size
     image = (X > l) & (X < u) & (Y > l) & (Y < u)
     return image.astype(float)
@@ -124,7 +123,8 @@ try:
             dct_array = np.ones((128, 128))
             otf_support_x = 3
             otf_support_y = 3
-            # This trys to call from the aslm_analysis module however its only located in the aslm_debug_model
+            # This trys to call from the aslm_analysis module however its only
+            # located in the aslm_debug_model
             # entropy = aslm_analysis.calculate_entropy()
             entropy = calculate_entropy(
                 self,

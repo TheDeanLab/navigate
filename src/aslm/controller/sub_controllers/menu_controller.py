@@ -58,6 +58,7 @@ from aslm.controller.sub_controllers import (
     MicroscopePopupController,
     FeaturePopupController,
     HelpPopupController,
+    FeatureAdvancedSettingController,
 )
 from aslm.tools.file_functions import save_yaml_file, load_yaml_file
 from aslm.tools.decorators import FeatureList
@@ -87,7 +88,6 @@ class MenuController(GUIController):
         self.resolution_value = tk.StringVar()
         self.feature_id_val = tk.IntVar()
         self.disable_stage_limits = tk.IntVar()
-        self.save_data = False
         self.fake_event = None
         self.feature_list_names = []
         self.system_feature_list_count = 0
@@ -152,7 +152,7 @@ class MenuController(GUIController):
                     "<Control_L-S>",
                 ],
                 "add_separator": [None],
-                "Save Data": [
+                "Toggle Save Data": [
                     "standard",
                     self.toggle_save,
                     "Ctrl+s",
@@ -339,7 +339,7 @@ class MenuController(GUIController):
                 ],
                 "Stage Control": [
                     "standard",
-                    lambda event: self.switch_tabs(2),
+                    lambda event: self.switch_tabs(3),
                     "Ctrl+3",
                     "<Control-Key-3>",
                     "<Control_L-Key-3",
@@ -426,6 +426,7 @@ class MenuController(GUIController):
             "Volume Search",
             "Time Series",
             "Decoupled Focus Stage Multiposition",
+            "Remove Empty Tiles",
         ]
         self.feature_list_count = len(self.feature_list_names)
         self.system_feature_list_count = self.feature_list_count
@@ -461,6 +462,9 @@ class MenuController(GUIController):
         self.view.menubar.menu_features.add_command(
             label="Delete Selected Feature List", command=self.delete_feature_list
         )
+        self.view.menubar.menu_features.add_command(
+            label="Advanced Setting", command=self.popup_feature_advanced_setting
+        )
         self.view.menubar.menu_features.add_separator()
         # add feature lists from previous loaded ones
         feature_lists_path = get_aslm_path() + "/feature_lists"
@@ -480,6 +484,28 @@ class MenuController(GUIController):
             )
             self.feature_list_names.append(feature["feature_list_name"])
             self.feature_list_count += 1
+
+    def toggle_save(self, *args):
+        """Toggle save button
+
+        Parameters
+        ----------
+        args:
+            could be tkinter event(Key press event)
+
+        Returns
+        -------
+        None
+
+        """
+        save_data = (
+            self.view.settings.channels_tab.stack_timepoint_frame.save_data.get()
+        )
+
+        self.parent_controller.channels_tab_controller.timepoint_vals["is_save"].set(
+            not save_data
+        )
+        self.parent_controller.channels_tab_controller.update_save_setting()
 
     def open_folder(self, path):
         """Open folder in file explorer.
@@ -714,11 +740,6 @@ class MenuController(GUIController):
             self.view, self.parent_controller, microscope_info
         )
 
-    def toggle_save(self, *args):
-        """Save the data."""
-        self.save_data = not self.save_data
-        self.parent_controller.execute("set_save", self.save_data)
-
     def acquire_data(self, *args):
         """Acquire data/Stop acquiring data."""
         self.parent_controller.acquire_bar_controller.launch_popup_window()
@@ -740,11 +761,8 @@ class MenuController(GUIController):
         try:
             focus = self.parent_controller.view.focus_get()
             if hasattr(focus, "widgetName"):
-                if focus.widgetName == "ttk::entry":
-                    return
-                elif focus.widgetName == "ttk::combobox":
-                    return
-                elif focus.widgetName == "text":
+                freeze_in = ["ttk::entry", "ttk::combobox", "text", "ttk::spinbox"]
+                if focus.widgetName in freeze_in:
                     return
             self.fake_event = FakeEvent(char=char)
             self.parent_controller.stage_controller.stage_key_press(self.fake_event)
@@ -778,7 +796,8 @@ class MenuController(GUIController):
         feature_list_files = [
             temp
             for temp in os.listdir(feature_lists_path)
-            if temp[temp.rindex(".") :] in (".yml", ".yaml")
+            if (temp.endswith(".yml") or temp.endswith(".yaml"))
+            and os.path.isfile(os.path.join(feature_lists_path, temp))
         ]
         feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
         if not feature_records:
@@ -899,3 +918,9 @@ class MenuController(GUIController):
 
         del feature_records[feature_id - self.system_feature_list_count]
         save_yaml_file(feature_lists_path, feature_records, "__sequence.yml")
+
+    def popup_feature_advanced_setting(self):
+        """Show feature advanced setting window"""
+        self.parent_controller.feature_advanced_setting_controller = (
+            FeatureAdvancedSettingController(self.view, self.parent_controller)
+        )

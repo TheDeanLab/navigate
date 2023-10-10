@@ -55,26 +55,24 @@ def stage_controller(dummy_controller):
         dummy_controller,
     )
 
+
 @pytest.mark.parametrize(
     "flip_x, flip_y",
-    [
-        (False, False),
-        (True, False),
-        (True, True),
-        (False, True),
-        (True, True)
-    ],
+    [(False, False), (True, False), (True, True), (False, True), (True, True)],
 )
 def test_stage_key_press(stage_controller, flip_x, flip_y):
-    microscope_name = stage_controller.parent_controller.configuration_controller.microscope_name
-    stage_config = stage_controller.parent_controller.configuration["configuration"]["microscopes"][microscope_name]["stage"]
+    microscope_name = (
+        stage_controller.parent_controller.configuration_controller.microscope_name
+    )
+    stage_config = stage_controller.parent_controller.configuration["configuration"][
+        "microscopes"
+    ][microscope_name]["stage"]
     stage_config["flip_x"] = flip_x
     stage_config["flip_y"] = flip_y
     stage_controller.initialize()
-    flip_flags = stage_controller.parent_controller.configuration_controller.stage_flip_flags
     x = round(np.random.random(), 1)
     y = round(np.random.random(), 1)
-    increment = round(np.random.random(), 1)
+    increment = round(np.random.random() + 1, 1)
     stage_controller.widget_vals["xy_step"].get = MagicMock(return_value=increment)
     stage_controller.widget_vals["x"].get = MagicMock(return_value=x)
     stage_controller.widget_vals["x"].set = MagicMock()
@@ -105,6 +103,7 @@ def test_stage_key_press(stage_controller, flip_x, flip_y):
 
     stage_config["flip_x"] = False
     stage_config["flip_y"] = False
+
 
 def test_set_position(stage_controller):
 
@@ -166,6 +165,7 @@ def test_get_position(stage_controller):
     position = stage_controller.get_position()
     assert position is None
 
+
 @pytest.mark.parametrize(
     "flip_x, flip_y, flip_z",
     [
@@ -173,17 +173,23 @@ def test_get_position(stage_controller):
         (True, False, False),
         (True, True, False),
         (False, True, True),
-        (True, True, True)
+        (True, True, True),
     ],
 )
 def test_up_btn_handler(stage_controller, flip_x, flip_y, flip_z):
-    microscope_name = stage_controller.parent_controller.configuration_controller.microscope_name
-    stage_config = stage_controller.parent_controller.configuration["configuration"]["microscopes"][microscope_name]["stage"]
+    microscope_name = (
+        stage_controller.parent_controller.configuration_controller.microscope_name
+    )
+    stage_config = stage_controller.parent_controller.configuration["configuration"][
+        "microscopes"
+    ][microscope_name]["stage"]
     stage_config["flip_x"] = flip_x
     stage_config["flip_y"] = flip_y
     stage_config["flip_z"] = flip_z
     stage_controller.initialize()
-    flip_flags = stage_controller.parent_controller.configuration_controller.stage_flip_flags
+    flip_flags = (
+        stage_controller.parent_controller.configuration_controller.stage_flip_flags
+    )
 
     vals = {}
     for axis in AXES:
@@ -225,6 +231,7 @@ def test_up_btn_handler(stage_controller, flip_x, flip_y, flip_z):
     stage_config["flip_y"] = False
     stage_config["flip_z"] = False
 
+
 @pytest.mark.parametrize(
     "flip_x, flip_y, flip_z",
     [
@@ -232,17 +239,23 @@ def test_up_btn_handler(stage_controller, flip_x, flip_y, flip_z):
         (True, False, False),
         (True, True, False),
         (False, True, True),
-        (True, True, True)
+        (True, True, True),
     ],
 )
 def test_down_btn_handler(stage_controller, flip_x, flip_y, flip_z):
-    microscope_name = stage_controller.parent_controller.configuration_controller.microscope_name
-    stage_config = stage_controller.parent_controller.configuration["configuration"]["microscopes"][microscope_name]["stage"]
+    microscope_name = (
+        stage_controller.parent_controller.configuration_controller.microscope_name
+    )
+    stage_config = stage_controller.parent_controller.configuration["configuration"][
+        "microscopes"
+    ][microscope_name]["stage"]
     stage_config["flip_x"] = flip_x
     stage_config["flip_y"] = flip_y
     stage_config["flip_z"] = flip_z
     stage_controller.initialize()
-    flip_flags = stage_controller.parent_controller.configuration_controller.stage_flip_flags
+    flip_flags = (
+        stage_controller.parent_controller.configuration_controller.stage_flip_flags
+    )
     vals = {}
     for axis in AXES:
         vals[axis] = np.random.randint(1, 9)
@@ -282,6 +295,7 @@ def test_down_btn_handler(stage_controller, flip_x, flip_y, flip_z):
     stage_config["flip_x"] = False
     stage_config["flip_y"] = False
     stage_config["flip_z"] = False
+
 
 def test_zero_btn_handler(stage_controller):
 

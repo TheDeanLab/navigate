@@ -35,6 +35,7 @@
 
 # Third Party Imports
 import pytest
+import random
 
 # Local Imports
 from aslm.controller.sub_controllers.camera_setting_controller import (
@@ -285,8 +286,9 @@ class TestCameraSettingController:
             self.camera_settings.mode_widgets["Readout"].set("Bottom-to-Top")
             self.camera_settings.mode_widgets["Pixels"].set(15)
             self.camera_settings.roi_widgets["Binning"].set("1x1")
-        self.camera_settings.roi_widgets["Width"].set(1600)
-        self.camera_settings.roi_widgets["Height"].set(1600)
+        width, height = random.randint(1, 2000), random.randint(1, 2000)
+        self.camera_settings.roi_widgets["Width"].set(width)
+        self.camera_settings.roi_widgets["Height"].set(height)
         self.camera_settings.framerate_widgets["frames_to_average"].set(5)
 
         # Update experiment dict and assert
@@ -300,16 +302,28 @@ class TestCameraSettingController:
             assert (
                 int(self.camera_settings.camera_setting_dict["number_of_pixels"]) == 15
             )
+        step_width = self.camera_settings.step_width
+        step_height = self.camera_settings.step_height
+        set_width = int(width // step_width) * step_width
+        set_height = int(height // step_height) * step_height
         if mode == "Light-Sheet":
             assert self.camera_settings.camera_setting_dict["binning"] == "1x1"
-            assert self.camera_settings.camera_setting_dict["img_x_pixels"] == 1600
-            assert self.camera_settings.camera_setting_dict["img_y_pixels"] == 1600
+            assert self.camera_settings.camera_setting_dict["img_x_pixels"] == set_width
+            assert (
+                self.camera_settings.camera_setting_dict["img_y_pixels"] == set_height
+            )
         else:
             assert self.camera_settings.camera_setting_dict["binning"] == "4x4"
-            assert self.camera_settings.camera_setting_dict["img_x_pixels"] == 400
-            assert self.camera_settings.camera_setting_dict["img_y_pixels"] == 400
-        assert self.camera_settings.camera_setting_dict["x_pixels"] == 1600
-        assert self.camera_settings.camera_setting_dict["y_pixels"] == 1600
+            assert (
+                self.camera_settings.camera_setting_dict["img_x_pixels"]
+                == set_width // 4
+            )
+            assert (
+                self.camera_settings.camera_setting_dict["img_y_pixels"]
+                == set_height // 4
+            )
+        assert self.camera_settings.camera_setting_dict["x_pixels"] == set_width
+        assert self.camera_settings.camera_setting_dict["y_pixels"] == set_height
         assert (
             self.camera_settings.camera_setting_dict["pixel_size"]
             == self.camera_settings.default_pixel_size
@@ -383,8 +397,7 @@ class TestCameraSettingController:
         assert str(self.camera_settings.roi_widgets["Height"].get()) == name
 
     def test_update_fov(self):
-
-        # Invoke commands
+        self.camera_settings.populate_experiment_values()
 
         # Change invoke
         self.camera_settings.in_initialization = False
@@ -395,6 +408,10 @@ class TestCameraSettingController:
         self.camera_settings.roi_widgets["Width"].widget.set(1600)
         self.camera_settings.roi_widgets["Height"].widget.set(1600)
 
+        # need these since we switched to read events
+        self.camera_settings.roi_widgets["Width"].get_variable().get()
+        self.camera_settings.roi_widgets["Height"].get_variable().get()
+
         # Check
         assert xFov != int(self.camera_settings.roi_widgets["FOV_X"].get())
         assert yFov != int(self.camera_settings.roi_widgets["FOV_Y"].get())
@@ -402,6 +419,11 @@ class TestCameraSettingController:
         # Reset
         self.camera_settings.roi_widgets["Width"].widget.set(2048)
         self.camera_settings.roi_widgets["Height"].widget.set(2048)
+
+        # need these since we switched to read events
+        self.camera_settings.roi_widgets["Width"].get_variable().get()
+        self.camera_settings.roi_widgets["Height"].get_variable().get()
+
         assert int(self.camera_settings.roi_widgets["FOV_X"].get()) == 13066
         assert int(self.camera_settings.roi_widgets["FOV_Y"].get()) == 13066
 
@@ -478,6 +500,8 @@ class TestCameraSettingController:
         self.camera_settings.parent_controller.configuration["experiment"][
             "MicroscopeState"
         ]["zoom"] = zoom
+
+        self.camera_settings.populate_experiment_values()
 
         # Calling
         self.camera_settings.calculate_physical_dimensions()

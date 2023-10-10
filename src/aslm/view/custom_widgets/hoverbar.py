@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,9 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
-import tkinter.ttk as ttk
 import logging
+
+# Third Party Imports
+
+# Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -39,9 +44,15 @@ logger = logging.getLogger(p)
 """
 see:
 
+
+"""
+
+
+class Tooltip:
+    """Create a tooltip for a given widget when the mouse hovers over it.
+
     http://stackoverflow.com/questions/3221956/
-           what-is-the-simplest-way-to-make-tooltips-
-           in-tkinter/36221216#36221216
+       what-is-the-simplest-way-to-make-tooltips-in-tkinter/36221216#36221216
 
     http://www.daniweb.com/programming/software-development/
            code/484591/a-tooltip-class-for-tkinter
@@ -59,15 +70,60 @@ see:
           wraplength on creation
       by Alberto Vassena on 2016.11.05.
 
-      Tested on Ubuntu 16.04/16.10, running Python 3.5.2
-
     TODO: themes styles support
-"""
 
+    Parameters
+    ----------
+    widget : tkinter widget
+        The widget to which this tooltip is bound.
+    bg : str, optional
+        Background color for the tooltip. The default is "#FFFFEA".
+    pad : tuple, optional
+        Padding to be left around the text. The default is (5, 3, 5, 3).
+    text : str, optional
+        Text to be displayed in the tooltip. The default is "widget info".
+    waittime : int, optional
+        Delay in miliseconds before the tooltip shows up. The default is 400.
+    wraplength : int, optional
+        Wrap length for the tooltip text. The default is 250.
 
-class Tooltip:
-    """
-    It creates a tooltip for a given widget as the mouse goes on it.
+    Attributes
+    ----------
+    widget : tkinter widget
+        The widget to which this tooltip is bound.
+    bg : str
+        Background color for the tooltip.
+    pad : tuple
+        Padding to be left around the text.
+    text : str
+        Text to be displayed in the tooltip.
+    waittime : int
+        Delay in miliseconds before the tooltip shows up.
+    wraplength : int
+        Wrap length for the tooltip text.
+    id : int
+        The id returned by tkinter after calling `after`.
+    tw : tkinter.Toplevel
+        The tooltip toplevel.
+
+    Methods
+    -------
+    onEnter(event=None)
+        Callback to be called when the mouse enters the widget.
+    onLeave(event=None)
+        Callback to be called when the mouse leaves the widget.
+    schedule()
+        Schedule the showing of the tooltip.
+    unschedule()
+        Unschedule the showing of the tooltip.
+    show()
+        Show the tooltip.
+    hide()
+        Hide the tooltip.
+
+    Returns
+    -------
+    None.
     """
 
     def __init__(
@@ -190,135 +246,3 @@ class Tooltip:
         if tw:
             tw.destroy()
         self.tw = None
-
-
-if __name__ == "__main__":
-
-    import random
-
-    def further_text():
-        # texts generated at http://lorem-ipsum.perbang.dk/
-        short_text = (
-            "Here are some words to fill the space."
-            "Microscopes look at small stuff! :)  "
-            "Widgets run the world!  "
-            "Stay hydrated. "
-            "lectus, amet cras, neque lacus quis. Malesuada "
-            "nibh. Eleifend nam, in eget a. Nec turpis, erat "
-            "wisi semper"
-        )
-        medium_text = (
-            "Lorem ipsum dolor sit amet, suspendisse aenean "
-            "ipsum sollicitudin, pellentesque nunc ultrices ac "
-            "ut, arcu elit turpis senectus convallis. Ac orci "
-            "pretium sed gravida, tortor nulla felis "
-            "consectetuer, mauris egestas est erat. Ut enim "
-            "tellus at diam, ac sagittis vel proin. Massa "
-            "eleifend orci tortor sociis, scelerisque in pede "
-            "metus phasellus, est tempor gravida nam, ante "
-            "fusce sem tempor. Mi diam auctor vel pede, mus "
-            "non mi luctus luctus, lectus sit varius repellat "
-            "eu"
-        )
-        long_text = (
-            "Lorem ipsum dolor sit amet, velit eu nam cursus "
-            "quisque gravida sollicitudin, felis arcu interdum "
-            "error quam quis massa, et velit libero ligula est "
-            "donec. Suspendisse fringilla urna ridiculus dui "
-            "volutpat justo, quisque nisl eget sed blandit "
-            "egestas, libero nullam magna sem dui nam, auctor "
-            "vehicula nunc arcu vel sed dictum, tincidunt vitae "
-            "id tristique aptent platea. Lacus eros nec proin "
-            "morbi sollicitudin integer, montes suspendisse "
-            "augue lorem iaculis sed, viverra sed interdum eget "
-            "ut at pulvinar, turpis vivamus ac pharetra nulla "
-            "maecenas ut. Consequat dui condimentum lectus nulla "
-            "vitae, nam consequat fusce ac facilisis eget orci, "
-            "cras enim donec aenean sed dolor aliquam, elit "
-            "lorem in a nec fringilla, malesuada curabitur diam "
-            "nonummy nisl nibh ipsum. In odio nunc nec porttitor "
-            "ipsum, nunc ridiculus platea wisi turpis praesent "
-            "vestibulum, suspendisse hendrerit amet quis vivamus "
-            "adipiscing elit, ut dolor nec nonummy mauris nec "
-            "libero, ad rutrum id tristique facilisis sed "
-            "ultrices. Convallis velit posuere mauris lectus sit "
-            "turpis, lobortis volutpat et placerat leo "
-            "malesuada, vulputate id maecenas at a volutpat "
-            "vulputate, est augue nec proin ipsum pellentesque "
-            "fringilla. Mattis feugiat metus ultricies repellat "
-            "dictum, suspendisse erat rhoncus ultricies in ipsum, "
-            "nulla ante pellentesque blandit ligula sagittis "
-            "ultricies, sed tortor sodales pede et duis platea"
-        )
-
-        text = random.choice([short_text, medium_text, long_text, long_text])
-
-        return "\nFurther info: " + text
-
-    def main_01(wraplength=200):
-
-        # alias
-        stuff = further_text
-
-        root = tk.Tk()
-        frame = ttk.Frame(root)
-
-        btn_ne = ttk.Button(frame, text="North East")
-        btn_se = ttk.Button(frame, text="South East")
-        btn_sw = ttk.Button(frame, text="South West")
-        btn_nw = ttk.Button(frame, text="North West")
-        btn_center = ttk.Button(frame, text="Center")
-        btn_n = ttk.Button(frame, text="North")
-        btn_e = ttk.Button(frame, text="East")
-        btn_s = ttk.Button(frame, text="South")
-        btn_w = ttk.Button(frame, text="West")
-
-        Tooltip(btn_nw, text="North West" + stuff(), wraplength=wraplength)
-        Tooltip(btn_ne, text="North East" + stuff(), wraplength=wraplength)
-        Tooltip(btn_se, text="South East" + stuff(), wraplength=wraplength)
-        Tooltip(btn_sw, text="South West" + stuff(), wraplength=wraplength)
-        Tooltip(btn_center, text="Center" + stuff(), wraplength=wraplength)
-        Tooltip(btn_n, text="North" + stuff(), wraplength=wraplength)
-        Tooltip(btn_e, text="East" + stuff(), wraplength=wraplength)
-        Tooltip(btn_s, text="South" + stuff(), wraplength=wraplength)
-        Tooltip(btn_w, text="West" + stuff(), wraplength=wraplength)
-
-        r = 0
-        c = 0
-        pad = 10
-        btn_nw.grid(row=r, column=c, padx=pad, pady=pad, sticky=tk.NW)
-        btn_n.grid(row=r, column=c + 1, padx=pad, pady=pad, sticky=tk.N)
-        btn_ne.grid(row=r, column=c + 2, padx=pad, pady=pad, sticky=tk.NE)
-
-        r += 1
-        btn_w.grid(row=r, column=c + 0, padx=pad, pady=pad, sticky=tk.W)
-        btn_center.grid(row=r, column=c + 1, padx=pad, pady=pad, sticky=tk.NSEW)
-        btn_e.grid(row=r, column=c + 2, padx=pad, pady=pad, sticky=tk.E)
-
-        r += 1
-        btn_sw.grid(row=r, column=c, padx=pad, pady=pad, sticky=tk.SW)
-        btn_s.grid(row=r, column=c + 1, padx=pad, pady=pad, sticky=tk.S)
-        btn_se.grid(row=r, column=c + 2, padx=pad, pady=pad, sticky=tk.SE)
-
-        frame.grid(sticky=tk.NSEW)
-        for i in (0, 2):
-            frame.rowconfigure(i, weight=1)
-            frame.columnconfigure(i, weight=1)
-
-        root.rowconfigure(0, weight=1)
-        root.columnconfigure(0, weight=1)
-
-        root.title("Tooltip wraplength = {}".format(wraplength))
-        root.mainloop()
-
-    def main():
-        print("Trying out three different wraplengths:")
-        logger.info("Trying out three different wraplengths:")
-        for i, wl in enumerate((200, 250, 400), 1):
-            logger.info(i)
-            print(" ", i)
-            main_01(wl)
-        print("Done.")
-        logger.info("Done")
-
-    main()

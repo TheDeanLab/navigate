@@ -440,7 +440,15 @@ class TestCameraViewController:
 
         # set the widget size
         widget = type("MyWidget", (object,), {"widget": self.camera_view.view})
-        event = type("MyEvent", (object,), {"widget": widget, "width": np.random.randint(5, 1000), "height": np.random.randint(5, 1000)})
+        event = type(
+            "MyEvent",
+            (object,),
+            {
+                "widget": widget,
+                "width": np.random.randint(5, 1000),
+                "height": np.random.randint(5, 1000),
+            },
+        )
         self.camera_view.resize(event)
 
         # monkeypatch cv2.resize
@@ -588,8 +596,6 @@ class TestCameraViewController:
     @pytest.mark.parametrize("transpose", [True, False])
     def test_display_image(self, transpose):
         images = np.random.rand(10, 100, 100)
-        microscope_state = {"stack_cycling_mode": "per_stack"}
-        images_received = 0
 
         self.camera_view.transpose = transpose
         count = np.random.randint(0, 10)
@@ -597,16 +603,55 @@ class TestCameraViewController:
         self.camera_view.image_metrics = {"Channel": MagicMock()}
         self.camera_view.process_image = MagicMock()
         self.camera_view.update_max_counts = MagicMock()
-
         self.camera_view.data_buffer = images
+
+        self.camera_view.flip_flags = {"x": False, "y": False}
         image_id = np.random.randint(0, 10)
         self.camera_view.display_image(image_id)
-
         assert np.shape(self.camera_view.image) == np.shape(images[image_id])
         self.camera_view.image_metrics["Channel"].set.assert_called_with(
             self.camera_view.channel_index
         )
         assert self.camera_view.image_count == count + 1
+
+        self.camera_view.flip_flags = {"x": True, "y": False}
+        image_id = np.random.randint(0, 10)
+        self.camera_view.display_image(image_id)
+        assert np.shape(self.camera_view.image) == np.shape(images[image_id])
+        if not transpose:
+            assert (self.camera_view.image == images[image_id][:, ::-1]).all()
+        else:
+            assert (self.camera_view.image == images[image_id][:, ::-1].T).all()
+        self.camera_view.image_metrics["Channel"].set.assert_called_with(
+            self.camera_view.channel_index
+        )
+        assert self.camera_view.image_count == count + 2
+
+        self.camera_view.flip_flags = {"x": False, "y": True}
+        image_id = np.random.randint(0, 10)
+        self.camera_view.display_image(image_id)
+        assert np.shape(self.camera_view.image) == np.shape(images[image_id])
+        if not transpose:
+            assert (self.camera_view.image == images[image_id][::-1, :]).all()
+        else:
+            assert (self.camera_view.image == images[image_id][::-1, :].T).all()
+        self.camera_view.image_metrics["Channel"].set.assert_called_with(
+            self.camera_view.channel_index
+        )
+        assert self.camera_view.image_count == count + 3
+
+        self.camera_view.flip_flags = {"x": True, "y": True}
+        image_id = np.random.randint(0, 10)
+        self.camera_view.display_image(image_id)
+        assert np.shape(self.camera_view.image) == np.shape(images[image_id])
+        if not transpose:
+            assert (self.camera_view.image == images[image_id][::-1, ::-1]).all()
+        else:
+            assert (self.camera_view.image == images[image_id][::-1, ::-1].T).all()
+        self.camera_view.image_metrics["Channel"].set.assert_called_with(
+            self.camera_view.channel_index
+        )
+        assert self.camera_view.image_count == count + 4
 
     def test_add_crosshair(self):
 
@@ -739,3 +784,12 @@ class TestCameraViewController:
         # Assert the output
         assert (self.camera_view.ilastik_seg_mask == mask).all()
         assert not self.camera_view.ilastik_mask_ready_lock.locked()
+
+    def test_update_canvas_size(self):
+        self.camera_view.view.canvas["width"] = random.randint(1, 2000)
+        self.camera_view.view.canvas["height"] = random.randint(1, 2000)
+
+        self.camera_view.update_canvas_size()
+
+        assert self.camera_view.canvas_width > 0
+        assert self.camera_view.canvas_height > 0

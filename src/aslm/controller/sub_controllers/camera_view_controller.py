@@ -169,6 +169,7 @@ class CameraViewController(GUIController):
         self.crosshair_x = None
         self.crosshair_y = None
         self.mask_color_table = None
+        self.flip_flags = None
 
         # ilastik mask
         self.display_mask_flag = False
@@ -356,8 +357,11 @@ class CameraViewController(GUIController):
         offset_x, offset_y = self.calculate_offset()
         stage_position = self.parent_controller.execute("get_stage_position")
         if stage_position is not None:
-            stage_position["x"] += offset_x
-            stage_position["y"] -= offset_y
+            stage_flip_flags = (
+                self.parent_controller.configuration_controller.stage_flip_flags
+            )
+            stage_position["x"] += offset_x * (-1 if stage_flip_flags["x"] else 1)
+            stage_position["y"] -= offset_y * (-1 if stage_flip_flags["y"] else 1)
 
             # Place the stage position in the multi-position table.
             self.parent_controller.execute("mark_position", stage_position)
@@ -416,8 +420,14 @@ class CameraViewController(GUIController):
         stage_position = self.parent_controller.execute("get_stage_position")
 
         if stage_position is not None:
-            stage_position["x"] += offset_x
-            stage_position["y"] -= offset_y
+            # TODO: if show image as what the camera gets(flipped one), the stage
+            # moving direction should be decided by stage_flip_flags
+            # and camera_flip_flags
+            stage_flip_flags = (
+                self.parent_controller.configuration_controller.stage_flip_flags
+            )
+            stage_position["x"] += offset_x * (-1 if stage_flip_flags["x"] else 1)
+            stage_position["y"] -= offset_y * (-1 if stage_flip_flags["y"] else 1)
             if self.mode == "stop":
                 command = "move_stage_and_acquire_image"
             else:
@@ -699,6 +709,9 @@ class CameraViewController(GUIController):
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
         self.original_image_width = int(camera_parameters["x_pixels"])
         self.original_image_height = int(camera_parameters["y_pixels"])
+        self.flip_flags = (
+            self.parent_controller.configuration_controller.camera_flip_flags
+        )
 
         self.update_canvas_size()
 
@@ -845,6 +858,14 @@ class CameraViewController(GUIController):
 
         # Store the maximum intensity value for the image.
         image = self.data_buffer[image_id]
+        # flip back image
+        if self.flip_flags["x"] and self.flip_flags["y"]:
+            image = image[::-1, ::-1]
+        elif self.flip_flags["x"]:
+            image = image[:, ::-1]
+        elif self.flip_flags["y"]:
+            image = image[::-1, :]
+
         self.max_intensity_history.append(np.max(image))
 
         # If the user has toggled the transpose button, transpose the image.
@@ -1090,9 +1111,9 @@ class CameraViewController(GUIController):
         self.ilastik_mask_ready_lock.release()
 
     def resize(self, event):
-        if self.view.is_popup == False and event.widget != self.view:
+        if self.view.is_popup is False and event.widget != self.view:
             return
-        if self.view.is_popup == True and event.widget.widgetName != "toplevel":
+        if self.view.is_popup is True and event.widget.widgetName != "toplevel":
             return
         if self.resizie_event_id:
             self.view.after_cancel(self.resizie_event_id)
@@ -1118,7 +1139,7 @@ class CameraViewController(GUIController):
         self.reset_display(False)
 
     def update_canvas_size(self):
-        r_canvas_width = int(self.view.canvas["width"])
+        r_canvas_width =int(self.view.canvas["width"])
         r_canvas_height = int(self.view.canvas["height"])
         img_ratio = self.original_image_width / self.original_image_height
         canvas_ratio = r_canvas_width / r_canvas_height

@@ -144,40 +144,4 @@ class MainApp(ttk.Frame):
         # notebook
         self.settings = SettingsNotebook(self.frame_left, self.root)
         self.camera_waveform = CameraNotebook(self.frame_top_right, self.root)
-
         self.acqbar = AcquireBar(self.top_frame, self.root)
-
-        # TODO: We do not understand the GUI sizing.
-        #  Notes here. Follow-up later when
-        # this becomes a problem.
-        # Adjust Canvas Width for Screen Resolution
-        # Appears that Windows has 96 DPI, and Apple has 72.
-        # iMac Built in Retina Display is 4480 x 2520
-        # In the settings, can adjust display scaling -> 2560 x 1440
-        # dpi = int(self.root.winfo_fpixels('1i'))
-        # tk_screen_width, tk_screen_height = int(root.winfo_screenwidth()),
-        # int(root.winfo_screenheight()) # 1920 x 1080
-        # TK screen width is the correct width according to the OS.
-
-        # Tk doesn't take into account the DPI?
-        # actual_screen_width, actual_screen_height = int(tk_screen_width *
-        # (dpi / 96)),
-        # int(tk_screen_height * (dpi / 96))
-        # Take into account the fact that we actually do not have 96 DPI,
-        # but actually
-        # 72. 2560 x 1440.
-
-        # print(f"TK Screen Width, Height, dpi: {tk_screen_width},
-        # {tk_screen_height},
-        # {dpi}")  # 1920 x 1080
-        # print(f"Actual Screen Width, Height: {actual_screen_width},
-        # {actual_screen_height}")  # 2560 x 1440.
-
-        # Is the GUI bigger than the actual or tk screen size?
-
-        # if canvas_width > screen_width or canvas_height > screen_height:
-        #     screen_scaling_factor = dpi / 72
-        #
-        #     self.root.tk.call('tk', 'scaling', screen_scaling_factor)
-
-        # self.root.geometry(f"{actual_screen_width}x{actual_screen_height}")

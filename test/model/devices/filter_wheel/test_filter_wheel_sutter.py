@@ -102,7 +102,7 @@ class TestSutterFilterWheel(unittest.TestCase):
             )
             self.assertEqual(
                 self.filter_wheel.wait_until_done_delay,
-                self.filter_wheel.delay_matrix[self.speed, delta],
+                self.filter_wheel.delay_matrix[delta, self.speed],
             )
 
     def test_set_filter_does_not_exist(self):

@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -30,50 +31,40 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
-import logging
+import tkinter as tk
+import time
 
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.lasers.laser_trigger_base import LaserTriggerBase
+from aslm.view.popups.waveform_parameter_popup_window import (
+    WaveformParameterPopupWindow,
+)
+from aslm.model.dummy import DummyModel
+from aslm.controller.configuration_controller import ConfigurationController
 
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
 
+def test_waveform_parameter_popup():
+    """
+    Tests that the remote focus popup and all its widgets gets created and does not
+    throw any exceptions. Test will fail if any exceptions.
 
-class SyntheticLaserTriggers(LaserTriggerBase):
-    def __init__(self, model):
-        super().__init__(model)
+    Parameters
+    ----------
+    None
 
-    def __del__(self):
-        pass
+    Returns
+    -------
+    bool : bool
+        True or False as to whether the test passed
+    """
+    model = DummyModel()
+    config_control = ConfigurationController(model.configuration)
+    root = tk.Tk()
+    r_pop = WaveformParameterPopupWindow(root, config_control)
+    root.update()
+    time.sleep(3)
+    bool = isinstance(r_pop, WaveformParameterPopupWindow)
+    root.destroy()
 
-    def enable_low_resolution_laser(self):
-        """
-        # Evaluates the experiment configuration in the model for the resolution mode.
-        # Triggers the DAQ to select the correct laser path.
-        """
-        self.switching_state = False
-        logger.debug("Low Resolution Laser Path Enabled")
-
-    def enable_high_resolution_laser(self):
-        """
-        # Evaluates the experiment configuration in the model for the resolution mode.
-        # Triggers the DAQ to select the correct laser path.
-        """
-        self.switching_state = True
-        logger.debug("High Resolution Laser Path Enabled")
-
-    def trigger_digital_laser(self, current_laser_index):
-        self.turn_off_lasers()
-        pass
-
-    def turn_off_lasers(self):
-        pass
-
-    def set_laser_analog_voltage(self, current_laser_index, current_laser_intensity):
-        """
-        # Sets the constant voltage on the DAQ according to the laser index and intensity, which is a percentage.
-        """
-        pass
+    assert bool

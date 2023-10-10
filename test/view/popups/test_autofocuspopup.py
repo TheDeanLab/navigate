@@ -1,10 +1,9 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -31,14 +30,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import pytest
+# Standard Library Imports
 import tkinter as tk
-from aslm.view.main_application_window import MainApp
+import time
 
-@pytest.mark.skip("_tkinter.TclError: image \"pyimage43\" doesn't exist")
-def test_mainapp():
+# Third Party Imports
+
+# Local Imports
+from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
+
+
+def test_autofocuspopup():
     """
-    Tests that the main application and all its widgets gets created and does not
+    Tests that the autofocus popup and all its widgets gets created and does not
     throw any exceptions. Test will fail if any exceptions.
 
     Parameters
@@ -51,9 +55,9 @@ def test_mainapp():
         True or False as to whether the test passed
     """
     root = tk.Tk()
-    main_app = MainApp(root)
+    auto_pop = AutofocusPopup(root)
     root.update()
-    bool = isinstance(main_app, MainApp)
+    time.sleep(3)
+    bool = isinstance(auto_pop, AutofocusPopup)
     root.destroy()
-
     assert bool

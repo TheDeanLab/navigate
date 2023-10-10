@@ -56,8 +56,12 @@ from aslm.model.features.common_features import (
     LoopByCount,
     ConProAcquisition,  # noqa
     StackPause,
-    MoveToNextPositionInMultiPostionTable,
+    MoveToNextPositionInMultiPositionTable,
     WaitToContinue,
+)
+from aslm.model.features.remove_empty_tiles import (
+    DetectTissueInStackAndRecord,
+    RemoveEmptyPositions,
 )
 from aslm.model.features.feature_container import load_features
 from aslm.model.features.restful_features import IlastikSegmentation
@@ -65,6 +69,8 @@ from aslm.model.features.volume_search import VolumeSearch
 from aslm.model.features.feature_related_functions import (
     convert_str_to_feature_list,
     convert_feature_list_to_str,
+    SharedList,
+    load_dynamic_parameter_functions,
 )
 from aslm.log_files.log_functions import log_setup
 from aslm.tools.common_dict_tools import update_stage_dict
@@ -142,7 +148,6 @@ class Model:
         self.total_image_count = None
         self.current_exposure_time = 0  # milliseconds
         self.pre_exposure_time = 0  # milliseconds
-        self.camera_line_interval = 9.7e-6  # s
         self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
         self.start_time = None
         self.data_buffer = None
@@ -242,10 +247,11 @@ class Model:
 
         self.feature_list.append(
             [
-                # {"name": MoveToNextPositionInMultiPostionTable},
+                # {"name": MoveToNextPositionInMultiPositionTable},
                 # {"name": CalculateFocusRange},
+                {"name": PrepareNextChannel},
                 (
-                    {"name": MoveToNextPositionInMultiPostionTable},
+                    {"name": MoveToNextPositionInMultiPositionTable},
                     {"name": Autofocus},
                     {
                         "name": ZStackAcquisition,
@@ -259,7 +265,31 @@ class Model:
                         "name": LoopByCount,
                         "args": ("experiment.MicroscopeState.multiposition_count",),
                     },
-                )
+                ),
+            ]
+        )
+
+        records = SharedList([], "records")
+        self.feature_list.append(
+            [
+                {"name": PrepareNextChannel},
+                (
+                    {"name": MoveToNextPositionInMultiPositionTable},
+                    # {"name": CalculateFocusRange},
+                    {
+                        "name": DetectTissueInStackAndRecord,
+                        "args": (
+                            5,
+                            0.75,
+                            records,
+                        ),
+                    },
+                    {
+                        "name": LoopByCount,
+                        "args": ("experiment.MicroscopeState.multiposition_count",),
+                    },
+                ),
+                {"name": RemoveEmptyPositions, "args": (records,)},
             ]
         )
 
@@ -441,6 +471,8 @@ class Model:
             self.is_save = self.configuration["experiment"]["MicroscopeState"][
                 "is_save"
             ]
+
+            # Calculate waveforms, turn on lasers, etc.
             self.prepare_acquisition()
 
             # load features
@@ -580,6 +612,10 @@ class Model:
                         )
 
                     self.addon_feature = self.feature_list[args[0] - 1]
+                    load_dynamic_parameter_functions(
+                        self.addon_feature,
+                        f"{get_aslm_path()}/feature_lists/feature_parameter_setting",
+                    )
                     self.signal_container, self.data_container = load_features(
                         self, self.addon_feature
                     )
@@ -612,6 +648,7 @@ class Model:
             """
             self.logger.info("ASLM Model - Stopping with stop command.")
             self.stop_acquisition = True
+
             if hasattr(self, "signal_container"):
                 self.signal_container.end_flag = True
             if self.imaging_mode == "ConstantVelocityAcquisition":
@@ -620,8 +657,8 @@ class Model:
                 self.signal_thread.join()
             if self.data_thread:
                 self.data_thread.join()
-            else:
-                self.end_acquisition()
+
+            self.end_acquisition()
             self.stop_stage()
 
         elif command == "terminate":
@@ -896,6 +933,7 @@ class Model:
 
         # Run the acquisition
         try:
+            self.active_microscope.turn_on_laser()
             self.active_microscope.daq.run_acquisition()
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()
@@ -904,6 +942,9 @@ class Model:
                 self.active_microscope.current_exposure_time,
             )
             self.active_microscope.daq.run_acquisition()
+        finally:
+            # Ensure the laser is turned off
+            self.active_microscope.turn_off_lasers()
 
         if hasattr(self, "signal_container"):
             self.signal_container.run(wait_response=True)
@@ -994,6 +1035,30 @@ class Model:
             self.logger.debug(f"{self.active_microscope_name} - {e}")
 
         self.active_microscope.ask_stage_for_position = True
+
+    def get_camera_line_interval_and_exposure_time(
+        self, exposure_time, number_of_pixel
+    ):
+        """Get camera line interval time and light sheet exposure time
+
+        Parameters
+        ----------
+        exposure_time : float
+            camera global exposure time
+        number_of_pixel: int
+            number of pixel in light sheet mode
+
+        Returns
+        -------
+        exposure_time : float
+            Light-sheet mode exposure time (ms).
+        camera_line_interval : float
+            line interval duration (s).
+
+        """
+        return self.active_microscope.camera.calculate_light_sheet_exposure_time(
+            exposure_time, number_of_pixel
+        )
 
     def load_images(self, filenames=None):
         """Load/Unload images to the Synthetic Camera
@@ -1153,7 +1218,8 @@ class Model:
         feature_list_files = [
             temp
             for temp in os.listdir(feature_lists_path)
-            if temp[temp.rindex(".") :] in (".yml", ".yaml")
+            if (temp.endswith(".yml") or temp.endswith(".yaml"))
+            and os.path.isfile(os.path.join(feature_lists_path, temp))
         ]
         for item in feature_list_files:
             if item == "__sequence.yml":
@@ -1201,8 +1267,8 @@ class Model:
         idx: int
             index of feature list
 
-        Return
-        ------
+        Returns
+        -------
         feature_list_str: str
             "" if not exist
             string of the feature list

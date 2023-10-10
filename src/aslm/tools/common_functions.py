@@ -118,9 +118,12 @@ def load_module_from_file(module_name, file_path):
     -------
     module: class of module
     """
-    spec = importlib.util.spec_from_file_location(module_name, file_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    try:
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    except ModuleNotFoundError:
+        return None
     return module
 
 class VariableWithLock:

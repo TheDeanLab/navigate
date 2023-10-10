@@ -235,9 +235,10 @@ class TigerController:
         self.safe_to_write.set()
 
         response = response.decode(encoding="ascii")
-
+        # print(response)
         # Remove leading and trailing empty spaces
         self.report_to_console(f"Received Response: {response.strip()}")
+        # print(f"Received Response: {response.strip()}")
         if response.startswith(":N"):
             raise TigerException(response)
 
@@ -265,8 +266,12 @@ class TigerController:
 
     def move_axis(self, axis: str, distance: float) -> None:
         """Move the stage with an absolute move on one axis"""
+        print("move axis tiger controller")
+        print(f"MOVE {axis}={round(distance, 6)}\r")
         self.send_command(f"MOVE {axis}={round(distance, 6)}\r")
+        print("command sent")
         self.read_response()
+        # print(f"response = {self.read_response()}")
 
     def set_max_speed(self, axis: str, speed: float) -> None:
         """Set the speed on a specific axis. Speed is in mm/s."""

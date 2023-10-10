@@ -160,7 +160,7 @@ class CVATTL:
         self.current_exposure_time = current_expsure_time
         self.readout_time = readout_time
         print("sweep time calculated")
-        scaling_factor = 1.05
+        scaling_factor = 1
         print("*** current sweep time before scaling:", current_sweep_time)
 
         # Provide just a bit of breathing room for the sweep time...
@@ -230,6 +230,9 @@ class CVATTL:
             self.model.configuration[
                 "experiment"]["MicroscopeState"]["number_z_steps"])
         
+        self.start_position_um = self.start_position*1000
+        self.stop_position_um = self.stop_position*1000
+        
         logger.info(f"*** z start position: {self.start_position}")
         logger.info(f"*** z end position: {self.stop_position}")
         logger.info(f"*** Expected number of steps: {self.number_z_steps}")
@@ -237,9 +240,11 @@ class CVATTL:
         print(f"Current Position = {pos}")
         print(f"Start position = {self.start_position*1000}")
         # print(f"Stage position before scan = {pos}")
-        buffer = 1
+        buffer = 3
+        print(f"stage buffer = {buffer}")
         stage_position_before_scan = ((self.start_position*1000)-buffer)
         self.stage_position_before_scan = (stage_position_before_scan)
+        print(f"stage_position_before_scan = {self.stage_position_before_scan}")
         logger.info(f"stage_position_before_scan = {self.stage_position_before_scan}")
         # move to start position:
         self.asi_stage.move_axis_absolute(self.axis,self.stage_position_before_scan, wait_until_done=True)
@@ -247,7 +252,9 @@ class CVATTL:
         self.asi_stage.wait_until_complete(self.axis)
         print("Stage wait until complete completed")
         posw = self.asi_stage.get_axis_position(self.axis)
-        print(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+        self.asi_stage.wait_until_complete(self.axis)
+        print("Stage wait until complete completed")
+        print(f"Current Position Before Scan = {self.stage_position_before_scan}, Current Position Before Scan: {posw}, Start position = {self.start_position*1000}")
         logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
 
         # print(f"Start position = {self.start_position*1000}")
@@ -284,11 +291,19 @@ class CVATTL:
         logger.info(f"*** Expected stage velocity, (mm/s): {expected_speed}")
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
 
+        actual_mechanical_step_size_mm = stage_velocity * self.current_sweep_time
+        self.actual_mechanical_step_size_um = actual_mechanical_step_size_mm * 1000
+        # self.desired_mechanical_step_size_mm = desired_mechanical_step_size_mm
+        new_z_steps = np.floor(
+            abs(self.stop_position_um - self.start_position_um) / self.actual_mechanical_step_size_um)
+        
+
         # expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
-        expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
+        expected_frames_v1 = np.ceil(((new_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
         expected_frames = int(np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time))
         print(f"*** Expected Frames V1:{expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
+        print(f"*** new_z_steps = {new_z_steps}")
         logger.info(f"*** Expected Frames: {expected_frames}")
         self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(np.ceil(int(expected_frames)/2))
@@ -499,10 +514,19 @@ class CVATTL:
             print(f"channel after in update channel = {self.channels}")
             print(f"channel before in update channel list = {self.current_channel_in_list}")
             # self.model.active_microscope.prepare_next_channel()
+            self.asi_stage.wait_until_complete(self.axis)
+            print("Stage wait until complete completed")
+            
             pos1 = self.asi_stage.get_axis_position(self.axis)
+            print("get position stage")
+            self.asi_stage.wait_until_complete(self.axis)
+            print("Stage wait until complete completed")
+
             print(f"Current Position Before move to start position = {pos1}")
             self.asi_stage.set_speed(percent=0.7)
             print("Stage speed set")
+            self.asi_stage.wait_until_complete(self.axis)
+            print("Stage wait until complete completed")
 
             # self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
             # print("stage moved to original position")
@@ -514,14 +538,21 @@ class CVATTL:
 
             self.asi_stage.wait_until_complete(self.axis)
             print("Stage wait until complete completed")
+
             print("stage moved to start position")
             posw = self.asi_stage.get_axis_position(self.axis)
-            print(f"Current Position update channel = {posw}")
-            print(f"Start position channel = {self.start_position*1000}")
-
+            
+            self.asi_stage.wait_until_complete(self.axis)
+            print("Stage wait until complete completed after update scan")
+            print(f"Position after stage movement = {posw}, Start position before scan: {self.stage_position_before_scan}, Start Position: {self.start_position_um}")
+            # print(f"Start position channel = {self.start_position*1000}")
             # self.model.active_microscope.current_channel = 0
             self.asi_stage.set_speed(percent=self.percent_speed)
             print("original stage speed set")
+
+            self.asi_stage.wait_until_complete(self.axis)
+            print("Stage wait until complete completed after update scan")
+            
             
             print(f"current channel = {self.model.active_microscope.current_channel}")
             self.model.active_microscope.prepare_next_channel()
@@ -583,10 +614,12 @@ class CVATTL:
             f"self.model.active_microscope.current_channel = {self.model.active_microscope.current_channel})")
         self.model.active_microscope.daq.external_trigger = None
         print("external trigger set to none")
+        self.model.active_microscope.daq.set_external_trigger(None)
+        print("external trigger set to none v2")
         self.model.active_microscope.prepare_next_channel()
         print("clean up channel prepared")
-        self.model.active_microscope.daq.set_external_trigger()
-        print("external trigger set to none v2")
+        # self.model.active_microscope.daq.set_external_trigger()
+        # print("external trigger set to none v2")
 
     def pre_data_func(self):
         # self.received_frames = 
@@ -627,7 +660,7 @@ class CVATTL:
             # self.end_acquisition = self.received_frames >= self.expected_frames
             # self.received_frames_v2 = self.received_frames + 1
         self.end_acquisition = self.received_frames >= self.total_frames
-        print(f"end acquistion statement = {self.end_acquisition}")
+        # print(f"end acquistion statement = {self.end_acquisition}")
             # print(f"end acquistion in if statement = {self.end_acquisition}")
         # If channel is ended, but there are more channels to go, return False
         # If channel is ended and this was the last channel, return True  

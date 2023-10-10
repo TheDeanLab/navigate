@@ -491,7 +491,7 @@ class Microscope:
                 sweep_time += duty_cycle_wait_duration
 
                 exposure_times[channel_key] = exposure_time
-                sweep_times[channel_key] = sweep_time
+                sweep_times[channel_key] = sweep_time * 1.05
 
         return exposure_times, sweep_times
 

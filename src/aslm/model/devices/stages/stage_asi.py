@@ -307,7 +307,9 @@ class ASIStage(StageBase):
                 self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 1000)
             else:
                 # The 10 is to account for the ASI units, 1/10 of a micron
+                print("stage moving function called")
                 self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
+                print("stage moved")
 
         except TigerException as e:
             print(
@@ -568,6 +570,7 @@ class ASIStage(StageBase):
                 print(f"Current Position:",{tempvar2})
                 time.sleep(0.1)
         except TigerException as e:
+            print(f"ASI Stage Exception {e}")
             logger.exception(f"ASI Stage Exception {e}")
             return False
         return True

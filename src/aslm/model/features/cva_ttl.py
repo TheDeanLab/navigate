@@ -240,7 +240,7 @@ class CVATTL:
         print(f"Current Position = {pos}")
         print(f"Start position = {self.start_position*1000}")
         # print(f"Stage position before scan = {pos}")
-        buffer = 3
+        buffer = 1
         print(f"stage buffer = {buffer}")
         stage_position_before_scan = ((self.start_position*1000)-buffer)
         self.stage_position_before_scan = (stage_position_before_scan)
@@ -335,8 +335,8 @@ class CVATTL:
         self.model.active_microscope.prepare_next_channel()
         # print("microscope channel prepared")
         print("channel prepared after model")
-        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
-        # print(f"external trigger set to {self.model.active_microscope.daq.external_trigger}")
+        self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
+        print(f"external trigger set to {self.model.active_microscope.daq.external_trigger}")
 
         # self.model.active_microscope.current_channel = 0
         

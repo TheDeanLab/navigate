@@ -256,6 +256,30 @@ class CVATTL:
         print("Stage wait until complete completed")
         print(f"Current Position Before Scan = {self.stage_position_before_scan}, Current Position Before Scan: {posw}, Start position = {self.start_position*1000}")
         logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+        self.start_position_um = self.start_position*1000
+        counter = 0
+        if posw > self.start_position_um:
+            print("current position greater than start position")
+            while posw > self.start_position_um:
+                print(f"in while loop {counter} times")
+                buffer =+ 0.1
+                stage_position_before_scan_v2 = ((self.start_position_um)-buffer)
+                pos = self.asi_stage.get_axis_position(self.axis)
+                print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+                self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+                print("stage moved to start position before scan")
+                self.asi_stage.wait_until_complete(self.axis)
+                print("Stage wait until complete completed")
+                posw = self.asi_stage.get_axis_position(self.axis)
+                self.asi_stage.wait_until_complete(self.axis)
+                print("Stage wait until complete completed")
+                print(f"Current Position Before Scan = {stage_position_before_scan_v2}, Current Position Before Scan: {posw}, Start position = {self.start_position*1000}")
+                logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+                counter =+ 1
+        
+            
+
+
 
         # print(f"Start position = {self.start_position*1000}")
 
@@ -437,6 +461,11 @@ class CVATTL:
             if self.stack_cycling_mode == "per_stack":
                 print("per stack if statment called")
                 print(f"channel list: {self.current_channel_in_list}")
+                # if self.current_channel_in_list == 0:
+                #     print(f"in if channel list = 0 statement, channel = {self.current_channel_in_list}")
+                #     # self.cleanup()
+                #     # print("clean up finished")
+                #     return True
                 self.update_channel()
                 print("if statement update channel finished")
                 # if run through all the channels, move to next position
@@ -547,6 +576,13 @@ class CVATTL:
             print(f"Position after stage movement = {posw}, Start position before scan: {self.stage_position_before_scan}, Start Position: {self.start_position_um}")
             # print(f"Start position channel = {self.start_position*1000}")
             # self.model.active_microscope.current_channel = 0
+            
+            if self.current_channel_in_list == 0:
+                print("if current channel is zero statement")
+                return True            
+            
+            print("after return zero statement")
+
             self.asi_stage.set_speed(percent=self.percent_speed)
             print("original stage speed set")
 
@@ -601,11 +637,15 @@ class CVATTL:
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {pos}")
         print(f"start position = {self.start_position*1000}")
+        self.asi_stage.wait_until_complete(self.axis)
+        print("Stage wait until complete completed after update scan")
+            
 
         # self.asi_stage.stop_scan()
         # print("stage stop scan")
-
+        print("DAQ STOP ACQUISITION CALLED CLEAN UP")
         self.model.active_microscope.daq.stop_acquisition()
+        print("DAQ STOP ACQUISITION FINISHED CLEAN UP")
         self.model.configuration[
             "experiment"]["MicroscopeState"]["waveform_template"] = "Default"
         print("config set to default")
@@ -614,10 +654,11 @@ class CVATTL:
             f"self.model.active_microscope.current_channel = {self.model.active_microscope.current_channel})")
         self.model.active_microscope.daq.external_trigger = None
         print("external trigger set to none")
-        self.model.active_microscope.daq.set_external_trigger(None)
+        print("DAQ set external trigger to none called")
+        # self.model.active_microscope.daq.set_external_trigger(None)
         print("external trigger set to none v2")
-        self.model.active_microscope.prepare_next_channel()
-        print("clean up channel prepared")
+        # self.model.active_microscope.prepare_next_channel()
+        # print("clean up channel prepared")
         # self.model.active_microscope.daq.set_external_trigger()
         # print("external trigger set to none v2")
 

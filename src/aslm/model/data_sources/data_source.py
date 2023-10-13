@@ -99,7 +99,7 @@ class DataSource:
 
         Methods
         -------
-        size()
+        nbytes()
             Return the size of the data source in bytes.
         mode()
             Return the mode of the data source.
@@ -140,7 +140,7 @@ class DataSource:
         self._current_frame = 0
 
     @property
-    def size(self) -> int:
+    def nbytes(self) -> int:
         """Getter for the size of this data source in bytes."
 
         Does not account for pyramidal data sources.

@@ -164,7 +164,7 @@ class BigDataViewerDataSource(DataSource):
         return self._shapes
 
     @property
-    def size(self) -> int:
+    def nbytes(self) -> int:
         """Getter for image size.
 
         Size in bytes. Overrides base class. Accounts for subdivisions.

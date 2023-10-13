@@ -561,7 +561,7 @@ class WaveformPopupController(GUIController):
             light_sheet_exposure_time,
             _,
         ) = self.parent_controller.model.get_camera_line_interval_and_exposure_time(
-            exposure_time, int(number_of_pixels)
+            exposure_time, int(number_of_pixels + 1)
         )
 
         frequency = 2 / light_sheet_exposure_time * exposure_time

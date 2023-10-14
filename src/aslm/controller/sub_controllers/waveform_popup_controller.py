@@ -548,6 +548,10 @@ class WaveformPopupController(GUIController):
             # If we are not in the light-sheet mode, widget returns an empty string.
             return
 
+        # TODO: Worth noting that this doesn't matter because it cancels out in the
+        # frequency bit, but this is often not the right value. The framerate widget
+        # doesn't update unless you change the exposure time in the channel settings.
+        # It launches as a default of 100 ms every time.
         exposure_time = (
             self.parent_controller.camera_setting_controller.framerate_widgets[
                 "exposure_time"

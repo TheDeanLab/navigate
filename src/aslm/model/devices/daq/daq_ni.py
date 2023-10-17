@@ -542,12 +542,30 @@ class NIDAQ(DAQBase):
         """
         try:
             print("try stop acquisition")
-            print(f"self.camera_trigger_task = {self.camera_trigger_task}")
-            self.camera_trigger_task.stop()
-            print("camera trigger task stopped")
-            self.camera_trigger_task.close()
-            print("camera trigger task closed")
+            print("try stop acquisition print statement v2")
+            # print(f"self.camera_trigger_task = {self.camera_trigger_task}")
+            
+            if self.trigger_mode == "self-trigger":
+                self.camera_trigger_task.stop()
+                print("camera trigger task stopped")
+                self.camera_trigger_task.close()
+                print("camera trigger task closed")
 
+            if self.trigger_mode == "external-trigger":
+                "print stop camera task external trigger"
+                if self.camera_trigger_task:
+                    "external trigger camera task exists"
+                    self.camera_trigger_task.stop()
+                    print("camera trigger task stopped")
+                    self.camera_trigger_task.close()
+                    print("camera trigger task closed")
+                    self.external_trigger = None
+                    print("set external trigger to None")
+                else:
+                    print("no camera task")
+                    self.external_trigger = None
+                    print("no camera task set external trigger to none")
+            
             if self.trigger_mode == "self-trigger":
                 print("if mode self trigger master trigger task stopped")
                 self.master_trigger_task.stop()

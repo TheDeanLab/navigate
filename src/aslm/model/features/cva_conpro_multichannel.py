@@ -305,7 +305,7 @@ class CVACONPROMULTICHANNEL:
         self.current_z_position_um = self.start_position_um
         self.end_signal_temp = 0
 
-        # self.asi_stage.start_scan(self.axis)
+        self.asi_stage.start_scan(self.axis)
 
     def main_signal_function(self):
         print("main function called")

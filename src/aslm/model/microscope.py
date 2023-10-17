@@ -463,7 +463,7 @@ class Microscope:
         for channel_key in microscope_state["channels"].keys():
             channel = microscope_state["channels"][channel_key]
             if channel["is_selected"] is True:
-                exposure_time = float(channel["camera_exposure_time"]) / 1000
+                exposure_time = (float(channel["camera_exposure_time"]) / 1000)
 
                 sweep_time = (
                     exposure_time
@@ -491,7 +491,7 @@ class Microscope:
                 sweep_time += duty_cycle_wait_duration
 
                 exposure_times[channel_key] = exposure_time
-                sweep_times[channel_key] = sweep_time * 1.05
+                sweep_times[channel_key] = sweep_time
 
         return exposure_times, sweep_times
 

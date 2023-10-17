@@ -267,9 +267,9 @@ class TigerController:
     def move_axis(self, axis: str, distance: float) -> None:
         """Move the stage with an absolute move on one axis"""
         print("move axis tiger controller")
-        print(f"MOVE {axis}={round(distance, 6)}\r")
+        # print(f"MOVE {axis}={round(distance, 6)}\r")
         self.send_command(f"MOVE {axis}={round(distance, 6)}\r")
-        print("command sent")
+        # print("command sent")
         self.read_response()
         # print(f"response = {self.read_response()}")
 

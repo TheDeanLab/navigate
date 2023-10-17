@@ -240,7 +240,7 @@ class CVATTL:
         print(f"Current Position = {pos}")
         print(f"Start position = {self.start_position*1000}")
         # print(f"Stage position before scan = {pos}")
-        buffer = 1
+        buffer = 0.7
         print(f"stage buffer = {buffer}")
         stage_position_before_scan = ((self.start_position*1000)-buffer)
         self.stage_position_before_scan = (stage_position_before_scan)
@@ -254,28 +254,122 @@ class CVATTL:
         posw = self.asi_stage.get_axis_position(self.axis)
         self.asi_stage.wait_until_complete(self.axis)
         print("Stage wait until complete completed")
-        print(f"Current Position Before Scan = {self.stage_position_before_scan}, Current Position Before Scan: {posw}, Start position = {self.start_position*1000}")
+        print(f"Position Before Scan = {self.stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
         logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
         self.start_position_um = self.start_position*1000
-        counter = 0
-        if posw > self.start_position_um:
-            print("current position greater than start position")
-            while posw > self.start_position_um:
-                print(f"in while loop {counter} times")
-                buffer =+ 0.1
-                stage_position_before_scan_v2 = ((self.start_position_um)-buffer)
-                pos = self.asi_stage.get_axis_position(self.axis)
-                print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
-                self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
-                print("stage moved to start position before scan")
-                self.asi_stage.wait_until_complete(self.axis)
-                print("Stage wait until complete completed")
-                posw = self.asi_stage.get_axis_position(self.axis)
-                self.asi_stage.wait_until_complete(self.axis)
-                print("Stage wait until complete completed")
-                print(f"Current Position Before Scan = {stage_position_before_scan_v2}, Current Position Before Scan: {posw}, Start position = {self.start_position*1000}")
-                logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
-                counter =+ 1
+        counter = 0  
+        counter2 = 0
+        tol = 0.3
+        self.tol = tol
+        buffer_new = 0.1
+        print(f"abs(posw - self.stage_position_before_scan) = {abs(posw - self.stage_position_before_scan)}")
+        if abs(posw - self.stage_position_before_scan)>tol:
+            print("current position greater than start position before")
+            while abs(posw - self.stage_position_before_scan)>tol:
+                print("inside while loop")
+                if (posw - self.stage_position_before_scan)<0:
+                    print(f"in if negative loop {counter} times")
+                    buffer_new = 0.1
+                    stage_position_before_scan_v2 = ((self.stage_position_before_scan)-buffer_new)
+                    pos = self.asi_stage.get_axis_position(self.axis)
+                    print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+                    self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+                    print("stage moved to start position before scan")
+                    self.asi_stage.wait_until_complete(self.axis)
+                    print("Stage wait until complete completed")
+                    posw = self.asi_stage.get_axis_position(self.axis)
+                    self.asi_stage.wait_until_complete(self.axis)
+                    print("Stage wait until complete completed")
+                    print(f"Position Before Scan New = {stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+                    logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+                    counter =+ 1
+                elif (posw - self.stage_position_before_scan)>0:   
+                    print(f"in if negative loop {counter} times")
+                    buffer_new = 0.1
+                    stage_position_before_scan_v2 = ((self.stage_position_before_scan)+buffer_new)
+                    pos = self.asi_stage.get_axis_position(self.axis)
+                    print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+                    self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+                    print("stage moved to start position before scan")
+                    self.asi_stage.wait_until_complete(self.axis)
+                    print("Stage wait until complete completed")
+                    posw = self.asi_stage.get_axis_position(self.axis)
+                    self.asi_stage.wait_until_complete(self.axis)
+                    print("Stage wait until complete completed")
+                    print(f"Position Before Scan New = {stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+                    logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+                    counter =+ 1
+                
+                
+                # if (posw - self.stage_position_before_scan)<0:
+        #         elif (posw - self.stage_position_before_scan)>0:
+        #              print(f"in while loop {counter} times")
+        #              stage_position_before_scan_v2 = ((posw)+buffer_new)
+        #              pos = self.asi_stage.get_axis_position(self.axis)
+        #              print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+        #              self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+        #              print("stage moved to start position before scan")
+        #              self.asi_stage.wait_until_complete(self.axis)
+        #              print("Stage wait until complete completed")
+        #              posw = self.asi_stage.get_axis_position(self.axis)
+        #              self.asi_stage.wait_until_complete(self.axis)
+        #              print("Stage wait until complete completed")
+        #              print(f"Position Before Scan New = {stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+        #              logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+        #              counter =+ 1 
+
+
+
+        # if abs(posw - self.stage_position_before_scan)>tol:
+        #     print("current position greater than start position before")
+        #     while abs(posw - self.stage_position_before_scan)>tol:
+        #         if (posw - self.stage_position_before_scan)<0:
+        #             print(f"in while loop {counter} times")
+        #             # buffer_new =+ 0.1
+        #             stage_position_before_scan_v2 = ((posw)-buffer_new)
+        #             pos = self.asi_stage.get_axis_position(self.axis)
+        #             print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+        #             self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+        #             print("stage moved to start position before scan")
+        #             self.asi_stage.wait_until_complete(self.axis)
+        #             print("Stage wait until complete completed")
+        #             posw = self.asi_stage.get_axis_position(self.axis)
+        #             self.asi_stage.wait_until_complete(self.axis)
+        #             print("Stage wait until complete completed")
+        #             print(f"Position Before Scan New = {stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+        #             logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+        #             counter =+ 1
+        #         elif (posw - self.stage_position_before_scan)>0:
+        #              print(f"in while loop {counter} times")
+        #              stage_position_before_scan_v2 = ((posw)+buffer_new)
+        #              pos = self.asi_stage.get_axis_position(self.axis)
+        #              print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+        #              self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+        #              print("stage moved to start position before scan")
+        #              self.asi_stage.wait_until_complete(self.axis)
+        #              print("Stage wait until complete completed")
+        #              posw = self.asi_stage.get_axis_position(self.axis)
+        #              self.asi_stage.wait_until_complete(self.axis)
+        #              print("Stage wait until complete completed")
+        #              print(f"Position Before Scan New = {stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+        #              logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+        #              counter =+ 1 
+                # while abs(posw-self.start_position)>0.5:
+                #     buffer =+ 0.1
+                #     stage_position_before_scan_v2 = ((self.start_position_um)+buffer)
+                #     pos = self.asi_stage.get_axis_position(self.axis)
+                #     print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+                #     self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+                #     print("stage moved to start position before scan")
+                #     self.asi_stage.wait_until_complete(self.axis)
+                #     print("Stage wait until complete completed")
+                #     posw = self.asi_stage.get_axis_position(self.axis)
+                #     self.asi_stage.wait_until_complete(self.axis)
+                #     print("Stage wait until complete completed")
+                #     print(f"Current Position Before Scan = {stage_position_before_scan_v2}, Current Position Before Scan: {posw}, Start position = {self.start_position*1000}")
+                #     logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+                #     counter2 =+ 1
+
         
             
 
@@ -583,12 +677,57 @@ class CVATTL:
             
             print("after return zero statement")
 
+            # self.asi_stage.set_speed(percent=self.percent_speed)
+            # print("original stage speed set")
+
+            # self.asi_stage.wait_until_complete(self.axis)
+            # print("Stage wait until complete completed after update scan")
+            
+            counter = 0
+            tol = self.tol
+            if abs(posw - self.stage_position_before_scan)>tol:
+                print("current position greater than start position before")
+                while abs(posw - self.stage_position_before_scan)>tol:
+                    print("inside while loop")
+                    if (posw - self.stage_position_before_scan)<0:
+                        print(f"in if negative loop {counter} times")
+                        buffer_new = 0.1
+                        stage_position_before_scan_v2 = ((self.stage_position_before_scan)-buffer_new)
+                        pos = self.asi_stage.get_axis_position(self.axis)
+                        print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+                        self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+                        print("stage moved to start position before scan")
+                        self.asi_stage.wait_until_complete(self.axis)
+                        print("Stage wait until complete completed")
+                        posw = self.asi_stage.get_axis_position(self.axis)
+                        self.asi_stage.wait_until_complete(self.axis)
+                        print("Stage wait until complete completed")
+                        print(f"Position Before Scan New = {self.stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+                        logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+                        counter =+ 1
+                    elif (posw - self.stage_position_before_scan)>0:   
+                        print(f"in if negative loop {counter} times")
+                        buffer_new = 0.1
+                        stage_position_before_scan_v2 = ((self.stage_position_before_scan)+buffer_new)
+                        pos = self.asi_stage.get_axis_position(self.axis)
+                        print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+                        self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+                        print("stage moved to start position before scan")
+                        self.asi_stage.wait_until_complete(self.axis)
+                        print("Stage wait until complete completed")
+                        posw = self.asi_stage.get_axis_position(self.axis)
+                        self.asi_stage.wait_until_complete(self.axis)
+                        print("Stage wait until complete completed")
+                        print(f"Position Before Scan New = {self.stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+                        logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+                        counter =+ 1
+                    
             self.asi_stage.set_speed(percent=self.percent_speed)
             print("original stage speed set")
 
             self.asi_stage.wait_until_complete(self.axis)
             print("Stage wait until complete completed after update scan")
-            
+
             
             print(f"current channel = {self.model.active_microscope.current_channel}")
             self.model.active_microscope.prepare_next_channel()
@@ -684,7 +823,12 @@ class CVATTL:
         # self.received_frames_v2 += self.received_frames
         # self.received_frames_v2 = 0
         expected_channel = self.expected_frames * (self.end_signal_temp + 1)
+        time_total = (self.total_frames * self.current_sweep_time)/60
+        time_per_channel = (expected_channel * self.current_sweep_time)/60
+        time_remaining_total = round(((self.total_frames - self.received_frames) * self.current_sweep_time)/(60),2)
+        time_remaining_per_channel = round(((expected_channel - self.received_frames) * self.current_sweep_time)/(60),2)
         print(f"Received: {self.received_frames} Per Channel: {expected_channel} Expected Total: {self.total_frames}")
+        print(f"time remaining per channel min: {time_remaining_per_channel}, time remaining total min: {time_remaining_total}")
         logger.info(f"Received: {self.received_frames} Per Channel: {expected_channel} Expected Total: {self.total_frames}")
         # print(f"Received V2: {self.received_frames_v2} Expected: {self.expected_frames}")
         print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")

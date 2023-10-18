@@ -240,7 +240,7 @@ class CVATTL:
         print(f"Current Position = {pos}")
         print(f"Start position = {self.start_position*1000}")
         # print(f"Stage position before scan = {pos}")
-        buffer = 0.7
+        buffer = 0.5
         print(f"stage buffer = {buffer}")
         stage_position_before_scan = ((self.start_position*1000)-buffer)
         self.stage_position_before_scan = (stage_position_before_scan)

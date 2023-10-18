@@ -102,10 +102,15 @@ class BigDataViewerDataSource(DataSource):
         elif self.__file_type == "n5":
             self.setup = self._setup_n5
             self.ds_name = self._n5_ds_name
-        super().__init__(file_name, mode)
 
         # self._current_frame = 0
         self.metadata = BigDataViewerMetadata()
+
+        super().__init__(file_name, mode)
+
+    def __getitem__(self, keys):
+        # slicing is xyczt
+        pass
 
     @property
     def resolutions(self) -> npt.ArrayLike:
@@ -288,6 +293,9 @@ class BigDataViewerDataSource(DataSource):
             self.image = h5py.File(self.file_name, "r")
         elif self.__file_type == "n5":
             self.image = zarr.N5Store(self.file_name)
+        xml_fn = os.path.splitext(self.file_name)[0] + ".xml"
+        self.metadata.parse_xml(xml_fn)
+        self.get_shape_from_metadata()
 
     def _setup_h5(self):
         """Set up the HDF5 file.

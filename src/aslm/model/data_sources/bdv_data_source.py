@@ -143,6 +143,8 @@ class BigDataViewerDataSource(DataSource):
                     # Only one key
                     val = keys
                 if isinstance(val, slice):
+                    if val.start is None and val.stop is None and val.step is None:
+                        return range(self.shape[pos])
                     return range(10**10)[val]
                 elif isinstance(val, int):
                     return range(val, val + 1)
@@ -173,11 +175,16 @@ class BigDataViewerDataSource(DataSource):
         if length > 5:
             val = keys[5]
             if isinstance(val, slice):
+                if val.start is None and val.stop is None and val.step is None:
+                    ps = range(self.positions)
                 ps = range(10**10)[val]
             elif isinstance(val, int):
                 ps = range(val, val + 1)
         else:
             ps = range(self.positions)
+
+        print(self.shape_c, self.shape_t, self.positions)
+        print(cs, ts, ps)
 
         if len(cs) == 1 and len(ts) == 1 and len(ps) == 1:
             return self.get_slice(xs, ys, cs[0], zs, ts[0], ps[0])

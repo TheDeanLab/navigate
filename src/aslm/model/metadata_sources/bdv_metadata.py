@@ -245,15 +245,19 @@ class BigDataViewerMetadata(XMLMetadata):
         ]
 
         # Get channels, one per setup
-        channels = [
-            x.text
-            for x in root.findall(
-                "SequenceDescription/ViewSetups/ViewSetup/attributes/channel"
+        channels = list(
+            set(
+                [
+                    x.text
+                    for x in root.findall(
+                        "SequenceDescription/ViewSetups/ViewSetup/attributes/channel"
+                    )
+                ]
             )
-        ]
+        )
 
         # Get number of positions, one per setup
-        positions = len(
+        self.positions = len(
             root.findall("SequenceDescription/ViewSetups/ViewSetup/attributes/tile")
         )
 
@@ -299,7 +303,7 @@ class BigDataViewerMetadata(XMLMetadata):
         self.dx, self.dy, self.dz = np.array(voxel_sizes).min(
             0
         )  # default to finest sampling
-        self._multiposition = positions > 1
+        self._multiposition = self.positions > 1
         self.shape_x, self.shape_y, self.shape_z = np.array(sizes).max(
             0
         )  # default to largest size captured

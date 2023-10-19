@@ -67,7 +67,7 @@ class TextArrayTestCase(unittest.TestCase):
         """
         text = "ASLM"
         text_output = text_array(text=text)
-        font = ImageFont.load_default()  # match font size in text_ouput
+        font = ImageFont.load_default()  # match font size in text_array()
         height = np.shape(text_output)[0]
         width = np.shape(text_output)[1]
         expected_width, expected_height = font.getsize(text)

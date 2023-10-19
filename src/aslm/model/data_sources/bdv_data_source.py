@@ -109,8 +109,118 @@ class BigDataViewerDataSource(DataSource):
         super().__init__(file_name, mode)
 
     def __getitem__(self, keys):
-        # slicing is xyczt
-        pass
+        """
+        Magic method to get slice requests passed by, e.g., ds[:,2:3,...].
+        Allows arbitrary slicing of dataset via calls to get_slice().
+
+        Order is xycztps where x, y, z are Cartesian indices, c is channel,
+        t is timepoints, p is positions and s is subdivisions to index along.
+
+        TODO: Add subdivisions.
+        """
+
+        # Check lengths
+        if isinstance(keys, slice) or isinstance(keys, int):
+            length = 1
+        else:
+            length = len(keys)
+        if length < 1:
+            raise IndexError("Too few indices. Indices may be (x, y, c, z, t, p).")
+        elif length > 6:
+            raise IndexError("Too many indices. Indices may be (x, y, c, z, t, p).")
+
+        # Handle "slice the rest"
+        if length > 1 and keys[-1] == Ellipsis:
+            keys = keys[:-2]
+            length -= 1
+
+        def ensure_iter(pos):
+            """Ensure the input is iterable."""
+            if length > pos:
+                try:
+                    val = keys[pos]
+                except TypeError:
+                    # Only one key
+                    val = keys
+                if isinstance(val, slice):
+                    return range(10**10)[val]
+                elif isinstance(val, int):
+                    return range(val, val + 1)
+            else:
+                return range(self.shape[pos])
+
+        def ensure_slice(pos):
+            """Ensure the input is a slice or a single integer."""
+            # TODO: Handle list as input
+            if length > pos:
+                try:
+                    val = keys[pos]
+                except TypeError:
+                    # Only one key
+                    val = keys
+                assert isinstance(val, slice) or isinstance(val, int)
+                return val
+            else:
+                # Default to all values
+                return slice(None, None, None)
+
+        # Get legal indices
+        xs = ensure_slice(0)
+        ys = ensure_slice(1)
+        cs = ensure_iter(2)
+        zs = ensure_slice(3)
+        ts = ensure_iter(4)
+        if length > 5:
+            val = keys[5]
+            if isinstance(val, slice):
+                ps = range(10**10)[val]
+            elif isinstance(val, int):
+                ps = range(val, val + 1)
+        else:
+            ps = range(self.positions)
+
+        if len(cs) == 1 and len(ts) == 1 and len(ps) == 1:
+            return self.get_slice(xs, ys, cs[0], zs, ts[0], ps[0])
+
+        sliced_ds = np.empty(
+            len(ps), len(ts), len(zs), len(cs), len(ys), len(xs), dtype=np.uint16
+        )
+
+        for c in cs:
+            for t in ts:
+                for p in ps:
+                    sliced_ds[p, t, :, c, :, :] = self.get_slice(xs, ys, c, zs, t, p)
+
+        return sliced_ds
+
+    def get_slice(self, x, y, c, z=0, t=0, p=0, subdiv=0):
+        """
+        Get a single slice of the dataset.
+
+        Parameters
+        ----------
+        x : int or slice
+            x indices to grab
+        y : int or slice
+            y indices to grab
+        c : int
+            Single channel
+        z : int or slice
+            z indices to grab
+        t : int
+            Single timepoint
+        p : int
+            Single position
+        subdiv : int
+            Subdivision of the dataset to index along
+
+        Returns
+        -------
+        npt.ArrayLike
+            3D (x, y, z) slice of data set
+        """
+        setup = self.ds_name(t, c, p).replace("???", str(subdiv))
+        return self.image[setup][z, y, x]
 
     @property
     def resolutions(self) -> npt.ArrayLike:

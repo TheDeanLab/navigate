@@ -506,5 +506,6 @@ class BigDataViewerDataSource(DataSource):
             self.__store.close()
         else:
             self.image.close()
-        self.metadata.write_xml(self.file_name, views=self._views)
+        if self.mode != "r":
+            self.metadata.write_xml(self.file_name, views=self._views)
         self._closed = True

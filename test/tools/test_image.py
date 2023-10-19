@@ -35,7 +35,9 @@ import unittest
 
 # Third-Party Imports
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFont
+
+# import pytest
 
 # Local Imports
 from aslm.tools.image import text_array, create_arrow_image
@@ -67,16 +69,15 @@ class TextArrayTestCase(unittest.TestCase):
         """
         text = "ASLM"
         text_output = text_array(text=text)
+        font = ImageFont.load_default()  # match font size in text_array()
         height = np.shape(text_output)[0]
         width = np.shape(text_output)[1]
-        expected_width = ((len(text) * height) / 2) + 2
-        expected_height = 11
+        _, _, expected_width, expected_height = font.getbbox(text)
         assert width == expected_width
         assert height == expected_height
 
 
 class TestCreateArrowImage(unittest.TestCase):
-
     def test_create_arrow_image(self):
         xys = [(50, 50), (150, 50), (200, 100)]
         image = create_arrow_image(xys, direction="right")
@@ -101,7 +102,6 @@ class TestCreateArrowImage(unittest.TestCase):
         self.assertEqual(image3.width, 400)
         self.assertEqual(image3.height, 300)
         assert image == image3
-
 
 
 if __name__ == "__main__":

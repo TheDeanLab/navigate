@@ -52,7 +52,7 @@ def dict_to_xml(d, tag=None, level=0):
     if tag is None:
         tag = list(d.keys())[0]
 
-    xml = "\t" * level + f"<{tag}"
+    xml = "  " * level + f"<{tag}"
     if isinstance(d, dict):
         next_xml = ""
         text = ""
@@ -78,7 +78,8 @@ def dict_to_xml(d, tag=None, level=0):
             if text != "":
                 xml += f"</{tag}>\n"
             else:
-                xml += f"</{tag}>"
+                xml += "  " * level
+                xml += f"</{tag}>\n"
         else:
             xml += "/>\n"
 

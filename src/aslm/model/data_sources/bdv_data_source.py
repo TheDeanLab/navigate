@@ -204,12 +204,14 @@ class BigDataViewerDataSource(DataSource):
             return (sx[1] - sx[0]) / sx[2]
 
         sliced_ds = np.empty(
-            len(ps),
-            len(ts),
-            slice_len(zs, self.shape_z),
-            len(cs),
-            slice_len(ys, self.shape_y),
-            slice_len(xs, self.shape_x),
+            (
+                len(ps),
+                len(ts),
+                slice_len(zs, self.shape_z),
+                len(cs),
+                slice_len(ys, self.shape_y),
+                slice_len(xs, self.shape_x),
+            ),
             dtype=np.uint16,
         )
 

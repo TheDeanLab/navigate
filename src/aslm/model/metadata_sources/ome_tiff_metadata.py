@@ -67,14 +67,14 @@ class OMETIFFMetadata(XMLMetadata):
         }
         if uid is not None:
             # Assume uid is a list passed in the order of the channels
-            if type(uid) != list:
+            if not isinstance(uid, list):
                 uid = [uid]
             ome_dict["UUID"] = "urn:uuid:" + uid[c]
         idx = c + t * self.shape_c
         ome_dict["Image"] = {"ID": f"Image:{idx}"}
         if file_name is not None:
             # Assume file name is a list passed in the order of the channels
-            if type(file_name) != list:
+            if not isinstance(file_name, list):
                 file_name = [file_name]
             ome_dict["Image"]["Name"] = os.path.basename(file_name[c])
         ome_dict["Image"]["Pixels"] = {"ID": f"Pixels:{idx}"}
@@ -138,9 +138,9 @@ class OMETIFFMetadata(XMLMetadata):
 
         if file_name is not None and uid is not None:
             ome_dict["Image"]["Pixels"]["TiffData"] = []
-            if type(file_name) != list:
+            if not isinstance(file_name, list):
                 file_name = [file_name]
-            if type(uid) != list:
+            if not isinstance(uid, list):
                 uid = [uid]
             if len(file_name) == len(uid):
                 # Assume file name is a list passed in the order of the channels

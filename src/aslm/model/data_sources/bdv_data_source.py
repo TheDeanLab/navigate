@@ -135,9 +135,13 @@ class BigDataViewerDataSource(DataSource):
         else:
             length = len(keys)
         if length < 1:
-            raise IndexError("Too few indices. Indices may be (x, y, c, z, t, p).")
-        elif length > 6:
-            raise IndexError("Too many indices. Indices may be (x, y, c, z, t, p).")
+            raise IndexError(
+                "Too few indices. Indices may be (x, y, c, z, t, p, subdiv)."
+            )
+        elif length > 7:
+            raise IndexError(
+                "Too many indices. Indices may be (x, y, c, z, t, p, subdiv)."
+            )
 
         # Handle "slice the rest"
         if length > 1 and keys[-1] == Ellipsis:
@@ -195,8 +199,13 @@ class BigDataViewerDataSource(DataSource):
         else:
             ps = range(self.positions)
 
+        if length > 6 and isinstance(keys[6], int):
+            subdiv = keys[6]
+        else:
+            subdiv = 0
+
         if len(cs) == 1 and len(ts) == 1 and len(ps) == 1:
-            return self.get_slice(xs, ys, cs[0], zs, ts[0], ps[0])
+            return self.get_slice(xs, ys, cs[0], zs, ts[0], ps[0], subdiv)
 
         def slice_len(sl, n):
             """Calculate the length of the slice over an array of size n."""
@@ -218,7 +227,9 @@ class BigDataViewerDataSource(DataSource):
         for c in cs:
             for t in ts:
                 for p in ps:
-                    sliced_ds[p, t, :, c, :, :] = self.get_slice(xs, ys, c, zs, t, p)
+                    sliced_ds[p, t, :, c, :, :] = self.get_slice(
+                        xs, ys, c, zs, t, p, subdiv
+                    )
 
         return sliced_ds
 

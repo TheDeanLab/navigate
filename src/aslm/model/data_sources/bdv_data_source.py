@@ -117,6 +117,16 @@ class BigDataViewerDataSource(DataSource):
         t is timepoints, p is positions and s is subdivisions to index along.
 
         TODO: Add subdivisions.
+
+        Parameters
+        ----------
+        keys : tuple
+            Tuple of indices.
+
+        Returns
+        -------
+        npt.ArrayLike
+            Array of shape (p, t, z, c, y, x)
         """
 
         # Check lengths
@@ -152,7 +162,9 @@ class BigDataViewerDataSource(DataSource):
                 return range(self.shape[pos])
 
         def ensure_slice(pos):
-            """Ensure the input is a slice or a single integer."""
+            """
+            Ensure the input is a slice or a single integer.
+            """
             # TODO: Handle list as input
             if length > pos:
                 try:
@@ -183,14 +195,22 @@ class BigDataViewerDataSource(DataSource):
         else:
             ps = range(self.positions)
 
-        print(self.shape_c, self.shape_t, self.positions)
-        print(cs, ts, ps)
-
         if len(cs) == 1 and len(ts) == 1 and len(ps) == 1:
             return self.get_slice(xs, ys, cs[0], zs, ts[0], ps[0])
 
+        def slice_len(sl, n):
+            """Calculate the length of the slice over an array of size n."""
+            sx = sl.indices(n)
+            return (sx[1] - sx[0]) / sx[2]
+
         sliced_ds = np.empty(
-            len(ps), len(ts), len(zs), len(cs), len(ys), len(xs), dtype=np.uint16
+            len(ps),
+            len(ts),
+            slice_len(zs, self.shape_z),
+            len(cs),
+            slice_len(ys, self.shape_y),
+            slice_len(xs, self.shape_x),
+            dtype=np.uint16,
         )
 
         for c in cs:
@@ -224,7 +244,7 @@ class BigDataViewerDataSource(DataSource):
         Returns
         -------
         npt.ArrayLike
-            3D (x, y, z) slice of data set
+            3D (z, y, x) slice of data set
         """
         setup = self.ds_name(t, c, p).replace("???", str(subdiv))
         return self.image[setup][z, y, x]

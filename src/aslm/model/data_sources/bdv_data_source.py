@@ -201,7 +201,7 @@ class BigDataViewerDataSource(DataSource):
         def slice_len(sl, n):
             """Calculate the length of the slice over an array of size n."""
             sx = sl.indices(n)
-            return (sx[1] - sx[0]) / sx[2]
+            return (sx[1] - sx[0]) // sx[2]
 
         sliced_ds = np.empty(
             (

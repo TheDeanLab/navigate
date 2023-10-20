@@ -193,7 +193,8 @@ class BigDataViewerDataSource(DataSource):
             if isinstance(val, slice):
                 if val.start is None and val.stop is None and val.step is None:
                     ps = range(self.positions)
-                ps = range(10**10)[val]
+                else:
+                    ps = range(10**10)[val]
             elif isinstance(val, int):
                 ps = range(val, val + 1)
         else:
@@ -216,10 +217,10 @@ class BigDataViewerDataSource(DataSource):
             (
                 len(ps),
                 len(ts),
-                slice_len(zs, self.shape_z),
+                slice_len(zs, self.shape_z) // self.resolutions[subdiv][2],
                 len(cs),
-                slice_len(ys, self.shape_y),
-                slice_len(xs, self.shape_x),
+                slice_len(ys, self.shape_y) // self.resolutions[subdiv][1],
+                slice_len(xs, self.shape_x) // self.resolutions[subdiv][0],
             ),
             dtype=np.uint16,
         )

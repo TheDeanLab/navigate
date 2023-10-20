@@ -240,7 +240,13 @@ class CVATTL:
         print(f"Current Position = {pos}")
         print(f"Start position = {self.start_position*1000}")
         # print(f"Stage position before scan = {pos}")
-        buffer = 0.5
+        buffer2 = 5
+        buffer_multiplier = 16
+        if buffer2 >= desired_sampling_um*buffer_multiplier:
+            buffer = buffer2
+        elif buffer2 < desired_sampling_um*buffer_multiplier:
+            buffer = desired_sampling_um*buffer_multiplier
+
         print(f"stage buffer = {buffer}")
         stage_position_before_scan = ((self.start_position*1000)-buffer)
         self.stage_position_before_scan = (stage_position_before_scan)
@@ -263,43 +269,59 @@ class CVATTL:
         self.tol = tol
         buffer_new = 0.1
         print(f"abs(posw - self.stage_position_before_scan) = {abs(posw - self.stage_position_before_scan)}")
+        # if abs(posw - self.start_position*1000):
         if abs(posw - self.stage_position_before_scan)>tol:
             print("current position greater than start position before")
-            while abs(posw - self.stage_position_before_scan)>tol:
-                print("inside while loop")
-                if (posw - self.stage_position_before_scan)<0:
-                    print(f"in if negative loop {counter} times")
-                    buffer_new = 0.1
-                    stage_position_before_scan_v2 = ((self.stage_position_before_scan)-buffer_new)
-                    pos = self.asi_stage.get_axis_position(self.axis)
-                    print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
-                    self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
-                    print("stage moved to start position before scan")
-                    self.asi_stage.wait_until_complete(self.axis)
-                    print("Stage wait until complete completed")
-                    posw = self.asi_stage.get_axis_position(self.axis)
-                    self.asi_stage.wait_until_complete(self.axis)
-                    print("Stage wait until complete completed")
-                    print(f"Position Before Scan New = {stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
-                    logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
-                    counter =+ 1
-                elif (posw - self.stage_position_before_scan)>0:   
-                    print(f"in if negative loop {counter} times")
-                    buffer_new = 0.1
-                    stage_position_before_scan_v2 = ((self.stage_position_before_scan)+buffer_new)
-                    pos = self.asi_stage.get_axis_position(self.axis)
-                    print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
-                    self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
-                    print("stage moved to start position before scan")
-                    self.asi_stage.wait_until_complete(self.axis)
-                    print("Stage wait until complete completed")
-                    posw = self.asi_stage.get_axis_position(self.axis)
-                    self.asi_stage.wait_until_complete(self.axis)
-                    print("Stage wait until complete completed")
-                    print(f"Position Before Scan New = {stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
-                    logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
-                    counter =+ 1
-                
+            print("PAUSING DATA THREAD IF STATEMENT")
+            self.model.pause_data_thread()
+            print("data thread paused")
+            print("DATA THREAD PAUSED IN CHANNEL")
+
+                # print("PAUSING DATA THREAD IF STATEMENT IN CHANNEL")
+                # self.model.pause_data_thread
+                # print("DATA THREAD PAUSED IN CHANNEL")
+        
+        # if abs(posw - self.stage_position_before_scan)>tol:
+        #     self.model.pause_data_thread()
+        #     print("current position greater than start position before")
+        #     while abs(posw - self.stage_position_before_scan)>tol:
+        #         print("inside while loop")
+        #         if (posw - self.stage_position_before_scan)<0:
+        #             print(f"in if negative loop {counter} times")
+        #             buffer_new = 0.1
+        #             stage_position_before_scan_v2 = ((self.stage_position_before_scan)-buffer_new)
+        #             pos = self.asi_stage.get_axis_position(self.axis)
+        #             print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+        #             self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+        #             print("stage moved to start position before scan")
+        #             self.asi_stage.wait_until_complete(self.axis)
+        #             print("Stage wait until complete completed")
+        #             posw = self.asi_stage.get_axis_position(self.axis)
+        #             self.asi_stage.wait_until_complete(self.axis)
+        #             print("Stage wait until complete completed")
+        #             print(f"Position Before Scan New = {stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+        #             logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+        #             counter =+ 1
+        #         elif (posw - self.stage_position_before_scan)>0:   
+        #             print(f"in if negative loop {counter} times")
+        #             buffer_new = 0.1
+        #             stage_position_before_scan_v2 = ((self.stage_position_before_scan)+buffer_new)
+        #             pos = self.asi_stage.get_axis_position(self.axis)
+        #             print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+        #             self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+        #             print("stage moved to start position before scan")
+        #             self.asi_stage.wait_until_complete(self.axis)
+        #             print("Stage wait until complete completed")
+        #             posw = self.asi_stage.get_axis_position(self.axis)
+        #             self.asi_stage.wait_until_complete(self.axis)
+        #             print("Stage wait until complete completed")
+        #             print(f"Position Before Scan New = {stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+        #             logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+        #             counter =+ 1
+
+
+
+
                 
                 # if (posw - self.stage_position_before_scan)<0:
         #         elif (posw - self.stage_position_before_scan)>0:
@@ -491,12 +513,52 @@ class CVATTL:
 
         # Start the daq acquisition.  Basically places all of the waveforms in a ready
         # state so that they will be run one time when the trigger is received.
+        tol2 = desired_sampling_um * 8
+        self.tol2 = tol2
+
+        # pos2 = self.asi_stage.get_axis_position(self.axis)
+
+        # if abs(pos2-self.start_position_um)<=tol2:
+        #     print("data thread resumed")
+        #     self.model.resume_data_thread()
+
+        # if abs(pos2-self.start_position_um)>tol2:
+        #     print("away from target")
+        #     while abs(pos2-self.start_position_um)>tol2:
+        #         print("in while loop")
+        #         pos2 = self.asi_stage.get_axis_position(self.axis)
+        #         print(f"pos2 = {pos2}")
+        
+        # if abs(pos2-self.start_position_um)<=tol2:
+        #     print("data thread resumed")
+        #     self.model.resume_data_thread()
+
+        # self.model.resume_data_thread()
         
 
         # Start the stage scan.  Also get this functionality into the ASI stage class.
         self.asi_stage.start_scan(self.axis)
         self.asi_stage.stop_scan()
         print("scan started")
+    
+
+        pos2 = self.asi_stage.get_axis_position(self.axis)
+
+        if abs(pos2-self.start_position_um)<=tol2:
+            print("data thread resumed")
+            self.model.resume_data_thread()
+
+        if abs(pos2-self.start_position_um)>tol2:
+            print("away from target")
+            while abs(pos2-self.start_position_um)>tol2:
+                print("in while loop")
+                pos2 = self.asi_stage.get_axis_position(self.axis)
+                print(f"pos2 = {pos2}")
+        
+        if abs(pos2-self.start_position_um)<=tol2:
+            print("data thread resumed")
+            self.model.resume_data_thread()
+
 
         self.asi_stage.wait_until_complete(self.axis)
         print("Stage wait until complete completed after scan")
@@ -645,8 +707,18 @@ class CVATTL:
             self.asi_stage.wait_until_complete(self.axis)
             print("Stage wait until complete completed")
 
+            if self.current_channel_in_list>0:
+                print("PAUSING DATA THREAD IF STATEMENT IN CHANNEL")
+                self.model.pause_data_thread
+                print("DATA THREAD PAUSED IN CHANNEL")
+
+            # if abs(pos1 - self.stage_position_before_scan)>self.tol and self.current_channel_in_list > 0:
+            #     print("current position greater than start position before")
+            #     self.model.pause_data_thread()
+            #     print("data thread paused")
+
             print(f"Current Position Before move to start position = {pos1}")
-            self.asi_stage.set_speed(percent=0.7)
+            self.asi_stage.set_speed(percent=0.5)
             print("Stage speed set")
             self.asi_stage.wait_until_complete(self.axis)
             print("Stage wait until complete completed")
@@ -683,44 +755,44 @@ class CVATTL:
             # self.asi_stage.wait_until_complete(self.axis)
             # print("Stage wait until complete completed after update scan")
             
-            counter = 0
-            tol = self.tol
-            if abs(posw - self.stage_position_before_scan)>tol:
-                print("current position greater than start position before")
-                while abs(posw - self.stage_position_before_scan)>tol:
-                    print("inside while loop")
-                    if (posw - self.stage_position_before_scan)<0:
-                        print(f"in if negative loop {counter} times")
-                        buffer_new = 0.1
-                        stage_position_before_scan_v2 = ((self.stage_position_before_scan)-buffer_new)
-                        pos = self.asi_stage.get_axis_position(self.axis)
-                        print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
-                        self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
-                        print("stage moved to start position before scan")
-                        self.asi_stage.wait_until_complete(self.axis)
-                        print("Stage wait until complete completed")
-                        posw = self.asi_stage.get_axis_position(self.axis)
-                        self.asi_stage.wait_until_complete(self.axis)
-                        print("Stage wait until complete completed")
-                        print(f"Position Before Scan New = {self.stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
-                        logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
-                        counter =+ 1
-                    elif (posw - self.stage_position_before_scan)>0:   
-                        print(f"in if negative loop {counter} times")
-                        buffer_new = 0.1
-                        stage_position_before_scan_v2 = ((self.stage_position_before_scan)+buffer_new)
-                        pos = self.asi_stage.get_axis_position(self.axis)
-                        print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
-                        self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
-                        print("stage moved to start position before scan")
-                        self.asi_stage.wait_until_complete(self.axis)
-                        print("Stage wait until complete completed")
-                        posw = self.asi_stage.get_axis_position(self.axis)
-                        self.asi_stage.wait_until_complete(self.axis)
-                        print("Stage wait until complete completed")
-                        print(f"Position Before Scan New = {self.stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
-                        logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
-                        counter =+ 1
+            
+            # tol = self.tol
+            # if abs(posw - self.stage_position_before_scan)>tol:
+            #     print("current position greater than start position before")
+            #     while abs(posw - self.stage_position_before_scan)>tol:
+            #         print("inside while loop")
+            #         if (posw - self.stage_position_before_scan)<0:
+            #             print(f"in if negative loop {counter} times")
+            #             buffer_new = 0.1
+            #             stage_position_before_scan_v2 = ((self.stage_position_before_scan)-buffer_new)
+            #             pos = self.asi_stage.get_axis_position(self.axis)
+            #             print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+            #             self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+            #             print("stage moved to start position before scan")
+            #             self.asi_stage.wait_until_complete(self.axis)
+            #             print("Stage wait until complete completed")
+            #             posw = self.asi_stage.get_axis_position(self.axis)
+            #             self.asi_stage.wait_until_complete(self.axis)
+            #             print("Stage wait until complete completed")
+            #             print(f"Position Before Scan New = {self.stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+            #             logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+            #             counter =+ 1
+            #         elif (posw - self.stage_position_before_scan)>0:   
+            #             print(f"in if negative loop {counter} times")
+            #             buffer_new = 0.1
+            #             stage_position_before_scan_v2 = ((self.stage_position_before_scan)+buffer_new)
+            #             pos = self.asi_stage.get_axis_position(self.axis)
+            #             print(f"stage_position_before_scan_v2 = {stage_position_before_scan_v2}")
+            #             self.asi_stage.move_axis_absolute(self.axis,stage_position_before_scan_v2, wait_until_done=True)
+            #             print("stage moved to start position before scan")
+            #             self.asi_stage.wait_until_complete(self.axis)
+            #             print("Stage wait until complete completed")
+            #             posw = self.asi_stage.get_axis_position(self.axis)
+            #             self.asi_stage.wait_until_complete(self.axis)
+            #             print("Stage wait until complete completed")
+            #             print(f"Position Before Scan New = {self.stage_position_before_scan}, Current Position: {posw}, Start position = {self.start_position*1000}")
+            #             logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
+            #             counter =+ 1
                     
             self.asi_stage.set_speed(percent=self.percent_speed)
             print("original stage speed set")
@@ -738,6 +810,49 @@ class CVATTL:
             self.asi_stage.start_scan(self.axis)
             self.asi_stage.stop_scan()
             print("update channel scan started")
+
+            
+            tol2 = self.tol2
+            pos2 = self.asi_stage.get_axis_position(self.axis)
+
+            # if abs(pos2-self.start_position_um)<=tol2:
+            #     print("data thread resumed")
+            #     self.model.resume_data_thread()
+
+            # if abs(pos2-self.start_position_um)>tol2:
+            #     print("away from target channel")
+            #     while abs(pos2-self.start_position_um)>tol2:
+            #         print("in while loop")
+            #         pos2 = self.asi_stage.get_axis_position(self.axis)
+            #         print(f"pos2 = {pos2}")
+            
+            # if abs(pos2-self.start_position_um)<=tol2:
+            #     print("data thread resumed")
+            #     self.model.resume_data_thread()
+
+            print("scan started")
+            self.asi_stage.start_scan(self.axis)
+            self.asi_stage.stop_scan()
+            print("update channel scan started")
+
+            if abs(pos2-self.start_position_um)<=tol2:
+                print("data thread resumed before while")
+                self.model.resume_data_thread()
+
+            if abs(pos2-self.start_position_um)>tol2:
+                print("away from target channel")
+                while abs(pos2-self.start_position_um)>tol2:
+                    print("in while loop")
+                    pos2 = self.asi_stage.get_axis_position(self.axis)
+                    print(f"pos2 = {pos2}")
+            
+            # if abs(pos2-self.start_position_um)<=tol2:
+            print("data thread resumed after while")
+            self.model.resume_data_thread()
+
+            # self.model.resume_data_thread()
+            # print("")
+
             self.asi_stage.wait_until_complete(self.axis)
             print("Stage wait until complete completed after update scan")
             # self.asi_stage.stop_scan()

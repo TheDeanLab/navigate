@@ -33,7 +33,7 @@
 import xml.etree.ElementTree as ET
 
 
-def dict_to_xml(d, tag=None):
+def dict_to_xml(d, tag=None, level=0):
     """Parse a Python dictionary to XML.
 
     Parameters
@@ -52,17 +52,18 @@ def dict_to_xml(d, tag=None):
     if tag is None:
         tag = list(d.keys())[0]
 
-    xml = f"<{tag}"
+    xml = "\t" * level + f"<{tag}"
     if isinstance(d, dict):
         next_xml = ""
         text = ""
+        next_level = level + 1
         for k, v in d.items():
             if isinstance(v, dict):
                 # Not a leaf node
-                next_xml += dict_to_xml(v, k)
+                next_xml += dict_to_xml(v, k, next_level)
             elif isinstance(v, list):
                 for el in v:
-                    next_xml += dict_to_xml(el, k)
+                    next_xml += dict_to_xml(el, k, next_level)
             else:
                 if k == "text":
                     text = str(v)
@@ -70,11 +71,16 @@ def dict_to_xml(d, tag=None):
                     xml += f' {k}="{v}"'
         if text != "" or next_xml != "":
             xml += ">"
-            xml += text
-            xml += next_xml
-            xml += f"</{tag}>"
+            if text != "":
+                xml += text
+            if next_xml != "":
+                xml += f"\n{next_xml}"
+            if text != "":
+                xml += f"</{tag}>\n"
+            else:
+                xml += f"</{tag}>"
         else:
-            xml += "/>"
+            xml += "/>\n"
 
     return xml
 
@@ -108,7 +114,7 @@ def parse_xml(root: ET.Element) -> dict:
     for child in root:
         tag = child.tag
         if tag == prev_tag:
-            if type(d[tag]) != list:
+            if not isinstance(d[tag], list):
                 # create the list
                 tmp = d[tag]
                 d[tag] = []

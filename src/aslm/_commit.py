@@ -30,11 +30,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+
 # Standard Library Imports
+import subprocess
 
 # Third Party Imports
 
 # Local Imports
 
 
-__version__ = "0.0.1"
+def get_git_revision_hash() -> str:
+    print("before subprocess")
+    return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+
+
+try:
+    __commit__ = get_git_revision_hash()
+except Exception:  # noqa
+    __commit__ = "unknown"

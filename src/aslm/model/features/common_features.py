@@ -1123,7 +1123,6 @@ class ZStackAcquisition:
 
         self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
         # get available channels
-        self.model.active_microscope.central_focus = None
         self.channels = microscope_state["selected_channels"]
         self.current_channel_in_list = 0
         self.model.active_microscope.current_channel = 0

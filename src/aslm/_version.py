@@ -43,7 +43,9 @@ def get_git_revision_hash() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
-__commit__ = get_git_revision_hash()
-
+try:
+    __commit__ = get_git_revision_hash()
+except Exception:
+    __commit__ = "unknown"
 
 __version__ = "0.0.1"

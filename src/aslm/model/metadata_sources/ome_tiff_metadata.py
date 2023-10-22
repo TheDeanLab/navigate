@@ -33,7 +33,7 @@ import os
 from typing import Optional, Union
 
 from .metadata import XMLMetadata
-from aslm import __version__
+from aslm import __version__, __commit__
 
 
 class OMETIFFMetadata(XMLMetadata):
@@ -59,7 +59,9 @@ class OMETIFFMetadata(XMLMetadata):
             OME TIFF metadata dictionary
         """
         ome_dict = {
-            "Creator": f"ASLM,v{__version__},Dean Lab at UTSW",
+            "Creator": f"ASLM,v{__version__}, "
+            f"Commit {__commit__}, "
+            f"Dean Lab at UTSW",
             "xmlns": "http://www.openmicroscopy.org/Schemas/OME/2016-06",
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "xsi:schemaLocation": "http://www.openmicroscopy.org/Schemas/OME/2016-06 "

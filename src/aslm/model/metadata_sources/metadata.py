@@ -36,7 +36,7 @@ from typing import Optional
 
 # Local Imports
 from aslm.tools import xml_tools
-from aslm import __version__
+from aslm import __version__, __commit__
 
 from multiprocessing.managers import DictProxy
 
@@ -216,7 +216,11 @@ class XMLMetadata(Metadata):
         """Write to XML file. Assumes we do not include the XML header in our nested
         metadata dictionary."""
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n'  # XML file header
-        xml += f"<!-- Created by ASLM, v{__version__}, Dean Lab at UTSW -->\n"
+        xml += (
+            f"<!-- Created by ASLM, "
+            f"v{__version__}, "
+            f"Commit {__commit__}, Dean Lab at UTSW -->\n"
+        )
         # TODO: should os.path.basename be the default? Added this for BigDataViewer's
         # relative path.
         xml += self.to_xml(file_type, root, file_name=os.path.basename(file_name), **kw)

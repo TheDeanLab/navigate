@@ -189,6 +189,7 @@ class TestStageASI:
             (["f", "z"], ["M", "X"]),
             (["x", "y", "z"], ["Y", "X", "M"]),
             (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+            (["x", "y", "z", "f"], ["x", "M", "y", "Z"]),
         ],
     )
     def test_initialize_stage(self, axes, axes_mapping):

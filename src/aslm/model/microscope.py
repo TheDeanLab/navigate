@@ -562,15 +562,13 @@ class Microscope:
         # Assume wherever we start is the central focus
         # TODO: is this the correct assumption?
         if self.central_focus is None:
-            try:
-                self.central_focus = self.get_stage_position()["f_pos"]
-            except KeyError:
-                self.central_focus = 0.0
-        self.move_stage(
-            {"f_abs": self.central_focus + float(channel["defocus"])},
-            wait_until_done=True,
-            update_focus=False,
-        )
+            self.central_focus = self.get_stage_position().get("f_pos")
+        if self.central_focus is not None:
+            self.move_stage(
+                {"f_abs": self.central_focus + float(channel["defocus"])},
+                wait_until_done=True,
+                update_focus=False,
+            )
 
     def get_readout_time(self):
         """Get readout time from camera.

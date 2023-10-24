@@ -44,22 +44,45 @@ logger = logging.getLogger(p)
 
 
 class SyntheticStage(StageBase):
+    """Synthetically generated stage for testing purposes.
+
+    Parameters
+    ----------
+    microscope_name : str
+        Name of the microscope.
+    device_connection : str
+        Connection string for the device.
+    configuration : dict
+        Configuration dictionary for the device.
+    device_id : int
+        Device ID for the device.
+
+    """
+
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         self.default_speed = 7.68 * 0.67
 
         # Default axes mapping
-        axes_mapping = {'x': 'X', 'y': 'Y', 'z': 'Z', 'theta': 'Theta', 'f': 'F'}
+        axes_mapping = {"x": "X", "y": "Y", "z": "Z", "theta": "Theta", "f": "F"}
         if not self.axes_mapping:
-            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
+            self.axes_mapping = {
+                axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
+            }
 
     def report_position(self):
+        """Report the current position of the stage.
+
+        Returns
+        -------
+        position_dict : dict
+            Dictionary containing the current position of the stage.
+        """
         return self.get_position_dict()
 
     def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
-        """
-        Implement movement logic along a single axis.
+        """Implement movement logic along a single axis.
 
         Example calls:
 
@@ -83,13 +106,13 @@ class SyntheticStage(StageBase):
 
         if wait_until_done:
             time.sleep(0.025)
-        
+
         # Move the stage
         setattr(self, f"{axis}_pos", axis_abs)
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
-        """
+        """Move stage along a single axis.
 
         Parameters
         ----------
@@ -109,7 +132,7 @@ class SyntheticStage(StageBase):
         if not abs_pos_dict:
             return False
 
-        for axis in abs_pos_dict:            
+        for axis in abs_pos_dict:
             setattr(self, f"{axis}_pos", abs_pos_dict[axis])
         if wait_until_done is True:
             time.sleep(0.025)
@@ -117,25 +140,89 @@ class SyntheticStage(StageBase):
         return True
 
     def load_sample(self):
+        """Load a sample.
+
+        TODO: Is this implemented?
+        """
         self.y_pos = self.y_load_position
 
     def unload_sample(self):
+        """Unload a sample.
+
+        TODO: Is this implemented?
+        """
         self.y_pos = self.y_unload_position
 
     def get_axis_position(self, axis):
+        """Get the current position of the stage along a single axis.
+
+        Parameters
+        ----------
+        axis : str
+            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
+
+        Returns
+        -------
+        float
+            The current position of the stage along the specified axis.
+        """
         return getattr(self, f"{axis}_pos")
-    
+
     def set_speed(self, velocity_dict):
+        """Set the speed of the stage.
+
+        Parameters
+        ----------
+        velocity_dict : dict
+            Dictionary containing the speed of the stage along each axis.
+        """
         pass
 
     def get_speed(self, axis):
+        """Get the speed of the stage.
+
+        Parameters
+        ----------
+        axis : str
+            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
+
+        Returns
+        -------
+        float
+            The speed of the stage along the specified axis.
+        """
+
         return 1
-    
-    def scanr(self, start_position_mm, end_position_mm, enc_divide, axis='z'):
+
+    def scanr(self, start_position_mm, end_position_mm, enc_divide, axis="z"):
+        """Scan the stage using the constant velocity mode along a single axis.
+
+        Parameters
+        ----------
+        start_position_mm : float
+            Starting position of the scan in mm.
+        end_position_mm : float
+            Ending position of the scan in mm.
+        enc_divide : int
+            Encoder divide value.
+        axis : str
+            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
+
+        """
+
         pass
 
     def start_scan(self, axis):
+        """Start a scan along a single axis.
+
+        Parameters
+        ----------
+        axis : str
+            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
+
+        """
         pass
 
     def stop_scan(self):
+        """Stop a scan."""
         pass

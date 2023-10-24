@@ -97,29 +97,6 @@ class PIStage(StageBase):
     configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
 
-    Attributes
-    -----------
-    pi_tools : object
-        Physik Instrumente tools object
-    pi_device : object
-        Physik Instrumente device object
-    pi_axes : list
-        List of Physik Instrumente axes
-
-    Methods
-    -------
-    get_position_dict()
-        Returns a dictionary with the hardware stage positions.
-    get_abs_position()
-        Makes sure that the move is within the min and max stage limits.
-    stop()
-        Emergency halt of stage operation.
-    report_position()
-        Return current stage positions.
-    move_axis_absolute()
-        Move stage along a single axis
-    move_absolute()
-        Move stage.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):

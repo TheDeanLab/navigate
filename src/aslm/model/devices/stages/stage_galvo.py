@@ -58,14 +58,6 @@ class GalvoNIStage(StageBase):
     configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
 
-    Methods
-    -------
-    create_position_dict()
-        Creates a dictionary with the hardware stage positions.
-    get_abs_position()
-        Makes sure that the move is within the min and max stage limits.
-    stop()
-        Emergency halt of stage operation.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
@@ -124,6 +116,20 @@ class GalvoNIStage(StageBase):
         return self.get_position_dict()
 
     def calculate_waveform(self, exposure_times, sweep_times):
+        """Calculate the waveform for the stage.
+
+        Parameters
+        ----------
+        exposure_times : dict
+            Dictionary of exposure times for each channel
+        sweep_times : dict
+            Dictionary of sweep times for each channel
+
+        Returns
+        -------
+        waveform_dict : dict
+            Dictionary of waveforms for each channel
+        """
         self.exposure_times = exposure_times
         self.sweep_times = sweep_times
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)

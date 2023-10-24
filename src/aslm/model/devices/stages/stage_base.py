@@ -54,50 +54,6 @@ class StageBase:
     configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
 
-    Attributes
-    -----------
-    x_pos : float
-        True x position
-    y_pos : float
-        True y position
-    z_pos : float
-        True z position
-    f_pos : float
-        True focus position
-    theta_pos : float
-        True rotation position
-    x_max : float
-        Max x position
-    y_max : float
-        Max y position
-    z_max : float
-        Max y position
-    f_max : float
-        Max focus position
-    theta_max : float
-        Max rotation position
-    x_min : float
-        Min x position
-    y_min : float
-        Min y position
-    z_min : float
-        Min y position
-    f_min : float
-        Min focus positoin
-    theta_min : float
-        Min rotation position
-
-    Methods
-    -------
-    get_position_dict()
-        Returns a dictionary with the hardware stage positions.
-    get_abs_position()
-        Makes sure that the move is within the min and max stage limits.
-    verify_abs_position()
-        Return a dictionary with moving positions within the min and max stage limits
-    stop()
-        Emergency halt of stage operation.
-
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):

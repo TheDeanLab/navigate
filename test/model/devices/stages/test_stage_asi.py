@@ -189,6 +189,7 @@ class TestStageASI:
             (["f", "z"], ["M", "X"]),
             (["x", "y", "z"], ["Y", "X", "M"]),
             (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+            (["x", "y", "z", "f"], ["x", "M", "y", "Z"]),
         ],
     )
     def test_initialize_stage(self, axes, axes_mapping):
@@ -219,7 +220,7 @@ class TestStageASI:
             assert len(stage.axes_mapping) <= len(stage.axes)
         else:
             for i, axis in enumerate(axes):
-                assert stage.axes_mapping[axis] == axes_mapping[i]
+                assert stage.axes_mapping[axis] == axes_mapping[i].upper()
 
         assert stage.stage_limits is True
 
@@ -238,6 +239,7 @@ class TestStageASI:
             (["f", "z"], ["M", "X"]),
             (["x", "y", "z"], ["Y", "X", "M"]),
             (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+            (["x", "y", "z", "f"], ["x", "M", "y", "Z"]),
         ],
     )
     def test_report_position(self, axes, axes_mapping):
@@ -287,6 +289,7 @@ class TestStageASI:
             (["f", "z"], ["M", "X"]),
             (["x", "y", "z"], ["Y", "X", "M"]),
             (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+            (["x", "y", "z", "f"], ["x", "M", "y", "Z"]),
         ],
     )
     def test_move_axis_absolute(self, axes, axes_mapping):
@@ -313,6 +316,7 @@ class TestStageASI:
             (["f", "z"], ["M", "X"]),
             (["x", "y", "z"], ["Y", "X", "M"]),
             (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+            (["x", "y", "z", "f"], ["x", "M", "y", "Z"]),
         ],
     )
     def test_move_absolute(self, axes, axes_mapping):

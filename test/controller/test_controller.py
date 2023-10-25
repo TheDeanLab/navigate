@@ -4,13 +4,13 @@ from types import SimpleNamespace
 import pytest
 
 
-@pytest.fixture(scope="session")
-def controller_root():
-    import tkinter as tk
+# @pytest.fixture(scope="session")
+# def controller_root():
+#     import tkinter as tk
 
-    root = tk.Tk()
-    yield root
-    root.destroy()
+#     root = tk.Tk()
+#     yield root
+#     root.destroy()
 
 
 class DummySplashScreen:
@@ -19,7 +19,7 @@ class DummySplashScreen:
 
 
 @pytest.fixture(scope="session")
-def controller(controller_root):
+def controller(tk_root):
     from aslm.controller.controller import Controller
 
     base_directory = Path.joinpath(
@@ -40,7 +40,7 @@ def controller(controller_root):
     args = SimpleNamespace(synthetic_hardware=True)
 
     controller = Controller(
-        controller_root,
+        tk_root,
         DummySplashScreen(),
         configuration_path,
         experiment_path,

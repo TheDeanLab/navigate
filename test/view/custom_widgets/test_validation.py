@@ -9,11 +9,11 @@ from aslm.view.custom_widgets.validation import ValidatedEntry
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
-@pytest.fixture
-def tk_root():
-    root = tk.Tk()
-    yield root
-    root.destroy()
+# @pytest.fixture
+# def tk_root():
+#     root = tk.Tk()
+#     yield root
+#     root.destroy()
 
 
 @pytest.fixture

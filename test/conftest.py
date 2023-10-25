@@ -55,7 +55,14 @@ def dummy_model():
 
 
 @pytest.fixture(scope="session")
-def dummy_view():
+def tk_root():
+    root = tk.Tk()
+    yield root
+    root.destroy()
+
+
+@pytest.fixture(scope="session")
+def dummy_view(root):
     """Dummy view for testing.
 
     Creates a dummy view for the controller tests.
@@ -66,11 +73,9 @@ def dummy_view():
     """
     from aslm.view.main_application_window import MainApp
 
-    root = tk.Tk()
     view = MainApp(root)
     root.update()
     yield view
-    root.destroy()
 
 
 @pytest.fixture(scope="package")
@@ -143,13 +148,14 @@ def dummy_controller(dummy_view):
 # def model(controller):
 #     return controller.model
 
+
 class IgnoreObj:
     def __init__(self):
         pass
 
     def __getattr__(self, __name: str):
         return self
-    
+
     def __call__(self, *args, **kwargs):
         pass
 
@@ -158,9 +164,10 @@ class IgnoreObj:
 
     def __getitem__(self, __key: str):
         return self
-    
+
     def __setitem__(self, __key: str, __value):
         pass
+
 
 @pytest.fixture(scope="package")
 def ignore_obj():

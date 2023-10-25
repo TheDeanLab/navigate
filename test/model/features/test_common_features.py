@@ -160,7 +160,7 @@ class TestZStack:
                             self.model.signal_records[idx][2]["__test_frame_id"]
                             == frame_id
                         ), (
-                            "prepare next channel(change channel) "
+                            "prepare next channel (change channel) "
                             f"should happen after {frame_id}"
                         )
 
@@ -170,7 +170,7 @@ class TestZStack:
                             ]
                             == self.model.signal_records[idx][2]["__test_frame_id"]
                         ), (
-                            "prepare next channel(change channel) "
+                            "prepare next channel (change channel) "
                             "should happen inside signal_end_func()"
                         )
 
@@ -182,7 +182,7 @@ class TestZStack:
                             )
                             is False
                         ), (
-                            "prepare next channel(change channel) "
+                            "prepare next channel (change channel) "
                             "should not happen more than once"
                         )
                         pre_change_channel_idx = idx

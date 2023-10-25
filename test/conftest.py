@@ -62,7 +62,7 @@ def tk_root():
 
 
 @pytest.fixture(scope="session")
-def dummy_view(root):
+def dummy_view(tk_root):
     """Dummy view for testing.
 
     Creates a dummy view for the controller tests.
@@ -73,8 +73,8 @@ def dummy_view(root):
     """
     from aslm.view.main_application_window import MainApp
 
-    view = MainApp(root)
-    root.update()
+    view = MainApp(tk_root)
+    tk_root.update()
     yield view
 
 

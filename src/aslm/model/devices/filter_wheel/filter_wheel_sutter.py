@@ -79,71 +79,53 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
 
 
 class SutterFilterWheel(FilterWheelBase):
-    """SutterFilterWheel Class
+    """SutterFilterWheel - Class for controlling Sutter Lambda Filter Wheels
 
-    Class for controlling Sutter Lambda Filter Wheels
-    https://www.sutter.com/manuals/LB10-3_OpMan.pdf
-
-    Attributes
-    ----------
-    filter_dictionary : dict
-        Dictionary with installed filter names, e.g., filter_dictionary = {'GFP', 0}.
-    number_of_filter_wheels : int
-        Number of installed filter wheels.
-    wheel_position : int
-        Default filter wheel position
-    wait_until_done_delay = float
-        Duration of time to wait for a filter wheel change.
-    wait_until_done = bool
-        Flag for enabling the wait period for a filter wheel change.
-    delay_matrix = np.ndarray
-        Matrix of duration in seconds needed to switch filter wheel positions
-    speed = int
-        Filter wheel movement speed.  0 = fastest, 8 = slowest.
-    init_finished = bool
-        Flag for confirming initialization is complete.
-    read_on_init = bool
-        Flag for reading serial port on initialization.
-    serial : serial.Serial
-        Serial port connection to the filter wheel.
-    microscope_name : str
-        Name of microscope.
-
-    Methods
-    -------
-    check_if_filter_in_filter_dictionary()
-        Checks to see if filter name exists in the filter dictionary.
-    filter_change_delay(filter_name)
-        Change the filter wheel to the position occupied by filter_name
-    read(num_bytes)
-        Read num_bytes of bytes from the serial port.
-    close()
-        Set the filter wheel to the empty position and close the communication port.
-    set_filter(filter_name, wait_until_done=True)
-        Change the filter wheel to the position occupied by filter_name
-
+    Note
+    ----
+        Additional information on the Sutter Lambda 10-B can be found at:
+        https://www.sutter.com/manuals/LB10-3_OpMan.pdf
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the SutterFilterWheel class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : dict
+            Dictionary of device connections.
+        configuration : dict
+            Dictionary of configuration parameters.
+        """
         super().__init__(microscope_name, device_connection, configuration)
 
+        #: obj: Serial port connection to the filter wheel.
         self.serial = device_connection
 
+        #: str: Name of the microscope.
         self.microscope_name = microscope_name
 
+        #: int: Number of filter wheels.
         self.number_of_filter_wheels = configuration["configuration"]["microscopes"][
             microscope_name
         ]["filter_wheel"]["hardware"]["wheel_number"]
 
+        #: bool: Wait until filter wheel has completed movement.
         self.wait_until_done = True
 
+        #: float: Delay in s for the wait until done function.
         self.wait_until_done_delay = None
 
+        #: bool: Read on initialization.
         self.read_on_init = True
 
+        #: int: Filter wheel speed.
         self.speed = 2
 
         # Delay in s for the wait until done function
+        #: np.matrix: Delay matrix for filter wheel.
         self.delay_matrix = np.matrix(
             [
                 [0, 0.031, 0.051, 0.074, 0.095, 0.115],
@@ -163,6 +145,7 @@ class SutterFilterWheel(FilterWheelBase):
 
         if self.read_on_init:
             self.read(2)  # class 'bytes'
+            #: bool: Software initialization complete flag.
             self.init_finished = True
             logger.debug("SutterFilterWheel - Initialized.")
         else:
@@ -174,25 +157,39 @@ class SutterFilterWheel(FilterWheelBase):
         logger.debug("SutterFilterWheel -  Placed in Default Filter Position.")
 
     def __enter__(self):
+        """Enter the SutterFilterWheel context manager."""
         return self
 
     def __exit__(self, *args, **kwargs):
+        """Exit the SutterFilterWheel context manager."""
         logger.debug("SutterFilterWheel - Closing Device.")
         self.close()
 
     def filter_change_delay(self, filter_name):
         """Calculate duration of time necessary to change filter wheel positions.
+
+        Calculate duration of time necessary to change filter wheel positions.
         Identifies the number of positions that must be switched, and then retrieves
         the duration of time necessary to perform the switch from self.delay_matrix.
-        Detailed information on timing located on page 38:
-        https://www.sutter.com/manuals/LB10-3_OpMan.pdf
-
-        TODO: Delay matrix should be model specific.
 
         Parameters
         ----------
         filter_name : str
             Name of filter that we want to move to.
+
+        Note
+        ----
+            Detailed information on timing located on page 38:
+            https://www.sutter.com/manuals/LB10-3_OpMan.pdf
+
+        Warn
+        ----
+            Delay matrix should be model specific.
+
+        Returns
+        -------
+        Index Error
+            If the filter wheel position is out of range.
         """
         # Find the old and new positions, the distance between them, and the
         # delay necessary.

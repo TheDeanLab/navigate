@@ -43,21 +43,21 @@ logger = logging.getLogger(p)
 
 
 class ShutterBase:
-    """ShutterBase Class
-    Parent class for the laser shutters.
-
-    Attributes
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
-    """
+    """ShutterBase Class - Parent class for the laser shutters."""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the Shutter.
 
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocesing.managers.DictProxy
+            Global configuration of the microscope
+        """
+        #: bool: Shutter state
         self.shutter_state = False
 
     def __del__(self):
@@ -65,11 +65,20 @@ class ShutterBase:
         pass
 
     def open_shutter(self):
+        """Open the Shutter."""
         self.shutter_state = True
 
     def close_shutter(self):
+        """Close the Shutter."""
         self.shutter_state = False
 
     @property
     def state(self):
+        """Get the Shutter state.
+
+        Returns
+        -------
+        bool
+            Shutter state
+        """
         return self.shutter_state

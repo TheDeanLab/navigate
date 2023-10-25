@@ -44,29 +44,42 @@ logger = logging.getLogger(p)
 
 
 class DAQBase:
-    """Parent class for Data Acquisition (DAQ) classes.
-
-    Attributes
-    ----------
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
-    """
+    """DAQBase - Parent class for Data Acquisition (DAQ) classes."""
 
     def __init__(self, configuration):
+        """Initializes the DAQBase class.
+
+        Parameters
+        ----------
+        configuration : dict
+            Dictionary of configuration parameters
+        """
+
+        #: dict: Dictionary of configuration parameters
         self.configuration = configuration
+
+        #: dict: Dictionary of waveform constants
         self.waveform_constants = self.configuration["waveform_constants"]
+
+        #: str: Name of the active microscope
         self.microscope_name = self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
+
+        #: dict: Dictionary of DAQ parameters
         self.daq_parameters = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]
 
         # Initialize Variables
+        #: float: Sample rate of the DAQ
         self.sample_rate = self.daq_parameters["sample_rate"]
+
+        #: float: Sweep time of the DAQ
         self.sweep_time = self.daq_parameters["sweep_time"]
 
         # Remote Focus Parameters
+        #: dict: Dictionary of remote focus ramp falling percentages
         self.remote_focus_ramp_falling = {}
         for m in self.configuration["configuration"]["microscopes"].keys():
             self.remote_focus_ramp_falling[m] = self.configuration["configuration"][
@@ -74,18 +87,29 @@ class DAQBase:
             ][m]["remote_focus_device"]["ramp_falling_percent"]
 
         # Camera Parameters
+        #: float: Camera delay percentage
         self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["camera"]["delay_percent"]
+
+        #: float: Camera pulse percentage
         self.camera_pulse_percent = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["camera"]["pulse_percent"]
+
+        #: float: Camera high time
         self.camera_high_time = self.camera_pulse_percent * 0.01 * self.sweep_time
+
+        #: float: Camera delay time
         self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
 
+        #: dict: Dictionary of waveforms.
         self.waveform_dict = {}
 
+        #: int: Number of times to repeat the waveform
         self.waveform_repeat_num = 1
+
+        #: int: Number of times to expand the waveform
         self.waveform_expand_num = 1
 
     def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
@@ -138,5 +162,12 @@ class DAQBase:
         return self.waveform_dict
 
     def enable_microscope(self, microscope_name):
+        """Enables the microscope.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the active microscope
+        """
         if microscope_name != self.microscope_name:
             self.microscope_name = microscope_name

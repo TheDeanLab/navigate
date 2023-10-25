@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -65,9 +66,9 @@ class TestZStack:
             if idx >= self.record_num:
                 assert False, "Some device movements are missed!"
         return idx
-    
+
     def exist_rectord(self, record_prefix, idx_start, idx_end):
-        for i in range(idx_start, idx_end+1):
+        for i in range(idx_start, idx_end + 1):
             if self.model.signal_records[i][0] == record_prefix:
                 return True
         return False
@@ -115,13 +116,11 @@ class TestZStack:
         idx = self.get_next_record(change_channel_func_str, idx)
         pre_change_channel_idx = idx
         assert (
-            self.model.signal_records[idx][2]["__test_frame_id_completed"]
-            == -1
-        ), f"prepare first channel should happen before 0"
+            self.model.signal_records[idx][2]["__test_frame_id_completed"] == -1
+        ), "prepare first channel should happen before 0"
         assert (
-            self.model.signal_records[idx][2]["__test_frame_id"]
-            == 0
-        ), f"prepare first channel should happen for frame: 0"
+            self.model.signal_records[idx][2]["__test_frame_id"] == 0
+        ), "prepare first channel should happen for frame: 0"
 
         for i, pos in enumerate(positions):
 
@@ -130,70 +129,92 @@ class TestZStack:
             # x, y, theta
             pos_moved = self.model.signal_records[idx][1][0]
             for axis in ["x", "y", "theta"]:
-                assert (
-                    pos[axis] == pos_moved[axis + "_abs"]
-                ), f"should move to {axis}: {pos[axis]}, but moved to {pos_moved[axis + '_abs']}"
+                assert pos[axis] == pos_moved[axis + "_abs"], (
+                    f"should move to {axis}: {pos[axis]}, "
+                    f"but moved to {pos_moved[axis + '_abs']}"
+                )
 
             z_pos = pos["z"] + self.config["start_position"]
             f_pos = pos["f"] + self.config["start_focus"]
 
             if mode == "per_z":
+                f_pos += selected_channels[0]["defocus"]
                 for j in range(self.config["number_z_steps"]):
                     idx = self.get_next_record("move_stage", idx)
 
                     pos_moved = self.model.signal_records[idx][1][0]
                     # z, f
-                    assert (
-                        pos_moved["z_abs"] == z_pos + j * z_step
-                    ), f"should move to z: {z_pos + j * z_step}, but moved to {pos_moved['z_abs']}"
-                    assert (
-                        pos_moved["f_abs"] == f_pos + j * f_step
-                    ), f"should move to z: {f_pos + j * f_step}, but moved to {pos_moved['f_abs']}"
+                    assert pos_moved["z_abs"] == z_pos + j * z_step, (
+                        f"should move to z: {z_pos + j * z_step}, "
+                        f"but moved to {pos_moved['z_abs']}"
+                    )
+                    assert pos_moved["f_abs"] == f_pos + j * f_step, (
+                        f"should move to f: {f_pos + j * f_step}, "
+                        f"but moved to {pos_moved['f_abs']}"
+                    )
 
                     # channel
                     for k in range(len(selected_channels)):
                         idx = self.get_next_record(change_channel_func_str, idx)
-                        # c = selected_channels[(k+1) % len(selected_channels)]['id']
-                        # assert self.model.signal_records[idx][1][0] == c, f"{frame_id} should change to channel {c}, but it's {model.signal_records[idx][1][0]}"
                         assert (
                             self.model.signal_records[idx][2]["__test_frame_id"]
                             == frame_id
-                        ), f"prepare next channel(change channel) should happen after {frame_id}"
+                        ), (
+                            "prepare next channel(change channel) "
+                            f"should happen after {frame_id}"
+                        )
 
                         assert (
-                            self.model.signal_records[idx][2]["__test_frame_id_completed"]
+                            self.model.signal_records[idx][2][
+                                "__test_frame_id_completed"
+                            ]
                             == self.model.signal_records[idx][2]["__test_frame_id"]
-                        ), f"prepare next channel(change channel) should happen inside signal_end_func()"
+                        ), (
+                            "prepare next channel(change channel) "
+                            "should happen inside signal_end_func()"
+                        )
 
-                        assert(
-                            self.exist_rectord(change_channel_func_str, pre_change_channel_idx+1, idx-1) == False
-                        ), f"prepare next channel(change channel) should not happen more than once"
+                        assert (
+                            self.exist_rectord(
+                                change_channel_func_str,
+                                pre_change_channel_idx + 1,
+                                idx - 1,
+                            )
+                            is False
+                        ), (
+                            "prepare next channel(change channel) "
+                            "should not happen more than once"
+                        )
                         pre_change_channel_idx = idx
                         frame_id += 1
 
             else:  # per_stack
                 for k in range(len(selected_channels)):
                     # z
+                    f_pos += selected_channels[k]["defocus"]
                     for j in range(self.config["number_z_steps"]):
                         idx = self.get_next_record("move_stage", idx)
 
                         pos_moved = self.model.signal_records[idx][1][0]
                         # z, f
-                        assert (
-                            pos_moved["z_abs"] == z_pos + j * z_step
-                        ), f"should move to z: {z_pos + j * z_step}, but moved to {pos_moved['z_abs']}"
-                        assert (
-                            pos_moved["f_abs"] == f_pos + j * f_step
-                        ), f"should move to z: {f_pos + j * f_step}, but moved to {pos_moved['f_abs']}"
+                        assert pos_moved["z_abs"] == z_pos + j * z_step, (
+                            f"should move to z: {z_pos + j * z_step}, "
+                            f"but moved to {pos_moved['z_abs']}"
+                        )
+                        assert pos_moved["f_abs"] == f_pos + j * f_step, (
+                            f"should move to f: {f_pos + j * f_step}, "
+                            f"but moved to {pos_moved['f_abs']}"
+                        )
                         frame_id += 1
-
+                    f_pos -= selected_channels[k]["defocus"]
                     idx = self.get_next_record(change_channel_func_str, idx)
-                    # c = selected_channels[(k+1) % len(selected_channels)]['id']
-                    # assert self.model.signal_records[idx][1][0] == c, f"{frame_id} should change to channel {c}, but it's {self.model.signal_records[idx][1][0]}"
                     assert (
                         self.model.signal_records[idx][2]["__test_frame_id"]
                         == frame_id - 1
-                    ), f"prepare next channel(change chanel) should happen at {frame_id - 1}"
+                    ), (
+                        "prepare next channel (change channel) "
+                        f"should happen at {frame_id - 1}"
+                    )
 
         # restore z, f
         idx = self.get_next_record("move_stage", idx)

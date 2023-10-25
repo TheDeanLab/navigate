@@ -41,7 +41,7 @@ logger = logging.getLogger(p)
 
 
 def build_MCLStage_connection(serialnum):
-    """Build a connection to the MCL stage.
+    """Build a connection to the Mad City Lab stage.
 
     Parameters
     ----------
@@ -66,35 +66,39 @@ def build_MCLStage_connection(serialnum):
 
 
 class MCLStage(StageBase):
-    """MCL stage class.
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of the microscope.
-    device_connection : dict
-        Dictionary containing the connection information for the device.
-    configuration : dict
-        Dictionary containing the configuration information for the device.
-    device_id : int
-        Device ID.
-
-    """
+    """Mad City Lab stage class."""
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the MCL stage.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : dict
+            Dictionary containing the connection information for the device.
+        configuration : dict
+            Dictionary containing the configuration information for the device.
+        device_id : int
+            Device ID.
+        """
         super().__init__(
             microscope_name, device_connection, configuration, device_id
         )  # only initialize the focus axis
 
         # Mapping from self.axes to corresponding MCL channels
         if device_connection is not None:
+            #: object: MCL controller object.
             self.mcl_controller = device_connection["controller"]
+
+            #: int: MCL handle.
             self.handle = device_connection["handle"]
 
         # Default axes mapping
         # the API maps axis to a number
         axes_mapping = {"x": "x", "y": "y", "z": "z", "f": "f", "theta": "aux"}
         if not self.axes_mapping:
+            #: dict: Dictionary of software axes and their corresponding hardware axes.
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }

@@ -72,29 +72,34 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200):
 
 
 class ASIStage(StageBase):
-    """ASIStage Class
+    """Applied Scientific Instrumentation (ASI) Stage Class
 
-    Detailed documentation: http://asiimaging.com/docs/products/serial_commands
-    Quick Start Guide: http://asiimaging.com/docs/command_quick_start
+    ASI Documentation: http://asiimaging.com/docs/products/serial_commands
+    ASI Quick Start Guide: http://asiimaging.com/docs/command_quick_start
 
-    Stage API provides all distances in a 10th of a micron unit.  To convert to microns,
-    requires division by factor of 10 to get to micron units...
+    Note
+    ----
+        ASI firmware requires all distances to be in a 10th of a micron.
 
-    NOTE: Do not ever change the F axis. This will alter the relative position of each
-    FTP stilt, adding strain to the system. Only move the Z axis, which will change both
-    stilt positions simultaneously.
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocessing.managers.DictProxy
-        Global configuration of the microscope
+    Warning
+    -------
+        Do not ever change the F axis. This will alter the relative position of each
+        FTP stilt, adding strain to the system. Only move the Z axis, which will
+        change both stilt positions simultaneously.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the ASI Stage connection.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+        """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Default axes mapping
@@ -102,11 +107,12 @@ class ASIStage(StageBase):
         if not self.axes_mapping:
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
-            }
+            }  #: Mapping of axes to ASI axes
         else:
             # Force cast axes to uppercase
             self.axes_mapping = {k: v.upper() for k, v in self.axes_mapping.items()}
         self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
+        #: ASI stage axes
 
         # Set feedback alignment values - Default to 85 if not specified
         if self.stage_feedback is None:
@@ -117,7 +123,7 @@ class ASIStage(StageBase):
                 for axis, self.stage_feedback in zip(self.asi_axes, self.stage_feedback)
             }
 
-        self.tiger_controller = device_connection
+        self.tiger_controller = device_connection  #: ASI Stage connection
         if device_connection is not None:
             # Set feedback alignment values
             for ax, aa in feedback_alignment.items():

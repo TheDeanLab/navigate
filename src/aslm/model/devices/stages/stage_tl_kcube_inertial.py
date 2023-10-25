@@ -78,22 +78,22 @@ def build_TLKIMStage_connection(serialnum):
 
 
 class TLKIMStage(StageBase):
-    """Thorlabs KIM Stage
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of the microscope.
-    device_connection : str
-        Connection string for the device.
-    configuration : dict
-        Configuration dictionary for the device.
-    device_id : int
-        Device ID for the device.
-
-    """
+    """Thorlabs KIM Stage"""
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the stage.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : str
+            Connection string for the device.
+        configuration : dict
+            Configuration dictionary for the device.
+        device_id : int
+            Device ID for the device.
+        """
         super().__init__(
             microscope_name, device_connection, configuration, device_id
         )  # only initialize the focus axis
@@ -101,24 +101,29 @@ class TLKIMStage(StageBase):
         # Default mapping from self.axes to corresponding KIM channels
         axes_mapping = {"x": 4, "y": 2, "z": 3, "f": 1}
         if not self.axes_mapping:
+            #: dict: Dictionary mapping software axes to hardware axes.
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
 
+        #: list: List of KIM axes available.
         self.kim_axes = list(self.axes_mapping.values())
 
         if device_connection is not None:
+            #: object: Thorlabs KIM Stage controller
             self.kim_controller = device_connection
 
         device_config = configuration["configuration"]["microscopes"][microscope_name][
             "stage"
         ]["hardware"]
         if type(device_config) == ListProxy:
+            #: str: Serial number of the stage.
             self.serial_number = str(device_config[device_id]["serial_number"])
         else:
             self.serial_number = device_config["serial_number"]
 
     def __del__(self):
+        """Delete the KIM Connection"""
         try:
             self.stop()
             self.kim_controller.KIM_Close(self.serial_number)
@@ -130,6 +135,11 @@ class TLKIMStage(StageBase):
 
         Reports the position of the stage for all axes, and creates the hardware
         position dictionary.
+
+        Returns
+        -------
+        position_dict : dict
+            Dictionary containing the current position of the stage.
         """
         for ax, i in self.axes_mapping.items():
             try:
@@ -148,8 +158,6 @@ class TLKIMStage(StageBase):
 
     def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """Implement movement logic along a single axis.
-
-        Example calls:
 
         Parameters
         ----------
@@ -193,7 +201,7 @@ class TLKIMStage(StageBase):
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
-        """Move stage
+        """Move stage along a single axis.
 
         Parameters
         ----------

@@ -44,29 +44,31 @@ logger = logging.getLogger(p)
 
 
 class SyntheticStage(StageBase):
-    """Synthetically generated stage for testing purposes.
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of the microscope.
-    device_connection : str
-        Connection string for the device.
-    configuration : dict
-        Configuration dictionary for the device.
-    device_id : int
-        Device ID for the device.
-
-    """
+    """Synthetically generated stage for testing purposes."""
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the stage.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : str
+            Connection string for the device.
+        configuration : dict
+            Configuration dictionary for the device.
+        device_id : int
+            Device ID for the device.
+        """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
+        #: float: The default speed of the stage in mm/s.
         self.default_speed = 7.68 * 0.67
 
         # Default axes mapping
         axes_mapping = {"x": "X", "y": "Y", "z": "Z", "theta": "Theta", "f": "F"}
         if not self.axes_mapping:
+            #: dict: Dictionary mapping software axes to hardware axes.
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
@@ -83,8 +85,6 @@ class SyntheticStage(StageBase):
 
     def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """Implement movement logic along a single axis.
-
-        Example calls:
 
         Parameters
         ----------
@@ -142,14 +142,18 @@ class SyntheticStage(StageBase):
     def load_sample(self):
         """Load a sample.
 
-        TODO: Is this implemented?
+        Warning
+        -------
+            Not implemented.
         """
         self.y_pos = self.y_load_position
 
     def unload_sample(self):
         """Unload a sample.
 
-        TODO: Is this implemented?
+        Warning
+        -------
+            Not implemented.
         """
         self.y_pos = self.y_unload_position
 

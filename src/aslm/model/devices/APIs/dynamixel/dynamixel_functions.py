@@ -25,10 +25,127 @@ from ctypes import cdll
 from pathlib import Path
 import sys
 import platform
+from unittest.mock import MagicMock
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
+
+def create_mock_dxl_device():
+    """Create a mock Dynamixel device for testing and documentation.
+
+    Returns
+    -------
+    dxl_lib : MagicMock
+        Mock Dynamixel device.
+    """
+    # Create a MagicMock instance for dxl_lib
+    dxl_lib = MagicMock()
+
+    # port_handler
+    dxl_lib.portHandler = MagicMock()
+    dxl_lib.openPort = MagicMock()
+    dxl_lib.closePort = MagicMock()
+    dxl_lib.clearPort = MagicMock()
+    dxl_lib.setPortName = MagicMock()
+    dxl_lib.getPortName = MagicMock()
+    dxl_lib.setBaudRate = MagicMock()
+    dxl_lib.getBaudRate = MagicMock()
+    dxl_lib.readPort = MagicMock()
+    dxl_lib.writePort = MagicMock()
+    dxl_lib.setPacketTimeout = MagicMock()
+    dxl_lib.setPacketTimeoutMSec = MagicMock()
+    dxl_lib.isPacketTimeout = MagicMock()
+
+    # packet_handler
+    dxl_lib.packetHandler = MagicMock()
+    dxl_lib.printTxRxResult = MagicMock()
+    dxl_lib.getTxRxResult = MagicMock()
+    dxl_lib.getTxRxResult.restype = ctypes.c_char_p
+    dxl_lib.printRxPacketError = MagicMock()
+    dxl_lib.getRxPacketError = MagicMock()
+    dxl_lib.getRxPacketError.restype = ctypes.c_char_p
+    dxl_lib.getLastTxRxResult = MagicMock()
+    dxl_lib.getLastRxPacketError = MagicMock()
+    dxl_lib.setDataWrite = MagicMock()
+    dxl_lib.getDataRead = MagicMock()
+    dxl_lib.txPacket = MagicMock()
+    dxl_lib.rxPacket = MagicMock()
+    dxl_lib.txRxPacket = MagicMock()
+    dxl_lib.ping = MagicMock()
+    dxl_lib.pingGetModelNum = MagicMock()
+    dxl_lib.broadcastPing = MagicMock()
+    dxl_lib.getBroadcastPingResult = MagicMock()
+    dxl_lib.reboot = MagicMock()
+    dxl_lib.factoryReset = MagicMock()
+    dxl_lib.readTx = MagicMock()
+    dxl_lib.readRx = MagicMock()
+    dxl_lib.readTxRx = MagicMock()
+    dxl_lib.read1ByteTx = MagicMock()
+    dxl_lib.read1ByteRx = MagicMock()
+    dxl_lib.read1ByteTxRx = MagicMock()
+    dxl_lib.read2ByteTx = MagicMock()
+    dxl_lib.read2ByteRx = MagicMock()
+    dxl_lib.read2ByteTxRx = MagicMock()
+    dxl_lib.read4ByteTx = MagicMock()
+    dxl_lib.read4ByteRx = MagicMock()
+    dxl_lib.read4ByteTxRx = MagicMock()
+    dxl_lib.writeTxOnly = MagicMock()
+    dxl_lib.writeTxRx = MagicMock()
+    dxl_lib.write1ByteTxOnly = MagicMock()
+    dxl_lib.write1ByteTxRx = MagicMock()
+    dxl_lib.write2ByteTxOnly = MagicMock()
+    dxl_lib.write2ByteTxRx = MagicMock()
+    dxl_lib.write4ByteTxOnly = MagicMock()
+    dxl_lib.write4ByteTxRx = MagicMock()
+    dxl_lib.regWriteTxOnly = MagicMock()
+    dxl_lib.regWriteTxRx = MagicMock()
+    dxl_lib.syncReadTx = MagicMock()
+    dxl_lib.syncWriteTxOnly = MagicMock()
+    dxl_lib.bulkReadTx = MagicMock()
+    dxl_lib.bulkWriteTxOnly = MagicMock()
+
+    # group_bulk_read
+    dxl_lib.groupBulkRead = MagicMock()
+    dxl_lib.groupBulkReadAddParam = MagicMock()
+    dxl_lib.groupBulkReadRemoveParam = MagicMock()
+    dxl_lib.groupBulkReadClearParam = MagicMock()
+    dxl_lib.groupBulkReadTxPacket = MagicMock()
+    dxl_lib.groupBulkReadRxPacket = MagicMock()
+    dxl_lib.groupBulkReadTxRxPacket = MagicMock()
+    dxl_lib.groupBulkReadIsAvailable = MagicMock()
+    dxl_lib.groupBulkReadGetData = MagicMock()
+
+    # group_bulk_write
+    dxl_lib.groupBulkWrite = MagicMock()
+    dxl_lib.groupBulkWriteAddParam = MagicMock()
+    dxl_lib.groupBulkWriteRemoveParam = MagicMock()
+    dxl_lib.groupBulkWriteChangeParam = MagicMock()
+    dxl_lib.groupBulkWriteClearParam = MagicMock()
+    dxl_lib.groupBulkWriteTxPacket = MagicMock()
+
+    # group_sync_read
+    dxl_lib.groupSyncRead = MagicMock()
+    dxl_lib.groupSyncReadAddParam = MagicMock()
+    dxl_lib.groupSyncReadRemoveParam = MagicMock()
+    dxl_lib.groupSyncReadClearParam = MagicMock()
+    dxl_lib.groupSyncReadTxPacket = MagicMock()
+    dxl_lib.groupSyncReadRxPacket = MagicMock()
+    dxl_lib.groupSyncReadTxRxPacket = MagicMock()
+    dxl_lib.groupSyncReadIsAvailable = MagicMock()
+    dxl_lib.groupSyncReadGetData = MagicMock()
+
+    # group_sync_write
+    dxl_lib.groupSyncWrite = MagicMock()
+    dxl_lib.groupSyncWriteAddParam = MagicMock()
+    dxl_lib.groupSyncWriteRemoveParam = MagicMock()
+    dxl_lib.groupSyncWriteChangeParam = MagicMock()
+    dxl_lib.groupSyncWriteClearParam = MagicMock()
+    dxl_lib.groupSyncWriteTxPacket = MagicMock()
+
+    return dxl_lib
+
 
 is_64bits = sys.maxsize > 2**32
 if platform.system() == "Darwin":
@@ -58,7 +175,11 @@ if Path(dxl_config).exists():
     dxl_lib = cdll.LoadLibrary(dxl_config)
     print("ROBOTIS dll Loaded")
 else:
-    print("Error Dynamixel DLL to Failed to Load Properly.")
+    print(
+        "Error Dynamixel DLL to Failed to Load Properly."
+        "Will Mock Dynamixel Library for Testing and Documentation."
+    )
+    dxl_lib = create_mock_dxl_device()
 
 # port_handler
 portHandler = dxl_lib.portHandler

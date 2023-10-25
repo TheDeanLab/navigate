@@ -48,13 +48,14 @@ logger = logging.getLogger(p)
 class RemoteFocusEquipmentSolutions(RemoteFocusNI):
     """RemoteFocusEquipmentSolutions Class
 
-    The SCA814 has a single character input buffer that can be overflowed if the proper
-    steps are not taken. To avoid overflowing the input buffer the user should send a
-    single character at a time and wait for that same character to be echoed back by the
-    controller. While not necessary, it is advisable to verify that the character
-    received from the controller is the same character sent. Once the character is
-    received the next character can be processed. Uses pyserial:
-    https://pyserial.readthedocs.io/en/latest/pyserial_api.html
+    Note
+    ----
+        The SCA814 has a single character input buffer that can be overflowed if the
+        proper steps are not taken. To avoid overflowing the input buffer the user
+        should send a single character at a time and wait for that same character to
+        be echoed back by the controller. While not necessary, it is advisable to
+        verify that the character received from the controller is the same character
+        sent. Once the character is received the next character can be processed.
     """
 
     def __init__(self, microscope_name, device_connection, configuration):

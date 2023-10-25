@@ -55,57 +55,46 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
     received from the controller is the same character sent. Once the character is
     received the next character can be processed. Uses pyserial:
     https://pyserial.readthedocs.io/en/latest/pyserial_api.html
-
-    Parameters
-    ----------
-    comport : str
-        COM port to connect to the RemoteFocusEquipmentSolutions device.
-    baudrate : int
-        Baudrate to connect to the RemoteFocusEquipmentSolutions device.
-    timeout : float
-        Timeout to connect to the RemoteFocusEquipmentSolutions device.
-    debug : bool
-        Debug mode for the RemoteFocusEquipmentSolutions device.
-
-    Attributes
-    ----------
-    comport : str
-        COM port for communicating with the voice coil
-    baud_rate : int
-        Baud rate for communicating with the voice coil
-    byte_size : Other
-        Number of data bits
-    parity : Other
-        Enable parity checking
-    stop_bits : Other
-        Number of stop bits.
-    timeout : float
-        Timeout duration.
-    read_on_init : bool
-        Establish connection upon initialization.
-    debug : bool
-        Debugging mode.  Prints statements for debugging.
-
-    Methods
-    -------
-    read_bytes()
-        Read bytes from the RemoteFocusEquipmentSolutions device.
-    send_command()
-        Send command to the RemoteFocusEquipmentSolutions device.
-    close_connection()
-        Close connection with the RemoteFocusEquipmentSolutions device.
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the RemoteFocusEquipmentSolutions Class
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope
+        device_connection : str
+            Name of the device connection
+        configuration : dict
+            Configuration dictionary
+        """
         super().__init__(microscope_name, device_connection, configuration)
-        self.comport = configuration['configuration']['microscopes'][
-            microscope_name]['remote_focus_device']['hardware'].get('comport', "COM1")
+
+        #: str: Name of the RS232 communication port.
+        self.comport = configuration["configuration"]["microscopes"][microscope_name][
+            "remote_focus_device"
+        ]["hardware"].get("comport", "COM1")
+
+        #: int: Baud rate of the RS232 communication port.
         self.baud_rate = 115200
+
+        #: int: Number of data bits.
         self.byte_size = serial.EIGHTBITS
+
+        #: int: Parity bit.
         self.parity = serial.PARITY_NONE
+
+        #: int: Number of stop bits.
         self.stop_bits = serial.STOPBITS_ONE
+
+        #: float: Timeout for the serial port.
         self.timeout = 1.25
+
+        #: bool: Read on initialization.
         self.read_on_init = True
+
+        #: bool: Debug mode.
         self.debug = False
 
         # Open Serial Port
@@ -215,9 +204,11 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
         received_bytes : bytearray
             Number of bytes received from the RemoteFocusEquipmentSolutions device.
 
-        Examples
-        --------
-        >>> read_bytes(1)
+        Raises
+        ------
+        UserWarning
+            If the serial port to the RemoteFocusEquipmentSolutions is connected, but it
+            isn't responding as expected.
 
         """
         for i in range(100):
@@ -246,13 +237,11 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
             Message to send to the RemoteFocusEquipmentSolutions device. If str ==
             'close', shutdown device.
 
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> remote_focus_equipment_solutions.send_command('d0')
+        Raises
+        ------
+        UserWarning
+            If there is an error in communicating with the RemoteFocusEquipmentSolutions
+            device.
         """
         try:
             if message == "close":
@@ -275,20 +264,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
             )
 
     def close_connection(self):
-        """Close RemoteFocusEquipmentSolutions class
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> remote_focus_equipment_solutions.close_connection()
-        """
+        """Close RemoteFocusEquipmentSolutions class"""
         try:
             self.send_command("k0\r")
             self.serial.close()

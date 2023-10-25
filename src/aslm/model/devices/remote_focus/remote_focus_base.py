@@ -44,73 +44,67 @@ logger = logging.getLogger(p)
 
 
 class RemoteFocusBase:
-    """RemoteFocusBase Class
-
-    Parent class for Remote Focusing Device.
-
-    Attributes
-    ----------
-    configuration : dict
-        Configuration dictionary.
-    microscope_name : str
-        Microscope name.
-    device_config : dict
-        Remote focus device configuration dictionary.
-    sample_rate : int
-        Sample rate.
-    sweep_time : float
-        Sweep time.
-    camera_delay_percent : float
-        Camera delay percent.
-    remote_focus_delay : float
-        Remote focus delay percent.
-    remote_focus_ramp_falling : float
-        Remote focus ramp falling percent.
-    remote_focus_max_voltage : float
-        Remote focus maximum voltage.
-    remote_focus_min_voltage : float
-        Remote focus minimum voltage.
-    samples : int
-        Number of samples.
-    waveform_dict : dict
-        Dictionary of waveforms.
-
-    Methods
-    -------
-    prepare_task(channel_key)
-        Prepares the task for the remote focus device.
-    start_task()
-        Starts the task for the remote focus device.
-    stop_task()
-        Stops the task for the remote focus device.
-    close_task()
-        Closes the task for the remote focus device.
-    """
+    """RemoteFocusBase Class - Parent class for Remote Focusing Device."""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initializes the RemoteFocusBase Class.
 
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : str
+            Connection string for the remote focus device.
+        configuration : dict
+            Configuration dictionary.
+        """
+
+        #: dict: Configuration dictionary.
         self.configuration = configuration
+
+        #: str: Name of the microscope.
         self.microscope_name = microscope_name
+
+        #: dict: Remote focus device parameters.
         self.device_config = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]
+
+        #: int: Sample rate of the DAQ.
         self.sample_rate = configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]
+
+        #: float: Sweep time of the DAQ.
         self.sweep_time = configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sweep_time"]
+
+        #: float: Camera delay percent.
         self.camera_delay_percent = configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]["delay_percent"]
 
         # Waveform Parameters
+        #: float: Remote focus delay.
         self.remote_focus_delay = self.device_config.get("delay_percent", 7.5)
+
+        #: float: Percent smoothing.
         self.percent_smoothing = self.device_config.get("smoothing", 0)
+
+        #: float: Remote focus ramp falling.
         self.remote_focus_ramp_falling = self.device_config["ramp_falling_percent"]
+
+        #: float: Remote focus max voltage.
         self.remote_focus_max_voltage = self.device_config["hardware"]["max"]
+
+        #: float: Remote focus min voltage.
         self.remote_focus_min_voltage = self.device_config["hardware"]["min"]
+
+        #: int: Number of samples.
         self.samples = int(self.sample_rate * self.sweep_time)
+
+        #: dict: Waveform dictionary.
         self.waveform_dict = {}
 
     def __del__(self):
@@ -131,10 +125,6 @@ class RemoteFocusBase:
         -------
         waveform : numpy.ndarray
             Waveform for the remote focus device.
-
-        Examples
-        --------
-        >>> remote_focus.adjust(0.1)
         """
 
         # calculate waveform
@@ -267,48 +257,20 @@ class RemoteFocusBase:
         task : nidaqmx.Task
             Task for the remote focus device.
 
-        Examples
-        --------
-        >>> remote_focus.prepare_task('488')
         """
 
         pass
 
     def start_task(self):
-        """Starts the task for the remote focus device.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> remote_focus.start_task()
-        """
+        """Starts the task for the remote focus device."""
 
         pass
 
     def stop_task(self):
-        """Stops the task for the remote focus device.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> remote_focus.stop_task()
-        """
+        """Stops the task for the remote focus device."""
 
         pass
 
     def close_task(self):
+        """Closes the task for the remote focus device."""
         pass

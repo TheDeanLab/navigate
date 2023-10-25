@@ -67,7 +67,7 @@ class TestZStack:
                 assert False, "Some device movements are missed!"
         return idx
 
-    def exist_rectord(self, record_prefix, idx_start, idx_end):
+    def exist_record(self, record_prefix, idx_start, idx_end):
         for i in range(idx_start, idx_end + 1):
             if self.model.signal_records[i][0] == record_prefix:
                 return True
@@ -175,7 +175,7 @@ class TestZStack:
                         )
 
                         assert (
-                            self.exist_rectord(
+                            self.exist_record(
                                 change_channel_func_str,
                                 pre_change_channel_idx + 1,
                                 idx - 1,

@@ -46,68 +46,37 @@ logger = logging.getLogger(p)
 
 
 class GalvoNI(GalvoBase):
-    """GalvoNI Class
-
-    This class is the NI DAQ implementation of the GalvoBase class.
-
-    Parameters
-    ----------
-    microscope_name : str
-        The name of the microscope
-    device_connection : object
-        The device connection object
-    configuration : dict
-        The configuration dictionary
-    galvo_id : int
-        The galvo id
-
-    Attributes
-    ----------
-    task : object
-        The NI DAQ task object
-    trigger_source : str
-        The trigger source for the galvo
-
-    Methods
-    -------
-    initialize_task()
-        Initialize the NI DAQ task for the galvo
-    __del__()
-        Deletes the task.
-    adjust(exposure_times, sweep_times)
-        Adjust the galvo to the readout time
-    prepare_task(channel_key)
-        Prepare the task for the given channel
-    start_task()
-        Start the NI DAQ task
-    stop_task()
-        Stop the NI DAQ task
-    close_task()
-        Close the NI DAQ task
-    """
+    """GalvoNI Class - NI DAQ Control of Galvanometers"""
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
+        """Initialize the GalvoNI class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : dict
+            Dictionary of device connections.
+        configuration : dict
+            Dictionary of configuration parameters.
+        galvo_id : int
+            Galvo ID.
+        """
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
 
+        #: obj: NI DAQ task for the galvo.
         self.task = None
 
+        #: str: Name of the NI port for galvo control.
         self.trigger_source = configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["trigger_source"]
 
+        #: obj: NI DAQ device connection.
         self.daq = device_connection
 
     def initialize_task(self):
-        """Initialize the NI DAQ task for the galvo
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Initialize the NI DAQ task for the galvo"""
 
         # TODO: make sure the task is reusable, Or need to create and close each time.
         self.task = nidaqmx.Task()
@@ -126,17 +95,7 @@ class GalvoNI(GalvoBase):
         self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
 
     def __del__(self):
-        """Delete the task.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
-
+        """Delete the task."""
         self.stop_task()
         self.close_task()
 
@@ -166,7 +125,8 @@ class GalvoNI(GalvoBase):
         return waveform_dict
 
     def turn_off(self):
-        """
+        """Turn off the galvo.
+
         Turns off the galvo. NOTE: This will only work if there isn't another task
         bound to this channel. This should only be called in microscope.terminate().
         """
@@ -188,24 +148,11 @@ class GalvoNI(GalvoBase):
         ----------
         channel_key : str
             The channel key for the task
-
-        Returns
-        -------
-        None
         """
         pass
 
     def start_task(self):
-        """Start the NI DAQ task for the galvo
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Start the NI DAQ task for the galvo."""
         pass
 
     def stop_task(self, force=False):
@@ -215,22 +162,9 @@ class GalvoNI(GalvoBase):
         ----------
         force : bool
             Force stop the task
-
-        Returns
-        -------
-        None
         """
         pass
 
     def close_task(self):
-        """Close the NI DAQ task for the galvo
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Close the NI DAQ task for the galvo"""
         pass

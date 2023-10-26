@@ -7,7 +7,8 @@ API Reference
    :recursive:
 
    aslm.config
-   aslm.model
    aslm.controller
-   aslm.view
+   aslm.log_files
+   aslm.model
    aslm.tools
+   aslm.view

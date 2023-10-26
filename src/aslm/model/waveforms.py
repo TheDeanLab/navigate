@@ -68,8 +68,9 @@ def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_del
 
     Examples
     --------
-    exposure_start, exposure_end = camera_exposure(sample_rate, sweep_time,
-    exposure, camera_delay)
+        >>> exposure_start, exposure_end = camera_exposure(sample_rate, sweep_time,
+        exposure, camera_delay)
+
     """
     amplitude = 5
 
@@ -117,7 +118,7 @@ def single_pulse(
 
     Examples
     --------
-    typical_TTL_pulse = single_pulse(sample_rate, sweep_time, 10, 1, 1, 0)
+    >>> typical_TTL_pulse = single_pulse(sample_rate, sweep_time, 10, 1, 1, 0)
     """
     # get an integer number of samples
     samples = int(np.floor(np.multiply(sample_rate, sweep_time)))
@@ -178,7 +179,7 @@ def remote_focus_ramp(
 
     Examples
     --------
-    etl_ramp = tunable_lens_ramp(sample_rate, exposure_time, sweep_time, etl_delay,
+    >>> etl_ramp = tunable_lens_ramp(sample_rate, exposure_time, sweep_time, etl_delay,
         camera_delay, fall, amplitude, offset)
 
     """
@@ -248,7 +249,7 @@ def sawtooth(
 
     Examples
     --------
-    typical_galvo = sawtooth(sample_rate, sweep_time, 10, 1, 0, 50, np.pi/2)
+    >>> typical_galvo = sawtooth(sample_rate, sweep_time, 10, 1, 0, 50, np.pi/2)
     """
 
     samples = int(np.multiply(sample_rate, sweep_time))
@@ -280,7 +281,7 @@ def dc_value(sample_rate=100000, sweep_time=0.4, amplitude=1):
 
     Examples
     --------
-    typical_galvo = dc_value(sample_rate, sweep_time, 1)
+    >>> typical_galvo = dc_value(sample_rate, sweep_time, 1)
 
     """
     samples = np.multiply(float(sample_rate), sweep_time)
@@ -324,7 +325,7 @@ def square(
 
     Examples
     --------
-    typical_laser = square(sample_rate, sweep_time, 10, 1, 0, 50, np.pi)
+    >>> typical_laser = square(sample_rate, sweep_time, 10, 1, 0, 50, np.pi)
     """
     samples = int(sample_rate * sweep_time)
     duty_cycle = duty_cycle / 100
@@ -362,7 +363,7 @@ def sine_wave(
 
     Examples
     --------
-    typical_laser = sine_wave(sample_rate, sweep_time, 10, 1, 0, 0)
+    >>> typical_laser = sine_wave(sample_rate, sweep_time, 10, 1, 0, 0)
 
     """
     samples = int(sample_rate * sweep_time)
@@ -385,6 +386,10 @@ def smooth_waveform(waveform, percent_smoothing=10):
     -------
     smoothed_waveform : np.array
         The smoothed waveform
+
+    Examples
+    --------
+    >>> smoothed_waveform = smooth_waveform(waveform, percent_smoothing)
 
     """
     waveform_length = np.size(waveform)

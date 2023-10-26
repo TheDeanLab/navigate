@@ -182,10 +182,13 @@ class BigDataViewerMetadata(XMLMetadata):
                             # an acquisition.
                             pass
 
+                    # Construct shear matrix
+                    shear_transform = np.eye(4, 4)[0:-1, :]
                     if self.shear_data:
-                        shear_transform = np.ones((3, 4), dtype=float)
-                    else:
-                        shear_transform = np.ones((3, 4), dtype=float)
+                        # [1 hxy hxz, 0,
+                        #  hyx 1 hyz, 0,
+                        #  hzx hzy 1, 0]
+                        shear_transform[0, 2] = 2
 
                     view_transforms = [
                         {

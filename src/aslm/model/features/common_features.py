@@ -1081,6 +1081,7 @@ class ZStackAcquisition:
         self.need_to_move_new_position = True
         self.need_to_move_z_position = True
         self.z_position_moved_time = 0
+        self.defocus = None
 
         self.stack_cycling_mode = "per_stack"
         self.channels = 1
@@ -1122,14 +1123,12 @@ class ZStackAcquisition:
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
 
         self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
+
         # get available channels
         self.channels = microscope_state["selected_channels"]
         self.current_channel_in_list = 0
-        self.model.active_microscope.current_channel = 0
-        self.model.active_microscope.prepare_next_channel()
 
         self.number_z_steps = int(microscope_state["number_z_steps"])
-
         self.start_z_position = float(microscope_state["start_position"])
         # end_z_position = float(microscope_state["end_position"])
         self.z_step_size = float(microscope_state["step_size"])
@@ -1175,6 +1174,12 @@ class ZStackAcquisition:
                 }
             ]
 
+        # Setup next channel down here, to ensure defocus isn't merged into
+        # restore f_pos, positions
+        self.model.active_microscope.central_focus = None
+        self.model.active_microscope.current_channel = 0
+        self.model.active_microscope.prepare_next_channel()
+
         self.model.logger.debug(
             f"*** ZStack pre_signal_func: {self.positions}, {self.start_focus}, "
             f"{self.start_z_position}"
@@ -1187,6 +1192,12 @@ class ZStackAcquisition:
         # TODO: distance > 1000 should not be hardcoded and somehow related to
         #  different kinds of stage devices.
         self.stage_distance_threshold = 1000
+
+        self.defocus = [
+            v["defocus"]
+            for v in microscope_state["channels"].values()
+            if v["is_selected"]
+        ]
 
     def signal_func(self):
         """
@@ -1220,6 +1231,10 @@ class ZStackAcquisition:
             self.current_focus_position = (
                 self.start_focus + self.positions[self.current_position_idx]["f"]
             )
+            if self.defocus is not None:
+                self.current_focus_position += self.defocus[
+                    self.current_channel_in_list
+                ]
 
             # calculate delta_x, delta_y
             # TODO: Here.
@@ -1322,6 +1337,10 @@ class ZStackAcquisition:
 
         if self.stack_cycling_mode != "per_stack":
             # update channel for each z position in 'per_slice'
+            if self.defocus is not None:
+                self.current_focus_position -= self.defocus[
+                    self.current_channel_in_list
+                ]
             self.update_channel()
             self.need_to_move_z_position = self.current_channel_in_list == 0
 
@@ -1389,11 +1408,12 @@ class ZStackAcquisition:
         -------
         None
         """
-
         self.current_channel_in_list = (
             self.current_channel_in_list + 1
         ) % self.channels
         self.model.active_microscope.prepare_next_channel()
+        if self.defocus is not None:
+            self.current_focus_position += self.defocus[self.current_channel_in_list]
 
     def pre_data_func(self):
         """

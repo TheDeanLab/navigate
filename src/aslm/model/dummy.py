@@ -40,7 +40,11 @@ import numpy as np
 import random
 
 # Local Imports
-from aslm.config.config import load_configs, verify_experiment_config, verify_waveform_constants
+from aslm.config.config import (
+    load_configs,
+    verify_experiment_config,
+    verify_waveform_constants,
+)
 from aslm.model.devices.camera.camera_synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
@@ -51,11 +55,13 @@ from aslm.model.features.feature_container import (
 
 
 class DummyController:
+    """Dummy Controller"""
+
     def __init__(self, view):
         """Initialize the Dummy controller.
 
-        Args
-        ----
+        Parameters
+        ----------
         view : DummyView
             The view to be controlled by this controller.
 
@@ -69,11 +75,17 @@ class DummyController:
         """
         from aslm.controller.configuration_controller import ConfigurationController
 
+        #: dict: The configuration dictionary.
         self.configuration = DummyModel().configuration
+        #: list: The list of commands.
         self.commands = []
+        #: DummyView: The view to be controlled by this controller.
         self.view = view
+        #: ConfigurationController: The configuration controller.
         self.configuration_controller = ConfigurationController(self.configuration)
+        #: dict: The stage positions.
         self.stage_pos = {}
+        #: dict: The stage offset positions.
         self.off_stage_pos = {}
 
     def execute(self, str, sec=None, *args):
@@ -83,16 +95,12 @@ class DummyController:
         first element is oldest command/first to pop off
 
 
-        Args
-        ----
+        Parameters
+        ----------
         str : str
             The command to be executed.
         sec : float
             The time to wait before executing the command.
-
-        Returns
-        -------
-        None
 
         Example
         -------
@@ -112,10 +120,6 @@ class DummyController:
         """Pop the oldest command.
 
         Use this method in testing code to grab the next command.
-
-        Parameters
-        ----------
-        None
 
         Returns
         -------
@@ -138,46 +142,10 @@ class DummyController:
 
 
 class DummyModel:
-    """Dummy Model
-
-    This class is used to test the controller and view.
-
-    Attributes
-    ----------
-    configuration : Configuration
-        The configuration object.
-    signal_container : SignalContainer
-        The signal container.
-    data_container : DataContainer
-        The data container.
-    signal_pipe : Pipe
-        The pipe for sending signals.
-    data_pipe : Pipe
-        The pipe for sending data.
-    signal_thread : Thread
-        The thread for sending signals.
-    data_thread : Thread
-        The thread for sending data.
-    stop_flag : bool
-        The flag for stopping the threads.
-    frame_id : int
-        The frame id.
-    data : list
-        The list of data.
-
-    Methods
-    -------
-    signal_func()
-        The function for sending signals.
-    data_func()
-        The function for sending data.
-
-    Example
-    -------
-    >>> model = DummyModel()
-    """
+    """Dummy Model - This class is used to test the controller and view."""
 
     def __init__(self):
+        """Initialize the Dummy model."""
         # Set up the model, experiment, waveform dictionaries
         base_directory = Path(__file__).resolve().parent.parent
         configuration_directory = Path.joinpath(base_directory, "config")
@@ -188,7 +156,9 @@ class DummyModel:
             configuration_directory, "waveform_constants.yml"
         )
 
+        #: Manager: The manager.
         self.manager = Manager()
+        #: dict: The configuration dictionary.
         self.configuration = load_configs(
             self.manager,
             configuration=config,
@@ -199,40 +169,54 @@ class DummyModel:
         verify_experiment_config(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)
 
+        #: DummyDevice: The device.
         self.device = DummyDevice()
+        #: Pipe: The pipe for sending signals.
         self.signal_pipe, self.data_pipe = None, None
-
+        #: DummyMicroscope: The microscope.
         self.active_microscope = DummyMicroscope(
             "Mesoscale", self.configuration, devices_dict={}, is_synthetic=True
         )
-
+        #: Object: The signal container.
         self.signal_container = None
+        #: Object: The data container.
         self.data_container = None
+        #: Thread: The signal thread.
         self.signal_thread = None
+        #: Thread: The data thread.
         self.data_thread = None
 
+        #: bool: The flag for stopping the model.
         self.stop_flag = False
+        #: int: The frame id.
         self.frame_id = 0  # signal_num
-
+        #: list: The list of data.
         self.data = []
+        #: list: The list of signal records.
         self.signal_records = []
+        #: list: The list of data records.
         self.data_records = []
-
+        #: int: The image width.
         self.img_width = int(
             self.configuration["experiment"]["CameraParameters"]["x_pixels"]
         )
+        #: int: The image height.
         self.img_height = int(
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
+        #: int: The number of frames in the data buffer.
         self.number_of_frames = 10
+        #: ndarray: The data buffer.
         self.data_buffer = np.zeros(
             (self.number_of_frames, self.img_width, self.img_height)
         )
+        #: ndarray: The data buffer positions.
         self.data_buffer_positions = np.zeros(
             shape=(self.number_of_frames, 5), dtype=float
         )  # z-index, x, y, z, theta, f
-
+        #: dict: The camera dictionary.
         self.camera = {}
+        #: str: The active microscope name.
         self.active_microscope_name = self.configuration["experiment"][
             "MicroscopeState"
         ]["microscope_name"]
@@ -247,6 +231,21 @@ class DummyModel:
             )
 
     def signal_func(self):
+        """Perform signal-related functionality.
+
+        This method is responsible for signal processing operations. It resets the
+        signal container and continues processing signals until the end flag is set.
+        During each iteration, it runs the signal container and communicates with
+        a separate process using a signal pipe. The `frame_id` is incremented after
+        each signal processing step.
+
+        Note
+        ----
+        - The function utilizes a signal container and a signal pipe for communication.
+        - It terminates when the `end_flag` is set and sends a "shutdown" signal.
+
+        """
+
         self.signal_container.reset()
         while not self.signal_container.end_flag:
             if self.signal_container:
@@ -265,19 +264,24 @@ class DummyModel:
         self.stop_flag = True
 
     def data_func(self):
-        """The function for sending data.
+        """The function responsible for sending and processing data.
 
-        Parameters
-        ----------
-        None
+        This method continuously sends data requests using a data pipe and receives
+        corresponding frame IDs. It appends the received frame IDs to the data storage
+        and runs data processing operations if a data container is available.
 
         Returns
         -------
         None
 
-        Example
-        -------
-        >>> model.data_func()
+        Notes
+        -----
+        - The function operates in a loop until the `stop_flag` is set.
+        - It communicates with a separate process using a data pipe for data retrieval.
+        - Received frame IDs are appended to the data storage and processed if
+        applicable.
+        - The method terminates by sending a "shutdown" signal.
+
         """
         while not self.stop_flag:
             self.data_pipe.send("getData")
@@ -302,7 +306,8 @@ class DummyModel:
 
         Returns
         -------
-        None
+        bool
+            True if the model is started successfully, False otherwise.
 
         Example
         -------
@@ -333,47 +338,39 @@ class DummyModel:
 
 
 class DummyDevice:
-    """Dummy Device
-
-    This class is used to test the controller and view.
-
-    Attributes
-    ----------
-    signal_pipe : Pipe
-        The pipe for sending signals.
-    data_pipe : Pipe
-        The pipe for sending data.
-
-    Methods
-    -------
-    setup()
-        Set up the pipes.
-    shutdown()
-        Shutdown the pipes.
-
-    Example
-    -------
-    >>> device = DummyDevice()
-    """
+    """Dummy Device - class is used to test the controller and view."""
 
     def __init__(self, timecost=0.2):
+        """Initialize the Dummy device.
+
+        Parameters
+        ----------
+        timecost : float
+            The time cost for generating a message.
+        """
+
+        #: int: The message count.
         self.msg_count = mp.Value("i", 0)
+        #: int: The sendout message count.
         self.sendout_msg_count = 0
+        #: Pipe: The pipe for sending signals.
         self.out_port = None
+        #: Pipe: The pipe for receiving signals.
         self.in_port = None
+        #: float: The time cost for generating a message.
         self.timecost = timecost
+        #: bool: The flag for stopping the device.
         self.stop_flag = False
 
     def setup(self):
         """Set up the pipes.
 
-        Parameters
-        ----------
-        None
-
         Returns
         -------
-        None
+        Pipe
+            The pipe for sending signals.
+        Pipe
+            The pipe for receiving signals.
 
         Example
         -------
@@ -396,14 +393,6 @@ class DummyDevice:
     def generate_message(self):
         """Generate a message.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> device.generate_message()
@@ -415,14 +404,6 @@ class DummyDevice:
     def clear(self):
         """Clear the pipes.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> device.clear()
@@ -431,14 +412,6 @@ class DummyDevice:
 
     def listen(self):
         """Listen to the pipe.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
 
         Example
         -------
@@ -458,11 +431,8 @@ class DummyDevice:
 
         Parameters
         ----------
-        None
-
-        Returns
-        -------
-        None
+        timeout : int
+            The timeout for sending out the message.
 
         Example
         -------
@@ -484,37 +454,37 @@ class DummyDevice:
 
 
 class DummyMicroscope:
-    """Dummy Microscope
-
-    This class is used to test the controller and view.
-
-    Attributes
-    ----------
-    signal_pipe : Pipe
-        The pipe for sending signals.
-    data_pipe : Pipe
-        The pipe for sending data.
-
-    Methods
-    -------
-    setup()
-        Set up the pipes.
-    shutdown()
-        Shutdown the pipes.
-
-    Example
-    -------
-    >>> device = DummyMicroscope()
-    """
+    """Dummy Microscope - Class is used to test the controller and view."""
 
     def __init__(self, name, configuration, devices_dict, is_synthetic=False):
+        """Initialize the Dummy microscope.
+
+        Parameters
+        ----------
+        name : str
+            The microscope name.
+        configuration : dict
+            The configuration dictionary.
+        devices_dict : dict
+            The dictionary of devices.
+        is_synthetic : bool
+            The flag for using a synthetic microscope.
+        """
+        #: str: The microscope name.
         self.microscope_name = name
+        #: dict: The configuration dictionary.
         self.configuration = configuration
+        #: np.ndarray: The data buffer.
         self.data_buffer = None
+        #: dict: The stage dictionary.
         self.stages = {}
+        #: dict: The lasers dictionary.
         self.lasers = {}
+        #: dict: The galvo dictionary.
         self.galvo = {}
+        #: dict: The DAQ dictionary.
         self.daq = devices_dict.get("daq", None)
+        #: int: The current channel.
         self.current_channel = 0
 
     def calculate_exposure_sweep_times(self, readout_time=0):
@@ -525,6 +495,13 @@ class DummyMicroscope:
         readout_time : float
             Readout time of the camera (seconds) if we are operating the camera in
             Normal mode, otherwise -1.
+
+        Returns
+        -------
+        dict
+            The dictionary of exposure times.
+        dict
+            The dictionary of sweep times.
         """
         exposure_times = {}
         sweep_times = {}

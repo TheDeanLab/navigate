@@ -48,6 +48,7 @@ class BigDataViewerMetadata(XMLMetadata):
 
     def __init__(self) -> None:
         super().__init__()
+        self.shear_data = True
 
     def bdv_xml_dict(
         self, file_name: Union[str, list, None], views: list, **kw
@@ -180,11 +181,33 @@ class BigDataViewerMetadata(XMLMetadata):
                             # We have most likely canceled in the middle of
                             # an acquisition.
                             pass
-                    d = {"timepoint": t, "setup": view_id}
-                    d["ViewTransform"] = {"type": "affine"}
-                    d["ViewTransform"]["affine"] = {
-                        "text": " ".join([f"{x:.6f}" for x in mat.ravel()])
-                    }
+
+                    if self.shear_data:
+                        shear_transform = np.ones((3, 4), dtype=float)
+                    else:
+                        shear_transform = np.ones((3, 4), dtype=float)
+
+                    view_transforms = [
+                        {
+                            "type": "affine",
+                            "Name": "Translation to Regular Grid",
+                            "affine": {
+                                "text": " ".join([f"{x:.6f}" for x in mat.ravel()])
+                            },
+                        },
+                        {
+                            "type": "affine",
+                            "Name": "Shearing Transform",
+                            "affine": {
+                                "text": " ".join(
+                                    [f"{x:.6f}" for x in shear_transform.ravel()]
+                                )
+                            },
+                        },
+                    ]
+
+                    d = dict(timepoint=t, setup=view_id, ViewTransform=view_transforms)
+
                     bdv_dict["ViewRegistrations"]["ViewRegistration"].append(d)
 
         return bdv_dict

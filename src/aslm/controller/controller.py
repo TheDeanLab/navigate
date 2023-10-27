@@ -90,35 +90,7 @@ logger = logging.getLogger(p)
 
 
 class Controller:
-    """ASLM Controller
-
-    Parameters
-    ----------
-    root : Tk top-level widget.
-        Tk.tk GUI instance.
-    splash_screen : Tk top-level widget.
-        Tk.tk GUI instance.
-    configuration_path : string
-        Path to the configuration yaml file.
-        Provides global microscope configuration parameters.
-    experiment_path : string
-        Path to the experiment yaml file.
-        Provides experiment-specific microscope configuration.
-    waveform_constants_path : string
-        Path to the waveform constants yaml file.
-        Provides magnification and wavelength-specific parameters.
-    rest_api_path : string
-        Path to the REST API yaml file.
-        Provides REST API configuration parameters.
-    waveform_templates_path : string
-        Path to the waveform templates yaml file.
-        Provides waveform templates for each channel.
-    use_gpu : Boolean
-        Flag for utilizing CUDA functionality.
-    *args :
-        Command line input arguments for non-default
-        file paths or using synthetic hardware modes.
-    """
+    """ASLM Controller"""
 
     def __init__(
         self,
@@ -132,16 +104,45 @@ class Controller:
         use_gpu,
         args,
     ):
+        """Initialize the ASLM Controller.
 
-        # Create a thread pool
+        Parameters
+        ----------
+        root : Tk top-level widget.
+            Tk.tk GUI instance.
+        splash_screen : Tk top-level widget.
+            Tk.tk GUI instance.
+        configuration_path : string
+            Path to the configuration yaml file.
+            Provides global microscope configuration parameters.
+        experiment_path : string
+            Path to the experiment yaml file.
+            Provides experiment-specific microscope configuration.
+        waveform_constants_path : string
+            Path to the waveform constants yaml file.
+            Provides magnification and wavelength-specific parameters.
+        rest_api_path : string
+            Path to the REST API yaml file.
+            Provides REST API configuration parameters.
+        waveform_templates_path : string
+            Path to the waveform templates yaml file.
+            Provides waveform templates for each channel.
+        use_gpu : Boolean
+            Flag for utilizing CUDA functionality.
+        *args :
+            Command line input arguments for non-default
+            file paths or using synthetic hardware modes.
+        """
+
+        #: Object: Thread pool for the controller.
         self.threads_pool = SynchronizedThreadPool()
-        self.event_queue = mp.Queue(
-            100
-        )  # pass events from the model to the view via controller
-        # accepts tuples, ('event_name', value)
 
-        # Create a shared memory manager
+        #: mp.Queue: Queue for retrieving events ('event_name', value) from model
+        self.event_queue = mp.Queue(100)
+
+        #: Manager: A shared memory manager
         self.manager = Manager()
+        #: dict: Configuration dictionary
         self.configuration = load_configs(
             self.manager,
             configuration=configuration_path,
@@ -155,6 +156,7 @@ class Controller:
         verify_waveform_constants(self.manager, self.configuration)
 
         # Initialize the Model
+        #: ObjectInSubprocess: Model object in MVC architecture.
         self.model = ObjectInSubprocess(
             Model, use_gpu, args, self.configuration, event_queue=self.event_queue
         )
@@ -165,45 +167,58 @@ class Controller:
         logger.info(f"Spec - Rest API Path: {rest_api_path}")
 
         # Wire up pipes
+        #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
 
         # save default experiment file
+        #: string: Path to the default experiment yaml file.
         self.default_experiment_file = experiment_path
 
         # waveform setting file
+        #: string: Path to the waveform constants yaml file.
         self.waveform_constants_path = waveform_constants_path
 
         # Configuration Reader
+        #: ConfigurationController: Configuration Controller object.
         self.configuration_controller = ConfigurationController(self.configuration)
 
         # Initialize the View
+        #: View: View object in MVC architecture.
         self.view = view(root)
 
         # Sub Gui Controllers
+        #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(
             self.view.acqbar, self.view.settings.channels_tab, self
         )
+        #: ChannelsTabController: Channels Tab Sub-Controller.
         self.channels_tab_controller = ChannelsTabController(
             self.view.settings.channels_tab, self
         )
+        #: MultiPositionController: Multi-Position Tab Sub-Controller.
         self.multiposition_tab_controller = MultiPositionController(
             self.view.settings.multiposition_tab.multipoint_list, self
         )
+        #: CameraViewController: Camera View Tab Sub-Controller.
         self.camera_view_controller = CameraViewController(
             self.view.camera_waveform.camera_tab, self
         )
+        #: CameraSettingController: Camera Settings Tab Sub-Controller.
         self.camera_setting_controller = CameraSettingController(
             self.view.settings.camera_settings_tab, self
         )
+        #: StageController: Stage Sub-Controller.
         self.stage_controller = StageController(
             self.view.settings.stage_control_tab,
             self.view,
             self.camera_view_controller.canvas,
             self,
         )
+        #: WaveformTabController: Waveform Display Sub-Controller.
         self.waveform_tab_controller = WaveformTabController(
             self.view.camera_waveform.waveform_tab, self
         )
+        #: KeystrokeController: Keystroke Sub-Controller.
         self.keystroke_controller = KeystrokeController(self.view, self)
 
         # Exit
@@ -221,15 +236,22 @@ class Controller:
         # ['microscopes'].keys()[0]  # Default to the first microscope
 
         # Initialize the menus
+        #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
 
         # Create default data buffer
+        #: int: Number of x_pixels from microscope configuration file.
         self.img_width = 0
+        #: int: Number of y_pixels from microscope configuration file.
         self.img_height = 0
+        #: SharedNDArray: Pre-allocated shared memory array.
         self.data_buffer = None
+        #: dict: Additional microscopes.
         self.additional_microscopes = {}
+        #: dict: Additional microscope configurations.
         self.additional_microscopes_configs = {}
+        #: bool: Flag for stopping acquisition.
         self.stop_acquisition_flag = False
 
         # Set view based on model.experiment
@@ -241,6 +263,7 @@ class Controller:
         # destroy splash screen and show main screen
         splash_screen.destroy()
         root.deiconify()
+        #: event: Event for resizing the GUI.
         self.resizie_event_id = None
         self.view.root.bind("<Configure>", self.resize)
 
@@ -335,7 +358,9 @@ class Controller:
         """
         # read the new file and update info of the configuration dict
         if not in_initialize:
-            update_config_dict(self.manager, self.configuration, "experiment", file_name)
+            update_config_dict(
+                self.manager, self.configuration, "experiment", file_name
+            )
             verify_experiment_config(self.manager, self.configuration)
 
         # update buffer
@@ -353,7 +378,10 @@ class Controller:
         self.menu_controller.disable_stage_limits.set(
             0 if self.configuration["experiment"]["StageParameters"]["limits"] else 1
         )
-        self.execute("stage_limits", self.configuration["experiment"]["StageParameters"]["limits"])
+        self.execute(
+            "stage_limits",
+            self.configuration["experiment"]["StageParameters"]["limits"],
+        )
 
         self.acquire_bar_controller.populate_experiment_values()
         # self.stage_controller.populate_experiment_values()
@@ -376,6 +404,11 @@ class Controller:
 
         Collect settings from sub-controllers will validate the value, if something
         is wrong, it will return False
+
+        Returns
+        -------
+        bool
+            True if all settings are valid, False otherwise.
 
         """
         # acquire_bar_controller - update image mode
@@ -403,6 +436,14 @@ class Controller:
         return True
 
     def resize(self, event):
+        """Resize the GUI.
+
+        Parameters
+        __________
+        event : event
+            event = <Configure x=0 y=0 width=1200 height=600>
+        """
+
         def refresh(width, height):
             if width < 1200 or height < 600:
                 return
@@ -424,6 +465,11 @@ class Controller:
 
         Updates model.experiment.
         Sets sub-controller's mode to 'live' when 'continuous is selected, or 'stop'.
+
+        Returns
+        -------
+        bool
+            True if all settings are valid, False otherwise.
         """
         if not self.update_experiment_setting():
             messagebox.showerror(
@@ -468,17 +514,18 @@ class Controller:
     def execute(self, command, *args):
         """Functions listens to the Sub_Gui_Controllers.
 
-        The controller.experiment is passed as
-        an argument to the model, which then overwrites
-        the model.experiment.
-        Workaround due to model being in a sub-process.
+        The controller.experiment is passed as an argument to the model, which then
+        overwrites the model.experiment. Workaround due to model being in a sub-process.
 
         Parameters
         __________
+        command : string
+            string = 'stage', 'stop_stage', 'move_stage_and_update_info',
         args* : function-specific passes.
         """
 
         if command == "joystick_toggle":
+            """Toggles the joystick mode on/off."""
             if self.stage_controller.joystick_is_on:
                 self.execute("stop_stage")
 
@@ -783,6 +830,7 @@ class Controller:
             string = 'acquire' or 'autofocus'
         mode : string
             string = 'continuous', 'z-stack', 'single', or 'projection'
+        args : function-specific passes.
         """
         self.camera_view_controller.image_count = 0
 
@@ -854,7 +902,22 @@ class Controller:
         self.set_mode_of_sub("stop")
 
     def launch_additional_microscopes(self):
+        """Launch additional microscopes."""
+
         def display_images(camera_view_controller, show_img_pipe, data_buffer):
+            """Display images from additional microscopes.
+
+            Parameters
+            ----------
+            camera_view_controller : CameraViewController
+                Camera View Controller object.
+            show_img_pipe : multiprocessing.Pipe
+                Pipe for showing images.
+            data_buffer : SharedNDArray
+                Pre-allocated shared memory array.
+                Size dictated by x_pixels, y_pixels, an number_of_frames in
+                configuration file.
+            """
             camera_view_controller.initialize_non_live_display(
                 data_buffer,
                 self.configuration["experiment"]["MicroscopeState"],
@@ -997,6 +1060,7 @@ class Controller:
         self.stage_controller.set_position_silent(stage_gui_dict)
 
     def update_event(self):
+        """Update the View/Controller based on events from the Model."""
         while True:
             event, value = self.event_queue.get()
 

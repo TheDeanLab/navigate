@@ -238,26 +238,40 @@ class BigDataViewerMetadata(XMLMetadata):
                             "affine": {
                                 "text": " ".join([f"{x:.6f}" for x in mat.ravel()])
                             },
-                        },
-                        {
-                            "type": "affine",
-                            "Name": "Shearing Transform",
-                            "affine": {
-                                "text": " ".join(
-                                    [f"{x:.6f}" for x in self.shear_transform.ravel()]
-                                )
-                            },
-                        },
-                        {
-                            "type": "affine",
-                            "Name": "Rotation Transform",
-                            "affine": {
-                                "text": " ".join(
-                                    [f"{x:.6f}" for x in self.rotate_transform.ravel()]
-                                )
-                            },
-                        },
+                        }
                     ]
+
+                    if self.shear_data:
+                        view_transforms.append(
+                            {
+                                "type": "affine",
+                                "Name": "Shearing Transform",
+                                "affine": {
+                                    "text": " ".join(
+                                        [
+                                            f"{x:.6f}"
+                                            for x in self.shear_transform.ravel()
+                                        ]
+                                    )
+                                },
+                            }
+                        )
+
+                    if self.rotate_data:
+                        view_transforms.append(
+                            {
+                                "type": "affine",
+                                "Name": "Rotation Transform",
+                                "affine": {
+                                    "text": " ".join(
+                                        [
+                                            f"{x:.6f}"
+                                            for x in self.rotate_transform.ravel()
+                                        ]
+                                    )
+                                },
+                            }
+                        )
 
                     d = dict(timepoint=t, setup=view_id, ViewTransform=view_transforms)
 

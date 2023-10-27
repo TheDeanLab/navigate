@@ -349,23 +349,26 @@ class BigDataViewerMetadata(XMLMetadata):
         0, 0, 1, 0]
         """
         if self.rotate_data:
+            cosine_theta = np.cos(np.deg2rad(self.rotate_angle))
+            sin_theta = np.sin(np.deg2rad(self.rotate_angle))
+
             if self.rotate_dimension == "X":
-                self.rotate_transform[1, 1] = np.cos(np.deg2rad(self.rotate_angle))
-                self.rotate_transform[1, 2] = -np.sin(np.deg2rad(self.rotate_angle))
-                self.rotate_transform[2, 1] = np.sin(np.deg2rad(self.rotate_angle))
-                self.rotate_transform[2, 2] = np.cos(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[1, 1] = cosine_theta
+                self.rotate_transform[1, 2] = -sin_theta
+                self.rotate_transform[2, 1] = sin_theta
+                self.rotate_transform[2, 2] = cosine_theta
 
             elif self.rotate_dimension == "Y":
-                self.rotate_transform[0, 0] = np.cos(np.deg2rad(self.rotate_angle))
-                self.rotate_transform[0, 2] = np.sin(np.deg2rad(self.rotate_angle))
-                self.rotate_transform[2, 0] = -np.sin(np.deg2rad(self.rotate_angle))
-                self.rotate_transform[2, 2] = np.cos(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[0, 0] = cosine_theta
+                self.rotate_transform[0, 2] = sin_theta
+                self.rotate_transform[2, 0] = -sin_theta
+                self.rotate_transform[2, 2] = cosine_theta
 
             elif self.rotate_dimension == "Z":
-                self.rotate_transform[0, 0] = np.cos(np.deg2rad(self.rotate_angle))
-                self.rotate_transform[0, 1] = -np.sin(np.deg2rad(self.rotate_angle))
-                self.rotate_transform[1, 0] = np.sin(np.deg2rad(self.rotate_angle))
-                self.rotate_transform[1, 1] = np.cos(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[0, 0] = cosine_theta
+                self.rotate_transform[0, 1] = -sin_theta
+                self.rotate_transform[1, 0] = sin_theta
+                self.rotate_transform[1, 1] = cosine_theta
             else:
                 pass
 

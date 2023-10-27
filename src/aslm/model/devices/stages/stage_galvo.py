@@ -89,11 +89,23 @@ class GalvoNIStage(StageBase):
 
             #: float: minimum voltage for each axis
             self.galvo_min_voltage = device_config[device_id]["min"]
+
+            #: float: Distance threshold for wait until delay
+            self.distance_threshold = device_config[device_id].get(
+                "distance_threshold", None
+            )
+
+            #: float: Stage settle duration in milliseconds.
+            self.stage_settle_duration = device_config[device_id].get(
+                "settle_duration_ms", 20
+            )
         else:
             self.volts_per_micron = device_config["volts_per_micron"]
             self.axes_channels = device_config["axes_mapping"]
             self.galvo_max_voltage = device_config["max"]
             self.galvo_min_voltage = device_config["min"]
+            self.distance_threshold = device_config.get("distance_threshold", None)
+            self.stage_settle_duration = device_config.get("settle_duration_ms", 20)
 
         #: dict: Mapping of software axes to hardware axes.
         self.axes_mapping = {self.axes[0]: self.axes_channels[0]}
@@ -353,14 +365,15 @@ class GalvoNIStage(StageBase):
         # update analog waveform
         self.daq.update_analog_task(self.axes_channels[0].split("/")[0])
 
+        # Stage Settle Duration
         if wait_until_done:
-            # Should only wait for large moves where a galvo or piezo might
-            # fail to keep up. 50 microns default hard-coded. Will move to
-            # configuration file if valuable.
-            if delta_position >= 50:
-                time.sleep(0.02)
-                print("paused"
-                      
+            if self.distance_threshold is None:
+                return
+            else:
+                if delta_position >= self.distance_threshold:
+                    # Convert from milliseconds to seconds.
+                    time.sleep(self.stage_settle_duration / 1000)
+
         setattr(self, f"{axis}_pos", axis_abs)
 
         return True

@@ -45,6 +45,18 @@ logger = logging.getLogger(p)
 
 
 def build_dynamixel_zoom_connection(configuration):
+    """Connect to the DynamixelZoom Servo.
+
+    Parameters
+    ----------
+    configuration : dict
+        Configuration dictionary for the device.
+
+    Returns
+    -------
+    port_num : int
+        DynamixelZoom port number.
+    """
     # id = configuration["configuration"]["hardware"]["zoom"]["servo_id"]
     comport = configuration["configuration"]["hardware"]["zoom"]["port"]
     devicename = comport.encode("utf-8")
@@ -65,57 +77,80 @@ def build_dynamixel_zoom_connection(configuration):
 
 
 class DynamixelZoom(ZoomBase):
-    """DynamixelZoom Class
-
-    Controls the Dynamixel Servo.
-
-    Methods
-    -------
-    set_zoom(zoom, wait_until_done)
-        Change the DynamixelZoom position to zoom value of the microscope.
-    move(position, wait_until_done)
-        Move the DynamixelZoom position.
-    read_position()
-        Read the position of the DynamixelZoom servo.
-
-    """
+    """DynamixelZoom Class - Controls the Dynamixel Servo."""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the DynamixelZoom Servo.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : int
+            Connection string for the device.
+        configuration : dict
+            Configuration dictionary for the device.
+        """
         super().__init__(microscope_name, device_connection, configuration)
+
+        #: object: DynamixelZoom object.
         self.dynamixel = dynamixel
+
+        #: int: DynamixelZoom ID.
         self.id = configuration["configuration"]["microscopes"][microscope_name][
             "zoom"
         ]["hardware"]["servo_id"]
+
+        #: int: DynamixelZoom torque enable.
         self.addr_mx_torque_enable = 24
+
+        #: int: DynamixelZoom goal position.
         self.addr_mx_goal_position = 30
+
+        #: int: DynamixelZoom present position.
         self.addr_mx_present_position = 36
+
+        #: int: DynamixelZoom p gain.
         self.addr_mx_p_gain = 28
+
+        #: int: DynamixelZoom torque limit.
         self.addr_mx_torque_limit = 34
+
+        #: int: DynamixelZoom moving speed.
         self.addr_mx_moving_speed = 32
 
         # Specifies how much the goal position can be off (+/-) from the target
+        #: int: DynamixelZoom goal position offset.
         self.goal_position_offset = 10
 
         # Specifies how long to sleep for the wait until done function
-
+        #: float: DynamixelZoom sleep time.
         self.sleeptime = 0.05
+
+        #: float: DynamixelZoom timeout duration.
         self.timeout = 15
 
         # the dynamixel library uses integers instead of booleans for binary
         # information
+        #: int: DynamixelZoom torque enable.
         self.torque_enable = 1
+
+        #: int: DynamixelZoom torque disable.
         self.torque_disable = 0
 
+        #: obj: DynamixelZoom port number.
         self.port_num = device_connection
 
     def __del__(self):
+        """Delete the DynamixelZoom Instance"""
         logger.debug("DynamixelZoom Instance Deleted")
         self.dynamixel.closePort(self.port_num)
 
     def set_zoom(self, zoom, wait_until_done=False):
         """Change the DynamixelZoom Servo.
 
-        Confirms tha the zoom position is available in the zoomdict
+        Confirms that the zoom position is available in the zoomdict, and then
+        changes to that zoom value.
 
         Parameters
         ----------
@@ -124,10 +159,15 @@ class DynamixelZoom(ZoomBase):
         wait_until_done : bool
             Delay parameter.
 
-        # Changes zoom after checking that the commanded value exists
+        Raises
+        ------
+        ValueError
+            If the zoom designation is not in the configuration.
+
         """
         if zoom in self.zoomdict:
             self.move(self.zoomdict[zoom], wait_until_done)
+            #: str: Current zoom value.
             self.zoomvalue = zoom
         else:
             logger.error(f"Zoom designation, {zoom}, not in the configuration")

@@ -43,24 +43,31 @@ logger = logging.getLogger(p)
 
 
 class ZoomBase:
-    """ZoomBase parent class.
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
-    """
+    """ZoomBase parent class."""
 
     def __init__(self, microscope_name, device_controller, configuration):
+        """Initialize the parent zoom class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_controller : object
+            Hardware device to connect to
+        configuration : multiprocesing.managers.DictProxy
+            Global configuration of the microscope
+        """
+
+        #: dict: Configuration dictionary for the device.
         self.configuration = configuration["configuration"]["microscopes"][
             microscope_name
         ]["zoom"]
+
+        #: dict: Zoom dictionary
         self.zoomdict = self.configuration["position"]
         self.build_stage_dict()
+
+        #: float: the desired zoom setting
         self.zoomvalue = None
 
     def build_stage_dict(self):
@@ -92,6 +99,7 @@ class ZoomBase:
             self.stage_offsets = None
             return
 
+        #: dict: Dictionary of stage offsets in between different zoom values.
         self.stage_offsets = {}
         for solvent, axes in stage_positions.items():
             self.stage_offsets[solvent] = {}
@@ -105,7 +113,7 @@ class ZoomBase:
                         )
 
     def set_zoom(self, zoom, wait_until_done=False):
-        """Change the Zoom Servo.
+        """Change the microscope zoom.
 
         Confirms tha the zoom position is available in the zoomdict
 
@@ -116,7 +124,7 @@ class ZoomBase:
         wait_until_done : bool
             Delay parameter.
 
-        # Changes zoom after checking that the commanded value exists
+        Changes zoom after checking that the commanded value exists
         """
         if zoom in self.zoomdict:
             self.zoomvalue = zoom

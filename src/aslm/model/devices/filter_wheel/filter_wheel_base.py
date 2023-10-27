@@ -43,28 +43,27 @@ logger = logging.getLogger(p)
 
 
 class FilterWheelBase:
-    """FilterWheelBase Class
-
-    Parent class for controlling filter wheels.
-
-    Attributes
-    ----------
-    filter_dictionary : dict
-        Dictionary with installed filter names, e.g., filter_dictionary = {'GFP', 0}.
-    wheel_position : int
-        Default filter wheel position
-
-    Methods
-    -------
-    check_if_filter_in_filter_dictionary()
-        Checks to see if filter name exists in the filter dictionary.
-    """
+    """FilterWheelBase - Parent class for controlling filter wheels."""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the FilterWheelBase class.
 
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : dict
+            Dictionary of device connections.
+        configuration : dict
+            Dictionary of configuration parameters.
+        """
+
+        #: dict: Dictionary of filters available on the filter wheel.
         self.filter_dictionary = configuration["configuration"]["microscopes"][
             microscope_name
         ]["filter_wheel"]["available_filters"]
+
+        #: int: Filter wheel position.
         self.wheel_position = 0
 
     def check_if_filter_in_filter_dictionary(self, filter_name):
@@ -80,6 +79,11 @@ class FilterWheelBase:
         -------
         filter_exists : bool
             Flag if filter exists in the filter dictionary.
+
+        Raises
+        ------
+        ValueError
+            If filter name is not in the filter dictionary.
 
         """
         if filter_name in self.filter_dictionary:

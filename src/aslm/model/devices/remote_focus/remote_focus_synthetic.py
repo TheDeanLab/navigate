@@ -44,39 +44,20 @@ logger = logging.getLogger(p)
 
 
 class SyntheticRemoteFocus(RemoteFocusBase):
-    """SyntheticRemoteFocus Class
-
-    Parameters
-    ----------
-    microscope_name : str
-        The name of the microscope.
-    device_connection : DeviceConnection
-        The device connection.
-    configuration : dict
-        The configuration.
-
-    Attributes
-    ----------
-    microscope_name : str
-        The name of the microscope.
-    device_connection : nidaqmx.Task
-        The connection to the device.
-    configuration : dict
-        The configuration of the device.
-
-    Methods
-    -------
-    prepare_task(channel_key)
-        Prepares the task for the given channel.
-    start_task()
-        Starts the task.
-    stop_task()
-        Stops the task.
-    close_task()
-        Closes the task.
-    """
+    """SyntheticRemoteFocus Class"""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the SyntheticRemoteFocus class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            The microscope name.
+        device_connection : object
+            The device connection object.
+        configuration : dict
+            The device configuration.
+        """
         super().__init__(microscope_name, device_connection, configuration)
         pass
 
@@ -93,68 +74,33 @@ class SyntheticRemoteFocus(RemoteFocusBase):
         channel_key : str
             The channel key.
 
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> prepare_task("remote_focus")
         """
         # write waveform
         logger.debug(f"remote focus writes the waveform for {channel_key}")
 
     def start_task(self):
-        """Starts the task.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> start_task()
-        """
+        """Starts the task."""
 
         logger.debug("remote focus started task!")
 
     def stop_task(self):
-        """Stops the task.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> stop_task()
-        """
+        """Stops the task."""
         logger.debug("remote focus stopped task!")
 
     def close_task(self):
-        """Closes the task.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> close_task()
-        """
+        """Closes the task."""
         logger.debug("remote focus closed task!")
 
     def move(self, readout_time, offset=None):
+        """Moves the remote focus.
+
+        This method moves the remote focus.
+
+        Parameters
+        ----------
+        readout_time : float
+            The readout time in seconds.
+        offset : float
+            The offset of the signal in volts.
+        """
         logger.debug(f"move remote focus offset: {offset}")

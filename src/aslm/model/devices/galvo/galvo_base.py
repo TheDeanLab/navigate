@@ -44,85 +44,71 @@ logger = logging.getLogger(p)
 
 
 class GalvoBase:
-    """GalvoBase Class
-
-    Parent class for galvanometers.
-
-    Parameters
-    ----------
-    microscope_name : str
-        Microscope name.
-    device_connection : str
-        Device connection.
-    configuration : dict
-        Configuration dictionary.
-    galvo_id : int, optional
-        Galvo ID, by default 0
-
-    Attributes
-    ----------
-    configuration : dict
-        Configuration dictionary.
-    microscope_name : str
-        Microscope name.
-    galvo_name : str
-        Galvo name.
-    device_config : dict
-        Device configuration dictionary.
-    sample_rate : int
-        Sample rate.
-    sweep_time : float
-        Sweep time.
-    camera_delay_percent : float
-        Camera delay percent.
-    galvo_max_voltage : float
-        Galvo maximum voltage.
-    galvo_min_voltage : float
-        Galvo minimum voltage.
-    remote_focus_ramp_falling : float
-        Remote focus ramp falling percent.
-    samples : int
-        Number of samples.
-    waveform_dict : dict
-        Waveform dictionary.
-
-    Methods
-    -------
-    prepare_task(channel_key)
-        Prepare the task for the given channel.
-    start_task()
-        Start the task.
-    stop_task()
-        Stop the task.
-    close_task()
-        Close the task.
-    """
+    """GalvoBase Class - Parent class for galvanometers."""
 
     def __init__(self, microscope_name, device_connection, configuration, galvo_id=0):
+        """Initialize the GalvoBase class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : dict
+            Dictionary of device connections.
+        configuration : dict
+            Dictionary of configuration parameters.
+        galvo_id : int
+            Galvo ID.
+        """
+
+        #: dict: Dictionary of microscope configuration parameters.
         self.configuration = configuration
+
+        #: str: Name of the microscope.
         self.microscope_name = microscope_name
+
+        #: str: Name of the galvo.
         self.galvo_name = "Galvo " + str(galvo_id)
+
+        #: dict: Dictionary of device connections.
         self.device_config = configuration["configuration"]["microscopes"][
             microscope_name
         ]["galvo"][galvo_id]
+
+        #: int: Sample rate.
         self.sample_rate = configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]
+
+        #: float: Sweep time.
         self.sweep_time = configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sweep_time"]
+
+        #: float: Camera delay percent.
         self.camera_delay_percent = configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]["delay_percent"]
+
+        #: float: Galvo max voltage.
         self.galvo_max_voltage = self.device_config["hardware"]["max"]
+
+        #: float: Galvo min voltage.
         self.galvo_min_voltage = self.device_config["hardware"]["min"]
+
+        #: float: Percent galvo ramp rising percent.
         self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]["ramp_falling_percent"]
 
         # Galvo Waveform Information
+        #: str: Galvo waveform. Waveform or Sawtooth.
         self.galvo_waveform = self.device_config.get("waveform", "sawtooth")
+
+        #: int: Number of samples.
         self.samples = int(self.sample_rate * self.sweep_time)
+
+        #: dict: Dictionary of galvo waveforms.
         self.waveform_dict = {}
 
     def __del__(self):
@@ -223,51 +209,21 @@ class GalvoBase:
         ----------
         channel_key : str
             Channel key.
-
-        Returns
-        -------
-        None
         """
         pass
 
     def start_task(self):
-        """Start the task.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Start the task."""
         pass
 
     def stop_task(self):
-        """Stop the task.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Stop the task."""
         pass
 
     def close_task(self):
-        """Close the task.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Close the task."""
         pass
 
     def turn_off(self):
+        """Turn off the galvo."""
         pass

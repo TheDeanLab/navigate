@@ -368,10 +368,11 @@ class GalvoNIStage(StageBase):
         # Stage Settle Duration
         if wait_until_done:
             if self.distance_threshold is None:
-                return
+                pass
             else:
                 if delta_position >= self.distance_threshold:
                     # Convert from milliseconds to seconds.
+                    print("Stage settle time activated")
                     time.sleep(self.stage_settle_duration / 1000)
 
         setattr(self, f"{axis}_pos", axis_abs)

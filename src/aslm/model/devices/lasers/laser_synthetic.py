@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,9 +30,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Synthetic Laser Class
-"""
+
 import logging
 
 from aslm.model.devices.lasers.laser_base import LaserBase
@@ -42,18 +41,30 @@ logger = logging.getLogger(p)
 
 
 class SyntheticLaser(LaserBase):
+    """SyntheticLaser Class"""
+
     def __init__(self, microscope_name, device_connection, configuration, laser_id):
+        """Initialize the SyntheticLaser class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            The microscope name.
+        device_connection : object
+            The device connection object.
+        configuration : dict
+            The device configuration.
+        laser_id : str
+            The laser ID.
+        """
         super().__init__(microscope_name, device_connection, configuration, laser_id)
 
     def close(self):
-        """
-        # Close the port before exit.
-        """
+        """Close the port before exit."""
         pass
 
     def initialize_laser(self):
         """
-        # Initialize lasers.
-        # Sets the laser to the maximum power, and sets the mode to CW-APC.
+        Initialize lasers.
         """
         pass

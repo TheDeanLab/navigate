@@ -36,6 +36,7 @@ from typing import Optional
 
 # Local Imports
 from aslm.tools import xml_tools
+from aslm import __version__, __commit__
 
 from multiprocessing.managers import DictProxy
 
@@ -156,22 +157,20 @@ class Metadata:
             ]
         )
 
-        # self._multiposition = self.configuration["experiment"]["MicroscopeState"][
-        #     "is_multiposition"
-        # ]
+        self._multiposition = self.configuration["experiment"]["MicroscopeState"][
+            "is_multiposition"
+        ]
 
-        # if bool(self._multiposition):
-        #     self.positions = len(
-        #         self.configuration["experiment"]["MultiPositions"]
-        #     )
-        # else:
-        #     self.positions = 1
+        if bool(self._multiposition):
+            self.positions = len(self.configuration["experiment"]["MultiPositions"])
+        else:
+            self.positions = 1
 
         # let the data sources have the ability to save more frames
-        self._multiposition = True
-        self.positions = len(
-            self.configuration["experiment"]["MultiPositions"]
-        )
+        # self._multiposition = True
+        # self.positions = len(
+        #     self.configuration["experiment"]["MultiPositions"]
+        # )
 
     def set_stack_order_from_configuration_experiment(self) -> None:
         self._per_stack = (
@@ -216,7 +215,12 @@ class XMLMetadata(Metadata):
     ) -> None:
         """Write to XML file. Assumes we do not include the XML header in our nested
         metadata dictionary."""
-        xml = '<?xml version="1.0" encoding="UTF-8"?>'  # XML file header
+        xml = '<?xml version="1.0" encoding="UTF-8"?>\n'  # XML file header
+        xml += (
+            f"<!-- Created by ASLM, "
+            f"v{__version__}, "
+            f"Commit {__commit__}, Dean Lab at UTSW -->\n"
+        )
         # TODO: should os.path.basename be the default? Added this for BigDataViewer's
         # relative path.
         xml += self.to_xml(file_type, root, file_name=os.path.basename(file_name), **kw)

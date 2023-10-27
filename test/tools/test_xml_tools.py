@@ -77,7 +77,7 @@ class TestDictToXml(unittest.TestCase):
     def test_dict_to_xml_with_single_level(self):
         # Test case with a dictionary containing a single level
         d = {"name": "John", "age": 30, "city": "New York"}
-        expected_xml = '<name name="John" age="30" city="New York"/>'
+        expected_xml = '<name name="John" age="30" city="New York"/>\n'
         actual_xml = xml_tools.dict_to_xml(d)
         self.assertEqual(actual_xml, expected_xml)
 
@@ -88,9 +88,9 @@ class TestDictToXml(unittest.TestCase):
             "address": {"street": "123 Main St", "zipcode": "10001"},
         }
         expected_xml = (
-            '<root><person name="John" age="30" '
-            'city="New York"/><address street="123 '
-            'Main St" zipcode="10001"/></root>'
+            '<root>\n  <person name="John" age="30" '
+            'city="New York"/>\n  <address street="123 '
+            'Main St" zipcode="10001"/>\n</root>\n'
         )
         actual_xml = xml_tools.dict_to_xml(d, tag="root")
         self.assertEqual(actual_xml, expected_xml)
@@ -105,9 +105,9 @@ class TestDictToXml(unittest.TestCase):
             ]
         }
         expected_xml = (
-            '<class><students name="Alice" '
-            'age="20"/><students name="Bob" '
-            'age="22"/><students name="Charlie" age="21"/></class>'
+            '<class>\n  <students name="Alice" '
+            'age="20"/>\n  <students name="Bob" '
+            'age="22"/>\n  <students name="Charlie" age="21"/>\n</class>\n'
         )
         actual_xml = xml_tools.dict_to_xml(d, tag="class")
         self.assertEqual(actual_xml, expected_xml)
@@ -123,8 +123,8 @@ class TestDictToXml(unittest.TestCase):
             }
         }
         expected_xml = (
-            '<root><person name="John" age="30" '
-            'city="New York">Hello, world!</person></root>'
+            '<root>\n  <person name="John" age="30" '
+            'city="New York">Hello, world!</person>\n</root>\n'
         )
         actual_xml = xml_tools.dict_to_xml(d, tag="root")
         self.assertEqual(actual_xml, expected_xml)

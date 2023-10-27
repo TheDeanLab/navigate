@@ -47,12 +47,20 @@ logger = logging.getLogger(p)
 
 def build_filter_wheel_connection(comport, baudrate=115200, timeout=0.25):
     """Build ASIFilterWheel Serial Port connection
-    Attributes
+
+    Parameters
     ----------
     comport : str
         Comport for communicating with the filter wheel, e.g., COM1.
     baudrate : int
-        Baud rate for communicating with the filter wheel, e.g., 9600.
+        Baud rate for communicating with the filter wheel, default is 115200.
+    timeout : float
+        Timeout for communicating with the filter wheel, default is 0.25.
+
+    Returns
+    -------
+    tiger_controller : TigerController
+        ASI Tiger Controller object.
     """
     # wait until ASI device is ready
     tiger_controller = TigerController(comport, baudrate)
@@ -63,23 +71,41 @@ def build_filter_wheel_connection(comport, baudrate=115200, timeout=0.25):
 
 
 class ASIFilterWheel(FilterWheelBase):
-    """ASIFilterWheel Class
+    """ASIFilterWheel - Class for controlling ASI Filter Wheels
 
-    Class for controlling ASI Filter Wheels
-    https://asiimaging.com/docs/fw_1000#fw-1000_ascii_command_set
-
+    Note
+    ----
+        Additional information on the ASI Filter Wheel can be found at:
+        https://asiimaging.com/docs/fw_1000#fw-1000_ascii_command_set
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the ASIFilterWheel class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : dict
+            Dictionary of device connections.
+        configuration : dict
+            Dictionary of configuration parameters.
+        """
+
         super().__init__(microscope_name, device_connection, configuration)
 
+        #: obj: ASI Tiger Controller object.
         self.filter_wheel = device_connection
+
+        #: str: Name of the ASI Filter Wheel.
         self.microscope_name = microscope_name
 
+        #: int: Number of filter wheels.
         self.number_of_filter_wheels = configuration["configuration"]["microscopes"][
             microscope_name
         ]["filter_wheel"]["hardware"]["wheel_number"]
 
+        #: float: Delay for filter wheel to change positions.
         self.wait_until_done_delay = configuration["configuration"]["microscopes"][
             microscope_name
         ]["filter_wheel"]["filter_wheel_delay"]
@@ -87,14 +113,20 @@ class ASIFilterWheel(FilterWheelBase):
         # Send Filter Wheel/Wheels to Zeroth Position
         for i in range(self.number_of_filter_wheels):
             self.filter_wheel.select_filter_wheel(filter_wheel_number=i)
+
+            #: int: Active filter wheel.
             self.active_filter_wheel = i
             self.filter_wheel.move_filter_wheel(filter_wheel_position=0)
+
+            #: int: Filter wheel position.
             self.filter_wheel_position = 0
 
     def __enter__(self):
+        """Enter the ASI Filter Wheel context manager."""
         return self
 
     def __exit__(self):
+        """Exit the ASI Filter Wheel context manager."""
         if self.filter_wheel.is_open():
             logger.debug("ASI Filter Wheel - Closing Device.")
             self.filter_wheel.disconnect_from_serial()
@@ -104,6 +136,12 @@ class ASIFilterWheel(FilterWheelBase):
 
         Assumes that it is ~40ms per adjacent position.
         Depends on filter wheel parameters and load.
+
+        Parameters
+        ----------
+        filter_name : str
+            Name of filter to move to.
+
         """
         old_position = self.filter_wheel_position
         new_position = self.filter_dictionary[filter_name]

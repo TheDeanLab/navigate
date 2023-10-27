@@ -81,7 +81,7 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
     dbytes = np.sum(
         ds.shapes.prod(1) * ds.shape_t * ds.shape_c * ds.positions * 2
     )  # 16 bits, 8 bits per byte
-    assert dbytes == ds.size
+    assert dbytes == ds.nbytes
     data_positions = (np.random.rand(n_images, 5) * 50e3).astype(float)
     for i in range(n_images):
         ds.write(

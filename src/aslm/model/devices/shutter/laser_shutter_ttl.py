@@ -51,24 +51,27 @@ class ShutterTTL(ShutterBase):
     Triggering for shutters delivered from DAQ using digital outputs.
     Each output keeps their last digital state for as long the device is not
     powered down.
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the ShutterTTL.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+        """
         super().__init__(microscope_name, device_connection, configuration)
 
         shutter_channel = configuration["configuration"]["microscopes"][
             microscope_name
         ]["shutter"]["hardware"]["channel"]
 
+        #: nidaqmx.Task: NI Data Acquisition Digital Output Task
         self.shutter_task = nidaqmx.Task()
         self.shutter_task.do_channels.add_do_chan(
             shutter_channel, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES
@@ -81,12 +84,13 @@ class ShutterTTL(ShutterBase):
 
     def open_shutter(self):
         """Open the shutter"""
+        #: bool: Shutter state
         self.shutter_state = True
         self.shutter_task.write(self.shutter_state, auto_start=True)
         logger.debug("ShutterTTL - Shutter opened")
 
     def close_shutter(self):
-        """CLose the shutter"""
+        """Close the shutter"""
         self.shutter_state = False
         self.shutter_task.write(self.shutter_state, auto_start=True)
         logger.debug("ShutterTTL - The shutter is closed")

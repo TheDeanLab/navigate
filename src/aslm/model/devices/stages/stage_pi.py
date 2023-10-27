@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 
 
 def build_PIStage_connection(controller_name, serial_number, stages, reference_modes):
-    """Connect to the Physik Instrumente Stage
+    """Connect to the Physik Instrumente (PI) Stage
 
     Parameters
     ----------
@@ -86,7 +86,7 @@ def build_PIStage_connection(controller_name, serial_number, stages, reference_m
 
 
 class PIStage(StageBase):
-    """Physik Instrumente Stage Class
+    """Physik Instrumente (PI) Stage Class
 
     Parameters
     ----------
@@ -97,29 +97,6 @@ class PIStage(StageBase):
     configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
 
-    Attributes
-    -----------
-    pi_tools : object
-        Physik Instrumente tools object
-    pi_device : object
-        Physik Instrumente device object
-    pi_axes : list
-        List of Physik Instrumente axes
-
-    Methods
-    -------
-    get_position_dict()
-        Returns a dictionary with the hardware stage positions.
-    get_abs_position()
-        Makes sure that the move is within the min and max stage limits.
-    stop()
-        Emergency halt of stage operation.
-    report_position()
-        Return current stage positions.
-    move_axis_absolute()
-        Move stage along a single axis
-    move_absolute()
-        Move stage.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
@@ -129,7 +106,10 @@ class PIStage(StageBase):
         axes_mapping = {"x": 1, "y": 2, "z": 3, "f": 5, "theta": 4}
 
         if device_connection is not None:
+            #: object: Physik Instrumente (PI) device
             self.pi_tools = device_connection["pi_tools"]
+
+            #: object: Physik Instrumente (PI) device
             self.pi_device = device_connection["pi_device"]
 
             # Non-default axes_mapping
@@ -140,6 +120,7 @@ class PIStage(StageBase):
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
 
+        #: list: List of PI axes available.
         self.pi_axes = list(self.axes_mapping.values())
 
     def __del__(self):
@@ -248,7 +229,7 @@ class PIStage(StageBase):
 
         Returns
         -------
-        success : bool
+        bool
             Was the move successful?
         """
         abs_pos_dict = self.verify_abs_position(move_dictionary)
@@ -295,7 +276,8 @@ class PIStage(StageBase):
 
         Returns
         -------
-        None
+        bool
+            Was the wait on target delay successful?
         """
         try:
             self.pi_tools.waitontarget(

@@ -372,7 +372,7 @@ class ImageWriter:
         _, _, free = shutil.disk_usage(self.save_directory)
 
         # Calculate the size in bytes.
-        image_size = self.data_source.size
+        image_size = self.data_source.nbytes
 
         # Confirm that there is enough disk space to save the data.
         if free < image_size:

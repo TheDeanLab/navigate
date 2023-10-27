@@ -99,7 +99,7 @@ class DataSource:
 
         Methods
         -------
-        size()
+        nbytes()
             Return the size of the data source in bytes.
         mode()
             Return the mode of the data source.
@@ -119,7 +119,8 @@ class DataSource:
         """
         self.logger = logging.getLogger(__name__.split(".")[1])
         self.file_name = file_name
-        self.metadata = None  # Expect a metadata object
+        if not hasattr(self, "metadata"):
+            self.metadata = None  # Expect a metadata object
         self._mode = None
         self._closed = True
         self.bits = 16
@@ -140,7 +141,7 @@ class DataSource:
         self._current_frame = 0
 
     @property
-    def size(self) -> int:
+    def nbytes(self) -> int:
         """Getter for the size of this data source in bytes."
 
         Does not account for pyramidal data sources.
@@ -245,7 +246,9 @@ class DataSource:
         """
 
         self.metadata.configuration = configuration
+        self.get_shape_from_metadata()
 
+    def get_shape_from_metadata(self):
         # pull new values from the metadata
         self.dx, self.dy, self.dz = self.metadata.voxel_size
         (

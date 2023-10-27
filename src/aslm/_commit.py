@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,28 +30,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+
 # Standard Library Imports
-import logging
+import subprocess
 
 # Third Party Imports
 
 # Local Imports
 
-# Logger Setup
-p = __name__.split(".")[1]
-logger = logging.getLogger(p)
+
+def get_git_revision_hash() -> str:
+    print("before subprocess")
+    return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
-class JoystickBase:
-    def __init__(self):
-        self.mode = "undefined"
-
-    """
-    TODO: Has to be completely revamped to remove PyQT software.
-    Added a large number of pass statements, and commented out PyQT
-
-    Contains the joystick handlers
-
-    Because the signals emitted can only be processed when a QEventLoop is running, you
-    need something with an event loop (e.g. a QApplication) even for testing.
-    """
+try:
+    __commit__ = get_git_revision_hash()
+except Exception:  # noqa
+    __commit__ = "unknown"

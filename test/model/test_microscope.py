@@ -67,7 +67,7 @@ def test_prepare_acquisition(dummy_microscope):
     )
     assert dummy_microscope.camera.is_acquiring is True
     assert dummy_microscope.shutter.shutter_state is True
-    assert type(waveform_dict) == dict
+    assert isinstance(waveform_dict, dict)
     assert [
         k in waveform_dict.keys()
         for k in ["camera_waveform", "remote_focus_waveform", "galvo_waveform"]
@@ -93,7 +93,7 @@ def test_get_stage_position(dummy_microscope):
         temp_pos = dummy_microscope.stages[axis].report_position()
         ret_pos_dict[pos_axis] = temp_pos[pos_axis]
 
-    assert type(stage_dict) == dict
+    assert isinstance(stage_dict, dict)
     assert ret_pos_dict == stage_dict
 
     # Check caching

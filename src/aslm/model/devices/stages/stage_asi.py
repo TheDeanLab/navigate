@@ -72,96 +72,34 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200):
 
 
 class ASIStage(StageBase):
-    """ASIStage Class
+    """Applied Scientific Instrumentation (ASI) Stage Class
 
-    Detailed documentation: http://asiimaging.com/docs/products/serial_commands
-    Quick Start Guide: http://asiimaging.com/docs/command_quick_start
+    ASI Documentation: http://asiimaging.com/docs/products/serial_commands
+    ASI Quick Start Guide: http://asiimaging.com/docs/command_quick_start
 
-    Stage API provides all distances in a 10th of a micron unit.  To convert to microns,
-    requires division by factor of 10 to get to micron units...
+    Note
+    ----
+        ASI firmware requires all distances to be in a 10th of a micron.
 
-    NOTE: Do not ever change the F axis. This will alter the relative position of each
-    FTP stilt, adding strain to the system. Only move the Z axis, which will change both
-    stilt positions simultaneously.
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocessing.managers.DictProxy
-        Global configuration of the microscope
-
-    Attributes
-    -----------
-    x_pos : float
-        True x position
-    y_pos : float
-        True y position
-    z_pos : float
-        True z position
-    f_pos : float
-        True focus position
-    theta_pos : float
-        True rotation position
-    position_dict : dict
-        Dictionary of true stage positions
-    x_max : float
-        Max x position
-    y_max : float
-        Max y position
-    z_max : float
-        Max y position
-    f_max : float
-        Max focus position
-    theta_max : float
-        Max rotation position
-    x_min : float
-        Min x position
-    y_min : float
-        Min y position
-    z_min : float
-        Min y position
-    f_min : float
-        Min focus position
-    theta_min : float
-        Min rotation position
-    default_speed: float
-        Default speed in millimeters per second
-
-    Methods
+    Warning
     -------
-    get_position_dict()
-        Returns a dictionary with the hardware stage positions.
-    get_abs_position()
-        Makes sure that the move is within the min and max stage limits.
-    stop()
-        Emergency halt of stage operation.
-    get_axis_position()
-        Get position of specific axis
-    move_axis_absolute()
-        Move stage along a single axis
-    move_absolute()
-        Move stage.
-    set_speed()
-        Set velocity that the stage can move when scanning.
-    get_speed()
-        Get velocity
-    report_position()
-        Return current stage positions.
-    scanr()
-        Set scan start position, end position, and enc_divide
-    start_scan()
-        Start scan state machine
-    stop_scan()
-        Start scan and stop after scanning
-    verify_abs_position()
-        Return a dictionary with moving positions within the min and max stage limits
-
+        Do not ever change the F axis. This will alter the relative position of each
+        FTP stilt, adding strain to the system. Only move the Z axis, which will
+        change both stilt positions simultaneously.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the ASI Stage connection.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+        """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Default axes mapping
@@ -169,8 +107,12 @@ class ASIStage(StageBase):
         if not self.axes_mapping:
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
-            }
+            }  #: Mapping of axes to ASI axes
+        else:
+            # Force cast axes to uppercase
+            self.axes_mapping = {k: v.upper() for k, v in self.axes_mapping.items()}
         self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
+        #: ASI stage axes
 
         # Set feedback alignment values - Default to 85 if not specified
         if self.stage_feedback is None:
@@ -181,7 +123,7 @@ class ASIStage(StageBase):
                 for axis, self.stage_feedback in zip(self.asi_axes, self.stage_feedback)
             }
 
-        self.tiger_controller = device_connection
+        self.tiger_controller = device_connection  #: ASI Stage connection
         if device_connection is not None:
             # Set feedback alignment values
             for ax, aa in feedback_alignment.items():
@@ -203,14 +145,15 @@ class ASIStage(StageBase):
                 )
                 / 2
             )
-            # If this is changing, the stage must be power cycled for these changes to take effect.
+            # If this is changing, the stage must be power cycled
+            # for these changes to take effect.
             for ax in self.asi_axes.keys():
                 if self.asi_axes[ax] == "theta":
                     self.tiger_controller.set_finishing_accuracy(ax, 0.003013)
                     self.tiger_controller.set_error(ax, 0.1)
                 else:
                     self.tiger_controller.set_finishing_accuracy(ax, finishing_accuracy)
-                    self.tiger_controller.set_error(ax, 1.2*finishing_accuracy)
+                    self.tiger_controller.set_error(ax, 1.2 * finishing_accuracy)
 
             # Set backlash to 0 (less accurate)
             for ax in self.asi_axes.keys():
@@ -220,7 +163,6 @@ class ASIStage(StageBase):
 
             # Speed optimizations - Set speed to 90% of maximum on each axis
             self.set_speed(percent=0.9)
-
 
     def __del__(self):
         """Delete the ASI Stage connection."""
@@ -303,7 +245,9 @@ class ASIStage(StageBase):
         # Move stage
         try:
             if axis == "theta":
-                self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 1000)
+                self.tiger_controller.move_axis(
+                    self.axes_mapping[axis], axis_abs * 1000
+                )
             else:
                 # The 10 is to account for the ASI units, 1/10 of a micron
                 self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
@@ -315,7 +259,7 @@ class ASIStage(StageBase):
             )
             logger.exception("ASI Stage Exception", e)
             return False
-        
+
         if wait_until_done:
             self.tiger_controller.wait_for_device()
         return True
@@ -371,7 +315,8 @@ class ASIStage(StageBase):
 
         # This is to account for the asi 1/10 of a micron units
         pos_dict = {
-            self.axes_mapping[axis]: pos * 1000 if axis == "theta" else pos * 10 for axis, pos in abs_pos_dict.items()
+            self.axes_mapping[axis]: pos * 1000 if axis == "theta" else pos * 10
+            for axis, pos in abs_pos_dict.items()
         }
         try:
             self.tiger_controller.move(pos_dict)

@@ -27,4 +27,20 @@ aslm.model.devices.filter\_wheel.filter\_wheel\_sutter.SutterFilterWheel
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SutterFilterWheel.serial
+      ~SutterFilterWheel.microscope_name
+      ~SutterFilterWheel.number_of_filter_wheels
+      ~SutterFilterWheel.wait_until_done
+      ~SutterFilterWheel.wait_until_done_delay
+      ~SutterFilterWheel.read_on_init
+      ~SutterFilterWheel.speed
+      ~SutterFilterWheel.delay_matrix
+      ~SutterFilterWheel.init_finished
+      ~SutterFilterWheel.filter_dictionary
+      ~SutterFilterWheel.wheel_position
+   
    

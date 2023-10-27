@@ -51,5 +51,11 @@ aslm.model.devices.camera.camera\_hamamatsu.HamamatsuOrcaLightning
       ~HamamatsuOrcaLightning.step_image_height
       ~HamamatsuOrcaLightning.step_image_width
       ~HamamatsuOrcaLightning.variance
+      ~HamamatsuOrcaLightning.configuration
+      ~HamamatsuOrcaLightning.camera_controller
+      ~HamamatsuOrcaLightning.camera_parameters
+      ~HamamatsuOrcaLightning.is_acquiring
+      ~HamamatsuOrcaLightning.x_pixels
+      ~HamamatsuOrcaLightning.y_pixels
    
    

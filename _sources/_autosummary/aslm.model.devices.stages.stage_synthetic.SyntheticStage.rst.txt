@@ -42,6 +42,10 @@ aslm.model.devices.stages.stage\_synthetic.SyntheticStage
 
    .. autosummary::
    
+      ~SyntheticStage.default_speed
       ~SyntheticStage.axes_mapping
+      ~SyntheticStage.axes
+      ~SyntheticStage.stage_feedback
+      ~SyntheticStage.stage_limits
    
    

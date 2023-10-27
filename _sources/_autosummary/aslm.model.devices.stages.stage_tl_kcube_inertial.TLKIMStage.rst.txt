@@ -35,5 +35,11 @@ aslm.model.devices.stages.stage\_tl\_kcube\_inertial.TLKIMStage
    .. autosummary::
    
       ~TLKIMStage.axes_mapping
+      ~TLKIMStage.kim_axes
+      ~TLKIMStage.kim_controller
+      ~TLKIMStage.serial_number
+      ~TLKIMStage.axes
+      ~TLKIMStage.stage_feedback
+      ~TLKIMStage.stage_limits
    
    

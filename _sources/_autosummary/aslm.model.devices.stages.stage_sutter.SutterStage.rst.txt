@@ -34,6 +34,16 @@ aslm.model.devices.stages.stage\_sutter.SutterStage
 
    .. autosummary::
    
+      ~SutterStage.stage
       ~SutterStage.axes_mapping
+      ~SutterStage.device_axes
+      ~SutterStage.resolution
+      ~SutterStage.speed
+      ~SutterStage.stage_x_pos
+      ~SutterStage.stage_y_pos
+      ~SutterStage.stage_z_pos
+      ~SutterStage.axes
+      ~SutterStage.stage_feedback
+      ~SutterStage.stage_limits
    
    

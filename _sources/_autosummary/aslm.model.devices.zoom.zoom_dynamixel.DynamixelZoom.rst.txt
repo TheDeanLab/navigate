@@ -1,0 +1,51 @@
+aslm.model.devices.zoom.zoom\_dynamixel.DynamixelZoom
+=====================================================
+
+.. currentmodule:: aslm.model.devices.zoom.zoom_dynamixel
+
+.. autoclass:: DynamixelZoom
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DynamixelZoom.__init__
+      ~DynamixelZoom.build_stage_dict
+      ~DynamixelZoom.move
+      ~DynamixelZoom.read_position
+      ~DynamixelZoom.set_zoom
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DynamixelZoom.dynamixel
+      ~DynamixelZoom.id
+      ~DynamixelZoom.addr_mx_torque_enable
+      ~DynamixelZoom.addr_mx_goal_position
+      ~DynamixelZoom.addr_mx_present_position
+      ~DynamixelZoom.addr_mx_p_gain
+      ~DynamixelZoom.addr_mx_torque_limit
+      ~DynamixelZoom.addr_mx_moving_speed
+      ~DynamixelZoom.goal_position_offset
+      ~DynamixelZoom.sleeptime
+      ~DynamixelZoom.timeout
+      ~DynamixelZoom.torque_enable
+      ~DynamixelZoom.torque_disable
+      ~DynamixelZoom.port_num
+      ~DynamixelZoom.configuration
+      ~DynamixelZoom.zoomdict
+      ~DynamixelZoom.zoomvalue
+   
+   

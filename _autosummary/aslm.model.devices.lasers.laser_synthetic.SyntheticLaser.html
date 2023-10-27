@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.lasers.laser_synthetic.SyntheticLaser &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.lasers.laser_synthetic.SyntheticLaser &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -80,45 +80,126 @@
 <dt class="sig sig-object py" id="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.lasers.laser_synthetic.</span></span><span class="sig-name descname"><span class="pre">SyntheticLaser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laser_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="aslm.model.devices.lasers.laser_base.LaserBase.html#aslm.model.devices.lasers.laser_base.LaserBase" title="aslm.model.devices.lasers.laser_base.LaserBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">LaserBase</span></code></a></p>
+<p>SyntheticLaser Class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laser_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the SyntheticLaser class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – The microscope name.</p></li>
+<li><p><strong>device_connection</strong> (<em>object</em>) – The device connection object.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – The device configuration.</p></li>
+<li><p><strong>laser_id</strong> (<em>str</em>) – The laser ID.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.__init__" title="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
-<td><p></p></td>
+<td><p>Initialize the SyntheticLaser class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.close" title="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
-<td><p># Close the port before exit.</p></td>
+<td><p>Close the port before exit.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.initialize_laser" title="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.initialize_laser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_laser</span></code></a>()</p></td>
-<td><p># Initialize lasers.</p></td>
+<td><p>Initialize lasers.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_power</span></code>(laser_intensity)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.set_power" title="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.set_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_power</span></code></a>(laser_intensity)</p></td>
+<td><p>Set laser power</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_off</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.turn_off" title="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.turn_off"><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_off</span></code></a>()</p></td>
+<td><p>Turn off the laser</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_on</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.turn_on" title="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.turn_on"><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_on</span></code></a>()</p></td>
+<td><p>Turn on the laser</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.configuration" title="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Configuration dictionary</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.microscope_name" title="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>Name of the microscope</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.device_config" title="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.device_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">device_config</span></code></a></p></td>
+<td><p>Laser ID</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.close">
 <span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.close" title="Link to this definition"></a></dt>
-<dd><p># Close the port before exit.</p>
+<dd><p>Close the port before exit.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.initialize_laser">
 <span class="sig-name descname"><span class="pre">initialize_laser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.initialize_laser" title="Link to this definition"></a></dt>
-<dd><p># Initialize lasers.
-# Sets the laser to the maximum power, and sets the mode to CW-APC.</p>
+<dd><p>Initialize lasers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.set_power">
+<span class="sig-name descname"><span class="pre">set_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">laser_intensity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.set_power" title="Link to this definition"></a></dt>
+<dd><p>Set laser power</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>laser_intensity</strong> (<em>int</em>) – Laser intensity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.turn_off">
+<span class="sig-name descname"><span class="pre">turn_off</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.turn_off" title="Link to this definition"></a></dt>
+<dd><p>Turn off the laser</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.turn_on">
+<span class="sig-name descname"><span class="pre">turn_on</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.turn_on" title="Link to this definition"></a></dt>
+<dd><p>Turn on the laser</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.configuration" title="Link to this definition"></a></dt>
+<dd><p>Configuration dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.device_config">
+<span class="sig-name descname"><span class="pre">device_config</span></span><a class="headerlink" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.device_config" title="Link to this definition"></a></dt>
+<dd><p>Laser ID</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.devices.lasers.laser_synthetic.SyntheticLaser.microscope_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

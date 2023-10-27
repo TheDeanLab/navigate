@@ -19,6 +19,7 @@ aslm.model.data\_sources.tiff\_data\_source.TiffDataSource
       ~TiffDataSource.__init__
       ~TiffDataSource.close
       ~TiffDataSource.generate_image_name
+      ~TiffDataSource.get_shape_from_metadata
       ~TiffDataSource.read
       ~TiffDataSource.set_bigtiff
       ~TiffDataSource.set_metadata_from_configuration_experiment
@@ -36,8 +37,8 @@ aslm.model.data\_sources.tiff\_data\_source.TiffDataSource
       ~TiffDataSource.is_bigtiff
       ~TiffDataSource.is_ome
       ~TiffDataSource.mode
+      ~TiffDataSource.nbytes
       ~TiffDataSource.shape
-      ~TiffDataSource.size
       ~TiffDataSource.voxel_size
    
    

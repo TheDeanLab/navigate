@@ -27,4 +27,12 @@ aslm.model.devices.lasers.laser\_synthetic.SyntheticLaser
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticLaser.configuration
+      ~SyntheticLaser.microscope_name
+      ~SyntheticLaser.device_config
+   
    

@@ -24,4 +24,23 @@ aslm.model.devices.daq.daq\_base.DAQBase
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DAQBase.configuration
+      ~DAQBase.waveform_constants
+      ~DAQBase.microscope_name
+      ~DAQBase.daq_parameters
+      ~DAQBase.sample_rate
+      ~DAQBase.sweep_time
+      ~DAQBase.remote_focus_ramp_falling
+      ~DAQBase.camera_delay_percent
+      ~DAQBase.camera_pulse_percent
+      ~DAQBase.camera_high_time
+      ~DAQBase.camera_delay
+      ~DAQBase.waveform_dict
+      ~DAQBase.waveform_repeat_num
+      ~DAQBase.waveform_expand_num
+   
    

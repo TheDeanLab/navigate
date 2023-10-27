@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.data_sources.data_source.DataSource &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.data_sources.data_source.DataSource &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -80,61 +80,9 @@
 <dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.data_sources.data_source.</span></span><span class="sig-name descname"><span class="pre">DataSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'w'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Base class for data sources, which can be of arbitrary file type.
-This implements read and write methods for accessing each data source.</p>
-<p>We expect to open the file for read or write during initialization.</p>
-<p>file_name  stores the name of the file to read/write from
-data       stores a pointer to the actual data in the data source and
-metdata    stores a pointer to the metadata.</p>
-<p>Concept and some of the code borrowed from python-microscopy
-(<a class="reference external" href="https://github.com/python-microscopy/python-microscopy/">https://github.com/python-microscopy/python-microscopy/</a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file_name</strong> (<em>str</em>) – Name of the file to read/write from.</p></li>
-<li><p><strong>mode</strong> (<em>str</em>) – Mode to open the file in. Can be ‘r’ or ‘w’.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.file_name">
-<span class="sig-name descname"><span class="pre">file_name</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.file_name" title="Link to this definition"></a></dt>
-<dd><p>Name of the file to read/write from.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.data">
-<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.data" title="Link to this definition"></a></dt>
-<dd><p>Pointer to the actual data in the data source.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>npt.ArrayLike</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.metadata">
-<span class="sig-name descname"><span class="pre">metadata</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.metadata" title="Link to this definition"></a></dt>
-<dd><p>Pointer to the metadata.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>npt.ArrayLike</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'w'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'w'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.__init__" title="Link to this definition"></a></dt>
 <dd><p>Base class for data sources, which can be of arbitrary file type.
 This implements read and write methods for accessing each data source.</p>
 <p>We expect to open the file for read or write during initialization.</p>
@@ -150,13 +98,21 @@ metdata    stores a pointer to the metadata.</p>
 <li><p><strong>mode</strong> (<em>str</em>) – Mode to open the file in. Can be ‘r’ or ‘w’.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">file_name</span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.logger" title="Link to this definition"></a></dt>
+<dd><p>Logger for this class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>logging.Logger</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.file_name">
+<span class="sig-name descname"><span class="pre">file_name</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.file_name" title="Link to this definition"></a></dt>
 <dd><p>Name of the file to read/write from.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -166,9 +122,9 @@ metdata    stores a pointer to the metadata.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
-<dd><p>Pointer to the actual data in the data source.</p>
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.metadata" title="Link to this definition"></a></dt>
+<dd><p>Pointer to the metadata.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>npt.ArrayLike</p>
@@ -177,14 +133,194 @@ metdata    stores a pointer to the metadata.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">metadata</span></span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
-<dd><p>Pointer to the metadata.</p>
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.bits">
+<span class="sig-name descname"><span class="pre">bits</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.bits" title="Link to this definition"></a></dt>
+<dd><p>Number of bits per pixel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>npt.ArrayLike</p>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.dx">
+<span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.dx" title="Link to this definition"></a></dt>
+<dd><p>Pixel size in x dimension (microns).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.dy">
+<span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.dy" title="Link to this definition"></a></dt>
+<dd><p>Pixel size in y dimension (microns).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.dz">
+<span class="sig-name descname"><span class="pre">dz</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.dz" title="Link to this definition"></a></dt>
+<dd><p>Pixel size in z dimension (microns).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.dt">
+<span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.dt" title="Link to this definition"></a></dt>
+<dd><p>Time displacement (seconds).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.dc">
+<span class="sig-name descname"><span class="pre">dc</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.dc" title="Link to this definition"></a></dt>
+<dd><p>Step size between channels (always 1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.shape_x">
+<span class="sig-name descname"><span class="pre">shape_x</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.shape_x" title="Link to this definition"></a></dt>
+<dd><p>Size of the data source in x dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.shape_y">
+<span class="sig-name descname"><span class="pre">shape_y</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.shape_y" title="Link to this definition"></a></dt>
+<dd><p>Size of the data source in y dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.shape_z">
+<span class="sig-name descname"><span class="pre">shape_z</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.shape_z" title="Link to this definition"></a></dt>
+<dd><p>Size of the data source in z dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.shape_t">
+<span class="sig-name descname"><span class="pre">shape_t</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.shape_t" title="Link to this definition"></a></dt>
+<dd><p>Size of the data source in t dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.shape_c">
+<span class="sig-name descname"><span class="pre">shape_c</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.shape_c" title="Link to this definition"></a></dt>
+<dd><p>Size of the data source in c dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.positions">
+<span class="sig-name descname"><span class="pre">positions</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.positions" title="Link to this definition"></a></dt>
+<dd><p>Number of positions in the data source.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.mode" title="Link to this definition"></a></dt>
+<dd><p>Mode to open the file in. Can be ‘r’ or ‘w’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.nbytes">
+<span class="sig-name descname"><span class="pre">nbytes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.nbytes" title="Link to this definition"></a></dt>
+<dd><p>Return the size of the data source in bytes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Return the mode of the data source.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.voxel_size">
+<span class="sig-name descname"><span class="pre">voxel_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.voxel_size" title="Link to this definition"></a></dt>
+<dd><p>Return the voxel size in x, y, z dimensions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.shape" title="Link to this definition"></a></dt>
+<dd><p>Return the shape of the data source in XYCZT format.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.set_metadata_from_configuration_experiment">
+<span class="sig-name descname"><span class="pre">set_metadata_from_configuration_experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.set_metadata_from_configuration_experiment" title="Link to this definition"></a></dt>
+<dd><p>Set the metadata from the microscope configuration.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.read" title="Link to this definition"></a></dt>
+<dd><p>Read data from file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">\*\*kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.write" title="Link to this definition"></a></dt>
+<dd><p>Write data to file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.close" title="Link to this definition"></a></dt>
+<dd><p>Clean up any leftover file pointers, etc.</p>
 </dd></dl>
 
 </dd></dl>
@@ -195,16 +331,19 @@ metdata    stores a pointer to the metadata.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.data_sources.data_source.DataSource.__init__" title="aslm.model.data_sources.data_source.DataSource.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([file_name, mode])</p></td>
 <td><p>Base class for data sources, which can be of arbitrary file type.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.data_sources.data_source.DataSource.close" title="aslm.model.data_sources.data_source.DataSource.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id1" title="aslm.model.data_sources.data_source.DataSource.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
 <td><p>Clean up any leftover file pointers, etc.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.data_sources.data_source.DataSource.read" title="aslm.model.data_sources.data_source.DataSource.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_shape_from_metadata</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="aslm.model.data_sources.data_source.DataSource.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>()</p></td>
 <td><p>Read data from file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.data_sources.data_source.DataSource.set_metadata_from_configuration_experiment" title="aslm.model.data_sources.data_source.DataSource.set_metadata_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_metadata_from_configuration_experiment</span></code></a>(...)</p></td>
-<td><p>Set metadata from configuration experiment.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id3" title="aslm.model.data_sources.data_source.DataSource.set_metadata_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_metadata_from_configuration_experiment</span></code></a>(...)</p></td>
+<td><p>Sets the metadata from according to the microscope configuration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.data_sources.data_source.DataSource.write" title="aslm.model.data_sources.data_source.DataSource.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(data, **kw)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id4" title="aslm.model.data_sources.data_source.DataSource.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(data, **kw)</p></td>
 <td><p>Write data to file.</p></td>
 </tr>
 </tbody>
@@ -212,80 +351,54 @@ metdata    stores a pointer to the metadata.</p>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id3" title="aslm.model.data_sources.data_source.DataSource.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.data_sources.data_source.DataSource.data" title="aslm.model.data_sources.data_source.DataSource.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a></p></td>
 <td><p>Return array representation of data stored in data source.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.data_sources.data_source.DataSource.mode" title="aslm.model.data_sources.data_source.DataSource.mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code></a></p></td>
-<td><p>Get the mode of the data source.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id5" title="aslm.model.data_sources.data_source.DataSource.mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code></a></p></td>
+<td><p>Getter for the mode of the data source.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.data_sources.data_source.DataSource.shape" title="aslm.model.data_sources.data_source.DataSource.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></p></td>
-<td><p>Return shape as XYCZT.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id6" title="aslm.model.data_sources.data_source.DataSource.nbytes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nbytes</span></code></a></p></td>
+<td><p>Getter for the size of this data source in bytes.&quot;</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.data_sources.data_source.DataSource.size" title="aslm.model.data_sources.data_source.DataSource.size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></a></p></td>
-<td><p>Return the size of this data source in bytes.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id7" title="aslm.model.data_sources.data_source.DataSource.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></p></td>
+<td><p>Getter for the shape as XYCZT.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.data_sources.data_source.DataSource.voxel_size" title="aslm.model.data_sources.data_source.DataSource.voxel_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">voxel_size</span></code></a></p></td>
-<td><p>Return voxel size</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id8" title="aslm.model.data_sources.data_source.DataSource.voxel_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">voxel_size</span></code></a></p></td>
+<td><p>Getter for the voxel size</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.close">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.close" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd><p>Clean up any leftover file pointers, etc.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_source</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.read" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd><p>Read data from file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>NotImplementedError</strong> – If not implemented in a derived class.</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_source</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.set_metadata_from_configuration_experiment">
-<span class="sig-name descname"><span class="pre">set_metadata_from_configuration_experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DictProxy</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.set_metadata_from_configuration_experiment" title="Link to this definition"></a></dt>
-<dd><p>Set metadata from configuration experiment.</p>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">set_metadata_from_configuration_experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DictProxy</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd><p>Sets the metadata from according to the microscope configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>configuration</strong> (<em>DictProxy</em>) – Configuration experiment.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_source</span><span class="o">.</span><span class="n">set_metadata_from_configuration_experiment</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.html#aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None" title="aslm.model.devices.galvo.galvo_synthetic.SyntheticGalvo.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.write" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
 <dd><p>Write data to file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -294,19 +407,15 @@ metdata    stores a pointer to the metadata.</p>
 <li><p><strong>**kw</strong> (<em>dict</em>) – Additional keyword arguments.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – If not implemented in a derived class.</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_source</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id3">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.data" title="Link to this definition"></a></dt>
 <dd><p>Return array representation of data stored in data source.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -318,17 +427,16 @@ metdata    stores a pointer to the metadata.</p>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>npt.ArrayLike</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – If not implemented in a derived class.</p>
+</dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_source</span><span class="o">.</span><span class="n">data</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.mode">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.mode" title="Link to this definition"></a></dt>
-<dd><p>Get the mode of the data source.</p>
+<dt class="sig sig-object py" id="id5">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd><p>Getter for the mode of the data source.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Mode of the data source.</p>
@@ -337,61 +445,41 @@ metdata    stores a pointer to the metadata.</p>
 <dd class="field-even"><p>str</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_source</span><span class="o">.</span><span class="n">mode</span>
-<span class="go">&#39;r&#39;</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.shape">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></em><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.shape" title="Link to this definition"></a></dt>
-<dd><p>Return shape as XYCZT.</p>
+<dt class="sig sig-object py" id="id6">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbytes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd><p>Getter for the size of this data source in bytes.”</p>
+<p>Does not account for pyramidal data sources.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id7">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></em><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd><p>Getter for the shape as XYCZT.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Shape of the data source in XYCZT format.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Shape of the data source in XYCZT format.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_source</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(1, 1, 1, 1, 1)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.size">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.size" title="Link to this definition"></a></dt>
-<dd><p>Return the size of this data source in bytes.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="aslm.model.data_sources.data_source.DataSource.voxel_size">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">voxel_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></em><a class="headerlink" href="#aslm.model.data_sources.data_source.DataSource.voxel_size" title="Link to this definition"></a></dt>
-<dd><p>Return voxel size</p>
+<dt class="sig sig-object py" id="id8">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">voxel_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></em><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd><p>Getter for the voxel size</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Voxel size in x, y, z dimensions.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Voxel size in x, y, z dimensions.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_source</span><span class="o">.</span><span class="n">voxel_size</span>
-<span class="go">(1, 1, 1)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 </dd></dl>

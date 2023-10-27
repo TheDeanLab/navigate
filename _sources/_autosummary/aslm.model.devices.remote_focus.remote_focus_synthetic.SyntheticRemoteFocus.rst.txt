@@ -28,4 +28,22 @@ aslm.model.devices.remote\_focus.remote\_focus\_synthetic.SyntheticRemoteFocus
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticRemoteFocus.configuration
+      ~SyntheticRemoteFocus.microscope_name
+      ~SyntheticRemoteFocus.device_config
+      ~SyntheticRemoteFocus.sample_rate
+      ~SyntheticRemoteFocus.sweep_time
+      ~SyntheticRemoteFocus.camera_delay_percent
+      ~SyntheticRemoteFocus.remote_focus_delay
+      ~SyntheticRemoteFocus.percent_smoothing
+      ~SyntheticRemoteFocus.remote_focus_ramp_falling
+      ~SyntheticRemoteFocus.remote_focus_max_voltage
+      ~SyntheticRemoteFocus.remote_focus_min_voltage
+      ~SyntheticRemoteFocus.samples
+      ~SyntheticRemoteFocus.waveform_dict
+   
    

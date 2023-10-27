@@ -27,4 +27,22 @@ aslm.model.devices.remote\_focus.remote\_focus\_base.RemoteFocusBase
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RemoteFocusBase.configuration
+      ~RemoteFocusBase.microscope_name
+      ~RemoteFocusBase.device_config
+      ~RemoteFocusBase.sample_rate
+      ~RemoteFocusBase.sweep_time
+      ~RemoteFocusBase.camera_delay_percent
+      ~RemoteFocusBase.remote_focus_delay
+      ~RemoteFocusBase.percent_smoothing
+      ~RemoteFocusBase.remote_focus_ramp_falling
+      ~RemoteFocusBase.remote_focus_max_voltage
+      ~RemoteFocusBase.remote_focus_min_voltage
+      ~RemoteFocusBase.samples
+      ~RemoteFocusBase.waveform_dict
+   
    

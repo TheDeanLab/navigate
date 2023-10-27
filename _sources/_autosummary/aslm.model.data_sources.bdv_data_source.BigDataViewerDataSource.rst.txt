@@ -18,6 +18,8 @@ aslm.model.data\_sources.bdv\_data\_source.BigDataViewerDataSource
    
       ~BigDataViewerDataSource.__init__
       ~BigDataViewerDataSource.close
+      ~BigDataViewerDataSource.get_shape_from_metadata
+      ~BigDataViewerDataSource.get_slice
       ~BigDataViewerDataSource.read
       ~BigDataViewerDataSource.set_metadata_from_configuration_experiment
       ~BigDataViewerDataSource.write
@@ -32,10 +34,10 @@ aslm.model.data\_sources.bdv\_data\_source.BigDataViewerDataSource
    
       ~BigDataViewerDataSource.data
       ~BigDataViewerDataSource.mode
+      ~BigDataViewerDataSource.nbytes
       ~BigDataViewerDataSource.resolutions
       ~BigDataViewerDataSource.shape
       ~BigDataViewerDataSource.shapes
-      ~BigDataViewerDataSource.size
       ~BigDataViewerDataSource.subdivisions
       ~BigDataViewerDataSource.voxel_size
    

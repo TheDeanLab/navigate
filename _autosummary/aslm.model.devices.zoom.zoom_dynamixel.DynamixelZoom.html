@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Autonomous Software for Light Microscopy
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="aslm-model-devices-zoom-zoom-dynamixel-dynamixelzoom">
+<h1>aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom<a class="headerlink" href="#aslm-model-devices-zoom-zoom-dynamixel-dynamixelzoom" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.zoom.zoom_dynamixel.</span></span><span class="sig-name descname"><span class="pre">DynamixelZoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="aslm.model.devices.zoom.zoom_base.ZoomBase.html#aslm.model.devices.zoom.zoom_base.ZoomBase" title="aslm.model.devices.zoom.zoom_base.ZoomBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZoomBase</span></code></a></p>
+<p>DynamixelZoom Class - Controls the Dynamixel Servo.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the DynamixelZoom Servo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of the microscope.</p></li>
+<li><p><strong>device_connection</strong> (<em>int</em>) – Connection string for the device.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – Configuration dictionary for the device.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.__init__" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
+<td><p>Initialize the DynamixelZoom Servo.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.build_stage_dict" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.build_stage_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_stage_dict</span></code></a>()</p></td>
+<td><p>Construct a dictionary of stage offsets in between different zoom values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.move" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code></a>(position[, wait_until_done])</p></td>
+<td><p>Move the DynamixelZoom Servo</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.read_position" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.read_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_position</span></code></a>()</p></td>
+<td><p>Read the position of the Zoom Servo.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.set_zoom" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.set_zoom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_zoom</span></code></a>(zoom[, wait_until_done])</p></td>
+<td><p>Change the DynamixelZoom Servo.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.dynamixel" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.dynamixel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dynamixel</span></code></a></p></td>
+<td><p>DynamixelZoom object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.id" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
+<td><p>DynamixelZoom ID.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_torque_enable" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_torque_enable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addr_mx_torque_enable</span></code></a></p></td>
+<td><p>DynamixelZoom torque enable.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_goal_position" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_goal_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addr_mx_goal_position</span></code></a></p></td>
+<td><p>DynamixelZoom goal position.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_present_position" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_present_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addr_mx_present_position</span></code></a></p></td>
+<td><p>DynamixelZoom present position.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_p_gain" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_p_gain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addr_mx_p_gain</span></code></a></p></td>
+<td><p>DynamixelZoom p gain.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_torque_limit" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_torque_limit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addr_mx_torque_limit</span></code></a></p></td>
+<td><p>DynamixelZoom torque limit.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_moving_speed" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_moving_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addr_mx_moving_speed</span></code></a></p></td>
+<td><p>DynamixelZoom moving speed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.goal_position_offset" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.goal_position_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">goal_position_offset</span></code></a></p></td>
+<td><p>DynamixelZoom goal position offset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.sleeptime" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.sleeptime"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sleeptime</span></code></a></p></td>
+<td><p>DynamixelZoom sleep time.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.timeout" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.timeout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">timeout</span></code></a></p></td>
+<td><p>DynamixelZoom timeout duration.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.torque_enable" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.torque_enable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">torque_enable</span></code></a></p></td>
+<td><p>DynamixelZoom torque enable.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.torque_disable" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.torque_disable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">torque_disable</span></code></a></p></td>
+<td><p>DynamixelZoom torque disable.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.port_num" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.port_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">port_num</span></code></a></p></td>
+<td><p>DynamixelZoom port number.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.configuration" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Configuration dictionary for the device.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.zoomdict" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.zoomdict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zoomdict</span></code></a></p></td>
+<td><p>Zoom dictionary</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.zoomvalue" title="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.zoomvalue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zoomvalue</span></code></a></p></td>
+<td><p>the desired zoom setting</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.build_stage_dict">
+<span class="sig-name descname"><span class="pre">build_stage_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.build_stage_dict" title="Link to this definition"></a></dt>
+<dd><p>Construct a dictionary of stage offsets in between different zoom values.</p>
+<p>This assumes self.configuration[“stage_positions”] is a dictionary of ideal
+focus positions for the same object taken in the same solvent at
+each magnification. e.g.,</p>
+<dl class="simple">
+<dt>stage_positions:</dt><dd><dl class="simple">
+<dt>BABB:</dt><dd><dl class="simple">
+<dt>f:</dt><dd><p>0.63x: 0
+1x: 70775
+2x: 72455
+3x: 72710
+4x: 72795
+5x: 72850
+6x: 72880</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>The resulting dictionary is keyed first on solvent (refractive index),
+followed by the stage axis to offset, followed by the current magnification
+and then the target magnification.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.move" title="Link to this definition"></a></dt>
+<dd><p>Move the DynamixelZoom Servo</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position</strong> (<em>int</em>) – Location to move to.</p></li>
+<li><p><strong>wait_until_done</strong> (<em>bool</em>) – Delay parameter</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.read_position">
+<span class="sig-name descname"><span class="pre">read_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.read_position" title="Link to this definition"></a></dt>
+<dd><p>Read the position of the Zoom Servo.</p>
+<p>Returned position is an int between 0 and 4096.
+Opens and closes the port.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cur_position</strong> – Servo position.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.set_zoom">
+<span class="sig-name descname"><span class="pre">set_zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zoom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.set_zoom" title="Link to this definition"></a></dt>
+<dd><p>Change the DynamixelZoom Servo.</p>
+<p>Confirms that the zoom position is available in the zoomdict, and then
+changes to that zoom value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zoom</strong> (<em>dict</em>) – Zoom dictionary</p></li>
+<li><p><strong>wait_until_done</strong> (<em>bool</em>) – Delay parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the zoom designation is not in the configuration.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_goal_position">
+<span class="sig-name descname"><span class="pre">addr_mx_goal_position</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_goal_position" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom goal position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_moving_speed">
+<span class="sig-name descname"><span class="pre">addr_mx_moving_speed</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_moving_speed" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom moving speed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_p_gain">
+<span class="sig-name descname"><span class="pre">addr_mx_p_gain</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_p_gain" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom p gain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_present_position">
+<span class="sig-name descname"><span class="pre">addr_mx_present_position</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_present_position" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom present position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_torque_enable">
+<span class="sig-name descname"><span class="pre">addr_mx_torque_enable</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_torque_enable" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom torque enable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_torque_limit">
+<span class="sig-name descname"><span class="pre">addr_mx_torque_limit</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.addr_mx_torque_limit" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom torque limit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.configuration" title="Link to this definition"></a></dt>
+<dd><p>Configuration dictionary for the device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.dynamixel">
+<span class="sig-name descname"><span class="pre">dynamixel</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.dynamixel" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.goal_position_offset">
+<span class="sig-name descname"><span class="pre">goal_position_offset</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.goal_position_offset" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom goal position offset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.id" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.port_num">
+<span class="sig-name descname"><span class="pre">port_num</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.port_num" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom port number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obj</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.sleeptime">
+<span class="sig-name descname"><span class="pre">sleeptime</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.sleeptime" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom sleep time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.timeout">
+<span class="sig-name descname"><span class="pre">timeout</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.timeout" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom timeout duration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.torque_disable">
+<span class="sig-name descname"><span class="pre">torque_disable</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.torque_disable" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom torque disable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.torque_enable">
+<span class="sig-name descname"><span class="pre">torque_enable</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.torque_enable" title="Link to this definition"></a></dt>
+<dd><p>DynamixelZoom torque enable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.zoomdict">
+<span class="sig-name descname"><span class="pre">zoomdict</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.zoomdict" title="Link to this definition"></a></dt>
+<dd><p>Zoom dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.zoomvalue">
+<span class="sig-name descname"><span class="pre">zoomvalue</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.zoomvalue" title="Link to this definition"></a></dt>
+<dd><p>the desired zoom setting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

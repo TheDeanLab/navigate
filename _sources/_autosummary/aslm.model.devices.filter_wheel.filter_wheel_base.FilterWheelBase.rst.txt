@@ -23,4 +23,11 @@ aslm.model.devices.filter\_wheel.filter\_wheel\_base.FilterWheelBase
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FilterWheelBase.filter_dictionary
+      ~FilterWheelBase.wheel_position
+   
    

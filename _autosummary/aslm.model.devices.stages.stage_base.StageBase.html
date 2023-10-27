@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.stages.stage_base.StageBase &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.stages.stage_base.StageBase &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -80,229 +80,42 @@
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.stages.stage_base.</span></span><span class="sig-name descname"><span class="pre">StageBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>StageBase Parent Class</p>
+<p>Stage Parent Class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the stage.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope in configuration</p></li>
 <li><p><strong>device_connection</strong> (<em>object</em>) – Hardware device to connect to</p></li>
 <li><p><strong>configuration</strong> (<em>multiprocessing.managers.DictProxy</em>) – Global configuration of the microscope</p></li>
+<li><p><strong>device_id</strong> (<em>int</em><em>, </em><em>optional</em>) – Device ID, by default 0</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.x_pos">
-<span class="sig-name descname"><span class="pre">x_pos</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.x_pos" title="Link to this definition"></a></dt>
-<dd><p>True x position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.y_pos">
-<span class="sig-name descname"><span class="pre">y_pos</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.y_pos" title="Link to this definition"></a></dt>
-<dd><p>True y position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.z_pos">
-<span class="sig-name descname"><span class="pre">z_pos</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.z_pos" title="Link to this definition"></a></dt>
-<dd><p>True z position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.f_pos">
-<span class="sig-name descname"><span class="pre">f_pos</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.f_pos" title="Link to this definition"></a></dt>
-<dd><p>True focus position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.theta_pos">
-<span class="sig-name descname"><span class="pre">theta_pos</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.theta_pos" title="Link to this definition"></a></dt>
-<dd><p>True rotation position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.x_max">
-<span class="sig-name descname"><span class="pre">x_max</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.x_max" title="Link to this definition"></a></dt>
-<dd><p>Max x position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.y_max">
-<span class="sig-name descname"><span class="pre">y_max</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.y_max" title="Link to this definition"></a></dt>
-<dd><p>Max y position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.z_max">
-<span class="sig-name descname"><span class="pre">z_max</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.z_max" title="Link to this definition"></a></dt>
-<dd><p>Max y position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.f_max">
-<span class="sig-name descname"><span class="pre">f_max</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.f_max" title="Link to this definition"></a></dt>
-<dd><p>Max focus position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.theta_max">
-<span class="sig-name descname"><span class="pre">theta_max</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.theta_max" title="Link to this definition"></a></dt>
-<dd><p>Max rotation position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.x_min">
-<span class="sig-name descname"><span class="pre">x_min</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.x_min" title="Link to this definition"></a></dt>
-<dd><p>Min x position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.y_min">
-<span class="sig-name descname"><span class="pre">y_min</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.y_min" title="Link to this definition"></a></dt>
-<dd><p>Min y position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.z_min">
-<span class="sig-name descname"><span class="pre">z_min</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.z_min" title="Link to this definition"></a></dt>
-<dd><p>Min y position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.f_min">
-<span class="sig-name descname"><span class="pre">f_min</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.f_min" title="Link to this definition"></a></dt>
-<dd><p>Min focus positoin</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.theta_min">
-<span class="sig-name descname"><span class="pre">theta_min</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.theta_min" title="Link to this definition"></a></dt>
-<dd><p>Min rotation position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.get_position_dict">
-<span class="sig-name descname"><span class="pre">get_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.get_position_dict" title="Link to this definition"></a></dt>
-<dd><p>Returns a dictionary with the hardware stage positions.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.get_abs_position">
-<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.get_abs_position" title="Link to this definition"></a></dt>
-<dd><p>Makes sure that the move is within the min and max stage limits.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.verify_abs_position">
-<span class="sig-name descname"><span class="pre">verify_abs_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.verify_abs_position" title="Link to this definition"></a></dt>
-<dd><p>Return a dictionary with moving positions within the min and max stage limits</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.stop" title="Link to this definition"></a></dt>
-<dd><p>Emergency halt of stage operation.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_base.StageBase.__init__" title="aslm.model.devices.stages.stage_base.StageBase.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
-<td><p></p></td>
+<td><p>Initialize the stage.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_base.StageBase.close" title="aslm.model.devices.stages.stage_base.StageBase.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
+<td><p>Close the stage.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.stages.stage_base.StageBase.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, axis_abs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_base.StageBase.get_abs_position" title="aslm.model.devices.stages.stage_base.StageBase.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, axis_abs)</p></td>
 <td><p>Ensure the requested position is within axis bounds and return it.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.stages.stage_base.StageBase.get_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_position_dict</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_base.StageBase.get_position_dict" title="aslm.model.devices.stages.stage_base.StageBase.get_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_position_dict</span></code></a>()</p></td>
 <td><p>Return a dictionary with the saved stage positions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id2" title="aslm.model.devices.stages.stage_base.StageBase.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_base.StageBase.stop" title="aslm.model.devices.stages.stage_base.StageBase.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
 <td><p>Stop all stage movement abruptly.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id3" title="aslm.model.devices.stages.stage_base.StageBase.verify_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_abs_position</span></code></a>(move_dictionary[, is_strict])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_base.StageBase.verify_abs_position" title="aslm.model.devices.stages.stage_base.StageBase.verify_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_abs_position</span></code></a>(move_dictionary[, is_strict])</p></td>
 <td><p>Ensure the requested moving positions are within axes bounds</p></td>
 </tr>
 </tbody>
@@ -310,14 +123,29 @@
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_base.StageBase.axes" title="aslm.model.devices.stages.stage_base.StageBase.axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes</span></code></a></p></td>
+<td><p>List of stage axes available.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_base.StageBase.stage_feedback" title="aslm.model.devices.stages.stage_base.StageBase.stage_feedback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_feedback</span></code></a></p></td>
+<td><p>Feedback alignment value for the stage.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_base.StageBase.axes_mapping" title="aslm.model.devices.stages.stage_base.StageBase.axes_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes_mapping</span></code></a></p></td>
 <td><p>Initial setting for all positions self.x_pos, self.y_pos etc are the true axis positions, no matter whether the stages are zeroed or not.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_base.StageBase.stage_limits" title="aslm.model.devices.stages.stage_base.StageBase.stage_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_limits</span></code></a></p></td>
+<td><p>Whether the stage has limits enabled or not.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_abs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.close" title="Link to this definition"></a></dt>
+<dd><p>Close the stage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.get_abs_position">
+<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_abs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.get_abs_position" title="Link to this definition"></a></dt>
 <dd><p>Ensure the requested position is within axis bounds and return it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -336,26 +164,37 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">get_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.get_position_dict">
+<span class="sig-name descname"><span class="pre">get_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.get_position_dict" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary with the saved stage positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of stage positions.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.stop" title="Link to this definition"></a></dt>
 <dd><p>Stop all stage movement abruptly.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">verify_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.verify_abs_position">
+<span class="sig-name descname"><span class="pre">verify_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.verify_abs_position" title="Link to this definition"></a></dt>
 <dd><p>Ensure the requested moving positions are within axes bounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement.
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement.
 Includes ‘x_abs’, ‘y_abs’, etc. for one or more axes.
-Expect values in micrometers, except for theta, which is in degrees.</p>
+Expect values in micrometers, except for theta, which is in degrees.</p></li>
+<li><p><strong>is_strict</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, return an empty dict if any axis is out of bounds.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a verified moving dict {axis: abs_position}</p>
@@ -367,11 +206,44 @@ Expect values in micrometers, except for theta, which is in degrees.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.axes">
+<span class="sig-name descname"><span class="pre">axes</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.axes" title="Link to this definition"></a></dt>
+<dd><p>List of stage axes available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.axes_mapping">
 <span class="sig-name descname"><span class="pre">axes_mapping</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.axes_mapping" title="Link to this definition"></a></dt>
 <dd><p>Initial setting for all positions
 self.x_pos, self.y_pos etc are the true axis positions, no matter whether
 the stages are zeroed or not. All units are in microns.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.stage_feedback">
+<span class="sig-name descname"><span class="pre">stage_feedback</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.stage_feedback" title="Link to this definition"></a></dt>
+<dd><p>Feedback alignment value for the stage. Default is None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_base.StageBase.stage_limits">
+<span class="sig-name descname"><span class="pre">stage_limits</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_base.StageBase.stage_limits" title="Link to this definition"></a></dt>
+<dd><p>Whether the stage has limits enabled or not. Default is True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

@@ -51,5 +51,11 @@ aslm.model.devices.camera.camera\_hamamatsu.HamamatsuOrca
       ~HamamatsuOrca.step_image_height
       ~HamamatsuOrca.step_image_width
       ~HamamatsuOrca.variance
+      ~HamamatsuOrca.configuration
+      ~HamamatsuOrca.camera_controller
+      ~HamamatsuOrca.camera_parameters
+      ~HamamatsuOrca.is_acquiring
+      ~HamamatsuOrca.x_pixels
+      ~HamamatsuOrca.y_pixels
    
    

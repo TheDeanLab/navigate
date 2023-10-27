@@ -33,7 +33,6 @@ aslm.model.devices
    aslm.model.devices.daq
    aslm.model.devices.filter_wheel
    aslm.model.devices.galvo
-   aslm.model.devices.joystick
    aslm.model.devices.lasers
    aslm.model.devices.objectives
    aslm.model.devices.remote_focus

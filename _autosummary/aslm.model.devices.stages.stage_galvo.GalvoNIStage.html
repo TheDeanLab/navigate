@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.stages.stage_galvo.GalvoNIStage &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.stages.stage_galvo.GalvoNIStage &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -81,6 +81,14 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.stages.stage_galvo.</span></span><span class="sig-name descname"><span class="pre">GalvoNIStage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="aslm.model.devices.stages.stage_base.StageBase.html#aslm.model.devices.stages.stage_base.StageBase" title="aslm.model.devices.stages.stage_base.StageBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">StageBase</span></code></a></p>
 <p>Galvo Stage Class (only supports one axis)</p>
+<p>Generic analog controlled stage. Could be used to control piezos, galvos,
+etc. Currently set up to handle National Instruments data acquisition cards.</p>
+<p>Retrieves the volts per micron from the configuration file and uses that to
+determine the correct voltage to send to the stage.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the Galvo Stage.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -90,42 +98,21 @@
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.create_position_dict">
-<span class="sig-name descname"><span class="pre">create_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.create_position_dict" title="Link to this definition"></a></dt>
-<dd><p>Creates a dictionary with the hardware stage positions.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_abs_position">
-<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_abs_position" title="Link to this definition"></a></dt>
-<dd><p>Makes sure that the move is within the min and max stage limits.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.stop" title="Link to this definition"></a></dt>
-<dd><p>Emergency halt of stage operation.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.__init__" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
-<td><p></p></td>
+<td><p>Initialize the Galvo Stage.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_waveform</span></code>(exposure_times, sweep_times)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.calculate_waveform" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.calculate_waveform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_waveform</span></code></a>(exposure_times, sweep_times)</p></td>
+<td><p>Calculate the waveform for the stage.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.close" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
+<td><p>Close the stage.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, axis_abs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_abs_position" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, axis_abs)</p></td>
 <td><p>Ensure the requested position is within axis bounds and return it.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_position_dict" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_position_dict</span></code></a>()</p></td>
@@ -140,7 +127,7 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.report_position" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.report_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_position</span></code></a>()</p></td>
 <td><p>Reports the position for all axes, and create position dictionary.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.stop" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
 <td><p>Stop all stage movement abruptly.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.verify_abs_position" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.verify_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_abs_position</span></code></a>(move_dictionary[, is_strict])</p></td>
@@ -151,14 +138,100 @@
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.volts_per_micron" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.volts_per_micron"><code class="xref py py-obj docutils literal notranslate"><span class="pre">volts_per_micron</span></code></a></p></td>
+<td><p>volts per micron scaling factor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes_channels" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes_channels</span></code></a></p></td>
+<td><p>channel number for each axis</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.galvo_max_voltage" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.galvo_max_voltage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">galvo_max_voltage</span></code></a></p></td>
+<td><p>maximum voltage for each axis</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.galvo_min_voltage" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.galvo_min_voltage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">galvo_min_voltage</span></code></a></p></td>
+<td><p>minimum voltage for each axis</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes_mapping" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes_mapping</span></code></a></p></td>
-<td><p>Initial setting for all positions self.x_pos, self.y_pos etc are the true axis positions, no matter whether the stages are zeroed or not.</p></td>
+<td><p>Mapping of software axes to hardware axes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.daq" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.daq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">daq</span></code></a></p></td>
+<td><p>Hardware device to connect to.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.microscope_name" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>Name of the microscope.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.configuration" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Global configuration of the microscope.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.trigger_source" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.trigger_source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trigger_source</span></code></a></p></td>
+<td><p>Trigger source for the DAQ.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.camera_delay_percent" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.camera_delay_percent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_delay_percent</span></code></a></p></td>
+<td><p>Percent of the camera delay.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.remote_focus_ramp_falling" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.remote_focus_ramp_falling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_ramp_falling</span></code></a></p></td>
+<td><p>Percent of the remote focus delay.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.remote_focus_delay" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.remote_focus_delay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_delay</span></code></a></p></td>
+<td><p>Percent of the remote focus delay.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.sample_rate" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.sample_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_rate</span></code></a></p></td>
+<td><p>Sample rate of the DAQ.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.sweep_time" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.sweep_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sweep_time</span></code></a></p></td>
+<td><p>Total duration of the waveform output by the DAQ.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.samples" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samples</span></code></a></p></td>
+<td><p>Number of samples in the waveform output by the DAQ.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.exposure_times" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.exposure_times"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exposure_times</span></code></a></p></td>
+<td><p>Dictionary of exposure times for each channel.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.sweep_times" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.sweep_times"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sweep_times</span></code></a></p></td>
+<td><p>Dictionary of sweep times for each channel.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.waveform_dict" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.waveform_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_dict</span></code></a></p></td>
+<td><p>Dictionary of waveforms for each channel.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes</span></code></a></p></td>
+<td><p>List of stage axes available.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_feedback" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_feedback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_feedback</span></code></a></p></td>
+<td><p>Feedback alignment value for the stage.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_limits" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_limits</span></code></a></p></td>
+<td><p>Whether the stage has limits enabled or not.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_abs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.calculate_waveform">
+<span class="sig-name descname"><span class="pre">calculate_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sweep_times</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.calculate_waveform" title="Link to this definition"></a></dt>
+<dd><p>Calculate the waveform for the stage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>exposure_times</strong> (<em>dict</em>) – Dictionary of exposure times for each channel</p></li>
+<li><p><strong>sweep_times</strong> (<em>dict</em>) – Dictionary of sweep times for each channel</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>waveform_dict</strong> – Dictionary of waveforms for each channel</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.close" title="Link to this definition"></a></dt>
+<dd><p>Close the stage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_abs_position">
+<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_abs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_abs_position" title="Link to this definition"></a></dt>
 <dd><p>Ensure the requested position is within axis bounds and return it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -180,6 +253,14 @@
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_position_dict">
 <span class="sig-name descname"><span class="pre">get_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.get_position_dict" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary with the saved stage positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of stage positions.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -208,7 +289,6 @@ Expects values in micrometers, except for theta, which is in degrees.</p></li>
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.move_axis_absolute">
 <span class="sig-name descname"><span class="pre">move_axis_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abs_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.move_axis_absolute" title="Link to this definition"></a></dt>
 <dd><p>Implement movement logic along a single axis.</p>
-<p>Example calls:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -231,11 +311,19 @@ For example, axis=’x’ corresponds to ‘x_abs’, ‘x_min’, etc.</p></li>
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.report_position">
 <span class="sig-name descname"><span class="pre">report_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.report_position" title="Link to this definition"></a></dt>
 <dd><p>Reports the position for all axes, and create position dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of positions for each axis.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.stop" title="Link to this definition"></a></dt>
 <dd><p>Stop all stage movement abruptly.</p>
 </dd></dl>
 
@@ -245,9 +333,12 @@ For example, axis=’x’ corresponds to ‘x_abs’, ‘x_min’, etc.</p></li>
 <dd><p>Ensure the requested moving positions are within axes bounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement.
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement.
 Includes ‘x_abs’, ‘y_abs’, etc. for one or more axes.
-Expect values in micrometers, except for theta, which is in degrees.</p>
+Expect values in micrometers, except for theta, which is in degrees.</p></li>
+<li><p><strong>is_strict</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, return an empty dict if any axis is out of bounds.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a verified moving dict {axis: abs_position}</p>
@@ -259,11 +350,234 @@ Expect values in micrometers, except for theta, which is in degrees.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes">
+<span class="sig-name descname"><span class="pre">axes</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes" title="Link to this definition"></a></dt>
+<dd><p>List of stage axes available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes_channels">
+<span class="sig-name descname"><span class="pre">axes_channels</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes_channels" title="Link to this definition"></a></dt>
+<dd><p>channel number for each axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes_mapping">
 <span class="sig-name descname"><span class="pre">axes_mapping</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes_mapping" title="Link to this definition"></a></dt>
-<dd><p>Initial setting for all positions
-self.x_pos, self.y_pos etc are the true axis positions, no matter whether
-the stages are zeroed or not. All units are in microns.</p>
+<dd><p>Mapping of software axes to hardware axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.camera_delay_percent">
+<span class="sig-name descname"><span class="pre">camera_delay_percent</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.camera_delay_percent" title="Link to this definition"></a></dt>
+<dd><p>Percent of the camera delay.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.configuration" title="Link to this definition"></a></dt>
+<dd><p>Global configuration of the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>multiprocessing.managers.DictProxy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.daq">
+<span class="sig-name descname"><span class="pre">daq</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.daq" title="Link to this definition"></a></dt>
+<dd><p>Hardware device to connect to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.exposure_times">
+<span class="sig-name descname"><span class="pre">exposure_times</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.exposure_times" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of exposure times for each channel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.galvo_max_voltage">
+<span class="sig-name descname"><span class="pre">galvo_max_voltage</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.galvo_max_voltage" title="Link to this definition"></a></dt>
+<dd><p>maximum voltage for each axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.galvo_min_voltage">
+<span class="sig-name descname"><span class="pre">galvo_min_voltage</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.galvo_min_voltage" title="Link to this definition"></a></dt>
+<dd><p>minimum voltage for each axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.microscope_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.remote_focus_delay">
+<span class="sig-name descname"><span class="pre">remote_focus_delay</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.remote_focus_delay" title="Link to this definition"></a></dt>
+<dd><p>Percent of the remote focus delay.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.remote_focus_ramp_falling">
+<span class="sig-name descname"><span class="pre">remote_focus_ramp_falling</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.remote_focus_ramp_falling" title="Link to this definition"></a></dt>
+<dd><p>Percent of the remote focus delay.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.sample_rate">
+<span class="sig-name descname"><span class="pre">sample_rate</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.sample_rate" title="Link to this definition"></a></dt>
+<dd><p>Sample rate of the DAQ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.samples">
+<span class="sig-name descname"><span class="pre">samples</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.samples" title="Link to this definition"></a></dt>
+<dd><p>Number of samples in the waveform output by the DAQ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_feedback">
+<span class="sig-name descname"><span class="pre">stage_feedback</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_feedback" title="Link to this definition"></a></dt>
+<dd><p>Feedback alignment value for the stage. Default is None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_limits">
+<span class="sig-name descname"><span class="pre">stage_limits</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_limits" title="Link to this definition"></a></dt>
+<dd><p>Whether the stage has limits enabled or not. Default is True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.sweep_time">
+<span class="sig-name descname"><span class="pre">sweep_time</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.sweep_time" title="Link to this definition"></a></dt>
+<dd><p>Total duration of the waveform output by the DAQ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.sweep_times">
+<span class="sig-name descname"><span class="pre">sweep_times</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.sweep_times" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of sweep times for each channel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.trigger_source">
+<span class="sig-name descname"><span class="pre">trigger_source</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.trigger_source" title="Link to this definition"></a></dt>
+<dd><p>Trigger source for the DAQ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.volts_per_micron">
+<span class="sig-name descname"><span class="pre">volts_per_micron</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.volts_per_micron" title="Link to this definition"></a></dt>
+<dd><p>volts per micron scaling factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.waveform_dict">
+<span class="sig-name descname"><span class="pre">waveform_dict</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.waveform_dict" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of waveforms for each channel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

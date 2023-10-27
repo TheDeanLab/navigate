@@ -27,4 +27,11 @@ aslm.model.devices.filter\_wheel.filter\_wheel\_synthetic.SyntheticFilterWheel
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticFilterWheel.filter_dictionary
+      ~SyntheticFilterWheel.wheel_position
+   
    

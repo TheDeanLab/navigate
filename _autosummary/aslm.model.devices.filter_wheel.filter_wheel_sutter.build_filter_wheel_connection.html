@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.filter_wheel.filter_wheel_sutter.build_filter_wheel_connection &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.filter_wheel.filter_wheel_sutter.build_filter_wheel_connection &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -79,16 +79,18 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.build_filter_wheel_connection">
 <span class="sig-prename descclassname"><span class="pre">aslm.model.devices.filter_wheel.filter_wheel_sutter.</span></span><span class="sig-name descname"><span class="pre">build_filter_wheel_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comport</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baudrate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.build_filter_wheel_connection" title="Link to this definition"></a></dt>
-<dd><p>Build SutterFilterWheel Serial Port connection
-.. attribute:: comport</p>
-<blockquote>
-<div><p>Comport for communicating with the filter wheel, e.g., COM1.</p>
+<dd><p>Build SutterFilterWheel Serial Port connection</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.comport">
+<span class="sig-prename descclassname"><span class="pre">aslm.model.devices.filter_wheel.filter_wheel_sutter.</span></span><span class="sig-name descname"><span class="pre">comport</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.comport" title="Link to this definition"></a></dt>
+<dd><p>Comport for communicating with the filter wheel, e.g., COM1.</p>
 <dl class="field-list simple">
-<dt class="field-odd">type<span class="colon">:</span></dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
-</div></blockquote>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.baudrate">
 <span class="sig-prename descclassname"><span class="pre">aslm.model.devices.filter_wheel.filter_wheel_sutter.</span></span><span class="sig-name descname"><span class="pre">baudrate</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.baudrate" title="Link to this definition"></a></dt>
@@ -100,6 +102,28 @@
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.timeout">
+<span class="sig-prename descclassname"><span class="pre">aslm.model.devices.filter_wheel.filter_wheel_sutter.</span></span><span class="sig-name descname"><span class="pre">timeout</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.timeout" title="Link to this definition"></a></dt>
+<dd><p>Timeout for communicating with the filter wheel, e.g., 0.25.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Serial port connection to the filter wheel.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>serial.Serial</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>UserWarning</strong> – Could not communicate with Sutter Lambda 10-B via COMPORT.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

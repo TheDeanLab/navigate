@@ -26,4 +26,12 @@ aslm.model.devices.zoom.zoom\_base.ZoomBase
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ZoomBase.configuration
+      ~ZoomBase.zoomdict
+      ~ZoomBase.zoomvalue
+   
    

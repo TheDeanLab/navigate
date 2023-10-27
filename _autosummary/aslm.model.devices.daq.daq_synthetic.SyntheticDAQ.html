@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.daq.daq_synthetic.SyntheticDAQ &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.daq.daq_synthetic.SyntheticDAQ &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -81,27 +81,22 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.daq.daq_synthetic.</span></span><span class="sig-name descname"><span class="pre">SyntheticDAQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="aslm.model.devices.daq.daq_base.DAQBase.html#aslm.model.devices.daq.daq_base.DAQBase" title="aslm.model.devices.daq.daq_base.DAQBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAQBase</span></code></a></p>
 <p>SyntheticDAQ class for Data Acquisition (DAQ).</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.configuration">
-<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.configuration" title="Link to this definition"></a></dt>
-<dd><p>Global configuration of the microscope</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>multiprocesing.managers.DictProxy</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the Synthetic DAQ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>configuration</strong> (<em>dict</em>) – Configuration dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.__init__" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(configuration)</p></td>
-<td><p></p></td>
+<td><p>Initialize the Synthetic DAQ.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.add_camera" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.add_camera"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_camera</span></code></a>(microscope_name, camera)</p></td>
 <td><p>Connect camera with daq: only in syntheticDAQ.</p></td>
@@ -121,8 +116,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_master_trigger_task" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.create_master_trigger_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_master_trigger_task</span></code></a>()</p></td>
 <td><p>Set up the DO master trigger task.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">enable_microscope</span></code>(microscope_name)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.enable_microscope" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.enable_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enable_microscope</span></code></a>(microscope_name)</p></td>
+<td><p>Enables the microscope.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.prepare_acquisition" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.prepare_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_acquisition</span></code></a>(channel_key, exposure_time)</p></td>
 <td><p>Prepare the acquisition.</p></td>
@@ -130,11 +125,11 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.run_acquisition" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.run_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_acquisition</span></code></a>()</p></td>
 <td><p>Run DAQ Acquisition.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_external_trigger</span></code>([external_trigger])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.set_external_trigger" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.set_external_trigger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_external_trigger</span></code></a>([external_trigger])</p></td>
+<td><p>Set the external trigger.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.start_tasks" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.start_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_tasks</span></code></a>()</p></td>
-<td><p>Start the tasks for camera triggering and analog outputs # If the tasks are configured to be triggered, they won't start until # run_tasks() is called.</p></td>
+<td><p>Start the tasks for camera triggering and analog outputs.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.stop_acquisition" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.stop_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_acquisition</span></code></a>()</p></td>
 <td><p>Stop Acquisition.</p></td>
@@ -142,11 +137,73 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.stop_tasks" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.stop_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_tasks</span></code></a>()</p></td>
 <td><p>Stop the tasks for triggering, analog and counter outputs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_analog_task</span></code>(board_name)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.update_analog_task" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.update_analog_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_analog_task</span></code></a>(board_name)</p></td>
+<td><p>Update the analog task.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.write_waveforms_to_tasks" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.write_waveforms_to_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_waveforms_to_tasks</span></code></a>()</p></td>
 <td><p>Write the galvo, remote focus, and laser waveforms to each task.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera</span></code></a></p></td>
+<td><p>Camera object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.wait_to_run_lock" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.wait_to_run_lock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_to_run_lock</span></code></a></p></td>
+<td><p>Lock for waiting to run.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.analog_outputs" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.analog_outputs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">analog_outputs</span></code></a></p></td>
+<td><p>Analog output tasks.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.is_updating_analog_task" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.is_updating_analog_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_updating_analog_task</span></code></a></p></td>
+<td><p>Flag for updating analog task.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.trigger_mode" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.trigger_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trigger_mode</span></code></a></p></td>
+<td><p>Trigger mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.configuration" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Dictionary of configuration parameters</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_constants" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_constants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_constants</span></code></a></p></td>
+<td><p>Dictionary of waveform constants</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.microscope_name" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>Name of the active microscope</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.daq_parameters" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.daq_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">daq_parameters</span></code></a></p></td>
+<td><p>Dictionary of DAQ parameters</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.sample_rate" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.sample_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_rate</span></code></a></p></td>
+<td><p>Sample rate of the DAQ</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.sweep_time" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.sweep_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sweep_time</span></code></a></p></td>
+<td><p>Sweep time of the DAQ</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.remote_focus_ramp_falling" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.remote_focus_ramp_falling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_ramp_falling</span></code></a></p></td>
+<td><p>Dictionary of remote focus ramp falling percentages</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_delay_percent" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_delay_percent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_delay_percent</span></code></a></p></td>
+<td><p>Camera delay percentage</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_pulse_percent" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_pulse_percent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_pulse_percent</span></code></a></p></td>
+<td><p>Camera pulse percentage</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_high_time" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_high_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_high_time</span></code></a></p></td>
+<td><p>Camera high time</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_delay" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_delay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_delay</span></code></a></p></td>
+<td><p>Camera delay time</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_dict" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_dict</span></code></a></p></td>
+<td><p>Dictionary of waveforms.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_repeat_num" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_repeat_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_repeat_num</span></code></a></p></td>
+<td><p>Number of times to repeat the waveform</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_expand_num" title="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_expand_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_expand_num</span></code></a></p></td>
+<td><p>Number of times to expand the waveform</p></td>
 </tr>
 </tbody>
 </table>
@@ -154,6 +211,14 @@
 <dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.add_camera">
 <span class="sig-name descname"><span class="pre">add_camera</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.add_camera" title="Link to this definition"></a></dt>
 <dd><p>Connect camera with daq: only in syntheticDAQ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope.</p></li>
+<li><p><strong>camera</strong> (<em>Camera</em>) – Camera object.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -204,6 +269,17 @@ display purposes.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.enable_microscope">
+<span class="sig-name descname"><span class="pre">enable_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.enable_microscope" title="Link to this definition"></a></dt>
+<dd><p>Enables the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>microscope_name</strong> (<em>str</em>) – Name of the active microscope</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.prepare_acquisition">
 <span class="sig-name descname"><span class="pre">prepare_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.prepare_acquisition" title="Link to this definition"></a></dt>
 <dd><p>Prepare the acquisition.</p>
@@ -220,19 +296,30 @@ display purposes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.run_acquisition">
 <span class="sig-name descname"><span class="pre">run_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.run_acquisition" title="Link to this definition"></a></dt>
-<dd><p>Run DAQ Acquisition.
-Run the tasks for triggering, analog and counter outputs.
+<dd><p>Run DAQ Acquisition.</p>
+<p>Run the tasks for triggering, analog and counter outputs.
 The master trigger initiates all other tasks via a shared trigger
 For this to work, all analog output and counter tasks have to be started so that
 they are waiting for the trigger signal.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.set_external_trigger">
+<span class="sig-name descname"><span class="pre">set_external_trigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">external_trigger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.set_external_trigger" title="Link to this definition"></a></dt>
+<dd><p>Set the external trigger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>external_trigger</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of external trigger.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.start_tasks">
 <span class="sig-name descname"><span class="pre">start_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.start_tasks" title="Link to this definition"></a></dt>
-<dd><p>Start the tasks for camera triggering and analog outputs
-# If the tasks are configured to be triggered, they won’t start until
-# run_tasks() is called.</p>
+<dd><p>Start the tasks for camera triggering and analog outputs.</p>
+<p>If the tasks are configured to be triggered, they won’t start until
+run_tasks() is called.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -248,9 +335,229 @@ they are waiting for the trigger signal.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.update_analog_task">
+<span class="sig-name descname"><span class="pre">update_analog_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">board_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.update_analog_task" title="Link to this definition"></a></dt>
+<dd><p>Update the analog task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>board_name</strong> (<em>str</em>) – Name of board.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.write_waveforms_to_tasks">
 <span class="sig-name descname"><span class="pre">write_waveforms_to_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.write_waveforms_to_tasks" title="Link to this definition"></a></dt>
 <dd><p>Write the galvo, remote focus, and laser waveforms to each task.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.analog_outputs">
+<span class="sig-name descname"><span class="pre">analog_outputs</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.analog_outputs" title="Link to this definition"></a></dt>
+<dd><p>Analog output tasks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera">
+<span class="sig-name descname"><span class="pre">camera</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera" title="Link to this definition"></a></dt>
+<dd><p>Camera object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_delay">
+<span class="sig-name descname"><span class="pre">camera_delay</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_delay" title="Link to this definition"></a></dt>
+<dd><p>Camera delay time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_delay_percent">
+<span class="sig-name descname"><span class="pre">camera_delay_percent</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_delay_percent" title="Link to this definition"></a></dt>
+<dd><p>Camera delay percentage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_high_time">
+<span class="sig-name descname"><span class="pre">camera_high_time</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_high_time" title="Link to this definition"></a></dt>
+<dd><p>Camera high time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_pulse_percent">
+<span class="sig-name descname"><span class="pre">camera_pulse_percent</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.camera_pulse_percent" title="Link to this definition"></a></dt>
+<dd><p>Camera pulse percentage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.configuration" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of configuration parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.daq_parameters">
+<span class="sig-name descname"><span class="pre">daq_parameters</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.daq_parameters" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of DAQ parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.is_updating_analog_task">
+<span class="sig-name descname"><span class="pre">is_updating_analog_task</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.is_updating_analog_task" title="Link to this definition"></a></dt>
+<dd><p>Flag for updating analog task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.microscope_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the active microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.remote_focus_ramp_falling">
+<span class="sig-name descname"><span class="pre">remote_focus_ramp_falling</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.remote_focus_ramp_falling" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of remote focus ramp falling percentages</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.sample_rate">
+<span class="sig-name descname"><span class="pre">sample_rate</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.sample_rate" title="Link to this definition"></a></dt>
+<dd><p>Sample rate of the DAQ</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.sweep_time">
+<span class="sig-name descname"><span class="pre">sweep_time</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.sweep_time" title="Link to this definition"></a></dt>
+<dd><p>Sweep time of the DAQ</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.trigger_mode">
+<span class="sig-name descname"><span class="pre">trigger_mode</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.trigger_mode" title="Link to this definition"></a></dt>
+<dd><p>Trigger mode. Self-trigger or external-trigger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.wait_to_run_lock">
+<span class="sig-name descname"><span class="pre">wait_to_run_lock</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.wait_to_run_lock" title="Link to this definition"></a></dt>
+<dd><p>Lock for waiting to run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Lock</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_constants">
+<span class="sig-name descname"><span class="pre">waveform_constants</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_constants" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of waveform constants</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_dict">
+<span class="sig-name descname"><span class="pre">waveform_dict</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_dict" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of waveforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_expand_num">
+<span class="sig-name descname"><span class="pre">waveform_expand_num</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_expand_num" title="Link to this definition"></a></dt>
+<dd><p>Number of times to expand the waveform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_repeat_num">
+<span class="sig-name descname"><span class="pre">waveform_repeat_num</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.waveform_repeat_num" title="Link to this definition"></a></dt>
+<dd><p>Number of times to repeat the waveform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

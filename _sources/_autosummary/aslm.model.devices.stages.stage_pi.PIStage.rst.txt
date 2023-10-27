@@ -35,6 +35,12 @@ aslm.model.devices.stages.stage\_pi.PIStage
 
    .. autosummary::
    
+      ~PIStage.pi_tools
+      ~PIStage.pi_device
+      ~PIStage.pi_axes
+      ~PIStage.axes
+      ~PIStage.stage_feedback
       ~PIStage.axes_mapping
+      ~PIStage.stage_limits
    
    

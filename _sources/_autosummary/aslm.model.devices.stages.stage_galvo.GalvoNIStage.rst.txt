@@ -35,6 +35,26 @@ aslm.model.devices.stages.stage\_galvo.GalvoNIStage
 
    .. autosummary::
    
+      ~GalvoNIStage.volts_per_micron
+      ~GalvoNIStage.axes_channels
+      ~GalvoNIStage.galvo_max_voltage
+      ~GalvoNIStage.galvo_min_voltage
       ~GalvoNIStage.axes_mapping
+      ~GalvoNIStage.daq
+      ~GalvoNIStage.microscope_name
+      ~GalvoNIStage.configuration
+      ~GalvoNIStage.trigger_source
+      ~GalvoNIStage.camera_delay_percent
+      ~GalvoNIStage.remote_focus_ramp_falling
+      ~GalvoNIStage.remote_focus_delay
+      ~GalvoNIStage.sample_rate
+      ~GalvoNIStage.sweep_time
+      ~GalvoNIStage.samples
+      ~GalvoNIStage.exposure_times
+      ~GalvoNIStage.sweep_times
+      ~GalvoNIStage.waveform_dict
+      ~GalvoNIStage.axes
+      ~GalvoNIStage.stage_feedback
+      ~GalvoNIStage.stage_limits
    
    

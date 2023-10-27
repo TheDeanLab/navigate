@@ -42,5 +42,9 @@ aslm.model.devices.stages.stage\_asi.ASIStage
    .. autosummary::
    
       ~ASIStage.axes_mapping
+      ~ASIStage.tiger_controller
+      ~ASIStage.axes
+      ~ASIStage.stage_feedback
+      ~ASIStage.stage_limits
    
    

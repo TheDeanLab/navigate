@@ -29,5 +29,6 @@ aslm.model.devices.shutter.laser\_shutter\_base.ShutterBase
    .. autosummary::
    
       ~ShutterBase.state
+      ~ShutterBase.shutter_state
    
    

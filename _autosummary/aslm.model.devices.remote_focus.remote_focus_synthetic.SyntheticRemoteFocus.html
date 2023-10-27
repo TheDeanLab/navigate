@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -81,100 +81,88 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.remote_focus.remote_focus_synthetic.</span></span><span class="sig-name descname"><span class="pre">SyntheticRemoteFocus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase.html#aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase" title="aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RemoteFocusBase</span></code></a></p>
 <p>SyntheticRemoteFocus Class</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>microscope_name</strong> (<em>str</em>) – The name of the microscope.</p></li>
-<li><p><strong>device_connection</strong> (<em>DeviceConnection</em>) – The device connection.</p></li>
-<li><p><strong>configuration</strong> (<em>dict</em>) – The configuration.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.microscope_name">
-<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.microscope_name" title="Link to this definition"></a></dt>
-<dd><p>The name of the microscope.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.device_connection">
-<span class="sig-name descname"><span class="pre">device_connection</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.device_connection" title="Link to this definition"></a></dt>
-<dd><p>The connection to the device.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>nidaqmx.Task</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.configuration">
-<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.configuration" title="Link to this definition"></a></dt>
-<dd><p>The configuration of the device.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.prepare_task">
-<span class="sig-name descname"><span class="pre">prepare_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.prepare_task" title="Link to this definition"></a></dt>
-<dd><p>Prepares the task for the given channel.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.start_task">
-<span class="sig-name descname"><span class="pre">start_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.start_task" title="Link to this definition"></a></dt>
-<dd><p>Starts the task.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.stop_task">
-<span class="sig-name descname"><span class="pre">stop_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.stop_task" title="Link to this definition"></a></dt>
-<dd><p>Stops the task.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.close_task">
-<span class="sig-name descname"><span class="pre">close_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.close_task" title="Link to this definition"></a></dt>
-<dd><p>Closes the task.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the SyntheticRemoteFocus class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – The microscope name.</p></li>
+<li><p><strong>device_connection</strong> (<em>object</em>) – The device connection object.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – The device configuration.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.__init__" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
-<td><p></p></td>
+<td><p>Initialize the SyntheticRemoteFocus class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.adjust" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.adjust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust</span></code></a>(exposure_times, sweep_times[, offset])</p></td>
 <td><p>Adjusts the remote focus waveform based on the readout time.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.close_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_task</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.close_task" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.close_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_task</span></code></a>()</p></td>
 <td><p>Closes the task.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code>(readout_time[, offset])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.move" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code></a>(readout_time[, offset])</p></td>
+<td><p>Moves the remote focus.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.prepare_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_task</span></code></a>(channel_key)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.prepare_task" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.prepare_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_task</span></code></a>(channel_key)</p></td>
 <td><p>Prepares the task for the given channel.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.start_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_task</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.start_task" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.start_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_task</span></code></a>()</p></td>
 <td><p>Starts the task.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id3" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.stop_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_task</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.stop_task" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.stop_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_task</span></code></a>()</p></td>
 <td><p>Stops the task.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.configuration" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Configuration dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.microscope_name" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>Name of the microscope.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.device_config" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.device_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">device_config</span></code></a></p></td>
+<td><p>Remote focus device parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.sample_rate" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.sample_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_rate</span></code></a></p></td>
+<td><p>Sample rate of the DAQ.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.sweep_time" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.sweep_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sweep_time</span></code></a></p></td>
+<td><p>Sweep time of the DAQ.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.camera_delay_percent" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.camera_delay_percent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_delay_percent</span></code></a></p></td>
+<td><p>Camera delay percent.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_delay" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_delay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_delay</span></code></a></p></td>
+<td><p>Remote focus delay.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.percent_smoothing" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.percent_smoothing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">percent_smoothing</span></code></a></p></td>
+<td><p>Percent smoothing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_ramp_falling" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_ramp_falling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_ramp_falling</span></code></a></p></td>
+<td><p>Remote focus ramp falling.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_max_voltage" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_max_voltage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_max_voltage</span></code></a></p></td>
+<td><p>Remote focus max voltage.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_min_voltage" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_min_voltage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_min_voltage</span></code></a></p></td>
+<td><p>Remote focus min voltage.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.samples" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samples</span></code></a></p></td>
+<td><p>Number of samples.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.waveform_dict" title="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.waveform_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_dict</span></code></a></p></td>
+<td><p>Waveform dictionary.</p></td>
 </tr>
 </tbody>
 </table>
@@ -196,82 +184,193 @@
 <dd class="field-odd"><p>numpy.ndarray</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">remote_focus</span><span class="o">.</span><span class="n">adjust</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">close_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.close_task">
+<span class="sig-name descname"><span class="pre">close_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.close_task" title="Link to this definition"></a></dt>
 <dd><p>Closes the task.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.move" title="Link to this definition"></a></dt>
+<dd><p>Moves the remote focus.</p>
+<p>This method moves the remote focus.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>readout_time</strong> (<em>float</em>) – The readout time in seconds.</p></li>
+<li><p><strong>offset</strong> (<em>float</em>) – The offset of the signal in volts.</p></li>
+</ul>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">close_task</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">prepare_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.prepare_task">
+<span class="sig-name descname"><span class="pre">prepare_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.prepare_task" title="Link to this definition"></a></dt>
 <dd><p>Prepares the task for the given channel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>channel_key</strong> (<em>str</em>) – The channel key.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">prepare_task</span><span class="p">(</span><span class="s2">&quot;remote_focus&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">start_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.start_task">
+<span class="sig-name descname"><span class="pre">start_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.start_task" title="Link to this definition"></a></dt>
 <dd><p>Starts the task.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">start_task</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">stop_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.stop_task">
+<span class="sig-name descname"><span class="pre">stop_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.stop_task" title="Link to this definition"></a></dt>
 <dd><p>Stops the task.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.camera_delay_percent">
+<span class="sig-name descname"><span class="pre">camera_delay_percent</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.camera_delay_percent" title="Link to this definition"></a></dt>
+<dd><p>Camera delay percent.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stop_task</span><span class="p">()</span>
-</pre></div>
-</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.configuration" title="Link to this definition"></a></dt>
+<dd><p>Configuration dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.device_config">
+<span class="sig-name descname"><span class="pre">device_config</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.device_config" title="Link to this definition"></a></dt>
+<dd><p>Remote focus device parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.microscope_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.percent_smoothing">
+<span class="sig-name descname"><span class="pre">percent_smoothing</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.percent_smoothing" title="Link to this definition"></a></dt>
+<dd><p>Percent smoothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_delay">
+<span class="sig-name descname"><span class="pre">remote_focus_delay</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_delay" title="Link to this definition"></a></dt>
+<dd><p>Remote focus delay.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_max_voltage">
+<span class="sig-name descname"><span class="pre">remote_focus_max_voltage</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_max_voltage" title="Link to this definition"></a></dt>
+<dd><p>Remote focus max voltage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_min_voltage">
+<span class="sig-name descname"><span class="pre">remote_focus_min_voltage</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_min_voltage" title="Link to this definition"></a></dt>
+<dd><p>Remote focus min voltage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_ramp_falling">
+<span class="sig-name descname"><span class="pre">remote_focus_ramp_falling</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.remote_focus_ramp_falling" title="Link to this definition"></a></dt>
+<dd><p>Remote focus ramp falling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.sample_rate">
+<span class="sig-name descname"><span class="pre">sample_rate</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.sample_rate" title="Link to this definition"></a></dt>
+<dd><p>Sample rate of the DAQ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.samples">
+<span class="sig-name descname"><span class="pre">samples</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.samples" title="Link to this definition"></a></dt>
+<dd><p>Number of samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.sweep_time">
+<span class="sig-name descname"><span class="pre">sweep_time</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.sweep_time" title="Link to this definition"></a></dt>
+<dd><p>Sweep time of the DAQ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.waveform_dict">
+<span class="sig-name descname"><span class="pre">waveform_dict</span></span><a class="headerlink" href="#aslm.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.waveform_dict" title="Link to this definition"></a></dt>
+<dd><p>Waveform dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

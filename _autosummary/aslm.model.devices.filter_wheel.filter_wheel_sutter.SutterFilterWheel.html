@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -80,111 +80,43 @@
 <dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.filter_wheel.filter_wheel_sutter.</span></span><span class="sig-name descname"><span class="pre">SutterFilterWheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="aslm.model.devices.filter_wheel.filter_wheel_base.FilterWheelBase.html#aslm.model.devices.filter_wheel.filter_wheel_base.FilterWheelBase" title="aslm.model.devices.filter_wheel.filter_wheel_base.FilterWheelBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterWheelBase</span></code></a></p>
-<p>SutterFilterWheel Class</p>
-<p>Class for controlling Sutter Lambda Filter Wheels
+<p>SutterFilterWheel - Class for controlling Sutter Lambda Filter Wheels</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Additional information on the Sutter Lambda 10-B can be found at:
 <a class="reference external" href="https://www.sutter.com/manuals/LB10-3_OpMan.pdf">https://www.sutter.com/manuals/LB10-3_OpMan.pdf</a></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_dictionary">
-<span class="sig-name descname"><span class="pre">filter_dictionary</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_dictionary" title="Link to this definition"></a></dt>
-<dd><p>Dictionary with installed filter names, e.g., filter_dictionary = {‘GFP’, 0}.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.number_of_filter_wheels">
-<span class="sig-name descname"><span class="pre">number_of_filter_wheels</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.number_of_filter_wheels" title="Link to this definition"></a></dt>
-<dd><p>Number of installed filter wheels.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wheel_position">
-<span class="sig-name descname"><span class="pre">wheel_position</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wheel_position" title="Link to this definition"></a></dt>
-<dd><p>Default filter wheel position</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">wait_until_done_delay</span> <span class="pre">=</span> <span class="pre">float</span></span></dt>
-<dd><p>Duration of time to wait for a filter wheel change.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">wait_until_done</span> <span class="pre">=</span> <span class="pre">bool</span></span></dt>
-<dd><p>Flag for enabling the wait period for a filter wheel change.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">delay_matrix</span> <span class="pre">=</span> <span class="pre">np.ndarray</span></span></dt>
-<dd><p>Matrix of duration in seconds needed to switch filter wheel positions</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">speed</span> <span class="pre">=</span> <span class="pre">int</span></span></dt>
-<dd><p>Filter wheel movement speed.  0 = fastest, 8 = slowest.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.check_if_filter_in_filter_dictionary">
-<span class="sig-name descname"><span class="pre">check_if_filter_in_filter_dictionary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.check_if_filter_in_filter_dictionary" title="Link to this definition"></a></dt>
-<dd><p>Checks to see if filter name exists in the filter dictionary.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_change_delay">
-<span class="sig-name descname"><span class="pre">filter_change_delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_change_delay" title="Link to this definition"></a></dt>
-<dd><p>Change the filter wheel to the position occupied by filter_name</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_bytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read" title="Link to this definition"></a></dt>
-<dd><p>Read num_bytes of bytes from the serial port.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.close">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.close" title="Link to this definition"></a></dt>
-<dd><p>Set the filter wheel to the empty position and close the communication port.</p>
-</dd></dl>
-
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the SutterFilterWheel class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of the microscope.</p></li>
+<li><p><strong>device_connection</strong> (<em>dict</em>) – Dictionary of device connections.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – Dictionary of configuration parameters.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.__init__" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
-<td><p></p></td>
+<td><p>Initialize the SutterFilterWheel class.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.check_if_filter_in_filter_dictionary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_if_filter_in_filter_dictionary</span></code></a>(filter_name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.check_if_filter_in_filter_dictionary" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.check_if_filter_in_filter_dictionary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_if_filter_in_filter_dictionary</span></code></a>(filter_name)</p></td>
 <td><p>Checks if the filter designation (string) given exists in the filter dictionary</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.close" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
 <td><p>Close the SutterFilterWheel serial port.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_change_delay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_change_delay</span></code></a>(filter_name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_change_delay" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_change_delay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_change_delay</span></code></a>(filter_name)</p></td>
 <td><p>Calculate duration of time necessary to change filter wheel positions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id3" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>(num_bytes)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>(num_bytes)</p></td>
 <td><p>Reads the specified number of bytes from the serial port.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.set_filter" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.set_filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_filter</span></code></a>(filter_name[, wait_until_done])</p></td>
@@ -192,9 +124,47 @@
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.serial" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.serial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serial</span></code></a></p></td>
+<td><p>Serial port connection to the filter wheel.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.microscope_name" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>Name of the microscope.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.number_of_filter_wheels" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.number_of_filter_wheels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_filter_wheels</span></code></a></p></td>
+<td><p>Number of filter wheels.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wait_until_done" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wait_until_done"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_until_done</span></code></a></p></td>
+<td><p>Wait until filter wheel has completed movement.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wait_until_done_delay" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wait_until_done_delay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_until_done_delay</span></code></a></p></td>
+<td><p>Delay in s for the wait until done function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read_on_init" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read_on_init"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_on_init</span></code></a></p></td>
+<td><p>Read on initialization.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.speed" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">speed</span></code></a></p></td>
+<td><p>Filter wheel speed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.delay_matrix" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.delay_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delay_matrix</span></code></a></p></td>
+<td><p>Delay matrix for filter wheel.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.init_finished" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.init_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_finished</span></code></a></p></td>
+<td><p>Software initialization complete flag.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_dictionary" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_dictionary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_dictionary</span></code></a></p></td>
+<td><p>Dictionary of filters available on the filter wheel.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wheel_position" title="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wheel_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wheel_position</span></code></a></p></td>
+<td><p>Filter wheel position.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">check_if_filter_in_filter_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.check_if_filter_in_filter_dictionary">
+<span class="sig-name descname"><span class="pre">check_if_filter_in_filter_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.check_if_filter_in_filter_dictionary" title="Link to this definition"></a></dt>
 <dd><p>Checks if the filter designation (string) given exists in the
 filter dictionary</p>
 <dl class="field-list simple">
@@ -207,38 +177,66 @@ filter dictionary</p>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
 </dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
-<dd><p>Close the SutterFilterWheel serial port.</p>
-<p>Sets the filter wheel to the Empty-Alignment position and then closes the port.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">filter_change_delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
-<dd><p>Calculate duration of time necessary to change filter wheel positions.
-Identifies the number of positions that must be switched, and then retrieves
-the duration of time necessary to perform the switch from self.delay_matrix.
-Detailed information on timing located on page 38:
-<a class="reference external" href="https://www.sutter.com/manuals/LB10-3_OpMan.pdf">https://www.sutter.com/manuals/LB10-3_OpMan.pdf</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>filter_name</strong> (<em>str</em>) – Name of filter that we want to move to.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If filter name is not in the filter dictionary.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_bytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.close" title="Link to this definition"></a></dt>
+<dd><p>Close the SutterFilterWheel serial port.</p>
+<p>Sets the filter wheel to the Empty-Alignment position and then closes the port.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_change_delay">
+<span class="sig-name descname"><span class="pre">filter_change_delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_change_delay" title="Link to this definition"></a></dt>
+<dd><p>Calculate duration of time necessary to change filter wheel positions.</p>
+<p>Calculate duration of time necessary to change filter wheel positions.
+Identifies the number of positions that must be switched, and then retrieves
+the duration of time necessary to perform the switch from self.delay_matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filter_name</strong> (<em>str</em>) – Name of filter that we want to move to.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Detailed information on timing located on page 38:
+<a class="reference external" href="https://www.sutter.com/manuals/LB10-3_OpMan.pdf">https://www.sutter.com/manuals/LB10-3_OpMan.pdf</a></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Delay matrix should be model specific.</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If the filter wheel position is out of range.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Index Error</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_bytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read" title="Link to this definition"></a></dt>
 <dd><p>Reads the specified number of bytes from the serial port.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>num_bytes</strong> (<em>int</em>) – Number of bytes to read from the serial port.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Bytes read from the serial port.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bytes</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>UserWarning</strong> – The serial port to the Sutter Lambda 10-B is on, but it isn’t responding as
+    expected.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -254,6 +252,127 @@ position argument.</p>
 <li><p><strong>filter_name</strong> (<em>str</em>) – Name of filter to move to.</p></li>
 <li><p><strong>wait_until_done</strong> (<em>bool</em>) – Waits duration of time necessary for filter wheel to change positions.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.delay_matrix">
+<span class="sig-name descname"><span class="pre">delay_matrix</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.delay_matrix" title="Link to this definition"></a></dt>
+<dd><p>Delay matrix for filter wheel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_dictionary">
+<span class="sig-name descname"><span class="pre">filter_dictionary</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.filter_dictionary" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of filters available on the filter wheel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.init_finished">
+<span class="sig-name descname"><span class="pre">init_finished</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.init_finished" title="Link to this definition"></a></dt>
+<dd><p>Software initialization complete flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.microscope_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.number_of_filter_wheels">
+<span class="sig-name descname"><span class="pre">number_of_filter_wheels</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.number_of_filter_wheels" title="Link to this definition"></a></dt>
+<dd><p>Number of filter wheels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read_on_init">
+<span class="sig-name descname"><span class="pre">read_on_init</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read_on_init" title="Link to this definition"></a></dt>
+<dd><p>Read on initialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.serial">
+<span class="sig-name descname"><span class="pre">serial</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.serial" title="Link to this definition"></a></dt>
+<dd><p>Serial port connection to the filter wheel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>obj</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.speed">
+<span class="sig-name descname"><span class="pre">speed</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.speed" title="Link to this definition"></a></dt>
+<dd><p>Filter wheel speed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wait_until_done">
+<span class="sig-name descname"><span class="pre">wait_until_done</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wait_until_done" title="Link to this definition"></a></dt>
+<dd><p>Wait until filter wheel has completed movement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wait_until_done_delay">
+<span class="sig-name descname"><span class="pre">wait_until_done_delay</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wait_until_done_delay" title="Link to this definition"></a></dt>
+<dd><p>Delay in s for the wait until done function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wheel_position">
+<span class="sig-name descname"><span class="pre">wheel_position</span></span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.wheel_position" title="Link to this definition"></a></dt>
+<dd><p>Filter wheel position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

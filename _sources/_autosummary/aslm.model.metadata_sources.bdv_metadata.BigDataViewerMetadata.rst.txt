@@ -17,8 +17,9 @@ aslm.model.metadata\_sources.bdv\_metadata.BigDataViewerMetadata
    .. autosummary::
    
       ~BigDataViewerMetadata.__init__
+      ~BigDataViewerMetadata.affine_matrix_to_stage_positions
       ~BigDataViewerMetadata.bdv_xml_dict
-      ~BigDataViewerMetadata.parse_bdv_xml
+      ~BigDataViewerMetadata.parse_xml
       ~BigDataViewerMetadata.set_from_configuration_experiment
       ~BigDataViewerMetadata.set_shape_from_configuration_experiment
       ~BigDataViewerMetadata.set_stack_order_from_configuration_experiment

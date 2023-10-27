@@ -28,4 +28,22 @@ aslm.model.devices.galvo.galvo\_base.GalvoBase
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GalvoBase.configuration
+      ~GalvoBase.microscope_name
+      ~GalvoBase.galvo_name
+      ~GalvoBase.device_config
+      ~GalvoBase.sample_rate
+      ~GalvoBase.sweep_time
+      ~GalvoBase.camera_delay_percent
+      ~GalvoBase.galvo_max_voltage
+      ~GalvoBase.galvo_min_voltage
+      ~GalvoBase.remote_focus_ramp_falling
+      ~GalvoBase.galvo_waveform
+      ~GalvoBase.samples
+      ~GalvoBase.waveform_dict
+   
    

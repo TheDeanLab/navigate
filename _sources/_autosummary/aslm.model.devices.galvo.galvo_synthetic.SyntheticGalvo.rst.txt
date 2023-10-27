@@ -28,4 +28,22 @@ aslm.model.devices.galvo.galvo\_synthetic.SyntheticGalvo
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticGalvo.configuration
+      ~SyntheticGalvo.microscope_name
+      ~SyntheticGalvo.galvo_name
+      ~SyntheticGalvo.device_config
+      ~SyntheticGalvo.sample_rate
+      ~SyntheticGalvo.sweep_time
+      ~SyntheticGalvo.camera_delay_percent
+      ~SyntheticGalvo.galvo_max_voltage
+      ~SyntheticGalvo.galvo_min_voltage
+      ~SyntheticGalvo.remote_focus_ramp_falling
+      ~SyntheticGalvo.galvo_waveform
+      ~SyntheticGalvo.samples
+      ~SyntheticGalvo.waveform_dict
+   
    

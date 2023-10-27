@@ -26,4 +26,12 @@ aslm.model.devices.zoom.zoom\_synthetic.SyntheticZoom
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticZoom.configuration
+      ~SyntheticZoom.zoomdict
+      ~SyntheticZoom.zoomvalue
+   
    

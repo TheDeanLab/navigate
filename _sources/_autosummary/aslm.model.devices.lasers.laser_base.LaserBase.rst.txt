@@ -27,4 +27,12 @@ aslm.model.devices.lasers.laser\_base.LaserBase
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LaserBase.configuration
+      ~LaserBase.microscope_name
+      ~LaserBase.device_config
+   
    

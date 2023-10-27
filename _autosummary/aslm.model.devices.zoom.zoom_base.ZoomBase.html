@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.zoom.zoom_base.ZoomBase &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.zoom.zoom_base.ZoomBase &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -81,25 +81,26 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.zoom.zoom_base.</span></span><span class="sig-name descname"><span class="pre">ZoomBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_base.ZoomBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>ZoomBase parent class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_base.ZoomBase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the parent zoom class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope in configuration</p></li>
-<li><p><strong>device_connection</strong> (<em>object</em>) – Hardware device to connect to</p></li>
+<li><p><strong>device_controller</strong> (<em>object</em>) – Hardware device to connect to</p></li>
 <li><p><strong>configuration</strong> (<em>multiprocesing.managers.DictProxy</em>) – Global configuration of the microscope</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_base.ZoomBase.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.__init__" title="aslm.model.devices.zoom.zoom_base.ZoomBase.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_controller, ...)</p></td>
-<td><p></p></td>
+<td><p>Initialize the parent zoom class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.build_stage_dict" title="aslm.model.devices.zoom.zoom_base.ZoomBase.build_stage_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_stage_dict</span></code></a>()</p></td>
 <td><p>Construct a dictionary of stage offsets in between different zoom values.</p></td>
@@ -111,7 +112,21 @@
 <td><p>Read the position of the Zoom Servo</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.set_zoom" title="aslm.model.devices.zoom.zoom_base.ZoomBase.set_zoom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_zoom</span></code></a>(zoom[, wait_until_done])</p></td>
-<td><p>Change the Zoom Servo.</p></td>
+<td><p>Change the microscope zoom.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.configuration" title="aslm.model.devices.zoom.zoom_base.ZoomBase.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Configuration dictionary for the device.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.zoomdict" title="aslm.model.devices.zoom.zoom_base.ZoomBase.zoomdict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zoomdict</span></code></a></p></td>
+<td><p>Zoom dictionary</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.zoomvalue" title="aslm.model.devices.zoom.zoom_base.ZoomBase.zoomvalue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zoomvalue</span></code></a></p></td>
+<td><p>the desired zoom setting</p></td>
 </tr>
 </tbody>
 </table>
@@ -174,15 +189,48 @@ and then the target magnification.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_base.ZoomBase.set_zoom">
 <span class="sig-name descname"><span class="pre">set_zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zoom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.set_zoom" title="Link to this definition"></a></dt>
-<dd><p>Change the Zoom Servo.</p>
+<dd><p>Change the microscope zoom.</p>
 <p>Confirms tha the zoom position is available in the zoomdict</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>zoom</strong> (<em>dict</em>) – Zoom dictionary</p></li>
 <li><p><strong>wait_until_done</strong> (<em>bool</em>) – Delay parameter.</p></li>
-<li><p><strong>exists</strong> (<em># Changes zoom after checking that the commanded value</em>) – </p></li>
+<li><p><strong>exists</strong> (<em>Changes zoom after checking that the commanded value</em>) – </p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_base.ZoomBase.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.configuration" title="Link to this definition"></a></dt>
+<dd><p>Configuration dictionary for the device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_base.ZoomBase.zoomdict">
+<span class="sig-name descname"><span class="pre">zoomdict</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.zoomdict" title="Link to this definition"></a></dt>
+<dd><p>Zoom dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.zoom.zoom_base.ZoomBase.zoomvalue">
+<span class="sig-name descname"><span class="pre">zoomvalue</span></span><a class="headerlink" href="#aslm.model.devices.zoom.zoom_base.ZoomBase.zoomvalue" title="Link to this definition"></a></dt>
+<dd><p>the desired zoom setting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>

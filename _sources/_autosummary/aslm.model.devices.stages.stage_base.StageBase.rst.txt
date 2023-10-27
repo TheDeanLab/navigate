@@ -31,6 +31,9 @@ aslm.model.devices.stages.stage\_base.StageBase
 
    .. autosummary::
    
+      ~StageBase.axes
+      ~StageBase.stage_feedback
       ~StageBase.axes_mapping
+      ~StageBase.stage_limits
    
    

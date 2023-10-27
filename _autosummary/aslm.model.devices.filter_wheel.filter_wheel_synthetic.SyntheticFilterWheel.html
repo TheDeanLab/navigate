@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -151,13 +151,23 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the FilterWheelBase class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of the microscope.</p></li>
+<li><p><strong>device_connection</strong> (<em>dict</em>) – Dictionary of device connections.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – Dictionary of configuration parameters.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.__init__" title="aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
-<td><p></p></td>
+<td><p>Initialize the FilterWheelBase class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.check_if_filter_in_filter_dictionary" title="aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.check_if_filter_in_filter_dictionary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_if_filter_in_filter_dictionary</span></code></a>(filter_name)</p></td>
 <td><p>Checks if the filter designation (string) given exists in the filter dictionary</p></td>
@@ -176,6 +186,17 @@
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.filter_dictionary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_dictionary</span></code></a></p></td>
+<td><p>Dictionary of filters available on the filter wheel.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id1" title="aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.wheel_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wheel_position</span></code></a></p></td>
+<td><p>Filter wheel position.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.check_if_filter_in_filter_dictionary">
 <span class="sig-name descname"><span class="pre">check_if_filter_in_filter_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.check_if_filter_in_filter_dictionary" title="Link to this definition"></a></dt>
@@ -190,6 +211,9 @@ filter dictionary</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If filter name is not in the filter dictionary.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -234,6 +258,28 @@ position argument.</p>
 <li><p><strong>filter_name</strong> (<em>str</em>) – Name of filter to move to.</p></li>
 <li><p><strong>wait_until_done</strong> (<em>bool</em>) – Waits duration of time necessary for filter wheel to change positions.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">filter_dictionary</span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of filters available on the filter wheel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">wheel_position</span></span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd><p>Filter wheel position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

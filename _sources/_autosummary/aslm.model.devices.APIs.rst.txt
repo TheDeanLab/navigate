@@ -30,6 +30,5 @@ aslm.model.devices.APIs
 
    aslm.model.devices.APIs.coherent
    aslm.model.devices.APIs.dynamixel
-   aslm.model.devices.APIs.logitech
    aslm.model.devices.APIs.omicron
 

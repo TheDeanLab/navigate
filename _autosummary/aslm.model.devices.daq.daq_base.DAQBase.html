@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.daq.daq_base.DAQBase &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.daq.daq_base.DAQBase &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -80,34 +80,76 @@
 <dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.daq.daq_base.</span></span><span class="sig-name descname"><span class="pre">DAQBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Parent class for Data Acquisition (DAQ) classes.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.configuration">
-<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.configuration" title="Link to this definition"></a></dt>
-<dd><p>Global configuration of the microscope</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>multiprocesing.managers.DictProxy</p>
-</dd>
-</dl>
-</dd></dl>
-
+<p>DAQBase - Parent class for Data Acquisition (DAQ) classes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initializes the DAQBase class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>configuration</strong> (<em>dict</em>) – Dictionary of configuration parameters</p>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.__init__" title="aslm.model.devices.daq.daq_base.DAQBase.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(configuration)</p></td>
-<td><p></p></td>
+<td><p>Initializes the DAQBase class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.calculate_all_waveforms" title="aslm.model.devices.daq.daq_base.DAQBase.calculate_all_waveforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_all_waveforms</span></code></a>(microscope_name, ...)</p></td>
 <td><p>Pre-calculates all waveforms necessary for the acquisition and organizes in a dictionary format.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">enable_microscope</span></code>(microscope_name)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.enable_microscope" title="aslm.model.devices.daq.daq_base.DAQBase.enable_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enable_microscope</span></code></a>(microscope_name)</p></td>
+<td><p>Enables the microscope.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.configuration" title="aslm.model.devices.daq.daq_base.DAQBase.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Dictionary of configuration parameters</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.waveform_constants" title="aslm.model.devices.daq.daq_base.DAQBase.waveform_constants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_constants</span></code></a></p></td>
+<td><p>Dictionary of waveform constants</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.microscope_name" title="aslm.model.devices.daq.daq_base.DAQBase.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>Name of the active microscope</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.daq_parameters" title="aslm.model.devices.daq.daq_base.DAQBase.daq_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">daq_parameters</span></code></a></p></td>
+<td><p>Dictionary of DAQ parameters</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.sample_rate" title="aslm.model.devices.daq.daq_base.DAQBase.sample_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_rate</span></code></a></p></td>
+<td><p>Sample rate of the DAQ</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.sweep_time" title="aslm.model.devices.daq.daq_base.DAQBase.sweep_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sweep_time</span></code></a></p></td>
+<td><p>Sweep time of the DAQ</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.remote_focus_ramp_falling" title="aslm.model.devices.daq.daq_base.DAQBase.remote_focus_ramp_falling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_ramp_falling</span></code></a></p></td>
+<td><p>Dictionary of remote focus ramp falling percentages</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.camera_delay_percent" title="aslm.model.devices.daq.daq_base.DAQBase.camera_delay_percent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_delay_percent</span></code></a></p></td>
+<td><p>Camera delay percentage</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.camera_pulse_percent" title="aslm.model.devices.daq.daq_base.DAQBase.camera_pulse_percent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_pulse_percent</span></code></a></p></td>
+<td><p>Camera pulse percentage</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.camera_high_time" title="aslm.model.devices.daq.daq_base.DAQBase.camera_high_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_high_time</span></code></a></p></td>
+<td><p>Camera high time</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.camera_delay" title="aslm.model.devices.daq.daq_base.DAQBase.camera_delay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_delay</span></code></a></p></td>
+<td><p>Camera delay time</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.waveform_dict" title="aslm.model.devices.daq.daq_base.DAQBase.waveform_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_dict</span></code></a></p></td>
+<td><p>Dictionary of waveforms.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.waveform_repeat_num" title="aslm.model.devices.daq.daq_base.DAQBase.waveform_repeat_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_repeat_num</span></code></a></p></td>
+<td><p>Number of times to repeat the waveform</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.daq.daq_base.DAQBase.waveform_expand_num" title="aslm.model.devices.daq.daq_base.DAQBase.waveform_expand_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_expand_num</span></code></a></p></td>
+<td><p>Number of times to expand the waveform</p></td>
 </tr>
 </tbody>
 </table>
@@ -130,6 +172,171 @@ display purposes.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.enable_microscope">
+<span class="sig-name descname"><span class="pre">enable_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.enable_microscope" title="Link to this definition"></a></dt>
+<dd><p>Enables the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>microscope_name</strong> (<em>str</em>) – Name of the active microscope</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.camera_delay">
+<span class="sig-name descname"><span class="pre">camera_delay</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.camera_delay" title="Link to this definition"></a></dt>
+<dd><p>Camera delay time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.camera_delay_percent">
+<span class="sig-name descname"><span class="pre">camera_delay_percent</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.camera_delay_percent" title="Link to this definition"></a></dt>
+<dd><p>Camera delay percentage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.camera_high_time">
+<span class="sig-name descname"><span class="pre">camera_high_time</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.camera_high_time" title="Link to this definition"></a></dt>
+<dd><p>Camera high time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.camera_pulse_percent">
+<span class="sig-name descname"><span class="pre">camera_pulse_percent</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.camera_pulse_percent" title="Link to this definition"></a></dt>
+<dd><p>Camera pulse percentage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.configuration" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of configuration parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.daq_parameters">
+<span class="sig-name descname"><span class="pre">daq_parameters</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.daq_parameters" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of DAQ parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.microscope_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the active microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.remote_focus_ramp_falling">
+<span class="sig-name descname"><span class="pre">remote_focus_ramp_falling</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.remote_focus_ramp_falling" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of remote focus ramp falling percentages</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.sample_rate">
+<span class="sig-name descname"><span class="pre">sample_rate</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.sample_rate" title="Link to this definition"></a></dt>
+<dd><p>Sample rate of the DAQ</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.sweep_time">
+<span class="sig-name descname"><span class="pre">sweep_time</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.sweep_time" title="Link to this definition"></a></dt>
+<dd><p>Sweep time of the DAQ</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.waveform_constants">
+<span class="sig-name descname"><span class="pre">waveform_constants</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.waveform_constants" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of waveform constants</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.waveform_dict">
+<span class="sig-name descname"><span class="pre">waveform_dict</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.waveform_dict" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of waveforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.waveform_expand_num">
+<span class="sig-name descname"><span class="pre">waveform_expand_num</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.waveform_expand_num" title="Link to this definition"></a></dt>
+<dd><p>Number of times to expand the waveform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.daq.daq_base.DAQBase.waveform_repeat_num">
+<span class="sig-name descname"><span class="pre">waveform_repeat_num</span></span><a class="headerlink" href="#aslm.model.devices.daq.daq_base.DAQBase.waveform_repeat_num" title="Link to this definition"></a></dt>
+<dd><p>Number of times to repeat the waveform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

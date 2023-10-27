@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -80,19 +80,31 @@
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.stages.stage_tl_kcube_inertial.</span></span><span class="sig-name descname"><span class="pre">TLKIMStage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="aslm.model.devices.stages.stage_base.StageBase.html#aslm.model.devices.stages.stage_base.StageBase" title="aslm.model.devices.stages.stage_base.StageBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">StageBase</span></code></a></p>
+<p>Thorlabs KIM Stage</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the stage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of the microscope.</p></li>
+<li><p><strong>device_connection</strong> (<em>str</em>) – Connection string for the device.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – Configuration dictionary for the device.</p></li>
+<li><p><strong>device_id</strong> (<em>int</em>) – Device ID for the device.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.__init__" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
-<td><p></p></td>
+<td><p>Initialize the stage.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.close" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
+<td><p>Close the stage.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, axis_abs)</p></td>
 <td><p>Ensure the requested position is within axis bounds and return it.</p></td>
@@ -101,13 +113,13 @@
 <td><p>Return a dictionary with the saved stage positions.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_absolute" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_absolute</span></code></a>(move_dictionary[, wait_until_done])</p></td>
-<td><p>Move stage</p></td>
+<td><p>Move stage along a single axis.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis_absolute</span></code></a>(axis, abs_pos[, ...])</p></td>
 <td><p>Implement movement logic along a single axis.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.report_position" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.report_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_position</span></code></a>()</p></td>
-<td><p># Reports the position of the stage for all axes, and creates the hardware # position dictionary.</p></td>
+<td><p>Report the position of the stage.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stop" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
 <td><p>Stop all stage channels move</p></td>
@@ -121,10 +133,34 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes_mapping" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes_mapping</span></code></a></p></td>
-<td><p>Initial setting for all positions self.x_pos, self.y_pos etc are the true axis positions, no matter whether the stages are zeroed or not.</p></td>
+<td><p>Dictionary mapping software axes to hardware axes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.kim_axes" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.kim_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kim_axes</span></code></a></p></td>
+<td><p>List of KIM axes available.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.kim_controller" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.kim_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kim_controller</span></code></a></p></td>
+<td><p>Thorlabs KIM Stage controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.serial_number" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.serial_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serial_number</span></code></a></p></td>
+<td><p>Serial number of the stage.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes</span></code></a></p></td>
+<td><p>List of stage axes available.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stage_feedback" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stage_feedback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_feedback</span></code></a></p></td>
+<td><p>Feedback alignment value for the stage.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stage_limits" title="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stage_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_limits</span></code></a></p></td>
+<td><p>Whether the stage has limits enabled or not.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.close" title="Link to this definition"></a></dt>
+<dd><p>Close the stage.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position">
 <span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_abs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_abs_position" title="Link to this definition"></a></dt>
@@ -149,12 +185,20 @@
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_position_dict">
 <span class="sig-name descname"><span class="pre">get_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.get_position_dict" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary with the saved stage positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of stage positions.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_absolute">
 <span class="sig-name descname"><span class="pre">move_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_absolute" title="Link to this definition"></a></dt>
-<dd><p>Move stage</p>
+<dd><p>Move stage along a single axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -177,7 +221,6 @@ in degrees.</p></li>
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute">
 <span class="sig-name descname"><span class="pre">move_axis_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abs_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute" title="Link to this definition"></a></dt>
 <dd><p>Implement movement logic along a single axis.</p>
-<p>Example calls:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -198,8 +241,17 @@ in degrees.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.report_position">
 <span class="sig-name descname"><span class="pre">report_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.report_position" title="Link to this definition"></a></dt>
-<dd><p># Reports the position of the stage for all axes, and creates the hardware
-# position dictionary.</p>
+<dd><p>Report the position of the stage.</p>
+<p>Reports the position of the stage for all axes, and creates the hardware
+position dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position_dict</strong> – Dictionary containing the current position of the stage.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -214,9 +266,12 @@ in degrees.</p></li>
 <dd><p>Ensure the requested moving positions are within axes bounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement.
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement.
 Includes ‘x_abs’, ‘y_abs’, etc. for one or more axes.
-Expect values in micrometers, except for theta, which is in degrees.</p>
+Expect values in micrometers, except for theta, which is in degrees.</p></li>
+<li><p><strong>is_strict</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, return an empty dict if any axis is out of bounds.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a verified moving dict {axis: abs_position}</p>
@@ -228,11 +283,80 @@ Expect values in micrometers, except for theta, which is in degrees.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes">
+<span class="sig-name descname"><span class="pre">axes</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes" title="Link to this definition"></a></dt>
+<dd><p>List of stage axes available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes_mapping">
 <span class="sig-name descname"><span class="pre">axes_mapping</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.axes_mapping" title="Link to this definition"></a></dt>
-<dd><p>Initial setting for all positions
-self.x_pos, self.y_pos etc are the true axis positions, no matter whether
-the stages are zeroed or not. All units are in microns.</p>
+<dd><p>Dictionary mapping software axes to hardware axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.kim_axes">
+<span class="sig-name descname"><span class="pre">kim_axes</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.kim_axes" title="Link to this definition"></a></dt>
+<dd><p>List of KIM axes available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.kim_controller">
+<span class="sig-name descname"><span class="pre">kim_controller</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.kim_controller" title="Link to this definition"></a></dt>
+<dd><p>Thorlabs KIM Stage controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.serial_number">
+<span class="sig-name descname"><span class="pre">serial_number</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.serial_number" title="Link to this definition"></a></dt>
+<dd><p>Serial number of the stage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stage_feedback">
+<span class="sig-name descname"><span class="pre">stage_feedback</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stage_feedback" title="Link to this definition"></a></dt>
+<dd><p>Feedback alignment value for the stage. Default is None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stage_limits">
+<span class="sig-name descname"><span class="pre">stage_limits</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.stage_limits" title="Link to this definition"></a></dt>
+<dd><p>Whether the stage has limits enabled or not. Default is True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

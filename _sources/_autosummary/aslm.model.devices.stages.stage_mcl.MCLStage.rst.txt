@@ -34,6 +34,11 @@ aslm.model.devices.stages.stage\_mcl.MCLStage
 
    .. autosummary::
    
+      ~MCLStage.mcl_controller
+      ~MCLStage.handle
       ~MCLStage.axes_mapping
+      ~MCLStage.axes
+      ~MCLStage.stage_feedback
+      ~MCLStage.stage_limits
    
    

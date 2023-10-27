@@ -1,0 +1,6 @@
+aslm.model.devices.APIs.dynamixel.dynamixel\_functions.create\_mock\_dxl\_device
+================================================================================
+
+.. currentmodule:: aslm.model.devices.APIs.dynamixel.dynamixel_functions
+
+.. autofunction:: create_mock_dxl_device

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.devices.shutter.laser_shutter_base.ShutterBase &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.devices.shutter.laser_shutter_base.ShutterBase &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -80,68 +80,84 @@
 <dt class="sig sig-object py" id="aslm.model.devices.shutter.laser_shutter_base.ShutterBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.shutter.laser_shutter_base.</span></span><span class="sig-name descname"><span class="pre">ShutterBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>ShutterBase Class
-Parent class for the laser shutters.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.microscope_name">
-<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.microscope_name" title="Link to this definition"></a></dt>
-<dd><p>Name of microscope in configuration</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.device_connection">
-<span class="sig-name descname"><span class="pre">device_connection</span></span><a class="headerlink" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.device_connection" title="Link to this definition"></a></dt>
-<dd><p>Hardware device to connect to</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>object</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.configuration">
-<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.configuration" title="Link to this definition"></a></dt>
-<dd><p>Global configuration of the microscope</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>multiprocesing.managers.DictProxy</p>
-</dd>
-</dl>
-</dd></dl>
-
+<p>ShutterBase Class - Parent class for the laser shutters.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the Shutter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope in configuration</p></li>
+<li><p><strong>device_connection</strong> (<em>object</em>) – Hardware device to connect to</p></li>
+<li><p><strong>configuration</strong> (<em>multiprocesing.managers.DictProxy</em>) – Global configuration of the microscope</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.__init__" title="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
-<td><p></p></td>
+<td><p>Initialize the Shutter.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_shutter</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.close_shutter" title="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.close_shutter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_shutter</span></code></a>()</p></td>
+<td><p>Close the Shutter.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">open_shutter</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.open_shutter" title="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.open_shutter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">open_shutter</span></code></a>()</p></td>
+<td><p>Open the Shutter.</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">state</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.state" title="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state</span></code></a></p></td>
+<td><p>Get the Shutter state.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.shutter_state" title="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.shutter_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shutter_state</span></code></a></p></td>
+<td><p>Shutter state</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.close_shutter">
+<span class="sig-name descname"><span class="pre">close_shutter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.close_shutter" title="Link to this definition"></a></dt>
+<dd><p>Close the Shutter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.open_shutter">
+<span class="sig-name descname"><span class="pre">open_shutter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.open_shutter" title="Link to this definition"></a></dt>
+<dd><p>Open the Shutter.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.shutter_state">
+<span class="sig-name descname"><span class="pre">shutter_state</span></span><a class="headerlink" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.shutter_state" title="Link to this definition"></a></dt>
+<dd><p>Shutter state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aslm.model.devices.shutter.laser_shutter_base.ShutterBase.state">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state</span></span><a class="headerlink" href="#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.state" title="Link to this definition"></a></dt>
+<dd><p>Get the Shutter state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Shutter state</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

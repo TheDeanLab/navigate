@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.features.image_writer.ImageWriter &mdash; ASLM 0.1 documentation</title>
+  <title>aslm.model.features.image_writer.ImageWriter &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            ASLM
+            Autonomous Software for Light Microscopy
               <img src="../_static/mic.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
@@ -56,7 +56,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">ASLM</a>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -80,7 +80,10 @@
 <dt class="sig sig-object py" id="aslm.model.features.image_writer.ImageWriter">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.features.image_writer.</span></span><span class="sig-name descname"><span class="pre">ImageWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.image_writer.ImageWriter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class for saving acquired data to disk.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.image_writer.ImageWriter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.image_writer.ImageWriter.__init__" title="Link to this definition"></a></dt>
+<dd><p>Class for saving acquired data to disk.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -238,167 +241,6 @@ indicating where to save data</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.features.image_writer.ImageWriter.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.image_writer.ImageWriter.__init__" title="Link to this definition"></a></dt>
-<dd><p>Class for saving acquired data to disk.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>model</strong> (<a class="reference internal" href="aslm.model.model.Model.html#aslm.model.model.Model" title="aslm.model.model.Model"><em>aslm.model.model.Model</em></a>) – ASLM Model class for controlling hardware/acquisition.</p></li>
-<li><p><strong>data_buffer</strong> (<em>[</em><a class="reference internal" href="aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray" title="aslm.model.concurrency.concurrency_tools.SharedNDArray"><em>SharedNDArray</em></a><em>]</em>) – data_buffer will use model’s default data_buffer if it’s not specified</p></li>
-<li><p><strong>sub_dir</strong> (<em>str</em>) – Sub-directory of self.model.configuration[‘experiment’]
-[‘Saving’][‘save_directory’]
-indicating where to save data</p></li>
-<li><p><strong>image_name</strong> (<em>str</em>) – Name of the image to be saved. If None, a name will be generated</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
-<dd><p>Close the data source.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">generate_image_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
-<dd><p>Generate a file name for saving data.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">generate_meta_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
-<dd><p>Generate meta data for saving data.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">save_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
-<dd><p>Save image to disk.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id4">
-<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
-<dd><p>Dictionary of functions to call for each configuration.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id5">
-<span class="sig-name descname"><span class="pre">current_time_point</span></span><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
-<dd><p>Current time point for saving data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id6">
-<span class="sig-name descname"><span class="pre">data_buffer</span></span><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
-<dd><p>Data buffer for saving data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference internal" href="aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray" title="aslm.model.concurrency.concurrency_tools.SharedNDArray">SharedNDArray</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id7">
-<span class="sig-name descname"><span class="pre">data_source</span></span><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
-<dd><p>Data source for saving data to disk.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>aslm.model.data_sources.DataSource</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id8">
-<span class="sig-name descname"><span class="pre">file_type</span></span><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
-<dd><p>File type for saving data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id9">
-<span class="sig-name descname"><span class="pre">mip</span></span><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
-<dd><p>Maximum intensity projection image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id10">
-<span class="sig-name descname"><span class="pre">mip_directory</span></span><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
-<dd><p>Directory for saving maximum intensity projection images.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id11">
-<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
-<dd><p>ASLM Model class for controlling hardware/acquisition.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="aslm.model.model.Model.html#aslm.model.model.Model" title="aslm.model.model.Model">aslm.model.model.Model</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id12">
-<span class="sig-name descname"><span class="pre">num_of_channels</span></span><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
-<dd><p>Number of channels in the experiment.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id13">
-<span class="sig-name descname"><span class="pre">save_directory</span></span><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
-<dd><p>Directory for saving data to disk.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="id14">
-<span class="sig-name descname"><span class="pre">sub_dir</span></span><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
-<dd><p>Sub-directory of self.model.configuration[‘experiment’]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <p class="rubric">Methods</p>
@@ -410,16 +252,16 @@ indicating where to save data</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.image_writer.ImageWriter.calculate_and_check_disk_space" title="aslm.model.features.image_writer.ImageWriter.calculate_and_check_disk_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_and_check_disk_space</span></code></a>()</p></td>
 <td><p>Estimate the size of the data that will be written to disk, and confirm that sufficient disk space is available.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id15" title="aslm.model.features.image_writer.ImageWriter.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.features.image_writer.ImageWriter.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
 <td><p>Close the data source we are writing to.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id16" title="aslm.model.features.image_writer.ImageWriter.generate_image_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_image_name</span></code></a>(current_channel[, ext])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id1" title="aslm.model.features.image_writer.ImageWriter.generate_image_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_image_name</span></code></a>(current_channel[, ext])</p></td>
 <td><p>Generates a string for the filename, e.g., CH00_000000.tif.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id17" title="aslm.model.features.image_writer.ImageWriter.generate_meta_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_meta_data</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id2" title="aslm.model.features.image_writer.ImageWriter.generate_meta_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_meta_data</span></code></a>()</p></td>
 <td><p>Generate meta data for the image.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id18" title="aslm.model.features.image_writer.ImageWriter.save_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_image</span></code></a>(frame_ids)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id3" title="aslm.model.features.image_writer.ImageWriter.save_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_image</span></code></a>(frame_ids)</p></td>
 <td><p>Save the data to disk.</p></td>
 </tr>
 </tbody>
@@ -428,15 +270,15 @@ indicating where to save data</p></li>
 <dt class="sig sig-object py" id="aslm.model.features.image_writer.ImageWriter.calculate_and_check_disk_space">
 <span class="sig-name descname"><span class="pre">calculate_and_check_disk_space</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.image_writer.ImageWriter.calculate_and_check_disk_space" title="Link to this definition"></a></dt>
 <dd><p>Estimate the size of the data that will be written to disk, and confirm
-that sufficient disk space is available. Also evaluates whether or not
+that sufficient disk space is available. Also evaluates whether
 big-tiff or tiff is needed. Tiff file formats were designed for 32-bit
 operating systems, whereas big-tiff was designed for 64-bit operating systems.</p>
 <p>Assumes 16-bit image type, without compression.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id15">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
 <dd><p>Close the data source we are writing to.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -453,8 +295,8 @@ operating systems, whereas big-tiff was designed for 64-bit operating systems.</
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id16">
-<span class="sig-name descname"><span class="pre">generate_image_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.tif'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">generate_image_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.tif'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd><p>Generates a string for the filename, e.g., CH00_000000.tif.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -475,8 +317,8 @@ of saved color channel.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id17">
-<span class="sig-name descname"><span class="pre">generate_meta_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id17" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">generate_meta_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd><p>Generate meta data for the image.</p>
 <p>TODO: Is this a vestigial function? DELETE???</p>
 <dl class="field-list simple">
@@ -490,8 +332,8 @@ of saved color channel.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id18">
-<span class="sig-name descname"><span class="pre">save_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id18" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">save_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
 <dd><p>Save the data to disk.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

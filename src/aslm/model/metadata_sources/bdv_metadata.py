@@ -47,7 +47,7 @@ class BigDataViewerMetadata(XMLMetadata):
     https://arxiv.org/abs/1412.0488."""
 
     def __init__(self):
-        """Initialize metadata object. """
+        """Initialize metadata object."""
 
         super().__init__()
 
@@ -79,24 +79,21 @@ class BigDataViewerMetadata(XMLMetadata):
         configuration : dict
             Configuration dictionary.
         """
-        bdv_configuration = configuration['configuration']["BDVParameters"]
+        bdv_configuration = configuration["configuration"]["BDVParameters"]
 
         # Shear Parameters
-        self.shear_data = bdv_configuration["shear"].get(
-            "shear_data", False)
-        self.shear_dimension = bdv_configuration["shear"].get(
-            "shear_dimension", "YZ")
-        self.shear_angle = bdv_configuration["shear"].get(
-            "shear_angle", 0)
+        self.shear_data = bdv_configuration["shear"].get("shear_data", False)
+        self.shear_dimension = (
+            bdv_configuration["shear"].get("shear_dimension", "YZ").upper()
+        )
+        self.shear_angle = bdv_configuration["shear"].get("shear_angle", 0)
 
         # Rotate Parameters
-        self.rotate_data = bdv_configuration["rotate"].get(
-            "rotate_data", False)
-        self.rotate_dimension = bdv_configuration["rotate"].get(
-            "rotate_dimension", "XY")
-        self.rotate_angle = bdv_configuration["rotate"].get(
-            "rotate_angle", 0)
-
+        self.rotate_data = bdv_configuration["rotate"].get("rotate_data", False)
+        self.rotate_dimension = (
+            bdv_configuration["rotate"].get("rotate_dimension", "XY").upper()
+        )
+        self.rotate_angle = bdv_configuration["rotate"].get("rotate_angle", 0)
 
     def bdv_xml_dict(
         self, file_name: Union[str, list, None], views: list, **kw
@@ -308,11 +305,11 @@ class BigDataViewerMetadata(XMLMetadata):
                 [self.dy / self.dx, self.dz / self.dx, self.dz / self.dy],
             )
 
-            if self.shear_dimension == "XY":
+            if self.shear_dimension == "XY" or self.shear_dimension == "YX":
                 self.shear_transform[0, 1] = scaled_angle[0]
-            elif self.shear_dimension == "XZ":
+            elif self.shear_dimension == "XZ" or self.shear_dimension == "ZX":
                 self.shear_transform[0, 2] = scaled_angle[1]
-            elif self.shear_dimension == "YZ":
+            elif self.shear_dimension == "YZ" or self.shear_dimension == "ZY":
                 self.shear_transform[1, 2] = scaled_angle[2]
             else:
                 pass

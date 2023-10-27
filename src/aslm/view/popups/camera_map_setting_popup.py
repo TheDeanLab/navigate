@@ -130,9 +130,7 @@ class CameraMapSettingPopup(PopUp):
     def get_widgets(self):
         """Get the input widgets.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

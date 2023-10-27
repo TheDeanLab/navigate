@@ -86,13 +86,8 @@ class TestAcquireBarController:
     def test_init(self):
         """Tests the initialization of the AcquireBarController class
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------
@@ -104,13 +99,8 @@ class TestAcquireBarController:
     def test_attr(self):
         """Tests the attributes of the AcquireBarController class
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------
@@ -144,9 +134,6 @@ class TestAcquireBarController:
         value_expected : int
             Expected value of the progress bar
 
-        Returns
-        -------
-        None
 
         Raises
         ------
@@ -251,9 +238,6 @@ class TestAcquireBarController:
         expected_state : str
             Expected state of the progress bar
 
-        Returns
-        -------
-        None
 
         Raises
         ------
@@ -298,9 +282,6 @@ class TestAcquireBarController:
         expected_state : str
             Expected state of the progress bar
 
-        Returns
-        -------
-        None
 
         Raises
         ------
@@ -336,9 +317,6 @@ class TestAcquireBarController:
         mode : str
             Mode of the progress bar
 
-        Returns
-        -------
-        None
 
         Raises
         ------
@@ -353,9 +331,6 @@ class TestAcquireBarController:
     def test_set_save(self):
         """Tests the set_save method of the AcquireBarController class
 
-        Returns
-        -------
-        None
 
         Raises
         ------
@@ -376,9 +351,6 @@ class TestAcquireBarController:
     def test_stop_acquire(self):
         """Tests the stop_acquire method of the AcquireBarController class
 
-        Returns
-        -------
-        None
 
         Raises
         ------
@@ -410,9 +382,6 @@ class TestAcquireBarController:
         expected_mode : str
             Expected state of the progress bar
 
-        Returns
-        -------
-        None
 
         Raises
         ------
@@ -444,9 +413,6 @@ class TestAcquireBarController:
     def test_populate_experiment_values(self):
         """Tests the populate_experiment_values method of the AcquireBarController class
 
-        Returns
-        -------
-        None
 
         Raises
         ------
@@ -518,9 +484,6 @@ class TestAcquireBarController:
         choice : str
             Choice of the user in the popup window
 
-        Returns
-        -------
-        None
 
         Raises
         ------

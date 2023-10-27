@@ -99,9 +99,9 @@ class WaveformTabController(GUIController):
         self.view.waveform_settings.inputs["sample_rate"].get_variable().trace_add(
             "write", self.update_sample_rate
         )
-        self.view.waveform_settings.inputs["waveform_template"].widget[
-            "values"] = list(
-            self.parent_controller.configuration["waveform_templates"].keys())
+        self.view.waveform_settings.inputs["waveform_template"].widget["values"] = list(
+            self.parent_controller.configuration["waveform_templates"].keys()
+        )
         self.view.waveform_settings.inputs["waveform_template"].set("Default")
         self.view.waveform_settings.inputs["waveform_template"].widget.bind(
             "<<ComboboxSelected>>", self.update_waveform_template
@@ -117,9 +117,7 @@ class WaveformTabController(GUIController):
         *args : tuple
             Unused
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -145,16 +143,15 @@ class WaveformTabController(GUIController):
         *args : tuple
             Unused
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
         >>> self.update_waveform_template()
         """
-        self.parent_controller.configuration["experiment"]["MicroscopeState"]["waveform_template"] = \
-            self.view.waveform_settings.inputs["waveform_template"].get()
+        self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "waveform_template"
+        ] = self.view.waveform_settings.inputs["waveform_template"].get()
 
         event = type("MyEvent", (object,), {})
         self.plot_waveforms(event)
@@ -169,9 +166,7 @@ class WaveformTabController(GUIController):
         sample_rate : int
             Sample rate of the waveforms
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -187,13 +182,9 @@ class WaveformTabController(GUIController):
     def initialize_plots(self):
         """Initialize the plots in the waveform tab
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
+
 
         Examples
         --------
@@ -214,9 +205,7 @@ class WaveformTabController(GUIController):
         event : Tkinter event
             Tkinter event
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -226,20 +215,24 @@ class WaveformTabController(GUIController):
 
         try:
             current_tab = parent_notebook.select()
-        except Exception as e:
+        except Exception:
             return
 
-        if self.view.is_docked and parent_notebook.tab(current_tab, "text") != "Waveform Settings":
+        if (
+            self.view.is_docked
+            and parent_notebook.tab(current_tab, "text") != "Waveform Settings"
+        ):
             return
         self.view.plot_etl.clear()
         self.view.plot_galvo.clear()
 
-        waveform_template_name = self.parent_controller.configuration[
-            "experiment"]["MicroscopeState"].get("waveform_template", "Default")
+        waveform_template_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ].get("waveform_template", "Default")
         repeat_num, expand_num = get_waveform_template_parameters(
             waveform_template_name,
             self.parent_controller.configuration["waveform_templates"],
-            self.parent_controller.configuration["experiment"]["MicroscopeState"]
+            self.parent_controller.configuration["experiment"]["MicroscopeState"],
         )
 
         last_etl = 0
@@ -259,30 +252,46 @@ class WaveformTabController(GUIController):
             waveform_repeat_total_num = repeat_num * expand_num
 
             self.view.plot_etl.plot(
-                np.arange(len(remote_focus_waveform) * waveform_repeat_total_num) / self.sample_rate + last_etl,
+                np.arange(len(remote_focus_waveform) * waveform_repeat_total_num)
+                / self.sample_rate
+                + last_etl,
                 np.hstack([remote_focus_waveform] * waveform_repeat_total_num),
                 label=k,
             )
             self.view.plot_galvo.plot(
-                np.arange(len(galvo_waveform) * waveform_repeat_total_num) / self.sample_rate + last_galvo,
+                np.arange(len(galvo_waveform) * waveform_repeat_total_num)
+                / self.sample_rate
+                + last_galvo,
                 np.hstack([galvo_waveform] * waveform_repeat_total_num),
                 label=k,
             )
             self.view.plot_etl.plot(
-                np.arange(len(camera_waveform) * waveform_repeat_total_num) / self.sample_rate + last_camera,
+                np.arange(len(camera_waveform) * waveform_repeat_total_num)
+                / self.sample_rate
+                + last_camera,
                 np.hstack([camera_waveform] * waveform_repeat_total_num),
                 c="k",
                 linestyle="--",
             )
             self.view.plot_galvo.plot(
-                np.arange(len(camera_waveform) * waveform_repeat_total_num) / self.sample_rate + last_camera,
+                np.arange(len(camera_waveform) * waveform_repeat_total_num)
+                / self.sample_rate
+                + last_camera,
                 np.hstack([camera_waveform] * waveform_repeat_total_num),
                 c="k",
                 linestyle="--",
             )
-            last_etl += len(remote_focus_waveform) * waveform_repeat_total_num / self.sample_rate
-            last_galvo += len(galvo_waveform) * waveform_repeat_total_num / self.sample_rate
-            last_camera += len(camera_waveform) * waveform_repeat_total_num / self.sample_rate
+            last_etl += (
+                len(remote_focus_waveform)
+                * waveform_repeat_total_num
+                / self.sample_rate
+            )
+            last_galvo += (
+                len(galvo_waveform) * waveform_repeat_total_num / self.sample_rate
+            )
+            last_camera += (
+                len(camera_waveform) * waveform_repeat_total_num / self.sample_rate
+            )
 
         self.view.plot_etl.set_title("Remote Focus Waveform")
         self.view.plot_galvo.set_title("Galvo Waveform")

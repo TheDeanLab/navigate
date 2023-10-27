@@ -145,9 +145,7 @@ class ValidatedMixin:
         **kwargs
             Keyword arguments to pass to the parent class
 
-        Returns
-        -------
-        None
+
 
         """
         self.error = error_var or tk.StringVar()
@@ -193,9 +191,7 @@ class ValidatedMixin:
         on : bool
             Whether to turn the error message on or off
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -320,9 +316,7 @@ class ValidatedMixin:
         action : str
             The action being performed. 0 for delete, 1 for insert, -1 for other
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -349,9 +343,7 @@ class ValidatedMixin:
         **kwargs
             Keyword arguments to pass to the invalid function
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -368,9 +360,7 @@ class ValidatedMixin:
         **kwargs
             Keyword arguments to pass to the invalid function
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -384,9 +374,7 @@ class ValidatedMixin:
     def trigger_focusout_validation(self):
         """Trigger the focusout validation
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -406,9 +394,7 @@ class ValidatedMixin:
         event : tk.Event
             The event that triggered the history addition
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -433,9 +419,7 @@ class ValidatedMixin:
         event : tk.Event
             The event that triggered the undo
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -474,9 +458,7 @@ class ValidatedMixin:
         event : tk.Event
             The event that triggered the redo
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -560,9 +542,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         value : str
             The value to set the entry to
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -584,9 +564,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         prec : int
             The precision to set the entry to
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -598,9 +576,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
     def _get_precision(self):
         """Get the precision of the entry
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -745,9 +721,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         event : tk.Event
             The event that triggered the update
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -765,9 +739,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         *args
             Arguments to pass to the invalid function
 
-        Returns
-        -------
-        None
+
         """
         current = self.get()
         try:
@@ -789,9 +761,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         *args
             Arguments to pass to the invalid function
 
-        Returns
-        -------
-        None
+
         """
         current = self.get()
         try:
@@ -813,9 +783,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         on : bool
             Whether to turn the error state on or off
 
-        Returns
-        -------
-        None
+
         """
         super()._toggle_error(on)
         if on:
@@ -983,9 +951,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         prec : int
             The number of decimal places allowed in the spinbox
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -1001,9 +967,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         int
             The number of decimal places allowed in the spinbox
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -1154,9 +1118,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         event : tk.Event
             The event that triggered the function
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -1174,9 +1136,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         *args
             Additional arguments
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -1202,9 +1162,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         *args
             Additional arguments
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -1230,9 +1188,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         on : bool, optional
             Whether to turn the error on or off, by default False
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------

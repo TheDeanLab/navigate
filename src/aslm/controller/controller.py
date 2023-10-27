@@ -332,10 +332,6 @@ class Controller:
         config file via config controller. For the entire view tab.
         Sets the minimum and maximum counts
         for when the data is not being autoscaled.
-
-        Returns
-        -------
-        None
         """
         # Populating Min and Max Counts
         minmax_values = [0, 2**16 - 1]

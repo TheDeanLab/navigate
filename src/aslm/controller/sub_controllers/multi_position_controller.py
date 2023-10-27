@@ -148,10 +148,6 @@ class MultiPositionController(GUIController):
         event : tkinter event
             event that triggers the function
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> handle_double_click(event)
@@ -194,9 +190,7 @@ class MultiPositionController(GUIController):
 
         The valid csv file should contain the line of headers ['X', 'Y', 'Z', 'R', 'F']
 
-        Returns
-        -------
-        None
+
 
         Example
         -------
@@ -229,9 +223,7 @@ class MultiPositionController(GUIController):
         This function opens a dialog that let the user input a filename
         Then, it will export positions to that csv file
 
-        Returns
-        -------
-        None
+
 
         Example
         -------
@@ -249,9 +241,7 @@ class MultiPositionController(GUIController):
     def move_to_position(self):
         """Move to a position within the Multi-Position Acquisition Interface.
 
-        Returns
-        -------
-        None
+
 
         Example
         -------
@@ -285,9 +275,7 @@ class MultiPositionController(GUIController):
         This function opens a dialog to let the user input start and end position
         Then it will generate positions for the user.
 
-        Returns
-        -------
-        None
+
 
         Example
         -------
@@ -301,9 +289,7 @@ class MultiPositionController(GUIController):
         This function will get the stage's current position,
         Then add it to position list
 
-        Returns
-        -------
-        None
+
 
         Example
         -------
@@ -320,9 +306,7 @@ class MultiPositionController(GUIController):
         position : dict
             position in the format of {axis: value}
 
-        Returns
-        -------
-        None
+
 
         Example
         -------
@@ -348,6 +332,8 @@ class MultiPositionController(GUIController):
             True: the position should be kept
         """
         positions = self.get_positions()
-        l = len(position_flag_list)
-        new_positions = [p for i, p in enumerate(positions) if (i >= l or position_flag_list[i])]
+        l = len(position_flag_list)  # noqa
+        new_positions = [
+            p for i, p in enumerate(positions) if (i >= l or position_flag_list[i])
+        ]
         self.set_positions(new_positions)

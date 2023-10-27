@@ -268,9 +268,7 @@ class TilingWizardController(GUIController):
         self : object
             Tiling Wizard Controller instance
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -358,9 +356,7 @@ class TilingWizardController(GUIController):
         self : object
             Tiling Wizard Controller instance
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -390,9 +386,7 @@ class TilingWizardController(GUIController):
         axis : str
             x, y, z axis of stage to calculate.
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -432,9 +426,7 @@ class TilingWizardController(GUIController):
         axis : str
             x, y, z axis of stage to calculate
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -458,9 +450,7 @@ class TilingWizardController(GUIController):
         self : object
             Tiling Wizard Controller instance
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -518,9 +508,7 @@ class TilingWizardController(GUIController):
         self : object
             Tiling Wizard Controller instance
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -553,9 +541,7 @@ class TilingWizardController(GUIController):
         self : object
             Tiling Wizard Controller instance
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------

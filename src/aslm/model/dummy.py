@@ -65,9 +65,7 @@ class DummyController:
         view : DummyView
             The view to be controlled by this controller.
 
-        Returns
-        -------
-        None
+
 
         Example
         -------
@@ -270,9 +268,7 @@ class DummyModel:
         corresponding frame IDs. It appends the received frame IDs to the data storage
         and runs data processing operations if a data container is available.
 
-        Returns
-        -------
-        None
+
 
         Notes
         -----

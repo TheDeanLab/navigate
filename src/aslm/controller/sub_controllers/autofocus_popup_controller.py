@@ -116,14 +116,6 @@ class AutofocusPopupController(GUIController):
         """Populate Experiment Values
 
         Populates the experiment values from the experiment settings dictionary
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
         """
         self.setting_dict = self.parent_controller.configuration["experiment"][
             "AutoFocusParameters"
@@ -154,30 +146,12 @@ class AutofocusPopupController(GUIController):
             self.view.setting_vars[k].set(setting_dict[device][device_ref][k])
 
     def showup(self):
-        """Shows the popup window
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Shows the popup window"""
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)
 
     def start_autofocus(self):
-        """Starts the autofocus process
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Starts the autofocus process."""
         device = self.widgets["device"].widget.get()
         device_ref = self.widgets["device_ref"].widget.get()
         self.parent_controller.execute("autofocus", device, device_ref)
@@ -188,10 +162,6 @@ class AutofocusPopupController(GUIController):
         Parameters
         ----------
         args: tk event arguments
-
-        Returns
-        -------
-        None
         """
         device = self.widgets["device"].widget.get()
         device_refs = self.setting_dict[self.microscope_name][device].keys()
@@ -204,10 +174,6 @@ class AutofocusPopupController(GUIController):
         Parameters
         ----------
         args: tk event arguments
-
-        Returns
-        -------
-        None
         """
         device = self.widgets["device"].widget.get()
         device_ref = self.widgets["device_ref"].widget.get()
@@ -221,10 +187,6 @@ class AutofocusPopupController(GUIController):
         Parameters
         ----------
         var: tk variable reference name
-
-        Returns
-        -------
-        None
         """
 
         def func(*args):
@@ -248,13 +210,9 @@ class AutofocusPopupController(GUIController):
             If True, the plot will be cleared before plotting.
             If False, the plot will be added to the existing plot.
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
+
         """
 
         data = np.asarray(data)

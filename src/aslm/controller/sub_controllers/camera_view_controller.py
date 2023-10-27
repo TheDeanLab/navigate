@@ -588,14 +588,6 @@ class CameraViewController(GUIController):
 
         If frames to average == 0 or 1, provides the maximum value from the last
         acquired data.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
         """
 
         # If the array is larger than 32 entries, remove the 0th entry.
@@ -1139,7 +1131,7 @@ class CameraViewController(GUIController):
         self.reset_display(False)
 
     def update_canvas_size(self):
-        r_canvas_width =int(self.view.canvas["width"])
+        r_canvas_width = int(self.view.canvas["width"])
         r_canvas_height = int(self.view.canvas["height"])
         img_ratio = self.original_image_width / self.original_image_height
         canvas_ratio = r_canvas_width / r_canvas_height

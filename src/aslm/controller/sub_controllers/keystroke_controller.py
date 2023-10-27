@@ -115,10 +115,6 @@ class KeystrokeController(GUIController):
         event : tkinter event
             Mouse wheel event
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> self.camera_view.canvas.bind("<Enter>",
@@ -145,10 +141,6 @@ class KeystrokeController(GUIController):
         event : tkinter event
             Mouse wheel event
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> self.camera_view.canvas.bind("<Leave>",
@@ -172,10 +164,6 @@ class KeystrokeController(GUIController):
         event : tkinter event
             Tab key event
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> self.main_view.bind("<Control-Key-1>", self.switch_tab)
@@ -193,10 +181,6 @@ class KeystrokeController(GUIController):
         event : tkinter event
             Undo key event
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> self.main_view.bind_all('<Control-Key-z>', self.widget_undo)
@@ -213,10 +197,6 @@ class KeystrokeController(GUIController):
         ----------
         event : tkinter event
             Redo key event
-
-        Returns
-        -------
-        None
 
         Example
         -------

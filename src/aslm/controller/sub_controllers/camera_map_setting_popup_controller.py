@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,13 +30,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard library imports
 import os
 from pathlib import Path
-
-import numpy as np
-import tifffile
 from tkinter import filedialog
 
+# Third party imports
+import tifffile
+
+# Local application imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.config import get_aslm_path
 from aslm.model.analysis.camera import compute_scmos_offset_and_variance_map
@@ -43,15 +46,25 @@ from aslm.model.analysis.camera import compute_scmos_offset_and_variance_map
 
 class CameraMapSettingPopupController(GUIController):
     def __init__(self, view, parent_controller=None):
-        """
+        """Controller for the camera map setting popup.
+
         Popup used to generate offset and variance maps of a camera from a
         series of dark frames. The maps are useful for estimating signal-
         to-noise ratios.
+
+        Parameters
+        ----------
+        view : aslm.view.sub_views.camera_map_setting_popup.CameraMapSettingPopup
+            View for the camera map setting popup.
+        parent_controller : aslm.controller.main_controller.MainController
+            Parent controller of this controller.
         """
         super().__init__(view, parent_controller)
-
+        #: str: Path to the camera maps directory.
         self.map_path = os.path.join(get_aslm_path(), "camera_maps")
+        #: np.ndarray: Offset map.
         self.off = None
+        #: np.ndarray: Variance map.
         self.var = None
 
         self.view.open_btn.configure(command=self.open_frames)
@@ -76,8 +89,8 @@ class CameraMapSettingPopupController(GUIController):
 
         Returns
         -------
-        list
-            List of serial numbers of available cameras.
+        menu : list
+            Serial numbers of available cameras.
         """
         menu = ["synthetic"]
         for v in self.parent_controller.configuration["configuration"][

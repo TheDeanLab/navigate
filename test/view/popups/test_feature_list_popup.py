@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
-import tkinter as tk
+# import tkinter as tk
 from tkinter import ttk
 import pytest
 
@@ -43,11 +43,11 @@ from aslm.view.popups.feature_list_popup import (
 )
 
 
-@pytest.fixture
-def tk_root():
-    root = tk.Tk()
-    yield root
-    root.destroy()
+# @pytest.fixture
+# def tk_root():
+#     root = tk.Tk()
+#     yield root
+#     root.destroy()
 
 
 def test_feature_icon(tk_root):

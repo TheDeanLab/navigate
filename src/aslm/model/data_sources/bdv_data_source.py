@@ -104,7 +104,7 @@ class BigDataViewerDataSource(DataSource):
             self.ds_name = self._n5_ds_name
 
         # self._current_frame = 0
-        self.metadata = BigDataViewerMetadata(configuration=self.model.configuration)
+        self.metadata = BigDataViewerMetadata()
 
         super().__init__(file_name, mode)
 
@@ -349,9 +349,11 @@ class BigDataViewerDataSource(DataSource):
         configuration : DictProxy
             The configuration experiment.
         """
-
         self._subdivisions = None
         self._shapes = None
+
+        # Set rotation and affine transform information in metadata.
+        self.metadata.get_affine_parameters(configuration=configuration)
         return super().set_metadata_from_configuration_experiment(configuration)
 
     def write(self, data: npt.ArrayLike, **kw) -> None:

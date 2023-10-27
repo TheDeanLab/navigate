@@ -46,42 +46,57 @@ class BigDataViewerMetadata(XMLMetadata):
     """Metadata for BigDataViewer files. XML spec in section 2.3 of
     https://arxiv.org/abs/1412.0488."""
 
-    def __init__(self, configuration):
-        """Initialize metadata object.
+    def __init__(self):
+        """Initialize metadata object. """
+
+        super().__init__()
+
+        # Affine Transform Parameters
+        #: bool: Shear the data.
+        self.shear_data = False
+        #: str: Dimension to shear the data.
+        self.shear_dimension = "YZ"
+        #: float: Angle in degrees to shear the data.
+        self.shear_angle = 0
+        #: npt.NDArray: Shear transform matrix.
+        self.shear_transform = np.eye(3, 4)
+
+        # Rotation Transform Parameters
+        #: bool: Rotate the data.
+        self.rotate_data = False
+        #: str: Dimension to rotate the data.
+        self.rotate_dimension = "X"
+        #: float: Angle in degrees to rotate the data.
+        self.rotate_angle = 0
+        #: npt.NDArray: Rotation transform matrix.
+        self.rotate_transform = np.eye(3, 4)
+
+    def get_affine_parameters(self, configuration):
+        """Get the affine transform parameters from the configuration file.
 
         Parameters
         ----------
         configuration : dict
             Configuration dictionary.
         """
+        bdv_configuration = configuration['configuration']["BDVParameters"]
 
-        super().__init__()
-        self.configuration = configuration
-
-        # Affine Transform Parameters
         # Shear Parameters
-        self.shear_data = self.configuration["BDVParameters"]["shear"].get(
-            "shear_data", False
-        )
-        self.shear_dimension = self.configuration["BDVParameters"]["shear"].get(
-            "shear_dimension", "YZ"
-        )
-        self.shear_angle = self.configuration["BDVParameters"]["shear"].get(
-            "shear_angle", 0
-        )
-        self.shear_transform = np.eye(3, 4)
+        self.shear_data = bdv_configuration["shear"].get(
+            "shear_data", False)
+        self.shear_dimension = bdv_configuration["shear"].get(
+            "shear_dimension", "YZ")
+        self.shear_angle = bdv_configuration["shear"].get(
+            "shear_angle", 0)
 
         # Rotate Parameters
-        self.rotate_data = self.configuration["BDVParameters"]["rotate"].get(
-            "rotate_data", False
-        )
-        self.rotate_dimension = self.configuration["BDVParameters"]["rotate"].get(
-            "rotate_dimension", "XY"
-        )
-        self.rotate_angle = self.configuration["BDVParameters"]["rotate"].get(
-            "rotate_angle", 0
-        )
-        self.rotate_transform = np.eye(3, 4)
+        self.rotate_data = bdv_configuration["rotate"].get(
+            "rotate_data", False)
+        self.rotate_dimension = bdv_configuration["rotate"].get(
+            "rotate_dimension", "XY")
+        self.rotate_angle = bdv_configuration["rotate"].get(
+            "rotate_angle", 0)
+
 
     def bdv_xml_dict(
         self, file_name: Union[str, list, None], views: list, **kw

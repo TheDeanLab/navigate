@@ -104,7 +104,7 @@ class BigDataViewerDataSource(DataSource):
             self.ds_name = self._n5_ds_name
 
         # self._current_frame = 0
-        self.metadata = BigDataViewerMetadata()
+        self.metadata = BigDataViewerMetadata(configuration=self.model.configuration)
 
         super().__init__(file_name, mode)
 

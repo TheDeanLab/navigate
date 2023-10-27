@@ -46,9 +46,42 @@ class BigDataViewerMetadata(XMLMetadata):
     """Metadata for BigDataViewer files. XML spec in section 2.3 of
     https://arxiv.org/abs/1412.0488."""
 
-    def __init__(self) -> None:
+    def __init__(self, configuration):
+        """Initialize metadata object.
+
+        Parameters
+        ----------
+        configuration : dict
+            Configuration dictionary.
+        """
+
         super().__init__()
-        self.shear_data = True
+        self.configuration = configuration
+
+        # Affine Transform Parameters
+        # Shear Parameters
+        self.shear_data = self.configuration["BDVParameters"]["shear"].get(
+            "shear_data", False
+        )
+        self.shear_dimension = self.configuration["BDVParameters"]["shear"].get(
+            "shear_dimension", "YZ"
+        )
+        self.shear_angle = self.configuration["BDVParameters"]["shear"].get(
+            "shear_angle", 0
+        )
+        self.shear_transform = np.eye(3, 4)
+
+        # Rotate Parameters
+        self.rotate_data = self.configuration["BDVParameters"]["rotate"].get(
+            "rotate_data", False
+        )
+        self.rotate_dimension = self.configuration["BDVParameters"]["rotate"].get(
+            "rotate_dimension", "XY"
+        )
+        self.rotate_angle = self.configuration["BDVParameters"]["rotate"].get(
+            "rotate_angle", 0
+        )
+        self.rotate_transform = np.eye(3, 4)
 
     def bdv_xml_dict(
         self, file_name: Union[str, list, None], views: list, **kw
@@ -102,6 +135,10 @@ class BigDataViewerMetadata(XMLMetadata):
                 "type": "relative",
                 "text": file_name,
             }
+
+        # Calculate shear and rotation transforms
+        self.calculate_shear_transform()
+        self.calculate_rotate_transform()
 
         # Populate ViewSetups
         bdv_dict["SequenceDescription"]["ViewSetups"] = {}
@@ -182,15 +219,6 @@ class BigDataViewerMetadata(XMLMetadata):
                             # an acquisition.
                             pass
 
-                    # Construct shear matrix
-                    shear_transform = np.eye(3, 4)
-
-                    if self.shear_data:
-                        # [1 hxy hxz, 0,
-                        #  hyx 1 hyz, 0,
-                        #  hzx hzy 1, 0]
-                        shear_transform[0, 2] = 2
-
                     view_transforms = [
                         {
                             "type": "affine",
@@ -204,7 +232,16 @@ class BigDataViewerMetadata(XMLMetadata):
                             "Name": "Shearing Transform",
                             "affine": {
                                 "text": " ".join(
-                                    [f"{x:.6f}" for x in shear_transform.ravel()]
+                                    [f"{x:.6f}" for x in self.shear_transform.ravel()]
+                                )
+                            },
+                        },
+                        {
+                            "type": "affine",
+                            "Name": "Rotation Transform",
+                            "affine": {
+                                "text": " ".join(
+                                    [f"{x:.6f}" for x in self.rotate_transform.ravel()]
                                 )
                             },
                         },
@@ -240,6 +277,71 @@ class BigDataViewerMetadata(XMLMetadata):
         theta, f = None, None
 
         return x, y, z, theta, f
+
+    def calculate_shear_transform(self):
+        """Calculate the shear transform matrix.
+
+        Affine Transform for shear has the following form:
+
+        [1 hxy hxz, 0,
+        hyx 1 hyz, 0,
+        hzx hzy 1, 0]
+        """
+        if self.shear_data:
+            scaled_angle = np.multiply(
+                np.cos(np.deg2rad(self.shear_angle)),
+                [self.dy / self.dx, self.dz / self.dx, self.dz / self.dy],
+            )
+
+            if self.shear_dimension == "XY":
+                self.shear_transform[0, 1] = scaled_angle[0]
+            elif self.shear_dimension == "XZ":
+                self.shear_transform[0, 2] = scaled_angle[1]
+            elif self.shear_dimension == "YZ":
+                self.shear_transform[1, 2] = scaled_angle[2]
+            else:
+                pass
+
+    def calculate_rotate_transform(self):
+        """Calculate the rotation transform matrix.
+
+        Affine transform for rotation has the following forms.
+
+        Rotation about x:
+        [1, 0, 0, 0,
+        0, cos(theta), -sin(theta), 0,
+        0, sin(theta), cos(theta), 0]
+
+        Rotation about Y:
+        [cos(theta), 0, sin(theta), 0,
+        0, 1, 0, 0,
+        -sin(theta), 0, cos(theta), 0,
+
+        Rotation about Z:
+        [cos(theta), -sin(theta), 0, 0,
+        sin(theta), cos(theta), 0, 0,
+        0, 0, 1, 0]
+        """
+        if self.rotate_data:
+            if self.rotate_dimension == "X":
+                self.rotate_transform[1, 1] = np.cos(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[1, 2] = -np.sin(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[2, 1] = np.sin(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[2, 2] = np.cos(np.deg2rad(self.rotate_angle))
+
+            elif self.rotate_dimension == "Y":
+                self.rotate_transform[0, 0] = np.cos(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[0, 2] = np.sin(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[2, 0] = -np.sin(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[2, 2] = np.cos(np.deg2rad(self.rotate_angle))
+
+            elif self.rotate_dimension == "Z":
+                self.rotate_transform[0, 0] = np.cos(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[0, 1] = -np.sin(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[1, 0] = np.sin(np.deg2rad(self.rotate_angle))
+                self.rotate_transform[1, 1] = np.cos(np.deg2rad(self.rotate_angle))
+            else:
+                pass
 
     def parse_xml(self, root: Union[str, ET.Element]) -> tuple:
         """Parse a BigDataViewer XML file into our metadata format."""

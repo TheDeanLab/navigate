@@ -40,7 +40,11 @@ import numpy as np
 import random
 
 # Local Imports
-from aslm.config.config import load_configs, verify_experiment_config, verify_waveform_constants
+from aslm.config.config import (
+    load_configs,
+    verify_experiment_config,
+    verify_waveform_constants,
+)
 from aslm.model.devices.camera.camera_synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
@@ -68,13 +72,20 @@ class DummyController:
         >>> controller = DummyController(view)
         """
         from aslm.controller.configuration_controller import ConfigurationController
+        from aslm.controller.sub_controllers import MenuController
 
         self.configuration = DummyModel().configuration
         self.commands = []
         self.view = view
         self.configuration_controller = ConfigurationController(self.configuration)
+        self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.stage_pos = {}
         self.off_stage_pos = {}
+        base_directory = Path.joinpath(Path(__file__).resolve().parent.parent)
+        configuration_directory = Path.joinpath(base_directory, "config")
+        self.waveform_constants_path = Path.joinpath(
+            configuration_directory, "waveform_constants.yml"
+        )
 
     def execute(self, str, sec=None, *args):
         """Execute a command.

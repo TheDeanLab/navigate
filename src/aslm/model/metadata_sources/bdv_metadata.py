@@ -350,7 +350,6 @@ class BigDataViewerMetadata(XMLMetadata):
         0, 0, 1, 0]
         """
         if self.rotate_data:
-
             if self.rotate_angle_x != 0:
                 cosine_theta = np.cos(np.deg2rad(self.rotate_angle_x))
                 sin_theta = np.sin(np.deg2rad(self.rotate_angle_x))
@@ -359,7 +358,8 @@ class BigDataViewerMetadata(XMLMetadata):
                 x_transform[1, 2] = -sin_theta
                 x_transform[2, 1] = sin_theta
                 x_transform[2, 2] = cosine_theta
-                self.rotate_transform = np.matmul(self.rotate_transform, x_transform)
+            else:
+                x_transform = None
 
             if self.rotate_angle_y != 0:
                 cosine_theta = np.cos(np.deg2rad(self.rotate_angle_y))
@@ -369,19 +369,39 @@ class BigDataViewerMetadata(XMLMetadata):
                 y_transform[0, 2] = sin_theta
                 y_transform[2, 0] = -sin_theta
                 y_transform[2, 2] = cosine_theta
-                self.rotate_transform = np.matmul(self.rotate_transform, y_transform)
+            else:
+                y_transform = None
 
             if self.rotate_angle_z != 0:
                 cosine_theta = np.cos(np.deg2rad(self.rotate_angle_z))
                 sin_theta = np.sin(np.deg2rad(self.rotate_angle_z))
-                self.rotate_transform[0, 0] = cosine_theta
                 z_transform = np.eye(3, 4)
+                z_transform[0, 0] = cosine_theta
                 z_transform[0, 1] = -sin_theta
                 z_transform[1, 0] = sin_theta
                 z_transform[1, 1] = cosine_theta
-                self.rotate_transform = np.matmul(self.rotate_transform, z_transform)
             else:
-                pass
+                z_transform = None
+
+            matrices = [x_transform, y_transform, z_transform]
+            matrices = [x for x in matrices if x is not None]
+            if len(matrices) == 0:
+                # self.rotate_data = True, but all angles are 0
+                self.rotate_transform = np.eye(3, 4)
+            if len(matrices) == 1:
+                # self.rotate_data = True, but one angle is non-zero
+                self.rotate_transform = matrices[0]
+            elif len(matrices) == 2:
+                # self.rotate_data = True, but two angles are non-zero
+                self.rotate_transform = np.multiply(matrices[0], matrices[1])
+            else:
+                # self.rotate_data = True, and all angles are non-zero
+                self.rotate_transform = np.multiply(
+                    matrices[0], matrices[1], matrices[2]
+                )
+        else:
+            # self.rotate_data is False
+            self.rotate_transform = np.eye(3, 4)
 
     def parse_xml(self, root: Union[str, ET.Element]) -> tuple:
         """Parse a BigDataViewer XML file into our metadata format."""

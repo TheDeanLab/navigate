@@ -64,10 +64,12 @@ class BigDataViewerMetadata(XMLMetadata):
         # Rotation Transform Parameters
         #: bool: Rotate the data.
         self.rotate_data = False
-        #: str: Dimension to rotate the data.
-        self.rotate_dimension = "X"
-        #: float: Angle in degrees to rotate the data.
-        self.rotate_angle = 0
+        #: float: Angle in degrees to rotate the data in X.
+        self.rotate_angle_x = 0
+        #: float: Angle in degrees to rotate the data in Y.
+        self.rotate_angle_y = 0
+        #: float: Angle in degrees to rotate the data in Z.
+        self.rotate_angle_z = 0
         #: npt.NDArray: Rotation transform matrix.
         self.rotate_transform = np.eye(3, 4)
 
@@ -90,10 +92,9 @@ class BigDataViewerMetadata(XMLMetadata):
 
         # Rotate Parameters
         self.rotate_data = bdv_configuration["rotate"].get("rotate_data", False)
-        self.rotate_dimension = (
-            bdv_configuration["rotate"].get("rotate_dimension", "XY").upper()
-        )
-        self.rotate_angle = bdv_configuration["rotate"].get("rotate_angle", 0)
+        self.rotate_angle_x = bdv_configuration["rotate"].get("X", 0)
+        self.rotate_angle_y = bdv_configuration["rotate"].get("Y", 0)
+        self.rotate_angle_z = bdv_configuration["rotate"].get("Z", 0)
 
     def bdv_xml_dict(
         self, file_name: Union[str, list, None], views: list, **kw
@@ -349,26 +350,36 @@ class BigDataViewerMetadata(XMLMetadata):
         0, 0, 1, 0]
         """
         if self.rotate_data:
-            cosine_theta = np.cos(np.deg2rad(self.rotate_angle))
-            sin_theta = np.sin(np.deg2rad(self.rotate_angle))
 
-            if self.rotate_dimension == "X":
-                self.rotate_transform[1, 1] = cosine_theta
-                self.rotate_transform[1, 2] = -sin_theta
-                self.rotate_transform[2, 1] = sin_theta
-                self.rotate_transform[2, 2] = cosine_theta
+            if self.rotate_angle_x != 0:
+                cosine_theta = np.cos(np.deg2rad(self.rotate_angle_x))
+                sin_theta = np.sin(np.deg2rad(self.rotate_angle_x))
+                x_transform = np.eye(3, 4)
+                x_transform[1, 1] = cosine_theta
+                x_transform[1, 2] = -sin_theta
+                x_transform[2, 1] = sin_theta
+                x_transform[2, 2] = cosine_theta
+                self.rotate_transform = np.matmul(self.rotate_transform, x_transform)
 
-            elif self.rotate_dimension == "Y":
+            if self.rotate_angle_y != 0:
+                cosine_theta = np.cos(np.deg2rad(self.rotate_angle_y))
+                sin_theta = np.sin(np.deg2rad(self.rotate_angle_y))
+                y_transform = np.eye(3, 4)
+                y_transform[0, 0] = cosine_theta
+                y_transform[0, 2] = sin_theta
+                y_transform[2, 0] = -sin_theta
+                y_transform[2, 2] = cosine_theta
+                self.rotate_transform = np.matmul(self.rotate_transform, y_transform)
+
+            if self.rotate_angle_z != 0:
+                cosine_theta = np.cos(np.deg2rad(self.rotate_angle_z))
+                sin_theta = np.sin(np.deg2rad(self.rotate_angle_z))
                 self.rotate_transform[0, 0] = cosine_theta
-                self.rotate_transform[0, 2] = sin_theta
-                self.rotate_transform[2, 0] = -sin_theta
-                self.rotate_transform[2, 2] = cosine_theta
-
-            elif self.rotate_dimension == "Z":
-                self.rotate_transform[0, 0] = cosine_theta
-                self.rotate_transform[0, 1] = -sin_theta
-                self.rotate_transform[1, 0] = sin_theta
-                self.rotate_transform[1, 1] = cosine_theta
+                z_transform = np.eye(3, 4)
+                z_transform[0, 1] = -sin_theta
+                z_transform[1, 0] = sin_theta
+                z_transform[1, 1] = cosine_theta
+                self.rotate_transform = np.matmul(self.rotate_transform, z_transform)
             else:
                 pass
 

@@ -45,6 +45,8 @@ from aslm.model.analysis.camera import compute_scmos_offset_and_variance_map
 
 
 class CameraMapSettingPopupController(GUIController):
+    """Controller for the camera map setting popup."""
+
     def __init__(self, view, parent_controller=None):
         """Controller for the camera map setting popup.
 

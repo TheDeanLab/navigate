@@ -54,19 +54,35 @@ logger = logging.getLogger(p)
 
 
 class CameraViewController(GUIController):
+    """Camera View Controller Class."""
+
     def __init__(self, view, parent_controller=None):
+        """Initialize the Camera View Controller Class.
 
+        Parameters
+        ----------
+        view : tkinter.Frame
+            The tkinter frame that contains the widgets.
+        parent_controller : Controller
+            The parent controller of the camera view controller.
+        """
         super().__init__(view, parent_controller)
-
+        #: SharedNDArray: The shared array that contains the image data.
         self.data_buffer = None
+        #: VariableWithLock: The variable that indicates if the image is being
+        # displayed.
         self.is_displaying_image = VariableWithLock(bool)
 
         # Logging
+        #: logging.Logger: The logger for the camera view controller.
         self.logger = logging.getLogger(p)
 
         # Getting Widgets/Buttons
+        #: dict: The dictionary of image metrics widgets.
         self.image_metrics = view.image_metrics.get_widgets()
+        #: dict: The dictionary of image palette widgets.
         self.image_palette = view.scale_palette.get_widgets()
+        #: tkinter.Canvas: The tkinter canvas that displays the image.
         self.canvas = self.view.canvas
 
         # Bindings for changes to the LUT
@@ -87,9 +103,11 @@ class CameraViewController(GUIController):
         self.view.live_frame.live.bind(
             "<<ComboboxSelected>>", self.update_display_state
         )
-
+        #: event: The resize event id.
         self.resizie_event_id = None
         self.view.bind("<Configure>", self.resize)
+        #: int: The width of the canvas.
+        #: int: The height of the canvas.
         self.width, self.height = 663, 597
         self.canvas_width, self.canvas_height = (
             self.view.canvas_width,
@@ -111,73 +129,123 @@ class CameraViewController(GUIController):
         #     self.canvas.bind("<Button-5>", self.mouse_wheel)
 
         # Right-Click Binding
+        #: tkinter.Menu: The tkinter menu that pops up on right click.
         self.menu = tk.Menu(self.canvas, tearoff=0)
         self.menu.add_command(label="Move Here", command=self.move_stage)
         self.menu.add_command(label="Reset Display", command=self.reset_display)
         self.menu.add_command(label="Mark Position", command=self.mark_position)
 
         # self.canvas.bind("<Button-3>", self.popup_menu)
+        #: int: The x position of the mouse.
         self.move_to_x = None
+        #: int: The y position of the mouse.
         self.move_to_y = None
 
         #  Stored Images
+        #: numpy.ndarray: The image data.
         self.tk_image = None
+        #: numpy.ndarray: The image data.
         self.image = None
+        #: numpy.ndarray: The image data.
         self.cross_hair_image = None
+        #: numpy.ndarray: The image data.
         self.saturated_pixels = None
+        #: numpy.ndarray: The image data.
         self.down_sampled_image = None
+        #: numpy.ndarray: The image data.
         self.zoom_image = None
 
         # Widget Defaults
+        #: bool: The autoscale flag.
         self.autoscale = True
+        #: int: The maximum image counts.
         self.max_counts = None
+        #: int: The minimum image counts.
         self.min_counts = None
+        #: bool: The crosshair flag.
         self.apply_cross_hair = True
+        #: str: The mode of the camera view controller.
         self.mode = "stop"
+        #: bool: The transpose flag.
         self.transpose = False
+        #: str: The display state.
         self.display_state = "Live"
 
         # Colormap Information
+        #: matplotlib.colors.LinearSegmentedColormap: The colormap.
         self.colormap = plt.get_cmap("gist_gray")
         # self.gray_lut = plt.get_cmap('gist_gray')
         # self.gradient_lut = plt.get_cmap('plasma')
         # self.rainbow_lut = plt.get_cmap('afmhot')
         # self.rdbu_r_lut = plt.get_cmap('RdBu_r')
 
+        #: int: The number of images displayed.
         self.image_count = 0
+        #: ndarray: A temporary array for image processing.
         self.temp_array = None
+        #: int: The number of frames to average.
         self.rolling_frames = 1
+        #: list: The list of maximum intensity values.
         self.max_intensity_history = []
-        self.bit_depth = 8  # bit-depth for PIL presentation.
+        #: int: The bit-depth for PIL presentation.
+        self.bit_depth = 8
+        #: float: The zoom value for image display.
         self.zoom_value = 1
+        #: float: The zoom scale for image display.
         self.zoom_scale = 1
+        #: numpy.ndarray: The zoom rectangle.
         self.zoom_rect = np.array([[0, self.canvas_width], [0, self.canvas_height]])
+        #: numpy.ndarray: The zoom offset.
         self.zoom_offset = np.array([[0], [0]])
+        #: int: The zoom width.
         self.zoom_width = self.canvas_width
+        #: int: The zoom height.
         self.zoom_height = self.canvas_height
+        #: int: The canvas width scaling factor.
         self.canvas_width_scale = 4
+        #: int: The canvas height scaling factor.
         self.canvas_height_scale = 4
+        #: int: The original image height.
         self.original_image_height = 2014
+        #: int: The original image width.
         self.original_image_width = 2014
+        #: int: The number of slices.
         self.number_of_slices = 0
+        #: numpy.ndarray: The image volume.
         self.image_volume = None
+        #: int: The total number of images per volume.
         self.total_images_per_volume = 0
+        #: int: The number of channels.
         self.number_of_channels = 0
+        #: int: The image counter.
         self.image_counter = 0
+        #: int: The slice index.
         self.slice_index = 0
+        #: int: The channel index.
         self.channel_index = 0
+        #: int: The crosshair x position.
         self.crosshair_x = None
+        #: int: The crosshair y position.
         self.crosshair_y = None
+        #: bool: The display mask flag.
         self.mask_color_table = None
+        #: bool: Whether or not to flip the image.
         self.flip_flags = None
 
         # ilastik mask
+        #: bool: The display mask flag for ilastik.
         self.display_mask_flag = False
+        #: threading.Lock: The lock for the ilastik mask.
         self.ilastik_mask_ready_lock = threading.Lock()
+        #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
 
     def update_snr(self):
+        """Updates the signal to noise ratio."""
+        #: bool: The signal to noise ratio flag.
         self._snr_selected = False
+        #: numpy.ndarray: The offset of the image.
+        #: numpy.ndarray: The variance of the image.
         self._offset, self._variance = None, None
         off, var = self.parent_controller.model.get_offset_variance_maps()
         if off is None:
@@ -369,11 +437,6 @@ class CameraViewController(GUIController):
     def calculate_offset(self):
         """Calculates the offset of the image.
 
-        Parameters
-        ----------
-        event : tkinter event
-            The tkinter event that triggered the function.
-
         Returns
         -------
         offset_x : int
@@ -461,6 +524,10 @@ class CameraViewController(GUIController):
 
     def process_image(self):
         """Process the image to be displayed.
+
+        Applies digital zoom, detects saturation, down-samples the image, scales the
+        image intensity, adds a crosshair, applies the lookup table, and populates the
+        image.
 
         Examples
         --------
@@ -616,22 +683,12 @@ class CameraViewController(GUIController):
             self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 
     def down_sample_image(self):
-        """Down-sample the data for image display according to widget size.
-
-        Example
-        -------
-        >>> self.down_sample_image()
-        """
+        """Down-sample the data for image display according to widget size."""
         sx, sy = self.canvas_width, self.canvas_height
         self.down_sampled_image = cv2.resize(self.zoom_image, (sx, sy))
 
     def scale_image_intensity(self):
-        """Scale the data to the min/max counts, and adjust bit-depth.
-
-        Example
-        -------
-        >>> self.scale_image_intensity()
-        """
+        """Scale the data to the min/max counts, and adjust bit-depth."""
         if self.autoscale is True:
             self.max_counts = np.max(self.down_sampled_image)
             self.min_counts = np.min(self.down_sampled_image)
@@ -649,12 +706,7 @@ class CameraViewController(GUIController):
         ] = scaling_factor
 
     def populate_image(self):
-        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas
-
-        Example
-        -------
-        >>> self.populate_image()
-        """
+        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
         if self.display_mask_flag:
             self.ilastik_mask_ready_lock.acquire()
             temp_img1 = self.cross_hair_image.astype(np.uint8)
@@ -708,11 +760,6 @@ class CameraViewController(GUIController):
         self.update_canvas_size()
 
         self.reset_display(False)
-
-        # self.image_volume = np.zeros((self.original_image_width,
-        #                               self.original_image_height,
-        #                               self.number_of_slices,
-        #                               self.number_of_channels))
 
     def identify_channel_index_and_slice(self, microscope_state, images_received):
         """As images arrive, identify channel index and slice.
@@ -887,19 +934,7 @@ class CameraViewController(GUIController):
             is_displaying_image.value = False
 
     def add_crosshair(self):
-        """Adds a cross-hair to the image.
-
-        Parameters
-        ----------
-        self.image : np.array
-            Must be a 2D image.
-
-        Returns
-        -------
-        self.apply_cross_hair_image : np.arrays
-            2D image, scaled between 0 and 1 with
-            cross-hair if self.apply_cross_hair == True
-        """
+        """Adds a cross-hair to the image."""
         self.cross_hair_image = np.copy(self.down_sampled_image)
         if self.apply_cross_hair:
             self.cross_hair_image[:, self.crosshair_x] = 1
@@ -910,19 +945,6 @@ class CameraViewController(GUIController):
 
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
-
-        Parameters
-        ----------
-        self.image : np.array
-            Must be a 2D image.
-
-        Returns
-        -------
-        self.apply_LUT_image : np.arrays
-
-        Example
-        -------
-        >>> self.apply_LUT()
         """
         # if self.colormap == 'gradient':
         #     self.cross_hair_image = self.rainbow_lut(self.cross_hair_image)
@@ -1002,11 +1024,9 @@ class CameraViewController(GUIController):
     def toggle_min_max_buttons(self):
         """Checks the value of the autoscale widget.
 
-        If enabled, the min and max widgets are
-        disabled and the image intensity is autoscaled.
-
-        If disabled, miu and max widgets are
-        enabled, and image intensity scaled.
+        If enabled, the min and max widgets are disabled and the image intensity is
+        autoscaled. If disabled, miu and max widgets are enabled, and image intensity
+        scaled.
         """
         self.autoscale = self.image_palette["Autoscale"].get()
 
@@ -1103,6 +1123,13 @@ class CameraViewController(GUIController):
         self.ilastik_mask_ready_lock.release()
 
     def resize(self, event):
+        """Resize the window.
+
+        Parameters
+        ----------
+        event : tkinter.Event
+            Tkinter event.
+        """
         if self.view.is_popup is False and event.widget != self.view:
             return
         if self.view.is_popup is True and event.widget.widgetName != "toplevel":
@@ -1114,6 +1141,15 @@ class CameraViewController(GUIController):
         )
 
     def refresh(self, width, height):
+        """Refresh the window.
+
+        Parameters
+        ----------
+        width : int
+            Width of the window.
+        height : int
+            Height of the window.
+        """
         if width == self.width and height == self.height:
             return
         self.canvas_width = width - self.view.image_metrics.winfo_width() - 24
@@ -1131,6 +1167,7 @@ class CameraViewController(GUIController):
         self.reset_display(False)
 
     def update_canvas_size(self):
+        """Update the canvas size."""
         r_canvas_width = int(self.view.canvas["width"])
         r_canvas_height = int(self.view.canvas["height"])
         img_ratio = self.original_image_width / self.original_image_height
@@ -1149,6 +1186,13 @@ class CameraViewController(GUIController):
         )
 
     def try_to_display_image(self, image_id):
+        """Try to display an image.
+
+        Parameters
+        ----------
+        image_id : int
+            Frame index in the data_buffer.
+        """
         with self.is_displaying_image as is_displaying_image:
             if is_displaying_image.value:
                 return

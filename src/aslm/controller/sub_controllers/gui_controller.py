@@ -43,18 +43,29 @@ logger = logging.getLogger(p)
 
 
 class GUIController:
+    """Base class for GUI controllers"""
+
     def __init__(self, view, parent_controller=None):
+        """Initializes GUI controller
+
+        Parameters
+        ----------
+        view : tkinter.Tk
+            GUI view
+        parent_controller : Controller
+            parent controller
+        """
+        #: tkinter.Tk: GUI view
         self.view = view
+        #: Controller: parent controller
         self.parent_controller = parent_controller
 
     def initialize(self):
         """This function is called when the controller is initialized
 
-        This function initializes GUI based on configuration setting
-        parameter: configuration_controller
-        set range value for entry or spinbox widgets;
-        add values to combobox
-        get other necessary information for configuration.yml
+        This function initializes GUI based on configuration setting parameter:
+        configuration_controller set range value for entry or spinbox widgets;
+        add values to combobox get other necessary information for configuration.yml
         """
         pass
 
@@ -82,10 +93,6 @@ class GUIController:
             command name
         args : tuple
             command arguments
-
-        Examples
-        --------
-        >>> self.execute("command", arg1, arg2)
         """
 
         self.show_verbose_info("command passed from child:", command)
@@ -98,9 +105,5 @@ class GUIController:
         ----------
         info : tuple
             information to be printed
-
-        Examples
-        --------
-        >>> self.show_verbose_info("command passed from child:", command)
         """
         logger.info(f"{self.__class__.__name__} : {info}")

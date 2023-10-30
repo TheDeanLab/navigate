@@ -72,6 +72,7 @@ class DummyController:
         >>> controller = DummyController(view)
         """
         from aslm.controller.configuration_controller import ConfigurationController
+        from aslm.controller.sub_controllers import MenuController
 
         #: dict: The configuration dictionary.
         self.configuration = DummyModel().configuration
@@ -81,10 +82,17 @@ class DummyController:
         self.view = view
         #: ConfigurationController: The configuration controller.
         self.configuration_controller = ConfigurationController(self.configuration)
+        #: MenuController: The menu controller.
+        self.menu_controller = MenuController(view=self.view, parent_controller=self)
         #: dict: The stage positions.
         self.stage_pos = {}
         #: dict: The stage offset positions.
         self.off_stage_pos = {}
+        base_directory = Path.joinpath(Path(__file__).resolve().parent.parent)
+        configuration_directory = Path.joinpath(base_directory, "config")
+        self.waveform_constants_path = Path.joinpath(
+            configuration_directory, "waveform_constants.yml"
+        )
 
     def execute(self, str, sec=None, *args):
         """Execute a command.

@@ -46,22 +46,40 @@ logger = logging.getLogger(p)
 
 
 class KeystrokeController(GUIController):
+    """Keystroke controller"""
+
     def __init__(self, main_view, parent_controller):
+        """Initialize the keystroke controller
+
+        Parameters
+        ----------
+        main_view : MainView
+            Main view
+        parent_controller : MainController
+            Main controller
+        """
         super().__init__(main_view, parent_controller)
 
         # References to all sub frames
+        #: tk.Frame: Camera View
         self.camera_view = main_view.camera_waveform.camera_tab  # Camera View
 
         # Multiposition Table
+        #: MultipositionTable: Multiposition Table
         self.multi_table = main_view.settings.multiposition_tab.multipoint_list
 
         # Main view
+        #: tk.Frame: Main view
         self.main_view = main_view.root
+        #: tk.Notebook: Main tabs
         self.main_tabs = main_view.settings
 
         # Controllers for all sub frames
+        #: CameraViewController: Camera View Controller
         self.camera_controller = parent_controller.camera_view_controller
+        #: MultipositionTableController: Multiposition Table Controller
         self.multi_controller = parent_controller.multiposition_tab_controller
+        #: StageController: Stage Controller
         self.stage_controller = parent_controller.stage_controller
 
         """Keystrokes for Camera View"""
@@ -91,6 +109,7 @@ class KeystrokeController(GUIController):
             )
 
         """Keystrokes for MultiTable"""
+        #: MultiPositionTable: Multiposition Table
         self.mp_table = self.multi_table.pt
         self.mp_table.rowheader.bind(
             "<Double-Button-1>", self.multi_controller.handle_double_click

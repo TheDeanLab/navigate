@@ -393,12 +393,13 @@ class BigDataViewerMetadata(XMLMetadata):
                 self.rotate_transform = matrices[0]
             elif len(matrices) == 2:
                 # self.rotate_data = True, but two angles are non-zero
-                self.rotate_transform = np.multiply(matrices[0], matrices[1])
+                self.rotate_transform = np.matmul(matrices[0].T, matrices[1])[:3]
             else:
                 # self.rotate_data = True, and all angles are non-zero
-                self.rotate_transform = np.multiply(
-                    matrices[0], matrices[1], matrices[2]
-                )
+                self.rotate_transform = np.matmul(matrices[0].T, matrices[1])[:3]
+                self.rotate_transform = np.matmul(self.rotate_transform.T, matrices[2])[
+                    :3
+                ]
         else:
             # self.rotate_data is False
             self.rotate_transform = np.eye(3, 4)

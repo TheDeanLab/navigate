@@ -423,7 +423,10 @@ class TilingWizardController(GUIController):
         """
 
         if axis not in self._axes + [None]:
-            logger.warning(f"Unknown axis {axis}, skipping calculate_tiles().")
+            logger.warning(
+                f"Controller - Tiling Wizard - Unknown axis {axis}, "
+                "skipping calculate_tiles()."
+            )
             return
 
         if axis is not None:
@@ -435,18 +438,21 @@ class TilingWizardController(GUIController):
         overlay = float(self._percent_overlap) / 100
 
         for ax in axis:
-            dist = abs(float(self.variables[f"{ax}_dist"].get()))  # um
-            fov = abs(float(self.variables[f"{ax}_fov"].get()))  # um
+            try:
+                dist = abs(float(self.variables[f"{ax}_dist"].get()))  # um
+                fov = abs(float(self.variables[f"{ax}_fov"].get()))  # um
 
-            if ax.lower() == "x" or ax.lower() == "y":
-                # + fov because distance is center of the fov to center of the fov
-                # and so we are covering a distance that is 2 * 1/2 * fov
-                # larger than dist
-                dist += fov
+                if ax.lower() == "x" or ax.lower() == "y":
+                    # + fov because distance is center of the fov to center of the fov
+                    # and so we are covering a distance that is 2 * 1/2 * fov
+                    # larger than dist
+                    dist += fov
 
-            num_tiles = calc_num_tiles(dist, overlay, fov)
+                num_tiles = calc_num_tiles(dist, overlay, fov)
 
-            self.variables[f"{ax}_tiles"].set(num_tiles)
+                self.variables[f"{ax}_tiles"].set(num_tiles)
+            except ValueError as e:
+                logger.warning(f"Controller - Tiling Wizard - {e}")
 
     def calculate_distance(self, axis):
         """Calculate the distance for a given axis

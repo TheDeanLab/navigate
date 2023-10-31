@@ -199,7 +199,14 @@ class TilingWizardController(GUIController):
         self.variables["z_end"].trace_add(
             "write", lambda *args: self.calculate_distance("z")
         )
+        self.variables["f_start"].trace_add(
+            "write", lambda *args: self.calculate_distance("f")
+        )
+        self.variables["f_end"].trace_add(
+            "write", lambda *args: self.calculate_distance("f")
+        )
 
+        # Bind FOV changes
         self.variables["x_fov"].trace_add(
             "write", lambda *args: self.calculate_tiles("x")
         )

@@ -202,7 +202,7 @@ def calc_num_tiles(dist, overlap, roi_length):
     else:
         ov = overlap * roi_length  # True overlap in distance units
         num_tiles = ceil(
-            dist / (roi_length - ov)
+            (dist - ov) / (roi_length - ov)
         )  # ceil(abs(dist - ov) / abs(roi_length - ov))
 
     return int(num_tiles)

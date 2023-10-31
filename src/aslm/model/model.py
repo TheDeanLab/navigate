@@ -897,6 +897,7 @@ class Model:
         self.event_queue.put(("waveform", waveform_dict))
 
         self.frame_id = 0
+        #self.run_uno = 0
 
     def snap_image(self):
         """Acquire an image after updating the waveforms.
@@ -909,6 +910,11 @@ class Model:
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()
+            # self.run_uno += 1
+            #
+            # if self.imaging_mode == "z-stack":
+            #     if self.run_uno == 1:
+            #         self.signal_container.run()
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is

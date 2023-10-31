@@ -32,6 +32,7 @@
 
 
 # Standard Library Imports
+import os
 import subprocess
 
 # Third Party Imports
@@ -40,8 +41,22 @@ import subprocess
 
 
 def get_git_revision_hash() -> str:
-    print("before subprocess")
-    return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+    """
+    TODO: This should not be dynamic. A packaged version will still have an
+    associated commit, but won't be an active git repo. The hash should be
+    stored in a file like in __version__ and bumped with each commit.
+    """
+    # print("before subprocess")
+    # we don't want to move the user, so we'll return to the directory
+    working_directory = os.getcwd()
+    # we need to check for the git commit inside of the cloned git folder,
+    # should this have been derived from a git commit
+    file_directory = os.path.abspath(os.path.dirname(__file__))
+    os.chdir(file_directory)
+    # call the hash
+    hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+    os.chdir(working_directory)  # restore directory
+    return hash
 
 
 try:

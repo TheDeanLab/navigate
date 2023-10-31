@@ -166,16 +166,22 @@ class TilingWizardController(GUIController):
         # Trace cam_settings FOV to catch user changes
         # FOV change handled in update_fov
         self.cam_settings_widgets["FOV_X"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov()
+            "write", lambda *args: self.update_fov("x")
         )
         self.cam_settings_widgets["FOV_Y"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov()
+            "write", lambda *args: self.update_fov("y")
         )
         self.stack_acq_widgets["abs_z_start"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov()
+            "write", lambda *args: self.update_fov("z")
         )
         self.stack_acq_widgets["abs_z_end"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov()
+            "write", lambda *args: self.update_fov("z")
+        )
+        self.stack_acq_widgets["start_focus"].get_variable().trace_add(
+            "write", lambda *args: self.update_fov("f")
+        )
+        self.stack_acq_widgets["end_focus"].get_variable().trace_add(
+            "write", lambda *args: self.update_fov("f")
         )
 
         # Calculate distances
@@ -220,14 +226,14 @@ class TilingWizardController(GUIController):
             "write", lambda *args: self.calculate_tiles("f")
         )
 
-        self.variables["x_start"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["x_end"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["y_start"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["y_end"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["z_start"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["z_end"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["f_start"].trace_add("write", lambda *args: self.update_fov())
-        self.variables["f_end"].trace_add("write", lambda *args: self.update_fov())
+        self.variables["x_start"].trace_add("write", lambda *args: self.update_fov("x"))
+        self.variables["x_end"].trace_add("write", lambda *args: self.update_fov("x"))
+        self.variables["y_start"].trace_add("write", lambda *args: self.update_fov("y"))
+        self.variables["y_end"].trace_add("write", lambda *args: self.update_fov("y"))
+        self.variables["z_start"].trace_add("write", lambda *args: self.update_fov("z"))
+        self.variables["z_end"].trace_add("write", lambda *args: self.update_fov("z"))
+        self.variables["f_start"].trace_add("write", lambda *args: self.update_fov("f"))
+        self.variables["f_end"].trace_add("write", lambda *args: self.update_fov("f"))
 
         # Calculating Number of Tiles traces
         # TODO: For reasons that make no sense to me at all,
@@ -262,8 +268,8 @@ class TilingWizardController(GUIController):
                 "write", lambda *args: self.update_total_tiles()
             )
 
-        # Update widgets to current values in other views
-        self.update_fov()
+            # Update widgets to current values in other views
+            self.update_fov(ax)
 
         # Properly Closing Popup with parent controller
         self.view.popup.protocol(
@@ -531,7 +537,7 @@ class TilingWizardController(GUIController):
 
         return handler
 
-    def update_fov(self):
+    def update_fov(self, axis=None):
         """Update the FOV for the tiling wizard
 
         Grabs the updated FOV if changed by user,
@@ -541,6 +547,8 @@ class TilingWizardController(GUIController):
         ----------
         self : object
             Tiling Wizard Controller instance
+        ax : str
+            Axis
 
         Returns
         -------
@@ -551,29 +559,39 @@ class TilingWizardController(GUIController):
         >>> self.update_fov()
         """
 
-        # Calculate signed fov
-        x = float(self.cam_settings_widgets["FOV_X"].get()) * sign(
-            float(self.variables["x_end"].get())
-            - float(self.variables["x_start"].get())
-        )
-        y = float(self.cam_settings_widgets["FOV_Y"].get()) * sign(
-            float(self.variables["y_end"].get())
-            - float(self.variables["y_start"].get())
-        )
-        z = float(self.stack_acq_widgets["end_position"].get()) - float(
-            self.stack_acq_widgets["start_position"].get()
-        )
-        f = float(self.stack_acq_widgets["end_focus"].get()) - float(
-            self.stack_acq_widgets["start_focus"].get()
-        )
+        if axis is None:
+            axis = self._axes
+        elif isinstance(axis, str):
+            axis = [axis]
 
-        for ax in self._axes:
+        for ax in axis:
+            # Calculate signed fov
+            if ax == "x":
+                x = float(self.cam_settings_widgets["FOV_X"].get()) * sign(
+                    float(self.variables["x_end"].get())
+                    - float(self.variables["x_start"].get())
+                )
+            elif ax == "y":
+                y = float(self.cam_settings_widgets["FOV_Y"].get()) * sign(
+                    float(self.variables["y_end"].get())
+                    - float(self.variables["y_start"].get())
+                )
+            elif ax == "z":
+                z = float(self.stack_acq_widgets["end_position"].get()) - float(
+                    self.stack_acq_widgets["start_position"].get()
+                )
+            elif ax == "f":
+                f = float(self.stack_acq_widgets["end_focus"].get()) - float(
+                    self.stack_acq_widgets["start_focus"].get()
+                )
+
+            # for ax in self._axes:
             # self._fov[ax] = locals().get(ax)
             self.variables[f"{ax}_fov"].set(
                 abs(locals().get(ax))
             )  # abs(self._fov[ax]))
 
-        self.calculate_tiles()
+            self.calculate_tiles(ax)
 
     def showup(self):
         """Show the tiling wizard

@@ -127,9 +127,9 @@ class TilingWizardController(GUIController):
 
         # Init widgets to zero
         self._axes = ["x", "y", "z", "f"]
-        self._percent_overlap = 0.0
+        self._percent_overlap = 10.0
         self._fov = dict([(ax, 0.0) for ax in self._axes])
-        self.variables["percent_overlap"].set(0.0)
+        self.variables["percent_overlap"].set(self._percent_overlap)
         self.variables["total_tiles"].set(1)
 
         for ax in self._axes:
@@ -411,10 +411,13 @@ class TilingWizardController(GUIController):
             dist = abs(float(self.variables[f"{ax}_dist"].get()))  # um
             fov = abs(float(self._fov[ax]))  # um
 
-            # + fov because distance is center of the fov to center of the fov
-            # and so we are covering a distance that is 2 * 1/2 * fov
-            # larger than dist
-            num_tiles = calc_num_tiles(dist + fov, overlay, fov)
+            if ax.lower() == "x" or ax.lower() == "y":
+                # + fov because distance is center of the fov to center of the fov
+                # and so we are covering a distance that is 2 * 1/2 * fov
+                # larger than dist
+                dist += fov
+
+            num_tiles = calc_num_tiles(dist, overlay, fov)
 
             self.variables[f"{ax}_tiles"].set(num_tiles)
 

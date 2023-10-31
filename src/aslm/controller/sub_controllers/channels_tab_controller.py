@@ -45,12 +45,12 @@ from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.controller.sub_controllers.channel_setting_controller import (
     ChannelSettingController,
 )
-from aslm.controller.sub_controllers.tiling_wizard_controller import (
+from aslm.controller.sub_controllers.tiling_wizard_controller2 import (
     TilingWizardController,
 )
 
 # View Imports that are not called on startup
-from aslm.view.popups.tiling_wizard_popup import TilingWizardPopup
+from aslm.view.popups.tiling_wizard_popup2 import TilingWizardPopup
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -535,7 +535,9 @@ class ChannelsTabController(GUIController):
         except tk._tkinter.TclError:
             self.microscope_state_dict["start_focus"] = 0
         try:
-            self.microscope_state_dict["end_focus"] = self.stack_acq_vals["end_focus"].get()
+            self.microscope_state_dict["end_focus"] = self.stack_acq_vals[
+                "end_focus"
+            ].get()
         except tk._tkinter.TclError:
             self.microscope_state_dict["end_focus"] = 0
         self.microscope_state_dict["stack_z_origin"] = self.z_origin

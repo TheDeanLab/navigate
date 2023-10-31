@@ -82,6 +82,7 @@ def listize(x):
 @pytest.mark.parametrize("f_tiles", listize(np.random.randint(0, 5)))
 @pytest.mark.parametrize("f_length", listize(np.random.rand() * 1000))
 @pytest.mark.parametrize("f_overlap", listize(np.random.rand()))
+@pytest.mark.parametrize("f_track_with_z", [True, False])
 def test_compute_tiles_from_bounding_box(
     x_start,
     x_tiles,
@@ -103,6 +104,7 @@ def test_compute_tiles_from_bounding_box(
     f_tiles,
     f_length,
     f_overlap,
+    f_track_with_z,
 ):
     from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box
 
@@ -127,6 +129,7 @@ def test_compute_tiles_from_bounding_box(
         f_tiles,
         f_length,
         f_overlap,
+        f_track_with_z,
     )
 
     x_tiles = 1 if x_tiles <= 0 else x_tiles
@@ -151,7 +154,10 @@ def test_compute_tiles_from_bounding_box(
     assert tiles[-1, 1] == y_max
     assert tiles[-1, 2] == z_max
     assert tiles[-1, 3] == theta_max
-    assert tiles[-1, 4] <= f_max  # Due to clipping. TODO: Fix
+    if f_track_with_z:
+        assert tiles[-1, 4] <= f_max  # Due to clipping. TODO: Fix
+    else:
+        assert tiles[-1, 4] == f_max
 
     # check bounding box
     assert np.min(tiles[:, 0]) == x_start
@@ -163,10 +169,16 @@ def test_compute_tiles_from_bounding_box(
     assert np.min(tiles[:, 3]) == theta_start
     assert np.max(tiles[:, 3]) == theta_max
     assert np.min(tiles[:, 4]) == f_start
-    assert np.max(tiles[:, 4]) <= f_max  # Due to clipping. TODO: Fix
+    if f_track_with_z:
+        assert np.max(tiles[:, 4]) <= f_max  # Due to clipping. TODO: Fix
+    else:
+        assert np.max(tiles[:, 4]) == f_max
 
-    # check length
-    assert len(tiles) == x_tiles * y_tiles * z_tiles * theta_tiles
+    if f_track_with_z:
+        # check length
+        assert len(tiles) == x_tiles * y_tiles * z_tiles * theta_tiles
+    else:
+        assert len(tiles) == x_tiles * y_tiles * z_tiles * theta_tiles * f_tiles
 
 
 @pytest.mark.parametrize("dist", listize(np.random.rand(3) * 1000))

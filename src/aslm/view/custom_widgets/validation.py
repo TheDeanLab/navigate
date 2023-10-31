@@ -1107,13 +1107,12 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         max_val = self.cget("to")
         min_val = self.cget("from")
         try:
-            max_val = round(Decimal(max_val), 16)
-            min_val = round(Decimal(min_val), 16)
+            max_val = Decimal(max_val)
+            min_val = Decimal(min_val)
         except InvalidOperation:
-            print(
-                f"Either min_val or max_val couldn't be cast to a Decimal. "
-                f"min_val: {min_val} max_val: {max_val}"
-            )
+            err_str = f"Either {min_val} or {max_val} couldn't be cast to a Decimal."
+            logger.warning(err_str)
+            print(err_str)
 
         # Check for error upon leaving widget
         if value.strip() == "" and self.required:

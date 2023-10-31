@@ -47,6 +47,7 @@ class BigDataViewerMetadata(XMLMetadata):
     https://arxiv.org/abs/1412.0488."""
 
     def __init__(self) -> None:
+        """Initialize the BigDataViewer metadata object."""
         super().__init__()
 
     def bdv_xml_dict(

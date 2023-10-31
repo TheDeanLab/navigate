@@ -31,7 +31,6 @@
 
 
 # Standard Library Imports
-import sys
 import logging
 from tkinter import messagebox
 
@@ -47,17 +46,33 @@ logger = logging.getLogger(p)
 
 
 class AcquireBarController(GUIController):
+    """Acquire Bar Controller."""
+
     def __init__(self, view, parent_view, parent_controller):
+        """Initialize the Acquire Bar Controller.
+
+        Parameters
+        ----------
+        view : object
+            Instance of the Acquire Bar View.
+        parent_view : object
+            Instance of the Main View.
+        parent_controller : object
+            Instance of the Main Controller.
+        """
         super().__init__(view, parent_controller)
 
+        #: object: Instance of the Main View.
         self.parent_view = parent_view
 
-        # acquisition image mode variable
+        #: str: Acquisition image mode.
         self.mode = "live"
         self.update_stack_acq(self.mode)
+        #: bool: Whether the image will be saved.
         self.is_save = False
+        #: bool: Whether the microscope is acquiring.
         self.is_acquiring = False
-
+        #: dict: Dictionary of different operating modes.
         self.mode_dict = {
             "Continuous Scan": "live",
             "Z-Stack": "z-stack",
@@ -156,7 +171,11 @@ class AcquireBarController(GUIController):
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )
-                    self.view.CurAcq["value"] = top_percent_complete % 100 if top_percent_complete > 100.0 else top_percent_complete
+                    self.view.CurAcq["value"] = (
+                        top_percent_complete % 100
+                        if (top_percent_complete > 100.0)
+                        else top_percent_complete
+                    )
                     bottom_anticipated_images = 100 * (
                         images_received / bottom_anticipated_images
                     )
@@ -244,7 +263,9 @@ class AcquireBarController(GUIController):
         >>> set_save_option(True)
         """
         self.is_save = is_save
-        self.parent_controller.configuration["experiment"]["MicroscopeState"]["is_save"] = is_save
+        self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "is_save"
+        ] = is_save
         self.show_verbose_info("set save data option:", is_save)
 
     def launch_popup_window(self):
@@ -270,6 +291,7 @@ class AcquireBarController(GUIController):
             self.parent_controller.execute("stop_acquire")
 
         elif self.is_save and self.mode != "live":
+            #: object: Instance of the popup save dialog.
             self.acquire_pop = AcquirePopUp(self.view)
             buttons = (
                 self.acquire_pop.get_buttons()
@@ -470,6 +492,7 @@ class AcquireBarController(GUIController):
         --------
         >>> populate_experiment_values()
         """
+        #: dict: Saving settings.
         self.saving_settings = self.parent_controller.configuration["experiment"][
             "Saving"
         ]

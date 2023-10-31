@@ -122,30 +122,12 @@ class MicroscopePopupController(GUIController):
         self.buttons["cancel"].configure(command=self.exit_func)
 
     def showup(self):
-        """This function will let the popup window show in front.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """This function will let the popup window show in front."""
         self.view.popup.deiconify()
         # self.view.popup.attributes("-topmost", 1)
 
     def exit_func(self):
-        """Close the window and delete this controller
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Close the window and delete this controller."""
         self.view.popup.dismiss()
         delattr(self.parent_controller, "microscope_popup_controller")
 
@@ -203,16 +185,7 @@ class MicroscopePopupController(GUIController):
         return func
 
     def confirm_microscope_setting(self):
-        """Confirm the microscope setting.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Confirm the microscope setting."""
         # must have one primary microscope
         if not self.primary_microscope:
             tkinter.messagebox.showerror(

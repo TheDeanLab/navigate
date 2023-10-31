@@ -44,37 +44,26 @@ logger = logging.getLogger(p)
 
 
 class ConfigurationController:
-    """Configuration Controller
-
-    This class is used to get the configuration of the microscope.
-
-    Parameters
-    ----------
-    configuration : dict
-        The configuration dictionary.
-    microscope_name : str
-        The name of the microscope.
-    microscope_config : dict
-        The configuration of the microscope.
-
-    Methods
-    -------
-    change_microscope()
-        Get the new microscope configuration dict according to the name.
-    get_microscope_configuration_dict()
-        Return microscope configuration dict.
-    get_stage_position_limits(suffix)
-        Return the position limits of the stage.
-    """
+    """Configuration Controller - Used to get the configuration of the microscope."""
 
     def __init__(self, configuration):
-        self.configuration = configuration
-        self.microscope_name = None
-        self.microscope_config = None
+        """Initialize the Configuration Controller
 
+        Parameters
+        ----------
+        configuration : dict
+            The configuration dictionary.
+        """
+        #: dict: The configuration dictionary.
+        self.configuration = configuration
+        #: str: The microscope name.
+        self.microscope_name = None
+        #: dict: The microscope configuration dictionary.
+        self.microscope_config = None
         self.change_microscope()
 
         microscopes_config = configuration["configuration"]["microscopes"]
+        #: int: The number of galvos.
         self.galvo_num = max(
             map(
                 lambda microscope_name: len(

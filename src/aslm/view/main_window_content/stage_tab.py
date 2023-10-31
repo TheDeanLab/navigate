@@ -272,9 +272,7 @@ class StageControlTab(tk.Frame):
         This function will return all the input widgets as a dictionary
         The reference name in the dictionary is the same as in the widget list file
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -289,9 +287,7 @@ class StageControlTab(tk.Frame):
     def get_variables(self):
         """Get all variables in the stage control tab.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -308,9 +304,7 @@ class StageControlTab(tk.Frame):
 
         the reference name is the same as in widget list
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -338,9 +332,7 @@ class StageControlTab(tk.Frame):
         joystick_axes : ListProxy
             A ListProxy containing the axes controlled by the joystick, if any
 
-        Returns
-        -------
-        None
+
         """
         self.xy_frame.toggle_button_states(joystick_is_on, joystick_axes)
         self.z_frame.toggle_button_states(joystick_is_on, joystick_axes)
@@ -356,9 +348,7 @@ class StageControlTab(tk.Frame):
         -------
         None
 
-        Returns
-        -------
-        None
+
         """
         self.xy_frame.toggle_button_states(False, ["x", "y"])
         self.z_frame.toggle_button_states(False, ["z"])
@@ -552,9 +542,7 @@ class OtherAxisFrame(ttk.Labelframe):
         joystick_axes : ListProxy
             A ListProxy containing the axes controlled by the joystick, if any
 
-        Returns
-        -------
-        None
+
         """
 
         buttons = [other_axis_frame.up_btn, other_axis_frame.down_btn]
@@ -708,9 +696,7 @@ class PositionFrame(ttk.Labelframe):
         joystick_axes : ListProxy
             A ListProxy containing the axes controlled by the joystick, if any
 
-        Returns
-        -------
-        None
+
         """
         frame_back_counter = 0
         if joystick_is_on:
@@ -981,9 +967,7 @@ class XYFrame(ttk.Labelframe):
         joystick_axes : list
             Contains strings representing joystick axes
 
-        Returns
-        -------
-        None
+
         """
 
         for axis in x_y_frame.button_axes_dict.keys():
@@ -1074,9 +1058,7 @@ class StopFrame(ttk.Frame):
         joystick_axes : ListProxy
             A ListProxy containing the axes controlled by the joystick, if any
 
-        Returns
-        -------
-        None
+
         """
         if joystick_is_on:
             stop_frame.joystick_btn.config(text="Disable Joystick")

@@ -194,13 +194,9 @@ class WaveformPopupController(GUIController):
         for low mode. The increment is set to 0.001 for high and nanoscale modes and
         0.01 for low mode.
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
+
         """
         if (
             self.resolution == "high"
@@ -273,16 +269,7 @@ class WaveformPopupController(GUIController):
         #
 
     def populate_experiment_values(self):
-        """Set experiment values.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Set experiment values."""
         self.remote_focus_experiment_dict = self.parent_controller.configuration[
             "experiment"
         ]["MicroscopeState"]
@@ -298,16 +285,7 @@ class WaveformPopupController(GUIController):
         self.show_magnification(mag)
 
     def showup(self):
-        """This function will let the popup window show in front.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """This function will let the popup window show in front."""
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)
 
@@ -319,9 +297,7 @@ class WaveformPopupController(GUIController):
         *args : tuple
             The first element is the new focus mode.
 
-        Returns
-        -------
-        None
+
         """
         # restore amplitude before change resolution if needed
         self.restore_amplitude()
@@ -348,9 +324,7 @@ class WaveformPopupController(GUIController):
         *args : tuple
             The first element is the new magnification setting.
 
-        Returns
-        -------
-        None
+
         """
         # get galvo dict for the specified microscope/magnification
         self.galvo_dict = self.parent_controller.configuration["configuration"][
@@ -434,9 +408,7 @@ class WaveformPopupController(GUIController):
         remote_focus_name : str
             The name of the remote focus setting.
 
-        Returns
-        -------
-        None
+
         """
         variable = self.variables[name]
 
@@ -490,9 +462,7 @@ class WaveformPopupController(GUIController):
         **wargs : dict
             The key is the name of the waveform and the value is the waveform
 
-        Returns
-        -------
-        None
+
         """
         if not self.update_waveform_parameters_flag:
             return
@@ -585,9 +555,7 @@ class WaveformPopupController(GUIController):
         parameter : str
             The name of the parameter.
 
-        Returns
-        -------
-        None
+
         """
         name = galvo_name + widget_name
         variable = self.variables[name]
@@ -627,16 +595,7 @@ class WaveformPopupController(GUIController):
         return func_galvo
 
     def save_waveform_constants(self):
-        """Save updated waveform parameters to yaml file.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Save updated waveform parameters to yaml file."""
         # errors = self.get_errors()
         # if errors:
         #     return  # Dont save if any errors TODO needs testing
@@ -664,13 +623,9 @@ class WaveformPopupController(GUIController):
         """Temporarily disable waveform amplitude for quick alignment on stationary
         beam.
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
+
         """
         if self.waveforms_enabled is True:
             self.view.buttons["toggle_waveform_button"].config(state="disabled")
@@ -721,16 +676,7 @@ class WaveformPopupController(GUIController):
             )
 
     def restore_amplitude(self):
-        """Restore amplitude values to previous values.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Restore amplitude values to previous values."""
         self.view.buttons["toggle_waveform_button"].config(text="Disable Waveforms")
         self.waveforms_enabled = True
         if self.amplitude_dict is None:

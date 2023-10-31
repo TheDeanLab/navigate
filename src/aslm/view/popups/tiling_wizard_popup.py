@@ -215,9 +215,7 @@ class TilingWizardPopup:
         This function returns a dictionary of all the variables that are tied to each
         widget name. The key is the widget name, value is the variable associated.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -235,9 +233,7 @@ class TilingWizardPopup:
         This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -252,9 +248,7 @@ class TilingWizardPopup:
         This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

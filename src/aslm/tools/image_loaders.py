@@ -79,9 +79,7 @@ class LazyTiff:
     def shape(self):
         """Shape of the image sequence.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

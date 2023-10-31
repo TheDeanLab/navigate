@@ -192,9 +192,7 @@ class DataSource:
     def data(self) -> npt.ArrayLike:
         """Return array representation of data stored in data source.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

@@ -156,9 +156,7 @@ class TiffDataSource(DataSource):
         kw : dict
             Keyword arguments to pass to tifffile.imsave.
 
-        Returns
-        -------
-        None
+
         """
         self.mode = "w"
 

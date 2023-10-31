@@ -152,9 +152,7 @@ class SutterStage(StageBase):
     def __del__(self):
         """Delete SutterStage Serial Port.
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------
@@ -269,24 +267,14 @@ class SutterStage(StageBase):
         return True
 
     def stop(self):
-        """Stop all stage movement abruptly.
-
-        Returns
-        -------
-        None
-        """
+        """Stop all stage movement abruptly."""
         try:
             self.stage.interrupt_move()
         except SerialException as error:
             logger.exception(f"MP-285 - Stage stop failed: {error}")
 
     def close(self):
-        """Close the stage.
-
-        Returns
-        -------
-        None
-        """
+        """Close the stage."""
 
         try:
             self.stop()

@@ -65,9 +65,6 @@ class TextExperimentFile(unittest.TestCase):
         expected_values : dict
             A dictionary of expected values for the section
 
-        Returns
-        -------
-        None
 
         Raises
         ------

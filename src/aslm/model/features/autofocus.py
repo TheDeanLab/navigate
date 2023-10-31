@@ -176,9 +176,7 @@ class Autofocus:
     def run(self):
         """Run the Autofocusing Routine
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -227,9 +225,7 @@ class Autofocus:
     def get_autofocus_frame_num(self):
         """Calculate how many frames are needed to get the best focus position.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -273,16 +269,7 @@ class Autofocus:
         return steps, pos_offset
 
     def pre_func_signal(self):
-        """Prepare the autofocus routine.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Prepare the autofocus routine."""
         settings = self.model.configuration["experiment"]["AutoFocusParameters"][
             self.model.active_microscope_name
         ][self.device][self.device_ref]
@@ -311,16 +298,7 @@ class Autofocus:
         self.signal_id = 0
 
     def in_func_signal(self):
-        """Run the autofocus routine.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Run the autofocus routine."""
 
         if self.signal_id < self.coarse_steps:
             self.init_pos += self.coarse_step_size
@@ -386,30 +364,12 @@ class Autofocus:
         return self.init_pos if self.signal_id > self.total_frame_num else None
 
     def end_func_signal(self):
-        """End the autofocus routine.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """End the autofocus routine."""
 
         return self.signal_id > self.total_frame_num
 
     def pre_func_data(self):
-        """Prepare the autofocus routine.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Prepare the autofocus routine."""
         # Initialize the autofocus data
         self.max_entropy = 0
         self.f_frame_id = -1
@@ -430,9 +390,7 @@ class Autofocus:
         frame_ids : list
             List of frame ids to be processed
 
-        Returns
-        -------
-        None
+
         """
 
         self.get_frames_num += len(frame_ids)
@@ -487,16 +445,7 @@ class Autofocus:
             return frame_ids
 
     def end_func_data(self):
-        """End the autofocus routine.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """End the autofocus routine."""
         if self.get_frames_num <= self.total_frame_num:
             return False
 
@@ -563,9 +512,7 @@ class Autofocus:
         TODO: Current values for amplitude, sigma, and alpha are hard-coded. Fitting
         is unfortunately unstable.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

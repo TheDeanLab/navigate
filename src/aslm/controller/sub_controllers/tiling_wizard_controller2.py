@@ -323,15 +323,15 @@ class TilingWizardController(GUIController):
         table_values = compute_tiles_from_bounding_box(
             x_start,
             x_tiles,
-            self.variables["x_fov"].get(),
+            float(self.variables["x_fov"].get()),
             ov,
             y_start,
             y_tiles,
-            self.variables["y_fov"].get(),
+            float(self.variables["y_fov"].get()),
             ov,
             z_start,
             z_tiles,
-            self.variables["z_fov"].get(),
+            float(self.variables["z_fov"].get()),
             ov,
             r_start,
             r_tiles,
@@ -339,7 +339,7 @@ class TilingWizardController(GUIController):
             ov,
             f_start,
             f_tiles,
-            self.variables["f_fov"].get(),
+            float(self.variables["f_fov"].get()),
             ov,
         )
 
@@ -411,7 +411,10 @@ class TilingWizardController(GUIController):
             dist = abs(float(self.variables[f"{ax}_dist"].get()))  # um
             fov = abs(float(self._fov[ax]))  # um
 
-            num_tiles = calc_num_tiles(dist, overlay, fov)
+            # + fov because distance is center of the fov to center of the fov
+            # and so we are covering a distance that is 2 * 1/2 * fov
+            # larger than dist
+            num_tiles = calc_num_tiles(dist + fov, overlay, fov)
 
             self.variables[f"{ax}_tiles"].set(num_tiles)
 

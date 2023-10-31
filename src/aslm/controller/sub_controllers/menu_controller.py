@@ -75,23 +75,56 @@ class FakeEvent:
     """Fake event class for keyboard shortcuts"""
 
     def __init__(self, char=None, keysym=None):
+        """Initialize FakeEvent
+
+        Parameters
+        ----------
+        char: str
+            The character that was pressed.
+        keysym: str
+            The key that was pressed.
+        """
+        #: str: The character that was pressed.
         self.char = char
+        #: str: The key that was pressed.
         self.keysym = keysym
+        #: int: The state of the keyboard.
         self.state = 0
 
 
 class MenuController(GUIController):
+    """Menu controller class."""
+
     def __init__(self, view, parent_controller=None):
+        """Initialize MenuController
+
+        Parameters
+        ----------
+        view: class
+            The view class.
+        parent_controller
+            The parent controller.
+        """
         super().__init__(view, parent_controller)
+        #: Controller: The parent controller.
         self.parent_controller = parent_controller
+        #: tk.canvas: The view class.
         self.view = view
+        #: tkinter.StringVar: Resolution value.
         self.resolution_value = tk.StringVar()
+        #: tkinter.IntVar: Feature id value.
         self.feature_id_val = tk.IntVar()
+        #: tkinter.IntVar: Disable stage limits.
         self.disable_stage_limits = tk.IntVar()
+        #: FakeEvent: Fake event.
         self.fake_event = None
+        #: list: List of feature list names.
         self.feature_list_names = []
+        #: int: System feature list count.
         self.system_feature_list_count = 0
+        #: int: Feature list count.
         self.feature_list_count = 0
+        #: str: Feature list file name.
         self.feature_list_file_name = "feature_lists.yaml"
 
     def initialize_menus(self):
@@ -522,10 +555,12 @@ class MenuController(GUIController):
             pass
 
     def open_log_files(self):
+        """Open log files folder."""
         path = os.path.join(get_aslm_path(), "logs")
         self.open_folder(path)
 
     def open_configuration_files(self):
+        """Open configuration files folder."""
         path = os.path.join(get_aslm_path(), "config")
         self.open_folder(path)
 

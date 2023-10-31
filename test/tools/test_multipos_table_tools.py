@@ -191,7 +191,9 @@ def test_calc_num_tiles(dist, overlap, roi_length):
     # overlap = .75
     # roi_length = 525
     expected_num_tiles = ceil(
-        abs(dist - overlap * roi_length) / abs(roi_length - overlap * roi_length)
+        # abs(dist - overlap * roi_length) / abs(roi_length - overlap * roi_length)
+        dist
+        / (roi_length - overlap * roi_length)
     )
 
     result = calc_num_tiles(dist, overlap, roi_length)

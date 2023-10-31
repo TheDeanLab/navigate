@@ -691,6 +691,33 @@ def verify_experiment_config(manager, configuration):
 
 
 def verify_waveform_constants(manager, configuration):
+    """Verifies and updates the waveform constants in the configuration dictionary.
+
+    This function checks and ensures that the waveform constants in the given
+    configuration dictionary conform to the expected structure. It verifies and
+    updates the constants related to remote focus devices, lasers, and galvos
+    for multiple microscopes.
+
+    Parameters
+    ----------
+    manager : multiprocessing.Manager
+        Shares objects (e.g., dict) between processes
+    configuration : dict
+        The configuration dictionary containing waveform constants.
+
+    Note
+    ----
+        If constants are missing or not in the expected structure, default values
+        or empty dictionaries are added as necessary.
+    Note
+    ----
+        Laser and galvo constants are validated and converted to float if possible.
+    Note
+    ----
+        Non-existent microscopes, zoom levels, lasers, and galvos are removed
+        from the configuration.
+
+    """
     if type(configuration["waveform_constants"]) is not DictProxy:
         update_config_dict(manager, configuration, "waveform_constants", {})
     waveform_dict = configuration["waveform_constants"]

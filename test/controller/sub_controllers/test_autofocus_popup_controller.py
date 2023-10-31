@@ -75,9 +75,6 @@ class TestAutofocusPopupController:
         dummy_controller : DummyController
             Dummy controller for testing
 
-        Returns
-        -------
-        None
         """
         autofocus_popup = AutofocusPopup(dummy_controller.view)
         self.autofocus_controller = AutofocusPopupController(
@@ -87,13 +84,8 @@ class TestAutofocusPopupController:
     def test_init(self):
         """Tests that the controller is initialized correctly
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------
@@ -106,13 +98,8 @@ class TestAutofocusPopupController:
     def test_attr(self):
         """Tests that the attributes are initialized correctly
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------
@@ -134,13 +121,8 @@ class TestAutofocusPopupController:
     def test_populate_experiment_values(self):
         """Tests that the values are populated correctly
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------
@@ -153,20 +135,17 @@ class TestAutofocusPopupController:
         for k in self.autofocus_controller.widgets:
             if k != "device" and k != "device_ref":
                 assert self.autofocus_controller.widgets[k].get() == str(
-                    self.autofocus_controller.setting_dict[microscope_name][device][device_ref][k]
+                    self.autofocus_controller.setting_dict[microscope_name][device][
+                        device_ref
+                    ][k]
                 )
             # Some values are ints but Tkinter only uses strings
 
     def test_update_experiment_values(self):
         """Tests that the values are updated correctly
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------
@@ -189,24 +168,23 @@ class TestAutofocusPopupController:
         for k in self.autofocus_controller.widgets:
             if k != "device" and k != "device_ref":
                 assert self.autofocus_controller.widgets[k].get() == str(
-                    self.autofocus_controller.setting_dict[microscope_name][device][device_ref][k]
+                    self.autofocus_controller.setting_dict[microscope_name][device][
+                        device_ref
+                    ][k]
                 )
-        for k in self.autofocus_controller.view.setting_vars: 
+        for k in self.autofocus_controller.view.setting_vars:
             assert (
                 self.autofocus_controller.view.setting_vars[k].get()
-                == self.autofocus_controller.setting_dict[microscope_name][device][device_ref][k]
+                == self.autofocus_controller.setting_dict[microscope_name][device][
+                    device_ref
+                ][k]
             )
 
     def test_start_autofocus(self):
         """Tests that the start autofocus function works correctly
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------
@@ -229,13 +207,8 @@ class TestAutofocusPopupController:
         Todo: Retrieve data from axessubplot instance and
         check that it is correct
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------

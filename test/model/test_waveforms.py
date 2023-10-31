@@ -196,13 +196,9 @@ class TestWaveforms(unittest.TestCase):
         """Test that the smoothed waveform is proportionally larger than the
         original waveform.
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
+
         """
         ps = 10
         waveform = waveforms.remote_focus_ramp()

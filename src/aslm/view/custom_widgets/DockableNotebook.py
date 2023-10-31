@@ -114,9 +114,7 @@ class DockableNotebook(ttk.Notebook):
         tab_list: list
             List of tab variables
 
-        Returns
-        -------
-        None
+
         """
         self.tab_list = tab_list
 
@@ -148,9 +146,7 @@ class DockableNotebook(ttk.Notebook):
             Holds information about the event that was triggered and caught by Tkinters
             event system
 
-        Returns
-        -------
-        None
+
         """
         element = event.widget.identify(event.x, event.y)
         if "label" in element:
@@ -167,13 +163,9 @@ class DockableNotebook(ttk.Notebook):
         in the tab list. If the tab is in the list, its removed from the list,
         hidden, and then passed to a new Top Level window.
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
+
         """
         # Get ref to correct tab to popout
         tab = self.select()
@@ -209,9 +201,7 @@ class DockableNotebook(ttk.Notebook):
         tab_text: string
             Name of the tab as it appears in the GUI
 
-        Returns
-        -------
-        None
+
         """
         self.root.wm_forget(tab)
         tab.grid(row=0, column=0)

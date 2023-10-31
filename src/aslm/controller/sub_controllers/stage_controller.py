@@ -182,9 +182,6 @@ class StageController(GUIController):
         event : tkinter.Event
             The tkinter event
 
-        Returns
-        -------
-        None
         """
         if event.state != 0:
             return
@@ -200,13 +197,7 @@ class StageController(GUIController):
                 self.up_btn_handler("x")()
 
     def initialize(self):
-        """Initialize the Stage limits of steps and positions
-
-        Returns
-        -------
-        None
-
-        """
+        """Initialize the Stage limits of steps and positions."""
         config = self.parent_controller.configuration_controller
         self.position_min = config.get_stage_position_limits("_min")
         self.position_max = config.get_stage_position_limits("_max")
@@ -260,16 +251,7 @@ class StageController(GUIController):
 
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can
-        unbind later.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        unbind later."""
         if not self.position_callbacks_bound:
             for axis in ["x", "y", "z", "theta", "f"]:
                 # add event bind to position entry variables
@@ -280,32 +262,14 @@ class StageController(GUIController):
             self.position_callbacks_bound = True
 
     def unbind_position_callbacks(self):
-        """Unbinds position callbacks.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Unbinds position callbacks."""
         if self.position_callbacks_bound:
             for axis, cbname in self.position_callback_traces.items():
                 self.widget_vals[axis].trace_remove("write", cbname)
             self.position_callbacks_bound = False
 
     def populate_experiment_values(self):
-        """This function set all the position and step values
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """This function set all the position and step values"""
         self.stage_setting_dict = self.parent_controller.configuration["experiment"][
             "StageParameters"
         ]
@@ -322,9 +286,7 @@ class StageController(GUIController):
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
 
-        Returns
-        -------
-        None
+
         """
         widgets = self.view.get_widgets()
         for axis in ["x", "y", "z", "theta", "f"]:
@@ -343,9 +305,7 @@ class StageController(GUIController):
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
 
-        Returns
-        -------
-        None
+
         """
         self.unbind_position_callbacks()
 
@@ -356,9 +316,7 @@ class StageController(GUIController):
     def get_position(self):
         """This function returns current position from the view.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -483,9 +441,7 @@ class StageController(GUIController):
     def xy_zero_btn_handler(self):
         """This function generates command functions to set xy position to zero
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -502,16 +458,7 @@ class StageController(GUIController):
         return handler
 
     def stop_button_handler(self, *args):
-        """This function stops the stage after a 250 ms debouncing period of time.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """This function stops the stage after a 250 ms debouncing period of time."""
         self.view.after(250, lambda *args: self.parent_controller.execute("stop_stage"))
 
     def joystick_button_handler(self, event=None, *args):
@@ -522,9 +469,7 @@ class StageController(GUIController):
         event : tkinter.Event
             The tkinter event
 
-        Returns
-        -------
-        None
+
 
         """
         if self.joystick_is_on:
@@ -544,9 +489,7 @@ class StageController(GUIController):
         event : tkinter.Event
             The tkinter event (currently unused)
 
-        Returns
-        -------
-        None
+
 
         """
         self.view.force_enable_all_axes()

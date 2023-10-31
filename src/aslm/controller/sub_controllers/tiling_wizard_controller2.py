@@ -125,17 +125,18 @@ class TilingWizardController(GUIController):
         self.buttons = self.view.get_buttons()
         self.variables = self.view.get_variables()
 
+        self._percent_overlap = 10.0  # default to 10% overlap
+
         # Init widgets to zero
         self._axes = ["x", "y", "z", "f"]
-        self._percent_overlap = 10.0
-        self._fov = dict([(ax, 0.0) for ax in self._axes])
+        # self._fov = dict([(ax, 0.0) for ax in self._axes])
         self.variables["percent_overlap"].set(self._percent_overlap)
         self.variables["total_tiles"].set(1)
-
         for ax in self._axes:
             self.variables[f"{ax}_start"].set(0.0)
             self.variables[f"{ax}_end"].set(0.0)
             self.variables[f"{ax}_dist"].set(0.0)
+            self.variables[f"{ax}_fov"].set(0.0)
             self.variables[f"{ax}_tiles"].set(1)
 
         # Ref to widgets in other views
@@ -197,6 +198,19 @@ class TilingWizardController(GUIController):
         )
         self.variables["z_end"].trace_add(
             "write", lambda *args: self.calculate_distance("z")
+        )
+
+        self.variables["x_fov"].trace_add(
+            "write", lambda *args: self.calculate_tiles("x")
+        )
+        self.variables["y_fov"].trace_add(
+            "write", lambda *args: self.calculate_tiles("y")
+        )
+        self.variables["z_fov"].trace_add(
+            "write", lambda *args: self.calculate_tiles("z")
+        )
+        self.variables["f_fov"].trace_add(
+            "write", lambda *args: self.calculate_tiles("f")
         )
 
         self.variables["x_start"].trace_add("write", lambda *args: self.update_fov())
@@ -409,7 +423,7 @@ class TilingWizardController(GUIController):
 
         for ax in axis:
             dist = abs(float(self.variables[f"{ax}_dist"].get()))  # um
-            fov = abs(float(self._fov[ax]))  # um
+            fov = abs(float(self.variables[f"{ax}_fov"].get()))  # um
 
             if ax.lower() == "x" or ax.lower() == "y":
                 # + fov because distance is center of the fov to center of the fov
@@ -547,8 +561,10 @@ class TilingWizardController(GUIController):
         )
 
         for ax in self._axes:
-            self._fov[ax] = locals().get(ax)
-            self.variables[f"{ax}_fov"].set(abs(self._fov[ax]))
+            # self._fov[ax] = locals().get(ax)
+            self.variables[f"{ax}_fov"].set(
+                abs(locals().get(ax))
+            )  # abs(self._fov[ax]))
 
         self.calculate_tiles()
 

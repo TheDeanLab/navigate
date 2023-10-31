@@ -31,8 +31,11 @@ def test_calculate_tiles(tiling_wizard_controller, axis):
     ov, dist, fov = random.random(), random.random() * 100, random.random() * 10
     tiling_wizard_controller._percent_overlap = ov * 100
     tiling_wizard_controller.variables[f"{axis}_dist"].set(dist)
-    tiling_wizard_controller._fov[axis] = fov
+    tiling_wizard_controller.variables[f"{axis}_fov"].set(fov)
     tiling_wizard_controller.calculate_tiles(axis)
+
+    if axis == "x" or axis == "y":
+        dist += fov
 
     assert int(
         tiling_wizard_controller.variables[f"{axis}_tiles"].get()
@@ -63,8 +66,8 @@ def test_update_fov(tiling_wizard_controller):
     tiling_wizard_controller.update_fov()
 
 
-# def test_set_table(tiling_wizard_controller):
-#     print(tiling_wizard_controller.cam_settings_widgets["FOV_X"].get())
-#     tiling_wizard_controller.set_table()
+def test_set_table(tiling_wizard_controller):
+    # print(tiling_wizard_controller.cam_settings_widgets["FOV_X"].get())
+    tiling_wizard_controller.set_table()
 
-#     assert True
+    assert True

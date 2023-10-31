@@ -18,6 +18,56 @@ def tiling_wizard_controller(dummy_view, dummy_controller):
     return TilingWizardController(tiling_wizard, SubController())
 
 
+def test_traces(tiling_wizard_controller):
+    """TODO: Find a way to access the actual lambda functions.
+
+    If we can, inspect.getsource(myfunc) should provide us the lambda definition.
+    """
+
+    def assert_one_trace(var):
+        tinfo = var.trace_info()
+        assert len(tinfo) == 1
+        assert tinfo[0][0][0] == "write"
+        assert "lambda" in tinfo[0][1]
+
+    for ax in ["x", "y", "z", "f"]:
+        # self.variables["x_start"], etc. should all be bound to two lambda functions
+        # calling calculate_distance() and update_fov()
+        for bound in ["start", "end"]:
+            tinfo = tiling_wizard_controller.variables[f"{ax}_{bound}"].trace_info()
+            assert len(tinfo) == 2
+            for ti in tinfo:
+                assert ti[0][0] == "write"
+                assert "lambda" in ti[1]
+
+        # fov should be bound to one lambda, calling calculate_tiles()
+        assert_one_trace(tiling_wizard_controller.variables[f"{ax}_fov"])
+
+        # dist should be bound to one lambda, calling calculate_tiles()
+        assert_one_trace(tiling_wizard_controller.variables[f"{ax}_dist"])
+
+    # Special cases
+    assert_one_trace(tiling_wizard_controller.variables["percent_overlap"])
+    assert_one_trace(
+        tiling_wizard_controller.cam_settings_widgets["FOV_X"].get_variable()
+    )
+    assert_one_trace(
+        tiling_wizard_controller.cam_settings_widgets["FOV_Y"].get_variable()
+    )
+    assert_one_trace(
+        tiling_wizard_controller.stack_acq_widgets["abs_z_start"].get_variable()
+    )
+    assert_one_trace(
+        tiling_wizard_controller.stack_acq_widgets["abs_z_end"].get_variable()
+    )
+    assert_one_trace(
+        tiling_wizard_controller.stack_acq_widgets["start_focus"].get_variable()
+    )
+    assert_one_trace(
+        tiling_wizard_controller.stack_acq_widgets["end_focus"].get_variable()
+    )
+
+
 def test_update_total_tiles(tiling_wizard_controller):
     tiling_wizard_controller.update_total_tiles()
 
@@ -113,7 +163,7 @@ def test_update_fov(tiling_wizard_controller, axis):
         ) - float(tiling_wizard_controller.stack_acq_widgets["start_focus"].get())
     tiling_wizard_controller.update_fov(axis)
 
-    assert float(tiling_wizard_controller.variables[f"{axis}_fov"].get()) == var
+    assert float(tiling_wizard_controller.variables[f"{axis}_fov"].get()) == abs(var)
 
 
 def test_set_table(tiling_wizard_controller):

@@ -110,7 +110,7 @@ class TilingWizardController(GUIController):
         Set the multipoint table to the tiling parameters
     showup()
         Show the popup
-    update_overlay()
+    update_overlap()
         Update the percent overlap when the user changes the value
     update_total_tiles()
         Update the total number of tiles when the user changes the value
@@ -158,9 +158,9 @@ class TilingWizardController(GUIController):
         )
 
         # Setting/Tracing Percent Overlay
-        # Overlay change is also handled in update_overlay
+        # Overlay change is also handled in update_overlap
         self.variables["percent_overlap"].trace_add(
-            "write", lambda *args: self.update_overlay()
+            "write", lambda *args: self.update_overlap()
         )
 
         # Trace cam_settings FOV to catch user changes
@@ -482,7 +482,7 @@ class TilingWizardController(GUIController):
         dist = abs(end - start)
         self.variables[axis + "_dist"].set(dist)
 
-    def update_overlay(self):
+    def update_overlap(self):
         """Update the overlay percentage for the tiling wizard
 
         Updates percent overlay when a user changes the widget in the popup.
@@ -500,7 +500,7 @@ class TilingWizardController(GUIController):
 
         Examples
         --------
-        >>> self.update_overlay()
+        >>> self.update_overlap()
         """
 
         try:

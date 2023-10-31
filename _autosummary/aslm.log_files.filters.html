@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.analysis.image_contrast.estimate_image_resolution &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+  <title>aslm.log_files.filters &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -64,9 +64,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">aslm.model.analysis.image_contrast.estimate_image_resolution</li>
+      <li class="breadcrumb-item active">aslm.log_files.filters</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/aslm.model.analysis.image_contrast.estimate_image_resolution.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/aslm.log_files.filters.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -74,15 +74,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="aslm-model-analysis-image-contrast-estimate-image-resolution">
-<h1>aslm.model.analysis.image_contrast.estimate_image_resolution<a class="headerlink" href="#aslm-model-analysis-image-contrast-estimate-image-resolution" title="Link to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="aslm.model.analysis.image_contrast.estimate_image_resolution">
-<span class="sig-prename descclassname"><span class="pre">aslm.model.analysis.image_contrast.</span></span><span class="sig-name descname"><span class="pre">estimate_image_resolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_high_pass_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fourier_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apodization_pixels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.analysis.image_contrast.estimate_image_resolution" title="Link to this definition"></a></dt>
-<dd><p>Estimates the resolution of an image using decorrelation analysis
-<a class="reference external" href="https://github.com/Ades91/ImDecorr/blob/master/main_imageDecorr.m">https://github.com/Ades91/ImDecorr/blob/master/main_imageDecorr.m</a></p>
-</dd></dl>
-
+  <section id="module-aslm.log_files.filters">
+<span id="aslm-log-files-filters"></span><h1>aslm.log_files.filters<a class="headerlink" href="#module-aslm.log_files.filters" title="Link to this heading"></a></h1>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="aslm.log_files.filters.NonPerfFilter.html#aslm.log_files.filters.NonPerfFilter" title="aslm.log_files.filters.NonPerfFilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NonPerfFilter</span></code></a>([name])</p></td>
+<td><p>A custom logging filter to exclude non-performance messages.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="aslm.log_files.filters.PerformanceFilter.html#aslm.log_files.filters.PerformanceFilter" title="aslm.log_files.filters.PerformanceFilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PerformanceFilter</span></code></a>([name])</p></td>
+<td><p>A custom logging filter to exclude performance messages.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 
 

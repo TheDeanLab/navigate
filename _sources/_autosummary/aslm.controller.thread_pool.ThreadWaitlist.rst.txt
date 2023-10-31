@@ -22,4 +22,11 @@ aslm.controller.thread\_pool.ThreadWaitlist
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ThreadWaitlist.waitlistLock
+      ~ThreadWaitlist.waitlist
+   
    

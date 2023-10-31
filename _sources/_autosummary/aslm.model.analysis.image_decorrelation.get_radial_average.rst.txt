@@ -1,6 +1,0 @@
-aslm.model.analysis.image\_decorrelation.get\_radial\_average
-=============================================================
-
-.. currentmodule:: aslm.model.analysis.image_decorrelation
-
-.. autofunction:: get_radial_average

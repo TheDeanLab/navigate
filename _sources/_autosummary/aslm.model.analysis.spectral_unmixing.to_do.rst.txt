@@ -1,6 +1,0 @@
-aslm.model.analysis.spectral\_unmixing.to\_do
-=============================================
-
-.. currentmodule:: aslm.model.analysis.spectral_unmixing
-
-.. autofunction:: to_do

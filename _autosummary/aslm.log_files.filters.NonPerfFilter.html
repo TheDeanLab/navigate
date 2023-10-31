@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.analysis.image_contrast.estimate_and_correct_flatfield &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+  <title>aslm.log_files.filters.NonPerfFilter &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -64,9 +64,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">aslm.model.analysis.image_contrast.estimate_and_correct_flatfield</li>
+      <li class="breadcrumb-item active">aslm.log_files.filters.NonPerfFilter</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/aslm.model.analysis.image_contrast.estimate_and_correct_flatfield.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/aslm.log_files.filters.NonPerfFilter.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -74,24 +74,52 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="aslm-model-analysis-image-contrast-estimate-and-correct-flatfield">
-<h1>aslm.model.analysis.image_contrast.estimate_and_correct_flatfield<a class="headerlink" href="#aslm-model-analysis-image-contrast-estimate-and-correct-flatfield" title="Link to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="aslm.model.analysis.image_contrast.estimate_and_correct_flatfield">
-<span class="sig-prename descclassname"><span class="pre">aslm.model.analysis.image_contrast.</span></span><span class="sig-name descname"><span class="pre">estimate_and_correct_flatfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.analysis.image_contrast.estimate_and_correct_flatfield" title="Link to this definition"></a></dt>
-<dd><p>Calculates flat and dark_field image from the input image using the default parameters.
-Corrects the input image using a 32-bit float data type.
-Returns the corrected image as 16-bit float data type.
-:param image_data: ndarray</p>
-<blockquote>
-<div><p>image to be corrected.</p>
-</div></blockquote>
+  <section id="aslm-log-files-filters-nonperffilter">
+<h1>aslm.log_files.filters.NonPerfFilter<a class="headerlink" href="#aslm-log-files-filters-nonperffilter" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="aslm.log_files.filters.NonPerfFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.log_files.filters.</span></span><span class="sig-name descname"><span class="pre">NonPerfFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.filters.NonPerfFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></p>
+<p>A custom logging filter to exclude non-performance messages.</p>
+<p>This filter is designed to be used with the Python logging module. It excludes
+log records whose messages do not start with “Performance” or “Spec.”</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.log_files.filters.NonPerfFilter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.filters.NonPerfFilter.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a filter.</p>
+<p>Initialize with the name of the logger which, together with its
+children, will have its events allowed through the filter. If no
+name is specified, allow every event.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.log_files.filters.NonPerfFilter.__init__" title="aslm.log_files.filters.NonPerfFilter.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([name])</p></td>
+<td><p>Initialize a filter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.log_files.filters.NonPerfFilter.filter" title="aslm.log_files.filters.NonPerfFilter.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a>(record)</p></td>
+<td><p>Filter out non-performance messages</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.log_files.filters.NonPerfFilter.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.filters.NonPerfFilter.filter" title="Link to this definition"></a></dt>
+<dd><p>Filter out non-performance messages</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return image_data<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ndarray
-flat_field corrected image data</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>record</strong> (<em>logging.LogRecord</em>) – The log record to filter</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the record should be logged, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

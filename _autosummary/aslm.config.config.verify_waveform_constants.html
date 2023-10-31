@@ -79,7 +79,34 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="aslm.config.config.verify_waveform_constants">
 <span class="sig-prename descclassname"><span class="pre">aslm.config.config.</span></span><span class="sig-name descname"><span class="pre">verify_waveform_constants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.config.config.verify_waveform_constants" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Verifies and updates the waveform constants in the configuration dictionary.</p>
+<p>This function checks and ensures that the waveform constants in the given
+configuration dictionary conform to the expected structure. It verifies and
+updates the constants related to remote focus devices, lasers, and galvos
+for multiple microscopes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>manager</strong> (<em>multiprocessing.Manager</em>) – Shares objects (e.g., dict) between processes</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – The configuration dictionary containing waveform constants.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If constants are missing or not in the expected structure, default values
+or empty dictionaries are added as necessary.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Laser and galvo constants are validated and converted to float if possible.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Non-existent microscopes, zoom levels, lasers, and galvos are removed
+from the configuration.</p>
+</div>
+</dd></dl>
 
 </section>
 

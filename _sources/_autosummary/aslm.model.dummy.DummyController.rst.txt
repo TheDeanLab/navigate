@@ -25,4 +25,16 @@ aslm.model.dummy.DummyController
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DummyController.configuration
+      ~DummyController.commands
+      ~DummyController.view
+      ~DummyController.configuration_controller
+      ~DummyController.menu_controller
+      ~DummyController.stage_pos
+      ~DummyController.off_stage_pos
+   
    

@@ -1,6 +1,0 @@
-aslm.model.analysis.image\_decorrelation.get\_image\_decorrelation
-==================================================================
-
-.. currentmodule:: aslm.model.analysis.image_decorrelation
-
-.. autofunction:: get_image_decorrelation

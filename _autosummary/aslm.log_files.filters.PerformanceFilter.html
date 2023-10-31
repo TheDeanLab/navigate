@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.analysis.image_transform &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+  <title>aslm.log_files.filters.PerformanceFilter &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -64,9 +64,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">aslm.model.analysis.image_transform</li>
+      <li class="breadcrumb-item active">aslm.log_files.filters.PerformanceFilter</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/aslm.model.analysis.image_transform.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/aslm.log_files.filters.PerformanceFilter.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -74,19 +74,54 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-aslm.model.analysis.image_transform">
-<span id="aslm-model-analysis-image-transform"></span><h1>aslm.model.analysis.image_transform<a class="headerlink" href="#module-aslm.model.analysis.image_transform" title="Link to this heading"></a></h1>
-<p class="rubric">Functions</p>
+  <section id="aslm-log-files-filters-performancefilter">
+<h1>aslm.log_files.filters.PerformanceFilter<a class="headerlink" href="#aslm-log-files-filters-performancefilter" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="aslm.log_files.filters.PerformanceFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.log_files.filters.</span></span><span class="sig-name descname"><span class="pre">PerformanceFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.filters.PerformanceFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></p>
+<p>A custom logging filter to exclude performance messages.</p>
+<p>This filter is designed to be used with the Python logging module. It includes
+log records whose messages do not start with “Performance” or “Spec.”</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.log_files.filters.PerformanceFilter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.filters.PerformanceFilter.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a filter.</p>
+<p>Initialize with the name of the logger which, together with its
+children, will have its events allowed through the filter. If no
+name is specified, allow every event.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="aslm.model.analysis.image_transform.deskew_image.html#aslm.model.analysis.image_transform.deskew_image" title="aslm.model.analysis.image_transform.deskew_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deskew_image</span></code></a>(image_data, shear_angle, ...)</p></td>
-<td><p>#  This function is designed to deskew an image.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.log_files.filters.PerformanceFilter.__init__" title="aslm.log_files.filters.PerformanceFilter.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([name])</p></td>
+<td><p>Initialize a filter.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="aslm.model.analysis.image_transform.initiate_gpu.html#aslm.model.analysis.image_transform.initiate_gpu" title="aslm.model.analysis.image_transform.initiate_gpu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initiate_gpu</span></code></a>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.log_files.filters.PerformanceFilter.filter" title="aslm.log_files.filters.PerformanceFilter.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a>(record)</p></td>
+<td><p>Filter out performance messages</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.log_files.filters.PerformanceFilter.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.filters.PerformanceFilter.filter" title="Link to this definition"></a></dt>
+<dd><p>Filter out performance messages</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>record</strong> (<em>logging.LogRecord</em>) – The log record to filter</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the record should be logged, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 

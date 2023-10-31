@@ -1,0 +1,26 @@
+aslm.log\_files.filters.PerformanceFilter
+=========================================
+
+.. currentmodule:: aslm.log_files.filters
+
+.. autoclass:: PerformanceFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PerformanceFilter.__init__
+      ~PerformanceFilter.filter
+   
+   
+
+   
+   
+   

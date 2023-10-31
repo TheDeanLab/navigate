@@ -79,7 +79,22 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="aslm.model.analysis.image_contrast.fast_normalized_dct_shannon_entropy">
 <span class="sig-prename descclassname"><span class="pre">aslm.model.analysis.image_contrast.</span></span><span class="sig-name descname"><span class="pre">fast_normalized_dct_shannon_entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psf_support_diameter_xy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.analysis.image_contrast.fast_normalized_dct_shannon_entropy" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Calculates the entropy of an image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_array</strong> (<em>np.ndarray</em>) – 2D or 3D image.  If 3D, will iterate through each 2D plane.</p></li>
+<li><p><strong>psf_support_diameter_xy</strong> (<em>float</em>) – Support for the PSF in the x-dimension.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>entropy</strong> – Entropy value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

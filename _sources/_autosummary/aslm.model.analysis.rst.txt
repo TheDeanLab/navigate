@@ -31,9 +31,5 @@ aslm.model.analysis
    aslm.model.analysis.boundary_detect
    aslm.model.analysis.camera
    aslm.model.analysis.detection
-   aslm.model.analysis.flatfield
    aslm.model.analysis.image_contrast
-   aslm.model.analysis.image_decorrelation
-   aslm.model.analysis.image_transform
-   aslm.model.analysis.spectral_unmixing
 

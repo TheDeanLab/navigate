@@ -80,6 +80,7 @@
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyController">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.dummy.</span></span><span class="sig-name descname"><span class="pre">DummyController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyController" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Dummy Controller</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyController.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyController.__init__" title="Link to this definition"></a></dt>
@@ -87,9 +88,6 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>view</strong> (<em>DummyView</em>) – The view to be controlled by this controller.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
@@ -115,6 +113,32 @@
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.configuration" title="aslm.model.dummy.DummyController.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>The configuration dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.commands" title="aslm.model.dummy.DummyController.commands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">commands</span></code></a></p></td>
+<td><p>The list of commands.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.view" title="aslm.model.dummy.DummyController.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a></p></td>
+<td><p>The view to be controlled by this controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.configuration_controller" title="aslm.model.dummy.DummyController.configuration_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration_controller</span></code></a></p></td>
+<td><p>The configuration controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.menu_controller" title="aslm.model.dummy.DummyController.menu_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">menu_controller</span></code></a></p></td>
+<td><p>The menu controller.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.stage_pos" title="aslm.model.dummy.DummyController.stage_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_pos</span></code></a></p></td>
+<td><p>The stage positions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyController.off_stage_pos" title="aslm.model.dummy.DummyController.off_stage_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">off_stage_pos</span></code></a></p></td>
+<td><p>The stage offset positions.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyController.clear">
 <span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyController.clear" title="Link to this definition"></a></dt>
@@ -134,9 +158,6 @@ first element is oldest command/first to pop off</p>
 <li><p><strong>sec</strong> (<em>float</em>) – The time to wait before executing the command.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
 </dl>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">controller</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;move_stage&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -150,20 +171,94 @@ first element is oldest command/first to pop off</p>
 <dd><p>Pop the oldest command.</p>
 <p>Use this method in testing code to grab the next command.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The oldest command.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The oldest command.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">controller</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyController.commands">
+<span class="sig-name descname"><span class="pre">commands</span></span><a class="headerlink" href="#aslm.model.dummy.DummyController.commands" title="Link to this definition"></a></dt>
+<dd><p>The list of commands.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyController.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.dummy.DummyController.configuration" title="Link to this definition"></a></dt>
+<dd><p>The configuration dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyController.configuration_controller">
+<span class="sig-name descname"><span class="pre">configuration_controller</span></span><a class="headerlink" href="#aslm.model.dummy.DummyController.configuration_controller" title="Link to this definition"></a></dt>
+<dd><p>The configuration controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="aslm.controller.configuration_controller.ConfigurationController.html#aslm.controller.configuration_controller.ConfigurationController" title="aslm.controller.configuration_controller.ConfigurationController">ConfigurationController</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyController.menu_controller">
+<span class="sig-name descname"><span class="pre">menu_controller</span></span><a class="headerlink" href="#aslm.model.dummy.DummyController.menu_controller" title="Link to this definition"></a></dt>
+<dd><p>The menu controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MenuController</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyController.off_stage_pos">
+<span class="sig-name descname"><span class="pre">off_stage_pos</span></span><a class="headerlink" href="#aslm.model.dummy.DummyController.off_stage_pos" title="Link to this definition"></a></dt>
+<dd><p>The stage offset positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyController.stage_pos">
+<span class="sig-name descname"><span class="pre">stage_pos</span></span><a class="headerlink" href="#aslm.model.dummy.DummyController.stage_pos" title="Link to this definition"></a></dt>
+<dd><p>The stage positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyController.view">
+<span class="sig-name descname"><span class="pre">view</span></span><a class="headerlink" href="#aslm.model.dummy.DummyController.view" title="Link to this definition"></a></dt>
+<dd><p>The view to be controlled by this controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DummyView</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

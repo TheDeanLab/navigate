@@ -1,6 +1,0 @@
-aslm.model.analysis.image\_contrast.estimate\_and\_correct\_flatfield
-=====================================================================
-
-.. currentmodule:: aslm.model.analysis.image_contrast
-
-.. autofunction:: estimate_and_correct_flatfield

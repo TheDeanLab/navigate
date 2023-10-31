@@ -80,59 +80,60 @@
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.dummy.</span></span><span class="sig-name descname"><span class="pre">DummyMicroscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Dummy Microscope</p>
-<p>This class is used to test the controller and view.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.signal_pipe">
-<span class="sig-name descname"><span class="pre">signal_pipe</span></span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.signal_pipe" title="Link to this definition"></a></dt>
-<dd><p>The pipe for sending signals.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Pipe</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.data_pipe">
-<span class="sig-name descname"><span class="pre">data_pipe</span></span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.data_pipe" title="Link to this definition"></a></dt>
-<dd><p>The pipe for sending data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Pipe</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.setup">
-<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.setup" title="Link to this definition"></a></dt>
-<dd><p>Set up the pipes.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.shutdown">
-<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.shutdown" title="Link to this definition"></a></dt>
-<dd><p>Shutdown the pipes.</p>
-</dd></dl>
-
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">device</span> <span class="o">=</span> <span class="n">DummyMicroscope</span><span class="p">()</span>
-</pre></div>
-</div>
+<p>Dummy Microscope - Class is used to test the controller and view.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the Dummy microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The microscope name.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – The configuration dictionary.</p></li>
+<li><p><strong>devices_dict</strong> (<em>dict</em>) – The dictionary of devices.</p></li>
+<li><p><strong>is_synthetic</strong> (<em>bool</em>) – The flag for using a synthetic microscope.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.__init__" title="aslm.model.dummy.DummyMicroscope.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(name, configuration, devices_dict)</p></td>
-<td><p></p></td>
+<td><p>Initialize the Dummy microscope.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.calculate_exposure_sweep_times" title="aslm.model.dummy.DummyMicroscope.calculate_exposure_sweep_times"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_exposure_sweep_times</span></code></a>([readout_time])</p></td>
 <td><p>Get the exposure and sweep times for all channels.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.microscope_name" title="aslm.model.dummy.DummyMicroscope.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>The microscope name.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.configuration" title="aslm.model.dummy.DummyMicroscope.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>The configuration dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.data_buffer" title="aslm.model.dummy.DummyMicroscope.data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_buffer</span></code></a></p></td>
+<td><p>The data buffer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.stages" title="aslm.model.dummy.DummyMicroscope.stages"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stages</span></code></a></p></td>
+<td><p>The stage dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.lasers" title="aslm.model.dummy.DummyMicroscope.lasers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lasers</span></code></a></p></td>
+<td><p>The lasers dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.galvo" title="aslm.model.dummy.DummyMicroscope.galvo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">galvo</span></code></a></p></td>
+<td><p>The galvo dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.daq" title="aslm.model.dummy.DummyMicroscope.daq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">daq</span></code></a></p></td>
+<td><p>The DAQ dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.dummy.DummyMicroscope.current_channel" title="aslm.model.dummy.DummyMicroscope.current_channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_channel</span></code></a></p></td>
+<td><p>The current channel.</p></td>
 </tr>
 </tbody>
 </table>
@@ -144,6 +145,101 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>readout_time</strong> (<em>float</em>) – Readout time of the camera (seconds) if we are operating the camera in
 Normal mode, otherwise -1.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>dict</em> – The dictionary of exposure times.</p></li>
+<li><p><em>dict</em> – The dictionary of sweep times.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.configuration" title="Link to this definition"></a></dt>
+<dd><p>The configuration dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.current_channel">
+<span class="sig-name descname"><span class="pre">current_channel</span></span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.current_channel" title="Link to this definition"></a></dt>
+<dd><p>The current channel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.daq">
+<span class="sig-name descname"><span class="pre">daq</span></span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.daq" title="Link to this definition"></a></dt>
+<dd><p>The DAQ dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.data_buffer">
+<span class="sig-name descname"><span class="pre">data_buffer</span></span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.data_buffer" title="Link to this definition"></a></dt>
+<dd><p>The data buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.galvo">
+<span class="sig-name descname"><span class="pre">galvo</span></span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.galvo" title="Link to this definition"></a></dt>
+<dd><p>The galvo dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.lasers">
+<span class="sig-name descname"><span class="pre">lasers</span></span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.lasers" title="Link to this definition"></a></dt>
+<dd><p>The lasers dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.microscope_name" title="Link to this definition"></a></dt>
+<dd><p>The microscope name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.dummy.DummyMicroscope.stages">
+<span class="sig-name descname"><span class="pre">stages</span></span><a class="headerlink" href="#aslm.model.dummy.DummyMicroscope.stages" title="Link to this definition"></a></dt>
+<dd><p>The stage dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>

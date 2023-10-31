@@ -32,4 +32,11 @@ aslm.controller.thread\_pool.SynchronizedThreadPool
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SynchronizedThreadPool.resources
+      ~SynchronizedThreadPool.toDeleteList
+   
    

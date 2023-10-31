@@ -1,6 +1,0 @@
-aslm.model.analysis.image\_transform.deskew\_image
-==================================================
-
-.. currentmodule:: aslm.model.analysis.image_transform
-
-.. autofunction:: deskew_image

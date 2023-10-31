@@ -1,0 +1,6 @@
+aslm.log\_files.log\_functions.find\_filename
+=============================================
+
+.. currentmodule:: aslm.log_files.log_functions
+
+.. autofunction:: find_filename

@@ -118,15 +118,14 @@ system prior to merging into the <code class="docutils literal notranslate"><spa
 </section>
 <section id="coding-style">
 <h2>Coding style<a class="headerlink" href="#coding-style" title="Link to this heading"></a></h2>
-<ul class="simple">
-<li><p>We follow the <a class="reference external" href="https://peps.python.org/pep-0008/">PEP8 code style guide</a>.
+<p>We follow the <a class="reference external" href="https://peps.python.org/pep-0008/">PEP8 code style guide</a>.
 Most importantly, all class names are written in <code class="docutils literal notranslate"><span class="pre">CamelCase</span></code> and all
-variable names are <code class="docutils literal notranslate"><span class="pre">lowercase_and_separated_by_underscores</span></code>.</p></li>
-<li><p>All classes and functions should have docstrings written in
-<a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">Numpydoc style</a>.</p></li>
-<li><p>We leverage pre-commit workflows to enforce consistent code formatting.</p></li>
-</ul>
-<p>Installation is optional. Use this only if it helps you. You could alternatively install Ruff (linter) and
+variable names are <code class="docutils literal notranslate"><span class="pre">lowercase_and_separated_by_underscores</span></code>.</p>
+<p>All classes and functions should have docstrings written in
+<a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html">Numpydoc style</a> in a sphinx-compatible format. This allows us to automatically generate
+documentation for the code base. Example documentation can be found <a class="reference internal" href="sphinx_numpydoc.html"><span class="doc">here</span></a></p>
+<p>We leverage pre-commit workflows to enforce consistent code formatting.
+Installation is optional. Use this only if it helps you. You could alternatively install Ruff (linter) and
 Black (code formatter) extensions in VSCode and have them do the work there. Whatever
 To enable pre-commits on your machine, follow the directions below:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">ASLM</span>

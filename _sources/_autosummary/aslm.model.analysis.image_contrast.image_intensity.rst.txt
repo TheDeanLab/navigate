@@ -1,6 +1,0 @@
-aslm.model.analysis.image\_contrast.image\_intensity
-====================================================
-
-.. currentmodule:: aslm.model.analysis.image_contrast
-
-.. autofunction:: image_intensity

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;no title&gt; &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Autonomous Software for Light Microscopy
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">&lt;no title&gt;</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/contributing/sphinx_numpydoc.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <blockquote>
+<div><dl>
+<dt>Example</dt><dd><p>Examples can be given using either the <code class="docutils literal notranslate"><span class="pre">Example</span></code> or <code class="docutils literal notranslate"><span class="pre">Examples</span></code>
+sections. Sections support any reStructuredText formatting, including
+literal blocks:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="err">$</span> <span class="n">python</span> <span class="n">example_numpy</span><span class="o">.</span><span class="n">py</span>
+
+
+<span class="n">Section</span> <span class="n">breaks</span> <span class="n">are</span> <span class="n">created</span> <span class="k">with</span> <span class="n">two</span> <span class="n">blank</span> <span class="n">lines</span><span class="o">.</span> <span class="n">Section</span> <span class="n">breaks</span> <span class="n">are</span> <span class="n">also</span>
+<span class="n">implicitly</span> <span class="n">created</span> <span class="n">anytime</span> <span class="n">a</span> <span class="n">new</span> <span class="n">section</span> <span class="n">starts</span><span class="o">.</span> <span class="n">Section</span> <span class="n">bodies</span> <span class="o">*</span><span class="n">may</span><span class="o">*</span> <span class="n">be</span>
+<span class="n">indented</span><span class="p">:</span>
+
+<span class="n">Notes</span>
+<span class="o">-----</span>
+    <span class="n">This</span> <span class="ow">is</span> <span class="n">an</span> <span class="n">example</span> <span class="n">of</span> <span class="n">an</span> <span class="n">indented</span> <span class="n">section</span><span class="o">.</span> <span class="n">It</span><span class="s1">&#39;s like any other section,</span>
+    <span class="n">but</span> <span class="n">the</span> <span class="n">body</span> <span class="ow">is</span> <span class="n">indented</span> <span class="n">to</span> <span class="n">help</span> <span class="n">it</span> <span class="n">stand</span> <span class="n">out</span> <span class="kn">from</span> <span class="nn">surrounding</span> <span class="n">text</span><span class="o">.</span>
+
+<span class="n">If</span> <span class="n">a</span> <span class="n">section</span> <span class="ow">is</span> <span class="n">indented</span><span class="p">,</span> <span class="n">then</span> <span class="n">a</span> <span class="n">section</span> <span class="k">break</span> <span class="ow">is</span> <span class="n">created</span> <span class="n">by</span>
+<span class="n">resuming</span> <span class="n">unindented</span> <span class="n">text</span><span class="o">.</span>
+
+<span class="n">Attributes</span>
+<span class="o">----------</span>
+<span class="n">module_level_variable1</span> <span class="p">:</span> <span class="nb">int</span>
+    <span class="n">Module</span> <span class="n">level</span> <span class="n">variables</span> <span class="n">may</span> <span class="n">be</span> <span class="n">documented</span> <span class="ow">in</span> <span class="n">either</span> <span class="n">the</span> <span class="err">``</span><span class="n">Attributes</span><span class="err">``</span>
+    <span class="n">section</span> <span class="n">of</span> <span class="n">the</span> <span class="n">module</span> <span class="n">docstring</span><span class="p">,</span> <span class="ow">or</span> <span class="ow">in</span> <span class="n">an</span> <span class="n">inline</span> <span class="n">docstring</span> <span class="n">immediately</span>
+    <span class="n">following</span> <span class="n">the</span> <span class="n">variable</span><span class="o">.</span>
+
+    <span class="n">Either</span> <span class="n">form</span> <span class="ow">is</span> <span class="n">acceptable</span><span class="p">,</span> <span class="n">but</span> <span class="n">the</span> <span class="n">two</span> <span class="n">should</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">mixed</span><span class="o">.</span> <span class="n">Choose</span>
+    <span class="n">one</span> <span class="n">convention</span> <span class="n">to</span> <span class="n">document</span> <span class="n">module</span> <span class="n">level</span> <span class="n">variables</span> <span class="ow">and</span> <span class="n">be</span> <span class="n">consistent</span>
+    <span class="k">with</span> <span class="n">it</span><span class="o">.</span>
+
+
+<span class="o">..</span> <span class="n">_NumPy</span> <span class="n">docstring</span> <span class="n">standard</span><span class="p">:</span>
+   <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">numpydoc</span><span class="o">.</span><span class="n">readthedocs</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">en</span><span class="o">/</span><span class="n">latest</span><span class="o">/</span><span class="nb">format</span><span class="o">.</span><span class="n">html</span><span class="c1">#docstring-standard</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">module_level_variable1 = 12345</span>
+
+<span class="sd">module_level_variable2 = 98765</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="nb">int</span><span class="p">:</span> <span class="n">Module</span> <span class="n">level</span> <span class="n">variable</span> <span class="n">documented</span> <span class="n">inline</span><span class="o">.</span>
+
+<span class="n">The</span> <span class="n">docstring</span> <span class="n">may</span> <span class="n">span</span> <span class="n">multiple</span> <span class="n">lines</span><span class="o">.</span> <span class="n">The</span> <span class="nb">type</span> <span class="n">may</span> <span class="n">optionally</span> <span class="n">be</span> <span class="n">specified</span>
+<span class="n">on</span> <span class="n">the</span> <span class="n">first</span> <span class="n">line</span><span class="p">,</span> <span class="n">separated</span> <span class="n">by</span> <span class="n">a</span> <span class="n">colon</span><span class="o">.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="sd">def function_with_types_in_docstring(param1, param2):</span>
+<span class="sd">    &quot;&quot;&quot;</span><span class="n">Example</span> <span class="n">function</span> <span class="k">with</span> <span class="n">types</span> <span class="n">documented</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">docstring</span><span class="o">.</span>
+
+    <span class="p">:</span><span class="n">pep</span><span class="p">:</span><span class="err">`</span><span class="mi">484</span><span class="err">`</span> <span class="nb">type</span> <span class="n">annotations</span> <span class="n">are</span> <span class="n">supported</span><span class="o">.</span> <span class="n">If</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="ow">and</span>
+    <span class="k">return</span> <span class="n">types</span> <span class="n">are</span> <span class="n">annotated</span> <span class="n">according</span> <span class="n">to</span> <span class="err">`</span><span class="n">PEP</span> <span class="mi">484</span><span class="err">`</span><span class="n">_</span><span class="p">,</span> <span class="n">they</span> <span class="n">do</span> <span class="ow">not</span> <span class="n">need</span> <span class="n">to</span> <span class="n">be</span>
+    <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">docstring</span><span class="p">:</span>
+
+    <span class="n">Parameters</span>
+    <span class="o">----------</span>
+    <span class="n">param1</span> <span class="p">:</span> <span class="nb">int</span>
+        <span class="n">The</span> <span class="n">first</span> <span class="n">parameter</span><span class="o">.</span>
+    <span class="n">param2</span> <span class="p">:</span> <span class="nb">str</span>
+        <span class="n">The</span> <span class="n">second</span> <span class="n">parameter</span><span class="o">.</span>
+
+    <span class="n">Returns</span>
+    <span class="o">-------</span>
+    <span class="nb">bool</span>
+        <span class="kc">True</span> <span class="k">if</span> <span class="n">successful</span><span class="p">,</span> <span class="kc">False</span> <span class="n">otherwise</span><span class="o">.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="sd">def function_with_pep484_type_annotations(param1: int, param2: str) -&gt; bool:</span>
+<span class="sd">    &quot;&quot;&quot;</span><span class="n">Example</span> <span class="n">function</span> <span class="k">with</span> <span class="n">PEP</span> <span class="mi">484</span> <span class="nb">type</span> <span class="n">annotations</span><span class="o">.</span>
+
+    <span class="n">The</span> <span class="k">return</span> <span class="nb">type</span> <span class="n">must</span> <span class="n">be</span> <span class="n">duplicated</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">docstring</span> <span class="n">to</span> <span class="n">comply</span>
+    <span class="k">with</span> <span class="n">the</span> <span class="n">NumPy</span> <span class="n">docstring</span> <span class="n">style</span><span class="o">.</span>
+
+    <span class="n">Parameters</span>
+    <span class="o">----------</span>
+    <span class="n">param1</span>
+        <span class="n">The</span> <span class="n">first</span> <span class="n">parameter</span><span class="o">.</span>
+    <span class="n">param2</span>
+        <span class="n">The</span> <span class="n">second</span> <span class="n">parameter</span><span class="o">.</span>
+
+    <span class="n">Returns</span>
+    <span class="o">-------</span>
+    <span class="nb">bool</span>
+        <span class="kc">True</span> <span class="k">if</span> <span class="n">successful</span><span class="p">,</span> <span class="kc">False</span> <span class="n">otherwise</span><span class="o">.</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="sd">def module_level_function(param1, param2=None, *args, **kwargs):</span>
+<span class="sd">    &quot;&quot;&quot;</span><span class="n">This</span> <span class="ow">is</span> <span class="n">an</span> <span class="n">example</span> <span class="n">of</span> <span class="n">a</span> <span class="n">module</span> <span class="n">level</span> <span class="n">function</span><span class="o">.</span>
+
+    <span class="n">Function</span> <span class="n">parameters</span> <span class="n">should</span> <span class="n">be</span> <span class="n">documented</span> <span class="ow">in</span> <span class="n">the</span> <span class="err">``</span><span class="n">Parameters</span><span class="err">``</span> <span class="n">section</span><span class="o">.</span>
+    <span class="n">The</span> <span class="n">name</span> <span class="n">of</span> <span class="n">each</span> <span class="n">parameter</span> <span class="ow">is</span> <span class="n">required</span><span class="o">.</span> <span class="n">The</span> <span class="nb">type</span> <span class="ow">and</span> <span class="n">description</span> <span class="n">of</span> <span class="n">each</span>
+    <span class="n">parameter</span> <span class="ow">is</span> <span class="n">optional</span><span class="p">,</span> <span class="n">but</span> <span class="n">should</span> <span class="n">be</span> <span class="n">included</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">obvious</span><span class="o">.</span>
+
+    <span class="n">If</span> <span class="err">``</span><span class="o">*</span><span class="n">args</span><span class="err">``</span> <span class="ow">or</span> <span class="err">``</span><span class="o">**</span><span class="n">kwargs</span><span class="err">``</span> <span class="n">are</span> <span class="n">accepted</span><span class="p">,</span>
+    <span class="n">they</span> <span class="n">should</span> <span class="n">be</span> <span class="n">listed</span> <span class="k">as</span> <span class="err">``</span><span class="o">*</span><span class="n">args</span><span class="err">``</span> <span class="ow">and</span> <span class="err">``</span><span class="o">**</span><span class="n">kwargs</span><span class="err">``</span><span class="o">.</span>
+
+    <span class="n">The</span> <span class="nb">format</span> <span class="k">for</span> <span class="n">a</span> <span class="n">parameter</span> <span class="ow">is</span><span class="p">::</span>
+
+        <span class="n">name</span> <span class="p">:</span> <span class="nb">type</span>
+            <span class="n">description</span>
+
+            <span class="n">The</span> <span class="n">description</span> <span class="n">may</span> <span class="n">span</span> <span class="n">multiple</span> <span class="n">lines</span><span class="o">.</span> <span class="n">Following</span> <span class="n">lines</span>
+            <span class="n">should</span> <span class="n">be</span> <span class="n">indented</span> <span class="n">to</span> <span class="n">match</span> <span class="n">the</span> <span class="n">first</span> <span class="n">line</span> <span class="n">of</span> <span class="n">the</span> <span class="n">description</span><span class="o">.</span>
+            <span class="n">The</span> <span class="s2">&quot;: type&quot;</span> <span class="ow">is</span> <span class="n">optional</span><span class="o">.</span>
+
+            <span class="n">Multiple</span> <span class="n">paragraphs</span> <span class="n">are</span> <span class="n">supported</span> <span class="ow">in</span> <span class="n">parameter</span>
+            <span class="n">descriptions</span><span class="o">.</span>
+
+    <span class="n">Parameters</span>
+    <span class="o">----------</span>
+    <span class="n">param1</span> <span class="p">:</span> <span class="nb">int</span>
+        <span class="n">The</span> <span class="n">first</span> <span class="n">parameter</span><span class="o">.</span>
+    <span class="n">param2</span> <span class="p">:</span> <span class="p">:</span><span class="n">obj</span><span class="p">:</span><span class="err">`</span><span class="nb">str</span><span class="err">`</span><span class="p">,</span> <span class="n">optional</span>
+        <span class="n">The</span> <span class="n">second</span> <span class="n">parameter</span><span class="o">.</span>
+    <span class="o">*</span><span class="n">args</span>
+        <span class="n">Variable</span> <span class="n">length</span> <span class="n">argument</span> <span class="nb">list</span><span class="o">.</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+        <span class="n">Arbitrary</span> <span class="n">keyword</span> <span class="n">arguments</span><span class="o">.</span>
+
+    <span class="n">Returns</span>
+    <span class="o">-------</span>
+    <span class="nb">bool</span>
+        <span class="kc">True</span> <span class="k">if</span> <span class="n">successful</span><span class="p">,</span> <span class="kc">False</span> <span class="n">otherwise</span><span class="o">.</span>
+
+        <span class="n">The</span> <span class="k">return</span> <span class="nb">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">optional</span><span class="o">.</span> <span class="n">The</span> <span class="err">``</span><span class="n">Returns</span><span class="err">``</span> <span class="n">section</span> <span class="n">may</span> <span class="n">span</span>
+        <span class="n">multiple</span> <span class="n">lines</span> <span class="ow">and</span> <span class="n">paragraphs</span><span class="o">.</span> <span class="n">Following</span> <span class="n">lines</span> <span class="n">should</span> <span class="n">be</span> <span class="n">indented</span> <span class="n">to</span>
+        <span class="k">match</span> <span class="n">the</span> <span class="n">first</span> <span class="n">line</span> <span class="n">of</span> <span class="n">the</span> <span class="n">description</span><span class="o">.</span>
+
+        <span class="n">The</span> <span class="err">``</span><span class="n">Returns</span><span class="err">``</span> <span class="n">section</span> <span class="n">supports</span> <span class="nb">any</span> <span class="n">reStructuredText</span> <span class="n">formatting</span><span class="p">,</span>
+        <span class="n">including</span> <span class="n">literal</span> <span class="n">blocks</span><span class="p">::</span>
+
+            <span class="p">{</span>
+                <span class="s1">&#39;param1&#39;</span><span class="p">:</span> <span class="n">param1</span><span class="p">,</span>
+                <span class="s1">&#39;param2&#39;</span><span class="p">:</span> <span class="n">param2</span>
+            <span class="p">}</span>
+
+    <span class="n">Raises</span>
+    <span class="o">------</span>
+    <span class="ne">AttributeError</span>
+        <span class="n">The</span> <span class="err">``</span><span class="n">Raises</span><span class="err">``</span> <span class="n">section</span> <span class="ow">is</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="nb">all</span> <span class="n">exceptions</span>
+        <span class="n">that</span> <span class="n">are</span> <span class="n">relevant</span> <span class="n">to</span> <span class="n">the</span> <span class="n">interface</span><span class="o">.</span>
+    <span class="ne">ValueError</span>
+        <span class="n">If</span> <span class="err">`</span><span class="n">param2</span><span class="err">`</span> <span class="ow">is</span> <span class="n">equal</span> <span class="n">to</span> <span class="err">`</span><span class="n">param1</span><span class="err">`</span><span class="o">.</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    if param1 == param2:</span>
+<span class="sd">        raise ValueError(&#39;param1 may not be equal to param2&#39;)</span>
+<span class="sd">    return True</span>
+
+
+<span class="sd">def example_generator(n):</span>
+<span class="sd">    &quot;&quot;&quot;</span><span class="n">Generators</span> <span class="n">have</span> <span class="n">a</span> <span class="err">``</span><span class="n">Yields</span><span class="err">``</span> <span class="n">section</span> <span class="n">instead</span> <span class="n">of</span> <span class="n">a</span> <span class="err">``</span><span class="n">Returns</span><span class="err">``</span> <span class="n">section</span><span class="o">.</span>
+
+    <span class="n">Parameters</span>
+    <span class="o">----------</span>
+    <span class="n">n</span> <span class="p">:</span> <span class="nb">int</span>
+        <span class="n">The</span> <span class="n">upper</span> <span class="n">limit</span> <span class="n">of</span> <span class="n">the</span> <span class="nb">range</span> <span class="n">to</span> <span class="n">generate</span><span class="p">,</span> <span class="kn">from</span> <span class="mi">0</span> <span class="n">to</span> <span class="err">`</span><span class="n">n</span><span class="err">`</span> <span class="o">-</span> <span class="mf">1.</span>
+
+    <span class="n">Yields</span>
+    <span class="o">------</span>
+    <span class="nb">int</span>
+        <span class="n">The</span> <span class="nb">next</span> <span class="n">number</span> <span class="ow">in</span> <span class="n">the</span> <span class="nb">range</span> <span class="n">of</span> <span class="mi">0</span> <span class="n">to</span> <span class="err">`</span><span class="n">n</span><span class="err">`</span> <span class="o">-</span> <span class="mf">1.</span>
+
+    <span class="n">Examples</span>
+    <span class="o">--------</span>
+    <span class="n">Examples</span> <span class="n">should</span> <span class="n">be</span> <span class="n">written</span> <span class="ow">in</span> <span class="n">doctest</span> <span class="nb">format</span><span class="p">,</span> <span class="ow">and</span> <span class="n">should</span> <span class="n">illustrate</span> <span class="n">how</span>
+    <span class="n">to</span> <span class="n">use</span> <span class="n">the</span> <span class="n">function</span><span class="o">.</span>
+
+    <span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">example_generator</span><span class="p">(</span><span class="mi">4</span><span class="p">)])</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    yield from range(n)</span>
+
+
+<span class="sd">class ExampleError(Exception):</span>
+<span class="sd">    &quot;&quot;&quot;</span><span class="n">Exceptions</span> <span class="n">are</span> <span class="n">documented</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">same</span> <span class="n">way</span> <span class="k">as</span> <span class="n">classes</span><span class="o">.</span>
+
+    <span class="n">The</span> <span class="fm">__init__</span> <span class="n">method</span> <span class="n">may</span> <span class="n">be</span> <span class="n">documented</span> <span class="ow">in</span> <span class="n">either</span> <span class="n">the</span> <span class="k">class</span> <span class="nc">level</span>
+    <span class="n">docstring</span><span class="p">,</span> <span class="ow">or</span> <span class="k">as</span> <span class="n">a</span> <span class="n">docstring</span> <span class="n">on</span> <span class="n">the</span> <span class="fm">__init__</span> <span class="n">method</span> <span class="n">itself</span><span class="o">.</span>
+
+    <span class="n">Either</span> <span class="n">form</span> <span class="ow">is</span> <span class="n">acceptable</span><span class="p">,</span> <span class="n">but</span> <span class="n">the</span> <span class="n">two</span> <span class="n">should</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">mixed</span><span class="o">.</span> <span class="n">Choose</span> <span class="n">one</span>
+    <span class="n">convention</span> <span class="n">to</span> <span class="n">document</span> <span class="n">the</span> <span class="fm">__init__</span> <span class="n">method</span> <span class="ow">and</span> <span class="n">be</span> <span class="n">consistent</span> <span class="k">with</span> <span class="n">it</span><span class="o">.</span>
+
+    <span class="n">Note</span>
+    <span class="o">----</span>
+    <span class="n">Do</span> <span class="ow">not</span> <span class="n">include</span> <span class="n">the</span> <span class="err">`</span><span class="bp">self</span><span class="err">`</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">the</span> <span class="err">``</span><span class="n">Parameters</span><span class="err">``</span> <span class="n">section</span><span class="o">.</span>
+
+    <span class="n">Parameters</span>
+    <span class="o">----------</span>
+    <span class="n">msg</span> <span class="p">:</span> <span class="nb">str</span>
+        <span class="n">Human</span> <span class="n">readable</span> <span class="n">string</span> <span class="n">describing</span> <span class="n">the</span> <span class="n">exception</span><span class="o">.</span>
+    <span class="n">code</span> <span class="p">:</span> <span class="p">:</span><span class="n">obj</span><span class="p">:</span><span class="err">`</span><span class="nb">int</span><span class="err">`</span><span class="p">,</span> <span class="n">optional</span>
+        <span class="n">Numeric</span> <span class="n">error</span> <span class="n">code</span><span class="o">.</span>
+
+    <span class="n">Attributes</span>
+    <span class="o">----------</span>
+    <span class="n">msg</span> <span class="p">:</span> <span class="nb">str</span>
+        <span class="n">Human</span> <span class="n">readable</span> <span class="n">string</span> <span class="n">describing</span> <span class="n">the</span> <span class="n">exception</span><span class="o">.</span>
+    <span class="n">code</span> <span class="p">:</span> <span class="nb">int</span>
+        <span class="n">Numeric</span> <span class="n">error</span> <span class="n">code</span><span class="o">.</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    def __init__(self, msg, code):</span>
+<span class="sd">        self.msg = msg</span>
+<span class="sd">        self.code = code</span>
+
+
+<span class="sd">class ExampleClass:</span>
+<span class="sd">    &quot;&quot;&quot;</span><span class="n">The</span> <span class="n">summary</span> <span class="n">line</span> <span class="k">for</span> <span class="n">a</span> <span class="k">class</span> <span class="nc">docstring</span> <span class="n">should</span> <span class="n">fit</span> <span class="n">on</span> <span class="n">one</span> <span class="n">line</span><span class="o">.</span>
+
+    <span class="n">If</span> <span class="n">the</span> <span class="k">class</span> <span class="nc">has</span> <span class="n">public</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">they</span> <span class="n">may</span> <span class="n">be</span> <span class="n">documented</span> <span class="n">here</span>
+    <span class="ow">in</span> <span class="n">an</span> <span class="err">``</span><span class="n">Attributes</span><span class="err">``</span> <span class="n">section</span> <span class="ow">and</span> <span class="n">follow</span> <span class="n">the</span> <span class="n">same</span> <span class="n">formatting</span> <span class="k">as</span> <span class="n">a</span>
+    <span class="n">function</span><span class="s1">&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+    <span class="n">inline</span> <span class="k">with</span> <span class="n">the</span> <span class="n">attribute</span><span class="s1">&#39;s declaration (see __init__ method below).</span>
+
+    <span class="n">Properties</span> <span class="n">created</span> <span class="k">with</span> <span class="n">the</span> <span class="err">``</span><span class="nd">@property</span><span class="err">``</span> <span class="n">decorator</span> <span class="n">should</span> <span class="n">be</span> <span class="n">documented</span>
+    <span class="ow">in</span> <span class="n">the</span> <span class="nb">property</span><span class="s1">&#39;s getter method.</span>
+
+    <span class="n">Attributes</span>
+    <span class="o">----------</span>
+    <span class="n">attr1</span> <span class="p">:</span> <span class="nb">str</span>
+        <span class="n">Description</span> <span class="n">of</span> <span class="err">`</span><span class="n">attr1</span><span class="err">`</span><span class="o">.</span>
+    <span class="n">attr2</span> <span class="p">:</span> <span class="p">:</span><span class="n">obj</span><span class="p">:</span><span class="err">`</span><span class="nb">int</span><span class="err">`</span><span class="p">,</span> <span class="n">optional</span>
+        <span class="n">Description</span> <span class="n">of</span> <span class="err">`</span><span class="n">attr2</span><span class="err">`</span><span class="o">.</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    def __init__(self, param1, param2, param3):</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="n">Example</span> <span class="n">of</span> <span class="n">docstring</span> <span class="n">on</span> <span class="n">the</span> <span class="fm">__init__</span> <span class="n">method</span><span class="o">.</span>
+
+        <span class="n">The</span> <span class="fm">__init__</span> <span class="n">method</span> <span class="n">may</span> <span class="n">be</span> <span class="n">documented</span> <span class="ow">in</span> <span class="n">either</span> <span class="n">the</span> <span class="k">class</span> <span class="nc">level</span>
+        <span class="n">docstring</span><span class="p">,</span> <span class="ow">or</span> <span class="k">as</span> <span class="n">a</span> <span class="n">docstring</span> <span class="n">on</span> <span class="n">the</span> <span class="fm">__init__</span> <span class="n">method</span> <span class="n">itself</span><span class="o">.</span>
+
+        <span class="n">Either</span> <span class="n">form</span> <span class="ow">is</span> <span class="n">acceptable</span><span class="p">,</span> <span class="n">but</span> <span class="n">the</span> <span class="n">two</span> <span class="n">should</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">mixed</span><span class="o">.</span> <span class="n">Choose</span> <span class="n">one</span>
+        <span class="n">convention</span> <span class="n">to</span> <span class="n">document</span> <span class="n">the</span> <span class="fm">__init__</span> <span class="n">method</span> <span class="ow">and</span> <span class="n">be</span> <span class="n">consistent</span> <span class="k">with</span> <span class="n">it</span><span class="o">.</span>
+
+        <span class="n">Note</span>
+        <span class="o">----</span>
+        <span class="n">Do</span> <span class="ow">not</span> <span class="n">include</span> <span class="n">the</span> <span class="err">`</span><span class="bp">self</span><span class="err">`</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">the</span> <span class="err">``</span><span class="n">Parameters</span><span class="err">``</span> <span class="n">section</span><span class="o">.</span>
+
+        <span class="n">Parameters</span>
+        <span class="o">----------</span>
+        <span class="n">param1</span> <span class="p">:</span> <span class="nb">str</span>
+            <span class="n">Description</span> <span class="n">of</span> <span class="err">`</span><span class="n">param1</span><span class="err">`</span><span class="o">.</span>
+        <span class="n">param2</span> <span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+            <span class="n">Description</span> <span class="n">of</span> <span class="err">`</span><span class="n">param2</span><span class="err">`</span><span class="o">.</span> <span class="n">Multiple</span>
+            <span class="n">lines</span> <span class="n">are</span> <span class="n">supported</span><span class="o">.</span>
+        <span class="n">param3</span> <span class="p">:</span> <span class="p">:</span><span class="n">obj</span><span class="p">:</span><span class="err">`</span><span class="nb">int</span><span class="err">`</span><span class="p">,</span> <span class="n">optional</span>
+            <span class="n">Description</span> <span class="n">of</span> <span class="err">`</span><span class="n">param3</span><span class="err">`</span><span class="o">.</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        self.attr1 = param1</span>
+<span class="sd">        self.attr2 = param2</span>
+<span class="sd">        self.attr3 = param3  #: Doc comment *inline* with attribute</span>
+
+<span class="sd">        #: list(str): Doc comment *before* attribute, with type specified</span>
+<span class="sd">        self.attr4 = [&quot;attr4&quot;]</span>
+
+<span class="sd">        self.attr5 = None</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="nb">str</span><span class="p">:</span> <span class="n">Docstring</span> <span class="o">*</span><span class="n">after</span><span class="o">*</span> <span class="n">attribute</span><span class="p">,</span> <span class="k">with</span> <span class="nb">type</span> <span class="n">specified</span><span class="o">.</span><span class="s2">&quot;&quot;&quot;</span>
+
+<span class="s2">    @property</span>
+<span class="s2">    def readonly_property(self):</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="nb">str</span><span class="p">:</span> <span class="n">Properties</span> <span class="n">should</span> <span class="n">be</span> <span class="n">documented</span> <span class="ow">in</span> <span class="n">their</span> <span class="n">getter</span> <span class="n">method</span><span class="o">.</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        return &quot;readonly_property&quot;</span>
+
+<span class="s2">    @property</span>
+<span class="s2">    def readwrite_property(self):</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="nb">list</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span> <span class="n">Properties</span> <span class="k">with</span> <span class="n">both</span> <span class="n">a</span> <span class="n">getter</span> <span class="ow">and</span> <span class="n">setter</span>
+        <span class="n">should</span> <span class="n">only</span> <span class="n">be</span> <span class="n">documented</span> <span class="ow">in</span> <span class="n">their</span> <span class="n">getter</span> <span class="n">method</span><span class="o">.</span>
+
+        <span class="n">If</span> <span class="n">the</span> <span class="n">setter</span> <span class="n">method</span> <span class="n">contains</span> <span class="n">notable</span> <span class="n">behavior</span><span class="p">,</span> <span class="n">it</span> <span class="n">should</span> <span class="n">be</span>
+        <span class="n">mentioned</span> <span class="n">here</span><span class="o">.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return [&quot;readwrite_property&quot;]</span>
+
+<span class="sd">    @readwrite_property.setter</span>
+<span class="sd">    def readwrite_property(self, value):</span>
+<span class="sd">        value</span>
+
+<span class="sd">    def example_method(self, param1, param2):</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="n">Class</span> <span class="n">methods</span> <span class="n">are</span> <span class="n">similar</span> <span class="n">to</span> <span class="n">regular</span> <span class="n">functions</span><span class="o">.</span>
+
+        <span class="n">Note</span>
+        <span class="o">----</span>
+        <span class="n">Do</span> <span class="ow">not</span> <span class="n">include</span> <span class="n">the</span> <span class="err">`</span><span class="bp">self</span><span class="err">`</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">the</span> <span class="err">``</span><span class="n">Parameters</span><span class="err">``</span> <span class="n">section</span><span class="o">.</span>
+
+        <span class="n">Parameters</span>
+        <span class="o">----------</span>
+        <span class="n">param1</span>
+            <span class="n">The</span> <span class="n">first</span> <span class="n">parameter</span><span class="o">.</span>
+        <span class="n">param2</span>
+            <span class="n">The</span> <span class="n">second</span> <span class="n">parameter</span><span class="o">.</span>
+
+        <span class="n">Returns</span>
+        <span class="o">-------</span>
+        <span class="nb">bool</span>
+            <span class="kc">True</span> <span class="k">if</span> <span class="n">successful</span><span class="p">,</span> <span class="kc">False</span> <span class="n">otherwise</span><span class="o">.</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return True</span>
+
+<span class="sd">    def __special__(self):</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="n">By</span> <span class="n">default</span> <span class="n">special</span> <span class="n">members</span> <span class="k">with</span> <span class="n">docstrings</span> <span class="n">are</span> <span class="ow">not</span> <span class="n">included</span><span class="o">.</span>
+
+        <span class="n">Special</span> <span class="n">members</span> <span class="n">are</span> <span class="nb">any</span> <span class="n">methods</span> <span class="ow">or</span> <span class="n">attributes</span> <span class="n">that</span> <span class="n">start</span> <span class="k">with</span> <span class="ow">and</span>
+        <span class="n">end</span> <span class="k">with</span> <span class="n">a</span> <span class="n">double</span> <span class="n">underscore</span><span class="o">.</span> <span class="n">Any</span> <span class="n">special</span> <span class="n">member</span> <span class="k">with</span> <span class="n">a</span> <span class="n">docstring</span>
+        <span class="n">will</span> <span class="n">be</span> <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">output</span><span class="p">,</span> <span class="k">if</span>
+        <span class="err">``</span><span class="n">napoleon_include_special_with_doc</span><span class="err">``</span> <span class="ow">is</span> <span class="nb">set</span> <span class="n">to</span> <span class="kc">True</span><span class="o">.</span>
+
+        <span class="n">This</span> <span class="n">behavior</span> <span class="n">can</span> <span class="n">be</span> <span class="n">enabled</span> <span class="n">by</span> <span class="n">changing</span> <span class="n">the</span> <span class="n">following</span> <span class="n">setting</span> <span class="ow">in</span>
+        <span class="n">Sphinx</span><span class="s1">&#39;s conf.py::</span>
+
+            <span class="n">napoleon_include_special_with_doc</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        pass</span>
+
+<span class="sd">    def __special_without_docstring__(self):</span>
+<span class="sd">        pass</span>
+
+<span class="sd">    def _private(self):</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="n">By</span> <span class="n">default</span> <span class="n">private</span> <span class="n">members</span> <span class="n">are</span> <span class="ow">not</span> <span class="n">included</span><span class="o">.</span>
+
+        <span class="n">Private</span> <span class="n">members</span> <span class="n">are</span> <span class="nb">any</span> <span class="n">methods</span> <span class="ow">or</span> <span class="n">attributes</span> <span class="n">that</span> <span class="n">start</span> <span class="k">with</span> <span class="n">an</span>
+        <span class="n">underscore</span> <span class="ow">and</span> <span class="n">are</span> <span class="o">*</span><span class="ow">not</span><span class="o">*</span> <span class="n">special</span><span class="o">.</span> <span class="n">By</span> <span class="n">default</span> <span class="n">they</span> <span class="n">are</span> <span class="ow">not</span> <span class="n">included</span>
+        <span class="ow">in</span> <span class="n">the</span> <span class="n">output</span><span class="o">.</span>
+
+        <span class="n">This</span> <span class="n">behavior</span> <span class="n">can</span> <span class="n">be</span> <span class="n">changed</span> <span class="n">such</span> <span class="n">that</span> <span class="n">private</span> <span class="n">members</span> <span class="o">*</span><span class="n">are</span><span class="o">*</span> <span class="n">included</span>
+        <span class="n">by</span> <span class="n">changing</span> <span class="n">the</span> <span class="n">following</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">Sphinx</span><span class="s1">&#39;s conf.py::</span>
+
+            <span class="n">napoleon_include_private_with_doc</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        pass</span>
+
+<span class="s2">    def _private_without_docstring(self):</span>
+<span class="s2">        pass</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</div></blockquote>
+<p>::</p>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

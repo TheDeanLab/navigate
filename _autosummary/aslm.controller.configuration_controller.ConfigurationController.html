@@ -80,53 +80,31 @@
 <dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.controller.configuration_controller.</span></span><span class="sig-name descname"><span class="pre">ConfigurationController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Configuration Controller</p>
-<p>This class is used to get the configuration of the microscope.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>configuration</strong> (<em>dict</em>) – The configuration dictionary.</p></li>
-<li><p><strong>microscope_name</strong> (<em>str</em>) – The name of the microscope.</p></li>
-<li><p><strong>microscope_config</strong> (<em>dict</em>) – The configuration of the microscope.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.change_microscope">
-<span class="sig-name descname"><span class="pre">change_microscope</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.change_microscope" title="Link to this definition"></a></dt>
-<dd><p>Get the new microscope configuration dict according to the name.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.get_microscope_configuration_dict">
-<span class="sig-name descname"><span class="pre">get_microscope_configuration_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.get_microscope_configuration_dict" title="Link to this definition"></a></dt>
-<dd><p>Return microscope configuration dict.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.get_stage_position_limits">
-<span class="sig-name descname"><span class="pre">get_stage_position_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suffix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.get_stage_position_limits" title="Link to this definition"></a></dt>
-<dd><p>Return the position limits of the stage.</p>
-</dd></dl>
-
+<p>Configuration Controller - Used to get the configuration of the microscope.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the Configuration Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>configuration</strong> (<em>dict</em>) – The configuration dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.configuration_controller.ConfigurationController.__init__" title="aslm.controller.configuration_controller.ConfigurationController.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(configuration)</p></td>
-<td><p></p></td>
+<td><p>Initialize the Configuration Controller</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="aslm.controller.configuration_controller.ConfigurationController.change_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">change_microscope</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.configuration_controller.ConfigurationController.change_microscope" title="aslm.controller.configuration_controller.ConfigurationController.change_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">change_microscope</span></code></a>()</p></td>
 <td><p>Get the new microscope configuration dict according to the name</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id1" title="aslm.controller.configuration_controller.ConfigurationController.get_microscope_configuration_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_microscope_configuration_dict</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.configuration_controller.ConfigurationController.get_microscope_configuration_dict" title="aslm.controller.configuration_controller.ConfigurationController.get_microscope_configuration_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_microscope_configuration_dict</span></code></a>()</p></td>
 <td><p>Return microscope configuration dictionary</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="aslm.controller.configuration_controller.ConfigurationController.get_stage_position_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_stage_position_limits</span></code></a>(suffix)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.configuration_controller.ConfigurationController.get_stage_position_limits" title="aslm.controller.configuration_controller.ConfigurationController.get_stage_position_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_stage_position_limits</span></code></a>(suffix)</p></td>
 <td><p>Return the position limits of the stage</p></td>
 </tr>
 </tbody>
@@ -176,11 +154,23 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.configuration_controller.ConfigurationController.stage_step" title="aslm.controller.configuration_controller.ConfigurationController.stage_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_step</span></code></a></p></td>
 <td><p>Get the step size of the stage</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.configuration_controller.ConfigurationController.configuration" title="aslm.controller.configuration_controller.ConfigurationController.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>The configuration dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.configuration_controller.ConfigurationController.microscope_name" title="aslm.controller.configuration_controller.ConfigurationController.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
+<td><p>The microscope name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.controller.configuration_controller.ConfigurationController.microscope_config" title="aslm.controller.configuration_controller.ConfigurationController.microscope_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_config</span></code></a></p></td>
+<td><p>The microscope configuration dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.controller.configuration_controller.ConfigurationController.galvo_num" title="aslm.controller.configuration_controller.ConfigurationController.galvo_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">galvo_num</span></code></a></p></td>
+<td><p>The number of galvos.</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">change_microscope</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.change_microscope">
+<span class="sig-name descname"><span class="pre">change_microscope</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.change_microscope" title="Link to this definition"></a></dt>
 <dd><p>Get the new microscope configuration dict according to the name</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -193,8 +183,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">get_microscope_configuration_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.get_microscope_configuration_dict">
+<span class="sig-name descname"><span class="pre">get_microscope_configuration_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.get_microscope_configuration_dict" title="Link to this definition"></a></dt>
 <dd><p>Return microscope configuration dictionary</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -207,8 +197,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">get_stage_position_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suffix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.get_stage_position_limits">
+<span class="sig-name descname"><span class="pre">get_stage_position_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suffix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.get_stage_position_limits" title="Link to this definition"></a></dt>
 <dd><p>Return the position limits of the stage</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -291,6 +281,17 @@ that are available in the configuration</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.configuration" title="Link to this definition"></a></dt>
+<dd><p>The configuration dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.daq_sample_rate">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">daq_sample_rate</span></span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.daq_sample_rate" title="Link to this definition"></a></dt>
@@ -315,6 +316,17 @@ that are available in the configuration</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.galvo_num">
+<span class="sig-name descname"><span class="pre">galvo_num</span></span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.galvo_num" title="Link to this definition"></a></dt>
+<dd><p>The number of galvos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -345,6 +357,28 @@ that are available in the configuration</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.microscope_config">
+<span class="sig-name descname"><span class="pre">microscope_config</span></span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.microscope_config" title="Link to this definition"></a></dt>
+<dd><p>The microscope configuration dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.controller.configuration_controller.ConfigurationController.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.controller.configuration_controller.ConfigurationController.microscope_name" title="Link to this definition"></a></dt>
+<dd><p>The microscope name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>

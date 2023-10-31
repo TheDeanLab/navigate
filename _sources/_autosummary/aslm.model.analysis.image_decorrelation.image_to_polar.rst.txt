@@ -1,6 +1,0 @@
-aslm.model.analysis.image\_decorrelation.image\_to\_polar
-=========================================================
-
-.. currentmodule:: aslm.model.analysis.image_decorrelation
-
-.. autofunction:: image_to_polar

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.analysis.image_decorrelation.image_to_polar &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+  <title>aslm.log_files.log_functions.main_process_listener &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -64,9 +64,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">aslm.model.analysis.image_decorrelation.image_to_polar</li>
+      <li class="breadcrumb-item active">aslm.log_files.log_functions.main_process_listener</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/aslm.model.analysis.image_decorrelation.image_to_polar.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/aslm.log_files.log_functions.main_process_listener.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -74,17 +74,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="aslm-model-analysis-image-decorrelation-image-to-polar">
-<h1>aslm.model.analysis.image_decorrelation.image_to_polar<a class="headerlink" href="#aslm-model-analysis-image-decorrelation-image-to-polar" title="Link to this heading"></a></h1>
+  <section id="aslm-log-files-log-functions-main-process-listener">
+<h1>aslm.log_files.log_functions.main_process_listener<a class="headerlink" href="#aslm-log-files-log-functions-main-process-listener" title="Link to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="aslm.model.analysis.image_decorrelation.image_to_polar">
-<span class="sig-prename descclassname"><span class="pre">aslm.model.analysis.image_decorrelation.</span></span><span class="sig-name descname"><span class="pre">image_to_polar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_image</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.analysis.image_decorrelation.image_to_polar" title="Link to this definition"></a></dt>
-<dd><p># imP = im2pol(imC)
-# Transform an image from carthesian to polar coordinate
-# Inputs:
-#  input_image              Input image in carthesian coordinate
-# Outputs:
-#  imP              Output image in polar coordinate</p>
+<dt class="sig sig-object py" id="aslm.log_files.log_functions.main_process_listener">
+<span class="sig-prename descclassname"><span class="pre">aslm.log_files.log_functions.</span></span><span class="sig-name descname"><span class="pre">main_process_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.log_functions.main_process_listener" title="Link to this definition"></a></dt>
+<dd><p>Listener function for the main process</p>
+<p>This function will listen for new logs put in queue from sub processes,
+it will then log via the main process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>queue</strong> (<em>multiprocessing.Queue</em>) – Queue to listen for new logs</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

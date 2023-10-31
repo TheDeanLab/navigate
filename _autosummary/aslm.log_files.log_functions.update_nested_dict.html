@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.analysis.image_decorrelation.linear_map &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+  <title>aslm.log_files.log_functions.update_nested_dict &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -64,9 +64,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">aslm.model.analysis.image_decorrelation.linear_map</li>
+      <li class="breadcrumb-item active">aslm.log_files.log_functions.update_nested_dict</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/aslm.model.analysis.image_decorrelation.linear_map.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/aslm.log_files.log_functions.update_nested_dict.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -74,20 +74,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="aslm-model-analysis-image-decorrelation-linear-map">
-<h1>aslm.model.analysis.image_decorrelation.linear_map<a class="headerlink" href="#aslm-model-analysis-image-decorrelation-linear-map" title="Link to this heading"></a></h1>
+  <section id="aslm-log-files-log-functions-update-nested-dict">
+<h1>aslm.log_files.log_functions.update_nested_dict<a class="headerlink" href="#aslm-log-files-log-functions-update-nested-dict" title="Link to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="aslm.model.analysis.image_decorrelation.linear_map">
-<span class="sig-prename descclassname"><span class="pre">aslm.model.analysis.image_decorrelation.</span></span><span class="sig-name descname"><span class="pre">linear_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapped_minimum_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapped_maximum_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.analysis.image_decorrelation.linear_map" title="Link to this definition"></a></dt>
-<dd><p># Performs a linear mapping of input_value from the range [minimum_value,maximum_value] to the range [mapped_minimum_value,mapped_maximum_value]
-# Inputs:
-#  input_value              Input value
-#  minimum_value            Minimum value of the range of input_value
-#  maximum_value            Maximum value of the range of input_value
-#  mapped_minimum_value             Minimum value of the new range of input_value
-#  mapped_maximum_value             Maximum value of the new range of input_value
-# Outputs:
-#  rescaled_value           Rescaled value</p>
+<dt class="sig sig-object py" id="aslm.log_files.log_functions.update_nested_dict">
+<span class="sig-prename descclassname"><span class="pre">aslm.log_files.log_functions.</span></span><span class="sig-name descname"><span class="pre">update_nested_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">find_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.log_functions.update_nested_dict" title="Link to this definition"></a></dt>
+<dd><p>Update a nested dictionary by applying a function to a value</p>
+<p>Loops through a nested dictionary and if find_func() conditions are met,
+run apply_func on that key.</p>
+<p>TODO: This is highly general and doesn’t belong here.
+TODO: It might be nice to make this non-recursive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d</strong> (<em>dict</em>) – Dictionary to be updated</p></li>
+<li><p><strong>find_func</strong> (<em>func</em>) – Accepts key, value pair and matches a condition based on these. Returns bool.</p></li>
+<li><p><strong>apply_func</strong> (<em>func</em>) – Accepts a value returns the new value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>d2</strong> – An version of d, updated according to the passed functions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

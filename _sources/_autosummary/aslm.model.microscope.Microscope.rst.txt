@@ -40,4 +40,29 @@ aslm.model.microscope.Microscope
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Microscope.microscope_name
+      ~Microscope.configuration
+      ~Microscope.data_buffer
+      ~Microscope.stages
+      ~Microscope.stages_list
+      ~Microscope.ask_stage_for_position
+      ~Microscope.lasers
+      ~Microscope.galvo
+      ~Microscope.daq
+      ~Microscope.tiger_controller
+      ~Microscope.info
+      ~Microscope.current_channel
+      ~Microscope.current_laser_index
+      ~Microscope.channels
+      ~Microscope.available_channels
+      ~Microscope.number_of_frames
+      ~Microscope.central_focus
+      ~Microscope.is_synthetic
+      ~Microscope.laser_wavelength
+      ~Microscope.ret_pos_dict
+   
    

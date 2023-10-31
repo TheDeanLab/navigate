@@ -27,4 +27,15 @@ aslm.model.dummy.DummyDevice
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DummyDevice.msg_count
+      ~DummyDevice.sendout_msg_count
+      ~DummyDevice.out_port
+      ~DummyDevice.in_port
+      ~DummyDevice.timecost
+      ~DummyDevice.stop_flag
+   
    

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.analysis.image_transform.initiate_gpu &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+  <title>aslm.log_files.log_functions.find_filename &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -64,9 +64,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">aslm.model.analysis.image_transform.initiate_gpu</li>
+      <li class="breadcrumb-item active">aslm.log_files.log_functions.find_filename</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/aslm.model.analysis.image_transform.initiate_gpu.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/aslm.log_files.log_functions.find_filename.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -74,12 +74,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="aslm-model-analysis-image-transform-initiate-gpu">
-<h1>aslm.model.analysis.image_transform.initiate_gpu<a class="headerlink" href="#aslm-model-analysis-image-transform-initiate-gpu" title="Link to this heading"></a></h1>
+  <section id="aslm-log-files-log-functions-find-filename">
+<h1>aslm.log_files.log_functions.find_filename<a class="headerlink" href="#aslm-log-files-log-functions-find-filename" title="Link to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="aslm.model.analysis.image_transform.initiate_gpu">
-<span class="sig-prename descclassname"><span class="pre">aslm.model.analysis.image_transform.</span></span><span class="sig-name descname"><span class="pre">initiate_gpu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.analysis.image_transform.initiate_gpu" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="aslm.log_files.log_functions.find_filename">
+<span class="sig-prename descclassname"><span class="pre">aslm.log_files.log_functions.</span></span><span class="sig-name descname"><span class="pre">find_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.log_functions.find_filename" title="Link to this definition"></a></dt>
+<dd><p>Check that we’ve met the condition dictionary key == ‘filename’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k</strong> (<em>str</em>) – Dictionary key</p></li>
+<li><p><strong>v</strong> (<em>str</em>) – Dictionary value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if k == ‘filename’, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">find_filename</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 </section>
 

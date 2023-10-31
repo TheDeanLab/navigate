@@ -43,5 +43,9 @@ aslm.controller.configuration\_controller.ConfigurationController
       ~ConfigurationController.stage_flip_flags
       ~ConfigurationController.stage_setting_dict
       ~ConfigurationController.stage_step
+      ~ConfigurationController.configuration
+      ~ConfigurationController.microscope_name
+      ~ConfigurationController.microscope_config
+      ~ConfigurationController.galvo_num
    
    

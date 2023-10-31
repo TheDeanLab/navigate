@@ -23,4 +23,17 @@ aslm.model.dummy.DummyMicroscope
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DummyMicroscope.microscope_name
+      ~DummyMicroscope.configuration
+      ~DummyMicroscope.data_buffer
+      ~DummyMicroscope.stages
+      ~DummyMicroscope.lasers
+      ~DummyMicroscope.galvo
+      ~DummyMicroscope.daq
+      ~DummyMicroscope.current_channel
+   
    

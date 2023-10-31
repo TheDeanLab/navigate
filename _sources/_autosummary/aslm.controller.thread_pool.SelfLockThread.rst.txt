@@ -41,5 +41,6 @@ aslm.controller.thread\_pool.SelfLockThread
       ~SelfLockThread.ident
       ~SelfLockThread.name
       ~SelfLockThread.native_id
+      ~SelfLockThread.selfLock
    
    

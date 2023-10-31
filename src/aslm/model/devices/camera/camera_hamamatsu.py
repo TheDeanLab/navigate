@@ -370,46 +370,47 @@ class HamamatsuOrca(CameraBase):
               out the actual readout_time
               calculated here (i.e. we don't need to do the calculations).
         """
-        h = 9.74436 * 10**-6  # Readout timing constant
-        h = self.camera_controller.get_property_value("readout_time")
-        vn = self.camera_controller.get_property_value("subarray_vsize")
-        sensor_mode = self.camera_controller.get_property_value("sensor_mode")
+        # h = 9.74436 * 10**-6  # Readout timing constant
+        readout_time = self.camera_controller.get_property_value("readout_time")
+        # vn = self.camera_controller.get_property_value("subarray_vsize")
+        # sensor_mode = self.camera_controller.get_property_value("sensor_mode")
         exposure_time = self.camera_controller.get_property_value("exposure_time")
-        trigger_source = self.camera_controller.get_property_value("trigger_source")
-        trigger_active = self.camera_controller.get_property_value("trigger_active")
+        # trigger_source = self.camera_controller.get_property_value("trigger_source")
+        # trigger_active = self.camera_controller.get_property_value("trigger_active")
 
-        if sensor_mode == 1:
-            #  Area sensor mode operation
-            if trigger_source == 1:
-                # Internal Trigger Source
-                max_frame_rate = 1 / ((vn / 2) * h)
-                readout_time = exposure_time - ((vn / 2) * h)
+        # if sensor_mode == 1:
+        #     #  Area sensor mode operation
+        #     if trigger_source == 1:
+        #         # Internal Trigger Source
+        #         max_frame_rate = 1 / ((vn / 2) * h)
+        #         readout_time = exposure_time - ((vn / 2) * h)
 
-            if trigger_active == 1 or 2:
-                #  External Trigger Source
-                #  Edge == 1, Level == 2
-                max_frame_rate = 1 / ((vn / 2) * h + exposure_time + 10 * h)
-                readout_time = exposure_time - ((vn / 2) * h + exposure_time + 10 * h)
+        #     if trigger_active == 1 or 2:
+        #         #  External Trigger Source
+        #         #  Edge == 1, Level == 2
+        #         max_frame_rate = 1 / ((vn / 2) * h + exposure_time + 10 * h)
+        #         readout_time = exposure_time - ((vn / 2) * h + exposure_time + 10 * h)
 
-            if trigger_active == 3:
-                #  External Trigger Source
-                #  Synchronous Readout == 3
-                max_frame_rate = 1 / ((vn / 2) * h + 5 * h)
-                readout_time = exposure_time - ((vn / 2) * h + 5 * h)
+        #     if trigger_active == 3:
+        #         #  External Trigger Source
+        #         #  Synchronous Readout == 3
+        #         max_frame_rate = 1 / ((vn / 2) * h + 5 * h)
+        #         readout_time = exposure_time - ((vn / 2) * h + 5 * h)
 
-            readout_time = h
-            max_frame_rate = 1.0 / (exposure_time + readout_time)
+        #     readout_time = h
+        #     max_frame_rate = 1.0 / (exposure_time + readout_time)
 
-        elif sensor_mode == 12:
-            #  Progressive sensor mode operation
-            max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
-            readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
+        # elif sensor_mode == 12:
+        #     #  Progressive sensor mode operation
+        #     max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
+        #     readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
 
-        else:
-            print(f"Hamamatsu Camera. Sensor mode {sensor_mode} not supported")
-            logger.error(f"Hamamatsu Camera. Sensor mode {sensor_mode} not supported")
-            max_frame_rate = 0
-            readout_time = 0
+        # else:
+        #     print(f"Hamamatsu Camera. Sensor mode {sensor_mode} not supported")
+        #     logger.error(f"Hamamatsu Camera. Sensor mode {sensor_mode} not supported")
+        #     max_frame_rate = 0
+        #     readout_time = 0
+        max_frame_rate = 1 / (exposure_time + readout_time)
         return readout_time, max_frame_rate
 
     def set_exposure_time(self, exposure_time):

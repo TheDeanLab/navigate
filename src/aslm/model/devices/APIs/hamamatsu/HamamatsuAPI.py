@@ -1014,7 +1014,11 @@ class DCAM:
 
         # Cast value to a multiple of step size
         if property_value_step > 0:
-            value = int(value // property_value_step) * property_value_step
+            value = (
+                int((value - property_value_min) // property_value_step)
+                * property_value_step
+                + property_value_min
+            )
 
         if value < property_value_min:
             print(

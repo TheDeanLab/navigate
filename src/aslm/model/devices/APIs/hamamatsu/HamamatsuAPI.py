@@ -721,7 +721,7 @@ class camReg(object):
             cls.numCameras = 0
 
         cls.numCameras += 1
-        print(f"Number of cameras is {cls.numCameras}")
+        # print(f"Number of cameras is {cls.numCameras}")
 
     @classmethod
     def unregCamera(cls):
@@ -750,7 +750,7 @@ class DCAM:
             "subarray_vsize"
         )
 
-        print(f"steps {self.step_image_height} {self.step_image_width}")
+        # print(f"steps {self.step_image_height} {self.step_image_width}")
 
         self._serial_number = self.get_string_value(
             c_int32(int("0x04000102", 0))
@@ -821,9 +821,9 @@ class DCAM:
             False:  if dcamdev_open() returned DCAMERR except SUCCESS.  lasterr()
                     returns the DCAMERR value.
         """
-        print("Opening Camera")
+        # print("Opening Camera")
         if self.__hdcam:
-            print("Camera already open")
+            # print("Camera already open")
             return self.__result(
                 DCAMERR.ALREADYOPENED
             )  # instance is already opened. New Error.
@@ -840,8 +840,8 @@ class DCAM:
         if ret is False:
             print("Camera dev_open failed")
             return False
-        else:
-            print("Camera Open")
+        # else:
+        #     print("Camera Open")
 
         self.__hdcam = c_void_p(paramopen.hdcam)
 

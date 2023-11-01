@@ -108,12 +108,15 @@ class SettingsNotebook(DockableNotebook):
         # Creating Multiposition Table Tab
         self.multiposition_tab = MultiPositionTab(self)
 
+        # TODO: Create a robot tab. @UTD
+
         # Tab list
         tab_list = [
             self.channels_tab,
             self.camera_settings_tab,
             self.stage_control_tab,
             self.multiposition_tab,
+            # @UTD
         ]
         self.set_tablist(tab_list)
 
@@ -122,3 +125,4 @@ class SettingsNotebook(DockableNotebook):
         self.add(self.camera_settings_tab, text="Camera Settings", sticky=tk.NSEW)
         self.add(self.stage_control_tab, text="Stage Control", sticky=tk.NSEW)
         self.add(self.multiposition_tab, text="Multiposition", sticky=tk.NSEW)
+        # @UTD

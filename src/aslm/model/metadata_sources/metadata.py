@@ -99,19 +99,16 @@ class Metadata:
             self.set_stack_order_from_configuration_experiment()
 
     def set_shape_from_configuration_experiment(self) -> None:
-        zoom = self.configuration["experiment"]["MicroscopeState"]["zoom"]
+        state = self.configuration["experiment"]["MicroscopeState"]
+        zoom = state["zoom"]
         pixel_size = float(
             self.configuration["configuration"]["microscopes"][self.active_microscope][
                 "zoom"
             ]["pixel_size"][zoom]
         )
         self.dx, self.dy = pixel_size, pixel_size
-        self.dz = float(
-            abs(self.configuration["experiment"]["MicroscopeState"]["step_size"])
-        )
-        self.dt = float(
-            self.configuration["experiment"]["MicroscopeState"]["timepoint_interval"]
-        )
+        self.dz = float(abs(state["step_size"]))
+        self.dt = float(state["timepoint_interval"])
 
         self.shape_x = int(
             self.configuration["experiment"]["CameraParameters"]["x_pixels"]
@@ -120,46 +117,21 @@ class Metadata:
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
         if (
-            (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "z-stack"
-            )
-            or (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "ConstantVelocityAcquisition"
-            )
-            or (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "customized"
-            )
+            (state["image_mode"] == "z-stack")
+            or (state["image_mode"] == "ConstantVelocityAcquisition")
+            or (state["image_mode"] == "customized")
         ):
-            self.shape_z = int(
-                self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
-            )
-        elif (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "confocal-projection"
-        ):
-            self.shape_z = int(
-                self.configuration["experiment"]["MicroscopeState"]["n_plane"]
-            )
+            self.shape_z = int(state["number_z_steps"])
+        elif state["image_mode"] == "confocal-projection":
+            self.shape_z = int(state["n_plane"])
         else:
             self.shape_z = 1
-        self.shape_t = int(
-            self.configuration["experiment"]["MicroscopeState"]["timepoints"]
-        )
+        self.shape_t = int(state["timepoints"])
         self.shape_c = sum(
-            [
-                v["is_selected"] is True
-                for k, v in self.configuration["experiment"]["MicroscopeState"][
-                    "channels"
-                ].items()
-            ]
+            [v["is_selected"] is True for k, v in state["channels"].items()]
         )
 
-        self._multiposition = self.configuration["experiment"]["MicroscopeState"][
-            "is_multiposition"
-        ]
+        self._multiposition = state["is_multiposition"]
 
         if bool(self._multiposition):
             self.positions = len(self.configuration["experiment"]["MultiPositions"])
@@ -173,16 +145,13 @@ class Metadata:
         # )
 
     def set_stack_order_from_configuration_experiment(self) -> None:
+        state = self.configuration["experiment"]["MicroscopeState"]
         self._per_stack = (
-            self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
-            == "per_stack"
-            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "z-stack"
+            state["stack_cycling_mode"] == "per_stack"
+            and state["image_mode"] == "z-stack"
         ) or (
-            self.configuration["experiment"]["MicroscopeState"]["conpro_cycling_mode"]
-            == "per_stack"
-            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "confocal-projection"
+            state["conpro_cycling_mode"] == "per_stack"
+            and state["image_mode"] == "confocal-projection"
         )
 
     @property

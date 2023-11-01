@@ -196,8 +196,25 @@ class BigDataViewerMetadata(XMLMetadata):
         """Convert stage positions to an affine matrix. Ignore theta, focus for now."""
         arr = np.eye(3, 4)
 
+        # Set the transform positions
+        xp, yp, zp = x / self.dx, y / self.dy, z / self.dz
+
+        # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
+        # if they are both moving along the same physical dimension
+        if self._coupled_axes is not None:
+            for leader, follower in self._coupled_axes:
+                if leader.lower() not in "xyz":
+                    print(
+                        f"Unrecognized coupled axis {leader}. "
+                        "Not gonna do anything with this."
+                    )
+                    continue
+                locals()[f"{leader.lower()}p"] += locals()[
+                    f"{follower.lower()}"
+                ] / getattr(self, f"d{follower.lower()}")
+
         # Translation into pixels
-        arr[:, 3] = [y / self.dy, x / self.dx, z / self.dz]
+        arr[:, 3] = [yp, xp, zp]
 
         # Rotation (theta pivots in the xz plane, about the y axis)
         # sin_theta, cos_theta = np.sin(theta), np.cos(theta)

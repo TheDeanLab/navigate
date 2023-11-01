@@ -61,6 +61,7 @@ class Metadata:
         self._order = "XYCZT"
         self._per_stack = True
         self._multiposition = False
+        self._coupled_axes = None
 
         # shape
         self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = (
@@ -100,12 +101,11 @@ class Metadata:
 
     def set_shape_from_configuration_experiment(self) -> None:
         state = self.configuration["experiment"]["MicroscopeState"]
+        scope = self.configuration["configuration"]["microscopes"][
+            self.active_microscope
+        ]
         zoom = state["zoom"]
-        pixel_size = float(
-            self.configuration["configuration"]["microscopes"][self.active_microscope][
-                "zoom"
-            ]["pixel_size"][zoom]
-        )
+        pixel_size = float(scope["zoom"]["pixel_size"][zoom])
         self.dx, self.dy = pixel_size, pixel_size
         self.dz = float(abs(state["step_size"]))
         self.dt = float(state["timepoint_interval"])
@@ -143,6 +143,29 @@ class Metadata:
         # self.positions = len(
         #     self.configuration["experiment"]["MultiPositions"]
         # )
+
+        # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
+        # if they are both moving along the same physical dimension
+        self._coupled_axes = scope["stage"].get("coupled_axes", None)
+
+        print(f"Coupled axes: {self._coupled_axes} {type(self._coupled_axes)}")
+
+        # safety
+        assert (self._coupled_axes is None) or isinstance(self._coupled_axes, DictProxy)
+
+        # If we have additional axes, create self.d{axis} for each
+        # additional axis, to ensure we keep track of the step size
+        if self._coupled_axes is not None:
+            for leader, follower in self._coupled_axes.items():
+                print(leader, follower)
+                assert leader.lower() in "xyzct"  # safety
+                if getattr(self, f"d{follower.lower()}", None) is None:
+                    print(state.get(f"{follower.lower()}_step_size", 1))
+                    setattr(
+                        self,
+                        f"d{follower.lower()}",
+                        state.get(f"{follower.lower()}_step_size", 1),
+                    )
 
     def set_stack_order_from_configuration_experiment(self) -> None:
         state = self.configuration["experiment"]["MicroscopeState"]

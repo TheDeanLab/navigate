@@ -372,6 +372,18 @@ class TilingWizardController(GUIController):
 
         update_table(self.multipoint_table, table_values)
 
+        # If we have additional axes, create self.d{axis} for each
+        # additional axis, to ensure we keep track of the step size
+        config = self.parent_controller.parent_controller.configuration
+        microscope_name = config["experiment"]["MicroscopeState"]["microscope_name"]
+        scope = config["configuration"]["microscopes"][microscope_name]
+        coupled_axes = scope["stage"].get("coupled_axes", None)
+        if coupled_axes is not None:
+            for follower in coupled_axes.values():
+                config["experiment"]["MicroscopeState"][
+                    f"{follower.lower()}_step_size"
+                ] = self.variables[f"{follower.lower()}_fov"].get()
+
     def update_total_tiles(self):
         """Update the total number of tiles in the tiling wizard
 

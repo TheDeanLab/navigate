@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 #  Standard Imports
+import sys
 import os
 from typing import Optional, Union
 import xml.etree.ElementTree as ET
@@ -199,19 +200,23 @@ class BigDataViewerMetadata(XMLMetadata):
         # Set the transform positions
         xp, yp, zp = x / self.dx, y / self.dy, z / self.dz
 
+
         # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
         # if they are both moving along the same physical dimension
         if self._coupled_axes is not None:
-            for leader, follower in self._coupled_axes:
+            for leader, follower in self._coupled_axes.items():
                 if leader.lower() not in "xyz":
                     print(
                         f"Unrecognized coupled axis {leader}. "
                         "Not gonna do anything with this."
                     )
                     continue
-                locals()[f"{leader.lower()}p"] += locals()[
-                    f"{follower.lower()}"
-                ] / getattr(self, f"d{follower.lower()}")
+                elif leader.lower() == "x":
+                    xp += float(locals()[f"{follower.lower()}"]) / self.dx
+                elif leader.lower() == "y":
+                    yp += float(locals()[f"{follower.lower()}"]) / self.dy
+                elif leader.lower() == "z":
+                    zp += float(locals()[f"{follower.lower()}"]) / self.dz
 
         # Translation into pixels
         arr[:, 3] = [yp, xp, zp]

@@ -118,7 +118,7 @@ def test_update_fov(tiling_wizard_controller, axis):
     import random
     from aslm.tools.multipos_table_tools import sign
 
-    if axis == "x":
+    if axis == "y":
         tiling_wizard_controller.cam_settings_widgets["FOV_X"].set(
             int(random.random() * 1000)
         )
@@ -130,7 +130,7 @@ def test_update_fov(tiling_wizard_controller, axis):
             float(tiling_wizard_controller.variables["x_end"].get())
             - float(tiling_wizard_controller.variables["x_start"].get())
         )
-    elif axis == "y":
+    elif axis == "x":
         tiling_wizard_controller.cam_settings_widgets["FOV_Y"].set(
             int(random.random() * 1000)
         )

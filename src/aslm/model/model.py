@@ -153,7 +153,7 @@ class Model:
         self.total_image_count = None
         self.current_exposure_time = 0  # milliseconds
         self.pre_exposure_time = 0  # milliseconds
-        self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
+        self.camera_wait_iterations = 100  # Thread waits this * 500 ms before it ends
         self.start_time = None
         self.data_buffer = None
         self.img_width = int(
@@ -755,7 +755,7 @@ class Model:
         data_func : object
             Function to run on the acquired data.
         """
-
+        print("RUN DATA PROCESS STARTED")
         wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
@@ -765,6 +765,7 @@ class Model:
 
         while not self.stop_acquisition:
             if self.ask_to_pause_data_thread:
+                print("ASK TO PAUSE THREAD TRUE IF STATEMENT")
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
@@ -774,9 +775,11 @@ class Model:
             )
             # if there is at least one frame available
             if not frame_ids:
+                print(f"ASLM Model - Waiting {wait_num}")
                 self.logger.info(f"ASLM Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
+                    print(f"Camera time out wait_num = {wait_num}")
                     # Camera timeout, abort acquisition.
                     break
                 continue
@@ -936,6 +939,7 @@ class Model:
         if hasattr(self, "signal_container"):
             print("hasstributes signal container")
             self.signal_container.run()
+            print("signal container running")
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
@@ -956,14 +960,18 @@ class Model:
             print("DAQ Trigger Sent")
             self.logger.info("DAQ Trigger Sent")
             self.active_microscope.daq.run_acquisition()
+            print("DAQ trigger running finished")
         except:  # noqa
             print("DAQ trigger except")
             self.active_microscope.daq.stop_acquisition()
+            print("stop acquisiton except")
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}",
                 self.active_microscope.current_exposure_time,
             )
+            print("prepare acquisition except")
             self.active_microscope.daq.run_acquisition()
+            print("run acquisition except")
         self.active_microscope.turn_off_lasers()
         print("lasers turned off")
 

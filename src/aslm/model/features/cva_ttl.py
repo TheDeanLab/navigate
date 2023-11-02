@@ -127,10 +127,7 @@ class CVATTL:
         self.current_channel_in_list = 0
         print(f"current channel = {self.channels}")
 
-        # self.received_frames = 0
-        # self.end_channel = False
         self.end_acquisition = False
-        # self.recieved_frames_v2 = 0
         self.received_frames = 0
         self.end_signal_temp = 0
 
@@ -240,7 +237,7 @@ class CVATTL:
         print(f"Current Position = {pos}")
         print(f"Start position = {self.start_position*1000}")
         # print(f"Stage position before scan = {pos}")
-        buffer2 = 5
+        buffer2 = 10
         buffer_multiplier = 16
         if buffer2 >= desired_sampling_um*buffer_multiplier:
             buffer = buffer2
@@ -270,12 +267,25 @@ class CVATTL:
         buffer_new = 0.1
         print(f"abs(posw - self.stage_position_before_scan) = {abs(posw - self.stage_position_before_scan)}")
         # if abs(posw - self.start_position*1000):
+        # if abs(posw - self.stage_position_before_scan)>tol:
+        #     print("current position greater than start position before")
+        #     print("PAUSING DATA THREAD IF STATEMENT")
+        #     self.model.pause_data_thread()
+        #     print("data thread paused")
+        #     print("DATA THREAD PAUSED IN CHANNEL")
+
+
+        # print("after return zero statement")
+        tol = 0.5
         if abs(posw - self.stage_position_before_scan)>tol:
-            print("current position greater than start position before")
-            print("PAUSING DATA THREAD IF STATEMENT")
+            print(f"STAGE POSITION AWAY FROM START POSITION POS = {posw} start position before scan = {self.stage_position_before_scan}")
             self.model.pause_data_thread()
-            print("data thread paused")
-            print("DATA THREAD PAUSED IN CHANNEL")
+            print("DATA THREAD PAUSED")
+            while abs(posw - self.stage_position_before_scan)>tol:
+                self.asi_stage.move_axis_absolute(self.axis, self.stage_position_before_scan, wait_until_done=True)
+                print("stage moved to start position")
+                posw = self.asi_stage.get_axis_position(self.axis)
+                print(f"current position = {posw}, start position before scan = {self.stage_position_before_scan}")
 
                 # print("PAUSING DATA THREAD IF STATEMENT IN CHANNEL")
                 # self.model.pause_data_thread
@@ -480,21 +490,8 @@ class CVATTL:
 
         # self.model.active_microscope.current_channel = 0
         
+
         
-        # print("stage moving to stop position at speed")
-        # posw = self.asi_stage.get_axis_position(self.axis)
-        # print(f"before scan to stop Current Position = {posw}")
-        # print(f"Start position = {self.start_position*1000}")
-        # self.asi_stage.move_axis_absolute(self.axis, self.stop_position * 1000.0, wait_until_done=True)
-        # posw = self.asi_stage.get_axis_position(self.axis)
-        # print(f"stop position Current Position = {posw}")
-        # print(f"stop position = {self.stop_position*1000}")
-        # print("stage moving to stop position at speed")
-        # self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
-        # posw = self.asi_stage.get_axis_position(self.axis)
-        # print(f"start position after scan to start Current Position = {posw}")
-        # print(f"Start position = {self.start_position*1000}")
-        # Configure the encoder to operate in constant velocity mode.
         self.asi_stage.scanr(
             start_position_mm=self.start_position,
             end_position_mm=self.stop_position,
@@ -513,7 +510,7 @@ class CVATTL:
 
         # Start the daq acquisition.  Basically places all of the waveforms in a ready
         # state so that they will be run one time when the trigger is received.
-        tol2 = desired_sampling_um * 8
+        tol2 = desired_sampling_um * 10
         self.tol2 = tol2
 
         # pos2 = self.asi_stage.get_axis_position(self.axis)
@@ -537,31 +534,41 @@ class CVATTL:
         
 
         # Start the stage scan.  Also get this functionality into the ASI stage class.
+        pos2 = self.asi_stage.get_axis_position(self.axis)
+        print(f"data thread resumed pos2 = {pos2}, start position before scan = {self.stage_position_before_scan}")
+        self.model.resume_data_thread()
+        
         self.asi_stage.start_scan(self.axis)
         self.asi_stage.stop_scan()
         print("scan started")
+
+        # while abs(pos2 - self.start_position_um)>0.1:
+        #         pos2 = self.asi_stage.get_axis_position(self.axis)
+        #         print(f"current position = {pos2}, start position of scan = {self.start_position_um}")
+        #         logger.info(f"current position = {pos2}, start position of scan = {self.start_position_um}")  
+ 
     
 
-        pos2 = self.asi_stage.get_axis_position(self.axis)
+        # pos2 = self.asi_stage.get_axis_position(self.axis)
 
-        if abs(pos2-self.start_position_um)<=tol2:
-            print("data thread resumed")
-            self.model.resume_data_thread()
+        # if abs(pos2-self.start_position_um)<=tol2:
+        #     print("data thread resumed")
+        #     self.model.resume_data_thread()
 
-        if abs(pos2-self.start_position_um)>tol2:
-            print("away from target")
-            while abs(pos2-self.start_position_um)>tol2:
-                print("in while loop")
-                pos2 = self.asi_stage.get_axis_position(self.axis)
-                print(f"pos2 = {pos2}")
+        # if abs(pos2-self.start_position_um)>tol2:
+        #     print("away from target")
+        #     while abs(pos2-self.start_position_um)>tol2:
+        #         print("in while loop")
+        #         pos2 = self.asi_stage.get_axis_position(self.axis)
+        #         print(f"pos2 = {pos2}")
         
-        if abs(pos2-self.start_position_um)<=tol2:
-            print("data thread resumed")
-            self.model.resume_data_thread()
+        # if abs(pos2-self.start_position_um)<=tol2:
+        #     print("data thread resumed")
+        #     self.model.resume_data_thread()
 
 
-        self.asi_stage.wait_until_complete(self.axis)
-        print("Stage wait until complete completed after scan")
+        # self.asi_stage.wait_until_complete(self.axis)
+        # print("Stage wait until complete completed after scan")
 
 
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
@@ -748,6 +755,15 @@ class CVATTL:
                 return True            
             
             print("after return zero statement")
+            tol = 0.5
+            if abs(posw - self.stage_position_before_scan)>tol:
+                print(f"STAGE POSITION AWAY FROM START POSITION POS = {posw} start position before scan = {self.stage_position_before_scan}")
+                while abs(posw - self.stage_position_before_scan)>tol:
+                    self.asi_stage.move_axis_absolute(self.axis, self.stage_position_before_scan, wait_until_done=True)
+                    print("stage moved to start position")
+                    posw = self.asi_stage.get_axis_position(self.axis)
+                    print(f"current position = {posw}, start position before scan = {self.stage_position_before_scan}")
+
 
             # self.asi_stage.set_speed(percent=self.percent_speed)
             # print("original stage speed set")
@@ -807,13 +823,26 @@ class CVATTL:
             self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
             print(f"external trigger set to {self.model.active_microscope.daq.external_trigger}")
 
+            #self.model.resume_data_thread()
+            print("DATA THREAD RESUMED IN CHANNEL")
+
+            posw = self.asi_stage.get_axis_position(self.axis)
+            print(f"current position = {posw}, start position before scan = {self.stage_position_before_scan}") 
+
             self.asi_stage.start_scan(self.axis)
             self.asi_stage.stop_scan()
-            print("update channel scan started")
+            print("UPDATE CHANNEL SCAN STARTED")
 
+            while abs(posw - self.start_position_um)>0.1:
+                posw = self.asi_stage.get_axis_position(self.axis)
+                print(f"current position = {posw}, start position of scan = {self.start_position_um}")
+                logger.info(f"current position = {posw}, start position of scan = {self.start_position_um}")  
+ 
+            # self.model.resume_data_thread()
+            # print("DATA THREAD RESUMED IN CHANNEL")
             
-            tol2 = self.tol2
-            pos2 = self.asi_stage.get_axis_position(self.axis)
+            # tol2 = self.tol2
+            # pos2 = self.asi_stage.get_axis_position(self.axis)
 
             # if abs(pos2-self.start_position_um)<=tol2:
             #     print("data thread resumed")
@@ -829,26 +858,28 @@ class CVATTL:
             # if abs(pos2-self.start_position_um)<=tol2:
             #     print("data thread resumed")
             #     self.model.resume_data_thread()
-
-            print("scan started")
-            self.asi_stage.start_scan(self.axis)
-            self.asi_stage.stop_scan()
-            print("update channel scan started")
-
-            if abs(pos2-self.start_position_um)<=tol2:
-                print("data thread resumed before while")
-                self.model.resume_data_thread()
-
-            if abs(pos2-self.start_position_um)>tol2:
-                print("away from target channel")
-                while abs(pos2-self.start_position_um)>tol2:
-                    print("in while loop")
-                    pos2 = self.asi_stage.get_axis_position(self.axis)
-                    print(f"pos2 = {pos2}")
             
+            
+            # self.model.resume_data_thread()
+            # print("update channel data thread resumed")
+            # print(f"initial position = {pos2}")
+            # print("scan started")
+           
+
             # if abs(pos2-self.start_position_um)<=tol2:
-            print("data thread resumed after while")
-            self.model.resume_data_thread()
+            #     print("data thread resumed before while")
+            #     self.model.resume_data_thread()
+
+            # if abs(pos2-self.start_position_um)>tol2:
+            #     print("away from target channel")
+            #     while abs(pos2-self.start_position_um)>tol2:
+            #         print("in while loop")
+            #         pos2 = self.asi_stage.get_axis_position(self.axis)
+            #         print(f"pos2 = {pos2}")
+            
+            # # if abs(pos2-self.start_position_um)<=tol2:
+            # print("data thread resumed after while")
+            # self.model.resume_data_thread()
 
             # self.model.resume_data_thread()
             # print("")
@@ -942,7 +973,7 @@ class CVATTL:
         time_per_channel = (expected_channel * self.current_sweep_time)/60
         time_remaining_total = round(((self.total_frames - self.received_frames) * self.current_sweep_time)/(60),2)
         time_remaining_per_channel = round(((expected_channel - self.received_frames) * self.current_sweep_time)/(60),2)
-        print(f"Received: {self.received_frames} Per Channel: {expected_channel} Expected Total: {self.total_frames}")
+        print(f"Received: {self.received_frames} Per Channel: {expected_channel} Expected Total: {self.total_frames} Channel = {self.end_signal_temp + 1} of {self.channels}")
         print(f"time remaining per channel min: {time_remaining_per_channel}, time remaining total min: {time_remaining_total}")
         logger.info(f"Received: {self.received_frames} Per Channel: {expected_channel} Expected Total: {self.total_frames}")
         # print(f"Received V2: {self.received_frames_v2} Expected: {self.expected_frames}")

@@ -494,8 +494,11 @@ class NIDAQ(DAQBase):
 
         try:
             print("try camera trigger task wait until done timeout = 10000")
+            print(f"camera trigger task = {self.camera_trigger_task}")
+            print(f"test after camera trigger task")
             self.camera_trigger_task.wait_until_done(timeout=10000)
             print("try camera trigger task timeout done")
+            print(f"tasks in {self.analog_output_tasks.values()}")
             for task in self.analog_output_tasks.values():
                 if self.trigger_mode == "self-trigger":
                     print("if mode self trigger task wait until done")
@@ -514,7 +517,7 @@ class NIDAQ(DAQBase):
             print(traceback.format_exc())
             pass
         try:
-            print("camera trigger task try statement")
+            print("try to stop camera trigger task")
             self.camera_trigger_task.stop()
             print("camera trigger task stopped")
             if self.trigger_mode == "self-trigger":
@@ -552,9 +555,11 @@ class NIDAQ(DAQBase):
                 print("camera trigger task closed")
 
             if self.trigger_mode == "external-trigger":
-                "print stop camera task external trigger"
-                if self.camera_trigger_task:
-                    "external trigger camera task exists"
+                print("stop camera task external trigger")
+                if self.camera_trigger_task == None:
+                    print("self.camera_trigger_task = None")
+                if self.camera_trigger_task != None:
+                    print("external trigger camera task exists")
                     self.camera_trigger_task.stop()
                     print("camera trigger task stopped")
                     self.camera_trigger_task.close()

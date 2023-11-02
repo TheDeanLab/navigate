@@ -166,10 +166,10 @@ class TilingWizardController(GUIController):
         # Trace cam_settings FOV to catch user changes
         # FOV change handled in update_fov
         self.cam_settings_widgets["FOV_X"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov("x")
+            "write", lambda *args: self.update_fov("y")
         )
         self.cam_settings_widgets["FOV_Y"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov("y")
+            "write", lambda *args: self.update_fov("x")
         )
         self.stack_acq_widgets["abs_z_start"].get_variable().trace_add(
             "write", lambda *args: self.update_fov("z")
@@ -584,13 +584,13 @@ class TilingWizardController(GUIController):
 
         for ax in axis:
             # Calculate signed fov
-            if ax == "x":
-                x = float(self.cam_settings_widgets["FOV_X"].get()) * sign(
+            if ax == "y":
+                y = float(self.cam_settings_widgets["FOV_X"].get()) * sign(
                     float(self.variables["x_end"].get())
                     - float(self.variables["x_start"].get())
                 )
-            elif ax == "y":
-                y = float(self.cam_settings_widgets["FOV_Y"].get()) * sign(
+            elif ax == "x":
+                x = float(self.cam_settings_widgets["FOV_Y"].get()) * sign(
                     float(self.variables["y_end"].get())
                     - float(self.variables["y_start"].get())
                 )

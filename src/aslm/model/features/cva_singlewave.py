@@ -439,11 +439,11 @@ class CVASINGLEWAVE:
             self.received_frames = 0
             print(f"channel after in update channel = {self.channels}")
             print(f"channel before in update channel list = {self.current_channel_in_list}")
-            # self.model.active_microscope.prepare_next_channel()
-            # pos1 = self.asi_stage.get_axis_position(self.axis)
+            self.model.active_microscope.prepare_next_channel()
+            pos1 = self.asi_stage.get_axis_position(self.axis)
             self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
-            # pos2 = self.asi_stage.get_axis_position(self.axis)
-            # print(f"Initial Position: {pos1} Current Position: {pos2} Start Position: {self.start_position*1000}")
+            pos2 = self.asi_stage.get_axis_position(self.axis)
+            print(f"Initial Position: {pos1} Current Position: {pos2} Start Position: {self.start_position*1000}")
             # self.model.active_microscope.current_channel = 0
             print(f"current channel = {self.model.active_microscope.current_channel}")
 

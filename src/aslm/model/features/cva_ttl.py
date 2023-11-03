@@ -75,6 +75,7 @@ class CVATTL:
         self.config_table = {
             "signal": {
                 "init": self.pre_func_signal,
+                "main": self.main_func_signal,
                 "end": self.end_func_signal,
                 "cleanup": self.cleanup,
             },
@@ -245,7 +246,7 @@ class CVATTL:
         # elif buffer2 < desired_sampling_um*buffer_multiplier:
         #     buffer = desired_sampling_um*buffer_multiplier
 
-        buffer = 50 # um
+        buffer = 10 # um
 
         print(f"stage buffer = {buffer}")
         stage_position_before_scan = ((self.start_position*1000)-buffer)
@@ -542,14 +543,14 @@ class CVATTL:
         print(f"data thread resumed pos2 = {pos2}, start position before scan = {self.stage_position_before_scan}")
         self.model.resume_data_thread()
         
-        self.asi_stage.start_scan(self.axis)
-        self.asi_stage.stop_scan()
-        print("scan started")
+        # self.asi_stage.start_scan(self.axis)
+        # self.asi_stage.stop_scan()
+        # print("scan started")
 
-        while abs(pos2 - self.start_position_um)>0.1:
-                pos2 = self.asi_stage.get_axis_position(self.axis)
-                print(f"current position = {pos2}, start position of scan = {self.start_position_um}")
-                logger.info(f"current position = {pos2}, start position of scan = {self.start_position_um}")  
+        # while abs(pos2 - self.stop_position_um)>0.1:
+        #         pos2 = self.asi_stage.get_axis_position(self.axis)
+        #         print(f"current position = {pos2}, start position of scan = {self.start_position_um}")
+        #         logger.info(f"current position = {pos2}, start position of scan = {self.start_position_um}")  
  
     
 
@@ -605,6 +606,20 @@ class CVATTL:
        
        # acquired_frame_num = self.model.active_microscope.run_data_process()
         # print(f"frames run data process init = {acquired_frame_num}") 
+    def main_func_signal(self):
+        print("main function started")
+        self.asi_stage.start_scan(self.axis)
+        self.asi_stage.stop_scan()
+        print("scan started")
+        pos2 = self.asi_stage.get_axis_position(self.axis)
+        print(f"current position pos2 = {pos2}, start position before scan = {self.stage_position_before_scan}")
+
+        # while abs(pos2 - self.stop_position_um)>0.1:
+        #         pos2 = self.asi_stage.get_axis_position(self.axis)
+        #         print(f"current position = {pos2}, start position of scan = {self.start_position_um}")
+        #         logger.info(f"current position = {pos2}, start position of scan = {self.start_position_um}")  
+ 
+
         
 
     def end_func_signal(self):

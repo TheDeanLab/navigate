@@ -213,9 +213,7 @@ class AutofocusPopup:
     def get_widgets(self):
         """Returns the dictionary of input widgets.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

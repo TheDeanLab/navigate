@@ -143,9 +143,6 @@ class Hover(object):
         text    : str
             Text to be displayed when hover is shown as a description
 
-        Returns
-        -------
-        None
         """
         self.description = text
 
@@ -168,9 +165,6 @@ class Hover(object):
         event   : event
             The event instance
 
-        Returns
-        -------
-        None
         """
         if self.type == "free" and self.description is not None:
             self.type = "description"
@@ -184,9 +178,6 @@ class Hover(object):
         event   : event
             The event instance
 
-        Returns
-        -------
-        None
         """
         if self.type == "description":
             self.hidetip()
@@ -198,19 +189,13 @@ class Hover(object):
         ----------
         newtype : str
             The new state of the hover
-
-        Returns
-        -------
-        None
         """
         self.type = newtype.lower()
 
     def get_type(self):
         """Getter for the type
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -226,10 +211,6 @@ class Hover(object):
         ----------
         text    :str
             The text to be displayed on the hover
-
-        Returns
-        -------
-        None
         """
         self.text = text
         if self.tipwindow or not self.text:
@@ -271,25 +252,12 @@ class Hover(object):
         ----------
         error    : str
             Error message to be displayed
-
-        Returns
-        -------
-        None
         """
         self.type = "error"
         self.showtip(text)
 
     def hidetip(self):
-        """Hides the hover and resets type
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Hides the hover and resets type."""
         self.type = "free"
         tw = self.tipwindow
         self.tipwindow = None

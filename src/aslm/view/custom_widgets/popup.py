@@ -145,13 +145,9 @@ class PopUp(tk.Toplevel):
 
         This function is used to display the popup window as a top-level window.
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
+
         """
         self.deiconify()
         self.attributes("-topmost", 1)
@@ -162,13 +158,9 @@ class PopUp(tk.Toplevel):
         This function is used to release control back to the main window from the
         popup window.
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
+
         """
         self.grab_release()  # Ensures input can be anywhere now
         self.destroy()
@@ -180,9 +172,7 @@ class PopUp(tk.Toplevel):
         This function is used to return the parent frame for any widgets you add to the
         popup window.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

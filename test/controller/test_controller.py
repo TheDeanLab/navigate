@@ -64,3 +64,30 @@ def test_update_buffer(controller):
     controller.update_buffer()
     assert controller.img_width == camera_parameters["img_x_pixels"]
     assert controller.img_height == camera_parameters["img_y_pixels"]
+
+
+def test_change_microscope(controller):
+    microscopes = controller.configuration["configuration"]["microscopes"]
+    for microscope_name in microscopes.keys():
+        zoom = microscopes[microscope_name]["zoom"]["position"].keys()[0]
+        controller.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
+        controller.change_microscope(microscope_name)
+        assert (
+            controller.configuration["experiment"]["MicroscopeState"]["microscope_name"]
+            == microscope_name
+        )
+
+
+def test_populate_experiment_setting(controller):
+    controller.populate_experiment_setting(in_initialize=False)
+    assert True
+
+
+def test_prepare_acquire_data(controller):
+    controller.prepare_acquire_data()
+    assert True
+
+
+def test_execute(controller):
+    controller.execute("acquire", "single")
+    assert True

@@ -47,6 +47,40 @@ class HamamatsuOrca(CameraBase):
     """HamamatsuOrca camera class.
 
     This is by default for an Orca Flash 4.0, Fusion, and Lightning cameras.
+
+    **Configuration**::
+
+        hardware:
+          camera:
+            -
+                type: HamamatsuOrca
+                serial_number: 302158
+            -
+                type: HamamatsuOrca
+                serial_number: 302159
+        ...
+
+        microscopes:
+          microscope_name:
+            camera:
+              hardware:
+                name: camera
+                type: HamamatsuOrca
+                serial_number: 302352
+              lightsheet_rolling_shutter_width: 608
+              defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
+              delay_percent: 10
+              pulse_percent: 1
+              x_pixels_step: 4
+              y_pixels_step: 4
+              x_pixels_min: 4
+              y_pixels_min: 4
+              exposure_time_range:
+                min: 1
+                max: 1000
+                step: 1
+              flip_x: False
+              flip_y: False
     """
 
     def __init__(self, microscope_name, device_connection, configuration):

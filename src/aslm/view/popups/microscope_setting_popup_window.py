@@ -154,10 +154,6 @@ class MicroscopeSettingPopupWindow:
         ----------
         microscope_info : dict
             Dictionary of microscope information
-
-        Returns
-        -------
-        None
         """
         c = 0
         for microscope_name in microscope_info.keys():
@@ -198,9 +194,7 @@ class MicroscopeSettingPopupWindow:
 
         The key is the widget name, value is the variable associated.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -218,9 +212,7 @@ class MicroscopeSettingPopupWindow:
 
         The key is the widget name, value is the LabelInput class that has all the data.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -235,9 +227,7 @@ class MicroscopeSettingPopupWindow:
 
         The key is the button name, value is the button.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

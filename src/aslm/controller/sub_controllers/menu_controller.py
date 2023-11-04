@@ -493,10 +493,6 @@ class MenuController(GUIController):
         args:
             could be tkinter event(Key press event)
 
-        Returns
-        -------
-        None
-
         """
         save_data = (
             self.view.settings.channels_tab.stack_timepoint_frame.save_data.get()
@@ -722,16 +718,7 @@ class MenuController(GUIController):
         self.parent_controller.waveform_popup_controller = waveform_popup_controller
 
     def popup_microscope_setting(self):
-        """Pop up the microscope setting window.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Pop up the microscope setting window."""
         if hasattr(self.parent_controller, "microscope_popup_controller"):
             self.parent_controller.microscope_popup_controller.showup()
             return

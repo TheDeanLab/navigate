@@ -228,9 +228,7 @@ class ImageWriter:
         frame_ids : int
             Index into self.model.data_buffer.
 
-        Returns
-        -------
-        None
+
         """
 
         for idx in frame_ids:
@@ -346,13 +344,9 @@ class ImageWriter:
     def close(self):
         """Close the data source we are writing to.
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
+
 
         Examples
         --------

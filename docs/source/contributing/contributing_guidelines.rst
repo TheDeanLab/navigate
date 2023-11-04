@@ -29,12 +29,17 @@ General principles
 Coding style
 --------------
 
-- We follow the `PEP8 code style guide <https://peps.python.org/pep-0008/>`_.
-  Most importantly, all class names are written in ``CamelCase`` and all
-  variable names are ``lowercase_and_separated_by_underscores``.
-- All classes and functions should have docstrings written in
-  `Numpydoc style <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
-- We leverage pre-commit workflows to enforce consistent code formatting.
+We follow the `PEP8 code style guide <https://peps.python.org/pep-0008/>`_.
+Most importantly, all class names are written in ``CamelCase`` and all
+variable names are ``lowercase_and_separated_by_underscores``.
+
+All classes and functions should have docstrings written in
+`Numpydoc style <https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy
+.html>`_ in a sphinx-compatible format. This allows us to automatically generate
+documentation for the code base. Example documentation can be found :doc:`here
+<sphinx_numpydoc>`
+
+We leverage pre-commit workflows to enforce consistent code formatting.
 Installation is optional. Use this only if it helps you. You could alternatively install Ruff (linter) and
 Black (code formatter) extensions in VSCode and have them do the work there. Whatever
 To enable pre-commits on your machine, follow the directions below::

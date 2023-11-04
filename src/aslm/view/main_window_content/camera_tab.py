@@ -258,9 +258,7 @@ class FramerateInfo(ttk.LabelFrame):
 
         The key is the widget name, value is the variable associated.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -279,9 +277,7 @@ class FramerateInfo(ttk.LabelFrame):
         This function returns the dictionary that holds the widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

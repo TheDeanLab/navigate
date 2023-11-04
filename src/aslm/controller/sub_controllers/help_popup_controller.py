@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,10 +30,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard library imports
+import logging
+
+# Third party imports
+
+# Local application imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
 
-
-import logging
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -40,19 +45,25 @@ logger = logging.getLogger(p)
 
 
 class HelpPopupController(GUIController):
+    """Controller for the help popup window"""
+
     def __init__(self, view, parent_controller):
+        """Initialize the help popup controller
+
+        Parameters:
+        ----------
+        view : HelpPopupView
+            The view for the help popup window
+        parent_controller : ASLMController
+            The parent controller for the help popup window
+
+        """
         super().__init__(view, parent_controller)
-
+        #: dict: The widgets for the help popup window
         self.widgets = self.view.get_widgets()
-
         self.view.popup.protocol("WM_DELETE_WINDOW", self.view.popup.dismiss)
 
     def showup(self):
-        """Show the help popup window
-
-        Example:
-        --------
-        >>> help_popup_controller.showup()
-        """
+        """Show the help popup window."""
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)

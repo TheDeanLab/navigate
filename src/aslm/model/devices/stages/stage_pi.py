@@ -126,9 +126,7 @@ class PIStage(StageBase):
     def __del__(self):
         """Delete the PI Connection
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------
@@ -255,12 +253,7 @@ class PIStage(StageBase):
         return True
 
     def stop(self):
-        """Stop all stage movement abruptly.
-
-        Returns
-        -------
-        None
-        """
+        """Stop all stage movement abruptly."""
         try:
             self.pi_device.STP(noraise=True)
         except GCSError as e:

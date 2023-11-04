@@ -174,14 +174,24 @@ class OMETIFFMetadata(XMLMetadata):
             ome_dict["Image"]["Pixels"]["Plane"] = []
             for i in range(self.shape_c):
                 view_idx = i * self.shape_z
+                view = views[view_idx]
+                x, y, z = view["x"], view["y"], view["z"]
+                # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
+                # if they are both moving along the same physical dimension
+                if self._coupled_axes is not None:
+                    for leader, follower in self._coupled_axes:
+                        view[leader] += view[follower] / float(getattr(
+                            self, f"d{follower.lower()}"
+                        ))
+
                 d = {
                     "DeltaT": dt,
                     "TheT": "0",
                     "TheC": str(i),
                     "TheZ": "0",
-                    "PositionX": views[view_idx]["x"],
-                    "PositionY": views[view_idx]["y"],
-                    "PositionZ": views[view_idx]["z"],
+                    "PositionX": x,
+                    "PositionY": y,
+                    "PositionZ": z,
                 }
                 ome_dict["Image"]["Pixels"]["Plane"].append(d)
 

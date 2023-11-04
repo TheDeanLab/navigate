@@ -73,12 +73,10 @@ def compute_tiles_from_bounding_box(
     f_tiles,
     f_length,
     f_overlap,
+    f_track_with_z=False,
 ):
     """Create a grid of ROIs to image based on start position, number of tiles, and
     signed FOV length in each dimension.
-
-    Focus currently tracks with z, since focus is z-dependent.
-    TODO: Change this behavior? Make it a flag?
 
     Parameters
     ----------
@@ -122,6 +120,8 @@ def compute_tiles_from_bounding_box(
         Signed length of the FOV along focus dimension.
     f_overlap : float
         Fractional overlap of ROIs along focus dimension.
+    f_track_with_z : bool
+        Make focus track with z/assume focus is z-dependent.
 
     Returns
     -------
@@ -142,9 +142,6 @@ def compute_tiles_from_bounding_box(
     z_step = z_length * (1 - z_overlap)
     theta_step = theta_length * (1 - theta_overlap)
     f_step = f_length * (1 - f_overlap)
-    # Although we assume focus FOVs have no thickness, we include
-    # overlap to adjust for z-ramping. We have no excuse for the
-    # theta overlap.
 
     # grid out each dimension starting from (x_start, y_start, z_start) in steps
     def dim_vector(start, n_tiles, step):
@@ -158,19 +155,22 @@ def compute_tiles_from_bounding_box(
     thetas = dim_vector(
         theta_start, theta_tiles, theta_step
     )  # we assume theta FOVs have no thickness
-    fs = dim_vector(f_start, f_tiles, f_step)  # we assume focus FOVs have no thickness
+    fs = dim_vector(f_start, f_tiles, f_step)
 
-    # grid out the 4D space...
-    x, y, z, t = np.meshgrid(xs, ys, zs, thetas)
+    if f_track_with_z:
+        # grid out the 4D space...
+        x, y, z, t = np.meshgrid(xs, ys, zs, thetas)
 
-    # we need to make f vary the same as z, for now, since focus changes with z
-    lz = len(z.ravel())
-    f = np.repeat(fs, np.ceil(lz / len(fs)))[
-        :lz
-    ]  # This only works if len(fs) = len(zs)
-    # TODO: Don't clip f. Practically fine for now.
+        # we need to make f vary the same as z, for now, since focus changes with z
+        lz = len(z.ravel())
+        f = np.repeat(fs, np.ceil(lz / len(fs)))[
+            :lz
+        ]  # This only works if len(fs) = len(zs)
+        # TODO: Don't clip f. Practically fine for now.
+    else:
+        x, y, z, t, f = np.meshgrid(xs, ys, zs, thetas, fs)
 
-    return np.vstack([x.ravel(), y.ravel(), z.ravel(), t.ravel(), f]).T
+    return np.vstack([x.ravel(), y.ravel(), z.ravel(), t.ravel(), f.ravel()]).T
 
 
 def calc_num_tiles(dist, overlap, roi_length):
@@ -201,7 +201,9 @@ def calc_num_tiles(dist, overlap, roi_length):
         num_tiles = 1
     else:
         ov = overlap * roi_length  # True overlap in distance units
-        num_tiles = ceil(abs(dist - ov) / abs(roi_length - ov))
+        num_tiles = ceil(
+            (dist - ov) / (roi_length - ov)
+        )  # ceil(abs(dist - ov) / abs(roi_length - ov))
 
     return int(num_tiles)
 

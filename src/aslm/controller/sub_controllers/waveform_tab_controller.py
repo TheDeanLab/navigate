@@ -47,43 +47,22 @@ logger = logging.getLogger(p)
 
 
 class WaveformTabController(GUIController):
-    """Controller for the waveform tab
-
-    Parameters
-    ----------
-    view : aslm.view.waveform_tab.WaveformTab
-        View for the waveform tab
-    parent_controller : aslm.controller.main_controller.MainController
-        Parent controller for the waveform tab
-
-    Attributes
-    ----------
-    waveform_dict : dict
-        Dictionary of waveforms
-    sample_rate : int
-        Sample rate of the waveforms
-    remote_focus_waveform : int
-        Remote focus waveform
-    laser_ao_waveforms : int
-        Laser analog output waveforms
-
-    Methods
-    -------
-    update_sample_rate(*args)
-        Update the sample rate in the waveform settings
-    update_waveform_template(*args)
-        Update waveform_template selection
-    update_waveforms(waveform_dict, sample_rate)
-        Update the waveforms in the waveform tab
-    initialize_plots()
-        Initialize the plots in the waveform tab
-    plot_waveforms(event)
-        Plot the waveforms in the waveform tab
-    """
+    """Controller for the waveform tab"""
 
     def __init__(self, view, parent_controller=None):
+        """Initialize the waveform tab controller
+
+        Parameters
+        ----------
+        view : aslm.view.waveform_tab.WaveformTab
+            View for the waveform tab
+        parent_controller : aslm.controller.main_controller.MainController
+            Parent controller for the waveform tab
+        """
         super().__init__(view, parent_controller)
+        #: dict: Dictionary of remote focus waveforms
         self.remote_focus_waveform = 0
+        #: dict: Dictionary of laser waveforms
         self.laser_ao_waveforms = 0
 
         self.initialize_plots()
@@ -117,8 +96,6 @@ class WaveformTabController(GUIController):
         *args : tuple
             Unused
 
-
-
         Examples
         --------
         >>> self.update_sample_rate()
@@ -133,6 +110,7 @@ class WaveformTabController(GUIController):
         self.parent_controller.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"] = int(sample_rate)
+        #: int: Sample rate of the waveforms
         self.sample_rate = int(sample_rate)
 
     def update_waveform_template(self, *args):
@@ -142,8 +120,6 @@ class WaveformTabController(GUIController):
         ----------
         *args : tuple
             Unused
-
-
 
         Examples
         --------
@@ -166,13 +142,11 @@ class WaveformTabController(GUIController):
         sample_rate : int
             Sample rate of the waveforms
 
-
-
         Examples
         --------
         >>> self.update_waveforms(waveform_dict, sample_rate)
         """
-
+        #: dict: Dictionary of waveforms
         self.waveform_dict = waveform_dict
         self.sample_rate = sample_rate
 
@@ -182,15 +156,10 @@ class WaveformTabController(GUIController):
     def initialize_plots(self):
         """Initialize the plots in the waveform tab
 
-
-
-
-
         Examples
         --------
         >>> self.initialize_plots()
         """
-
         self.view.plot_etl = self.view.fig.add_subplot(211)
         self.view.plot_galvo = self.view.fig.add_subplot(212)
         self.view.canvas.get_tk_widget().grid(
@@ -205,8 +174,6 @@ class WaveformTabController(GUIController):
         event : Tkinter event
             Tkinter event
 
-
-
         Examples
         --------
         >>> self.plot_waveforms(event)
@@ -215,7 +182,7 @@ class WaveformTabController(GUIController):
 
         try:
             current_tab = parent_notebook.select()
-        except Exception:
+        except Exception:  # noqa
             return
 
         if (
@@ -309,5 +276,16 @@ class WaveformTabController(GUIController):
         self.view.canvas.draw_idle()
 
     def set_mode(self, mode):
+        """Set the mode of the waveform tab
+
+        Parameters
+        ----------
+        mode : str
+            Mode to set the waveform tab to
+
+        Examples
+        --------
+        >>> self.set_mode(mode)
+        """
         state = "normal" if mode == "stop" else "disabled"
         self.view.waveform_settings.inputs["waveform_template"].widget["state"] = state

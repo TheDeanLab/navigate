@@ -61,75 +61,35 @@ class TilingWizardController(GUIController):
     values for the respective axis when pressed and display in popup
     Number of images we need to acquire with our desired
     percent overlap is calculated and then displayed in third column
-
-
-    Parameters
-    ----------
-    view : object
-        GUI element containing widgets and variables to control.
-        Likely tk.Toplevel-derived. In this case tiling_wizard_popup.py
-    parent_controller : channels_tab_controller
-        The controller that creates the popup/this controller.
-
-    Attributes
-    ----------
-    widgets : dict
-        Dictionary of widgets in the view
-    buttons : dict
-        Dictionary of buttons in the view
-    variables : dict
-        Dictionary of variables in the view
-    _axes : list
-        List of axes to iterate over
-    _percent_overlap : float
-        Percent overlap of tiles
-    _fov : dict
-        Dictionary of fov values for each axis
-    cam_settings_widgets : dict
-        Dictionary of widgets in the camera settings tab
-    stack_acq_widgets : dict
-        Dictionary of widgets in the stack acquisition tab
-    stage_position_vars : dict
-        Dictionary of variables in the stage control tab
-    multipoint_table : ttk.Treeview
-        Treeview of multipoint table in the multipoint tab
-
-    Methods
-    -------
-    calculate_distance()
-        Calculate the distance between start and end positions for each axis
-    calculate_tiles()
-        Calculate the number of tiles for each axis
-    update_table()
-        Update the multipoint table with the new tiling parameters
-    update_fov()
-        Update the fov values when the user changes the camera settings
-    position_handler()
-        Handler for the set start/end position buttons
-    set_table()
-        Set the multipoint table to the tiling parameters
-    showup()
-        Show the popup
-    update_overlap()
-        Update the percent overlap when the user changes the value
-    update_total_tiles()
-        Update the total number of tiles when the user changes the value
-
     """
 
     def __init__(self, view, parent_controller):
+        """Initialize Tiling Wizard Controller
+
+        Parameters
+        ----------
+        view : object
+            GUI element containing widgets and variables to control.
+            Likely tk.Toplevel-derived. In this case tiling_wizard_popup.py
+        parent_controller : channels_tab_controller
+            The controller that creates the popup/this controller.
+
+        """
         super().__init__(view, parent_controller)
 
         # Getting widgets and buttons and vars of widgets
+        #: dict: Dictionary of widgets in the view
         self.widgets = self.view.get_widgets()
+        #: dict: Dictionary of buttons in the view
         self.buttons = self.view.get_buttons()
+        #: dict: Dictionary of variables in the view
         self.variables = self.view.get_variables()
-
+        #: int: Default percent overlap between tiles
         self._percent_overlap = 10.0  # default to 10% overlap
 
         # Init widgets to zero
+        #: list: List of axes to iterate over
         self._axes = ["x", "y", "z", "f"]
-        # self._fov = dict([(ax, 0.0) for ax in self._axes])
         self.variables["percent_overlap"].set(self._percent_overlap)
         self.variables["total_tiles"].set(1)
         for ax in self._axes:
@@ -185,8 +145,6 @@ class TilingWizardController(GUIController):
         )
 
         # Calculate distances
-        # TODO: For reasons that make no sense to me at all,
-        #  these can't go in a for ax in self._axes loop?
         self.variables["x_start"].trace_add(
             "write", lambda *args: self.calculate_distance("x")
         )
@@ -236,8 +194,6 @@ class TilingWizardController(GUIController):
         self.variables["f_end"].trace_add("write", lambda *args: self.update_fov("f"))
 
         # Calculating Number of Tiles traces
-        # TODO: For reasons that make no sense to me at all,
-        #  these can't go in a for ax in self._axes loop?
         self.variables["x_dist"].trace_add(
             "write", lambda *args: self.calculate_tiles("x")
         )
@@ -290,15 +246,6 @@ class TilingWizardController(GUIController):
         pandas dataframe which is then set as the new table data.
         The table is then redrawn.
 
-        Parameters
-        ----------
-        self : object
-            Tiling Wizard Controller instance
-
-        Returns
-        -------
-        None
-
         Examples
         --------
         >>> self.set_table()
@@ -336,6 +283,20 @@ class TilingWizardController(GUIController):
 
         # for consistency, always go from low to high
         def sort_vars(a, b):
+            """Sort two variables from low to high
+
+            Parameters
+            ----------
+            a : float
+                First variable
+            b : float
+                Second variable
+
+            Returns
+            -------
+            a, b : float
+                Sorted variables
+            """
             if a > b:
                 return b, a
             return a, b
@@ -390,15 +351,6 @@ class TilingWizardController(GUIController):
         Sums the tiles for each axis in the tiling wizard.
         Will update when any axis has a tile amount change.
 
-        Parameters
-        ----------
-        self : object
-            Tiling Wizard Controller instance
-
-        Returns
-        -------
-        None
-
         Examples
         --------
         >>> self.update_total_tiles()
@@ -420,14 +372,8 @@ class TilingWizardController(GUIController):
 
         Parameters
         ----------
-        self : object
-            Tiling Wizard Controller instance
         axis : str
             x, y, z, f axis of stage to calculate.
-
-        Returns
-        -------
-        None
 
         Examples
         --------
@@ -475,14 +421,8 @@ class TilingWizardController(GUIController):
 
         Parameters
         ----------
-        self : object
-            Tiling Wizard Controller instance
         axis : str
             x, y, z axis of stage to calculate
-
-        Returns
-        -------
-        None
 
         Examples
         --------
@@ -500,15 +440,6 @@ class TilingWizardController(GUIController):
         Updates percent overlay when a user changes the widget in the popup.
         This value is used for backend calculations.
         The number of tiles will then be recalculated
-
-        Parameters
-        ----------
-        self : object
-            Tiling Wizard Controller instance
-
-        Returns
-        -------
-        None
 
         Examples
         --------
@@ -530,8 +461,6 @@ class TilingWizardController(GUIController):
 
         Parameters
         ----------
-        self : object
-            Tiling Wizard Controller instance
         axis : str
             x, y, z, f axis that corresponds to stage axis
         start_end : str
@@ -563,14 +492,8 @@ class TilingWizardController(GUIController):
 
         Parameters
         ----------
-        self : object
-            Tiling Wizard Controller instance
-        ax : str
+        axis : str
             Axis
-
-        Returns
-        -------
-        None
 
         Examples
         --------
@@ -614,16 +537,7 @@ class TilingWizardController(GUIController):
     def showup(self):
         """Show the tiling wizard
 
-        Brings popup window to front
-
-        Parameters
-        ----------
-        self : object
-            Tiling Wizard Controller instance
-
-        Returns
-        -------
-        None
+        Brings popup window to front of screen
 
         Examples
         --------

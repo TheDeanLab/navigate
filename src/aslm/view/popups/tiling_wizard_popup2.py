@@ -47,38 +47,21 @@ logger = logging.getLogger(p)
 
 
 class TilingWizardPopup:
-    """Popup for tiling parameters in View.
-
-    Parameters
-    ----------
-    root : object
-        GUI root
-    *args : object
-        Arguments
-    **kwargs : object
-        Keyword arguments
-
-    Attributes
-    ----------
-    popup : object
-        Popup window
-    inputs : dict
-        Dictionary of inputs
-    buttons : dict
-        Dictionary of buttons
-
-    Methods
-    -------
-    get_variables()
-        Returns the variables
-    get_buttons()
-        Returns the buttons
-    get_widgets()
-        Returns the widgets
-
-    """
+    """Popup for tiling parameters in View."""
 
     def __init__(self, root, *args, **kwargs):
+        """Initialize the popup
+
+        Parameters
+        ----------
+        root : tk.Tk
+            The root Tk instance
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+        """
+        #: tk.TopLevel: The popup window
         self.popup = PopUp(
             root,
             "Multi-Position Tiling Wizard",
@@ -101,9 +84,10 @@ class TilingWizardPopup:
             self.popup.content_frame.columnconfigure(col, pad=5, weight=1)
         for row in range(nrow):
             self.popup.content_frame.rowconfigure(row, pad=5, weight=1)
-
-        self.inputs = {}  # The GUI elements used for input, mostly ttk.Frames
-        self.buttons = {}  # Action buttons for the inputs, a dictionary of ttk.Buttons
+        #: dict: The GUI elements used for input, mostly ttk.Frames
+        self.inputs = {}
+        #: dict: The GUI elements used for buttons, mostly ttk.Buttons
+        self.buttons = {}
 
         # Add one row per axis
         for row, ax in enumerate(axes):
@@ -238,10 +222,6 @@ class TilingWizardPopup:
         This function returns a dictionary of all the variables that are tied to each
         widget name. The key is the widget name, value is the variable associated.
 
-        Parameters
-        ----------
-        None
-
         Returns
         -------
         variables : dict
@@ -255,10 +235,6 @@ class TilingWizardPopup:
         This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
 
-        Parameters
-        ----------
-        None
-
         Returns
         -------
         self.inputs : dict
@@ -271,10 +247,6 @@ class TilingWizardPopup:
 
         This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
-
-        Parameters
-        ----------
-        None
 
         Returns
         -------

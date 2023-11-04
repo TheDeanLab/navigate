@@ -246,7 +246,7 @@ class CVATTL:
         # elif buffer2 < desired_sampling_um*buffer_multiplier:
         #     buffer = desired_sampling_um*buffer_multiplier
 
-        buffer = 10 # um
+        buffer = 5 # um
 
         print(f"stage buffer = {buffer}")
         stage_position_before_scan = ((self.start_position*1000)-buffer)
@@ -405,6 +405,23 @@ class CVATTL:
                 #     print(f"Current Position Before Scan = {stage_position_before_scan_v2}, Current Position Before Scan: {posw}, Start position = {self.start_position*1000}")
                 #     logger.info(f"Current Position Before Scan = {posw},Start position = {self.start_position*1000}")
                 #     counter2 =+ 1
+        self.step_size_mm = step_size_mm
+        # self.asi_stage.scanr(
+        #     start_position_mm=self.start_position,
+        #     end_position_mm=self.stop_position,
+        #     enc_divide=self.step_size_mm,
+        #     # round(
+        #     #     float(
+        #     #         self.model.configuration[
+        #     #             "experiment"]["MicroscopeState"][
+        #     #             "start_focus"])) / 45397.6,
+        #     axis=self.axis
+        #     )
+        
+        # print("scan r initalized update channel")
+        
+        # self.asi_stage.wait_until_complete(self.axis)
+        # print("Stage wait until complete completed after scanr")
 
         
             
@@ -493,22 +510,22 @@ class CVATTL:
         print(f"external trigger set to {self.model.active_microscope.daq.external_trigger}")
 
         # self.model.active_microscope.current_channel = 0
-        self.step_size_mm = step_size_mm
+        
         
 
         
-        self.asi_stage.scanr(
-            start_position_mm=self.start_position,
-            end_position_mm=self.stop_position,
-            enc_divide=step_size_mm,
-            # round(
-            #     float(
-            #         self.model.configuration[
-            #             "experiment"]["MicroscopeState"][
-            #             "start_focus"])) / 45397.6,
-            axis=self.axis
-        )
-        print("scan r initalized")
+        # self.asi_stage.scanr(
+        #     start_position_mm=self.start_position,
+        #     end_position_mm=self.stop_position,
+        #     enc_divide=step_size_mm,
+        #     # round(
+        #     #     float(
+        #     #         self.model.configuration[
+        #     #             "experiment"]["MicroscopeState"][
+        #     #             "start_focus"])) / 45397.6,
+        #     axis=self.axis
+        # )
+        # print("scan r initalized")
 
         self.asi_stage.wait_until_complete(self.axis)
         print("Stage wait until complete completed after scanr")
@@ -542,6 +559,7 @@ class CVATTL:
         pos2 = self.asi_stage.get_axis_position(self.axis)
         print(f"data thread resumed pos2 = {pos2}, start position before scan = {self.stage_position_before_scan}")
         self.model.resume_data_thread()
+        print("DATA THREAD RESUMED")
         
         # self.asi_stage.start_scan(self.axis)
         # self.asi_stage.stop_scan()
@@ -608,11 +626,42 @@ class CVATTL:
         # print(f"frames run data process init = {acquired_frame_num}") 
     def main_func_signal(self):
         print("main function started")
+        self.asi_stage.scanr(
+            start_position_mm=self.start_position,
+            end_position_mm=self.stop_position,
+            enc_divide=self.step_size_mm,
+            # round(
+            #     float(
+            #         self.model.configuration[
+            #             "experiment"]["MicroscopeState"][
+            #             "start_focus"])) / 45397.6,
+            axis=self.axis
+            )
+        
+        self.asi_stage.wait_until_complete(self.axis)
+        print("Stage wait until complete completed after scanr")
+        # print("scan r initalized update channel")
+        self.asi_stage.set_speed(percent=self.percent_speed)
+        print("original stage speed set")
+        # self.asi_stage.wait_until_complete(self.axis)
+        # print("Stage wait until complete completed after scanr")
+
+
+        posw = self.asi_stage.get_axis_position(self.axis)
+        print(f"current pos = {posw}, start position = {self.start_position_um}")
+        self.asi_stage.wait_until_complete(self.axis)
         self.asi_stage.start_scan(self.axis)
-        self.asi_stage.stop_scan()
+        # self.asi_stage.stop_scan()
         print("scan started")
-        pos2 = self.asi_stage.get_axis_position(self.axis)
-        print(f"current position pos2 = {pos2}, start position before scan = {self.stage_position_before_scan}")
+
+        # while abs(posw - self.stop_position_um)>0.1:
+        #         posw = self.asi_stage.get_axis_position(self.axis)
+        #         print(f"current position = {posw}, start position of scan = {self.start_position_um}")
+        #         logger.info(f"current position = {posw}, start position of scan = {self.start_position_um}")  
+        #         time.sleep(0.1)
+ 
+        # pos2 = self.asi_stage.get_axis_position(self.axis)
+        # print(f"current position pos2 = {pos2}, start position before scan = {self.stage_position_before_scan}")
 
         # while abs(pos2 - self.stop_position_um)>0.1:
         #         pos2 = self.asi_stage.get_axis_position(self.axis)
@@ -849,27 +898,27 @@ class CVATTL:
             print(f"current position = {posw}, start position before scan = {self.stage_position_before_scan}") 
 
             
-            self.asi_stage.scanr(
-            start_position_mm=self.start_position,
-            end_position_mm=self.stop_position,
-            enc_divide=self.step_size_mm,
-            # round(
-            #     float(
-            #         self.model.configuration[
-            #             "experiment"]["MicroscopeState"][
-            #             "start_focus"])) / 45397.6,
-            axis=self.axis
-            )
-            print("scan r initalized update channel")
+            # self.asi_stage.scanr(
+            # start_position_mm=self.start_position,
+            # end_position_mm=self.stop_position,
+            # enc_divide=self.step_size_mm,
+            # # round(
+            # #     float(
+            # #         self.model.configuration[
+            # #             "experiment"]["MicroscopeState"][
+            # #             "start_focus"])) / 45397.6,
+            # axis=self.axis
+            # )
+            # print("scan r initalized update channel")
             
-            self.asi_stage.start_scan(self.axis)
-            self.asi_stage.stop_scan()
-            print("UPDATE CHANNEL SCAN STARTED")
+            # self.asi_stage.start_scan(self.axis)
+            # self.asi_stage.stop_scan()
+            # print("UPDATE CHANNEL SCAN STARTED")
 
-            while abs(posw - self.start_position_um)>0.1:
-                posw = self.asi_stage.get_axis_position(self.axis)
-                print(f"current position = {posw}, start position of scan = {self.start_position_um}")
-                logger.info(f"current position = {posw}, start position of scan = {self.start_position_um}")  
+            # while abs(posw - self.start_position_um)>0.1:
+            #     posw = self.asi_stage.get_axis_position(self.axis)
+            #     print(f"current position = {posw}, start position of scan = {self.start_position_um}")
+            #     logger.info(f"current position = {posw}, start position of scan = {self.start_position_um}")  
  
             # self.model.resume_data_thread()
             # print("DATA THREAD RESUMED IN CHANNEL")
@@ -917,8 +966,9 @@ class CVATTL:
             # self.model.resume_data_thread()
             # print("")
 
-            self.asi_stage.wait_until_complete(self.axis)
-            print("Stage wait until complete completed after update scan")
+            # self.asi_stage.wait_until_complete(self.axis)
+            # print("Stage wait until complete completed after update scan")
+           
             # self.asi_stage.stop_scan()
             # self.pre_func_signal()
             # print("pre function signal initiated")

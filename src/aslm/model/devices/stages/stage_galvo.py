@@ -190,19 +190,10 @@ class GalvoNIStage(StageBase):
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
 
-        if self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "z-stack":
-            # If we are in the z-stack mode, we should move the stage to the start position
-            volts = eval(
-                self.volts_per_micron,
-                {"x": self.configuration["experiment"]["MicroscopeState"]["start_position"]},
-            )
-            # start_position
-        else:
-            # If we are in the live mode, we want to keep the stage where we are.
-            volts = eval(
-                self.volts_per_micron,
-                {"x": self.configuration["experiment"]["StageParameters"][self.axes[0]]},
-            )
+        volts = eval(
+            self.volts_per_micron,
+            {"x": self.configuration["experiment"]["StageParameters"][self.axes[0]]},
+        )
 
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...

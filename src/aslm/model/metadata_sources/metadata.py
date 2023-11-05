@@ -165,6 +165,13 @@ class Metadata:
             print(f"METADATA shape expand frames = {testvar}")
             print(f"METADATA zstep shape = {testvar2}")    
             self.shape_z = int(testvar2)
+        elif (self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVACONPRO"):
+            testvar = self.configuration["waveform_templates"]["CVACONPRO"]["expand"]
+            testvar2 = self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
+            print(f"METADATA shape expand frames = {testvar}")
+            print(f"METADATA zstep shape = {testvar2}")    
+            self.shape_z = int(testvar2)    
         else:
             self.shape_z = 1
         self.shape_t = int(
@@ -211,6 +218,10 @@ class Metadata:
             == "per_stack"
             and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
             == "CVATTL"
+        ) or (self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
+            == "per_stack"
+            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "CVACONPRO"
         )
 
     @property

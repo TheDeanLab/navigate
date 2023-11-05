@@ -30,10 +30,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
+# Standard Library Imports
 import re
 import tkinter as Tk
 import logging
+
+# Third Party Imports
+
+# Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -75,7 +79,7 @@ def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
     """
 
     def check_range_spinbox(value):
-        """
+        """Check range for spinbox widget
 
         This function used to validate whether the value is inside specified range.
         This function used to validate spinbox widget.
@@ -104,7 +108,7 @@ def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
         return valid
 
     def check_range_entry(value):
-        """This function used to validate whether the value is inside specified range.
+        """Validate whether the value is inside specified range.
 
         Used to validate entry widget.
 
@@ -143,7 +147,7 @@ def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
     match_string = REGEX_DICT[float_or_integer + is_negative]
 
     def check_float(value):
-        """This function used to validate whether the value is float or integer.
+        """Validate whether the value is float or integer.
 
         Function binds to validatecommand
 
@@ -169,7 +173,7 @@ def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
         return valid
 
     def show_error_func(is_entry=False):
-        """This function used to show error message.
+        """Show error message.
 
         Function generate functions that bind to invalidcommand
 
@@ -189,6 +193,7 @@ def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
         """
 
         def func():
+            """Show error message for spinbox widget."""
             widget.configure(foreground="red")
             if not re.match(match_string, widget.get()):
                 widget.set(0)
@@ -201,6 +206,7 @@ def validate_wrapper(widget, negative=False, is_entry=False, is_integer=False):
                 widget.set(widget["to"])
 
         def entry_func():
+            """Show error message for entry widget."""
             widget.configure(foreground="red")
             if not re.match(match_string, widget.get()):
                 widget.delete(0, Tk.END)

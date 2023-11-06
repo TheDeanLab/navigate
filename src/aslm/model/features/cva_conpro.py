@@ -49,6 +49,7 @@ class CVACONPRO:
     # def __init__(self, model, axis='z', saving_flag=False, saving_dir="cva"):
     def __init__(self, model, axis='z', saving_flag=False, saving_dir="cva"):
         self.model = model
+        print("***CVA CONPRO init function****")
 
         # Update stage position
         # self.model.active_microscope.ask_stage_for_position = True
@@ -119,7 +120,7 @@ class CVACONPRO:
         # self.model.active_microscope.daq.number_triggers = 0
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
         
-        print("**** CVA TTL STARTED pre signal func****") 
+        print("**** CVA CONPRO STARTED pre signal func****") 
         print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
         print("self.asi stage")

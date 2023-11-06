@@ -141,7 +141,7 @@ class AcquireBarController(GUIController):
             number_of_slices = microscope_state["n_plane"]
         elif mode == "z-stack" or "ConstantVelocityAcquisition" or "CVATTL" or "CVACONPRO" or "CVASINGLEWAVE" or "CVACONT" or "CVACONPROMULTICHANNEL":
             number_of_slices = microscope_state["number_z_steps"]
-            print(f"number of slices = {number_of_slices}")
+            # print(f"number of slices = {number_of_slices}")
 
         top_anticipated_images = number_of_slices
         bottom_anticipated_images = (

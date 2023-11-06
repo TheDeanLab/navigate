@@ -507,7 +507,7 @@ class Model:
             if self.imaging_mode == "projection":
                 self.move_stage({"z_abs": 0})
 
-            if self.imaging_mode == "live" or self.imaging_mode == "projection" or self.imaging_mode == "CVATTL":
+            if self.imaging_mode == "live" or self.imaging_mode == "projection" or self.imaging_mode == "CVATTL" or self.imaging_mode == "CVACONPRO":
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:
                 self.signal_thread = threading.Thread(target=self.run_acquisition)
@@ -846,6 +846,7 @@ class Model:
 
         This function is called when user resumes the acquisition.
         """
+        print("RESUME DATA THREAD INITIATED")
 
         self.ask_to_pause_data_thread = False
         self.pause_data_event.set()

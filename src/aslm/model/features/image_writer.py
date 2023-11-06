@@ -220,14 +220,6 @@ class ImageWriter:
         -------
         None
         """
-        self.num_of_slices = self.model.configuration["experiment"]["MicroscopeState"][
-            "number_z_steps"
-        ]
-        print(f"number of slices = {self.num_of_slices}")
-
-        self.data_source.set_metadata_from_configuration_experiment(
-            self.model.configuration
-        )
 
         for idx in frame_ids:
             # Identify channel, z, time, and position indices

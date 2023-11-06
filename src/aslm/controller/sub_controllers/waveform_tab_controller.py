@@ -215,7 +215,12 @@ class WaveformTabController(GUIController):
             if galvo_waveform is None:
                 galvo_waveform = []
 
-            camera_waveform = self.waveform_dict["camera_waveform"][k]
+            # rescale camera waveform from [0, 1] to match remote_focus_waveform
+            max_cam = np.max(remote_focus_waveform)
+            min_cam = np.min(remote_focus_waveform)
+            camera_waveform = (max_cam - min_cam) * self.waveform_dict[
+                "camera_waveform"
+            ][k] + min_cam
             waveform_repeat_total_num = repeat_num * expand_num
 
             self.view.plot_etl.plot(

@@ -72,7 +72,7 @@ def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_del
         exposure, camera_delay)
 
     """
-    amplitude = 5
+    amplitude = 1
 
     # get an integer number of samples
     samples = int(np.multiply(sample_rate, sweep_time))
@@ -179,7 +179,7 @@ def remote_focus_ramp(
 
     Examples
     --------
-    >>> etl_ramp = tunable_lens_ramp(sample_rate, exposure_time, sweep_time, etl_delay,
+    >>> etl_ramp = remote_focus_ramp(sample_rate, exposure_time, sweep_time, etl_delay,
         camera_delay, fall, amplitude, offset)
 
     """
@@ -403,3 +403,99 @@ def smooth_waveform(waveform, percent_smoothing=10):
     )
 
     return smoothed_waveform
+
+
+# From https://mathematica.stackexchange.com/questions/38293/make-a-differentiable-smooth-sawtooth-waveform
+def trig_triangle(x, delta=0.01):
+    """Triangle wave expressed as trignometric formulas.
+
+    Parameters
+    ----------
+    x : np.array
+        Samples
+    delta : float
+        Standard deviation of smoothing.
+
+    Returns
+    -------
+    Triangle wave with optional smoothing.
+
+    """
+    return 1 - 2 * np.arccos((1 - delta) * np.sin(2 * np.pi * x)) / np.pi
+
+
+def trig_square(x, delta=0.01):
+    """Square wave expressed as trignometric formulas.
+
+    Parameters
+    ----------
+    x : np.array
+        Samples
+    delta : float
+        Standard deviation of smoothing.
+
+    Returns
+    -------
+    Square wave with optional smoothing.
+
+    """
+    return 2 * np.arctan(np.sin(2 * np.pi * x) / delta) / np.pi
+
+
+def trig_sawtooth(x, delta=0.01):
+    """Sawtooth wave expressed as trignometric formulas.
+
+    Parameters
+    ----------
+    x : np.array
+        Samples
+    delta : float
+        Standard deviation of smoothing.
+
+    Returns
+    -------
+    Sawtooth wave with optional smoothing.
+
+    """
+    return (1 + trig_triangle((2 * x - 1) / 4, delta) * trig_square(x / 2, delta)) / 2
+
+
+def trig_remote_focus_ramp(
+    sample_rate=100000,
+    exposure_time=0.2,
+    sweep_time=0.24,
+    remote_focus_delay=7.5,
+    camera_delay=10,
+    amplitude=1,
+    offset=0,
+    delta=0.01,
+):
+
+    samples = int(np.ceil(sample_rate * sweep_time * (1 + delta)))
+
+    # create an array just containing the negative amplitude voltage:
+    delay_samples = int(remote_focus_delay * exposure_time * sample_rate / 100)
+    delay_array = np.zeros(delay_samples) + offset - amplitude
+
+    trig_samples = int(
+        np.ceil(
+            (exposure_time + exposure_time * (camera_delay - remote_focus_delay) / 100)
+            * sample_rate
+            * (1 + delta)
+        )
+    )
+    trig_smooth_ramp = (
+        2 * trig_sawtooth(np.linspace(0, 1, trig_samples), delta=delta) - 1
+    )
+    scale = amplitude / np.max(trig_smooth_ramp)
+
+    sawtooth_array = scale * trig_smooth_ramp - offset
+
+    extra_samples = int(samples - (delay_samples + trig_samples))
+    if extra_samples > 0:
+        extra_array = np.zeros(extra_samples) + offset - amplitude
+        waveform = np.hstack([delay_array, sawtooth_array, extra_array])
+    else:
+        waveform = np.hstack([delay_array, sawtooth_array])
+
+    return waveform

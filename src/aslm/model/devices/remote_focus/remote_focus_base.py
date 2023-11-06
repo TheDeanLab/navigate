@@ -36,7 +36,11 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.waveforms import remote_focus_ramp, smooth_waveform
+from aslm.model.waveforms import (
+    remote_focus_ramp,
+    smooth_waveform,
+    trig_remote_focus_ramp,
+)
 
 # # Logger Setup
 p = __name__.split(".")[1]
@@ -106,6 +110,8 @@ class RemoteFocusBase:
 
         #: dict: Waveform dictionary.
         self.waveform_dict = {}
+
+        self.waveform = self.device_config.get("waveform", "remote_focus_ramp")
 
     def __del__(self):
         """Destructor"""
@@ -215,24 +221,36 @@ class RemoteFocusBase:
                 if offset is not None:
                     remote_focus_offset += offset
 
-                # Calculate the Waveforms
-                self.waveform_dict[channel_key] = remote_focus_ramp(
-                    sample_rate=self.sample_rate,
-                    exposure_time=exposure_time,
-                    sweep_time=self.sweep_time,
-                    remote_focus_delay=self.remote_focus_delay,
-                    camera_delay=self.camera_delay_percent,
-                    fall=self.remote_focus_ramp_falling,
-                    amplitude=remote_focus_amplitude,
-                    offset=remote_focus_offset,
-                )
-
-                # Smooth the Waveform if specified
-                if self.percent_smoothing > 0:
-                    self.waveform_dict[channel_key] = smooth_waveform(
-                        waveform=self.waveform_dict[channel_key],
-                        percent_smoothing=self.percent_smoothing,
+                if self.waveform == "trig_remote_focus_ramp":
+                    self.waveform_dict[channel_key] = trig_remote_focus_ramp(
+                        sample_rate=self.sample_rate,
+                        exposure_time=exposure_time,
+                        sweep_time=self.sweep_time,
+                        remote_focus_delay=self.remote_focus_delay,
+                        camera_delay=self.camera_delay_percent,
+                        amplitude=remote_focus_amplitude,
+                        offset=remote_focus_offset,
+                        delta=(self.percent_smoothing / 100),
                     )[: self.samples]
+                else:
+                    # Calculate the Waveforms
+                    self.waveform_dict[channel_key] = remote_focus_ramp(
+                        sample_rate=self.sample_rate,
+                        exposure_time=exposure_time,
+                        sweep_time=self.sweep_time,
+                        remote_focus_delay=self.remote_focus_delay,
+                        camera_delay=self.camera_delay_percent,
+                        fall=self.remote_focus_ramp_falling,
+                        amplitude=remote_focus_amplitude,
+                        offset=remote_focus_offset,
+                    )
+
+                    # Smooth the Waveform if specified
+                    if self.percent_smoothing > 0:
+                        self.waveform_dict[channel_key] = smooth_waveform(
+                            waveform=self.waveform_dict[channel_key],
+                            percent_smoothing=self.percent_smoothing,
+                        )[: self.samples]
 
                 # Clip any values outside of the hardware limits
                 self.waveform_dict[channel_key][

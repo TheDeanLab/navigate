@@ -38,7 +38,7 @@ import platform
 
 # Local Imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.view.custom_widgets.validation import ValidatedEntry
+from aslm.view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -46,22 +46,40 @@ logger = logging.getLogger(p)
 
 
 class KeystrokeController(GUIController):
+    """Keystroke controller"""
+
     def __init__(self, main_view, parent_controller):
+        """Initialize the keystroke controller
+
+        Parameters
+        ----------
+        main_view : MainView
+            Main view
+        parent_controller : MainController
+            Main controller
+        """
         super().__init__(main_view, parent_controller)
 
         # References to all sub frames
+        #: tk.Frame: Camera View
         self.camera_view = main_view.camera_waveform.camera_tab  # Camera View
 
         # Multiposition Table
+        #: MultipositionTable: Multiposition Table
         self.multi_table = main_view.settings.multiposition_tab.multipoint_list
 
         # Main view
+        #: tk.Frame: Main view
         self.main_view = main_view.root
+        #: tk.Notebook: Main tabs
         self.main_tabs = main_view.settings
 
         # Controllers for all sub frames
+        #: CameraViewController: Camera View Controller
         self.camera_controller = parent_controller.camera_view_controller
+        #: MultipositionTableController: Multiposition Table Controller
         self.multi_controller = parent_controller.multiposition_tab_controller
+        #: StageController: Stage Controller
         self.stage_controller = parent_controller.stage_controller
 
         """Keystrokes for Camera View"""
@@ -91,17 +109,16 @@ class KeystrokeController(GUIController):
             )
 
         """Keystrokes for MultiTable"""
+        #: MultiPositionTable: Multiposition Table
         self.mp_table = self.multi_table.pt
         self.mp_table.rowheader.bind(
             "<Double-Button-1>", self.multi_controller.handle_double_click
         )
 
         """Keystrokes for Main Window"""
-        self.main_view.bind("w", self.stage_controller.stage_key_press)
-        self.main_view.bind("s", self.stage_controller.stage_key_press)
-        self.main_view.bind("a", self.stage_controller.stage_key_press)
-        self.main_view.bind("d", self.stage_controller.stage_key_press)
-        self.main_view.bind("<Control-KeyRelease-j>", self.stage_controller.joystick_button_handler)
+        self.main_view.bind(
+            "<Control-KeyRelease-j>", self.stage_controller.joystick_button_handler
+        )
         self.main_view.bind("<Control-Key-1>", self.switch_tab)
         self.main_view.bind("<Control-Key-2>", self.switch_tab)
         self.main_view.bind("<Control-Key-3>", self.switch_tab)
@@ -116,10 +133,6 @@ class KeystrokeController(GUIController):
         ----------
         event : tkinter event
             Mouse wheel event
-
-        Returns
-        -------
-        None
 
         Example
         -------
@@ -147,10 +160,6 @@ class KeystrokeController(GUIController):
         event : tkinter event
             Mouse wheel event
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> self.camera_view.canvas.bind("<Leave>",
@@ -174,10 +183,6 @@ class KeystrokeController(GUIController):
         event : tkinter event
             Tab key event
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> self.main_view.bind("<Control-Key-1>", self.switch_tab)
@@ -195,16 +200,12 @@ class KeystrokeController(GUIController):
         event : tkinter event
             Undo key event
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> self.main_view.bind_all('<Control-Key-z>', self.widget_undo)
         """
-        if isinstance(
-            event.widget, ValidatedEntry
+        if isinstance(event.widget, ValidatedEntry) or isinstance(
+            event.widget, ValidatedSpinbox
         ):  # Add all widgets that you want to be able to undo here
             event.widget.undo(event)
 
@@ -216,16 +217,12 @@ class KeystrokeController(GUIController):
         event : tkinter event
             Redo key event
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> self.main_view.bind_all('<Control-Key-y>', self.widget_redo)
         """
 
-        if isinstance(
-            event.widget, ValidatedEntry
+        if isinstance(event.widget, ValidatedEntry) or isinstance(
+            event.widget, ValidatedSpinbox
         ):  # Add all widgets that you want to be able to undo here
             event.widget.redo(event)

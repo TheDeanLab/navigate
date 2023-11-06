@@ -43,98 +43,79 @@ logger = logging.getLogger(p)
 
 
 class StageBase:
-    """StageBase Parent Class
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocessing.managers.DictProxy
-        Global configuration of the microscope
-
-    Attributes
-    -----------
-    x_pos : float
-        True x position
-    y_pos : float
-        True y position
-    z_pos : float
-        True z position
-    f_pos : float
-        True focus position
-    theta_pos : float
-        True rotation position
-    x_max : float
-        Max x position
-    y_max : float
-        Max y position
-    z_max : float
-        Max y position
-    f_max : float
-        Max focus position
-    theta_max : float
-        Max rotation position
-    x_min : float
-        Min x position
-    y_min : float
-        Min y position
-    z_min : float
-        Min y position
-    f_min : float
-        Min focus positoin
-    theta_min : float
-        Min rotation position
-
-    Methods
-    -------
-    get_position_dict()
-        Returns a dictionary with the hardware stage positions.
-    get_abs_position()
-        Makes sure that the move is within the min and max stage limits.
-    verify_abs_position()
-        Return a dictionary with moving positions within the min and max stage limits
-    stop()
-        Emergency halt of stage operation.
-
-    """
+    """Stage Parent Class"""
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the stage.
 
-        stage = configuration["configuration"]["microscopes"][microscope_name]["stage"]
-        if type(stage["hardware"]) == ListProxy:
-            self.axes = list(stage["hardware"][device_id]["axes"])
-            device_axes = stage["hardware"][device_id].get("axes_mapping", [])
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+        device_id : int, optional
+            Device ID, by default 0
+        """
+        stage_configuration = configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["stage"]
+        if type(stage_configuration["hardware"]) == ListProxy:
+
+            #: list: List of stage axes available.
+            self.axes = list(stage_configuration["hardware"][device_id]["axes"])
+
+            device_axes = stage_configuration["hardware"][device_id].get(
+                "axes_mapping", []
+            )
+
+            #: int: Feedback alignment value for the stage. Default is None.
+            self.stage_feedback = stage_configuration["hardware"][device_id].get(
+                "feedback_alignment", None
+            )
         else:
-            self.axes = list(stage["hardware"]["axes"])
-            device_axes = stage["hardware"].get("axes_mapping", [])
+            self.axes = list(stage_configuration["hardware"]["axes"])
+            device_axes = stage_configuration["hardware"].get("axes_mapping", [])
+            self.stage_feedback = stage_configuration["hardware"].get(
+                "feedback_alignment", None
+            )
 
         if device_axes is None:
             device_axes = []
 
         if len(self.axes) > len(device_axes):
             log_string = (
-                f"{microscope_name}: stage axes mapping is not specified in "
-                "the configuration file, will use the default one in the code!"
+                f"{microscope_name}: Stage axes mapping is not specified in "
+                "the configuration file, will use default settings!"
             )
             logger.debug(log_string)
             print(log_string)
 
+        #: dict: Dictionary of stage axes and their corresponding hardware axes.
         self.axes_mapping = dict(zip(self.axes, device_axes))
 
         """Initial setting for all positions
         self.x_pos, self.y_pos etc are the true axis positions, no matter whether
-        the stages are zeroed or not.
+        the stages are zeroed or not. All units are in microns.
         """
         for ax in self.axes:
             setattr(self, f"{ax}_pos", 0)
-            setattr(self, f"{ax}_min", stage[f"{ax}_min"])  # Units are in microns
-            setattr(self, f"{ax}_max", stage[f"{ax}_max"])  # Units are in microns
+            setattr(self, f"{ax}_min", stage_configuration[f"{ax}_min"])
+            setattr(self, f"{ax}_max", stage_configuration[f"{ax}_max"])
+
+        #: bool: Whether the stage has limits enabled or not. Default is True.
         self.stage_limits = True
 
     def get_position_dict(self):
-        """Return a dictionary with the saved stage positions."""
+        """Return a dictionary with the saved stage positions.
+
+        Returns
+        -------
+        dict
+            Dictionary of stage positions.
+        """
         position_dict = {}
         for ax in self.axes:
             ax_str = f"{ax}_pos"
@@ -194,6 +175,8 @@ class StageBase:
             A dictionary of values required for movement.
             Includes 'x_abs', 'y_abs', etc. for one or more axes.
             Expect values in micrometers, except for theta, which is in degrees.
+        is_strict : bool, optional
+            If True, return an empty dict if any axis is out of bounds.
 
         Returns
         -------
@@ -229,4 +212,5 @@ class StageBase:
         pass
 
     def close(self):
+        """Close the stage."""
         pass

@@ -46,65 +46,35 @@ logger = logging.getLogger(p)
 
 
 class RemoteFocusNI(RemoteFocusBase):
-    """RemoteFocusNI Class
-
-    This class is used to control the remote focus device.
-
-    Parameters
-    ----------
-    microscope_name : str
-        The microscope name.
-    device_connection : object
-        The device connection.
-    configuration : dict
-        The configuration.
-
-    Attributes
-    ----------
-    microscope_name : str
-        The name of the microscope.
-    device_connection : nidaqmx.Task
-        The connection to the device.
-    configuration : dict
-        The configuration of the device.
-    task : nidaqmx.Task
-        The task to control the device.
-    trigger_source : str
-        The trigger source of the device.
-    daq : nidaqmx.Task
-        The connection to the device.
-
-    Methods
-    -------
-    initialize_task()
-        Initialize the task.
-    __del__()
-        Delete the task.
-    adjust(exposure_times, sweep_times)
-        Adjust the waveform.
-    prepare_task(channel_key)
-        Prepare the task.
-    start_task()
-        Start the task.
-    stop_task(force=False)
-        Stop the task.
-    close_task()
-        Close the task.
-
-    """
+    """RemoteFocusNI Class - Analog control of the remote focus device."""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the RemoteFocusNI class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            The microscope name.
+        device_connection : object
+            The device connection object.
+        configuration : dict
+            The configuration dictionary.
+
+        """
         super().__init__(microscope_name, device_connection, configuration)
 
+        #: object: National Instruments Analog Task
         self.task = None
 
+        #: str: The trigger source (e.g., physical channel).
         self.trigger_source = configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["trigger_source"]
 
-        # self.initialize_task()
-
+        #: object: The device connection object.
         self.daq = device_connection
+
+        #: str: The board name.
         self.board_name = self.device_config["hardware"]["channel"].split("/")[0]
 
     def initialize_task(self):
@@ -112,19 +82,8 @@ class RemoteFocusNI(RemoteFocusBase):
 
         This method initializes the task.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> self.initialize_task()
         """
-        # TODO: makesure the task is reusable, Or need to create and close each time.
+        # TODO: make sure the task is reusable, Or need to create and close each time.
         self.task = nidaqmx.Task()
         channel = self.device_config["hardware"]["channel"]
         self.task.ao_channels.add_ao_voltage_chan(channel)
@@ -157,14 +116,13 @@ class RemoteFocusNI(RemoteFocusBase):
             Dictionary of exposure times for each selected channel
         sweep_times : dict
             Dictionary of sweep times for each selected channel
+        offset : float
+            The offset of the signal in volts.
 
         Returns
         -------
-        None
-
-        Examples
-        --------
-        >>> self.adjust(exposure_times, sweep_times)
+        waveform_dict : dict
+            The waveform dictionary.
         """
         waveform_dict = super().adjust(exposure_times, sweep_times, offset)
 
@@ -178,6 +136,19 @@ class RemoteFocusNI(RemoteFocusBase):
         return waveform_dict
 
     def move(self, exposure_times, sweep_times, offset=None):
+        """Move the remote focus.
+
+        This method moves the remote focus.
+
+        Parameters
+        ----------
+        exposure_times : dict
+            Dictionary of exposure times for each selected channel
+        sweep_times : dict
+            Dictionary of sweep times for each selected channel
+        offset : float
+            The offset of the signal in volts.
+        """
         self.adjust(exposure_times, sweep_times, offset)
         self.daq.update_analog_task(self.board_name)
 
@@ -191,13 +162,6 @@ class RemoteFocusNI(RemoteFocusBase):
         channel_key : str
             The channel key.
 
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> self.prepare_task(channel_key)
         """
 
         # write waveform
@@ -209,17 +173,6 @@ class RemoteFocusNI(RemoteFocusBase):
 
         This method starts the task.
 
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> self.start_task()
         """
         # self.task.start()
         pass
@@ -233,14 +186,6 @@ class RemoteFocusNI(RemoteFocusBase):
         ----------
         force : bool
             Force the task to stop.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> self.stop_task(force)
         """
 
         # if not force:
@@ -252,18 +197,6 @@ class RemoteFocusNI(RemoteFocusBase):
         """Close the task.
 
         This method closes the task.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> self.close_task()
         """
         # self.task.close()
         pass

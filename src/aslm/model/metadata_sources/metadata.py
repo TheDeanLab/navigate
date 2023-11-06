@@ -36,6 +36,7 @@ from typing import Optional
 
 # Local Imports
 from aslm.tools import xml_tools
+from aslm import __version__, __commit__
 
 from multiprocessing.managers import DictProxy
 
@@ -60,6 +61,7 @@ class Metadata:
         self._order = "XYCZT"
         self._per_stack = True
         self._multiposition = False
+        self._coupled_axes = None
 
         # shape
         self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = (
@@ -98,19 +100,15 @@ class Metadata:
             self.set_stack_order_from_configuration_experiment()
 
     def set_shape_from_configuration_experiment(self) -> None:
-        zoom = self.configuration["experiment"]["MicroscopeState"]["zoom"]
-        pixel_size = float(
-            self.configuration["configuration"]["microscopes"][self.active_microscope][
-                "zoom"
-            ]["pixel_size"][zoom]
-        )
+        state = self.configuration["experiment"]["MicroscopeState"]
+        scope = self.configuration["configuration"]["microscopes"][
+            self.active_microscope
+        ]
+        zoom = state["zoom"]
+        pixel_size = float(scope["zoom"]["pixel_size"][zoom])
         self.dx, self.dy = pixel_size, pixel_size
-        self.dz = float(
-            self.configuration["experiment"]["MicroscopeState"]["step_size"]
-        )
-        self.dt = float(
-            self.configuration["experiment"]["MicroscopeState"]["timepoint_interval"]
-        )
+        self.dz = float(abs(state["step_size"]))
+        self.dt = float(state["timepoint_interval"])
 
         self.shape_x = int(
             self.configuration["experiment"]["CameraParameters"]["x_pixels"]
@@ -119,71 +117,64 @@ class Metadata:
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
         if (
-            (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "z-stack"
-            )
-            or (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "ConstantVelocityAcquisition"
-            )
-            or (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "customized"
-            )
+            (state["image_mode"] == "z-stack")
+            or (state["image_mode"] == "ConstantVelocityAcquisition")
+            or (state["image_mode"] == "customized")
         ):
-            self.shape_z = int(
-                self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
-            )
-        elif (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "confocal-projection"
-        ):
-            self.shape_z = int(
-                self.configuration["experiment"]["MicroscopeState"]["n_plane"]
-            )
+            self.shape_z = int(state["number_z_steps"])
+        elif state["image_mode"] == "confocal-projection":
+            self.shape_z = int(state["n_plane"])
         else:
             self.shape_z = 1
-        self.shape_t = int(
-            self.configuration["experiment"]["MicroscopeState"]["timepoints"]
-        )
+        self.shape_t = int(state["timepoints"])
         self.shape_c = sum(
-            [
-                v["is_selected"] is True
-                for k, v in self.configuration["experiment"]["MicroscopeState"][
-                    "channels"
-                ].items()
-            ]
+            [v["is_selected"] is True for k, v in state["channels"].items()]
         )
 
-        # self._multiposition = self.configuration["experiment"]["MicroscopeState"][
-        #     "is_multiposition"
-        # ]
+        self._multiposition = state["is_multiposition"]
 
-        # if bool(self._multiposition):
-        #     self.positions = len(
-        #         self.configuration["experiment"]["MultiPositions"]
-        #     )
-        # else:
-        #     self.positions = 1
+        if bool(self._multiposition):
+            self.positions = len(self.configuration["experiment"]["MultiPositions"])
+        else:
+            self.positions = 1
 
         # let the data sources have the ability to save more frames
-        self._multiposition = True
-        self.positions = len(
-            self.configuration["experiment"]["MultiPositions"]
-        )
+        # self._multiposition = True
+        # self.positions = len(
+        #     self.configuration["experiment"]["MultiPositions"]
+        # )
+
+        # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
+        # if they are both moving along the same physical dimension
+        self._coupled_axes = scope["stage"].get("coupled_axes", None)
+
+        print(f"Coupled axes: {self._coupled_axes} {type(self._coupled_axes)}")
+
+        # safety
+        assert (self._coupled_axes is None) or isinstance(self._coupled_axes, DictProxy)
+
+        # If we have additional axes, create self.d{axis} for each
+        # additional axis, to ensure we keep track of the step size
+        if self._coupled_axes is not None:
+            for leader, follower in self._coupled_axes.items():
+                print(leader, follower)
+                assert leader.lower() in "xyzct"  # safety
+                if getattr(self, f"d{follower.lower()}", None) is None:
+                    print(state.get(f"{follower.lower()}_step_size", 1))
+                    setattr(
+                        self,
+                        f"d{follower.lower()}",
+                        state.get(f"{follower.lower()}_step_size", 1),
+                    )
 
     def set_stack_order_from_configuration_experiment(self) -> None:
+        state = self.configuration["experiment"]["MicroscopeState"]
         self._per_stack = (
-            self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
-            == "per_stack"
-            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "z-stack"
+            state["stack_cycling_mode"] == "per_stack"
+            and state["image_mode"] == "z-stack"
         ) or (
-            self.configuration["experiment"]["MicroscopeState"]["conpro_cycling_mode"]
-            == "per_stack"
-            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "confocal-projection"
+            state["conpro_cycling_mode"] == "per_stack"
+            and state["image_mode"] == "confocal-projection"
         )
 
     @property
@@ -216,7 +207,12 @@ class XMLMetadata(Metadata):
     ) -> None:
         """Write to XML file. Assumes we do not include the XML header in our nested
         metadata dictionary."""
-        xml = '<?xml version="1.0" encoding="UTF-8"?>'  # XML file header
+        xml = '<?xml version="1.0" encoding="UTF-8"?>\n'  # XML file header
+        xml += (
+            f"<!-- Created by ASLM, "
+            f"v{__version__}, "
+            f"Commit {__commit__}, Dean Lab at UTSW -->\n"
+        )
         # TODO: should os.path.basename be the default? Added this for BigDataViewer's
         # relative path.
         xml += self.to_xml(file_type, root, file_name=os.path.basename(file_name), **kw)

@@ -48,111 +48,59 @@ logger = logging.getLogger(p)
 
 
 class NIDAQ(DAQBase):
-    """NIDAQ class for Data Acquisition (DAQ).
-
-    Parameters
-    ----------
-    configuration : dict
-        Global configuration of the microscope
-
-    Attributes
-    ----------
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
-    waveform_constants : dict
-        Dictionary of waveform constants
-    microscope_name : str
-        Microscope name
-    daq_parameters : dict
-        Dictionary of DAQ parameters
-    sample_rate : float
-        Sample rate
-    sweep_time : float
-        Sweep time
-    camera_trigger_task : nidaqmx.Task
-        Task for camera triggering
-    master_trigger_task : nidaqmx.Task
-        Task for master triggering
-    trigger_mode : int
-        0: self-trigger, 1: external-trigger
-    external_trigger : nidaqmx.Task
-        Task for external triggering
-    laser_switching_task : nidaqmx.Task
-        Task for laser switching
-    analog_outputs : dict
-        Dictionary of analog outputs and their waveforms
-    analog_output_tasks : dict
-        Dictionary of analog output tasks
-    n_sample : int
-        Number of samples
-    current_channel_key : str
-        Current channel key
-    is_updating_analog_task : bool
-        Flag for updating analog task
-    wait_to_run_lock : threading.Lock
-        Lock for waiting to run
-
-    Methods
-    -------
-    calculate_all_waveforms(microscope_name, readout_time)
-        Calculate all waveforms
-    enable_microscope(microscope_name)
-        Enable microscope
-    set_external_trigger(external_trigger)
-        Set trigger mode
-    restart_analog_task_callback()
-        Restart analog task callback
-    create_camera_task(exposure_time)
-        Create camera task
-    create_master_trigger_task()
-        Create master trigger task
-    create_analog_output_tasks(channel_key)
-        Create analog output tasks
-    prepare_acquisition(channel_key, exposure_time)
-        Prepare acquisition
-    run_acquisition()
-        Run acquisition
-    stop_acquisition()
-        Stop acquisition
-    enable_microscope(microscope_name)
-        Enable microscope
-    update_analog_task(board_name)
-        Update analog task
-    """
+    """NIDAQ class for Control of NI Data Acquisition Cards."""
 
     def __init__(self, configuration):
+        """Initialize NIDAQ class.
+
+        Parameters
+        ----------
+        configuration : dict
+            Configuration dictionary.
+        """
         super().__init__(configuration)
+
+        #: obj: NI DAQmx task for camera trigger
         self.camera_trigger_task = None
+
+        #: obj: NI DAQmx task for master trigger
         self.master_trigger_task = None
-        self.trigger_mode = "self-trigger" # self-trigger, external-trigger
+
+        #: str: Trigger mode. Self-trigger or external-trigger.
+        self.trigger_mode = "self-trigger"  # self-trigger, external-trigger
+
+        #: str: NI DAQmx port for laser switching
         self.external_trigger = None
         try:
             # switching_port = self.configuration["configuration"]["microscopes"][
             #     self.microscope_name
             # ]["daq"]["laser_port_switcher"]
+            #: obj: NI DAQmx task for laser switching
             self.laser_switching_task = nidaqmx.Task()
         except KeyError:
             self.laser_switching_task = None
 
         # keep track of analog outputs and their waveforms
+        #: dict: Analog outputs.
         self.analog_outputs = {}
+
+        #: dict: NI DAQmx tasks for analog output.
         self.analog_output_tasks = {}
+
+        #: float: Number of samples.
         self.n_sample = None
+
+        #: str: Current channel key.
         self.current_channel_key = ""
+
+        #: bool: Flag for updating analog task.
         self.is_updating_analog_task = False
+
+        #: bool: Flag for waiting to run.
         self.wait_to_run_lock = Lock()
 
     def __del__(self):
-        """Destructor.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Destructor."""
         if self.camera_trigger_task is not None:
             self.stop_acquisition()
 
@@ -163,19 +111,17 @@ class NIDAQ(DAQBase):
         ----------
         external_trigger : nidaqmx.Task
             Task for external triggering
-
-        Returns
-        -------
-        None
         """
-        self.trigger_mode = "self-trigger" if external_trigger is None else "external-trigger"
+        self.trigger_mode = (
+            "self-trigger" if external_trigger is None else "external-trigger"
+        )
         self.external_trigger = external_trigger
 
         # change trigger mode during acquisition in a feature
         if self.trigger_mode == "self-trigger":
             self.create_master_trigger_task()
             trigger_source = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
+                self.microscope_name
             ]["daq"]["trigger_source"]
             # set camera task trigger source
             self.camera_trigger_task.stop()
@@ -186,7 +132,9 @@ class NIDAQ(DAQBase):
             # set analog task trigger source
             for board_name in self.analog_output_tasks.keys():
                 self.analog_output_tasks[board_name].stop()
-                self.analog_output_tasks[board_name].triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
+                self.analog_output_tasks[
+                    board_name
+                ].triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
                 self.analog_output_tasks[board_name].register_done_event(None)
 
         else:
@@ -196,13 +144,17 @@ class NIDAQ(DAQBase):
                 self.master_trigger_task.close()
             self.master_trigger_task = None
             # camera task trigger source
-            self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(self.external_trigger)
+            self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
+                self.external_trigger
+            )
             # change camera task to regeneratable.
             self.camera_trigger_task.triggers.start_trigger.retriggerable = True
             # add callback function to analog tasks
             for board_name in self.analog_output_tasks.keys():
                 task = self.analog_output_tasks[board_name]
-                task.triggers.start_trigger.cfg_dig_edge_start_trig(self.external_trigger)
+                task.triggers.start_trigger.cfg_dig_edge_start_trig(
+                    self.external_trigger
+                )
                 task.register_done_event(None)
                 task.register_done_event(self.restart_analog_task_callback_func(task))
 
@@ -220,13 +172,15 @@ class NIDAQ(DAQBase):
         callback_func : function
             Callback function
         """
+
         def callback_func(task_handle, status, callback_data):
             try:
                 task.stop()
                 task.start()
-            except:
+            except Exception:
                 print("*** there is some error when restarting the analog task")
             return status
+
         return callback_func
 
     def create_camera_task(self, exposure_time):
@@ -236,15 +190,10 @@ class NIDAQ(DAQBase):
         Channel that the TTL is delivered from, and its delay (typically ~10 ms), are
         specified in the configuration.yaml file.
 
-
         Parameters
         ----------
         exposure_time : float
             Duration of camera exposure.
-
-        Returns
-        -------
-        None
         """
         self.camera_trigger_task = nidaqmx.Task()
         camera_trigger_out_line = self.configuration["configuration"]["microscopes"][
@@ -252,9 +201,7 @@ class NIDAQ(DAQBase):
         ]["daq"]["camera_trigger_out_line"]
         self.camera_high_time = 0.004
         self.camera_low_time = self.sweep_time - self.camera_high_time
-        self.camera_delay = (self.camera_delay_percent / 100) * (
-            exposure_time / 1000
-        )
+        self.camera_delay = (self.camera_delay_percent / 100) * (exposure_time / 1000)
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
             camera_trigger_out_line,
@@ -267,19 +214,11 @@ class NIDAQ(DAQBase):
         camera_waveform_repeat_num = self.waveform_repeat_num * self.waveform_expand_num
         self.camera_trigger_task.timing.cfg_implicit_timing(
             sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-            samps_per_chan=camera_waveform_repeat_num)
+            samps_per_chan=camera_waveform_repeat_num,
+        )
 
     def create_master_trigger_task(self):
-        """Set up the DO master trigger task.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Set up the DO master trigger task."""
         self.master_trigger_task = nidaqmx.Task()
         master_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -300,10 +239,6 @@ class NIDAQ(DAQBase):
         ----------
         channel_key : str
             Channel key for analog output.
-
-        Returns
-        -------
-        None
         """
         n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
         if len(n_samples) > 1:
@@ -314,7 +249,8 @@ class NIDAQ(DAQBase):
             )
         self.n_sample = min(n_samples)
         max_sample = self.n_sample * self.waveform_expand_num
-        # TODO: GalvoStage and remote_focus waveform are not calculated based on a same sweep time. There needs some fix.
+        # TODO: GalvoStage and remote_focus waveform are not calculated based on a
+        #  same sweep time. There needs some fix.
 
         # Create one analog output task per board, grouping the channels
         boards = list(set([x.split("/")[0] for x in self.analog_outputs.keys()]))
@@ -354,7 +290,8 @@ class NIDAQ(DAQBase):
             # self.analog_output_tasks[board].triggers.start_trigger.cfg_dig_edge_start_trig(
             #     triggers[0]
             # )
-            # TODO: may change this later to automatically expand the waveform to the longest
+            # TODO: may change this later to automatically expand the waveform to the
+            #  longest
             for k, v in self.analog_outputs.items():
                 if k.split("/")[0] == board and v["samples"] < max_sample:
                     v["waveform"][channel_key] = np.hstack(
@@ -382,16 +319,17 @@ class NIDAQ(DAQBase):
             Index of channel to be imaged.
         exposure_time : float
             Camera exposure duration.
-
-        Returns
-        -------
-        None
         """
-        waveform_template_name = self.configuration['experiment']['MicroscopeState']["waveform_template"]
-        self.waveform_repeat_num, self.waveform_expand_num = get_waveform_template_parameters(
+        waveform_template_name = self.configuration["experiment"]["MicroscopeState"][
+            "waveform_template"
+        ]
+        (
+            self.waveform_repeat_num,
+            self.waveform_expand_num,
+        ) = get_waveform_template_parameters(
             waveform_template_name,
             self.configuration["waveform_templates"],
-            self.configuration['experiment']['MicroscopeState']
+            self.configuration["experiment"]["MicroscopeState"],
         )
         self.create_camera_task(exposure_time)
         self.create_analog_output_tasks(channel_key)
@@ -410,14 +348,6 @@ class NIDAQ(DAQBase):
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
         they are waiting for the trigger signal.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
         """
         # wait if writing analog tasks
         if self.is_updating_analog_task:
@@ -428,7 +358,7 @@ class NIDAQ(DAQBase):
             self.camera_trigger_task.start()
             for task in self.analog_output_tasks.values():
                 task.start()
-        
+
         if self.trigger_mode == "self-trigger":
             self.master_trigger_task.write(
                 [False, True, True, True, False], auto_start=True
@@ -439,8 +369,9 @@ class NIDAQ(DAQBase):
                 task.wait_until_done()
                 if self.trigger_mode == "self-trigger":
                     task.stop()
-        except:
-            # when triggered from external triggers, sometimes the camera trigger task is done but not actually done, there will a DAQ WARNING message
+        except Exception:
+            # when triggered from external triggers, sometimes the camera trigger
+            # task is done but not actually done, there will a DAQ WARNING message
             pass
         if self.trigger_mode == "self-trigger":
             try:
@@ -453,14 +384,6 @@ class NIDAQ(DAQBase):
         """Stop Acquisition.
 
         Stop all tasks and close them.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
         """
         try:
             self.camera_trigger_task.stop()
@@ -474,7 +397,7 @@ class NIDAQ(DAQBase):
                 task.stop()
                 task.close()
 
-        except (AttributeError, nidaqmx.errors.DaqError) as e:
+        except (AttributeError, nidaqmx.errors.DaqError):
             pass
 
         if self.wait_to_run_lock.locked():
@@ -489,10 +412,6 @@ class NIDAQ(DAQBase):
         ----------
         microscope_name : str
             Name of microscope to enable.
-
-        Returns
-        -------
-        None
         """
         if microscope_name != self.microscope_name:
             self.microscope_name = microscope_name
@@ -565,7 +484,7 @@ class NIDAQ(DAQBase):
                 self.analog_output_tasks[board].close()
 
             self.create_analog_output_tasks(self.current_channel_key)
-            print(f"create new daq analog output task because DAQmx Write failed!")
+            print("create new daq analog output task because DAQmx Write failed!")
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()

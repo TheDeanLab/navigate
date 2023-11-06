@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -44,24 +45,24 @@ logger = logging.getLogger(p)
 
 
 class SyntheticZoom(ZoomBase):
-    """SyntheticZoom Class
-
-    Controls the SyntheticZoom Servo.
-
-    Methods
-    -------
-    set_zoom(zoom, wait_until_done)
-        Change the DynamixelZoom position to zoom value of the microscope.
-    move(position, wait_until_done)
-        Move the DynamixelZoom position.
-    read_position()
-        Read the position of the DynamixelZoom servo.
-    """
+    """SyntheticZoom Class - Controls the SyntheticZoom Servo."""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the SyntheticZoom Servo.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+        """
         super().__init__(microscope_name, device_connection, configuration)
         logger.debug("SyntheticZoom Servo Initialized")
 
     def __del__(self):
+        """Delete the SyntheticZoom Servo."""
         logger.debug("SyntheticZoom Servo instance Deleted")
         pass

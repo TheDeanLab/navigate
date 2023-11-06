@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -48,10 +49,42 @@ logger = logging.getLogger(p)
 
 
 class SelfLockThread(threading.Thread):
+    """A custom thread class with self-locking capabilities.
+
+    This class extends the functionality of the Python threading.Thread class by
+    providing the ability to lock and unlock the thread explicitly. It is useful
+    in scenarios where thread synchronization and control are required.
+
+    Note
+    ----
+    - This class provides additional control over thread execution using the
+      `wait()` and `unlock()` methods.
+    - It allows checking whether the thread is currently locked using the `isLocked()`
+      method.
+    """
+
     def __init__(
         self, group=None, target=None, name=None, args=(), kwargs={}, *, daemon=None
     ):
+        """Initialize the SelfLockThread.
+
+        Parameters
+        ----------
+        group : ThreadGroup, optional
+            The thread group, by default None
+        target : callable, optional
+            The target function of the thread, by default None
+        name : str, optional
+            The name of the thread, by default None
+        args : tuple, optional
+            The arguments of the target function, by default ()
+        kwargs : dict, optional
+            The keyword arguments of the target function, by default {}
+        daemon : bool, optional
+            Whether the thread is daemon, by default None
+        """
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
+        #: threading.Lock: The lock of the thread.
         self.selfLock = threading.Lock()
         # lock itself
         self.selfLock.acquire()
@@ -63,8 +96,14 @@ class SelfLockThread(threading.Thread):
             try:
                 self._target(*self._args, **self._kwargs)
             except Exception as e:
-                print(f"{self.name} thread ended because of exception!: {e}", traceback.format_exc())
-                logger.debug(f"{self.name} thread ended because of exception!: {e}", traceback.format_exc())
+                print(
+                    f"{self.name} thread ended because of exception!: {e}",
+                    traceback.format_exc(),
+                )
+                logger.debug(
+                    f"{self.name} thread ended because of exception!: {e}",
+                    traceback.format_exc(),
+                )
             finally:
                 pass
 
@@ -78,13 +117,40 @@ class SelfLockThread(threading.Thread):
             self.selfLock.release()
 
     def isLocked(self):
-        """Check if the thread is locked."""
+        """Check if the thread is locked.
+
+        Returns
+        -------
+        bool
+            Whether the thread is locked.
+        """
         return self.selfLock.locked()
 
 
 class SynchronizedThreadPool:
+    """
+    A custom thread pool with synchronization and control features.
+
+    This class provides a thread pool for managing threads associated with different
+    resources. It allows registering resources, creating threads, wrapping thread tasks,
+    removing threads, and other thread-related operations with explicit control and
+    synchronization.
+
+    Note
+    ----
+    - This class provides explicit control over thread creation, removal,
+    and synchronization.
+    - It allows managing threads associated with different resources efficiently.
+    - The `clear` method moves threads to the `toDeleteList` for later deletion.
+
+    """
+
     def __init__(self):
+        """Initialize the SynchronizedThreadPool."""
+
+        #: dict: The resources of the thread pool.
         self.resources = {}
+        #: dict: The toDeleteList of the thread pool.
         self.toDeleteList = {}
 
     def registerResource(self, resourceName):
@@ -127,6 +193,11 @@ class SynchronizedThreadPool:
             The arguments of the callback function, by default ()
         cbKargs : dict, optional
             The keyword arguments of the callback function, by default {}
+
+        Returns
+        -------
+        SelfLockThread
+            The created thread.
         """
 
         if resourceName not in self.resources:
@@ -155,6 +226,11 @@ class SynchronizedThreadPool:
             The arguments of the callback function, by default ()
         cbKargs : dict, optional
             The keyword arguments of the callback function, by default {}
+
+        Returns
+        -------
+        callable
+            The wrapped target function.
         """
 
         def func(*args, **kwargs):
@@ -207,6 +283,11 @@ class SynchronizedThreadPool:
             The name of the resource.
         taskThread : SelfLockThread
             The thread to remove.
+
+        Returns
+        -------
+        bool
+            Whether the thread is removed.
         """
         # can only remove waiting threads
         # do not remove running threading
@@ -243,6 +324,11 @@ class SynchronizedThreadPool:
         ----------
         resourceName : str
             The name of the resource.
+
+        Returns
+        -------
+        SelfLockThread
+            The running thread.
         """
         if (
             resourceName not in self.resources
@@ -304,6 +390,11 @@ class SynchronizedThreadPool:
             The event of the thread.
         arg : any
             The argument of the thread.
+
+        Returns
+        -------
+        callable
+            The local trace function if the event is "call", otherwise None.
         """
 
         if event == "call":
@@ -322,6 +413,11 @@ class SynchronizedThreadPool:
             The event of the thread.
         arg : any
             The argument of the thread.
+
+        Returns
+        -------
+        callable
+            The local trace function if the event is "exception", otherwise None.
         """
 
         if event == "exception":
@@ -345,13 +441,23 @@ class SynchronizedThreadPool:
 
 
 class ThreadWaitlist:
+    """A custom thread waitlist with synchronization capabilities."""
+
     def __init__(self):
         """Initialize the ThreadWaitlist."""
+        #: threading.Lock: The lock of the waitlist.
         self.waitlistLock = threading.Lock()
+        #: deque: The waitlist.
         self.waitlist = deque()
 
     def __enter__(self):
-        """Enter the context."""
+        """Enter the context.
+
+        Returns
+        -------
+        ThreadWaitlist
+            The waitlist.
+        """
         self.waitlistLock.acquire()
         return self
 

@@ -30,10 +30,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard Library Imports
 import tkinter as tk
 from tkinter import ttk
 import logging
 
+# Third Party Imports
+
+# Local Imports
 from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
 from aslm.view.custom_widgets.hovermixin import (
     HoverButton,
@@ -47,56 +51,27 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-"""
-Base design courtesy of: Python GUI Programming
-A Complete Reference Guide by Alan D. Moore and B. M. Harwani
-
-If you need a reference for the types of arguments that
-different widgets accept you can use the below:
-https://tkdocs.com/shipman/
-
-It will help with creating the input_args and
-label_args dictionaries if you so choose to use them
-
-Kwargs can be used to communicate arguments to the parent thru the super init function
-To use the kwargs argument:
-treat the kwargs as an array or dict of arguments
-So if you wanted to pass a width and height to the parent you can do so with
-kwargs.update(width=900, height=600)
-
-do it this way to override any values currently there
-otherwise funky behavior could occur
-super().__init__(parent, **kwargs) # this passes the two arguments above
-
-User Guide for the Class
-If you need reference for default functions in python:
-https://www.geeksforgeeks.org/default-arguments-in-python/
-
-Lets assume the parent in this case is Settings Frame
-
-LabelInput( settings,
-            label_pos="top",
-            label="Exposure Time",
-            input_class=ttk.Spinbox,
-            input_var=tk.IntVar(),
-            input_args={"from_": 0.5, "to": 100, "increment": 0.1},
-            label_args={"height": 2, "width": 4}
-            )
-
-Please note that these values are arbitrary and just to show usage.
-
-Typically this class will be called as a child of a
-LabelFrame for a related grouping of data or fields.
-
-Each widget you need to create will be a new instance of the LabelInput class.
-The widget within a LabelInput class can be directly referenced with self.widget,
-this allows base tkinter calls to be made on the internal widget
-(ex grid or when setting readonly)
-"""
-
-
 class LabelInput(ttk.Frame):
     """Widget class that contains label and input together.
+
+    Acknowledgment: Based on the design from "Python GUI Programming:
+    A Complete Reference Guide" by Alan D. Moore and B. M. Harwani.
+
+    For reference on widget arguments, visit: https://tkdocs.com/shipman/
+
+    To use kwargs for parent arguments, update kwargs like this:
+    kwargs.update(width=900, height=600)
+    Ensure you use super().__init__(parent, **kwargs) to override values correctly.
+
+    User Guide:
+    Create instances of LabelInput as children of a LabelFrame for grouped data.
+    Access the widget within LabelInput using self.widget for customization.
+    Example usage:
+    LabelInput(settings, label_pos="top", label="Exposure Time",
+               input_class=ttk.Spinbox, input_var=tk.IntVar(),
+               input_args={"from_": 0.5, "to": 100, "increment": 0.1},
+               label_args={"height": 2, "width": 4})
+
 
     Parameters
     ----------
@@ -147,10 +122,7 @@ class LabelInput(ttk.Frame):
         self.variable = input_var
         self.input_class = input_class
 
-        """This if statement will check for the type of widget being created
-        and will create it based on that, since certain
-        widgets need different formatting, like how button types
-        don't need a textvariable like a StringVar()"""
+        """ Create widgets based on their type, considering formatting differences."""
         if input_class in (
             ttk.Checkbutton,
             ttk.Button,
@@ -167,14 +139,10 @@ class LabelInput(ttk.Frame):
             self.label.grid(row=0, column=0, sticky=(tk.W + tk.E))
             input_args["textvariable"] = input_var
 
-        """This will call the passed in widget types constructor,
-        the **input_args is the dict passed in with the arguments needed for
-        that type if desired, its totally optional"""
+        """Call the passed widget type constructor with the passed args"""
         self.widget = input_class(self, **input_args)
 
-        """ This if will change the pos of the label based on what is passed in
-        top will put label on top of widge, while left will put it on the
-        left"""
+        """Specify label position"""
         if label_pos == "top":
             self.widget.grid(row=1, column=0, sticky=(tk.W + tk.E))
             self.columnconfigure(0, weight=1)
@@ -182,20 +150,7 @@ class LabelInput(ttk.Frame):
             self.widget.grid(row=0, column=1, sticky=(tk.W + tk.E))
             self.rowconfigure(0, weight=1)
 
-        # Error handling
-        # self.error = getattr(self.widget, 'error', tk.StringVar())
-        # self.error_label = ttk.Label(
-        #     self, textvariable=self.error, foreground='red')
-        # self.error_label.grid(row=2, column=0, sticky=(tk.W + tk.E))
-
-    # def grid(self, sticky=(tk.E + tk.W), **kwargs):
-    #     """
-    #     #### Creating a custom grid function that
-    #     will default LabelInput.grid() to sticky=tk.W + tk.E
-    #     """
-    #     super().grid(sticky=sticky, **kwargs)
-
-    def get(self):
+    def get(self, default=None):
         """Returns the value of the input widget
 
         Creating a generic get function to catch all types of widgets,
@@ -203,7 +158,8 @@ class LabelInput(ttk.Frame):
 
         Parameters
         ----------
-        None
+        default: object, optional
+            The default value to return if the get value doesn't work
 
         Returns
         -------
@@ -218,8 +174,7 @@ class LabelInput(ttk.Frame):
             if self.variable:
                 return self.variable.get()  # Catches widgets that don't have text
             elif isinstance(self.widget, tk.Text):
-                # This is to account for the different formatting with Text
-                # widgets
+                # This is to account for the different formatting with Text widgets
                 return self.widget.get("1.0", tk.END)
             else:
                 return (
@@ -228,14 +183,12 @@ class LabelInput(ttk.Frame):
         except (TypeError, tk.TclError):
             # Catches times when a numeric entry input has a blank, since this
             # cannot be converted into a numeric value
+            if default is not None:
+                return default
             return ""
 
     def get_variable(self):
         """Returns the variable of the input widget
-
-        Parameters
-        ----------
-        None
 
         Returns
         -------
@@ -256,9 +209,7 @@ class LabelInput(ttk.Frame):
         value : str
             The value to set the input widget to
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -298,7 +249,9 @@ class LabelInput(ttk.Frame):
             self.widget.insert(0, value)
 
     def set_values(self, values):
-        """This is a function to set the values of a combobox, it will
+        """Set values of a combobox
+
+        This is a function to set the values of a combobox, it will
         automatically set the values and set the first value as the current
 
         Values should be a list of strings or numbers that
@@ -309,9 +262,7 @@ class LabelInput(ttk.Frame):
         values : list
             list of values to be set in the widget
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -335,7 +286,9 @@ class LabelInput(ttk.Frame):
             )
 
     def pad_input(self, left, up, right, down):
-        """This is a function to pad the input widget, it will
+        """Pad the input widget
+
+        This is a function to pad the input widget, it will
         automatically set the padding of the widget
 
         Parameters
@@ -349,9 +302,7 @@ class LabelInput(ttk.Frame):
         down : int
             down padding
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------

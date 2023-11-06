@@ -7,6 +7,7 @@ from .waveform_tab_controller import WaveformTabController  # noqa
 from .waveform_popup_controller import WaveformPopupController  # noqa
 from .autofocus_popup_controller import AutofocusPopupController  # noqa
 from .features_popup_controller import FeaturePopupController #noqa
+from .feature_advanced_setting_controller import FeatureAdvancedSettingController #noqa
 from .keystroke_controller import KeystrokeController  # noqa
 from .multi_position_controller import MultiPositionController  # noqa
 from .ilastik_popup_controller import IlastikPopupController  # noqa

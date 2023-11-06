@@ -46,20 +46,31 @@ logger = logging.getLogger(p)
 
 
 class SyntheticDAQ(DAQBase):
-    """SyntheticDAQ class for Data Acquisition (DAQ).
-
-    Attributes
-    ----------
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
-    """
+    """SyntheticDAQ class for Data Acquisition (DAQ)."""
 
     def __init__(self, configuration):
+        """Initialize the Synthetic DAQ.
+
+        Parameters
+        ----------
+        configuration : dict
+            Configuration dictionary.
+        """
         super().__init__(configuration)
+
+        #: dict: Camera object.
         self.camera = {}
+
+        #: Lock: Lock for waiting to run.
         self.wait_to_run_lock = Lock()
+
+        #: dict: Analog output tasks.
         self.analog_outputs = {}
+
+        #: bool: Flag for updating analog task.
         self.is_updating_analog_task = False
+
+        #: str: Trigger mode. Self-trigger or external-trigger.
         self.trigger_mode = "self-trigger"
 
     def create_camera_task(self):
@@ -71,13 +82,14 @@ class SyntheticDAQ(DAQBase):
         pass
 
     def create_galvo_remote_focus_tasks(self):
-        r"""Create galvo and remote focus tasks"""
+        """Create galvo and remote focus tasks"""
         pass
 
     def start_tasks(self):
-        """Start the tasks for camera triggering and analog outputs
-        # If the tasks are configured to be triggered, they won't start until
-        # run_tasks() is called."""
+        """Start the tasks for camera triggering and analog outputs.
+
+        If the tasks are configured to be triggered, they won't start until
+        run_tasks() is called."""
         pass
 
     def stop_tasks(self):
@@ -105,6 +117,7 @@ class SyntheticDAQ(DAQBase):
 
     def run_acquisition(self):
         """Run DAQ Acquisition.
+
         Run the tasks for triggering, analog and counter outputs.
         The master trigger initiates all other tasks via a shared trigger
         For this to work, all analog output and counter tasks have to be started so that
@@ -123,18 +136,33 @@ class SyntheticDAQ(DAQBase):
         pass
 
     def write_waveforms_to_tasks(self):
-        r"""Write the galvo, remote focus, and laser waveforms to each task."""
+        """Write the galvo, remote focus, and laser waveforms to each task."""
         pass
 
     def add_camera(self, microscope_name, camera):
-        """Connect camera with daq: only in syntheticDAQ."""
+        """Connect camera with daq: only in syntheticDAQ.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope.
+        camera : Camera
+            Camera object.
+        """
         self.camera[microscope_name] = camera
 
     def update_analog_task(self, board_name):
+        """Update the analog task.
+
+        Parameters
+        ----------
+        board_name : str
+            Name of board.
+        """
         # can't update an analog task while updating one.
         if self.is_updating_analog_task:
             return False
-        
+
         self.wait_to_run_lock.acquire()
         self.is_updating_analog_task = True
 
@@ -142,4 +170,14 @@ class SyntheticDAQ(DAQBase):
         self.wait_to_run_lock.release()
 
     def set_external_trigger(self, external_trigger=None):
-        self.trigger_mode = "self-trigger" if external_trigger is None else "external-trigger"
+        """Set the external trigger.
+
+        Parameters
+        ----------
+        external_trigger : str, optional
+            Name of external trigger.
+        """
+
+        self.trigger_mode = (
+            "self-trigger" if external_trigger is None else "external-trigger"
+        )

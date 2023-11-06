@@ -239,9 +239,7 @@ class RenderFrame(ttk.Labelframe):
 
         The key is the widget name, value is the variable associated.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -258,9 +256,7 @@ class RenderFrame(ttk.Labelframe):
 
         The key is the widget name, value is the LabelInput class that has all the data.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -382,9 +378,7 @@ class WaveformSettingsFrame(ttk.Labelframe):
     def get_variables(self):
         """Function to get the variables.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -399,9 +393,7 @@ class WaveformSettingsFrame(ttk.Labelframe):
     def get_widgets(self):
         """Function to get the widgets.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -490,9 +482,7 @@ class MetricsFrame(ttk.Labelframe):
 
         The key is the widget name, value is the variable associated.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -509,9 +499,7 @@ class MetricsFrame(ttk.Labelframe):
 
         The key is the widget name, value is the LabelInput class that has all the data.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -653,9 +641,7 @@ class IntensityFrame(ttk.Labelframe):
 
         The key is the widget name, value is the variable associated.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -672,9 +658,7 @@ class IntensityFrame(ttk.Labelframe):
 
         The key is the widget name, value is the LabelInput class that has all the data.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

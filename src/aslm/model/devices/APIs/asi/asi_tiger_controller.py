@@ -140,11 +140,45 @@ class TigerController:
         self.read_response()
 
     def set_backlash(self, axis, val):
+        """
+        Enable/disable stage backlash correction.
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        val : float
+            Distance of anti-backlash motion [mm]
+        """
         self.send_command(f"B {axis}={val:.7f}\r")
         self.read_response()
 
     def set_finishing_accuracy(self, axis, ac):
+        """
+        Set the stage finishing accuracy.
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        ac : float
+            Position error [mm]
+        """
         self.send_command(f"PC {axis}={ac:.7f}\r")
+        self.read_response()
+
+    def set_error(self, axis, ac):
+        """
+        Set the stage drift error
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        ac : float
+            Position error [mm]
+        """
+        self.send_command(f"E {axis}={ac:.7f}\r")
         self.read_response()
 
     ##### END TODO #####
@@ -305,7 +339,7 @@ class TigerController:
         res = self.read_response()
         return "B" in res
 
-    def wait_for_device(self, timeout: float = 2) -> None:
+    def wait_for_device(self, timeout: float = 1.75) -> None:
         """Waits for the all motors to stop moving.
 
         timeout : float

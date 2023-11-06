@@ -46,11 +46,41 @@ from ..metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
 
 class TiffDataSource(DataSource):
+    """Data source for TIFF files.
+
+    Parameters
+    ----------
+    file_name : str
+        Path to file.
+    mode : str
+        File mode. "r" for read, "w" for write.
+    is_bigtiff : bool
+        Is this a bigtiff file?
+
+    Attributes
+    ----------
+    image : tifffile.TiffFile
+        Tiff file object.
+    metadata : Metadata
+        Metadata object.
+    save_directory : str
+        Directory to save files to.
+
+    Methods
+    -------
+    read()
+        Read data from file.
+    write(data, **kw)
+        Write data to file.
+    generate_image_name(current_channel, current_time_point)
+        Generate a string for the filename.
+    close
+        Close the file.
+
+    """
+
     def __init__(
-            self,
-            file_name: str = "",
-            mode: str = "w",
-            is_bigtiff: bool = False
+        self, file_name: str = "", mode: str = "w", is_bigtiff: bool = False
     ) -> None:
         self.image = None
         self._write_mode = None
@@ -126,9 +156,7 @@ class TiffDataSource(DataSource):
         kw : dict
             Keyword arguments to pass to tifffile.imsave.
 
-        Returns
-        -------
-        None
+
         """
         self.mode = "w"
 

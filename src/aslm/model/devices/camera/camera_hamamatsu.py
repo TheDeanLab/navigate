@@ -46,35 +46,77 @@ logger = logging.getLogger(p)
 class HamamatsuOrca(CameraBase):
     """HamamatsuOrca camera class.
 
-    This is by default for an Orca Flash 4.0.
+    This is by default for an Orca Flash 4.0, Fusion, and Lightning cameras.
 
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
+    **Configuration**::
+
+        hardware:
+          camera:
+            -
+                type: HamamatsuOrca
+                serial_number: 302158
+            -
+                type: HamamatsuOrca
+                serial_number: 302159
+        ...
+
+        microscopes:
+          microscope_name:
+            camera:
+              hardware:
+                name: camera
+                type: HamamatsuOrca
+                serial_number: 302352
+              lightsheet_rolling_shutter_width: 608
+              defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
+              delay_percent: 10
+              pulse_percent: 1
+              x_pixels_step: 4
+              y_pixels_step: 4
+              x_pixels_min: 4
+              y_pixels_min: 4
+              exposure_time_range:
+                min: 1
+                max: 1000
+                step: 1
+              flip_x: False
+              flip_y: False
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize HamamatsuOrca class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocesing.managers.DictProxy
+            Global configuration of the microscope
+        """
         super().__init__(microscope_name, device_connection, configuration)
 
-        self.max_image_width = self.camera_controller.max_image_width
-        self.max_image_height = self.camera_controller.max_image_height
+        #: dict: Camera parameters
         self.camera_parameters["x_pixels"] = self.max_image_width
         self.camera_parameters["y_pixels"] = self.max_image_height
+        self.camera_parameters["x_pixels_min"] = self.min_image_width
+        self.camera_parameters["y_pixels_min"] = self.min_image_height
+        self.camera_parameters["x_pixels_step"] = self.step_image_width
+        self.camera_parameters["y_pixels_step"] = self.step_image_height
 
-        speed_range = self.camera_controller.get_property_range("readout_speed")
-        if speed_range[1] != None:
-            self.camera_controller.set_property_value("readout_speed", int(speed_range[1]))
-            self.camera_parameters["readout_speed"] = int(speed_range[1])
+        #: object: Camera controller
+        _, speed_max, _ = self.camera_controller.get_property_range("readout_speed")
+        if speed_max is not None:
+            self.camera_controller.set_property_value("readout_speed", int(speed_max))
+            self.camera_parameters["readout_speed"] = int(speed_max)
         else:
             self.camera_controller.set_property_value("readout_speed", 1)
             self.camera_parameters["readout_speed"] = 1
 
-        self.camera_parameters["pixel_size_in_microns"] = self.camera_controller.get_property_value("pixel_width")
+        self.camera_parameters[
+            "pixel_size_in_microns"
+        ] = self.camera_controller.get_property_value("pixel_width")
 
         # Values are pulled from the CameraParameters section of the configuration.yml
         # file. Exposure time converted here from milliseconds to seconds.
@@ -82,7 +124,6 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value(
             "defect_correct_mode", self.camera_parameters["defect_correct_mode"]
         )
-
         self.camera_controller.set_property_value(
             "trigger_active", self.camera_parameters["trigger_active"]
         )
@@ -99,6 +140,7 @@ class HamamatsuOrca(CameraBase):
         logger.info("HamamatsuOrca Initialized")
 
     def __del__(self):
+        """Delete HamamatsuOrca class."""
         logger.info("HamamatsuOrca Shutdown")
 
     @property
@@ -112,8 +154,132 @@ class HamamatsuOrca(CameraBase):
         """
         return self.camera_controller._serial_number
 
+    # The pass statements get around camera base calls
+    @property
+    def max_image_width(self):
+        """Get maximum image width.
+
+        Returns
+        -------
+        max_image_width : int
+            Maximum image width.
+        """
+        return self.camera_controller.max_image_width
+
+    @max_image_width.setter
+    def max_image_width(self, value):
+        """Set maximum image width."""
+        pass
+
+    @property
+    def min_image_width(self):
+        """Get minimum image width.
+
+        Returns
+        -------
+        min_image_width : int
+            Minimum image width.
+        """
+        return self.camera_controller.min_image_width
+
+    @min_image_width.setter
+    def min_image_width(self, value):
+        """Set minimum image width.
+
+        Parameters
+        ----------
+        value : int
+            Minimum image width.
+        """
+        pass
+
+    @property
+    def max_image_height(self):
+        """Get maximum image height.
+
+        Returns
+        -------
+        max_image_height : int
+            Maximum image height.
+        """
+        return self.camera_controller.max_image_height
+
+    @max_image_height.setter
+    def max_image_height(self, value):
+        """Set maximum image height.
+
+        Parameters
+        ----------
+        value : int
+            Maximum image height.
+        """
+        pass
+
+    @property
+    def min_image_height(self):
+        """Get minimum image height.
+
+        Returns
+        -------
+        min_image_height : int
+            Minimum image height.
+        """
+        return self.camera_controller.min_image_height
+
+    @min_image_height.setter
+    def min_image_height(self, value):
+        """Set minimum image height.
+
+        Parameters
+        ----------
+        value : int
+            Minimum image height.
+        """
+        pass
+
+    @property
+    def step_image_width(self):
+        """Get step image width.
+
+        Returns
+        -------
+        step_image_width : int
+            Step image width.
+        """
+        return self.camera_controller.step_image_width
+
+    @step_image_width.setter
+    def step_image_width(self, value):
+        """Set step image width.
+
+        Parameters
+        ----------
+        value : int
+            Step image width.
+        """
+        pass
+
+    @property
+    def step_image_height(self):
+        """Get step image height.
+
+        Returns
+        -------
+        step_image_height : int
+            Step image height.
+        """
+        return self.camera_controller.step_image_height
+
+    @step_image_height.setter
+    def step_image_height(self, value):
+        """Step image height."""
+
+        pass
+
     def report_settings(self):
-        """Print Camera Settings."""
+        """Print Camera Settings.
+
+        Prints the current camera settings to the console and the log file."""
         params = [
             "defect_correct_mode",
             "sensor_mode",
@@ -147,12 +313,21 @@ class HamamatsuOrca(CameraBase):
         modes_dict = {"Normal": 1, "Light-Sheet": 12}
         if mode in modes_dict:
             self.camera_controller.set_property_value("sensor_mode", modes_dict[mode])
+
+            # Update minimum image sizes based on scan mode
+            (
+                self.camera_controller.min_image_width,
+                _,
+                self.camera_controller.step_image_width,
+            ) = self.camera_controller.get_property_range("subarray_hsize")
+            (
+                self.camera_controller.min_image_height,
+                _,
+                self.camera_controller.step_image_height,
+            ) = self.camera_controller.get_property_range("subarray_vsize")
         else:
             print("Camera mode not supported")
             logger.info("Camera mode not supported")
-
-        # print("Camera Sensor Mode:",
-        #       self.camera_controller.get_property_value("sensor_mode"))
 
     def set_readout_direction(self, mode):
         """Set HamamatsuOrca readout direction.
@@ -240,8 +415,10 @@ class HamamatsuOrca(CameraBase):
     def set_exposure_time(self, exposure_time):
         """Set HamamatsuOrca exposure time.
 
-        Units of the Hamamatsu API are in seconds.
-        All of our units are in milliseconds. Function convert to seconds.
+        Note
+        ----
+            Units of the Hamamatsu API are in seconds.
+            Units for ASLM are in milliseconds. Conversion is done here.
 
         Parameters
         ----------
@@ -263,6 +440,18 @@ class HamamatsuOrca(CameraBase):
             "internal_line_interval", line_interval_time
         )
 
+    def get_line_interval(self):
+        """Get HamamatsuOrca line interval.
+
+        Returns
+        -------
+        line_interval_time : float
+            Line interval duration.
+        """
+        self.line_interval = self.camera_controller.get_property_value(
+            "internal_line_interval"
+        )
+
     def set_binning(self, binning_string):
         """Set HamamatsuOrca binning mode.
 
@@ -275,6 +464,7 @@ class HamamatsuOrca(CameraBase):
         Returns
         -------
         result: bool
+            True if successful, False otherwise.
         """
         binning_dict = {
             "1x1": 1,
@@ -292,11 +482,11 @@ class HamamatsuOrca(CameraBase):
         self.camera_controller.set_property_value(
             "binning", binning_dict[binning_string]
         )
-        idx = binning_string.index("x")
-        x_binning = int(binning_string[:idx])
-        y_binning = int(binning_string[idx + 1 :])
-        self.x_pixels = int(self.x_pixels / x_binning)
-        self.y_pixels = int(self.y_pixels / y_binning)
+        # idx = binning_string.index("x")
+        # x_binning = int(binning_string[:idx])
+        # y_binning = int(binning_string[idx + 1 :])
+        # self.x_pixels = int(self.x_pixels / x_binning)
+        # self.y_pixels = int(self.y_pixels / y_binning)
 
         # should update experiment in controller side
         # self.configuration['experiment']['CameraParameters']['camera_binning'] =
@@ -312,6 +502,11 @@ class HamamatsuOrca(CameraBase):
             Height of active camera region.
         roi_width : int
             Width of active camera region.
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
         """
         # Get the Maximum Number of Pixels from the Configuration File
         camera_height = self.max_image_height
@@ -320,21 +515,17 @@ class HamamatsuOrca(CameraBase):
         if (
             roi_height > camera_height
             or roi_width > camera_width
-            or roi_height % 2 == 1
-            or roi_width % 2 == 1
+            or roi_height < 1
+            or roi_width < 1
         ):
             logger.debug(f"can't set roi to {roi_width} and {roi_height}")
             return False
 
         # Calculate Location of Image Edges
         roi_top = (camera_height - roi_height) / 2
-        roi_bottom = roi_top + roi_height - 1
+        roi_bottom = roi_top + roi_height
         roi_left = (camera_width - roi_width) / 2
-        roi_right = roi_left + roi_width - 1
-
-        if roi_top % 2 != 0 or roi_bottom % 2 == 0:
-            logger.debug(f"can't set ROI to {roi_width} and {roi_height}")
-            return False
+        roi_right = roi_left + roi_width
 
         # Set ROI
         self.x_pixels, self.y_pixels = self.camera_controller.set_ROI(
@@ -382,16 +573,29 @@ class HamamatsuOrca(CameraBase):
         self.is_acquiring = False
 
     def get_new_frame(self):
-        """Get frame from HamamatsuOrca camera."""
+        """Get frame from HamamatsuOrca camera.
+
+        Returns
+        -------
+        frame : numpy.ndarray
+            Frame from HamamatsuOrca camera.
+        """
         return self.camera_controller.get_frames()
 
     def get_minimum_waiting_time(self):
         """Get minimum waiting time for HamamatsuOrca.
 
-        This function get timing information from the camera device
+        This function gets the timing information from the camera device
         cyclic_trigger_period, minimum_trigger_blank, minimum_trigger_interval
-        'cyclic_trigger_period' of current device is 0
-        according to the document, trigger_blank should be bigger than trigger_interval.
+        'cyclic_trigger_period' if current device is 0.
+
+        According to the documentation, trigger_blank should be bigger than
+        trigger_interval.
+
+        Returns
+        -------
+        trigger_blank : float
+            Minimum waiting time.
         """
         # cyclic_trigger =
         #   self.camera_controller.get_property_value('cyclic_trigger_period')
@@ -404,7 +608,20 @@ class HamamatsuOrca(CameraBase):
 
 
 class HamamatsuOrcaLightning(HamamatsuOrca):
+    """HamamatsuOrcaLightning camera class."""
+
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize HamamatsuOrcaLightning class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocesing.managers.DictProxy
+            Global configuration of the microscope
+        """
         HamamatsuOrca.__init__(self, microscope_name, device_connection, configuration)
 
         logger.info("HamamatsuOrcaLightning Initialized")
@@ -412,8 +629,28 @@ class HamamatsuOrcaLightning(HamamatsuOrca):
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
     ):
+        """Calculate light sheet exposure time.
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Full chip exposure time.
+        shutter_width : int
+            Shutter width.
+
+        Returns
+        -------
+        exposure_time : float
+            Exposure time.
+        camera_line_interval : float
+            Camera line interval.
+        """
+
         camera_line_interval = (full_chip_exposure_time / 1000) / (
             (shutter_width + self.y_pixels - 1) / 4
         )
+
+        self.camera_parameters["line_interval"] = camera_line_interval
+
         exposure_time = camera_line_interval * (shutter_width / 4) * 1000
         return exposure_time, camera_line_interval

@@ -143,9 +143,7 @@ class HelpPopup:
     def get_widgets(self):
         """Returns the widgets of the popup.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

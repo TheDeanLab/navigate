@@ -35,6 +35,7 @@ import copy
 
 import pytest
 import numpy as np
+from unittest.mock import MagicMock
 
 
 @pytest.fixture
@@ -63,6 +64,12 @@ def test_update_z_steps(channels_tab_controller):
     step_size = max(1, min(random.randint(1, 10), (z_end - z_start) // 2))
 
     # Set params
+    channels_tab_controller.microscope_state_dict = (
+        channels_tab_controller.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]
+    )
+    channels_tab_controller.in_initialization = False
     channels_tab_controller.stack_acq_vals["start_position"].set(z_start)
     channels_tab_controller.stack_acq_vals["start_focus"].set(f_start)
     channels_tab_controller.stack_acq_vals["end_position"].set(z_end)
@@ -73,11 +80,32 @@ def test_update_z_steps(channels_tab_controller):
     channels_tab_controller.update_z_steps()
 
     # Verify
-    # number_z_steps = int(np.ceil(np.abs((z_start - z_end) / step_size)))
+    number_z_steps = int(np.ceil(np.abs((z_start - z_end) / step_size)))
     assert (
         int(channels_tab_controller.stack_acq_vals["number_z_steps"].get())
-        == 0  # currently return
+        == number_z_steps
     )
+
+    # test flip_z is True
+    microscope_name = (
+        channels_tab_controller.parent_controller.configuration_controller.microscope_name
+    )
+    stage_config = channels_tab_controller.parent_controller.configuration[
+        "configuration"
+    ]["microscopes"][microscope_name]["stage"]
+    stage_config["flip_z"] = True
+    channels_tab_controller.z_origin = (z_start + z_end) / 2
+    channels_tab_controller.stack_acq_vals["start_position"].set(z_end)
+    channels_tab_controller.stack_acq_vals["start_focus"].set(f_end)
+    channels_tab_controller.stack_acq_vals["end_position"].set(z_start)
+    channels_tab_controller.stack_acq_vals["end_focus"].set(f_start)
+    channels_tab_controller.update_z_steps()
+    assert channels_tab_controller.stack_acq_vals["step_size"].get() == step_size
+    assert channels_tab_controller.microscope_state_dict["step_size"] == -1 * step_size
+    assert (
+        channels_tab_controller.stack_acq_vals["number_z_steps"].get() == number_z_steps
+    )
+    stage_config["flip_z"] = False
 
 
 def test_update_start_position(channels_tab_controller):
@@ -95,6 +123,22 @@ def test_update_start_position(channels_tab_controller):
     assert channels_tab_controller.focus_origin == f
     assert int(channels_tab_controller.stack_acq_vals["start_position"].get()) == 0
     assert int(channels_tab_controller.stack_acq_vals["start_focus"].get()) == 0
+
+    # test flip_z is True
+    microscope_name = (
+        channels_tab_controller.parent_controller.configuration_controller.microscope_name
+    )
+    stage_config = channels_tab_controller.parent_controller.configuration[
+        "configuration"
+    ]["microscopes"][microscope_name]["stage"]
+    stage_config["flip_z"] = True
+    channels_tab_controller.update_start_position()
+
+    assert channels_tab_controller.z_origin == z
+    assert channels_tab_controller.focus_origin == f
+    assert int(channels_tab_controller.stack_acq_vals["end_position"].get()) == 0
+    assert int(channels_tab_controller.stack_acq_vals["end_focus"].get()) == 0
+    stage_config["flip_z"] = False
 
 
 def test_update_end_position(channels_tab_controller):
@@ -162,9 +206,48 @@ def test_update_end_position(channels_tab_controller):
     )
     assert channels_tab_controller.stack_acq_vals["end_focus"].get() == end_focus_minus
 
+    # test flip_z is True
+    microscope_name = (
+        channels_tab_controller.parent_controller.configuration_controller.microscope_name
+    )
+    stage_config = channels_tab_controller.parent_controller.configuration[
+        "configuration"
+    ]["microscopes"][microscope_name]["stage"]
+    stage_config["flip_z"] = True
+    # forward
+    channels_tab_controller.z_origin = z
+    channels_tab_controller.focus_origin = f
+    configuration["experiment"]["StageParameters"]["z"] = z - 2 * z_shift
+    configuration["experiment"]["StageParameters"]["f"] = f - 2 * f_shift
+    channels_tab_controller.update_end_position()
+    assert channels_tab_controller.z_origin == z - z_shift
+    assert channels_tab_controller.focus_origin == f - f_shift
+    assert channels_tab_controller.stack_acq_vals["start_position"].get() == z_shift
+    assert channels_tab_controller.stack_acq_vals["end_position"].get() == -1 * z_shift
+    assert channels_tab_controller.stack_acq_vals["start_focus"].get() == f_shift
+    assert channels_tab_controller.stack_acq_vals["end_focus"].get() == -1 * f_shift
+
+    # backward
+    channels_tab_controller.z_origin = z
+    channels_tab_controller.focus_origin = f
+    configuration["experiment"]["StageParameters"]["z"] = z + 2 * z_shift
+    configuration["experiment"]["StageParameters"]["f"] = f + 2 * f_shift
+    channels_tab_controller.update_end_position()
+    assert channels_tab_controller.z_origin == z + z_shift
+    assert channels_tab_controller.focus_origin == f + f_shift
+    assert channels_tab_controller.stack_acq_vals["start_position"].get() == z_shift
+    assert channels_tab_controller.stack_acq_vals["end_position"].get() == -1 * z_shift
+    assert channels_tab_controller.stack_acq_vals["start_focus"].get() == f_shift
+    assert channels_tab_controller.stack_acq_vals["end_focus"].get() == -1 * f_shift
+    stage_config["flip_z"] = False
+
 
 def test_update_start_update_end_position(channels_tab_controller):
     configuration = channels_tab_controller.parent_controller.configuration
+    channels_tab_controller.microscope_state_dict = configuration["experiment"][
+        "MicroscopeState"
+    ]
+    channels_tab_controller.in_initialization = False
 
     # Initialize
     z, f = random.randint(0, 1000), random.randint(0, 1000)
@@ -228,3 +311,61 @@ def test_update_start_update_end_position(channels_tab_controller):
         channels_tab_controller.stack_acq_vals["start_focus"].get() == start_focus_minus
     )
     assert channels_tab_controller.stack_acq_vals["end_focus"].get() == end_focus_minus
+
+    # test flip_z is true
+    microscope_name = (
+        channels_tab_controller.parent_controller.configuration_controller.microscope_name
+    )
+    stage_config = channels_tab_controller.parent_controller.configuration[
+        "configuration"
+    ]["microscopes"][microscope_name]["stage"]
+    stage_config["flip_z"] = True
+    configuration = channels_tab_controller.parent_controller.configuration
+    z, f = random.randint(0, 1000), random.randint(0, 1000)
+    z_shift, f_shift = random.randint(1, 500), random.randint(1, 500)
+    configuration["experiment"]["StageParameters"]["z"] = z - z_shift
+    configuration["experiment"]["StageParameters"]["f"] = f - f_shift
+    channels_tab_controller.update_start_position()
+    configuration["experiment"]["StageParameters"]["z"] = z + z_shift
+    configuration["experiment"]["StageParameters"]["f"] = f + f_shift
+    channels_tab_controller.update_end_position()
+
+    assert channels_tab_controller.z_origin == z
+    assert channels_tab_controller.focus_origin == f
+    assert channels_tab_controller.stack_acq_vals["start_position"].get() == z_shift
+    assert channels_tab_controller.stack_acq_vals["end_position"].get() == -1 * z_shift
+    assert channels_tab_controller.stack_acq_vals["start_focus"].get() == f_shift
+    assert channels_tab_controller.stack_acq_vals["end_focus"].get() == -1 * f_shift
+
+    assert configuration["experiment"]["MicroscopeState"]["start_position"] == z_shift
+    assert (
+        configuration["experiment"]["MicroscopeState"]["end_position"] == -1 * z_shift
+    )
+    assert configuration["experiment"]["MicroscopeState"]["abs_z_start"] == z - z_shift
+    assert configuration["experiment"]["MicroscopeState"]["abs_z_end"] == z + z_shift
+    assert configuration["experiment"]["MicroscopeState"]["start_focus"] == f_shift
+    assert configuration["experiment"]["MicroscopeState"]["end_focus"] == -1 * f_shift
+
+    configuration["experiment"]["StageParameters"]["z"] = z + z_shift
+    configuration["experiment"]["StageParameters"]["f"] = f + f_shift
+    channels_tab_controller.update_start_position()
+    configuration["experiment"]["StageParameters"]["z"] = z - z_shift
+    configuration["experiment"]["StageParameters"]["f"] = f - f_shift
+    channels_tab_controller.update_end_position()
+
+    assert channels_tab_controller.z_origin == z
+    assert channels_tab_controller.focus_origin == f
+    assert channels_tab_controller.stack_acq_vals["start_position"].get() == z_shift
+    assert channels_tab_controller.stack_acq_vals["end_position"].get() == -1 * z_shift
+    assert channels_tab_controller.stack_acq_vals["start_focus"].get() == f_shift
+    assert channels_tab_controller.stack_acq_vals["end_focus"].get() == -1 * f_shift
+
+    assert configuration["experiment"]["MicroscopeState"]["start_position"] == z_shift
+    assert (
+        configuration["experiment"]["MicroscopeState"]["end_position"] == -1 * z_shift
+    )
+    assert configuration["experiment"]["MicroscopeState"]["abs_z_start"] == z - z_shift
+    assert configuration["experiment"]["MicroscopeState"]["abs_z_end"] == z + z_shift
+    assert configuration["experiment"]["MicroscopeState"]["start_focus"] == f_shift
+    assert configuration["experiment"]["MicroscopeState"]["end_focus"] == -1 * f_shift
+    stage_config["flip_z"] = False

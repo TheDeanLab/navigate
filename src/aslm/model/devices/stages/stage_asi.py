@@ -72,96 +72,34 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200):
 
 
 class ASIStage(StageBase):
-    """ASIStage Class
+    """Applied Scientific Instrumentation (ASI) Stage Class
 
-    Detailed documentation: http://asiimaging.com/docs/products/serial_commands
-    Quick Start Guide: http://asiimaging.com/docs/command_quick_start
+    ASI Documentation: http://asiimaging.com/docs/products/serial_commands
+    ASI Quick Start Guide: http://asiimaging.com/docs/command_quick_start
 
-    Stage API provides all distances in a 10th of a micron unit.  To convert to microns,
-    requires division by factor of 10 to get to micron units...
+    Note
+    ----
+        ASI firmware requires all distances to be in a 10th of a micron.
 
-    NOTE: Do not ever change the F axis. This will alter the relative position of each
-    FTP stilt, adding strain to the system. Only move the Z axis, which will change both
-    stilt positions simultaneously.
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocessing.managers.DictProxy
-        Global configuration of the microscope
-
-    Attributes
-    -----------
-    x_pos : float
-        True x position
-    y_pos : float
-        True y position
-    z_pos : float
-        True z position
-    f_pos : float
-        True focus position
-    theta_pos : float
-        True rotation position
-    position_dict : dict
-        Dictionary of true stage positions
-    x_max : float
-        Max x position
-    y_max : float
-        Max y position
-    z_max : float
-        Max y position
-    f_max : float
-        Max focus position
-    theta_max : float
-        Max rotation position
-    x_min : float
-        Min x position
-    y_min : float
-        Min y position
-    z_min : float
-        Min y position
-    f_min : float
-        Min focus position
-    theta_min : float
-        Min rotation position
-    default_speed: float
-        Default speed in millimeters per second
-
-    Methods
+    Warning
     -------
-    get_position_dict()
-        Returns a dictionary with the hardware stage positions.
-    get_abs_position()
-        Makes sure that the move is within the min and max stage limits.
-    stop()
-        Emergency halt of stage operation.
-    get_axis_position()
-        Get position of specific axis
-    move_axis_absolute()
-        Move stage along a single axis
-    move_absolute()
-        Move stage.
-    set_speed()
-        Set velocity that the stage can move when scanning.
-    get_speed()
-        Get velocity
-    report_position()
-        Return current stage positions.
-    scanr()
-        Set scan start position, end position, and enc_divide
-    start_scan()
-        Start scan state machine
-    stop_scan()
-        Start scan and stop after scanning
-    verify_abs_position()
-        Return a dictionary with moving positions within the min and max stage limits
-
+        Do not ever change the F axis. This will alter the relative position of each
+        FTP stilt, adding strain to the system. Only move the Z axis, which will
+        change both stilt positions simultaneously.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the ASI Stage connection.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+        """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Default axes mapping
@@ -169,39 +107,28 @@ class ASIStage(StageBase):
         if not self.axes_mapping:
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
+            }  #: Mapping of axes to ASI axes
+        else:
+            # Force cast axes to uppercase
+            self.axes_mapping = {k: v.upper() for k, v in self.axes_mapping.items()}
+        self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
+        #: ASI stage axes
+
+        # Set feedback alignment values - Default to 85 if not specified
+        if self.stage_feedback is None:
+            feedback_alignment = {axis: 85 for axis in self.asi_axes}
+        else:
+            feedback_alignment = {
+                axis: self.stage_feedback
+                for axis, self.stage_feedback in zip(self.asi_axes, self.stage_feedback)
             }
 
-        # Axes mapping: {'x': 'V', 'y': 'X', 'z': 'Z', 'f': 'Y', 'theta': 'T'}
-        # ASI axes: {'V': 'x', 'X': 'y', 'Z': 'z', 'Y': 'f', 'T': 'theta'}
-        self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
-
-        self.tiger_controller = device_connection
-        # set default speed
-        # self.default_speed = 1.920015 # 5.745760 #7.68 * 0.67
-        # default_speeds = {axis: self.default_speed for axis in self.asi_axes.keys()}
-        # default_speeds["X"] = 5.745760
-        # default_speeds["Y"] = 5.745760
-        # if self.tiger_controller != None:
-        #     try:
-        #         self.tiger_controller.set_speed(default_speeds)
-        #     except TigerException:
-        #         logger.exception(f"Initialize ASI Stage with default speed failed!")
-
+        self.tiger_controller = device_connection  #: ASI Stage connection
         if device_connection is not None:
-            ### Speed optimizations
-            # Set speed to 90% of maximum on each axis
-            self.set_speed(percent=0.9)
-
-            # Set feedback alignment
-            # TODO: Grab this dictionary from configuration.yaml as it is per-stage
-            #       In the absence of such a dictionary, set all to 85 by default.
-            feedback_alignment = {"X": 91, "Y": 91, "Z": 91, "T": 85, "V": 88, "W": 88}
+            # Set feedback alignment values
             for ax, aa in feedback_alignment.items():
                 self.tiger_controller.set_feedback_alignment(ax, aa)
-
-            # Set backlash to 0 (less accurate)
-            for ax in self.asi_axes.keys():
-                self.tiger_controller.set_backlash(ax, 0.0)
+            logger.debug("ASI Stage Feedback Alignment Settings:", feedback_alignment)
 
             # Set finishing accuracy to half of the minimum pixel size we will use
             # pixel size is in microns, finishing accuracy is in mm
@@ -218,8 +145,24 @@ class ASIStage(StageBase):
                 )
                 / 2
             )
+            # If this is changing, the stage must be power cycled
+            # for these changes to take effect.
             for ax in self.asi_axes.keys():
-                self.tiger_controller.set_finishing_accuracy(ax, finishing_accuracy)
+                if self.asi_axes[ax] == "theta":
+                    self.tiger_controller.set_finishing_accuracy(ax, 0.003013)
+                    self.tiger_controller.set_error(ax, 0.1)
+                else:
+                    self.tiger_controller.set_finishing_accuracy(ax, finishing_accuracy)
+                    self.tiger_controller.set_error(ax, 1.2 * finishing_accuracy)
+
+            # Set backlash to 0 (less accurate)
+            for ax in self.asi_axes.keys():
+                if self.asi_axes[ax] == "theta":
+                    self.tiger_controller.set_backlash(ax, 0.1)
+                self.tiger_controller.set_backlash(ax, 0.0)
+
+            # Speed optimizations - Set speed to 90% of maximum on each axis
+            self.set_speed(percent=0.9)
 
     def __del__(self):
         """Delete the ASI Stage connection."""
@@ -229,15 +172,16 @@ class ASIStage(StageBase):
                 logger.debug("ASI stage connection closed")
         except (AttributeError, BaseException) as e:
             print("Error while disconnecting the ASI stage")
-            logger.exception(e)
+            logger.exception("ASI Stage Exception", e)
             raise
 
     def get_axis_position(self, axis):
-        """Get position of specific axos
+        """Get position of specific axis
 
         Parameters
         ----------
         axis : str
+            Axis to get position of
 
         Returns
         -------
@@ -249,7 +193,7 @@ class ASIStage(StageBase):
         except TigerException:
             return float("inf")
         except KeyError as e:
-            logger.exception(f"KeyError in get_axis_position: {e}")
+            logger.exception(f"ASI Stage - KeyError in get_axis_position: {e}")
             return float("inf")
         return pos
 
@@ -260,14 +204,14 @@ class ASIStage(StageBase):
             # positions from the device are in microns
             pos_dict = self.tiger_controller.get_position(list(self.asi_axes.keys()))
             for axis, pos in pos_dict.items():
-                setattr(self, f"{self.asi_axes[axis]}_pos", float(pos) / 10.0)
-            # for axis, asi_axis in self.axes_mapping.items():
-            #     pos = self.tiger_controller.get_axis_position(asi_axis)
-            #     # print(f"ASI axis {asi_axis} = {pos}")
-            #     setattr(self, f"{axis}_pos", float(pos) / 10.0)
+                ax = self.asi_axes[axis]
+                if ax == "theta":
+                    setattr(self, f"{ax}_pos", float(pos) / 1000.0)
+                else:
+                    setattr(self, f"{ax}_pos", float(pos) / 10.0)
         except TigerException as e:
             print("Failed to report ASI Stage Position")
-            logger.exception(e)
+            logger.exception("ASI Stage Exception", e)
 
         return self.get_position_dict()
 
@@ -300,26 +244,44 @@ class ASIStage(StageBase):
 
         # Move stage
         try:
-            # print(f"Moving {self.axes_mapping[axis]}")
-            # print(f"Axes mapping: {self.axes_mapping}")
-            # print(f"ASI axes: {self.asi_axes}")
-            # The 10 is to account for the ASI units, 1/10 of a micron
-            self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
+            if axis == "theta":
+                self.tiger_controller.move_axis(
+                    self.axes_mapping[axis], axis_abs * 1000
+                )
+            else:
+                # The 10 is to account for the ASI units, 1/10 of a micron
+                self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
 
-            if wait_until_done:
-                self.tiger_controller.wait_for_device()
-            return True
         except TigerException as e:
             print(
                 f"ASI stage move axis absolute failed or is trying to move out of "
                 f"range: {e}"
             )
-            logger.exception(e)
+            logger.exception("ASI Stage Exception", e)
             return False
+
+        if wait_until_done:
+            self.tiger_controller.wait_for_device()
+        return True
 
     def verify_move(self, move_dictionary):
         """Don't submit a move command for axes that aren't moving.
-        The Tiger controller wait time for each axis is additive."""
+        The Tiger controller wait time for each axis is additive.
+
+        Parameters
+        ----------
+        move_dictionary : dict
+            A dictionary of values required for movement. Includes 'x_abs', etc. for
+            one or more axes. Expect values in micrometers, except for theta, which is
+            in degrees.
+
+        Returns
+        -------
+        res_dict : dict
+            A dictionary of values required for movement. Includes 'x_abs', etc. for
+            one or more axes. Expect values in micrometers, except for theta, which is
+            in degrees.
+        """
         res_dict = {}
         for axis, val in move_dictionary.items():
             curr_pos = getattr(self, f"{axis}_pos", None)
@@ -353,7 +315,8 @@ class ASIStage(StageBase):
 
         # This is to account for the asi 1/10 of a micron units
         pos_dict = {
-            self.axes_mapping[axis]: pos * 10 for axis, pos in abs_pos_dict.items()
+            self.axes_mapping[axis]: pos * 1000 if axis == "theta" else pos * 10
+            for axis, pos in abs_pos_dict.items()
         }
         try:
             self.tiger_controller.move(pos_dict)
@@ -362,7 +325,7 @@ class ASIStage(StageBase):
                 f"ASI stage move axis absolute failed or is trying to move out of "
                 f"range: {e}"
             )
-            logger.exception(e)
+            logger.exception("ASI Stage Exception", e)
             return False
         if wait_until_done:
             self.tiger_controller.wait_for_device()
@@ -375,7 +338,7 @@ class ASIStage(StageBase):
             self.tiger_controller.stop()
         except TigerException as e:
             print(f"ASI stage halt command failed: {e}")
-            logger.exception(e)
+            logger.exception("ASI Stage Exception", e)
 
     def set_speed(self, velocity_dict=None, percent=None):
         """Set scan velocity.
@@ -393,8 +356,6 @@ class ASIStage(StageBase):
         success: bool
             Was the setting successful?
         """
-        # temp = dict(map(lambda k: (self.axes_mapping[k],
-        #                            velocity_dict[k]), velocity_dict))
         if percent is not None:
             try:
                 self.tiger_controller.set_speed_as_percent_max(percent)
@@ -407,7 +368,7 @@ class ASIStage(StageBase):
             except TigerException:
                 return False
             except KeyError as e:
-                logger.exception(f"KeyError in set_speed: {e}")
+                logger.exception(f"ASI Stage - KeyError in set_speed: {e}")
                 return False
         return True
 
@@ -429,7 +390,7 @@ class ASIStage(StageBase):
         except TigerException:
             return 0
         except KeyError as e:
-            logger.exception(f"KeyError in get_speed: {e}")
+            logger.exception(f"ASI Stage - KeyError in get_speed: {e}")
             return 0
         return velocity
 
@@ -460,7 +421,7 @@ class ASIStage(StageBase):
         except TigerException:
             return False
         except KeyError as e:
-            logger.exception(f"KeyError in scanr: {e}")
+            logger.exception(f"ASI Stage - KeyError in scanr: {e}")
             return False
         return True
 
@@ -484,7 +445,7 @@ class ASIStage(StageBase):
         except TigerException:
             return False
         except KeyError as e:
-            logger.exception(f"KeyError in start_scan: {e}")
+            logger.exception(f"ASI Stage - KeyError in start_scan: {e}")
             return False
         return True
 
@@ -493,4 +454,4 @@ class ASIStage(StageBase):
         try:
             self.tiger_controller.stop_scan()
         except TigerException as e:
-            logger.exception(e)
+            logger.exception("ASI Stage Exception", e)

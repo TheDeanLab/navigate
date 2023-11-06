@@ -141,9 +141,7 @@ class ilastik_setting_popup:
     def get_buttons(self):
         """Get all buttons
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -155,9 +153,7 @@ class ilastik_setting_popup:
     def get_variables(self):
         """Get all variables
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -169,9 +165,7 @@ class ilastik_setting_popup:
     def get_widgets(self):
         """Get all widgets
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

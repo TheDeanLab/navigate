@@ -49,26 +49,26 @@ logger = logging.getLogger(p)
 class GalvoNIStage(StageBase):
     """Galvo Stage Class (only supports one axis)
 
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocessing.managers.DictProxy
-        Global configuration of the microscope
+    Generic analog controlled stage. Could be used to control piezos, galvos,
+    etc. Currently set up to handle National Instruments data acquisition cards.
 
-    Methods
-    -------
-    create_position_dict()
-        Creates a dictionary with the hardware stage positions.
-    get_abs_position()
-        Makes sure that the move is within the min and max stage limits.
-    stop()
-        Emergency halt of stage operation.
+    Retrieves the volts per micron from the configuration file and uses that to
+    determine the correct voltage to send to the stage.
+
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the Galvo Stage.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+        """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # 1 V/ 100 um
@@ -76,11 +76,17 @@ class GalvoNIStage(StageBase):
             "stage"
         ]["hardware"]
 
-        # eval(self.volts_per_micron, {"x": 100})
         if type(device_config) == ListProxy:
+            #: float: volts per micron scaling factor.
             self.volts_per_micron = device_config[device_id]["volts_per_micron"]
+
+            #: int: channel number for each axis
             self.axes_channels = device_config[device_id]["axes_mapping"]
+
+            #: float: maximum voltage for each axis
             self.galvo_max_voltage = device_config[device_id]["max"]
+
+            #: float: minimum voltage for each axis
             self.galvo_min_voltage = device_config[device_id]["min"]
         else:
             self.volts_per_micron = device_config["volts_per_micron"]
@@ -88,42 +94,84 @@ class GalvoNIStage(StageBase):
             self.galvo_max_voltage = device_config["max"]
             self.galvo_min_voltage = device_config["min"]
 
-        # Notice: only supports one axis
+        #: dict: Mapping of software axes to hardware axes.
         self.axes_mapping = {self.axes[0]: self.axes_channels[0]}
 
+        #: object: Hardware device to connect to.
         self.daq = device_connection
 
+        #: str: Name of the microscope.
         self.microscope_name = microscope_name
+
+        #: multiprocessing.managers.DictProxy: Global configuration of the microscope.
         self.configuration = configuration
 
+        #: str: Trigger source for the DAQ.
         self.trigger_source = configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["trigger_source"]
+
+        #: float: Percent of the camera delay.
         self.camera_delay_percent = configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]["delay_percent"]
+
+        #: float: Percent of the remote focus delay.
         self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]["ramp_falling_percent"]
+
+        #: float: Percent of the remote focus delay.
         self.remote_focus_delay = configuration["configuration"]["microscopes"][
             microscope_name
         ]["remote_focus_device"]["delay_percent"]
+
+        #: float: Sample rate of the DAQ.
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["sample_rate"]
+
+        #: float: Total duration of the waveform output by the DAQ.
         self.sweep_time = None
+
+        #: int: Number of samples in the waveform output by the DAQ.
         self.samples = None
+
+        #: dict: Dictionary of exposure times for each channel.
         self.exposure_times = None
+
+        #: dict: Dictionary of sweep times for each channel.
         self.sweep_times = None
 
+        #: dict: Dictionary of waveforms for each channel.
         self.waveform_dict = {}
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self):
-        """Reports the position for all axes, and create position dictionary."""
+        """Reports the position for all axes, and create position dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary of positions for each axis.
+        """
         return self.get_position_dict()
 
     def calculate_waveform(self, exposure_times, sweep_times):
+        """Calculate the waveform for the stage.
+
+        Parameters
+        ----------
+        exposure_times : dict
+            Dictionary of exposure times for each channel
+        sweep_times : dict
+            Dictionary of sweep times for each channel
+
+        Returns
+        -------
+        waveform_dict : dict
+            Dictionary of waveforms for each channel
+        """
         self.exposure_times = exposure_times
         self.sweep_times = sweep_times
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
@@ -147,30 +195,6 @@ class GalvoNIStage(StageBase):
 
                 self.samples = int(self.sample_rate * self.sweep_time)
 
-                # Calculate the Waveforms
-                # if (
-                #     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                #     == "z-stack"
-                # ):
-                #     z_start = self.configuration["experiment"]["MicroscopeState"][
-                #         "abs_z_start"
-                #     ]
-                #     z_end = self.configuration["experiment"]["MicroscopeState"][
-                #         "abs_z_end"
-                #     ]
-                #     amp = eval(self.volts_per_micron, {"x": 0.5 * (z_end - z_start)})
-                #     off = eval(self.volts_per_micron, {"x": 0.5 * (z_end + z_start)})
-                #     self.waveform_dict[channel_key] = remote_focus_ramp(
-                #         sample_rate=self.sample_rate,
-                #         exposure_time=exposure_time,
-                #         sweep_time=self.sweep_time,
-                #         remote_focus_delay=self.remote_focus_delay,
-                #         camera_delay=self.camera_delay_percent,
-                #         fall=self.remote_focus_ramp_falling,
-                #         amplitude=amp,
-                #         offset=off,
-                #     )
-                # elif (
                 if (
                     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                     == "confocal-projection"
@@ -244,8 +268,6 @@ class GalvoNIStage(StageBase):
 
     def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """Implement movement logic along a single axis.
-
-        Example calls:
 
         Parameters
         ----------

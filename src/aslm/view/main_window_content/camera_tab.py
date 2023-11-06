@@ -258,9 +258,7 @@ class FramerateInfo(ttk.LabelFrame):
 
         The key is the widget name, value is the variable associated.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -279,9 +277,7 @@ class FramerateInfo(ttk.LabelFrame):
         This function returns the dictionary that holds the widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -372,7 +368,7 @@ class ROI(ttk.Labelframe):
                 label=self.roi_labels[i],
                 input_class=ValidatedSpinbox,
                 input_var=tk.IntVar(),
-                input_args={"from_": 0, "to": 2048, "increment": 1.0, "width": 5},
+                input_args={"from_": 0, "increment": 2.0, "width": 5},
             )
             self.inputs[self.roi_labels[i]].grid(row=i, column=0, pady=5, padx=5)
 
@@ -380,9 +376,9 @@ class ROI(ttk.Labelframe):
             self.inputs[self.fov_names[i]] = LabelInput(
                 parent=self.fov_frame,
                 label=self.xy_labels[i],
-                input_class=ttk.Entry,
+                input_class=ValidatedSpinbox,
                 input_var=tk.IntVar(),
-                input_args={"width": 7},
+                input_args={"width": 7, "required": True},
             )
             self.inputs[self.fov_names[i]].grid(row=i, column=0, pady=1, padx=5)
 
@@ -390,7 +386,8 @@ class ROI(ttk.Labelframe):
             self.inputs[self.center_names[i]] = LabelInput(
                 parent=self.center_roi_frame,
                 label=self.xy_labels[i],
-                input_class=ttk.Spinbox,
+                # input_class=ttk.Spinbox,
+                input_class=ValidatedSpinbox,
                 input_var=tk.IntVar(),
                 input_args={"from_": 0, "to": 2048, "increment": 1.0, "width": 6},
             )

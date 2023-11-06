@@ -395,7 +395,7 @@ def verify_experiment_config(manager, configuration):
         "img_x_pixels": 2048,
         "img_y_pixels": 2048,
         "sensor_mode": "Normal",
-        "readout_direction": "Top to Bottom",
+        "readout_direction": "Top-to-Bottom",
         "number_of_pixels": 10,
         "binning": "1x1",
         "frames_to_average": 1,
@@ -445,11 +445,10 @@ def verify_experiment_config(manager, configuration):
     if camera_setting_dict["sensor_mode"] not in ["Normal", "Light-Sheet"]:
         camera_setting_dict["sensor_mode"] = "Normal"
     if camera_setting_dict["readout_direction"] not in [
-        "",
-        "Top to Bottom",
-        "Bottom to Top",
+        "Top-to-Bottom",
+        "Bottom-to-Top",
     ]:
-        camera_setting_dict["readout_direction"] = "Top to Bottom"
+        camera_setting_dict["readout_direction"] = "Top-to-Bottom"
 
     # databuffer_size, number_of_pixels
     for k in ["databuffer_size", "number_of_pixels", "frames_to_average"]:
@@ -564,13 +563,15 @@ def verify_experiment_config(manager, configuration):
     for k in microscope_state_dict_sample:
         if k not in microscope_setting_dict.keys():
             microscope_setting_dict[k] = microscope_state_dict_sample[k]
-        elif type(microscope_setting_dict[k]) != type(microscope_state_dict_sample[k]):
-            if type(microscope_state_dict_sample[k]) == float:
+        elif not isinstance(
+            microscope_setting_dict[k], type(microscope_state_dict_sample[k])
+        ):
+            if isinstance(microscope_state_dict_sample[k], float):
                 try:
                     microscope_setting_dict[k] = float(microscope_setting_dict[k])
                 except ValueError:
                     microscope_setting_dict[k] = microscope_state_dict_sample[k]
-            elif type(microscope_state_dict_sample[k]) == int:
+            elif isinstance(microscope_state_dict_sample[k], int):
                 try:
                     microscope_setting_dict[k] = int(microscope_setting_dict[k])
                 except ValueError:
@@ -649,24 +650,22 @@ def verify_experiment_config(manager, configuration):
             "laser_power": 20.0,
             "camera_exposure_time": 200.0,
             "interval_time": 0.0,
-            "defocus": 0.0
+            "defocus": 0.0,
         }
         for k in temp:
             try:
-                channel_value[k] = float(
-                    channel_value[k]
-                )
+                channel_value[k] = float(channel_value[k])
             except ValueError:
                 channel_value[k] = temp[k]
             if channel_value[k] < 0:
                 channel_value[k] = temp[k]
-        
+
     microscope_setting_dict["selected_channels"] = selected_channel_num
 
     # MultiPositions
     if (
-        "MultiPositions" not in microscope_setting_dict
-        or type(microscope_setting_dict["MultiPositions"]) is not ListProxy
+        "MultiPositions" not in configuration["experiment"]
+        or type(configuration["experiment"]["MultiPositions"]) is not ListProxy
     ):
         update_config_dict(manager, configuration["experiment"], "MultiPositions", [])
     position_ids = []
@@ -692,6 +691,33 @@ def verify_experiment_config(manager, configuration):
 
 
 def verify_waveform_constants(manager, configuration):
+    """Verifies and updates the waveform constants in the configuration dictionary.
+
+    This function checks and ensures that the waveform constants in the given
+    configuration dictionary conform to the expected structure. It verifies and
+    updates the constants related to remote focus devices, lasers, and galvos
+    for multiple microscopes.
+
+    Parameters
+    ----------
+    manager : multiprocessing.Manager
+        Shares objects (e.g., dict) between processes
+    configuration : dict
+        The configuration dictionary containing waveform constants.
+
+    Note
+    ----
+        If constants are missing or not in the expected structure, default values
+        or empty dictionaries are added as necessary.
+    Note
+    ----
+        Laser and galvo constants are validated and converted to float if possible.
+    Note
+    ----
+        Non-existent microscopes, zoom levels, lasers, and galvos are removed
+        from the configuration.
+
+    """
     if type(configuration["waveform_constants"]) is not DictProxy:
         update_config_dict(manager, configuration, "waveform_constants", {})
     waveform_dict = configuration["waveform_constants"]

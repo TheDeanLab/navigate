@@ -45,6 +45,18 @@ logger = logging.getLogger(p)
 
 
 def build_TLKIMStage_connection(serialnum):
+    """Connect to the Thorlabs KIM Stage
+
+    Parameters
+    ----------
+    serialnum : str
+        Serial number of the stage.
+
+    Returns
+    -------
+    kim_controller
+        Thorlabs KIM Stage controller
+    """
     kim_controller = importlib.import_module(
         "aslm.model.devices.APIs.thorlabs.kcube_inertial"
     )
@@ -52,17 +64,36 @@ def build_TLKIMStage_connection(serialnum):
     # Initialize
     kim_controller.TLI_BuildDeviceList()
 
-    # Open the same serial number device if there are severial devices connected to the computer
+    # Open the same serial number device if there are several devices connected to the
+    # computer
     available_serialnum = kim_controller.TLI_GetDeviceListExt()
     if not list(filter(lambda s: str(s) == str(serialnum), available_serialnum)):
-        print(f"** Please make sure Thorlabs stage with serial number {serialnum} is connected to the computer!")
+        print(
+            f"** Please make sure Thorlabs stage with serial number {serialnum} "
+            f"is connected to the computer!"
+        )
         raise RuntimeError
     kim_controller.KIM_Open(str(serialnum))
     return kim_controller
 
 
 class TLKIMStage(StageBase):
+    """Thorlabs KIM Stage"""
+
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the stage.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : str
+            Connection string for the device.
+        configuration : dict
+            Configuration dictionary for the device.
+        device_id : int
+            Device ID for the device.
+        """
         super().__init__(
             microscope_name, device_connection, configuration, device_id
         )  # only initialize the focus axis
@@ -70,20 +101,29 @@ class TLKIMStage(StageBase):
         # Default mapping from self.axes to corresponding KIM channels
         axes_mapping = {"x": 4, "y": 2, "z": 3, "f": 1}
         if not self.axes_mapping:
-            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
+            #: dict: Dictionary mapping software axes to hardware axes.
+            self.axes_mapping = {
+                axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
+            }
 
+        #: list: List of KIM axes available.
         self.kim_axes = list(self.axes_mapping.values())
 
         if device_connection is not None:
+            #: object: Thorlabs KIM Stage controller
             self.kim_controller = device_connection
 
-        device_config = configuration["configuration"]["microscopes"][microscope_name]["stage"]["hardware"]
+        device_config = configuration["configuration"]["microscopes"][microscope_name][
+            "stage"
+        ]["hardware"]
         if type(device_config) == ListProxy:
+            #: str: Serial number of the stage.
             self.serial_number = str(device_config[device_id]["serial_number"])
         else:
             self.serial_number = device_config["serial_number"]
 
     def __del__(self):
+        """Delete the KIM Connection"""
         try:
             self.stop()
             self.kim_controller.KIM_Close(self.serial_number)
@@ -91,9 +131,15 @@ class TLKIMStage(StageBase):
             pass
 
     def report_position(self):
-        """
-        # Reports the position of the stage for all axes, and creates the hardware
-        # position dictionary.
+        """Report the position of the stage.
+
+        Reports the position of the stage for all axes, and creates the hardware
+        position dictionary.
+
+        Returns
+        -------
+        position_dict : dict
+            Dictionary containing the current position of the stage.
         """
         for ax, i in self.axes_mapping.items():
             try:
@@ -111,10 +157,7 @@ class TLKIMStage(StageBase):
         return self.get_position_dict()
 
     def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
-        """
-        Implement movement logic along a single axis.
-
-        Example calls:
+        """Implement movement logic along a single axis.
 
         Parameters
         ----------
@@ -132,7 +175,7 @@ class TLKIMStage(StageBase):
         """
         if axis not in self.axes_mapping:
             return False
-        
+
         axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
             return False
@@ -146,7 +189,8 @@ class TLKIMStage(StageBase):
             target_pos = axis_abs
             while (stage_pos != target_pos) and (i < n_tries):
                 # TODO: do we need to request before we get the current position
-                # self.kim_controller.KIM_RequestCurrentPosition(self.serial_number, int(self.axes_mapping[axis]))
+                # self.kim_controller.KIM_RequestCurrentPosition(self.serial_number,
+                # int(self.axes_mapping[axis]))
                 stage_pos = self.kim_controller.KIM_GetCurrentPosition(
                     self.serial_number, int(self.axes_mapping[axis])
                 )
@@ -157,7 +201,7 @@ class TLKIMStage(StageBase):
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
-        """Move stage
+        """Move stage along a single axis.
 
         Parameters
         ----------
@@ -178,7 +222,12 @@ class TLKIMStage(StageBase):
         for ax, n in self.axes_mapping.items():
             if f"{ax}_abs" not in move_dictionary:
                 continue
-            result = self.move_axis_absolute(ax, move_dictionary[f"{ax}_abs"], wait_until_done) and result
+            result = (
+                self.move_axis_absolute(
+                    ax, move_dictionary[f"{ax}_abs"], wait_until_done
+                )
+                and result
+            )
 
         return result
 
@@ -186,4 +235,3 @@ class TLKIMStage(StageBase):
         """Stop all stage channels move"""
         for i in self.kim_axes:
             self.kim_controller.KIM_MoveStop(self.serial_number, i)
-

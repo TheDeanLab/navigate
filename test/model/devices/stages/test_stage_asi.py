@@ -106,6 +106,8 @@ class MockASIStage:
             self.output_buffer.append(":A")
         elif command == "PC":
             self.output_buffer.append(":A")
+        elif command == "E":
+            self.output_buffer.append(":A")
 
     def readline(self):
         return bytes(self.output_buffer.pop(0), encoding="ascii")
@@ -187,6 +189,7 @@ class TestStageASI:
             (["f", "z"], ["M", "X"]),
             (["x", "y", "z"], ["Y", "X", "M"]),
             (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+            (["x", "y", "z", "f"], ["x", "M", "y", "Z"]),
         ],
     )
     def test_initialize_stage(self, axes, axes_mapping):
@@ -217,7 +220,7 @@ class TestStageASI:
             assert len(stage.axes_mapping) <= len(stage.axes)
         else:
             for i, axis in enumerate(axes):
-                assert stage.axes_mapping[axis] == axes_mapping[i]
+                assert stage.axes_mapping[axis] == axes_mapping[i].upper()
 
         assert stage.stage_limits is True
 
@@ -236,6 +239,7 @@ class TestStageASI:
             (["f", "z"], ["M", "X"]),
             (["x", "y", "z"], ["Y", "X", "M"]),
             (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+            (["x", "y", "z", "f"], ["x", "M", "y", "Z"]),
         ],
     )
     def test_report_position(self, axes, axes_mapping):
@@ -255,9 +259,18 @@ class TestStageASI:
             for axis in axes:
                 pos = random.randrange(-100, 500)
                 pos_dict[f"{axis}_pos"] = float(pos)
-                setattr(
-                    asi_stage.serial_port, f"{stage.axes_mapping[axis]}_abs", pos * 10.0
-                )
+                if axis == "theta":
+                    setattr(
+                        asi_stage.serial_port,
+                        f"{stage.axes_mapping[axis]}_abs",
+                        pos * 1000.0,
+                    )
+                else:
+                    setattr(
+                        asi_stage.serial_port,
+                        f"{stage.axes_mapping[axis]}_abs",
+                        pos * 10.0,
+                    )
             temp_pos = stage.report_position()
             assert pos_dict == temp_pos
 
@@ -276,6 +289,7 @@ class TestStageASI:
             (["f", "z"], ["M", "X"]),
             (["x", "y", "z"], ["Y", "X", "M"]),
             (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+            (["x", "y", "z", "f"], ["x", "M", "y", "Z"]),
         ],
     )
     def test_move_axis_absolute(self, axes, axes_mapping):
@@ -302,6 +316,7 @@ class TestStageASI:
             (["f", "z"], ["M", "X"]),
             (["x", "y", "z"], ["Y", "X", "M"]),
             (["x", "y", "z", "f"], ["X", "M", "Y", "Z"]),
+            (["x", "y", "z", "f"], ["x", "M", "y", "Z"]),
         ],
     )
     def test_move_absolute(self, axes, axes_mapping):

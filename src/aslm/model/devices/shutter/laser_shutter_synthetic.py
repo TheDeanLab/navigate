@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -44,30 +45,18 @@ logger = logging.getLogger(p)
 
 
 class SyntheticShutter(ShutterBase):
-    """SyntheticShutter Class
-
-    Triggering for shutters delivered from synthetically.
-
-    Attributes
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
-
-    Methods
-    -------
-    open_left()
-        Open the left shutter, close the right shutter.
-    open_right()
-        Open the right shutter, close the left shutter.
-    close_shutters()
-        Close both shutters
-    state()
-        Return the current state of the shutters
-    """
+    """SyntheticShutter Class - Triggering for shutters delivered from synthetically."""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the SyntheticShutter.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+        """
         super().__init__(microscope_name, device_connection, configuration)

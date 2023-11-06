@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 #  Standard Imports
+import sys
 import os
 from typing import Optional, Union
 import xml.etree.ElementTree as ET
@@ -47,6 +48,7 @@ class BigDataViewerMetadata(XMLMetadata):
     https://arxiv.org/abs/1412.0488."""
 
     def __init__(self) -> None:
+        """Initialize the BigDataViewer metadata object."""
         super().__init__()
 
     def bdv_xml_dict(
@@ -192,11 +194,32 @@ class BigDataViewerMetadata(XMLMetadata):
     def stage_positions_to_affine_matrix(
         self, x: float, y: float, z: float, theta: float, f: Optional[float] = None
     ) -> npt.ArrayLike:
-        """Convert stage positions to an affine matrix. Ignore focus for now."""
+        """Convert stage positions to an affine matrix. Ignore theta, focus for now."""
         arr = np.eye(3, 4)
 
+        # Set the transform positions
+        xp, yp, zp = x / self.dx, y / self.dy, z / self.dz
+
+
+        # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
+        # if they are both moving along the same physical dimension
+        if self._coupled_axes is not None:
+            for leader, follower in self._coupled_axes.items():
+                if leader.lower() not in "xyz":
+                    print(
+                        f"Unrecognized coupled axis {leader}. "
+                        "Not gonna do anything with this."
+                    )
+                    continue
+                elif leader.lower() == "x":
+                    xp += float(locals()[f"{follower.lower()}"]) / self.dx
+                elif leader.lower() == "y":
+                    yp += float(locals()[f"{follower.lower()}"]) / self.dy
+                elif leader.lower() == "z":
+                    zp += float(locals()[f"{follower.lower()}"]) / self.dz
+
         # Translation into pixels
-        arr[:, 3] = [x / self.dx, y / self.dy, z / self.dz]
+        arr[:, 3] = [yp, xp, zp]
 
         # Rotation (theta pivots in the xz plane, about the y axis)
         # sin_theta, cos_theta = np.sin(theta), np.cos(theta)
@@ -205,16 +228,30 @@ class BigDataViewerMetadata(XMLMetadata):
 
         return arr
 
-    def parse_bdv_xml(root: ET.Element) -> tuple:
-        """Parse a BigDataViewer XML file.
+    def affine_matrix_to_stage_positions(self, mat: npt.ArrayLike) -> tuple:
+        """
+        Convert affine matrix back into stage positions. Ignore theta, focus for now.
+        """
+        y, x, z = mat[:, 3] * np.array([self.dy, self.dx, self.dz])
+        theta, f = None, None
 
-        TODO: Incomplete."""
+        return x, y, z, theta, f
+
+    def parse_xml(self, root: Union[str, ET.Element]) -> tuple:
+        """Parse a BigDataViewer XML file into our metadata format."""
+
+        # Open the file, if present
+        if isinstance(root, str) and os.path.isfile(root):
+            with open(root, "r") as fp:
+                example = fp.read()
+                root = ET.fromstring(example)
+
         if root.tag != "SpimData":
             raise NotImplementedError(f"Unknown format {root.tag} failed to load.")
 
         # Check if we are loading a BigDataViewer hdf5
         image_loader = root.find("SequenceDescription/ImageLoader")
-        if image_loader.attrib["format"] != "bdv.hdf5":
+        if image_loader.attrib["format"] not in ["bdv.hdf5", "bdv.n5"]:
             raise NotImplementedError(
                 f"Unknown format {image_loader.attrib['format']} failed to load."
             )
@@ -222,16 +259,43 @@ class BigDataViewerMetadata(XMLMetadata):
         # Parse the file path
         base_path = root.find("BasePath")
         file = root.find("SequenceDescription/ImageLoader/hdf5")
-        file_path = file.text
-        if file.attrib["type"] == "relative":
-            file_path = os.path.join(base_path.text, file_path)
-            if base_path.attrib["type"] == "relative":
-                file_path = os.path.join(os.getcwd(), file_path)
+        file_path = os.path.join(base_path.text, file.text)
 
         # Get setups. Each setup represents a visualisation data source in the viewer
         # that provides one image volume per timepoint
         setups = [
             x.text for x in root.findall("SequenceDescription/ViewSetups/ViewSetup/id")
+        ]
+
+        # Get channels, one per setup
+        channels = list(
+            set(
+                [
+                    x.text
+                    for x in root.findall(
+                        "SequenceDescription/ViewSetups/ViewSetup/attributes/channel"
+                    )
+                ]
+            )
+        )
+
+        # Get number of positions, one per setup
+        self.positions = len(
+            root.findall("SequenceDescription/ViewSetups/ViewSetup/attributes/tile")
+        )
+
+        # Get image sizes in (x, y, z), one per setup
+        sizes = [
+            [int(y) for y in x.text.split()]
+            for x in root.findall("SequenceDescription/ViewSetups/ViewSetup/size")
+        ]
+
+        # Get image voxel sizes (dx, dy, dz), one per setup
+        voxel_sizes = [
+            [float(y) for y in x.text.split()]
+            for x in root.findall(
+                "SequenceDescription/ViewSetups/ViewSetup/voxelSize/size"
+            )
         ]
 
         # Get timepoints
@@ -242,9 +306,34 @@ class BigDataViewerMetadata(XMLMetadata):
             )
         t_start = int(root.find("SequenceDescription/Timepoints/first").text)
         t_stop = int(root.find("SequenceDescription/Timepoints/last").text)
-        timepoints = range(t_start, t_stop + 1)
+        timepoints = (t_start, t_stop + 1)
 
-        return file_path, setups, timepoints
+        # Get affine transformations, one per setup
+        tt, ts = np.array(
+            [
+                [int(x.attrib["timepoint"]), int(x.attrib["setup"])]
+                for x in root.findall("ViewRegistrations/ViewRegistration")
+            ]
+        ).T
+        transforms = [
+            np.array(x.text.split(), dtype=float).reshape(-1, 4)
+            for x in root.findall(
+                "ViewRegistrations/ViewRegistration/ViewTransform/affine"
+            )
+        ]
+
+        # Set up metadata parameters
+        self.dx, self.dy, self.dz = np.array(voxel_sizes).min(
+            0
+        )  # default to finest sampling
+        self._multiposition = self.positions > 1
+        self.shape_x, self.shape_y, self.shape_z = np.array(sizes).max(
+            0
+        )  # default to largest size captured
+        self.shape_c = len(channels)
+        self.shape_t = timepoints[1] - timepoints[0]
+
+        return file_path, setups, transforms
 
     def write_xml(self, file_name: str, views: list) -> None:
         return super().write_xml(

@@ -46,33 +46,58 @@ logger = logging.getLogger(p)
 
 
 class CameraBase:
-    """CameraBase Parent camera class.
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
-    """
+    """CameraBase - Parent camera class."""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize CameraBase class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocesing.managers.DictProxy
+            Global configuration of the microscope
+
+        Raises
+        ------
+        NameError
+            If microscope name is not in configuration
+        """
         if microscope_name not in configuration["configuration"]["microscopes"].keys():
             raise NameError(f"Microscope {microscope_name} does not exist!")
 
+        #: dict: Global configuration of the microscope
         self.configuration = configuration
+
+        #: object: Hardware device to connect to
         self.camera_controller = device_connection
+
+        #: dict: Camera parameters
         self.camera_parameters = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]
+
+        #: bool: Whether the camera is currently acquiring
         self.is_acquiring = False
 
         # Initialize Pixel Information
+        #: int: Maximum image width
         self.max_image_width = 2048
+        #: int: Maximum image height
         self.max_image_height = 2048
+        #: int: Minimum image width
+        self.min_image_width = 4
+        #: int: Minimum image height
+        self.min_image_height = 4
+        #: int: Minimum step size for image width.
+        self.step_image_width = 4
+        #: int: Minimum step size for image height.
+        self.step_image_height = 4
+        #: int: Number of pixels in the x direction
         self.x_pixels = self.max_image_width
+        #: int: Number of pixels in the y direction
         self.y_pixels = self.max_image_height
         self.camera_parameters["x_pixels"] = self.max_image_width
         self.camera_parameters["y_pixels"] = self.max_image_height
@@ -83,12 +108,27 @@ class CameraBase:
         self.camera_parameters["trigger_mode"] = 1.0
         self.camera_parameters["trigger_polarity"] = 2.0
 
-
         # Initialize offset and variance maps, if present
+        #: np.ndarray: Offset map
+        #: np.ndarray: Variance map
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
 
     def get_offset_variance_maps(self):
+        """Get offset and variance maps from file.
+
+        Returns
+        -------
+        offset : np.ndarray
+            Offset map.
+        variance : np.ndarray
+            Variance map.
+
+        Raises
+        ------
+        FileNotFoundError
+            If offset or variance map is not found.
+        """
         serial_number = self.camera_parameters["hardware"]["serial_number"]
         try:
             map_path = os.path.join(get_aslm_path(), "camera_maps")
@@ -104,12 +144,27 @@ class CameraBase:
 
     @property
     def offset(self):
+        """Return offset map. If not present, load from file.
+
+        Returns
+        -------
+        offset : np.ndarray
+            Offset map.
+        """
         if self._offset is None:
             self.get_offset_variance_maps()
         return self._offset
 
     @property
     def variance(self):
+        """Return variance map. If not present, load from file.
+
+        Returns
+        -------
+        variance : np.ndarray
+            Variance map.
+        """
+
         if self._variance is None:
             self.get_offset_variance_maps()
         return self._variance
@@ -119,8 +174,8 @@ class CameraBase:
 
         Parameters
         ----------
-            mode : str
-                'Top-to-Bottom', 'Bottom-to-Top', 'bytrigger', or 'diverge'.
+        mode : str
+            'Top-to-Bottom', 'Bottom-to-Top', 'bytrigger', or 'diverge'.
         """
         logger.debug(f"set camera readout direction to: {mode}")
 
@@ -148,8 +203,22 @@ class CameraBase:
         camera_line_interval = (full_chip_exposure_time / 1000) / (
             shutter_width + self.y_pixels - 1
         )
+
+        self.camera_parameters["line_interval"] = camera_line_interval
+
         exposure_time = camera_line_interval * shutter_width * 1000
         return exposure_time, camera_line_interval
 
     def close_camera(self):
+        """Close camera."""
         pass
+
+    def get_line_interval(self):
+        """Return stored camera line interval.
+
+        Returns
+        -------
+        line_interval : float
+            line interval duration (s).
+        """
+        return self.camera_parameters.get("line_interval", None)

@@ -49,8 +49,20 @@ logger = logging.getLogger(p)
 
 
 class MultiPositionController(GUIController):
+    """Controller for the Multi-Position Acquisition Interface."""
+
     def __init__(self, view, parent_controller=None):
+        """Initialize the Multi-Position Acquisition Interface.
+
+        Parameters
+        ----------
+        view : MultiPositionView
+            view for the Multi-Position Acquisition Interface
+        parent_controller : Controller, optional
+            parent controller, by default None
+        """
         super().__init__(view, parent_controller)
+        #: MultiPositionTable: Multi-Position Acquisition Interface
         self.table = self.view.pt
         # self.table.rowheader.bind("<Double-Button-1>", self.handle_double_click)
         self.table.loadCSV = self.load_positions
@@ -58,6 +70,29 @@ class MultiPositionController(GUIController):
         self.table.insertRow = self.insert_row_func
         self.table.generatePositions = self.generate_positions
         self.table.addStagePosition = self.add_stage_position
+
+        self.view.master.tiling_buttons.buttons["tiling"].config(
+            command=self.parent_controller.channels_tab_controller.launch_tiling_wizard
+        )
+
+        self.view.master.tiling_buttons.buttons["save_data"].config(
+            command=self.export_positions
+        )
+
+        self.view.master.tiling_buttons.buttons["load_data"].config(
+            command=self.load_positions
+        )
+
+        self.view.master.tiling_buttons.buttons["eliminate_tiles"].config(
+            command=self.eliminate_tiles
+        )
+
+    def eliminate_tiles(self):
+        """Eliminate tiles that do not contain tissue."""
+        print(
+            "TODO: Implement feature that goes to the middle position of each tile, "
+            "evaluates whether or not it consists of tissue, and if not, remove it."
+        )
 
     def set_positions(self, positions):
         """Set positions to multi-position's table
@@ -69,13 +104,11 @@ class MultiPositionController(GUIController):
 
         Example
         -------
-        positions = {
-            0: {'x': 0, 'y': 0, 'z': 0, 'theta': 0, 'f': 0},
-            1: {'x': 1, 'y': 1, 'z': 1, 'theta': 1, 'f': 1},
-            2: {'x': 2, 'y': 2, 'z': 2, 'theta': 2, 'f': 2}
-            }
-
-        >>> set_positions(positions)
+        >>>    positions = {
+        >>>    0: {'x': 0, 'y': 0, 'z': 0, 'theta': 0, 'f': 0},
+        >>>    1: {'x': 1, 'y': 1, 'z': 1, 'theta': 1, 'f': 1},
+        >>>    2: {'x': 2, 'y': 2, 'z': 2, 'theta': 2, 'f': 2}}
+        >>>    set_positions(positions)
         """
         axis_dict = {"x": "X", "y": "Y", "z": "Z", "theta": "R", "f": "F"}
         data = {}
@@ -118,21 +151,13 @@ class MultiPositionController(GUIController):
     def handle_double_click(self, event):
         """Move to a position within the Multi-Position Acquisition Interface.
 
-        When double clicked the row head, it will call the parent/central controller
+        When double-clicked the row head, it will call the parent/central controller
         to move stage and update stage view
 
         Parameters
         ----------
         event : tkinter event
             event that triggers the function
-
-        Returns
-        -------
-        None
-
-        Example
-        -------
-        >>> handle_double_click(event)
         """
         rowclicked = self.table.get_row_clicked(event)
         df = self.table.model.df
@@ -172,10 +197,6 @@ class MultiPositionController(GUIController):
 
         The valid csv file should contain the line of headers ['X', 'Y', 'Z', 'R', 'F']
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> load_positions()
@@ -207,10 +228,6 @@ class MultiPositionController(GUIController):
         This function opens a dialog that let the user input a filename
         Then, it will export positions to that csv file
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> export_positions()
@@ -227,10 +244,6 @@ class MultiPositionController(GUIController):
     def move_to_position(self):
         """Move to a position within the Multi-Position Acquisition Interface.
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> move_to_position()
@@ -241,11 +254,6 @@ class MultiPositionController(GUIController):
 
     def insert_row_func(self):
         """Insert a row in the Multi-Position Acquisition Interface.
-
-
-        Returns
-            -------
-            None
 
         Example
         -------
@@ -263,10 +271,6 @@ class MultiPositionController(GUIController):
         This function opens a dialog to let the user input start and end position
         Then it will generate positions for the user.
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> generate_positions()
@@ -278,10 +282,6 @@ class MultiPositionController(GUIController):
 
         This function will get the stage's current position,
         Then add it to position list
-
-        Returns
-        -------
-        None
 
         Example
         -------
@@ -298,10 +298,6 @@ class MultiPositionController(GUIController):
         position : dict
             position in the format of {axis: value}
 
-        Returns
-        -------
-        None
-
         Example
         -------
         >>> append_position(position)
@@ -315,3 +311,19 @@ class MultiPositionController(GUIController):
         self.table.redraw()
         self.table.tableChanged()
         self.show_verbose_info("add current stage position to position list")
+
+    def remove_positions(self, position_flag_list):
+        """Remove positions according to position_flag_list
+
+        Parameters
+        ----------
+        position_flag_list : list[bool]
+            False: the position should be removed
+            True: the position should be kept
+        """
+        positions = self.get_positions()
+        l = len(position_flag_list)  # noqa
+        new_positions = [
+            p for i, p in enumerate(positions) if (i >= l or position_flag_list[i])
+        ]
+        self.set_positions(new_positions)

@@ -224,7 +224,9 @@ class WaveformParameterPopupWindow:
             )
 
             galvo_freq = ttk.Label(
-                self.laser_frame, text=galvo_labels[i] + " Freq", padding=(2, 5, 0, 0)
+                self.laser_frame,
+                text=galvo_labels[i] + " Freq (Hz)",
+                padding=(2, 5, 0, 0),
             )
 
             galvo_freq.grid(row=prev + 2, column=0, sticky=tk.NSEW)
@@ -240,12 +242,20 @@ class WaveformParameterPopupWindow:
                 row=prev + 2, column=1, sticky=tk.NSEW, pady=(20, 0)
             )
 
+            # Button for automatic estimate of galvo frequency
+            self.buttons[galvo_labels[i] + " Freq"] = ttk.Button(
+                self.laser_frame,
+                text="Estimate Frequency",
+            )
+
+            self.buttons[galvo_labels[i] + " Freq"].grid(
+                row=prev + 2, column=2, sticky=tk.NSEW, pady=(20, 0)
+            )
+
             prev = prev + 2
 
         # High/Low Resolution
-        hi_lo_labels = ["Percent Delay",
-                        "Percent Smoothing",
-                        "Remote Focus Settle Duration (ms)"]
+        hi_lo_labels = ["Percent Delay", "Percent Smoothing", "Settle Duration (ms)"]
         dict_labels = ["Delay", "Smoothing", "Duty"]
         for i in range(3):
             self.inputs[dict_labels[i]] = LabelInput(
@@ -263,7 +273,7 @@ class WaveformParameterPopupWindow:
         # Padding Entry Widgets
         self.inputs["Delay"].pad_input(60, 0, 0, 0)
         self.inputs["Smoothing"].pad_input(30, 0, 0, 0)
-        self.inputs["Duty"].pad_input(5, 0, 0, 0)
+        self.inputs["Duty"].pad_input(25, 0, 0, 0)
 
     # Getters
     def get_variables(self):
@@ -273,9 +283,7 @@ class WaveformParameterPopupWindow:
         that are tied to each widget name.
         The key is the widget name, value is the variable associated.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -297,9 +305,7 @@ class WaveformParameterPopupWindow:
         This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -318,9 +324,7 @@ class WaveformParameterPopupWindow:
         This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------

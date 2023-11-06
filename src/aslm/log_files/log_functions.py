@@ -108,8 +108,12 @@ def log_setup(logging_configuration, logging_path=None):
     """Setup logging configuration
 
     Initialize a logger from a YAML file containing information in the Python logging
-    dictionary format.  Additional information here:
-    https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+    dictionary format.
+
+    Note
+    ----
+        Additional information here:
+        https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
 
     Parameters
     ----------
@@ -154,6 +158,10 @@ def log_setup(logging_configuration, logging_path=None):
         v : str
             Value to be updated
 
+        Returns
+        -------
+        Path : str
+            Path to the log file
         """
         return Path.joinpath(todays_path, v)
 

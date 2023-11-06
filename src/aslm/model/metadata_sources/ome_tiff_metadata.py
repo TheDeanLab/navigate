@@ -33,7 +33,7 @@ import os
 from typing import Optional, Union
 
 from .metadata import XMLMetadata
-from aslm import __version__
+from aslm import __version__, __commit__
 
 
 class OMETIFFMetadata(XMLMetadata):
@@ -59,7 +59,9 @@ class OMETIFFMetadata(XMLMetadata):
             OME TIFF metadata dictionary
         """
         ome_dict = {
-            "Creator": f"ASLM,DeanLab,v{__version__}",
+            "Creator": f"ASLM,v{__version__}, "
+            f"Commit {__commit__}, "
+            f"Dean Lab at UTSW",
             "xmlns": "http://www.openmicroscopy.org/Schemas/OME/2016-06",
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "xsi:schemaLocation": "http://www.openmicroscopy.org/Schemas/OME/2016-06 "
@@ -67,14 +69,14 @@ class OMETIFFMetadata(XMLMetadata):
         }
         if uid is not None:
             # Assume uid is a list passed in the order of the channels
-            if type(uid) != list:
+            if not isinstance(uid, list):
                 uid = [uid]
             ome_dict["UUID"] = "urn:uuid:" + uid[c]
         idx = c + t * self.shape_c
         ome_dict["Image"] = {"ID": f"Image:{idx}"}
         if file_name is not None:
             # Assume file name is a list passed in the order of the channels
-            if type(file_name) != list:
+            if not isinstance(file_name, list):
                 file_name = [file_name]
             ome_dict["Image"]["Name"] = os.path.basename(file_name[c])
         ome_dict["Image"]["Pixels"] = {"ID": f"Pixels:{idx}"}
@@ -138,9 +140,9 @@ class OMETIFFMetadata(XMLMetadata):
 
         if file_name is not None and uid is not None:
             ome_dict["Image"]["Pixels"]["TiffData"] = []
-            if type(file_name) != list:
+            if not isinstance(file_name, list):
                 file_name = [file_name]
-            if type(uid) != list:
+            if not isinstance(uid, list):
                 uid = [uid]
             if len(file_name) == len(uid):
                 # Assume file name is a list passed in the order of the channels
@@ -172,14 +174,24 @@ class OMETIFFMetadata(XMLMetadata):
             ome_dict["Image"]["Pixels"]["Plane"] = []
             for i in range(self.shape_c):
                 view_idx = i * self.shape_z
+                view = views[view_idx]
+                x, y, z = view["x"], view["y"], view["z"]
+                # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
+                # if they are both moving along the same physical dimension
+                if self._coupled_axes is not None:
+                    for leader, follower in self._coupled_axes:
+                        view[leader] += view[follower] / float(getattr(
+                            self, f"d{follower.lower()}"
+                        ))
+
                 d = {
                     "DeltaT": dt,
                     "TheT": "0",
                     "TheC": str(i),
                     "TheZ": "0",
-                    "PositionX": views[view_idx]["x"],
-                    "PositionY": views[view_idx]["y"],
-                    "PositionZ": views[view_idx]["z"],
+                    "PositionX": x,
+                    "PositionY": y,
+                    "PositionZ": z,
                 }
                 ome_dict["Image"]["Pixels"]["Plane"].append(d)
 

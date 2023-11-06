@@ -1,5 +1,3 @@
-# ASLM Model Waveforms
-
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
@@ -198,13 +196,9 @@ class TestWaveforms(unittest.TestCase):
         """Test that the smoothed waveform is proportionally larger than the
         original waveform.
 
-        Parameters
-        ----------
-        None
 
-        Returns
-        -------
-        None
+
+
         """
         ps = 10
         waveform = waveforms.remote_focus_ramp()

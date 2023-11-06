@@ -145,9 +145,7 @@ class ValidatedMixin:
         **kwargs
             Keyword arguments to pass to the parent class
 
-        Returns
-        -------
-        None
+
 
         """
         self.error = error_var or tk.StringVar()
@@ -193,9 +191,7 @@ class ValidatedMixin:
         on : bool
             Whether to turn the error message on or off
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -240,6 +236,13 @@ class ValidatedMixin:
         valid = True  # Again true means no error
         if event == "focusout":  # Leaving widget
             valid = self._focusout_validate(event=event)
+            if valid:
+                self.add_history(event)
+            else:
+                if self.undo_history:
+                    # Only keep the most recent value in forced undo
+                    self.undo_history = [self.undo_history[-1]]
+                valid = self.undo(event)
         elif event == "key":  # Keystroke into widget
             valid = self._key_validate(
                 proposed=proposed,
@@ -313,9 +316,7 @@ class ValidatedMixin:
         action : str
             The action being performed. 0 for delete, 1 for insert, -1 for other
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -342,9 +343,7 @@ class ValidatedMixin:
         **kwargs
             Keyword arguments to pass to the invalid function
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -361,9 +360,7 @@ class ValidatedMixin:
         **kwargs
             Keyword arguments to pass to the invalid function
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -377,9 +374,7 @@ class ValidatedMixin:
     def trigger_focusout_validation(self):
         """Trigger the focusout validation
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -399,24 +394,22 @@ class ValidatedMixin:
         event : tk.Event
             The event that triggered the history addition
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
         >>> widget = ttk.Entry()
         >>> widget.add_history(tk.Event())
         """
-        if self.get() != "":
-            if not self.undo_history or self.get() != self.undo_history[-1]:
-                if len(self.undo_history) < 3:
-                    self.undo_history.append(self.get())
-                    self.redo_history.clear()
-                else:
-                    self.undo_history.append(self.get())
-                    self.undo_history.pop(0)
-                    self.redo_history.clear()
+        value = self.get()
+        if value != "":
+            # Don't add duplicates
+            if self.undo_history and self.undo_history[-1] == value:
+                pass
+            else:
+                self.undo_history.append(value)
+            if len(self.undo_history) > 3:
+                self.undo_history.pop(0)
 
     def undo(self, event):
         """Undo the last change
@@ -426,9 +419,7 @@ class ValidatedMixin:
         event : tk.Event
             The event that triggered the undo
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -436,11 +427,28 @@ class ValidatedMixin:
         >>> widget.undo(tk.Event())
         """
         if self.undo_history:
-            if len(self.undo_history) > 1:
-                self.set(self.undo_history[-2])
-                self.redo_history.append(self.undo_history.pop())
-            elif len(self.undo_history) == 1:
-                self.redo_history.append(self.undo_history.pop())
+            # Get the redo value
+            value = self.undo_history.pop()
+            if self.redo_history and self.redo_history[-1] == value:
+                pass
+            else:
+                self.redo_history.append(value)
+            if len(self.redo_history) > 3:
+                self.redo_history.pop(0)
+
+            # Restore the undo value
+            if self.undo_history:
+                value = self.undo_history.pop()
+                self.set(value)
+            else:
+                # Don't let the undo history drop to zero.
+                # This lets us restore values.
+                # We have to set the value first to replace the invalid entry.
+                self.set(value)
+                self.redo_history.pop()
+                self.add_history(event)
+            return True
+        return False
 
     def redo(self, event):
         """Redo the last change
@@ -450,9 +458,7 @@ class ValidatedMixin:
         event : tk.Event
             The event that triggered the redo
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -460,12 +466,13 @@ class ValidatedMixin:
         >>> widget.redo(tk.Event())
         """
         if self.redo_history:
-            if not self.undo_history:
-                self.undo_history.append(self.redo_history.pop())
-                if not self.redo_history:
-                    return
-            self.set(self.redo_history[-1])
-            self.undo_history.append(self.redo_history.pop())
+            value = self.get()
+            self.add_history(event)
+            value = self.redo_history.pop()
+            self.set(value)
+            self.add_history(event)
+            return True
+        return False
 
 
 class ValidatedEntry(ValidatedMixin, ttk.Entry):
@@ -522,7 +529,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         self.precision = (
             self.resolution.normalize().as_tuple().exponent
         )  # Precision of number as exponent
-        self.variable = kwargs.get("textvariable") or tk.StringVar
+        self.variable = kwargs.get("textvariable") or tk.StringVar()
         self.min = min
         self.max = max
         self.required = required
@@ -535,18 +542,16 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         value : str
             The value to set the entry to
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
         >>> widget = ValidatedEntry(parent)
         >>> widget.set('1')
         """
-        self.delete(0, tk.END)
+        # self.delete(0, tk.END)
         self.variable.set(value)
-        self.insert(0, value)
+        # self.insert(0, value)
 
     def set_precision(self, prec):
         """Set the precision of the entry
@@ -559,9 +564,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         prec : int
             The precision to set the entry to
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -573,9 +576,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
     def _get_precision(self):
         """Get the precision of the entry
 
-        Parameters
-        ----------
-        None
+
 
         Returns
         -------
@@ -690,16 +691,15 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         else:
             self.error.set("")
 
-        # check if there are range limits
-        if min_val == "-Infinity" or max_val == "Infinity":
-            self.add_history(event)
-            return True
-
         try:
             value = Decimal(value)
         except InvalidOperation:
             self.error.set("Invalid number string: {}".format(value))
             return False
+
+        # check if there are range limits
+        if min_val == "-Infinity" or max_val == "Infinity":
+            return True
 
         # Checking if greater than minimum
         if value < int(min_val):
@@ -711,8 +711,6 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             self.error.set("Value is too high (max {})".format(max_val))
 
         # If input is valid on focusout add to history of widget
-        if valid:
-            self.add_history(event)
         return valid
 
     def _set_focus_update_var(self, event):
@@ -723,9 +721,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         event : tk.Event
             The event that triggered the update
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -743,9 +739,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         *args
             Arguments to pass to the invalid function
 
-        Returns
-        -------
-        None
+
         """
         current = self.get()
         try:
@@ -767,9 +761,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         *args
             Arguments to pass to the invalid function
 
-        Returns
-        -------
-        None
+
         """
         current = self.get()
         try:
@@ -791,9 +783,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         on : bool
             Whether to turn the error state on or off
 
-        Returns
-        -------
-        None
+
         """
         super()._toggle_error(on)
         if on:
@@ -961,9 +951,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         prec : int
             The number of decimal places allowed in the spinbox
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -979,9 +967,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         int
             The number of decimal places allowed in the spinbox
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -1062,13 +1048,13 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         return valid
 
-    def _focusout_validate(self, **kwargs):
+    def _focusout_validate(self, event):
         """Validate the spinbox when it loses focus
 
         Parameters
         ----------
-        **kwargs
-            Additional keyword arguments
+        event : tk.Event
+            The event that triggered the validation
 
         Returns
         -------
@@ -1081,16 +1067,16 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         """
         valid = True
         value = self.get()
+
         max_val = self.cget("to")
         min_val = self.cget("from")
         try:
-            max_val = round(Decimal(max_val), 16)
-            min_val = round(Decimal(min_val), 16)
+            max_val = Decimal(max_val)
+            min_val = Decimal(min_val)
         except InvalidOperation:
-            print(
-                f"Either min_val or max_val couldn't be case to a Decimal. "
-                f"min_val: {min_val} max_val: {max_val}"
-            )
+            err_str = f"Either {min_val} or {max_val} couldn't be cast to a Decimal."
+            logger.warning(err_str)
+            print(err_str)
 
         # Check for error upon leaving widget
         if value.strip() == "" and self.required:
@@ -1106,17 +1092,17 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         try:
             value = Decimal(value)
         except InvalidOperation:
-            self.error.set("Invalid number string: {}".format(value))
+            self.error.set("Invalid Number Provided: {}".format(value))
             return False
 
         # Checking if greater than minimum
         if value < min_val:
-            self.error.set(f"Value is too low (min {min_val:.3f})")
+            self.error.set(f"Minimum Value: {min_val:.3f}")
             valid = False
 
         # Checking if less than max
         if value > max_val:
-            self.error.set(f"Value is too high (max {max_val:.3f})")
+            self.error.set(f"Maximum Value: {max_val:.3f}")
             valid = False
 
         return valid
@@ -1131,9 +1117,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         event : tk.Event
             The event that triggered the function
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -1151,9 +1135,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         *args
             Additional arguments
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -1179,9 +1161,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         *args
             Additional arguments
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -1207,9 +1187,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         on : bool, optional
             Whether to turn the error on or off, by default False
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------

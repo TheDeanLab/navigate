@@ -45,58 +45,67 @@ logger = logging.getLogger(p)
 
 
 class Microscope:
-    """Microscope Class
-
-    This class is used to control the microscope.
-
-    Attributes
-    ----------
-    configuration : dict
-        Configuration dictionary.
-    data_buffer : ListProxy
-        Data buffer.
-    daq : Daq
-        Daq object.
-    microscope_name : str
-        Microscope name.
-    number_of_frames : int
-        Number of frames.
-
-    Methods
-    -------
-    update_data_buffer(img_width, img_height, data_buffer, number_of_frames)
-        Update the data buffer for the camera.
-    move_stage_offset(former_microscope=None)
-        Move the stage to the offset position.
-    end_acquisition()
-        End the acquisition.
-    get_readout_time()
-        Get readout time from camera.
-    """
+    """Microscope Class - Used to control the microscope."""
 
     def __init__(
         self, name, configuration, devices_dict, is_synthetic=False, is_virtual=False
     ):
+        """Initialize the microscope.
+
+        Parameters
+        ----------
+        name : str
+            Name of the microscope.
+        configuration : dict
+            Configuration dictionary.
+        devices_dict : dict
+            Dictionary of devices.
+        is_synthetic : bool, optional
+            Is synthetic, by default False
+        is_virtual : bool, optional
+            Is virtual, by default False
+        """
 
         # Initialize microscope object
+        #: str: Name of the microscope.
         self.microscope_name = name
+        #: dict: Configuration dictionary.
         self.configuration = configuration
+        #: SharedNDArray: Buffer for image data.
         self.data_buffer = None
+        #: dict: Dictionary of stages.
         self.stages = {}
+        #: list: List of stages.
         self.stages_list = []
+        #: bool: Ask stage for position.
         self.ask_stage_for_position = True
+        #: dict: Dictionary of lasers.
         self.lasers = {}
+        #: dict: Dictionary of galvanometers.
         self.galvo = {}
+        #: dict: Dictionary of data acquisition devices.
         self.daq = devices_dict.get("daq", None)
+        #: object; Tiger Controller object.
         self.tiger_controller = None
+        #: dict: Dictionary of microscope info.
         self.info = {}
+        #: int: Current channel.
         self.current_channel = None
+        #: int: Current laser index.
+        self.current_laser_index = 0
+        #: list: List of all channels.
         self.channels = None
+        #: list: List of available channels.
         self.available_channels = None
+        #: int: Number of images.
         self.number_of_frames = None
+        #: float: Central focus position.
         self.central_focus = None
+        #: Bool: Is a synthetic microscope.
         self.is_synthetic = is_synthetic
+        #: list: List of laser wavelengths.
         self.laser_wavelength = []
+        #: dict: Dictionary of returned stage positions.
         self.ret_pos_dict = {}
 
         if is_virtual:
@@ -253,10 +262,6 @@ class Microscope:
             Data buffer for the camera.
         number_of_frames : int
             Number of frames to be acquired.
-
-        Returns
-        -------
-        None
         """
 
         if self.camera.is_acquiring:
@@ -272,10 +277,6 @@ class Microscope:
         ----------
         former_microscope : str
             Name of the former microscope.
-
-        Returns
-        -------
-        None
         """
 
         if former_microscope:
@@ -306,13 +307,10 @@ class Microscope:
     def prepare_acquisition(self):
         """Prepare the acquisition.
 
-        Parameters
-        ----------
-        None
-
         Returns
         -------
-        None
+        waveform : dict
+            Dictionary of all the waveforms.
         """
         self.current_channel = 0
         self.central_focus = None
@@ -349,17 +347,10 @@ class Microscope:
         return self.calculate_all_waveform()
 
     def end_acquisition(self):
-        """End the acquisition.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """End the acquisition."""
         self.stop_stage()
+        if self.central_focus is not None:
+            self.move_stage({"f_abs": self.central_focus})
         self.daq.stop_acquisition()
         if self.camera.is_acquiring:
             self.camera.close_image_series()
@@ -369,12 +360,16 @@ class Microscope:
         self.current_channel = 0
         self.central_focus = None
 
+    def turn_on_laser(self):
+        """Turn on the current laser."""
+        self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
+
+    def turn_off_lasers(self):
+        """Turn off current laser."""
+        self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_off()
+
     def calculate_all_waveform(self):
         """Calculate all the waveforms.
-
-        Parameters
-        ----------
-        None
 
         Returns
         -------
@@ -406,11 +401,27 @@ class Microscope:
     def calculate_exposure_sweep_times(self, readout_time):
         """Get the exposure and sweep times for all channels.
 
+        The `calculate_exposure_sweep_times` function calculates and returns exposure
+        times and sweep times for all channels in a microscope configuration. It takes
+        the camera's readout time as an input parameter and considers various parameters
+        such as camera exposure time, delay percentages, and smoothing to compute these
+        times. The function iterates through the channels, performs calculations, and
+        returns the results as dictionaries containing exposure times and sweep times
+        for each channel.
+
         Parameters
         ----------
         readout_time : float
             Readout time of the camera (seconds) if we are operating the camera in
             Normal mode, otherwise -1.
+
+        Returns
+        -------
+        exposure_times : dict
+            Dictionary of exposure times.
+        sweep_times : dict
+            Dictionary of sweep times.
+
         """
         exposure_times = {}
         sweep_times = {}
@@ -470,13 +481,14 @@ class Microscope:
     def prepare_next_channel(self):
         """Prepare the next channel.
 
-        Parameters
-        ----------
-        None
+        This function, `prepare_next_channel`, is responsible for configuring various
+        hardware components for the next imaging channel in an experimental setup.
+        It sequentially selects the next available channel, sets the filter wheel,
+        camera exposure time, laser power, and other parameters based on the selected
+        channel's configuration. Additionally, it stops data acquisition, prepares the
+        data acquisition system for the new channel, and adjusts the focus position as
+        necessary, ensuring the hardware is ready for imaging the selected channel.
 
-        Returns
-        -------
-        None
         """
         curr_channel = self.current_channel
         prefix = "channel_"
@@ -518,13 +530,13 @@ class Microscope:
         self.camera.set_exposure_time(self.current_exposure_time)
 
         # Laser Settings
-        current_laser_index = channel["laser_index"]
+        self.current_laser_index = channel["laser_index"]
         for k in self.lasers:
             self.lasers[k].turn_off()
-        self.lasers[str(self.laser_wavelength[current_laser_index])].set_power(
+        self.lasers[str(self.laser_wavelength[self.current_laser_index])].set_power(
             channel["laser_power"]
         )
-        self.lasers[str(self.laser_wavelength[current_laser_index])].turn_on()
+        # self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
         # stop daq before writing new waveform
         self.daq.stop_acquisition()
@@ -535,15 +547,13 @@ class Microscope:
         # Assume wherever we start is the central focus
         # TODO: is this the correct assumption?
         if self.central_focus is None:
-            try:
-                self.central_focus = self.get_stage_position()["f_pos"]
-            except KeyError:
-                self.central_focus = 0.0
-        self.move_stage(
-            {"f_abs": self.central_focus + float(channel["defocus"])},
-            wait_until_done=True,
-            update_focus=False,
-        )
+            self.central_focus = self.get_stage_position().get("f_pos")
+        if self.central_focus is not None:
+            self.move_stage(
+                {"f_abs": self.central_focus + float(channel["defocus"])},
+                wait_until_done=True,
+                update_focus=False,
+            )
 
     def get_readout_time(self):
         """Get readout time from camera.
@@ -551,10 +561,6 @@ class Microscope:
         Get the camera readout time if we are in normal mode.
         Return a -1 to indicate when we are not in normal mode.
         This is needed in daq.calculate_all_waveforms()
-
-        Parameters
-        ----------
-        None
 
         Returns
         -------
@@ -583,7 +589,8 @@ class Microscope:
 
         Returns
         -------
-        None
+        success : bool
+            True if stage is successfully moved, False otherwise.
         """
         self.ask_stage_for_position = True
 
@@ -612,16 +619,7 @@ class Microscope:
         return success
 
     def stop_stage(self):
-        """Stop stage.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Stop stage."""
 
         self.ask_stage_for_position = True
 
@@ -630,10 +628,6 @@ class Microscope:
 
     def get_stage_position(self):
         """Get stage position.
-
-        Parameters
-        ----------
-        None
 
         Returns
         -------
@@ -649,11 +643,25 @@ class Microscope:
         return self.ret_pos_dict
 
     def move_remote_focus(self, offset=None):
+        """Move remote focus.
+
+        Parameters
+        ----------
+        offset : float, optional
+            Offset, by default None
+        """
         readout_time = self.get_readout_time()
         exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
         self.remote_focus_device.move(exposure_times, sweep_times, offset)
 
     def update_stage_limits(self, limits_flag=True):
+        """Update stage limits.
+
+        Parameters
+        ----------
+        limits_flag : bool, optional
+            Limits flag, by default True
+        """
         self.ask_stage_for_position = True
         for stage, _ in self.stages_list:
             stage.stage_limits = limits_flag
@@ -730,10 +738,6 @@ class Microscope:
             Name.
         i : int
             Index.
-
-        Returns
-        -------
-        None
         """
         # Import start_device classes
         try:

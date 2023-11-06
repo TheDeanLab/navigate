@@ -41,6 +41,18 @@ logger = logging.getLogger(p)
 
 
 def build_MCLStage_connection(serialnum):
+    """Build a connection to the Mad City Lab stage.
+
+    Parameters
+    ----------
+    serialnum : int
+        Serial number of the stage.
+
+    Returns
+    -------
+    stage_connection : dict
+        Dictionary containing the connection information for the stage.
+    """
     mcl_controller = importlib.import_module("aslm.model.devices.APIs.mcl.madlib")
 
     # Initialize
@@ -54,30 +66,54 @@ def build_MCLStage_connection(serialnum):
 
 
 class MCLStage(StageBase):
+    """Mad City Lab stage class."""
+
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the MCL stage.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : dict
+            Dictionary containing the connection information for the device.
+        configuration : dict
+            Dictionary containing the configuration information for the device.
+        device_id : int
+            Device ID.
+        """
         super().__init__(
             microscope_name, device_connection, configuration, device_id
         )  # only initialize the focus axis
 
         # Mapping from self.axes to corresponding MCL channels
         if device_connection is not None:
+            #: object: MCL controller object.
             self.mcl_controller = device_connection["controller"]
+
+            #: int: MCL handle.
             self.handle = device_connection["handle"]
 
         # Default axes mapping
         # the API maps axis to a number
-        axes_mapping = {'x': 'x', 'y': 'y', 'z': 'z', 'f': 'f', 'theta': 'aux'}
+        axes_mapping = {"x": "x", "y": "y", "z": "z", "f": "f", "theta": "aux"}
         if not self.axes_mapping:
-            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
+            #: dict: Dictionary of software axes and their corresponding hardware axes.
+            self.axes_mapping = {
+                axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
+            }
 
     def report_position(self):
-        """
-        # Reports the position of the stage for all axes, and creates the hardware
-        # position dictionary.
+        """Report the position of the stage.
+
+        Reports the position of the stage for all axes, and creates the hardware
+        position dictionary.
         """
         for ax in self.axes_mapping:
             try:
-                pos = self.mcl_controller.MCL_SingleReadN(self.axes_mapping[ax], self.handle)
+                pos = self.mcl_controller.MCL_SingleReadN(
+                    self.axes_mapping[ax], self.handle
+                )
                 setattr(self, f"{ax}_pos", pos)
             except self.mcl_controller.MadlibError as e:
                 logger.debug(f"MCL - {e}")
@@ -86,8 +122,7 @@ class MCLStage(StageBase):
         return self.get_position_dict()
 
     def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
-        """
-        Implement movement logic along a single axis.
+        """Implement movement logic along a single axis.
 
         Example calls:
 
@@ -110,7 +145,9 @@ class MCLStage(StageBase):
         if axis_abs == -1e50:
             return False
 
-        self.mcl_controller.MCL_SingleWriteN(axis_abs, self.axes_mapping[axis], self.handle)
+        self.mcl_controller.MCL_SingleWriteN(
+            axis_abs, self.axes_mapping[axis], self.handle
+        )
 
         if wait_until_done:
             stage_pos, n_tries, i = -1e50, 10, 0
@@ -123,7 +160,7 @@ class MCLStage(StageBase):
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
-        """
+        """Move the stage to an absolute position.
 
         Parameters
         ----------
@@ -142,10 +179,10 @@ class MCLStage(StageBase):
         abs_pos_dict = self.verify_abs_position(move_dictionary)
         if not abs_pos_dict:
             return False
-        
+
         result = True
         for ax in abs_pos_dict:
-            success = self.move_axis_absolute(ax, abs_pos_dict[ax], wait_until_done)    
+            success = self.move_axis_absolute(ax, abs_pos_dict[ax], wait_until_done)
             result = result and success
 
         return result

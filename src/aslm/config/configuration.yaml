@@ -62,10 +62,16 @@ microscopes:
       defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
       delay_percent: 10
       pulse_percent: 1
+      x_pixels_step: 4
+      y_pixels_step: 4
+      x_pixels_min: 4
+      y_pixels_min: 4
       exposure_time_range:
         min: 1
         max: 1000
         step: 1
+      flip_x: False
+      flip_y: False
     remote_focus_device:
       hardware:
         name: daq
@@ -148,6 +154,10 @@ microscopes:
       z_offset: 0
       theta_offset: 0
       f_offset: 0
+
+      flip_x: False
+      flip_y: False
+      flip_z: False
 
     zoom:
       hardware:
@@ -278,6 +288,10 @@ microscopes:
       defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
       delay_percent: 10
       pulse_percent: 1
+      x_pixels_step: 4
+      y_pixels_step: 4
+      x_pixels_min: 4
+      y_pixels_min: 4
       exposure_time_range:
         min: 1
         max: 1000

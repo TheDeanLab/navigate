@@ -39,6 +39,13 @@ import logging
 
 
 class PerformanceFilter(logging.Filter):
+    """
+    A custom logging filter to exclude performance messages.
+
+    This filter is designed to be used with the Python logging module. It includes
+    log records whose messages do not start with "Performance" or "Spec."
+    """
+
     def filter(self, record):
         """Filter out performance messages
 
@@ -63,6 +70,13 @@ class PerformanceFilter(logging.Filter):
 
 
 class NonPerfFilter(logging.Filter):
+    """
+    A custom logging filter to exclude non-performance messages.
+
+    This filter is designed to be used with the Python logging module. It excludes
+    log records whose messages do not start with "Performance" or "Spec."
+    """
+
     def filter(self, record):
         """Filter out non-performance messages
 

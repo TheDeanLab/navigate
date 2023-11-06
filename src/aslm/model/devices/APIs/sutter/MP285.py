@@ -94,10 +94,10 @@ class MP285:
         self.safe_to_write.wait()
         self.safe_to_write.clear()
         curr_time = time.time()
-        # Recommended time between commands is 2 ms 
+        # Recommended time between commands is 2 ms
         diff_time = curr_time - self.last_write_time
         if diff_time < 0.002:
-            time.sleep(0.002-diff_time + 0.0001)
+            time.sleep(0.002 - diff_time + 0.0001)
         self.serial.read_all()
         self.serial.reset_input_buffer()
         self.serial.reset_output_buffer()
@@ -115,16 +115,7 @@ class MP285:
         self.serial.close()
 
     def flush_buffers(self):
-        """Flush Serial I/O Buffers.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
+        """Flush Serial I/O Buffers."""
         self.safe_to_write.wait()
         self.safe_to_write.clear()
         self.serial.read_all()

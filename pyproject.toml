@@ -57,6 +57,7 @@ docs = [
     "numpydoc",
     "nbconvert",
     "sphinx<6.0.0",
+    "sphinx_rtd_theme",
     "sphinx-copybutton",
     "sphinx-issues",
     "sphinx-design",

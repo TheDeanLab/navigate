@@ -46,106 +46,60 @@ class StageController(GUIController):
     This class is the controller for the stage GUI. It handles the stage movement
     and the stage limits. It also handles the stage movement buttons and the
     stage movement limits.
-
-    Parameters
-    ----------
-    view : aslm.view.stage_view.StageView
-        The stage view
-    main_view : tkinter.Tk
-        The main view of the microscope
-    canvas : tkinter.Canvas
-        The canvas of the microscope
-    parent_controller : aslm.controller.microscope_controller.MicroscopeController
-        The parent controller of the stage controller
-
-    Attributes
-    ----------
-    main_view : tkinter.Tk
-        The main view of the microscope
-    canvas : tkinter.Canvas
-        The canvas of the microscope
-    stage_setting_dict : dict
-        The stage settings dictionary
-    event_id : dict
-        The event id dictionary
-    position_min : dict
-        The minimum position dictionary
-    position_max : dict
-        The maximum position dictionary
-    widget_vals : dict
-        The widget values dictionary
-    position_callback_traces : dict
-        The position callback traces dictionary
-    position_callbacks_bound : bool
-        The position callbacks bound boolean
-    joystick_is_on : bool
-        The joystick on/off boolean
-    joystick_axes : list
-        The joystick axes
-    stage_limits: bool
-        The flag to turn on/off stage position limits
-    flip_flags: dict
-        A flag dictionary to indicate whether an axis is flipped
-
-    Methods
-    -------
-    bind_position_callbacks()
-        Bind the position callbacks
-    down_btn_handler(axis)
-        The down button handler
-    get_position()
-        Get the position
-    initialize()
-        Initialize the stage limits of steps and positions
-    populate_experiment_values()
-        Populate the experiment values
-    position_callback(axis, position)
-        The position callback
-    set_position(position)
-        Set the position
-    set_position_silent(position)
-        Set the position silently
-    stage_key_press(event)
-        The stage key press
-    stop_button_handler()
-        The stop button handler
-    joystick_button_handler()
-        The enable/disable joystick button
-    unbind_position_callbacks()
-        Unbind the position callbacks
-    up_btn_handler(axis)
-        The up button handler
-    xy_zero_btn_handler()
-        The xy zero button handler
-    zero_btn_handler(axis)
-        The zero button handler
     """
 
     def __init__(self, view, main_view, canvas, parent_controller):
+        """Initializes the StageController
+
+        Parameters
+         ----------
+         view : aslm.view.stage_view.StageView
+             The stage view
+         main_view : tkinter.Tk
+             The main view of the microscope
+         canvas : tkinter.Canvas
+             The canvas of the microscope
+         parent_controller : aslm.controller.microscope_controller.MicroscopeController
+             The parent controller of the stage controller
+        """
         super().__init__(view, parent_controller)
 
+        #: str: The default microscope
         self.default_microscope = (
             f"{self.parent_controller.configuration_controller.microscope_name}"
         )
+
+        #: bool: The joystick mode is on.
         self.joystick_is_on = False
+
+        #: list: The joystick axes
         self.joystick_axes = self.parent_controller.configuration["configuration"][
             "microscopes"
         ][self.default_microscope]["stage"].get("joystick_axes", [])
 
+        #: tkinter.Tk: The main view of the microscope
         self.main_view = main_view
+
+        #: tkinter.Canvas: The canvas of the microscope
         self.canvas = canvas
 
+        #: dict: The stage setting dictionary
         self.stage_setting_dict = self.parent_controller.configuration["experiment"][
             "StageParameters"
         ]
 
+        #: dict: The event id
         self.event_id = {"x": None, "y": None, "z": None, "theta": None, "f": None}
 
         # stage movement limits
+        #: dict: The minimum stage position.
         self.position_min = {}
+
+        #: dict: The maximum stage position.
         self.position_max = {}
 
         # variables
+        #: dict: The widget values
         self.widget_vals = self.view.get_variables()
 
         # gui event bind
@@ -166,16 +120,30 @@ class StageController(GUIController):
             )
 
         buttons["stop"].configure(command=self.stop_button_handler)
+
         buttons["joystick"].configure(command=self.joystick_button_handler)
+
+        #: dict: The position callback traces
         self.position_callback_traces = {}
+
+        #: bool: The position callbacks are bound
         self.position_callbacks_bound = False
+
         self.bind_position_callbacks()
+
+        #: bool: The stage limits are on
         self.stage_limits = True
+
+        #: list: The stage flip flags
         self.flip_flags = None
+
         self.initialize()
 
     def stage_key_press(self, event):
-        """The stage key press
+        """The stage key press.
+
+        This function is called when a W, A, S, or D is
+        pressed and initializes a stage movement..
 
         Parameters
         ----------
@@ -269,7 +237,7 @@ class StageController(GUIController):
             self.position_callbacks_bound = False
 
     def populate_experiment_values(self):
-        """This function set all the position and step values"""
+        """This function sets all the position and step values"""
         self.stage_setting_dict = self.parent_controller.configuration["experiment"][
             "StageParameters"
         ]
@@ -285,8 +253,6 @@ class StageController(GUIController):
         ----------
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
-
-
         """
         widgets = self.view.get_widgets()
         for axis in ["x", "y", "z", "theta", "f"]:
@@ -304,8 +270,6 @@ class StageController(GUIController):
         ----------
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
-
-
         """
         self.unbind_position_callbacks()
 
@@ -315,8 +279,6 @@ class StageController(GUIController):
 
     def get_position(self):
         """This function returns current position from the view.
-
-
 
         Returns
         -------
@@ -362,6 +324,8 @@ class StageController(GUIController):
             step_val = self.widget_vals[axis + "_step"]
 
         def handler():
+            """This function generates command functions according to the desired axis
+            to move."""
             stage_direction = -1 if self.flip_flags[axis] else 1
             try:
                 temp = position_val.get() + step_val.get() * stage_direction
@@ -400,6 +364,8 @@ class StageController(GUIController):
             step_val = self.widget_vals[axis + "_step"]
 
         def handler():
+            """This function generates command functions according to the desired axis
+            to move."""
             stage_direction = -1 if self.flip_flags[axis] else 1
             try:
                 temp = position_val.get() - step_val.get() * stage_direction
@@ -441,8 +407,6 @@ class StageController(GUIController):
     def xy_zero_btn_handler(self):
         """This function generates command functions to set xy position to zero
 
-
-
         Returns
         -------
         handler : object
@@ -468,9 +432,6 @@ class StageController(GUIController):
         ----------
         event : tkinter.Event
             The tkinter event
-
-
-
         """
         if self.joystick_is_on:
             self.joystick_is_on = False
@@ -488,9 +449,8 @@ class StageController(GUIController):
         ----------
         event : tkinter.Event
             The tkinter event (currently unused)
-
-
-
+        *args : ...
+            ...
         """
         self.view.force_enable_all_axes()
 
@@ -512,13 +472,13 @@ class StageController(GUIController):
         handler : object
             Function for moving stage to the desired position with debounce
             functionality.
-
         """
         position_var = self.widget_vals[axis]
         temp = self.view.get_widgets()
         widget = temp[axis].widget
 
         def handler(*args):
+            """Callback functions bind to position variables."""
             if self.event_id[axis]:
                 self.view.after_cancel(self.event_id[axis])
             # if position is not a number, then do not move stage
@@ -569,6 +529,7 @@ class StageController(GUIController):
         """
 
         def func(*args):
+            """Callback functions bind to step size variables."""
             microscope_name = self.parent_controller.configuration["experiment"][
                 "MicroscopeState"
             ]["microscope_name"]

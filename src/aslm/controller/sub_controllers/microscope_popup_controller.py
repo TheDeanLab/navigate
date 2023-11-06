@@ -48,9 +48,10 @@ logger = logging.getLogger(p)
 
 
 class MicroscopePopupController(GUIController):
+    """Controller for the microscope setting popup window."""
+
     def __init__(self, view, parent_controller, microscope_info):
-        """
-        Controller for remote focus parameters.
+        """Initialize the MicroscopePopupController.
 
         Parameters
         ----------
@@ -62,43 +63,19 @@ class MicroscopePopupController(GUIController):
         microscope_info : dict
             A dictionary containing the information of the microscopes.
 
-        Attributes
-        ----------
-        view : object
-            GUI element containing widgets and variables to control.
-            Likely tk.Toplevel-derived.
-        parent_controller : ASLM_controller
-            The main controller.
-        widgets : dict
-            A dictionary containing the widgets in the view.
-        variables : dict
-            A dictionary containing the variables in the view.
-        buttons : dict
-            A dictionary containing the buttons in the view.
-        microscope_info : dict
-            A dictionary containing the information of the microscopes.
-        primary_microscope : str
-            The name of the primary microscope.
-
-        Methods
-        -------
-        showup()
-            This function will let the popup window show in front.
-        exit_func()
-            Close the window and delete this controller
-        update_microscope_mode(microscope_name)
-            Update the microscope mode.
-        confirm_microscope_setting()
-            Confirm the microscope setting.
         """
         super().__init__(view, parent_controller)
-
+        #: tk.Toplevel-derived: The popup window.
         self.view = MicroscopeSettingPopupWindow(view, microscope_info)
+        #: dict: A dictionary containing the widgets.
         self.widgets = self.view.get_widgets()
+        #: dict: A dictionary containing the variables.
         self.variables = self.view.get_variables()
+        #: dict: A dictionary containing the buttons.
         self.buttons = self.view.get_buttons()
-
+        #: dict: A dictionary containing the microscope information.
         self.microscope_info = microscope_info
+        #: str: The name of the primary microscope.
         self.primary_microscope = None
 
         # add saving function to the function closing the window
@@ -159,6 +136,13 @@ class MicroscopePopupController(GUIController):
         microscope_name = microscope_name
 
         def func(*args):
+            """Update the microscope mode.
+
+            Parameters
+            ----------
+            *args : list
+                The arguments.
+            """
             setting_value = variable.get()
             if setting_value == "Primary Microscope":
                 self.primary_microscope = microscope_name
@@ -185,7 +169,7 @@ class MicroscopePopupController(GUIController):
         return func
 
     def confirm_microscope_setting(self):
-        """Confirm the microscope setting."""
+        """Confirm the microscope settings."""
         # must have one primary microscope
         if not self.primary_microscope:
             tkinter.messagebox.showerror(

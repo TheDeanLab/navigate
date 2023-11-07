@@ -482,7 +482,7 @@ class CVACONPRO:
         # print(f"received_Frames v2: {self.recieved_frames_v2}")
 
     def end_data_func(self):
-        # pos = self.asi_stage.get_axis_position(self.axis)
+        pos = self.asi_stage.get_axis_position(self.axis)
         expected_channel = self.expected_frames * (self.end_signal_temp + 1)
         time_total = (self.total_frames * self.current_sweep_time)/60
         time_per_channel = (expected_channel * self.current_sweep_time)/60
@@ -492,8 +492,8 @@ class CVACONPRO:
         print(f"time remaining per channel min: {time_remaining_per_channel}, time remaining total min: {time_remaining_total}")
         logger.info(f"Received: {self.received_frames} Per Channel: {expected_channel} Expected Total: {self.total_frames}")
         # print(f"Received V2: {self.received_frames_v2} Expected: {self.expected_frames}")
-        # print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
-        # logger.info(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
+        print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
+        logger.info(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
         self.end_acquisition = self.received_frames >= self.total_frames
         return self.end_acquisition
     

@@ -231,9 +231,9 @@ class ImageWriter:
 
         """
 
-        self.data_source.set_metadata_from_configuration_experiment(
-            self.model.configuration
-        )
+        # self.data_source.set_metadata_from_configuration_experiment(
+        #     self.model.configuration
+        # )
 
         for idx in frame_ids:
             # Identify channel, z, time, and position indices

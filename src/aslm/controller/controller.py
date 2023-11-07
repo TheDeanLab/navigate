@@ -184,7 +184,7 @@ class Controller:
 
         # Initialize the View
         #: View: View object in MVC architecture.
-        self.view = view(root)
+        self.view = view(root=root, configuration=self.configuration)
 
         # Sub Gui Controllers
         #: AcquireBarController: Acquire Bar Sub-Controller.

@@ -88,7 +88,7 @@ class MainApp(ttk.Frame):
     spots 1 & 2
     """
 
-    def __init__(self, root, *args, **kwargs):
+    def __init__(self, root, configuration, *args, **kwargs):
 
         # Inits this class as a frame subclass with the root as its parent
         self.scroll_frame = ScrolledFrame(root)
@@ -103,6 +103,7 @@ class MainApp(ttk.Frame):
         # widgets can be resized with the window
         self.root = root
         self.root.title("Autonomous Software for Light Microscopy")
+        self.configuration = configuration
 
         # keep icons relative to view directory structure
         view_directory = Path(__file__).resolve().parent
@@ -142,6 +143,8 @@ class MainApp(ttk.Frame):
 
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook
-        self.settings = SettingsNotebook(self.frame_left, self.root)
-        self.camera_waveform = CameraNotebook(self.frame_top_right, self.root)
-        self.acqbar = AcquireBar(self.top_frame, self.root)
+        self.settings = SettingsNotebook(
+            frame_left=self.frame_left, root=self.root, configuration=self.configuration
+        )
+        self.camera_waveform = CameraNotebook(self.frame_top_right, root=self.root)
+        self.acqbar = AcquireBar(self.top_frame, root=self.root)

@@ -88,16 +88,17 @@ class SettingsNotebook(DockableNotebook):
     None
     """
 
-    def __init__(self, frame_left, root, *args, **kwargs):
+    def __init__(self, frame_left, root, configuration, *args, **kwargs):
 
         # Init notebook
         DockableNotebook.__init__(self, frame_left, root, *args, **kwargs)
 
         # Putting notebook 1 into left frame
         self.grid(row=0, column=0)
+        self.configuration = configuration
 
         # Creating the Channels tab
-        self.channels_tab = ChannelsTab(self)
+        self.channels_tab = ChannelsTab(self, configuration=self.configuration)
 
         # Creating the Camera tab
         self.camera_settings_tab = CameraSettingsTab(self)

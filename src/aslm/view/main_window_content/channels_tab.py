@@ -48,82 +48,69 @@ logger = logging.getLogger(p)
 
 
 class ChannelsTab(tk.Frame):
-    """Channels Tab for the Main Window
+    """Channels Tab for the Main Window"""
 
-    This tab is used to set the channels for the stack acquisition.
+    def __init__(self, setntbk, configuration, *args, **kwargs):
+        """Initialize the Channels Tab
 
-    Parameters
-    ----------
-    setntbk : tk.Notebook
-        The notebook that this tab is added to
-    *args : tuple
-        Positional arguments for tk.Frame
-    **kwargs : dict
-        Keyword arguments for tk.Frame
-
-    Attributes
-    ----------
-    index : int
-        The index of the tab in the notebook
-    channel_widgets_frame : ChannelCreator
-        The frame that contains the channel settings
-    stack_acq_frame : StackAcquisitionFrame
-        The frame that contains the stack acquisition settings
-    stack_timepoint_frame : StackTimePointFrame
-        The frame that contains the time settings
-    multipoint_frame : MultiPointFrame
-        The frame that contains the multipoint settings
-    quick_launch : QuickLaunchFrame
-        The frame that contains the quick launch buttons
-    conpro_acq_frame : ConfocalProjectionFrame
-        The frame that contains the confocal projection settings
-
-    Methods
-    -------
-    None
-    """
-
-    def __init__(self, setntbk, *args, **kwargs):
+        Parameters
+        ----------
+        setntbk : ttk.Notebook
+            The Notebook that this frame is added to
+        configuration : Configuration
+            The configuration object
+        *args : tuple
+            Positional arguments for tk.Frame
+        **kwargs : dict
+            Keyword arguments for tk.Frame
+        """
         # Init Frame
         tk.Frame.__init__(self, setntbk, *args, **kwargs)
-
-        self.index = 0
+        self.configuration = configuration
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Channel Settings
-        self.channel_widgets_frame = ChannelCreator(self)
+        #: tk.Frame: The frame that holds the channel settings
+        self.channel_widgets_frame = ChannelCreator(
+            self, configuration=self.configuration
+        )
         self.channel_widgets_frame.grid(
             row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
         # Stack Acquisition Settings
+        #: tk.Frame: The frame that holds the stack acquisition settings
         self.stack_acq_frame = StackAcquisitionFrame(self)
         self.stack_acq_frame.grid(
             row=1, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
         # Time Settings
+        #: tk.Frame: The frame that holds the time settings
         self.stack_timepoint_frame = StackTimePointFrame(self)
         self.stack_timepoint_frame.grid(
             row=3, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
         # Multipoint Enable
+        #: tk.Frame: The frame that holds the multipoint settings
         self.multipoint_frame = MultiPointFrame(self)
         self.multipoint_frame.grid(
             row=4, column=0, columnspan=1, sticky=tk.NSEW, padx=10, pady=10
         )
 
         # Quick Launch Buttons
+        #: tk.Frame: The frame that holds the quick launch buttons
         self.quick_launch = QuickLaunchFrame(self)
         self.quick_launch.grid(
             row=4, column=1, columnspan=2, sticky=tk.NSEW, padx=10, pady=10
         )
 
         # Confocal Projection Settings
+        #: tk.Frame: The frame that holds the confocal projection settings
         self.conpro_acq_frame = ConfocalProjectionFrame(self)
         self.conpro_acq_frame.grid(
             row=5, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
@@ -131,45 +118,27 @@ class ChannelsTab(tk.Frame):
 
 
 class ChannelCreator(ttk.Labelframe):
-    """Channel Creator
+    """Channel Creator Frame"""
 
-    This frame is used to create the channels for the stack acquisition.
+    def __init__(self, channels_tab, configuration, *args, **kwargs):
+        """Initialize the Channel Creator Frame
 
-    Parameters
-    ----------
-    channels_tab : tk.Frame
-        The frame that this frame is added to
-    *args : tuple
-        Positional arguments for ttk.Labelframe
-    **kwargs : dict
-        Keyword arguments for ttk.Labelframe
-
-    Attributes
-    ----------
-    title : str
-        The title of the frame
-    channel_variables : list
-        The list of tk.BooleanVar for the channel checkbuttons
-    channel_checks : list
-        The list of tk.Checkbutton for the channel checkbuttons
-    laser_variables : list
-        The list of tk.StringVar for the laser pulldowns
-    laser_pulldowns : list
-        The list of tk.OptionMenu for the laser pulldowns
-    add_channel_button : tk.Button
-        The button to add a channel
-    remove_channel_button : tk.Button
-        The button to remove a channel
-
-    Methods
-    -------
-    None
-    """
-
-    def __init__(self, channels_tab, *args, **kwargs):
+        Parameters
+        ----------
+        channels_tab : tkinter.Frame
+            The frame that holds the channels tab
+        configuration : Configuration
+            The configuration object
+        *args : tuple
+            Variable length argument list
+        **kwargs : dict
+            Arbitrary keyword arguments
+        """
         #  Init Frame
-        self.title = "Channel Settings"
-        ttk.Labelframe.__init__(self, channels_tab, text=self.title, *args, **kwargs)
+        ttk.Labelframe.__init__(
+            self, channels_tab, text="Channel Settings", *args, **kwargs
+        )
+        self.configuration = configuration
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
@@ -179,47 +148,53 @@ class ChannelCreator(ttk.Labelframe):
         #  TODO refactor using dicts for variables and one for widgets,
         #   allow access to arrays via a key. might be overly complicated.
         #   Below way is clear just a bit repetitive
-        #  Channel Checkbuttons
+        self.label_text = []
+
+        #  Channel Checkboxes
         self.channel_variables = []
         self.channel_checks = []
+        self.label_text.append("Channel")
 
         #  Laser Dropdowns
         self.laser_variables = []
         self.laser_pulldowns = []
+        self.label_text.append("Laser")
 
         #  LaserPower Dropdowns
         self.laserpower_variables = []
         self.laserpower_pulldowns = []
+        self.label_text.append("Power")
 
         #  FilterWheel Dropdowns
         self.filterwheel_variables = []
         self.filterwheel_pulldowns = []
+        self.label_text.append("Filter")
+
+        # Dichroic Turret Dropdowns
+        dichroic = self.configuration["configuration"]["hardware"].get(
+            "dichroic_turret", None
+        )
+        if dichroic is not None:
+            self.dichroic_variables = []
+            self.dichroic_pulldowns = []
+            self.label_text.append("Dichroic")
 
         #  Exposure Time Dropdowns
         self.exptime_variables = []
         self.exptime_pulldowns = []
+        self.label_text.append("Exposure")
 
         #  Time Interval Spinboxes
         self.interval_variables = []
         self.interval_spins = []
+        self.label_text.append("Interval")
 
         # Defocus Spinboxes
         self.defocus_variables = []
         self.defocus_spins = []
-
-        #  Channel Creation
+        self.label_text.append("Defocus")
 
         #  Grids labels them across the top row of each column
-        self.label_text = [
-            "Channel",
-            "Laser",
-            "Power",
-            "Filter",
-            "Exp. Time (ms)",
-            "Exposure",
-            "Interval",
-            "Defocus",
-        ]
         self.labels = []
         self.frame_columns = []
 
@@ -252,13 +227,16 @@ class ChannelCreator(ttk.Labelframe):
         custom_font = tk.font.Font(size=11)
         style.configure("CustomCheckbutton.TCheckbutton", font=custom_font)
 
-        for num in range(0, 5):
+        number_of_channels = self.configuration["configuration"]["gui"].get("count", 5)
+        # TODO: Channel setting controller expects 5 channels. Shouldn't be hardcoded.
 
+        for num in range(0, number_of_channels):
+            counter = 0
             #  Channel Checkboxes
             self.channel_variables.append(tk.BooleanVar())
             self.channel_checks.append(
                 ttk.Checkbutton(
-                    self.frame_columns[0],
+                    self.frame_columns[counter],
                     text="CH" + str(num + 1),
                     variable=self.channel_variables[num],
                     style="CustomCheckbutton.TCheckbutton",
@@ -267,12 +245,13 @@ class ChannelCreator(ttk.Labelframe):
             self.channel_checks[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            counter += 1
 
             #  Laser Wavelength
             self.laser_variables.append(tk.StringVar())
             self.laser_pulldowns.append(
                 ttk.Combobox(
-                    self.frame_columns[1],
+                    self.frame_columns[counter],
                     textvariable=self.laser_variables[num],
                     width=6,
                     font=tk.font.Font(size=11),
@@ -282,12 +261,13 @@ class ChannelCreator(ttk.Labelframe):
             self.laser_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            counter += 1
 
             #  Laser Power
             self.laserpower_variables.append(tk.StringVar())
             self.laserpower_pulldowns.append(
                 ttk.Spinbox(
-                    self.frame_columns[2],
+                    self.frame_columns[counter],
                     from_=0,
                     to=100.0,
                     textvariable=self.laserpower_variables[num],
@@ -299,12 +279,13 @@ class ChannelCreator(ttk.Labelframe):
             self.laserpower_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NS, padx=1, pady=1
             )
+            counter += 1
 
             #  Filter Wheel Position
             self.filterwheel_variables.append(tk.StringVar())
             self.filterwheel_pulldowns.append(
                 ttk.Combobox(
-                    self.frame_columns[3],
+                    self.frame_columns[counter],
                     textvariable=self.filterwheel_variables[num],
                     width=10,
                     font=tk.font.Font(size=11),
@@ -314,12 +295,30 @@ class ChannelCreator(ttk.Labelframe):
             self.filterwheel_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            counter += 1
+
+            # Dichroic Turret Position
+            if dichroic is not None:
+                self.dichroic_variables.append(tk.StringVar())
+                self.dichroic_pulldowns.append(
+                    ttk.Combobox(
+                        self.frame_columns[counter],
+                        textvariable=self.dichroic_variables[num],
+                        width=10,
+                        font=tk.font.Font(size=11),
+                    )
+                )
+                self.dichroic_pulldowns[num].state(["readonly"])
+                self.dichroic_pulldowns[num].grid(
+                    row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
+                )
+                counter += 1
 
             #  Exposure Time
             self.exptime_variables.append(tk.StringVar())
             self.exptime_pulldowns.append(
                 ttk.Spinbox(
-                    self.frame_columns[4],
+                    self.frame_columns[counter],
                     from_=0,
                     to=5000.0,
                     textvariable=self.exptime_variables[num],
@@ -331,12 +330,13 @@ class ChannelCreator(ttk.Labelframe):
             self.exptime_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            counter += 1
 
             #  Time Interval
             self.interval_variables.append(tk.StringVar())
             self.interval_spins.append(
                 ttk.Spinbox(
-                    self.frame_columns[5],
+                    self.frame_columns[counter],
                     from_=0,
                     to=5000.0,
                     textvariable=self.interval_variables[num],
@@ -348,12 +348,13 @@ class ChannelCreator(ttk.Labelframe):
             self.interval_spins[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            counter += 1
 
             # Defocus Spinbox
             self.defocus_variables.append(tk.DoubleVar())
             self.defocus_spins.append(
                 ValidatedSpinbox(
-                    self.frame_columns[6],
+                    self.frame_columns[counter],
                     from_=-500.0,
                     to=500.0,
                     textvariable=self.defocus_variables[num],

@@ -241,7 +241,7 @@ class NIDAQ(DAQBase):
             samps_per_chan=camera_waveform_repeat_num,
         )
             # sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
-            samps_per_chan=camera_waveform_repeat_num)
+            # samps_per_chan=camera_waveform_repeat_num)
 
     def create_master_trigger_task(self):
         """Set up the DO master trigger task."""

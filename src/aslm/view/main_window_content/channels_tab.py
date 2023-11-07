@@ -216,6 +216,7 @@ class ChannelCreator(ttk.Labelframe):
             "Power",
             "Filter",
             "Exp. Time (ms)",
+            "Exposure",
             "Interval",
             "Defocus",
         ]
@@ -223,7 +224,6 @@ class ChannelCreator(ttk.Labelframe):
         self.frame_columns = []
 
         #  Creates a column frame for each widget,
-        # this is to help with the lables lining up
         for idx in range(len(self.label_text)):
             self.frame_columns.append(ttk.Frame(self))
             self.frame_columns[idx].columnconfigure(0, weight=1, uniform=1)
@@ -232,7 +232,11 @@ class ChannelCreator(ttk.Labelframe):
                 row=0, column=idx, sticky=tk.NSEW, padx=1, pady=(4, 6)
             )
             self.labels.append(
-                ttk.Label(self.frame_columns[idx], text=self.label_text[idx])
+                ttk.Label(
+                    self.frame_columns[idx],
+                    text=self.label_text[idx],
+                    font=tk.font.Font(size=11),
+                )
             )
             self.labels[idx].grid(row=0, column=0, sticky=tk.N, pady=1, padx=1)
         self.frame_columns[5].grid(padx=(1, 4))
@@ -242,8 +246,14 @@ class ChannelCreator(ttk.Labelframe):
         #  TODO add connection to config file to specify the range.
         #   This will allow custom selection of amount of channels.
         #   Also may need further refactoring
+
+        # ttk Style object for the checkbutton.
+        style = ttk.Style()
+        custom_font = tk.font.Font(size=11)
+        style.configure("CustomCheckbutton.TCheckbutton", font=custom_font)
+
         for num in range(0, 5):
-            #  This will add a widget to each column frame for the respective types
+
             #  Channel Checkboxes
             self.channel_variables.append(tk.BooleanVar())
             self.channel_checks.append(
@@ -251,19 +261,21 @@ class ChannelCreator(ttk.Labelframe):
                     self.frame_columns[0],
                     text="CH" + str(num + 1),
                     variable=self.channel_variables[num],
+                    style="CustomCheckbutton.TCheckbutton",
                 )
             )
             self.channel_checks[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-            #  Laser Dropdowns
+            #  Laser Wavelength
             self.laser_variables.append(tk.StringVar())
             self.laser_pulldowns.append(
                 ttk.Combobox(
                     self.frame_columns[1],
                     textvariable=self.laser_variables[num],
                     width=6,
+                    font=tk.font.Font(size=11),
                 )
             )
             self.laser_pulldowns[num].state(["readonly"])
@@ -271,7 +283,7 @@ class ChannelCreator(ttk.Labelframe):
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-            #  Laser Power Spinbox
+            #  Laser Power
             self.laserpower_variables.append(tk.StringVar())
             self.laserpower_pulldowns.append(
                 ttk.Spinbox(
@@ -280,7 +292,7 @@ class ChannelCreator(ttk.Labelframe):
                     to=100.0,
                     textvariable=self.laserpower_variables[num],
                     increment=5,
-                    width=3,
+                    width=4,
                     font=tk.font.Font(size=11),
                 )
             )
@@ -288,13 +300,14 @@ class ChannelCreator(ttk.Labelframe):
                 row=num + 1, column=0, sticky=tk.NS, padx=1, pady=1
             )
 
-            #  FilterWheel Dropdowns
+            #  Filter Wheel Position
             self.filterwheel_variables.append(tk.StringVar())
             self.filterwheel_pulldowns.append(
                 ttk.Combobox(
                     self.frame_columns[3],
                     textvariable=self.filterwheel_variables[num],
                     width=10,
+                    font=tk.font.Font(size=11),
                 )
             )
             self.filterwheel_pulldowns[num].state(["readonly"])
@@ -302,7 +315,7 @@ class ChannelCreator(ttk.Labelframe):
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-            #  Exposure Time Spinboxes
+            #  Exposure Time
             self.exptime_variables.append(tk.StringVar())
             self.exptime_pulldowns.append(
                 ttk.Spinbox(
@@ -319,7 +332,7 @@ class ChannelCreator(ttk.Labelframe):
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-            #  Time Interval Spinboxes
+            #  Time Interval
             self.interval_variables.append(tk.StringVar())
             self.interval_spins.append(
                 ttk.Spinbox(

@@ -229,6 +229,7 @@ class RemoteFocusBase:
                         remote_focus_delay=self.remote_focus_delay,
                         camera_delay=self.camera_delay_percent,
                         amplitude=remote_focus_amplitude,
+                        fall=self.remote_focus_ramp_falling,
                         offset=remote_focus_offset,
                         delta=(self.percent_smoothing / 100),
                     )[: self.samples]

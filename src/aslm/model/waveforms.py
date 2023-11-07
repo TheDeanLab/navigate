@@ -466,32 +466,33 @@ def trig_remote_focus_ramp(
     sweep_time=0.24,
     remote_focus_delay=7.5,
     camera_delay=10,
+    fall=2.5,
     amplitude=1,
     offset=0,
     delta=0.01,
 ):
-
-    samples = int(np.ceil(sample_rate * sweep_time * (1 + delta)))
 
     # create an array just containing the negative amplitude voltage:
     delay_samples = int(remote_focus_delay * exposure_time * sample_rate / 100)
     delay_array = np.zeros(delay_samples) + offset - amplitude
 
     trig_samples = int(
-        np.ceil(
-            (exposure_time + exposure_time * (camera_delay - remote_focus_delay) / 100)
-            * sample_rate
-            * (1 + delta)
+        (
+            exposure_time
+            + exposure_time * (camera_delay - remote_focus_delay + fall) / 100
         )
+        * sample_rate
+        * (1 + delta)
     )
+
     trig_smooth_ramp = (
-        2 * trig_sawtooth(np.linspace(0, 1, trig_samples), delta=delta) - 1
+        2 * trig_sawtooth(np.linspace(delta, 1 + delta, trig_samples), delta=delta) - 1
     )
     scale = amplitude / np.max(trig_smooth_ramp)
 
     sawtooth_array = scale * trig_smooth_ramp - offset
 
-    extra_samples = int(samples - (delay_samples + trig_samples))
+    extra_samples = int(int(sample_rate * sweep_time) - (delay_samples + trig_samples))
     if extra_samples > 0:
         extra_array = np.zeros(extra_samples) + offset - amplitude
         waveform = np.hstack([delay_array, sawtooth_array, extra_array])

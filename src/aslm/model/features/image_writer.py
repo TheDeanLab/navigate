@@ -221,6 +221,10 @@ class ImageWriter:
         None
         """
 
+        self.data_source.set_metadata_from_configuration_experiment(
+            self.model.configuration
+        )
+
         for idx in frame_ids:
             # Identify channel, z, time, and position indices
             c_idx, z_idx, t_idx, p_idx = self.data_source._cztp_indices(

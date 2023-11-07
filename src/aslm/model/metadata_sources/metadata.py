@@ -131,10 +131,10 @@ class Metadata:
                 self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                 == "CVASINGLEWAVE"
             )
-            or (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "CVACONPRO"
-            )
+            # or (
+            #     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            #     == "CVACONPRO"
+            # )
             or (
                 self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                 == "CVACONT"
@@ -162,16 +162,16 @@ class Metadata:
                 == "CVATTL"):
             testvar = self.configuration["waveform_templates"]["CVACONPRO"]["expand"]
             testvar2 = self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
-            print(f"METADATA shape expand frames = {testvar}")
-            print(f"METADATA zstep shape = {testvar2}")    
+            # print(f"METADATA shape expand frames = {testvar}")
+            # print(f"METADATA zstep shape = {testvar2}")    
             self.shape_z = int(testvar2)
         elif (self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                 == "CVACONPRO"):
-            testvar = self.configuration["waveform_templates"]["CVACONPRO"]["expand"]
-            testvar2 = self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
-            print(f"METADATA shape expand frames = {testvar}")
-            print(f"METADATA zstep shape = {testvar2}")    
-            self.shape_z = int(testvar2)    
+            # testvar = self.configuration["waveform_templates"]["CVACONPRO"]["expand"]
+            # testvar2 = self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
+            # # print(f"METADATA shape expand frames = {testvar}")
+            # # print(f"METADATA zstep shape = {testvar2}")    
+            self.shape_z = int(self.configuration["experiment"]["MicroscopeState"]["number_z_steps"])    
         else:
             self.shape_z = 1
         self.shape_t = int(

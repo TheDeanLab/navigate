@@ -457,7 +457,14 @@ def trig_sawtooth(x, delta=0.01):
     Sawtooth wave with optional smoothing.
 
     """
-    return (1 + trig_triangle((2 * x - 1) / 4, delta) * trig_square(x / 2, delta)) / 2
+    tri = trig_triangle((2 * x - 1) / 4, delta)
+    sq = trig_square(x / 2, delta)
+
+    tri_max_guess = 1 - 2 * np.arccos(1 - delta) / np.pi
+    sq_max_guess = 2 * np.arctan(1 / delta) / np.pi
+    print(f"Tri min: {np.min(tri)} max: {np.max(tri)} max guess: {tri_max_guess}")
+    print(f"Square min: {np.min(sq)} max: {np.max(sq)} max guess: {sq_max_guess}")
+    return (1 + tri * sq) / 2
 
 
 def trig_remote_focus_ramp(
@@ -482,7 +489,7 @@ def trig_remote_focus_ramp(
             + exposure_time * (camera_delay - remote_focus_delay + fall) / 100
         )
         * sample_rate
-        * (1 + delta)
+        * (1 + 2 * delta)
     )
 
     trig_smooth_ramp = (

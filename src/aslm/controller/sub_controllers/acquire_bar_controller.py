@@ -82,6 +82,11 @@ class AcquireBarController(GUIController):
             "Confocal-Projection": "confocal-projection",
             "ConstantVelocityAcquisition": "ConstantVelocityAcquisition",
             "Customized": "customized",
+            "CVA-TTL":"CVATTL",
+            "CVA-Conpro":"CVACONPRO",
+            "CVA-SingleWave":"CVASINGLEWAVE",
+            "CVA-Continous":"CVACONT",
+            "CVA-Conpro-multichannel":"CVACONPROMULTICHANNEL",
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
@@ -149,8 +154,9 @@ class AcquireBarController(GUIController):
             number_of_slices = 1
         elif mode == "confocal-projection":
             number_of_slices = microscope_state["n_plane"]
-        elif mode == "z-stack" or "ConstantVelocityAcquisition":
+        elif mode == "z-stack" or "ConstantVelocityAcquisition" or "CVATTL" or "CVACONPRO" or "CVASINGLEWAVE" or "CVACONT" or "CVACONPROMULTICHANNEL":
             number_of_slices = microscope_state["number_z_steps"]
+            print(f"number of slices = {number_of_slices}")
 
         top_anticipated_images = number_of_slices
         bottom_anticipated_images = (
@@ -167,7 +173,7 @@ class AcquireBarController(GUIController):
                     self.view.CurAcq.start()
                     self.view.OvrAcq.start()
 
-                elif mode == "z-stack" or mode == "confocal-projection":
+                elif mode == "z-stack" or mode == "confocal-projection" or mode == "CVATTL" or mode == "CVACONPRO":
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )
@@ -362,6 +368,11 @@ class AcquireBarController(GUIController):
             "z-stack",
             "projection",
             "ConstantVelocityAcquisition",
+            "CVATTL",
+            "CVACONPRO",
+            "CVASINGLEWAVE",
+            "CVACONT",
+            "CVACONPROMULTICHANNEL",
             "customized",
         ]:
             state = "normal"

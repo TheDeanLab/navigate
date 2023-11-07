@@ -9,6 +9,7 @@ import threading
 
 import time
 
+import numpy as np
 
 class TigerException(Exception):
     """
@@ -62,6 +63,7 @@ class TigerController:
         self._max_speeds = None
         self.safe_to_write = threading.Event()
         self.safe_to_write.set()
+        self._last_cmd_send_time = time.perf_counter()
 
     @staticmethod
     def scan_ports() -> list[str]:
@@ -222,6 +224,7 @@ class TigerController:
         self.report_to_console(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
         self.serial_port.write(command)
+        self._last_cmd_send_time = time.perf_counter()
         # print(f"Sent Command: {command.decode(encoding='ascii')}")
 
     def read_response(self) -> str:
@@ -232,9 +235,10 @@ class TigerController:
         self.safe_to_write.set()
 
         response = response.decode(encoding="ascii")
-
+        # print(response)
         # Remove leading and trailing empty spaces
         self.report_to_console(f"Received Response: {response.strip()}")
+        # print(f"Received Response: {response.strip()}")
         if response.startswith(":N"):
             raise TigerException(response)
 
@@ -262,8 +266,12 @@ class TigerController:
 
     def move_axis(self, axis: str, distance: float) -> None:
         """Move the stage with an absolute move on one axis"""
+        print("move axis tiger controller")
+        # print(f"MOVE {axis}={round(distance, 6)}\r")
         self.send_command(f"MOVE {axis}={round(distance, 6)}\r")
+        # print("command sent")
         self.read_response()
+        # print(f"response = {self.read_response()}")
 
     def set_max_speed(self, axis: str, speed: float) -> None:
         """Set the speed on a specific axis. Speed is in mm/s."""
@@ -410,7 +418,7 @@ class TigerController:
         self.send_command(f"SPEED {axis}?")
         response = self.read_response()
         return float(response.split("=")[1])
-
+    
     def get_encoder_counts_per_mm(self, axis: str):
         """
         Get encoder counts pre mm of axis
@@ -434,14 +442,44 @@ class TigerController:
         if enc_divide == 0:
             enc_divide = enc_divide_mm
         else:
-            enc_divide = enc_divide * enc_divide_mm
+            enc_divide_v1 = int(enc_divide * enc_divide_mm)
+            enc_divide_v2 = np.ceil(enc_divide * enc_divide_mm)
+            enc_divide = enc_divide_v1
+        print("Encoder Divide in mm:", enc_divide_mm)
+        print("Set Encoder Divide int:", enc_divide_v1)
+        print("Set Encoder Divide np.ceil:",enc_divide_v2)
+            # enc_divide = env_divide_v1
         command = (
-            f"SCANR X={round(start_position_mm, 6)} "
-            f"Y={round(end_position_mm, 6)} Z={round(enc_divide)}"
+            f"SCANR "
+            f"X={round(start_position_mm, 6)} "
+            f"Y={round(end_position_mm, 6)} "
+            f"Z={round(enc_divide)}"
         )
+
         self.send_command(command)
         self.read_response()
 
+    def scanv(
+        self,
+        start_position_mm: float,
+        end_position_mm: float,
+        number_of_lines: float,
+        overshoot: float = 1.0,
+        axis: str = "X",
+    ):  
+        command = (
+            f"SCANV "
+            f"X={round(start_position_mm, 6)} "
+            f"Y={round(end_position_mm, 6)} "
+            f"Z={round(number_of_lines, 6)}"
+            f"F={round(overshoot, 6)}"
+        )
+
+        self.send_command(command)
+        self.read_response()
+        
+
+    
     def start_scan(self, axis: str, is_single_axis_scan: bool = True):
         """
         Start scan
@@ -453,7 +491,11 @@ class TigerController:
         slow_axis_id = 1 - fast_axis_id
         if is_single_axis_scan:
             slow_axis_id = 9
-        self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
+
+        # Not sure if this requires an S
+        # self.send_command(f"SCAN S")
+        self.send_command(f"SCAN")
+        # self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
         self.read_response()
 
     def stop_scan(self):
@@ -462,6 +504,43 @@ class TigerController:
         """
         self.send_command("SCAN P")
         self.read_response()
+
+    def is_moving(self):
+        """ Check to see if the stage is moving.
+
+        Sends the command / which is equivalent to STATUS
+
+        Gets response:
+        N - there are no motors running from a serial command
+        B - there is a motor running from a serial command
+
+        Returns
+        -------
+        response: Bool
+            True if any axis is moving. False if not.
+        """
+
+        # Calculate duration of time since last command.
+        time_since_last_cmd = time.perf_counter() - self._last_cmd_send_time
+
+        # Wait 50 milliseconds before pinging controller again.
+        sleep_time = 0.050 - time_since_last_cmd
+        if sleep_time > 0:
+            time.sleep(sleep_time)
+
+        self.send_command("/")
+        response = self.read_response().rstrip().rstrip('\r\n')
+        if response == "ACK":
+            self.send_command("/")
+            response = self.read_response().rstrip().rstrip('\r\n')
+        if response == "B":
+            return True
+        elif response == "N":
+            return False
+        else:
+            print("WARNING: WAIT UNTIL DONE RECEIVED NO RESPONSE")
+            # act as if the stage is not moving.
+            return False
 
     # Basic Serial Commands for Filter Wheels
 

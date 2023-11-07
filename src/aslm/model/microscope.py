@@ -387,6 +387,7 @@ class Microscope:
         galvo_waveform = [
             self.galvo[k].adjust(exposure_times, sweep_times) for k in self.galvo
         ]
+
         # TODO: calculate waveform for galvo stage
         for stage, axes in self.stages_list:
             if type(stage) == GalvoNIStage:
@@ -446,7 +447,7 @@ class Microscope:
         for channel_key in microscope_state["channels"].keys():
             channel = microscope_state["channels"][channel_key]
             if channel["is_selected"] is True:
-                exposure_time = float(channel["camera_exposure_time"]) / 1000
+                exposure_time = (float(channel["camera_exposure_time"]) / 1000)
 
                 sweep_time = (
                     exposure_time
@@ -490,27 +491,35 @@ class Microscope:
         necessary, ensuring the hardware is ready for imaging the selected channel.
 
         """
+        print("prepare next microscope in microscope called")
         curr_channel = self.current_channel
+        print(f"curr_channel = {curr_channel}")
         prefix = "channel_"
         if self.current_channel == 0:
+            print(f"self_available_channels_0 = {self.available_channels[0]}")
             self.current_channel = self.available_channels[0]
         else:
             idx = (self.available_channels.index(self.current_channel) + 1) % len(
                 self.available_channels
             )
+            print(f"idx = {idx}")
             self.current_channel = self.available_channels[idx]
+            print(f"self.available_channels[idx] = {self.available_channels[idx]}")
         if curr_channel == self.current_channel:
             return
 
         channel_key = prefix + str(self.current_channel)
+        print(f"channel_key = {channel_key}")
         channel = self.configuration["experiment"]["MicroscopeState"]["channels"][
             channel_key
         ]
+        print(f"channel = {channel}")
         # Filter Wheel Settings.
         self.filter_wheel.set_filter(channel["filter"])
 
         # Camera Settings
         self.current_exposure_time = float(channel["camera_exposure_time"])
+        print(f"self.current_exposure_time = {self.current_exposure_time}")
         if (
             self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
             == "Light-Sheet"
@@ -539,8 +548,8 @@ class Microscope:
         # self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
         # stop daq before writing new waveform
+        # When called the first time, throws an error.
         self.daq.stop_acquisition()
-        # prepare daq: write waveform
         self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # Add Defocus term

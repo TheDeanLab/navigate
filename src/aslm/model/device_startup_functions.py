@@ -247,10 +247,7 @@ def load_mirror(configuration, is_synthetic=False):
         from aslm.model.devices.APIs.imagineoptics.imop import IMOP_Mirror
         return auto_redial(IMOP_Mirror, (), exception=Exception)
     elif mirror_type == 'SyntheticMirror':
-        # TODO: Add a SyntheticMirror() class...
-        # from aslm.model.devices.camera.camera_synthetic import SyntheticCameraController
-        # return SyntheticCameraController()
-        pass
+        return DummyDeviceConnection()
     else:
         device_not_found('mirror', mirror_type)
 
@@ -287,10 +284,8 @@ def start_mirror(microscope_name, device_connection, configuration, is_synthetic
         from aslm.model.devices.mirrors.mirror_imop import ImagineOpticsMirror
         return ImagineOpticsMirror(microscope_name, device_connection, configuration)
     elif mirror_type == 'SyntheticMirror':
-        # TODO: Add a SyntheticMirror() class...
-        # from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
-        # return SyntheticCamera(microscope_name, device_connection, configuration)
-        pass
+        from aslm.model.devices.mirrors.mirror_synthetic import SyntheticMirror
+        return SyntheticMirror(microscope_name, device_connection, configuration)
     else:
         device_not_found(microscope_name, 'mirror', mirror_type)
 

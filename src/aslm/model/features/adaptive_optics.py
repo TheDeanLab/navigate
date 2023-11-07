@@ -41,6 +41,8 @@ from aslm.model.features.feature_container import load_features
 import aslm.model.analysis.image_contrast as img_contrast
 from copy import deepcopy
 
+from aslm.model.features.image_writer import ImageWriter
+
 def poly2(x, a, b, c):
     return a*x**2 + b*x + c
 
@@ -111,6 +113,9 @@ class TonyWilson:
         self.tw_frame_queue = Queue()
         self.tw_data_queue = Queue()
         
+        # Image Writer
+        self.image_writer = ImageWriter(model, sub_dir='AO_Frames')
+
         # target channel
         self.target_channel = 1
 
@@ -154,6 +159,7 @@ class TonyWilson:
         self.model.data_thread = threading.Thread(
             target=self.model.run_data_process,
             args=(frame_num+1,),
+            kwargs={'data_func': self.image_writer.save_image},
             name='TonyWilson Data'
         )
 
@@ -227,12 +233,19 @@ class TonyWilson:
 
             # if step == int(self.n_steps/2):
             #     self.best_peaks.append(plot_data[-1])
-                
+
+            self.model.logger.debug(
+                f"*** TonyWilson > in_func_signal :: iter: {itr}\tcoef: {coef}\tstep: {step}"
+            )
+            coef_str = ' '.join([f'{c:.2f}' for c in (coef_arr + self.best_coefs)])    
+            self.model.logger.debug(
+                f"*** TonyWilson > in_func_signal :: display_modes: [{coef_str}]"
+            )
+
             self.signal_id += 1
 
             # if coef == 0 and step == 0 and itr > 0:
             #     self.coef_sweep *= 0.9
-
 
             if coef == self.n_coefs-1:
                 if step == self.n_steps-1:
@@ -298,7 +311,7 @@ class TonyWilson:
         Only PUT into data_queue
         """
         
-        out_str = ''
+        out_str = 'in_func_data'
 
         while True:
             try:
@@ -309,23 +322,18 @@ class TonyWilson:
                         itr, 
                         coef, 
                         step, 
-                        coef_arr 
+                        coef_arr
                     ) = self.tw_frame_queue.get_nowait()
                 if self.f_frame_id not in frame_ids:
                     break
             except Exception:
                 break
 
-            coef_str = ' '.join([f'{c:.2f}' for c in (coef_arr + self.best_coefs)[3:]])
-            out_str += f'in_func_data\t>>>\titer: {itr}\tcoef: {coef}\tstep: {step}\t[{coef_str}]'
+            # coef_str = ' '.join([f'{c:.2f}' for c in (coef_arr + self.best_coefs)[3:]])
+            # out_str += f'\t>>>\titer: {itr}\tcoef: {coef}\tstep: {step}\t[{coef_str}]'
 
             # get the image metric
             img = self.model.data_buffer[self.f_frame_id]
-            # nx, ny = img.shape
-            # nx = int(nx/2)
-            # ny = int(ny/2)
-            # roi = 128
-            # img = img[ny-roi:ny+roi, nx-roi:nx+roi]
             
             """ IMAGE METRICS """
             if self.metric == 'Pixel Max':
@@ -347,11 +355,15 @@ class TonyWilson:
                     }
 
             self.plot_data.append(new_data)
-            out_str += f'\t{np.flip(self.plot_data)}'
+            out_str += f'\t{np.flip(self.plot_data)}\n'
 
             self.f_frame_id = -1
 
             print(out_str)
+
+            self.model.logger.debug(
+                f"*** TonyWilson > in_func_data :: plot_data: {np.flip(self.plot_data)}"
+            )
 
             if self.frame_num == 1:
                 self.frame_num = 10  # any value but not 1

@@ -101,7 +101,6 @@ class Controller:
         waveform_constants_path,
         rest_api_path,
         waveform_templates_path,
-        use_gpu,
         args,
     ):
         """Initialize the ASLM Controller.
@@ -127,8 +126,6 @@ class Controller:
         waveform_templates_path : string
             Path to the waveform templates yaml file.
             Provides waveform templates for each channel.
-        use_gpu : Boolean
-            Flag for utilizing CUDA functionality.
         *args :
             Command line input arguments for non-default
             file paths or using synthetic hardware modes.
@@ -158,7 +155,7 @@ class Controller:
         # Initialize the Model
         #: ObjectInSubprocess: Model object in MVC architecture.
         self.model = ObjectInSubprocess(
-            Model, use_gpu, args, self.configuration, event_queue=self.event_queue
+            Model, args, self.configuration, event_queue=self.event_queue
         )
 
         logger.info(f"Spec - Configuration Path: {configuration_path}")

@@ -49,6 +49,7 @@ aslm = "aslm.main:main"
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pytest-xvfb",
     "pytest-cov",
     "pre-commit",
     "ipykernel",

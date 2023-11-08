@@ -209,9 +209,7 @@ class LabelInput(ttk.Frame):
         value : str
             The value to set the input widget to
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -264,9 +262,7 @@ class LabelInput(ttk.Frame):
         values : list
             list of values to be set in the widget
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------
@@ -306,9 +302,7 @@ class LabelInput(ttk.Frame):
         down : int
             down padding
 
-        Returns
-        -------
-        None
+
 
         Examples
         --------

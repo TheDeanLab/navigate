@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath("../../src"))
 
 # -- Project information -----------------------------------------------------
 
-project = "ASLM"
+project = "Autonomous Software for Light Microscopy"
 copyright = "2023, Dean Lab, UT Southwestern Medical Center"
 author = "Dean Lab, UT Southwestern Medical Center"
 
@@ -47,7 +47,7 @@ autosummary_generate = True
 
 # Both the class’ and the __init__ method’s docstring are concatenated
 # and inserted.
-autoclass_content = "both"
+autoclass_content = "class"  # "both"
 
 # inheritance_graph_attrs = {'rankdir': "TB",
 #                           'clusterrank': 'local'}
@@ -65,6 +65,8 @@ autodoc_default_flags = [
     "inherited-members",
     "show-inheritance",
 ]
+
+autodoc_inherit_docstrings = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["./_templates"]

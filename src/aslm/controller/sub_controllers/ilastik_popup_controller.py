@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,13 +30,17 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard library imports
 from tkinter import filedialog, messagebox, Checkbutton, Label
 import traceback
+import logging
 
+# Third party imports
+
+# Local application imports
 from aslm.controller.sub_controllers.gui_controller import GUIController
 from aslm.model.features.restful_features import prepare_service
 
-import logging
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -43,18 +48,35 @@ logger = logging.getLogger(p)
 
 
 class IlastikPopupController(GUIController):
-    def __init__(self, view, parent_controller, service_url):
-        super().__init__(view, parent_controller)
+    """Ilastik popup controller"""
 
+    def __init__(self, view, parent_controller, service_url):
+        """Initialize the ilastik popup controller
+
+        Parameters
+        ----------
+        view : IlastikPopupView
+            ilastik popup view
+        parent_controller : MainController
+            main controller
+        service_url : str
+            url of the aslm_server for ilastik
+        """
+        super().__init__(view, parent_controller)
+        #: str: url of the aslm_server for ilastik
         self.service_url = service_url
+        #: str: ilastik project file name
         self.project_filename = None
+        #: bool: show segmentation flag
         self.show_segmentation_flag = False
+        #: bool: mark position flag
         self.mark_position_flag = False
+        #: dict: label dictionary
         self.label_dict = None
         self.showup()
 
     def load_project(self):
-        """load ilastik project file."""
+        """Load ilastik project file."""
         filename = filedialog.askopenfilename(
             defaultextension=".ilp", filetypes=[("Ilastik Project File", "*.ilp")]
         )
@@ -87,7 +109,7 @@ class IlastikPopupController(GUIController):
             self.update_project(filename, r)
 
     def update_project(self, filename, label_dict):
-        """update project file name and labels
+        """Update project file name and labels
 
         Parameters
         ----------
@@ -95,7 +117,6 @@ class IlastikPopupController(GUIController):
             project file name
         label_dict : dict
             label dictionary
-
         """
 
         self.project_filename_var.set(filename)
@@ -120,7 +141,7 @@ class IlastikPopupController(GUIController):
             color_block.grid(row=1 + i, column=1, pady=(0, 10), padx=(0, 10))
 
     def toggle_label(self, label_id):
-        """toggle label status
+        """Toggle label status
 
         Parameters
         ----------
@@ -129,6 +150,7 @@ class IlastikPopupController(GUIController):
         """
 
         def func():
+            """toggle label status"""
             self.label_dict["status"][label_id] = not self.label_dict["status"][
                 label_id
             ]
@@ -136,18 +158,17 @@ class IlastikPopupController(GUIController):
         return func
 
     def toggle_display(self):
-        """toggle display of ilastik segmentation results"""
+        """Toggle display of ilastik segmentation results"""
         self.show_segmentation_flag = not self.show_segmentation_flag
 
     def toggle_mark_position(self):
-        """toggle mark position of ilastik segmentation results"""
+        """Toggle mark position of ilastik segmentation results"""
         self.mark_position_flag = not self.mark_position_flag
 
     def confirm_setting(self):
         """Confirm settings
 
-        tell the model which labels will be used
-        activate features containing ilastik
+        Tell the model which labels will be used activate features containing ilastik
         """
         # update ilastik menu status
         ilastik_menu_state = "normal" if self.project_filename else "disabled"
@@ -160,8 +181,8 @@ class IlastikPopupController(GUIController):
         )
         # tell model the target label
         if (
-            self.show_segmentation_flag == False
-            and self.mark_position_flag == False
+            self.show_segmentation_flag is False
+            and self.mark_position_flag is False
             or (self.mark_position_flag and True not in self.label_dict["status"])
         ):
             messagebox.showwarning(
@@ -184,9 +205,14 @@ class IlastikPopupController(GUIController):
             self.view.popup.dismiss()
 
     def showup(self, popup_window=None):
-        """show the ilastik popup window
+        """Show the ilastik popup window
 
-        this function will let the popup window show in front
+        This function will let the popup window show in front.
+
+        Parameters
+        ----------
+        popup_window : IlastikPopupView, optional
+            ilastik popup window, by default None
         """
         if popup_window is not None:
             self.view = popup_window

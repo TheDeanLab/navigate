@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -29,31 +30,49 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from aslm.controller.sub_controllers.widget_functions import validate_wrapper
-from aslm.controller.sub_controllers.gui_controller import GUIController
+# Standard library imports
 import logging
 import tkinter as tk
+
+# Third party imports
+
+# Local application imports
+from aslm.controller.sub_controllers.widget_functions import validate_wrapper
+from aslm.controller.sub_controllers.gui_controller import GUIController
+
 
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
-"""
-TODO Create a dictionary for widgets that holds a list of widgets for each column.Will attempt after formatting.
-"""
-
 
 class ChannelSettingController(GUIController):
-    def __init__(self, view, parent_controller=None, configuration_controller=None):
-        super().__init__(view, parent_controller)
+    """Controller for the channel setting widgets."""
 
+    def __init__(self, view, parent_controller=None, configuration_controller=None):
+        """Initialize the ChannelSettingController.
+
+        Parameters
+        ----------
+        view : aslm.view.channel_setting_view.ChannelSettingView
+            The view for the channel setting widgets.
+        parent_controller : aslm.controller.main_controller.MainController
+            The parent controller.
+        configuration_controller : ConfigurationController
+            The configuration controller.
+        """
+        super().__init__(view, parent_controller)
+        #: ConfigurationController: The configuration controller.
         self.configuration_controller = configuration_controller
         # num: numbers of channels
         self.num = self.configuration_controller.number_of_channels
-        # 'live': acquire mode is set to 'continuous'
+        #: str: The mode of the channel setting controller. Either 'live' or 'stop'.
         self.mode = "stop"
+        #: bool: Whether the channel setting controller is in initialization.
         self.in_initialization = True
+        #: int: The event id.
         self.event_id = None
+        #: dict: The channel setting dictionary.
         self.channel_setting_dict = None
 
         # add validation functions to spinbox
@@ -150,22 +169,13 @@ class ChannelSettingController(GUIController):
     def set_spinbox_range_limits(self, settings):
         """Set the range limits for the spinboxes in the View.
 
+        This function will set the spinbox widget's values of from_, to, step
+        according to the settings
+
         Parameters
         ----------
         settings : dict
             Dictionary containing the range limits for the spinboxes.
-
-            This function will set the spinbox widget's values of from_, to, step
-
-            Examples
-            --------
-            >>> settings = {
-            >>>     "exposure_time": [0.001, 10],
-            >>>     "interval_time": [0.001, 10],
-            >>>     "laser_power": [0.001, 10],
-            >>>     "defocus": [-10, 10]
-            >>> }
-            >>> self.set_spinbox_range_limits(settings)
         """
 
         temp_dict = {
@@ -183,9 +193,10 @@ class ChannelSettingController(GUIController):
     def channel_callback(self, channel_id, widget_name):
         """Callback function for the channel widgets.
 
-        In 'live' mode (when acquire mode is set to 'continuous') and a channel is selected,
-        any change of the channel setting will influence devices instantly
-        this function will call the central controller to response user's request
+        In 'live' mode (when acquire mode is set to 'continuous') and a channel is
+        selected, any change of the channel setting will influence devices
+        instantly this function will call the central controller to response user's
+        request
 
         Parameters
         ----------
@@ -193,6 +204,11 @@ class ChannelSettingController(GUIController):
             The channel id.
         widget_name : str
             The name of the widget.
+
+        Returns
+        -------
+        success : bool
+            Whether the callback function is executed successfully.
 
         Examples
         --------
@@ -203,6 +219,20 @@ class ChannelSettingController(GUIController):
         prefix = "channel_"
 
         def update_setting_dict(setting_dict, widget_name):
+            """Update the setting dictionary.
+
+            Parameters
+            ----------
+            setting_dict : dict
+                The setting dictionary.
+            widget_name : str
+                The name of the widget.
+
+            Returns
+            -------
+            success : bool
+                Whether the setting dictionary is updated successfully.
+            """
             if channel_vals[widget_name].get() is None:
                 return False
 
@@ -223,7 +253,7 @@ class ChannelSettingController(GUIController):
             ]:
                 try:
                     setting_dict[widget_name] = float(channel_vals[widget_name].get())
-                except:
+                except Exception:
                     setting_dict[widget_name] = 0
                     return False
             else:
@@ -240,6 +270,10 @@ class ChannelSettingController(GUIController):
             ----------
             *args : tuple
                 The arguments passed to the callback function.
+
+            Returns
+            -------
+            success : bool
             """
 
             if self.in_initialization:
@@ -274,7 +308,9 @@ class ChannelSettingController(GUIController):
                 if r:
                     self.event_id = self.view.after(
                         500,
-                        lambda: self.parent_controller.execute("update_setting", "channel"),
+                        lambda: self.parent_controller.execute(
+                            "update_setting", "channel"
+                        ),
                     )
 
             self.show_verbose_info("channel setting has been changed")

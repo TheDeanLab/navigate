@@ -44,7 +44,7 @@ logger = logging.getLogger(p)
 
 
 def build_MP285_connection(com_port, baud_rate, timeout=0.25):
-    """Build SutterStage Serial Port connection
+    """Build Sutter Stage Serial Port connection
 
     Parameters
     ----------
@@ -72,57 +72,63 @@ def build_MP285_connection(com_port, baud_rate, timeout=0.25):
 
 
 class SutterStage(StageBase):
-    """SutterStage Class for MP-285
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of the microscope.
-    device_connection : MP285
-        MP285 stage.
-    configuration : dict
-        Configuration dictionary for the SutterStage.
-
-    Attributes
-    ----------
-    stage : MP285
-        MP285 stage object.
-    resolution : str
-        Resolution of the stage.
-    speed : int
-        Speed of the stage.
-    sutter_axes : list
-        List of SutterStage axes.
-
-    Methods
-    -------
-    read(num_bytes)
-        Read num_bytes of bytes from the serial port.
-    close()
-        Set the filter wheel to the empty position and close the communication port.
-    """
+    """SutterStage Class for MP-285."""
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
+        """Initialize the SutterStage.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : MP285
+            MP285 stage.
+        configuration : dict
+            Configuration dictionary for the SutterStage.
+
+        Raises
+        ------
+        UserWarning
+            Error while connecting to the SutterStage.
+        UserWarning
+            Error while setting resolution and velocity.
+        UserWarning
+            Error while setting absolute operation mode.
+        """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
         # Device Connection
         if device_connection is None:
             logger.error("The MP285 stage is unavailable!")
             raise UserWarning("The MP285 stage is unavailable!")
-        
+
+        #: object: MP285 stage.
         self.stage = device_connection
+
+        #: bool: Wait until stage has finished moving before returning.
         self.stage.wait_until_done = True
 
         # Default mapping from self.axes to corresponding MP285 axis labelling
         axes_mapping = {"x": "x", "y": "y", "z": "z"}
         if not self.axes_mapping:
-            self.axes_mapping = {axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping}
+            #: dict: Dictionary of stage axes and their corresponding hardware axes.
+            self.axes_mapping = {
+                axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
+            }
 
+        #: dict: Dictionary of hardware axes and their corresponding stage axes.
         self.device_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
         # Default Operating Parameters
-        self.resolution = "low" #"high"
-        self.speed = 3000  #1300  # in units microns/s.
+        #: str: Resolution of the stage.
+        self.resolution = "low"  # "high"
+
+        #: int: Speed of the stage.
+        self.speed = 3000  # 1300  # in units microns/s.
+
+        #: float: Position of the stage along the x-axis.
+        #: float: Position of the stage along the y-axis.
+        #: float: Position of the stage along the z-axis.
         self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = None, None, None
 
         # Set the resolution and velocity of the stage
@@ -146,9 +152,7 @@ class SutterStage(StageBase):
     def __del__(self):
         """Delete SutterStage Serial Port.
 
-        Returns
-        -------
-        None
+
 
         Raises
         ------
@@ -164,12 +168,16 @@ class SutterStage(StageBase):
 
         Returns
         -------
-        position_dict : dict
+        position : dict
             Dictionary containing the position of all axes
         """
         position = {}
         try:
-            self.stage_x_pos, self.stage_y_pos, self.stage_z_pos = self.stage.get_current_position()
+            (
+                self.stage_x_pos,
+                self.stage_y_pos,
+                self.stage_z_pos,
+            ) = self.stage.get_current_position()
             for axis, hardware_axis in self.axes_mapping.items():
                 hardware_position = getattr(self, f"stage_{hardware_axis}_pos")
                 self.__setattr__(f"{axis}_pos", hardware_position)
@@ -182,12 +190,9 @@ class SutterStage(StageBase):
             time.sleep(0.01)
 
         return position
-    
-    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
-        """
-        Implement movement logic along a single axis.
 
-        Example calls:
+    def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
+        """Implement movement logic along a single axis.
 
         Parameters
         ----------
@@ -233,7 +238,13 @@ class SutterStage(StageBase):
         self.stage.wait_until_done = wait_until_done
         move_stage = {}
         for axis in pos_dict:
-            if abs(getattr(self, f"stage_{self.axes_mapping[axis]}_pos") - pos_dict[axis]) < 0.02:
+            if (
+                abs(
+                    getattr(self, f"stage_{self.axes_mapping[axis]}_pos")
+                    - pos_dict[axis]
+                )
+                < 0.02
+            ):
                 move_stage[axis] = False
             else:
                 move_stage[axis] = True
@@ -245,7 +256,7 @@ class SutterStage(StageBase):
                 self.stage.move_to_specified_position(
                     x_pos=self.stage_x_pos,
                     y_pos=self.stage_y_pos,
-                    z_pos=self.stage_z_pos
+                    z_pos=self.stage_z_pos,
                 )
             except SerialException as e:
                 logger.debug(f"MP285: move_axis_absolute failed - {e}")
@@ -256,18 +267,15 @@ class SutterStage(StageBase):
         return True
 
     def stop(self):
-        """Stop all stage movement abruptly.
-
-        Returns
-        -------
-        None
-        """
+        """Stop all stage movement abruptly."""
         try:
             self.stage.interrupt_move()
         except SerialException as error:
             logger.exception(f"MP-285 - Stage stop failed: {error}")
 
     def close(self):
+        """Close the stage."""
+
         try:
             self.stop()
             self.stage.close()

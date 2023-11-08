@@ -52,6 +52,7 @@ class SyntheticCameraController:
     """SyntheticCameraController. Synthetic Camera API."""
 
     def __init__(self):
+        """Initialize SyntheticCameraController class."""
         pass
 
     def get_property_value(self, name):
@@ -70,40 +71,60 @@ class SyntheticCameraController:
         return -1
 
     def set_property_value(self, name, value):
+        """Set the value of a camera property.
+
+        Parameters
+        ----------
+        name : str
+            Name of the property to set.
+        value : int
+            Value to set the property to.
+        """
         logger.debug(f"set camera property {name}: {value}")
 
 
 class SyntheticCamera(CameraBase):
-    """SyntheticCamera camera class.
-
-    Parameters
-    ----------
-    microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
-
-    """
+    """SyntheticCamera camera class."""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize SyntheticCamera class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocesing.managers.DictProxy
+            Global configuration of the microscope
+        """
         super().__init__(microscope_name, device_connection, configuration)
 
+        #: bool: Whether the camera is currently acquiring
         self.is_acquiring = False
+        #: int: mean background count for synthetic image
         self._mean_background_count = 100
+        #: float: noise sigma for synthetic image
         self._noise_sigma = camera.compute_noise_sigma()
+        #: int: current image id
         self.current_frame_idx = None
+        #: object: data buffer
         self.data_buffer = None
+        #: int: number of frames
         self.num_of_frame = None
+        #: int: previous image id
         self.pre_frame_idx = None
+        #: bool: whether to use random image
         self.random_image = True
+        #: int: serial number
         self.serial_number = "synthetic"
+        #: float: exposure time
         self.camera_exposure_time = 0.2
 
         logger.info("SyntheticCamera Class Initialized")
 
     def __del__(self):
+        """Delete SyntheticCamera class."""
         logger.info("SyntheticCamera Shutdown")
         pass
 
@@ -128,7 +149,7 @@ class SyntheticCamera(CameraBase):
     def set_exposure_time(self, exposure_time):
         """Set SyntheticCamera exposure time.
 
-        All of our units are in milliseconds. Function convert to seconds.
+        All of our units are in milliseconds. Function converts to seconds.
 
         Parameters
         ----------
@@ -156,7 +177,9 @@ class SyntheticCamera(CameraBase):
         binning_string : str
             Desired binning properties (e.g., '2x2', '4x4', '8x8'
         """
+        #: int: x binning
         self.x_binning = int(binning_string[0])
+        #: int: y binning
         self.y_binning = int(binning_string[2])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
@@ -190,8 +213,11 @@ class SyntheticCamera(CameraBase):
         """Pre-populate the buffer with images. Can either come from TIFF files or
         Numpy stacks."""
         self.random_image = False
+        #: int: current image id
         self.img_id = 0
+        #: int: current tif id
         self.current_tif_id = 0
+        #: list: list of tif images
         self.tif_images = []
         idx = 0
         if filenames is not None:
@@ -277,10 +303,10 @@ class SyntheticCamera(CameraBase):
     def get_minimum_waiting_time(self):
         """Get minimum waiting time for SyntheticCamera.
 
-        This function get timing information from the camera device
-        cyclic_trigger_period, minimum_trigger_blank, minimum_trigger_interval
-        'cyclic_trigger_period' of current device is 0
-        according to the document, trigger_blank should be bigger than trigger_interval.
+        Returns
+        -------
+        float
+            Minimum waiting time.
         """
         return 0.01
 

@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -40,32 +41,58 @@ logger = logging.getLogger(p)
 
 
 class LaserBase:
+    """Laser Base Class"""
+
     def __init__(self, microscope_name, device_connection, configuration, laser_id):
+        """Initialize Laser Base Class
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope
+        device_connection : str
+            Connection string for the device
+        configuration : dict
+            Configuration dictionary
+        laser_id : int
+            Laser ID
+        """
+
+        #: dict: Configuration dictionary
         self.configuration = configuration
+
+        #: str: Name of the microscope
         self.microscope_name = microscope_name
 
+        #: int: Laser ID
         self.device_config = configuration["configuration"]["microscopes"][
             microscope_name
         ]["lasers"][laser_id]
 
     def set_power(self, laser_intensity):
+        """Set laser power
+
+        Parameters
+        ----------
+        laser_intensity : int
+            Laser intensity
+        """
         pass
 
     def turn_on(self):
+        """Turn on the laser"""
         pass
 
     def turn_off(self):
+        """Turn off the laser"""
         pass
 
     def close(self):
         """
-        # Close the port before exit.
+        Close the laser before exit.
         """
         pass
 
     def initialize_laser(self):
-        """
-        # Initialize lasers.
-        # Sets the laser to the maximum power, and sets the mode to CW-APC.
-        """
+        """Initialize lasers."""
         pass

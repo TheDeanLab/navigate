@@ -46,9 +46,8 @@ class BigDataViewerMetadata(XMLMetadata):
     """Metadata for BigDataViewer files. XML spec in section 2.3 of
     https://arxiv.org/abs/1412.0488."""
 
-    def __init__(self):
-        """Initialize metadata object."""
-
+    def __init__(self) -> None:
+        """Initialize the BigDataViewer metadata object."""
         super().__init__()
 
         # Affine Transform Parameters
@@ -286,8 +285,28 @@ class BigDataViewerMetadata(XMLMetadata):
         """Convert stage positions to an affine matrix. Ignore theta, focus for now."""
         arr = np.eye(3, 4)
 
+        # Set the transform positions
+        xp, yp, zp = x / self.dx, y / self.dy, z / self.dz
+
+        # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
+        # if they are both moving along the same physical dimension
+        if self._coupled_axes is not None:
+            for leader, follower in self._coupled_axes.items():
+                if leader.lower() not in "xyz":
+                    print(
+                        f"Unrecognized coupled axis {leader}. "
+                        "Not gonna do anything with this."
+                    )
+                    continue
+                elif leader.lower() == "x":
+                    xp += float(locals()[f"{follower.lower()}"]) / self.dx
+                elif leader.lower() == "y":
+                    yp += float(locals()[f"{follower.lower()}"]) / self.dy
+                elif leader.lower() == "z":
+                    zp += float(locals()[f"{follower.lower()}"]) / self.dz
+
         # Translation into pixels
-        arr[:, 3] = [y / self.dy, x / self.dx, z / self.dz]
+        arr[:, 3] = [yp, xp, zp]
 
         # Rotation (theta pivots in the xz plane, about the y axis)
         # sin_theta, cos_theta = np.sin(theta), np.cos(theta)

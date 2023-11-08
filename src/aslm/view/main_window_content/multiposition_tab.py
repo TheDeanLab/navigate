@@ -435,9 +435,7 @@ class MultiPositionTable(Table):
         callback : function
             The function that is called when the table is shown.
 
-        Returns
-        -------
-        None
+
         """
         super().show(callback)
 

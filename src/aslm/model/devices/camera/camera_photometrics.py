@@ -48,49 +48,49 @@ logger = logging.getLogger(p)
 
 
 class PhotometricsKinetix(CameraBase):
-    """Photometrics Kinetix camera class. This class is the
-    interface between the rest of the microscope code and the Photometrics API.
-    , calling the Photometrics camera API functions from here (implemented mainly by
-    Photometrics).
+    """Photometrics Kinetix camera class.
 
-    Parameters
-    ---------
-    microscope_name : str
-            Name of microscope in configuration
-    device_connection : object
-            Hardware device to connect to. will be saved in camera_controller
-    configuration : multiprocesing.managers.DictProxy
-            Global configuration of the microscope
-
+    This class is the interface between the rest of the microscope code and the
+    Photometrics API.
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
-        """
-        initialize the Photometrics class.
-        Parameters
-        ----------
-        microscope_name: used to navigate in camera base class to load the right
-        parameters from the right microscope (e.g. mesoscale or nanoscale)
-        device_connection:
-        configuration
+        """Initialize the Photometrics class.
 
-        Returns
+        Parameters
+        ---------
+        microscope_name : str
+                Name of microscope in configuration
+        device_connection : object
+                Hardware device to connect to. will be saved in camera_controller
+        configuration : multiprocesing.managers.DictProxy
+                Global configuration of the microscope
         -------
 
         """
         super().__init__(microscope_name, device_connection, configuration)
 
-        ####properties
+        #: int: Exposure Time in milliseconds
         self._exposuretime = 20
+        #: int: Scan Mode (0 = Normal, 1 = ASLM)
         self._scanmode = 0
+        #: int: Scan Delay
         self._scandelay = 1
+        #: int: Number of frames
         self._numberofframes = 100
+        #: obj: Data Buffer
         self._databuffer = None
+        #: int: Number of frames received
         self._frames_received = 0
+        #: float: Unit for line delay
         self._unitforlinedelay = 0.00375  # 3.75  us for dynamic mode kinetix
+        #: list: Frame IDs
         self._frame_ids = []
+        #: int: Max image width
         self.max_image_width = self.camera_controller.sensor_size[0]
+        #: int: Max image height
         self.max_image_height = self.camera_controller.sensor_size[1]
+        #: dict: Camera parameters
         self.camera_parameters["x_pixels"] = self.max_image_width
         self.camera_parameters["y_pixels"] = self.max_image_height
 
@@ -131,6 +131,7 @@ class PhotometricsKinetix(CameraBase):
         logger.info("Photometrics Initialized")
 
     def __del__(self):
+        """Delete PhotometricsKinetix object."""
         if hasattr(self, "camera_controller"):
             self.camera_controller.close()
             # pvc.uninit_pvcam()
@@ -140,10 +141,11 @@ class PhotometricsKinetix(CameraBase):
     @property
     def serial_number(self):
         """Get Camera Serial Number
+
         Returns
         -------
         serial_number : str
-        Serial number for the camera.
+            Serial number for the camera.
         """
         # return self.camera_controller._serial_number
         ser_no = self.camera_controller.serial_no
@@ -170,8 +172,9 @@ class PhotometricsKinetix(CameraBase):
         self.camera_controller.close()
 
     def set_sensor_mode(self, mode):
-        """Set Photometrics sensor mode (programmable scan mode),
-        i.e. whether it is normal light sheet or ASLM mode.
+        """Set Photometrics sensor mode
+
+        Can be normal or programmable scan mode (e.g., ASLM).
 
         Parameters
         ----------
@@ -191,9 +194,9 @@ class PhotometricsKinetix(CameraBase):
 
         Parameters
         ----------
-            mode : str
-                'Top-to-Bottom', 'Bottom-to-Top', 'Alternate'
-                # Scan direction options: {'Down': 0, 'Up': 1, 'Down/Up Alternate': 2}
+        mode : str
+            'Top-to-Bottom', 'Bottom-to-Top', 'Alternate'
+            Scan direction options: {'Down': 0, 'Up': 1, 'Down/Up Alternate': 2}
 
         """
         print("available scan directions on camera are:")
@@ -213,10 +216,13 @@ class PhotometricsKinetix(CameraBase):
 
     def calculate_readout_time(self):
         """Calculate duration of time needed to readout an image.
+
         Calculates the readout time and maximum frame rate according to the camera
         configuration settings.
-        Assumes model C13440 with Camera Link communication from Hamamatsu.
-        Currently pulling values directly from the camera.
+
+        Warn
+        ----
+            Not implemented. Currently hard-coded for Hamamatsu Orca Flash 4.0.
 
         Returns
         -------
@@ -273,14 +279,18 @@ class PhotometricsKinetix(CameraBase):
     def set_exposure_time(self, exposure_time):
         """Set Photometrics exposure time.
 
-        Units of the Hamamatsu API are in seconds.
-        All of our units are in milliseconds. Function convert to seconds.
+        Units of the Photometrics API are in seconds.
+        All of our units are in milliseconds.
 
         Parameters
         ----------
         exposure_time : float
             Exposure time in milliseconds.
 
+        Returns
+        -------
+        exposure_time : float
+            Exposure time in seconds.
         """
         self._exposuretime = exposure_time
         return exposure_time
@@ -353,12 +363,21 @@ class PhotometricsKinetix(CameraBase):
         return ASLM_lineExposure, ASLM_line_delay
 
     def _calculate_ASLMparameters(self, desired_exposuretime):
-        """
-        calculate the parameters for an ASLM acquisition
-        :param desired_exposuretime: the exposure time that is desired for the whole
-        acquisition
+        """Calculate the parameters for an ASLM acquisition
 
-        :return: set the important parameters for ASLM acquisitions
+        Parameters
+        ----------
+        desired_exposuretime : float
+            Exposure time in milliseconds.
+
+        Returns
+        -------
+        exposure_time : float
+            Light-sheet mode exposure time.
+
+        Warn
+        ----
+            Not implemented. No code in this function.
         """
 
     def set_binning(self, binning_string):
@@ -373,15 +392,13 @@ class PhotometricsKinetix(CameraBase):
         Returns
         -------
         result: bool
+            True if binning was set successfully, False otherwise.
+
         """
         binning_dict = {
             "1x1": 1,
             "2x2": 2,
             "4x4": 4,
-            # '8x8': 8,
-            # '16x16': 16,
-            # '1x2': 102,
-            # '2x4': 204
         }
         if binning_string not in binning_dict.keys():
             logger.debug(f"can't set binning to {binning_string}")
@@ -389,7 +406,9 @@ class PhotometricsKinetix(CameraBase):
             return False
         self.camera_controller.binning = binning_dict[binning_string]
         idx = binning_string.index("x")
+        #: int: Binning in x direction
         self.x_binning = int(binning_string[:idx])
+        #: int: Binning in y direction
         self.y_binning = int(binning_string[idx + 1 :])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)

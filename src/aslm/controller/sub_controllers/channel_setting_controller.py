@@ -76,7 +76,7 @@ class ChannelSettingController(GUIController):
         self.channel_setting_dict = None
 
         # add validation functions to spinbox
-        for i in range(self.num):
+        for i in range(self.num - 1):
             validate_wrapper(self.view.exptime_pulldowns[i])
             validate_wrapper(self.view.interval_spins[i])
             validate_wrapper(self.view.laserpower_pulldowns[i])
@@ -103,7 +103,7 @@ class ChannelSettingController(GUIController):
         self.mode = mode
         state = "normal" if mode == "stop" else "disabled"
         state_readonly = "readonly" if mode == "stop" else "disabled"
-        for i in range(5):
+        for i in range(self.num):
             self.view.channel_checks[i].config(state=state)
             self.view.interval_spins[i].config(state=state)
             self.view.laser_pulldowns[i]["state"] = state_readonly

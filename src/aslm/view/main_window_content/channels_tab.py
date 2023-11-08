@@ -227,8 +227,9 @@ class ChannelCreator(ttk.Labelframe):
         custom_font = tk.font.Font(size=11)
         style.configure("CustomCheckbutton.TCheckbutton", font=custom_font)
 
-        number_of_channels = self.configuration["configuration"]["gui"].get("count", 5)
-        # TODO: Channel setting controller expects 5 channels. Shouldn't be hardcoded.
+        number_of_channels = self.configuration["configuration"]["gui"]["channels"].get(
+            "count", 5
+        )
 
         for num in range(0, number_of_channels):
             counter = 0

@@ -119,12 +119,10 @@ class Microscope:
             "remote_focus_device": ["type", "channel"],
             "galvo": ["type", "channel"],
             "lasers": ["wavelength"],
+            "dichroic": ["type"]
         }
 
-        # TODO: This cannot be pulled into the repo.
-        #  I need help comping up with a more general way to have
-        # shared devices.
-        # devices_dict['filter_wheel']['ASI'] = devices_dict['stages']['ASI_119060508']
+        # TODO: Create more general way to have devices with shared controllers.
 
         device_name_dict = {"lasers": "wavelength"}
 
@@ -133,8 +131,7 @@ class Microscope:
         ]["lasers"]
         self.laser_wavelength = [laser["wavelength"] for laser in laser_list]
 
-        # LOAD/START CAMERAS, FILTER_WHEELS, ZOOM, SHUTTERS, REMOTE_FOCUS_DEVICES,
-        # GALVOS, AND LASERS
+        # device_name: camera, filter_wheel, zoom, etc.
         for device_name in device_ref_dict.keys():
             device_connection = None
             (
@@ -145,6 +142,7 @@ class Microscope:
                 device_name=device_name, device_name_dict=device_name_dict
             )
 
+            # device_config_list: all of the device configurations (e.g., x_pixels, y_pixels, defect_correct_mode)
             for i, device in enumerate(device_config_list):
                 device_ref_name = None
                 if "hardware" in device.keys():
@@ -686,6 +684,7 @@ class Microscope:
         device_config_list = []
         device_name_list = []
 
+        #daq, dichroic, camera, stage, remote_focus_device, galvo, filter_wheel, etc.
         devices = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ][device_name]

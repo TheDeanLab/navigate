@@ -176,7 +176,7 @@ def start_dichroic(microscope_name, device_connection, configuration, is_synthet
         is_synthetic=False)
     """
     if device_connection is None:
-        device_not_found(microscope_name, "Dichroic")
+        device_not_found(microscope_name, "dichroic")
 
     if is_synthetic:
         dichroic_type = "SyntheticDichroic"
@@ -194,7 +194,7 @@ def start_dichroic(microscope_name, device_connection, configuration, is_synthet
         return SyntheticDichroic(microscope_name, device_connection, configuration)
 
     else:
-        device_not_found(microscope_name, "Dichroic", dichroic_type)
+        device_not_found(microscope_name, "dichroic", dichroic_type)
 
 
 def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
@@ -1080,7 +1080,7 @@ def load_devices(configuration, is_synthetic=False) -> dict:
     if "dichroic" in configuration["configuration"]["hardware"].keys():
         devices["dichroic"] = {}
         device = configuration["configuration"]["hardware"]["dichroic"]
-        devices["filter_wheel"][device["type"]] = load_dichroic_connection(
+        devices["dichroic"][device["type"]] = load_dichroic_connection(
             configuration, is_synthetic
         )
 

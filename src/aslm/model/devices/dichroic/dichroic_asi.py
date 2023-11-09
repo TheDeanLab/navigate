@@ -66,7 +66,7 @@ def build_ASI_dichroic_connection(com_port, baud_rate=115200):
     asi_dichroic = TigerController(com_port, baud_rate)
     asi_dichroic.connect_to_serial()
     if not asi_dichroic.is_open():
-        raise Exception("ASI stage connection failed.")
+        raise Exception("ASI dichroic connection failed.")
 
     return asi_dichroic
 

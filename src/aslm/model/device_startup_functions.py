@@ -143,7 +143,7 @@ def load_dichroic_connection(configuration, is_synthetic=False):
 
         tiger_controller = auto_redial(
             build_ASI_dichroic_connection,
-            (device_info["port"], device_info["baudrate"], 0.25),
+            (device_info["port"], device_info["baudrate"]),
             exception=Exception,
         )
         return tiger_controller
@@ -246,9 +246,7 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
             from pyvcam.camera import Camera
 
             pvc.init_pvcam()
-            print("pvcam initialized")
             camera_names = Camera.get_available_camera_names()
-            print("Available cameras: " + str(camera_names))
             camera_toopen = Camera.select_camera(camera_connection)
             camera_toopen.open()
             return camera_toopen
@@ -256,7 +254,6 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
         camera_connection = configuration["configuration"]["hardware"]["camera"][
             camera_id
         ]["camera_connection"]
-        print(camera_connection)
 
         # return camera object in the auto_redial function.
         return auto_redial(
@@ -421,6 +418,7 @@ def load_stages(configuration, is_synthetic=False):
             filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"][
                 "type"
             ]
+
             if filter_wheel == "ASI":
                 stage_devices.append("shared device")
             else:
@@ -1080,8 +1078,16 @@ def load_devices(configuration, is_synthetic=False) -> dict:
     if "dichroic" in configuration["configuration"]["hardware"].keys():
         devices["dichroic"] = {}
         device = configuration["configuration"]["hardware"]["dichroic"]
-        devices["dichroic"][device["type"]] = load_dichroic_connection(
-            configuration, is_synthetic
+        filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"].get("type", None)
+
+        if (filter_wheel == "ASI") and (device["type"] == "ASI"):
+            # Devices share a common controller.
+            devices["dichroic"][device["type"]] = devices["filter_wheel"][device["type"]]
+
+        else:
+            # No common controller exists. Must create new device connection.
+            devices["dichroic"][device["type"]] = load_dichroic_connection(
+                configuration, is_synthetic
         )
 
     # load zoom

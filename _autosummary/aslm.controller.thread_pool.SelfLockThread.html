@@ -11,14 +11,17 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="aslm.controller.thread_pool.SynchronizedThreadPool" href="aslm.controller.thread_pool.SynchronizedThreadPool.html" />
+    <link rel="prev" title="aslm.controller.thread_pool" href="aslm.controller.thread_pool.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,13 +44,31 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="aslm.controller.html">aslm.controller</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aslm.controller.configuration_controller.html">aslm.controller.configuration_controller</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aslm.controller.thread_pool.html">aslm.controller.thread_pool</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">aslm.controller.thread_pool.SelfLockThread</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.controller.thread_pool.SynchronizedThreadPool.html">aslm.controller.thread_pool.SynchronizedThreadPool</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.controller.thread_pool.ThreadWaitlist.html">aslm.controller.thread_pool.ThreadWaitlist</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.log_files.html">aslm.log_files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.model.html">aslm.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.tools.html">aslm.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.view.html">aslm.view</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -64,6 +85,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="aslm.controller.html">aslm.controller</a></li>
+          <li class="breadcrumb-item"><a href="aslm.controller.thread_pool.html">aslm.controller.thread_pool</a></li>
       <li class="breadcrumb-item active">aslm.controller.thread_pool.SelfLockThread</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/_autosummary/aslm.controller.thread_pool.SelfLockThread.rst.txt" rel="nofollow"> View page source</a>
@@ -75,10 +99,10 @@
            <div itemprop="articleBody">
              
   <section id="aslm-controller-thread-pool-selflockthread">
-<h1>aslm.controller.thread_pool.SelfLockThread<a class="headerlink" href="#aslm-controller-thread-pool-selflockthread" title="Link to this heading"></a></h1>
+<h1>aslm.controller.thread_pool.SelfLockThread<a class="headerlink" href="#aslm-controller-thread-pool-selflockthread" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.controller.thread_pool.</span></span><span class="sig-name descname"><span class="pre">SelfLockThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.controller.thread_pool.</span></span><span class="sig-name descname"><span class="pre">SelfLockThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>A custom thread class with self-locking capabilities.</p>
 <p>This class extends the functionality of the Python threading.Thread class by
@@ -95,7 +119,7 @@ method.</p></li>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize the SelfLockThread.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -174,21 +198,21 @@ method.</p></li>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.getName">
-<span class="sig-name descname"><span class="pre">getName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.getName" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">getName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.getName" title="Permalink to this definition"></a></dt>
 <dd><p>Return a string used for identification purposes only.</p>
 <p>This method is deprecated, use the name attribute instead.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.isDaemon">
-<span class="sig-name descname"><span class="pre">isDaemon</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.isDaemon" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">isDaemon</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.isDaemon" title="Permalink to this definition"></a></dt>
 <dd><p>Return whether this thread is a daemon.</p>
 <p>This method is deprecated, use the daemon attribute instead.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.isLocked">
-<span class="sig-name descname"><span class="pre">isLocked</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.isLocked" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">isLocked</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.isLocked" title="Permalink to this definition"></a></dt>
 <dd><p>Check if the thread is locked.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -202,7 +226,7 @@ method.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.is_alive">
-<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.is_alive" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.is_alive" title="Permalink to this definition"></a></dt>
 <dd><p>Return whether the thread is alive.</p>
 <p>This method returns True just before the run() method starts until just
 after the run() method terminates. See also the module function
@@ -211,7 +235,7 @@ enumerate().</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.join">
-<span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.join" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.join" title="Permalink to this definition"></a></dt>
 <dd><p>Wait until the thread terminates.</p>
 <p>This blocks the calling thread until the thread whose join() method is
 called terminates – either normally or through an unhandled exception
@@ -232,27 +256,27 @@ exception.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.run" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.run" title="Permalink to this definition"></a></dt>
 <dd><p>Run the thread.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.setDaemon">
-<span class="sig-name descname"><span class="pre">setDaemon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemonic</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.setDaemon" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setDaemon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemonic</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.setDaemon" title="Permalink to this definition"></a></dt>
 <dd><p>Set whether this thread is a daemon.</p>
 <p>This method is deprecated, use the .daemon property instead.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.setName">
-<span class="sig-name descname"><span class="pre">setName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.setName" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.setName" title="Permalink to this definition"></a></dt>
 <dd><p>Set the name string for this thread.</p>
 <p>This method is deprecated, use the name attribute instead.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.start" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.start" title="Permalink to this definition"></a></dt>
 <dd><p>Start the thread’s activity.</p>
 <p>It must be called at most once per thread object. It arranges for the
 object’s run() method to be invoked in a separate thread of control.</p>
@@ -262,19 +286,19 @@ same thread object.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.unlock">
-<span class="sig-name descname"><span class="pre">unlock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.unlock" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">unlock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.unlock" title="Permalink to this definition"></a></dt>
 <dd><p>Unlock the thread.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.wait">
-<span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.wait" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.wait" title="Permalink to this definition"></a></dt>
 <dd><p>Wait for the thread to finish.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.daemon">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">daemon</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.daemon" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">daemon</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.daemon" title="Permalink to this definition"></a></dt>
 <dd><p>A boolean value indicating whether this thread is a daemon thread.</p>
 <p>This must be set before start() is called, otherwise RuntimeError is
 raised. Its initial value is inherited from the creating thread; the
@@ -285,7 +309,7 @@ the main thread default to daemon = False.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.ident">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ident</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.ident" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ident</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.ident" title="Permalink to this definition"></a></dt>
 <dd><p>Thread identifier of this thread or None if it has not been started.</p>
 <p>This is a nonzero integer. See the get_ident() function. Thread
 identifiers may be recycled when a thread exits and another thread is
@@ -294,7 +318,7 @@ created. The identifier is available even after the thread has exited.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.name" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.name" title="Permalink to this definition"></a></dt>
 <dd><p>A string used for identification purposes only.</p>
 <p>It has no semantics. Multiple threads may be given the same name. The
 initial name is set by the constructor.</p>
@@ -302,7 +326,7 @@ initial name is set by the constructor.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.native_id">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">native_id</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.native_id" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">native_id</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.native_id" title="Permalink to this definition"></a></dt>
 <dd><p>Native integral thread ID of this thread, or None if it has not been started.</p>
 <p>This is a non-negative integer. See the get_native_id() function.
 This represents the Thread ID as reported by the kernel.</p>
@@ -310,7 +334,7 @@ This represents the Thread ID as reported by the kernel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.controller.thread_pool.SelfLockThread.selfLock">
-<span class="sig-name descname"><span class="pre">selfLock</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.selfLock" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">selfLock</span></span><a class="headerlink" href="#aslm.controller.thread_pool.SelfLockThread.selfLock" title="Permalink to this definition"></a></dt>
 <dd><p>The lock of the thread.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -326,7 +350,10 @@ This represents the Thread ID as reported by the kernel.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="aslm.controller.thread_pool.html" class="btn btn-neutral float-left" title="aslm.controller.thread_pool" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.controller.thread_pool.SynchronizedThreadPool.html" class="btn btn-neutral float-right" title="aslm.controller.thread_pool.SynchronizedThreadPool" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

@@ -10,11 +10,12 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=2709fde1"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -47,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -139,8 +141,6 @@
         <li><a href="_autosummary/aslm.model.concurrency.proxy_objects.ProxyManager.html#aslm.model.concurrency.proxy_objects.ProxyManager.__init__">(aslm.model.concurrency.proxy_objects.ProxyManager method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.concurrency.proxy_objects.ProxyObject.html#aslm.model.concurrency.proxy_objects.ProxyObject.__init__">(aslm.model.concurrency.proxy_objects.ProxyObject method)</a>
-</li>
-        <li><a href="_autosummary/aslm.model.concurrency.write_parameters.write_Params.html#aslm.model.concurrency.write_parameters.write_Params.__init__">(aslm.model.concurrency.write_parameters.write_Params method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.__init__">(aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
 </li>
@@ -491,13 +491,6 @@
 </li>
       </ul></li>
       <li>
-    aslm.model.concurrency.write_parameters
-
-      <ul>
-        <li><a href="_autosummary/aslm.model.concurrency.write_parameters.html#module-aslm.model.concurrency.write_parameters">module</a>
-</li>
-      </ul></li>
-      <li>
     aslm.model.data_sources
 
       <ul>
@@ -728,8 +721,6 @@
         <li><a href="_autosummary/aslm.model.devices.remote_focus.remote_focus_base.html#module-aslm.model.devices.remote_focus.remote_focus_base">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     aslm.model.devices.remote_focus.remote_focus_synthetic
 
@@ -737,6 +728,8 @@
         <li><a href="_autosummary/aslm.model.devices.remote_focus.remote_focus_synthetic.html#module-aslm.model.devices.remote_focus.remote_focus_synthetic">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     aslm.model.devices.shutter
 
@@ -2281,8 +2274,6 @@
         <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.ResultThread.html#aslm.model.concurrency.concurrency_tools.ResultThread.ident">(aslm.model.concurrency.concurrency_tools.ResultThread property)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/aslm.tools.main_functions.identify_gpu.html#aslm.tools.main_functions.identify_gpu">identify_gpu() (in module aslm.tools.main_functions)</a>
-</li>
       <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation">IlastikSegmentation (class in aslm.model.features.restful_features)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.imag">imag (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
@@ -2720,8 +2711,6 @@
         <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.html#module-aslm.model.concurrency.concurrency_tools">aslm.model.concurrency.concurrency_tools</a>
 </li>
         <li><a href="_autosummary/aslm.model.concurrency.proxy_objects.html#module-aslm.model.concurrency.proxy_objects">aslm.model.concurrency.proxy_objects</a>
-</li>
-        <li><a href="_autosummary/aslm.model.concurrency.write_parameters.html#module-aslm.model.concurrency.write_parameters">aslm.model.concurrency.write_parameters</a>
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.html#module-aslm.model.data_sources">aslm.model.data_sources</a>
 </li>
@@ -4376,8 +4365,6 @@
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.write">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id3">[1]</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id9">[2]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/aslm.model.concurrency.write_parameters.write_Params.html#aslm.model.concurrency.write_parameters.write_Params">write_Params (class in aslm.model.concurrency.write_parameters)</a>
-</li>
       <li><a href="_autosummary/aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.html#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.write_waveforms_to_tasks">write_waveforms_to_tasks() (aslm.model.devices.daq.daq_synthetic.SyntheticDAQ method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.write_xml">write_xml() (aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata method)</a>

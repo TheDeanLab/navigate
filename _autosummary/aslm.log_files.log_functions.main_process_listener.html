@@ -11,14 +11,17 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="aslm.log_files.log_functions.update_nested_dict" href="aslm.log_files.log_functions.update_nested_dict.html" />
+    <link rel="prev" title="aslm.log_files.log_functions.log_setup" href="aslm.log_files.log_functions.log_setup.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,13 +44,32 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="aslm.log_files.html">aslm.log_files</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aslm.log_files.filters.html">aslm.log_files.filters</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aslm.log_files.log_functions.html">aslm.log_files.log_functions</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="aslm.log_files.log_functions.find_filename.html">aslm.log_files.log_functions.find_filename</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.log_files.log_functions.log_setup.html">aslm.log_files.log_functions.log_setup</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">aslm.log_files.log_functions.main_process_listener</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.log_files.log_functions.update_nested_dict.html">aslm.log_files.log_functions.update_nested_dict</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.model.html">aslm.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.tools.html">aslm.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.view.html">aslm.view</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -64,6 +86,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="aslm.log_files.html">aslm.log_files</a></li>
+          <li class="breadcrumb-item"><a href="aslm.log_files.log_functions.html">aslm.log_files.log_functions</a></li>
       <li class="breadcrumb-item active">aslm.log_files.log_functions.main_process_listener</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/_autosummary/aslm.log_files.log_functions.main_process_listener.rst.txt" rel="nofollow"> View page source</a>
@@ -75,10 +100,10 @@
            <div itemprop="articleBody">
              
   <section id="aslm-log-files-log-functions-main-process-listener">
-<h1>aslm.log_files.log_functions.main_process_listener<a class="headerlink" href="#aslm-log-files-log-functions-main-process-listener" title="Link to this heading"></a></h1>
+<h1>aslm.log_files.log_functions.main_process_listener<a class="headerlink" href="#aslm-log-files-log-functions-main-process-listener" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="aslm.log_files.log_functions.main_process_listener">
-<span class="sig-prename descclassname"><span class="pre">aslm.log_files.log_functions.</span></span><span class="sig-name descname"><span class="pre">main_process_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.log_functions.main_process_listener" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">aslm.log_files.log_functions.</span></span><span class="sig-name descname"><span class="pre">main_process_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.log_files.log_functions.main_process_listener" title="Permalink to this definition"></a></dt>
 <dd><p>Listener function for the main process</p>
 <p>This function will listen for new logs put in queue from sub processes,
 it will then log via the main process.</p>
@@ -94,7 +119,10 @@ it will then log via the main process.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="aslm.log_files.log_functions.log_setup.html" class="btn btn-neutral float-left" title="aslm.log_files.log_functions.log_setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.log_files.log_functions.update_nested_dict.html" class="btn btn-neutral float-right" title="aslm.log_files.log_functions.update_nested_dict" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

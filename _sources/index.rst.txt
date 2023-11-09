@@ -38,6 +38,7 @@ contains a feature list that acts as a recipe maker for automated microscope rou
    software_configuration
    contributing/contributing_home
    feature_container/feature_container_home
+   api
 
 
 

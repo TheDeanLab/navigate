@@ -11,14 +11,16 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Reference" href="../api.html" />
     <link rel="prev" title="Adding New Model Features" href="../contributing/contributing_model.html" /> 
 </head>
 
@@ -59,6 +61,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#deleting-features">Deleting Features</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -86,11 +89,11 @@
            <div itemprop="articleBody">
              
   <section id="feature-container">
-<h1>Feature Container<a class="headerlink" href="#feature-container" title="Link to this heading"></a></h1>
+<h1>Feature Container<a class="headerlink" href="#feature-container" title="Permalink to this heading"></a></h1>
 <p>To make ASLM as powerful as possible, we want to encourage users to contribute code and
 engage in the software collaboratively.</p>
 <section id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h2>
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h2>
 <p>The ASLM <strong>feature container</strong> allows for reconfigurable acquisition and
 analysis. The feature container runs a tree of <strong>features</strong>, where each
 feature may perform a <em>signal</em> operation, where it modifies the state of
@@ -105,7 +108,7 @@ z-stack, and <code class="docutils literal notranslate"><span class="pre">aslm.m
 ideal plane of focus of a sample using a Discrete Cosine Transform.</p>
 </section>
 <section id="currently-implemented-features">
-<h2>Currently Implemented Features<a class="headerlink" href="#currently-implemented-features" title="Link to this heading"></a></h2>
+<h2>Currently Implemented Features<a class="headerlink" href="#currently-implemented-features" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p>VolumeSearch</p></li>
 <li><p>IlastikSegmentation</p></li>
@@ -127,7 +130,7 @@ ideal plane of focus of a sample using a Discrete Cosine Transform.</p>
 </ul>
 </section>
 <section id="the-feature-object">
-<h2>The Feature Object<a class="headerlink" href="#the-feature-object" title="Link to this heading"></a></h2>
+<h2>The Feature Object<a class="headerlink" href="#the-feature-object" title="Permalink to this heading"></a></h2>
 <p>Each feature is an object that accepts a pointer to <code class="docutils literal notranslate"><span class="pre">aslm.model.model</span></code> in its
 <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>  arguments and contains a configuration dictionary that dictates
 feature behavior in its <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function. A complete configuration
@@ -170,7 +173,7 @@ it has indeed moved) before proceeding.</p>
 dictionaries are methods of the feature object.</p>
 </section>
 <section id="creating-custom-features">
-<h2>Creating Custom Features<a class="headerlink" href="#creating-custom-features" title="Link to this heading"></a></h2>
+<h2>Creating Custom Features<a class="headerlink" href="#creating-custom-features" title="Permalink to this heading"></a></h2>
 <p>The ASLM Software allows you to build a custom feature that implements new
 functionality, or a new feature list that builds an intelligent acquisition workflow
 from existing features. This documentation explains how to create and load
@@ -211,7 +214,7 @@ load the specified feature list, making it available for use in your experiments
 analyses. It will appear at the bottom of the <cite>Features</cite> menu.</p>
 </section>
 <section id="combining-features">
-<h2>Combining Features<a class="headerlink" href="#combining-features" title="Link to this heading"></a></h2>
+<h2>Combining Features<a class="headerlink" href="#combining-features" title="Permalink to this heading"></a></h2>
 <p>Once you have loaded your feature, the next step is to use it in combination with
 other features to create an intelligent acquisition workflow. To do this, you will
 need to create a new feature list that combines your custom feature with other
@@ -251,7 +254,7 @@ user-selected format.</p>
 under the “Features” menu.</p>
 </section>
 <section id="loading-custom-functions">
-<h2>Loading Custom Functions<a class="headerlink" href="#loading-custom-functions" title="Link to this heading"></a></h2>
+<h2>Loading Custom Functions<a class="headerlink" href="#loading-custom-functions" title="Permalink to this heading"></a></h2>
 <p>1. You could load customized functions in the software by selecting the menu
 “Features-&gt;Advanced Setting”.</p>
 <img alt="../_images/step_10.png" src="../_images/step_10.png" />
@@ -271,7 +274,7 @@ name will appear and you can choose the one you just added.</p>
 <img alt="../_images/step_15.png" src="../_images/step_15.png" />
 </section>
 <section id="editing-function-parameters">
-<h2>Editing Function Parameters<a class="headerlink" href="#editing-function-parameters" title="Link to this heading"></a></h2>
+<h2>Editing Function Parameters<a class="headerlink" href="#editing-function-parameters" title="Permalink to this heading"></a></h2>
 <p>1. Select the feature list you want to run, choose “Customized” acquisition mode, and
 then click “Acquire”. A feature edit popup window will show up. In this popup window,
 you can see the structure of the selected feature list.</p>
@@ -287,7 +290,7 @@ could set the parameter you want. Close the parameter window.</p>
 <img alt="../_images/step_20.png" src="../_images/step_20.png" />
 </section>
 <section id="deleting-features">
-<h2>Deleting Features<a class="headerlink" href="#deleting-features" title="Link to this heading"></a></h2>
+<h2>Deleting Features<a class="headerlink" href="#deleting-features" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Select the feature list you want to delete in the <cite>Features</cite> menu.</p></li>
 </ol>
@@ -302,6 +305,7 @@ List”. The feature list will be removed from the menu and the software.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../contributing/contributing_model.html" class="btn btn-neutral float-left" title="Adding New Model Features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -11,14 +11,17 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="aslm.model.model" href="aslm.model.model.html" />
+    <link rel="prev" title="aslm.model.microscope" href="aslm.model.microscope.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,13 +44,38 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.log_files.html">aslm.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="aslm.model.html">aslm.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.concurrency.html">aslm.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">aslm.model.microscope.Microscope</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.model.html">aslm.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.waveforms.html">aslm.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.tools.html">aslm.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.view.html">aslm.view</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -64,6 +92,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.html">aslm.model</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.microscope.html">aslm.model.microscope</a></li>
       <li class="breadcrumb-item active">aslm.model.microscope.Microscope</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/_autosummary/aslm.model.microscope.Microscope.rst.txt" rel="nofollow"> View page source</a>
@@ -75,15 +106,15 @@
            <div itemprop="articleBody">
              
   <section id="aslm-model-microscope-microscope">
-<h1>aslm.model.microscope.Microscope<a class="headerlink" href="#aslm-model-microscope-microscope" title="Link to this heading"></a></h1>
+<h1>aslm.model.microscope.Microscope<a class="headerlink" href="#aslm-model-microscope-microscope" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.microscope.</span></span><span class="sig-name descname"><span class="pre">Microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_virtual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.microscope.</span></span><span class="sig-name descname"><span class="pre">Microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_virtual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Microscope Class - Used to control the microscope.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_virtual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_virtual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize the microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -227,7 +258,7 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.assemble_device_config_lists">
-<span class="sig-name descname"><span class="pre">assemble_device_config_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_name_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.assemble_device_config_lists" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">assemble_device_config_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_name_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.assemble_device_config_lists" title="Permalink to this definition"></a></dt>
 <dd><p>Assemble device config lists.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -248,7 +279,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.calculate_all_waveform">
-<span class="sig-name descname"><span class="pre">calculate_all_waveform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.calculate_all_waveform" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calculate_all_waveform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.calculate_all_waveform" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate all the waveforms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -262,7 +293,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.calculate_exposure_sweep_times">
-<span class="sig-name descname"><span class="pre">calculate_exposure_sweep_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.calculate_exposure_sweep_times" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calculate_exposure_sweep_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.calculate_exposure_sweep_times" title="Permalink to this definition"></a></dt>
 <dd><p>Get the exposure and sweep times for all channels.</p>
 <p>The <cite>calculate_exposure_sweep_times</cite> function calculates and returns exposure
 times and sweep times for all channels in a microscope configuration. It takes
@@ -288,13 +319,13 @@ Normal mode, otherwise -1.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.end_acquisition">
-<span class="sig-name descname"><span class="pre">end_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.end_acquisition" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">end_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.end_acquisition" title="Permalink to this definition"></a></dt>
 <dd><p>End the acquisition.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.get_readout_time">
-<span class="sig-name descname"><span class="pre">get_readout_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.get_readout_time" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_readout_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.get_readout_time" title="Permalink to this definition"></a></dt>
 <dd><p>Get readout time from camera.</p>
 <p>Get the camera readout time if we are in normal mode.
 Return a -1 to indicate when we are not in normal mode.
@@ -311,7 +342,7 @@ This is needed in daq.calculate_all_waveforms()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.get_stage_position">
-<span class="sig-name descname"><span class="pre">get_stage_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.get_stage_position" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_stage_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.get_stage_position" title="Permalink to this definition"></a></dt>
 <dd><p>Get stage position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -325,7 +356,7 @@ This is needed in daq.calculate_all_waveforms()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.load_and_start_devices">
-<span class="sig-name descname"><span class="pre">load_and_start_devices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_name_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_ref_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.load_and_start_devices" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_and_start_devices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_name_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_ref_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.load_and_start_devices" title="Permalink to this definition"></a></dt>
 <dd><p>Load and start devices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -344,7 +375,7 @@ This is needed in daq.calculate_all_waveforms()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.move_remote_focus">
-<span class="sig-name descname"><span class="pre">move_remote_focus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.move_remote_focus" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">move_remote_focus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.move_remote_focus" title="Permalink to this definition"></a></dt>
 <dd><p>Move remote focus.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -355,7 +386,7 @@ This is needed in daq.calculate_all_waveforms()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.move_stage">
-<span class="sig-name descname"><span class="pre">move_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_focus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.move_stage" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">move_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_focus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.move_stage" title="Permalink to this definition"></a></dt>
 <dd><p>Move stage to a position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -376,7 +407,7 @@ This is needed in daq.calculate_all_waveforms()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.move_stage_offset">
-<span class="sig-name descname"><span class="pre">move_stage_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">former_microscope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.move_stage_offset" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">move_stage_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">former_microscope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.move_stage_offset" title="Permalink to this definition"></a></dt>
 <dd><p>Move the stage to the offset position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -387,7 +418,7 @@ This is needed in daq.calculate_all_waveforms()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.prepare_acquisition">
-<span class="sig-name descname"><span class="pre">prepare_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.prepare_acquisition" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prepare_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.prepare_acquisition" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare the acquisition.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -401,7 +432,7 @@ This is needed in daq.calculate_all_waveforms()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.prepare_next_channel">
-<span class="sig-name descname"><span class="pre">prepare_next_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.prepare_next_channel" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prepare_next_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.prepare_next_channel" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare the next channel.</p>
 <p>This function, <cite>prepare_next_channel</cite>, is responsible for configuring various
 hardware components for the next imaging channel in an experimental setup.
@@ -414,31 +445,31 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.stop_stage">
-<span class="sig-name descname"><span class="pre">stop_stage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.stop_stage" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stop_stage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.stop_stage" title="Permalink to this definition"></a></dt>
 <dd><p>Stop stage.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.terminate">
-<span class="sig-name descname"><span class="pre">terminate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.terminate" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">terminate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.terminate" title="Permalink to this definition"></a></dt>
 <dd><p>Close hardware explicitly.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.turn_off_lasers">
-<span class="sig-name descname"><span class="pre">turn_off_lasers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.turn_off_lasers" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">turn_off_lasers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.turn_off_lasers" title="Permalink to this definition"></a></dt>
 <dd><p>Turn off current laser.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.turn_on_laser">
-<span class="sig-name descname"><span class="pre">turn_on_laser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.turn_on_laser" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">turn_on_laser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.turn_on_laser" title="Permalink to this definition"></a></dt>
 <dd><p>Turn on the current laser.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.update_data_buffer">
-<span class="sig-name descname"><span class="pre">update_data_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_frames</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.update_data_buffer" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_data_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_frames</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.update_data_buffer" title="Permalink to this definition"></a></dt>
 <dd><p>Update the data buffer for the camera.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -454,7 +485,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.update_stage_limits">
-<span class="sig-name descname"><span class="pre">update_stage_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limits_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.update_stage_limits" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_stage_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limits_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.microscope.Microscope.update_stage_limits" title="Permalink to this definition"></a></dt>
 <dd><p>Update stage limits.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -465,7 +496,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.ask_stage_for_position">
-<span class="sig-name descname"><span class="pre">ask_stage_for_position</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.ask_stage_for_position" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ask_stage_for_position</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.ask_stage_for_position" title="Permalink to this definition"></a></dt>
 <dd><p>Ask stage for position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -476,7 +507,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.available_channels">
-<span class="sig-name descname"><span class="pre">available_channels</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.available_channels" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">available_channels</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.available_channels" title="Permalink to this definition"></a></dt>
 <dd><p>List of available channels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -487,7 +518,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.central_focus">
-<span class="sig-name descname"><span class="pre">central_focus</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.central_focus" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">central_focus</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.central_focus" title="Permalink to this definition"></a></dt>
 <dd><p>Central focus position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -498,7 +529,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.channels">
-<span class="sig-name descname"><span class="pre">channels</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.channels" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">channels</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.channels" title="Permalink to this definition"></a></dt>
 <dd><p>List of all channels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -509,7 +540,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.configuration">
-<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.configuration" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.configuration" title="Permalink to this definition"></a></dt>
 <dd><p>Configuration dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -520,7 +551,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.current_channel">
-<span class="sig-name descname"><span class="pre">current_channel</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.current_channel" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">current_channel</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.current_channel" title="Permalink to this definition"></a></dt>
 <dd><p>Current channel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -531,7 +562,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.current_laser_index">
-<span class="sig-name descname"><span class="pre">current_laser_index</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.current_laser_index" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">current_laser_index</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.current_laser_index" title="Permalink to this definition"></a></dt>
 <dd><p>Current laser index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -542,7 +573,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.daq">
-<span class="sig-name descname"><span class="pre">daq</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.daq" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">daq</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.daq" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionary of data acquisition devices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -553,7 +584,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.data_buffer">
-<span class="sig-name descname"><span class="pre">data_buffer</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.data_buffer" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_buffer</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.data_buffer" title="Permalink to this definition"></a></dt>
 <dd><p>Buffer for image data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -564,7 +595,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.galvo">
-<span class="sig-name descname"><span class="pre">galvo</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.galvo" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">galvo</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.galvo" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionary of galvanometers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -575,7 +606,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.info">
-<span class="sig-name descname"><span class="pre">info</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.info" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">info</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.info" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionary of microscope info.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -586,7 +617,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.is_synthetic">
-<span class="sig-name descname"><span class="pre">is_synthetic</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.is_synthetic" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">is_synthetic</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.is_synthetic" title="Permalink to this definition"></a></dt>
 <dd><p>Is a synthetic microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -597,7 +628,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.laser_wavelength">
-<span class="sig-name descname"><span class="pre">laser_wavelength</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.laser_wavelength" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">laser_wavelength</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.laser_wavelength" title="Permalink to this definition"></a></dt>
 <dd><p>List of laser wavelengths.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -608,7 +639,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.lasers">
-<span class="sig-name descname"><span class="pre">lasers</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.lasers" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">lasers</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.lasers" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionary of lasers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -619,7 +650,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.microscope_name">
-<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.microscope_name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.microscope_name" title="Permalink to this definition"></a></dt>
 <dd><p>Name of the microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -630,7 +661,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.number_of_frames">
-<span class="sig-name descname"><span class="pre">number_of_frames</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.number_of_frames" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">number_of_frames</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.number_of_frames" title="Permalink to this definition"></a></dt>
 <dd><p>Number of images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -641,7 +672,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.ret_pos_dict">
-<span class="sig-name descname"><span class="pre">ret_pos_dict</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.ret_pos_dict" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ret_pos_dict</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.ret_pos_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionary of returned stage positions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -652,7 +683,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.stages">
-<span class="sig-name descname"><span class="pre">stages</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.stages" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stages</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.stages" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionary of stages.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -663,7 +694,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.stages_list">
-<span class="sig-name descname"><span class="pre">stages_list</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.stages_list" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stages_list</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.stages_list" title="Permalink to this definition"></a></dt>
 <dd><p>List of stages.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -674,7 +705,7 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.microscope.Microscope.tiger_controller">
-<span class="sig-name descname"><span class="pre">tiger_controller</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.tiger_controller" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">tiger_controller</span></span><a class="headerlink" href="#aslm.model.microscope.Microscope.tiger_controller" title="Permalink to this definition"></a></dt>
 <dd><p>object; Tiger Controller object.</p>
 </dd></dl>
 
@@ -685,7 +716,10 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="aslm.model.microscope.html" class="btn btn-neutral float-left" title="aslm.model.microscope" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.model.html" class="btn btn-neutral float-right" title="aslm.model.model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

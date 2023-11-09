@@ -11,11 +11,12 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=2709fde1"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -105,6 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -132,11 +134,11 @@
            <div itemprop="articleBody">
              
   <section id="supported-hardware">
-<h1>Supported Hardware<a class="headerlink" href="#supported-hardware" title="Link to this heading"></a></h1>
+<h1>Supported Hardware<a class="headerlink" href="#supported-hardware" title="Permalink to this heading"></a></h1>
 <section id="data-acquisition-card">
-<h2>Data Acquisition Card<a class="headerlink" href="#data-acquisition-card" title="Link to this heading"></a></h2>
+<h2>Data Acquisition Card<a class="headerlink" href="#data-acquisition-card" title="Permalink to this heading"></a></h2>
 <section id="ni">
-<h3>NI<a class="headerlink" href="#ni" title="Link to this heading"></a></h3>
+<h3>NI<a class="headerlink" href="#ni" title="Permalink to this heading"></a></h3>
 <p>We have used several different NI-based data acquisition cards to run the software.
 These include PCIe-6738, PXIe-6259, and PXIe-6733. Prior to installing the card within the computer, first install
 the <a class="reference external" href="https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560">NI-DAQmx drivers</a>. Once installed,
@@ -163,7 +165,7 @@ however provide us with deterministic behavior between image frames, and some ji
 There are multiple pins for each PFIO, including source, out, gate, etc. You must use the out terminal.</p>
 </div>
 <section id="pcie-6738">
-<h4>PCIe-6738<a class="headerlink" href="#pcie-6738" title="Link to this heading"></a></h4>
+<h4>PCIe-6738<a class="headerlink" href="#pcie-6738" title="Permalink to this heading"></a></h4>
 <p>The PCIe-6738 can only create one software-timed analog task for every four channels.
 As such, the lasers much be attached to analog output ports outside of the banks used by
 the galvo/remote focus units. For example, if you use AO0, AO2, and AO6 for the
@@ -175,16 +177,16 @@ lasers on simultaneously, we could distribute the lasers across independent bank
 .g. AO8, AO14, AO19).</p>
 </section>
 <section id="pxi-6259">
-<h4>PXI-6259<a class="headerlink" href="#pxi-6259" title="Link to this heading"></a></h4>
+<h4>PXI-6259<a class="headerlink" href="#pxi-6259" title="Permalink to this heading"></a></h4>
 <p>The PXI-6259 can create one software-timed analog task per channel. As such, the
 galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 </section>
 </section>
 </section>
 <section id="cameras">
-<h2>Cameras<a class="headerlink" href="#cameras" title="Link to this heading"></a></h2>
+<h2>Cameras<a class="headerlink" href="#cameras" title="Permalink to this heading"></a></h2>
 <section id="hamamatsu-flash-4-0-fusion-and-lightning">
-<h3>Hamamatsu Flash 4.0, Fusion, and Lightning<a class="headerlink" href="#hamamatsu-flash-4-0-fusion-and-lightning" title="Link to this heading"></a></h3>
+<h3>Hamamatsu Flash 4.0, Fusion, and Lightning<a class="headerlink" href="#hamamatsu-flash-4-0-fusion-and-lightning" title="Permalink to this heading"></a></h3>
 <ul>
 <li><p>Insert the USB that came with the camera into the computer and install HCImageLive.</p></li>
 <li><p>When prompted with the DCAM-API Setup</p>
@@ -202,7 +204,7 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 <p>counter port, e.g., <code class="docutils literal notranslate"><span class="pre">/PXI6259/ctr0</span></code></p>
 </section>
 <section id="photometrics-iris-15">
-<h3>Photometrics Iris 15<a class="headerlink" href="#photometrics-iris-15" title="Link to this heading"></a></h3>
+<h3>Photometrics Iris 15<a class="headerlink" href="#photometrics-iris-15" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>Download the <a class="reference external" href="https://www.photometrics.com/support/software-and-drivers">PVCAM software</a> from Photometrics.</p></li>
 </ul>
@@ -215,14 +217,14 @@ You will likely have to register and agree to Photometrics terms.
 </section>
 </section>
 <section id="voicecoil">
-<h2>Voicecoil<a class="headerlink" href="#voicecoil" title="Link to this heading"></a></h2>
+<h2>Voicecoil<a class="headerlink" href="#voicecoil" title="Permalink to this heading"></a></h2>
 <p>Voice coils, also known as linear actuators, play a crucial role in implementing
 aberration-free remote focusing in ASLM. These electromagnetic actuators are used to
 control the axial position of the light-sheet and the sample relative to the
 microscope objective lens. By precisely adjusting the axial position, the focal plane
 can be shifted without moving the objective lens, thus enabling remote focusing.</p>
 <section id="equipment-solutions">
-<h3>Equipment Solutions<a class="headerlink" href="#equipment-solutions" title="Link to this heading"></a></h3>
+<h3>Equipment Solutions<a class="headerlink" href="#equipment-solutions" title="Permalink to this heading"></a></h3>
 <ul>
 <li><p><a class="reference external" href="https://www.equipsolutions.com/products/linear-servo-controllers/sca814-linear-servo-controller/">SCA814 Linear Servo Controller</a></p>
 <blockquote>
@@ -235,12 +237,12 @@ can be shifted without moving the objective lens, thus enabling remote focusing.
 </ul>
 </section>
 <section id="thorlabs-blink">
-<h3>Thorlabs BLINK<a class="headerlink" href="#thorlabs-blink" title="Link to this heading"></a></h3>
+<h3>Thorlabs BLINK<a class="headerlink" href="#thorlabs-blink" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 </section>
 <section id="stages">
-<h2>Stages<a class="headerlink" href="#stages" title="Link to this heading"></a></h2>
+<h2>Stages<a class="headerlink" href="#stages" title="Permalink to this heading"></a></h2>
 <p>Our software empowers users with a flexible solution for configuring
 multiple stages, catering to diverse microscope modalities. Each stage can be
 customized to suit the specific requirements of a particular modality or shared
@@ -248,7 +250,7 @@ across  various modalities. Our unique approach allows seamless integration of s
 from different manufacturers, enabling users to mix and match components for a truly
 versatile and optimized setup tailored to their research needs.</p>
 <section id="asi-tiger-controller">
-<h3>ASI Tiger Controller<a class="headerlink" href="#asi-tiger-controller" title="Link to this heading"></a></h3>
+<h3>ASI Tiger Controller<a class="headerlink" href="#asi-tiger-controller" title="Permalink to this heading"></a></h3>
 <p>Constant Velocity Acquisition - Software is designed to acquire data in a continuous
 stage scanning mode. Rather than using the default SYNC signal from the ASI stage to
 synchronize the start of imaging, we use the encoder output pulsing mode of the ASI
@@ -260,72 +262,72 @@ Whatever you do, don’t change the F position. You will damage your
 stage.</p>
 </section>
 <section id="sutter">
-<h3>Sutter<a class="headerlink" href="#sutter" title="Link to this heading"></a></h3>
+<h3>Sutter<a class="headerlink" href="#sutter" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 <section id="physik-instrumente">
-<h3>Physik Instrumente<a class="headerlink" href="#physik-instrumente" title="Link to this heading"></a></h3>
+<h3>Physik Instrumente<a class="headerlink" href="#physik-instrumente" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 <section id="thorlabs">
-<h3>Thorlabs<a class="headerlink" href="#thorlabs" title="Link to this heading"></a></h3>
+<h3>Thorlabs<a class="headerlink" href="#thorlabs" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 <section id="analog-controlled-galvo-piezo-etc">
-<h3>Analog Controlled (Galvo/Piezo/etc.)<a class="headerlink" href="#analog-controlled-galvo-piezo-etc" title="Link to this heading"></a></h3>
+<h3>Analog Controlled (Galvo/Piezo/etc.)<a class="headerlink" href="#analog-controlled-galvo-piezo-etc" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 </section>
 <section id="deformable-mirrors">
-<h2>Deformable Mirrors<a class="headerlink" href="#deformable-mirrors" title="Link to this heading"></a></h2>
+<h2>Deformable Mirrors<a class="headerlink" href="#deformable-mirrors" title="Permalink to this heading"></a></h2>
 <section id="imagine-optics">
-<h3>Imagine Optics<a class="headerlink" href="#imagine-optics" title="Link to this heading"></a></h3>
+<h3>Imagine Optics<a class="headerlink" href="#imagine-optics" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 </section>
 <section id="filter-wheels">
-<h2>Filter Wheels<a class="headerlink" href="#filter-wheels" title="Link to this heading"></a></h2>
+<h2>Filter Wheels<a class="headerlink" href="#filter-wheels" title="Permalink to this heading"></a></h2>
 <section id="id1">
-<h3>Sutter<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<h3>Sutter<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 <section id="asi">
-<h3>ASI<a class="headerlink" href="#asi" title="Link to this heading"></a></h3>
+<h3>ASI<a class="headerlink" href="#asi" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 </section>
 <section id="galvanometers">
-<h2>Galvanometers<a class="headerlink" href="#galvanometers" title="Link to this heading"></a></h2>
+<h2>Galvanometers<a class="headerlink" href="#galvanometers" title="Permalink to this heading"></a></h2>
 <section id="cambridge-technologies-novanta">
-<h3>Cambridge Technologies/Novanta<a class="headerlink" href="#cambridge-technologies-novanta" title="Link to this heading"></a></h3>
+<h3>Cambridge Technologies/Novanta<a class="headerlink" href="#cambridge-technologies-novanta" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 <section id="scannermax">
-<h3>ScannerMAX<a class="headerlink" href="#scannermax" title="Link to this heading"></a></h3>
+<h3>ScannerMAX<a class="headerlink" href="#scannermax" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 </section>
 <section id="lasers">
-<h2>Lasers<a class="headerlink" href="#lasers" title="Link to this heading"></a></h2>
+<h2>Lasers<a class="headerlink" href="#lasers" title="Permalink to this heading"></a></h2>
 <section id="coherent">
-<h3>Coherent<a class="headerlink" href="#coherent" title="Link to this heading"></a></h3>
+<h3>Coherent<a class="headerlink" href="#coherent" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 <section id="omicron">
-<h3>Omicron<a class="headerlink" href="#omicron" title="Link to this heading"></a></h3>
+<h3>Omicron<a class="headerlink" href="#omicron" title="Permalink to this heading"></a></h3>
 </section>
 </section>
 <section id="shutters">
-<h2>Shutters<a class="headerlink" href="#shutters" title="Link to this heading"></a></h2>
+<h2>Shutters<a class="headerlink" href="#shutters" title="Permalink to this heading"></a></h2>
 <section id="id2">
-<h3>Thorlabs<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<h3>Thorlabs<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 </section>
 <section id="mechanical-zoom">
-<h2>Mechanical Zoom<a class="headerlink" href="#mechanical-zoom" title="Link to this heading"></a></h2>
+<h2>Mechanical Zoom<a class="headerlink" href="#mechanical-zoom" title="Permalink to this heading"></a></h2>
 <section id="dynamixel">
-<h3>Dynamixel<a class="headerlink" href="#dynamixel" title="Link to this heading"></a></h3>
+<h3>Dynamixel<a class="headerlink" href="#dynamixel" title="Permalink to this heading"></a></h3>
 <p>In progress…</p>
 </section>
 </section>

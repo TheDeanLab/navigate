@@ -30,5 +30,4 @@ aslm.model.concurrency
 
    aslm.model.concurrency.concurrency_tools
    aslm.model.concurrency.proxy_objects
-   aslm.model.concurrency.write_parameters
 

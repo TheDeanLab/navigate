@@ -11,14 +11,17 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="aslm.model.features" href="aslm.model.features.html" />
+    <link rel="prev" title="aslm.model.dummy.DummyMicroscope" href="aslm.model.dummy.DummyMicroscope.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,13 +44,41 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.log_files.html">aslm.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="aslm.model.html">aslm.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.concurrency.html">aslm.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.dummy.DummyController.html">aslm.model.dummy.DummyController</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.dummy.DummyDevice.html">aslm.model.dummy.DummyDevice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.dummy.DummyMicroscope.html">aslm.model.dummy.DummyMicroscope</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">aslm.model.dummy.DummyModel</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.model.html">aslm.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.waveforms.html">aslm.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.tools.html">aslm.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.view.html">aslm.view</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -64,6 +95,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.html">aslm.model</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.dummy.html">aslm.model.dummy</a></li>
       <li class="breadcrumb-item active">aslm.model.dummy.DummyModel</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/_autosummary/aslm.model.dummy.DummyModel.rst.txt" rel="nofollow"> View page source</a>
@@ -75,15 +109,15 @@
            <div itemprop="articleBody">
              
   <section id="aslm-model-dummy-dummymodel">
-<h1>aslm.model.dummy.DummyModel<a class="headerlink" href="#aslm-model-dummy-dummymodel" title="Link to this heading"></a></h1>
+<h1>aslm.model.dummy.DummyModel<a class="headerlink" href="#aslm-model-dummy-dummymodel" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.dummy.</span></span><span class="sig-name descname"><span class="pre">DummyModel</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.dummy.</span></span><span class="sig-name descname"><span class="pre">DummyModel</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Dummy Model - This class is used to test the controller and view.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyModel.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyModel.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize the Dummy model.</p>
 </dd></dl>
 
@@ -177,7 +211,7 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.data_func">
-<span class="sig-name descname"><span class="pre">data_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_func" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_func" title="Permalink to this definition"></a></dt>
 <dd><p>The function responsible for sending and processing data.</p>
 <p>This method continuously sends data requests using a data pipe and receives
 corresponding frame IDs. It appends the received frame IDs to the data storage
@@ -194,7 +228,7 @@ and runs data processing operations if a data container is available.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.signal_func">
-<span class="sig-name descname"><span class="pre">signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyModel.signal_func" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyModel.signal_func" title="Permalink to this definition"></a></dt>
 <dd><p>Perform signal-related functionality.</p>
 <p>This method is responsible for signal processing operations. It resets the
 signal container and continues processing signals until the end flag is set.
@@ -212,7 +246,7 @@ each signal processing step.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyModel.start" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.dummy.DummyModel.start" title="Permalink to this definition"></a></dt>
 <dd><p>Start the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -233,7 +267,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.active_microscope">
-<span class="sig-name descname"><span class="pre">active_microscope</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.active_microscope" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">active_microscope</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.active_microscope" title="Permalink to this definition"></a></dt>
 <dd><p>The microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -244,7 +278,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.active_microscope_name">
-<span class="sig-name descname"><span class="pre">active_microscope_name</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.active_microscope_name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">active_microscope_name</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.active_microscope_name" title="Permalink to this definition"></a></dt>
 <dd><p>The active microscope name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -255,7 +289,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.camera">
-<span class="sig-name descname"><span class="pre">camera</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.camera" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">camera</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.camera" title="Permalink to this definition"></a></dt>
 <dd><p>The camera dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -266,7 +300,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.configuration">
-<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.configuration" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.configuration" title="Permalink to this definition"></a></dt>
 <dd><p>The configuration dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -277,7 +311,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.data">
-<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data" title="Permalink to this definition"></a></dt>
 <dd><p>The list of data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -288,7 +322,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.data_buffer">
-<span class="sig-name descname"><span class="pre">data_buffer</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_buffer" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_buffer</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_buffer" title="Permalink to this definition"></a></dt>
 <dd><p>The data buffer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -299,7 +333,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.data_buffer_positions">
-<span class="sig-name descname"><span class="pre">data_buffer_positions</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_buffer_positions" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_buffer_positions</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_buffer_positions" title="Permalink to this definition"></a></dt>
 <dd><p>The data buffer positions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -310,7 +344,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.data_container">
-<span class="sig-name descname"><span class="pre">data_container</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_container" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_container</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_container" title="Permalink to this definition"></a></dt>
 <dd><p>The data container.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -321,7 +355,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.data_pipe">
-<span class="sig-name descname"><span class="pre">data_pipe</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_pipe" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_pipe</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_pipe" title="Permalink to this definition"></a></dt>
 <dd><p>The pipe for sending signals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -332,7 +366,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.data_records">
-<span class="sig-name descname"><span class="pre">data_records</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_records" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_records</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_records" title="Permalink to this definition"></a></dt>
 <dd><p>The list of data records.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -343,7 +377,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.data_thread">
-<span class="sig-name descname"><span class="pre">data_thread</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_thread" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_thread</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.data_thread" title="Permalink to this definition"></a></dt>
 <dd><p>The data thread.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -354,7 +388,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.device">
-<span class="sig-name descname"><span class="pre">device</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.device" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">device</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.device" title="Permalink to this definition"></a></dt>
 <dd><p>The device.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -365,7 +399,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.frame_id">
-<span class="sig-name descname"><span class="pre">frame_id</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.frame_id" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">frame_id</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.frame_id" title="Permalink to this definition"></a></dt>
 <dd><p>The frame id.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -376,7 +410,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.img_height">
-<span class="sig-name descname"><span class="pre">img_height</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.img_height" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">img_height</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.img_height" title="Permalink to this definition"></a></dt>
 <dd><p>The image height.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -387,7 +421,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.img_width">
-<span class="sig-name descname"><span class="pre">img_width</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.img_width" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">img_width</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.img_width" title="Permalink to this definition"></a></dt>
 <dd><p>The image width.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -398,7 +432,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.manager">
-<span class="sig-name descname"><span class="pre">manager</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.manager" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">manager</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.manager" title="Permalink to this definition"></a></dt>
 <dd><p>The manager.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -409,7 +443,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.number_of_frames">
-<span class="sig-name descname"><span class="pre">number_of_frames</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.number_of_frames" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">number_of_frames</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.number_of_frames" title="Permalink to this definition"></a></dt>
 <dd><p>The number of frames in the data buffer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -420,7 +454,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.signal_container">
-<span class="sig-name descname"><span class="pre">signal_container</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.signal_container" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">signal_container</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.signal_container" title="Permalink to this definition"></a></dt>
 <dd><p>The signal container.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -431,7 +465,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.signal_pipe">
-<span class="sig-name descname"><span class="pre">signal_pipe</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.signal_pipe" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">signal_pipe</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.signal_pipe" title="Permalink to this definition"></a></dt>
 <dd><p>The pipe for sending signals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -442,7 +476,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.signal_records">
-<span class="sig-name descname"><span class="pre">signal_records</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.signal_records" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">signal_records</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.signal_records" title="Permalink to this definition"></a></dt>
 <dd><p>The list of signal records.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -453,7 +487,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.signal_thread">
-<span class="sig-name descname"><span class="pre">signal_thread</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.signal_thread" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">signal_thread</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.signal_thread" title="Permalink to this definition"></a></dt>
 <dd><p>The signal thread.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -464,7 +498,7 @@ each signal processing step.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.dummy.DummyModel.stop_flag">
-<span class="sig-name descname"><span class="pre">stop_flag</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.stop_flag" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stop_flag</span></span><a class="headerlink" href="#aslm.model.dummy.DummyModel.stop_flag" title="Permalink to this definition"></a></dt>
 <dd><p>The flag for stopping the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -480,7 +514,10 @@ each signal processing step.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="aslm.model.dummy.DummyMicroscope.html" class="btn btn-neutral float-left" title="aslm.model.dummy.DummyMicroscope" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.features.html" class="btn btn-neutral float-right" title="aslm.model.features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

@@ -16,7 +16,6 @@ aslm.tools.main\_functions
    
       create_parser
       evaluate_parser_input_arguments
-      identify_gpu
    
    
 

@@ -11,14 +11,17 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="aslm.model.waveforms" href="aslm.model.waveforms.html" />
+    <link rel="prev" title="aslm.model.model" href="aslm.model.model.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,13 +44,38 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.log_files.html">aslm.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="aslm.model.html">aslm.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.concurrency.html">aslm.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aslm.model.model.html">aslm.model.model</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">aslm.model.model.Model</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.waveforms.html">aslm.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.tools.html">aslm.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.view.html">aslm.view</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -64,6 +92,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.html">aslm.model</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.model.html">aslm.model.model</a></li>
       <li class="breadcrumb-item active">aslm.model.model.Model</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/_autosummary/aslm.model.model.Model.rst.txt" rel="nofollow"> View page source</a>
@@ -75,21 +106,20 @@
            <div itemprop="articleBody">
              
   <section id="aslm-model-model-model">
-<h1>aslm.model.model.Model<a class="headerlink" href="#aslm-model-model-model" title="Link to this heading"></a></h1>
+<h1>aslm.model.model.Model<a class="headerlink" href="#aslm-model-model-model" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="aslm.model.model.Model">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">USE_GPU</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>ASLM Model Class</p>
 <p>Model for Model-View-Controller Software Architecture.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">USE_GPU</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize the Model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>USE_GPU</strong> (<em>bool</em>) – Whether to use GPU.</p></li>
 <li><p><strong>args</strong> (<em>argparse.Namespace</em>) – Command line arguments.</p></li>
 <li><p><strong>configuration</strong> (<em>dict</em>) – Configuration dictionary.</p></li>
 <li><p><strong>event_queue</strong> (<em>multiprocessing.Queue</em>) – Queue for events.</p></li>
@@ -101,7 +131,7 @@
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.__init__" title="aslm.model.model.Model.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(USE_GPU, args[, configuration, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.model.Model.__init__" title="aslm.model.model.Model.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(args[, configuration, event_queue])</p></td>
 <td><p>Initialize the Model.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.model.Model.change_resolution" title="aslm.model.model.Model.change_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">change_resolution</span></code></a>(resolution_value)</p></td>
@@ -329,7 +359,7 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.change_resolution">
-<span class="sig-name descname"><span class="pre">change_resolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.change_resolution" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">change_resolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.change_resolution" title="Permalink to this definition"></a></dt>
 <dd><p>Switch resolution mode of the microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -340,7 +370,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.create_pipe">
-<span class="sig-name descname"><span class="pre">create_pipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipe_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.create_pipe" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_pipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipe_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.create_pipe" title="Permalink to this definition"></a></dt>
 <dd><p>Create a data pipe.</p>
 <p>Creates a pair of connection objects connected by a pipe which by default is
 duplex (two-way)</p>
@@ -359,7 +389,7 @@ duplex (two-way)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.destroy_virtual_microscope">
-<span class="sig-name descname"><span class="pre">destroy_virtual_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.destroy_virtual_microscope" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">destroy_virtual_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.destroy_virtual_microscope" title="Permalink to this definition"></a></dt>
 <dd><p>Destroy a virtual microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -370,7 +400,7 @@ duplex (two-way)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.end_acquisition">
-<span class="sig-name descname"><span class="pre">end_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.end_acquisition" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">end_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.end_acquisition" title="Permalink to this definition"></a></dt>
 <dd><p>End the acquisition.</p>
 <p>Sets the current channel to 0, clears the signal and data containers,
 disconnects buffer in live mode and closes the shutters.</p>
@@ -378,7 +408,7 @@ disconnects buffer in live mode and closes the shutters.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.get_active_microscope">
-<span class="sig-name descname"><span class="pre">get_active_microscope</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_active_microscope" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_active_microscope</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_active_microscope" title="Permalink to this definition"></a></dt>
 <dd><p>Get the active microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -392,7 +422,7 @@ disconnects buffer in live mode and closes the shutters.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.get_camera_line_interval_and_exposure_time">
-<span class="sig-name descname"><span class="pre">get_camera_line_interval_and_exposure_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_pixel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_camera_line_interval_and_exposure_time" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_camera_line_interval_and_exposure_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_pixel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_camera_line_interval_and_exposure_time" title="Permalink to this definition"></a></dt>
 <dd><p>Get camera line interval time and light sheet exposure time</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -413,7 +443,7 @@ disconnects buffer in live mode and closes the shutters.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.get_data_buffer">
-<span class="sig-name descname"><span class="pre">get_data_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_data_buffer" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_data_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_data_buffer" title="Permalink to this definition"></a></dt>
 <dd><p>Get the data buffer.</p>
 <p>If the number of active pixels in x and y changes, updates the data buffer and
 returns newly-sized buffer.</p>
@@ -435,7 +465,7 @@ returns newly-sized buffer.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.get_feature_list">
-<span class="sig-name descname"><span class="pre">get_feature_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_feature_list" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_feature_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_feature_list" title="Permalink to this definition"></a></dt>
 <dd><p>Get feature list str by index</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -453,7 +483,7 @@ string of the feature list</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.get_microscope_info">
-<span class="sig-name descname"><span class="pre">get_microscope_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_microscope_info" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_microscope_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_microscope_info" title="Permalink to this definition"></a></dt>
 <dd><p>Return Microscopes device information.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -467,7 +497,7 @@ string of the feature list</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.get_offset_variance_maps">
-<span class="sig-name descname"><span class="pre">get_offset_variance_maps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_offset_variance_maps" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_offset_variance_maps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_offset_variance_maps" title="Permalink to this definition"></a></dt>
 <dd><p>Get the offset variance maps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -481,7 +511,7 @@ string of the feature list</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.get_stage_position">
-<span class="sig-name descname"><span class="pre">get_stage_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_stage_position" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_stage_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.get_stage_position" title="Permalink to this definition"></a></dt>
 <dd><p>Get the position of the stage.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -495,7 +525,7 @@ string of the feature list</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.launch_virtual_microscope">
-<span class="sig-name descname"><span class="pre">launch_virtual_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microscope_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.launch_virtual_microscope" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">launch_virtual_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microscope_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.launch_virtual_microscope" title="Permalink to this definition"></a></dt>
 <dd><p>Launch a virtual microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -515,7 +545,7 @@ string of the feature list</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.load_feature_list_from_file">
-<span class="sig-name descname"><span class="pre">load_feature_list_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_feature_list_from_file" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_feature_list_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_feature_list_from_file" title="Permalink to this definition"></a></dt>
 <dd><p>Append feature list from file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -529,7 +559,7 @@ string of the feature list</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.load_feature_list_from_str">
-<span class="sig-name descname"><span class="pre">load_feature_list_from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_list_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_feature_list_from_str" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_feature_list_from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_list_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_feature_list_from_str" title="Permalink to this definition"></a></dt>
 <dd><p>Append feature list from feature_list_str</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -540,7 +570,7 @@ string of the feature list</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.load_feature_records">
-<span class="sig-name descname"><span class="pre">load_feature_records</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_feature_records" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_feature_records</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_feature_records" title="Permalink to this definition"></a></dt>
 <dd><p>Load installed feature lists from system folder</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -550,7 +580,7 @@ string of the feature list</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.load_images">
-<span class="sig-name descname"><span class="pre">load_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_images" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.load_images" title="Permalink to this definition"></a></dt>
 <dd><p>Load/Unload images to the Synthetic Camera</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -561,7 +591,7 @@ string of the feature list</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.move_stage">
-<span class="sig-name descname"><span class="pre">move_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.move_stage" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">move_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.move_stage" title="Permalink to this definition"></a></dt>
 <dd><p>Moves the stages.</p>
 <p>Updates the stage dictionary, moves to the desired position, and reports
 the position.</p>
@@ -583,14 +613,14 @@ the position.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.pause_data_thread">
-<span class="sig-name descname"><span class="pre">pause_data_thread</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.pause_data_thread" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pause_data_thread</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.pause_data_thread" title="Permalink to this definition"></a></dt>
 <dd><p>Pause the data thread.</p>
 <p>Function is called when user pauses the acquisition.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.prepare_acquisition">
-<span class="sig-name descname"><span class="pre">prepare_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turn_off_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.prepare_acquisition" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prepare_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turn_off_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.prepare_acquisition" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare the acquisition.</p>
 <p>This function is called when user starts the acquisition.
 Sets flags. Calculates all of the waveforms. Sets the Camera Sensor Mode
@@ -604,7 +634,7 @@ Initializes the data buffer and starts camera. Opens Shutters</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.release_pipe">
-<span class="sig-name descname"><span class="pre">release_pipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipe_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.release_pipe" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">release_pipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipe_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.release_pipe" title="Permalink to this definition"></a></dt>
 <dd><p>Close a data pipe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -615,20 +645,20 @@ Initializes the data buffer and starts camera. Opens Shutters</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.resume_data_thread">
-<span class="sig-name descname"><span class="pre">resume_data_thread</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.resume_data_thread" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">resume_data_thread</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.resume_data_thread" title="Permalink to this definition"></a></dt>
 <dd><p>Resume the data thread.</p>
 <p>Function is called when user resumes the acquisition.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.run_acquisition">
-<span class="sig-name descname"><span class="pre">run_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.run_acquisition" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.run_acquisition" title="Permalink to this definition"></a></dt>
 <dd><p>Run acquisition along with a feature list one time.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.run_command">
-<span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.run_command" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.run_command" title="Permalink to this definition"></a></dt>
 <dd><p>Receives commands from the controller.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -643,7 +673,7 @@ Initializes the data buffer and starts camera. Opens Shutters</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.run_data_process">
-<span class="sig-name descname"><span class="pre">run_data_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_of_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.run_data_process" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_data_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_of_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.run_data_process" title="Permalink to this definition"></a></dt>
 <dd><p>Run the data process.</p>
 <p>This function is the structure of data thread.</p>
 <dl class="field-list simple">
@@ -658,7 +688,7 @@ Initializes the data buffer and starts camera. Opens Shutters</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.run_live_acquisition">
-<span class="sig-name descname"><span class="pre">run_live_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.run_live_acquisition" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_live_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.run_live_acquisition" title="Permalink to this definition"></a></dt>
 <dd><p>Stream live image to the GUI.</p>
 <p>Recalculates the waveforms for each image, thereby allowing people to adjust
 acquisition parameters in real-time.</p>
@@ -666,7 +696,7 @@ acquisition parameters in real-time.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.simplified_data_process">
-<span class="sig-name descname"><span class="pre">simplified_data_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_img_pipe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.simplified_data_process" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">simplified_data_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_img_pipe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.simplified_data_process" title="Permalink to this definition"></a></dt>
 <dd><p>Run the data process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -681,7 +711,7 @@ acquisition parameters in real-time.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.snap_image">
-<span class="sig-name descname"><span class="pre">snap_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.snap_image" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">snap_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.snap_image" title="Permalink to this definition"></a></dt>
 <dd><p>Acquire an image after updating the waveforms.</p>
 <p>Can be used in acquisitions where changing waveforms are required,
 but there is additional overhead due to the need to write the
@@ -691,19 +721,19 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.stop_stage">
-<span class="sig-name descname"><span class="pre">stop_stage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.stop_stage" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stop_stage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.stop_stage" title="Permalink to this definition"></a></dt>
 <dd><p>Stop the stages.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.terminate">
-<span class="sig-name descname"><span class="pre">terminate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.terminate" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">terminate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.terminate" title="Permalink to this definition"></a></dt>
 <dd><p>Terminate the model.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.update_data_buffer">
-<span class="sig-name descname"><span class="pre">update_data_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.update_data_buffer" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_data_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.update_data_buffer" title="Permalink to this definition"></a></dt>
 <dd><p>Update the Data Buffer</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -717,7 +747,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.model.Model.update_ilastik_setting">
-<span class="sig-name descname"><span class="pre">update_ilastik_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_segmentation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mark_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.update_ilastik_setting" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_ilastik_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_segmentation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mark_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.model.Model.update_ilastik_setting" title="Permalink to this definition"></a></dt>
 <dd><p>Update the ilastik setting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -732,7 +762,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.acquisition_count">
-<span class="sig-name descname"><span class="pre">acquisition_count</span></span><a class="headerlink" href="#aslm.model.model.Model.acquisition_count" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">acquisition_count</span></span><a class="headerlink" href="#aslm.model.model.Model.acquisition_count" title="Permalink to this definition"></a></dt>
 <dd><p>Number of acquisitions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -743,7 +773,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.active_microscope">
-<span class="sig-name descname"><span class="pre">active_microscope</span></span><a class="headerlink" href="#aslm.model.model.Model.active_microscope" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">active_microscope</span></span><a class="headerlink" href="#aslm.model.model.Model.active_microscope" title="Permalink to this definition"></a></dt>
 <dd><p>Name of the active microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -754,7 +784,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.active_microscope_name">
-<span class="sig-name descname"><span class="pre">active_microscope_name</span></span><a class="headerlink" href="#aslm.model.model.Model.active_microscope_name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">active_microscope_name</span></span><a class="headerlink" href="#aslm.model.model.Model.active_microscope_name" title="Permalink to this definition"></a></dt>
 <dd><p>Name of the active microscope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -765,7 +795,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.ask_to_pause_data_thread">
-<span class="sig-name descname"><span class="pre">ask_to_pause_data_thread</span></span><a class="headerlink" href="#aslm.model.model.Model.ask_to_pause_data_thread" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ask_to_pause_data_thread</span></span><a class="headerlink" href="#aslm.model.model.Model.ask_to_pause_data_thread" title="Permalink to this definition"></a></dt>
 <dd><p>Ask to pause data thread?</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -776,7 +806,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.autofocus_on">
-<span class="sig-name descname"><span class="pre">autofocus_on</span></span><a class="headerlink" href="#aslm.model.model.Model.autofocus_on" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">autofocus_on</span></span><a class="headerlink" href="#aslm.model.model.Model.autofocus_on" title="Permalink to this definition"></a></dt>
 <dd><p>Autofocus on?</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -787,7 +817,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.binning">
-<span class="sig-name descname"><span class="pre">binning</span></span><a class="headerlink" href="#aslm.model.model.Model.binning" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">binning</span></span><a class="headerlink" href="#aslm.model.model.Model.binning" title="Permalink to this definition"></a></dt>
 <dd><p>Binning mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -798,7 +828,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.camera_wait_iterations">
-<span class="sig-name descname"><span class="pre">camera_wait_iterations</span></span><a class="headerlink" href="#aslm.model.model.Model.camera_wait_iterations" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">camera_wait_iterations</span></span><a class="headerlink" href="#aslm.model.model.Model.camera_wait_iterations" title="Permalink to this definition"></a></dt>
 <dd><p>Number of timeouts before aborting acquisition.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -809,7 +839,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.configuration">
-<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.model.Model.configuration" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#aslm.model.model.Model.configuration" title="Permalink to this definition"></a></dt>
 <dd><p>Configuration dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -820,7 +850,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.current_exposure_time">
-<span class="sig-name descname"><span class="pre">current_exposure_time</span></span><a class="headerlink" href="#aslm.model.model.Model.current_exposure_time" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">current_exposure_time</span></span><a class="headerlink" href="#aslm.model.model.Model.current_exposure_time" title="Permalink to this definition"></a></dt>
 <dd><p>Current exposure time in milliseconds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -831,7 +861,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.data_buffer">
-<span class="sig-name descname"><span class="pre">data_buffer</span></span><a class="headerlink" href="#aslm.model.model.Model.data_buffer" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_buffer</span></span><a class="headerlink" href="#aslm.model.model.Model.data_buffer" title="Permalink to this definition"></a></dt>
 <dd><p>Data buffer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -842,7 +872,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.data_buffer_positions">
-<span class="sig-name descname"><span class="pre">data_buffer_positions</span></span><a class="headerlink" href="#aslm.model.model.Model.data_buffer_positions" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_buffer_positions</span></span><a class="headerlink" href="#aslm.model.model.Model.data_buffer_positions" title="Permalink to this definition"></a></dt>
 <dd><p>Number of frames in the data buffer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -853,7 +883,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.data_thread">
-<span class="sig-name descname"><span class="pre">data_thread</span></span><a class="headerlink" href="#aslm.model.model.Model.data_thread" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data_thread</span></span><a class="headerlink" href="#aslm.model.model.Model.data_thread" title="Permalink to this definition"></a></dt>
 <dd><p>Data thread.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -864,7 +894,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.event_queue">
-<span class="sig-name descname"><span class="pre">event_queue</span></span><a class="headerlink" href="#aslm.model.model.Model.event_queue" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">event_queue</span></span><a class="headerlink" href="#aslm.model.model.Model.event_queue" title="Permalink to this definition"></a></dt>
 <dd><p>Waveform queue.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -875,7 +905,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.f_position">
-<span class="sig-name descname"><span class="pre">f_position</span></span><a class="headerlink" href="#aslm.model.model.Model.f_position" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">f_position</span></span><a class="headerlink" href="#aslm.model.model.Model.f_position" title="Permalink to this definition"></a></dt>
 <dd><p>Current focus position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -886,7 +916,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.feature_list">
-<span class="sig-name descname"><span class="pre">feature_list</span></span><a class="headerlink" href="#aslm.model.model.Model.feature_list" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">feature_list</span></span><a class="headerlink" href="#aslm.model.model.Model.feature_list" title="Permalink to this definition"></a></dt>
 <dd><p>List of features.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -897,7 +927,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.focus_pos">
-<span class="sig-name descname"><span class="pre">focus_pos</span></span><a class="headerlink" href="#aslm.model.model.Model.focus_pos" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">focus_pos</span></span><a class="headerlink" href="#aslm.model.model.Model.focus_pos" title="Permalink to this definition"></a></dt>
 <dd><p>Autofocus maximum entropy position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -908,7 +938,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.frame_id">
-<span class="sig-name descname"><span class="pre">frame_id</span></span><a class="headerlink" href="#aslm.model.model.Model.frame_id" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">frame_id</span></span><a class="headerlink" href="#aslm.model.model.Model.frame_id" title="Permalink to this definition"></a></dt>
 <dd><p>Frame ID.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -919,7 +949,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.image_count">
-<span class="sig-name descname"><span class="pre">image_count</span></span><a class="headerlink" href="#aslm.model.model.Model.image_count" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">image_count</span></span><a class="headerlink" href="#aslm.model.model.Model.image_count" title="Permalink to this definition"></a></dt>
 <dd><p>Number of images acquired.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -930,7 +960,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.image_writer">
-<span class="sig-name descname"><span class="pre">image_writer</span></span><a class="headerlink" href="#aslm.model.model.Model.image_writer" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">image_writer</span></span><a class="headerlink" href="#aslm.model.model.Model.image_writer" title="Permalink to this definition"></a></dt>
 <dd><p>Image writer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -941,7 +971,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.imaging_mode">
-<span class="sig-name descname"><span class="pre">imaging_mode</span></span><a class="headerlink" href="#aslm.model.model.Model.imaging_mode" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">imaging_mode</span></span><a class="headerlink" href="#aslm.model.model.Model.imaging_mode" title="Permalink to this definition"></a></dt>
 <dd><p>Imaging mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -952,7 +982,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.img_height">
-<span class="sig-name descname"><span class="pre">img_height</span></span><a class="headerlink" href="#aslm.model.model.Model.img_height" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">img_height</span></span><a class="headerlink" href="#aslm.model.model.Model.img_height" title="Permalink to this definition"></a></dt>
 <dd><p>Number of active pixels in the y-dimension.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -963,7 +993,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.img_width">
-<span class="sig-name descname"><span class="pre">img_width</span></span><a class="headerlink" href="#aslm.model.model.Model.img_width" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">img_width</span></span><a class="headerlink" href="#aslm.model.model.Model.img_width" title="Permalink to this definition"></a></dt>
 <dd><p>Number of active pixels in the x-dimension.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -974,7 +1004,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.is_acquiring">
-<span class="sig-name descname"><span class="pre">is_acquiring</span></span><a class="headerlink" href="#aslm.model.model.Model.is_acquiring" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">is_acquiring</span></span><a class="headerlink" href="#aslm.model.model.Model.is_acquiring" title="Permalink to this definition"></a></dt>
 <dd><p>Is the model acquiring?</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -985,7 +1015,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.is_live">
-<span class="sig-name descname"><span class="pre">is_live</span></span><a class="headerlink" href="#aslm.model.model.Model.is_live" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">is_live</span></span><a class="headerlink" href="#aslm.model.model.Model.is_live" title="Permalink to this definition"></a></dt>
 <dd><p>Is the model live?</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -996,7 +1026,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.is_save">
-<span class="sig-name descname"><span class="pre">is_save</span></span><a class="headerlink" href="#aslm.model.model.Model.is_save" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">is_save</span></span><a class="headerlink" href="#aslm.model.model.Model.is_save" title="Permalink to this definition"></a></dt>
 <dd><p>Is the model saving the data?</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1007,7 +1037,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.logger">
-<span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#aslm.model.model.Model.logger" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#aslm.model.model.Model.logger" title="Permalink to this definition"></a></dt>
 <dd><p>Logger object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1018,7 +1048,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.max_entropy">
-<span class="sig-name descname"><span class="pre">max_entropy</span></span><a class="headerlink" href="#aslm.model.model.Model.max_entropy" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">max_entropy</span></span><a class="headerlink" href="#aslm.model.model.Model.max_entropy" title="Permalink to this definition"></a></dt>
 <dd><p>Autofocus maximum entropy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1029,7 +1059,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.microscopes">
-<span class="sig-name descname"><span class="pre">microscopes</span></span><a class="headerlink" href="#aslm.model.model.Model.microscopes" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">microscopes</span></span><a class="headerlink" href="#aslm.model.model.Model.microscopes" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionary of physical microscopes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1040,7 +1070,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.number_of_frames">
-<span class="sig-name descname"><span class="pre">number_of_frames</span></span><a class="headerlink" href="#aslm.model.model.Model.number_of_frames" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">number_of_frames</span></span><a class="headerlink" href="#aslm.model.model.Model.number_of_frames" title="Permalink to this definition"></a></dt>
 <dd><p>Number of frames in the data buffer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1051,7 +1081,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.pause_data_event">
-<span class="sig-name descname"><span class="pre">pause_data_event</span></span><a class="headerlink" href="#aslm.model.model.Model.pause_data_event" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pause_data_event</span></span><a class="headerlink" href="#aslm.model.model.Model.pause_data_event" title="Permalink to this definition"></a></dt>
 <dd><p>Pause data event.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1062,7 +1092,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.pause_data_ready_lock">
-<span class="sig-name descname"><span class="pre">pause_data_ready_lock</span></span><a class="headerlink" href="#aslm.model.model.Model.pause_data_ready_lock" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pause_data_ready_lock</span></span><a class="headerlink" href="#aslm.model.model.Model.pause_data_ready_lock" title="Permalink to this definition"></a></dt>
 <dd><p>Pause data ready lock.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1073,7 +1103,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.plot_pipe">
-<span class="sig-name descname"><span class="pre">plot_pipe</span></span><a class="headerlink" href="#aslm.model.model.Model.plot_pipe" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_pipe</span></span><a class="headerlink" href="#aslm.model.model.Model.plot_pipe" title="Permalink to this definition"></a></dt>
 <dd><p>Plot pipe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1084,7 +1114,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.pre_exposure_time">
-<span class="sig-name descname"><span class="pre">pre_exposure_time</span></span><a class="headerlink" href="#aslm.model.model.Model.pre_exposure_time" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pre_exposure_time</span></span><a class="headerlink" href="#aslm.model.model.Model.pre_exposure_time" title="Permalink to this definition"></a></dt>
 <dd><p>Pre-exposure time in milliseconds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1095,7 +1125,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.show_img_pipe">
-<span class="sig-name descname"><span class="pre">show_img_pipe</span></span><a class="headerlink" href="#aslm.model.model.Model.show_img_pipe" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">show_img_pipe</span></span><a class="headerlink" href="#aslm.model.model.Model.show_img_pipe" title="Permalink to this definition"></a></dt>
 <dd><p>Show image pipe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1106,7 +1136,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.signal_thread">
-<span class="sig-name descname"><span class="pre">signal_thread</span></span><a class="headerlink" href="#aslm.model.model.Model.signal_thread" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">signal_thread</span></span><a class="headerlink" href="#aslm.model.model.Model.signal_thread" title="Permalink to this definition"></a></dt>
 <dd><p>Signal thread.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1117,7 +1147,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.start_time">
-<span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#aslm.model.model.Model.start_time" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#aslm.model.model.Model.start_time" title="Permalink to this definition"></a></dt>
 <dd><p>Time before acquisition.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1128,7 +1158,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.stop_acquisition">
-<span class="sig-name descname"><span class="pre">stop_acquisition</span></span><a class="headerlink" href="#aslm.model.model.Model.stop_acquisition" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stop_acquisition</span></span><a class="headerlink" href="#aslm.model.model.Model.stop_acquisition" title="Permalink to this definition"></a></dt>
 <dd><p>Stop signal and data threads?</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1139,7 +1169,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.stop_send_signal">
-<span class="sig-name descname"><span class="pre">stop_send_signal</span></span><a class="headerlink" href="#aslm.model.model.Model.stop_send_signal" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stop_send_signal</span></span><a class="headerlink" href="#aslm.model.model.Model.stop_send_signal" title="Permalink to this definition"></a></dt>
 <dd><p>Stop signal thread?</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1150,7 +1180,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.total_acquisition_count">
-<span class="sig-name descname"><span class="pre">total_acquisition_count</span></span><a class="headerlink" href="#aslm.model.model.Model.total_acquisition_count" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">total_acquisition_count</span></span><a class="headerlink" href="#aslm.model.model.Model.total_acquisition_count" title="Permalink to this definition"></a></dt>
 <dd><p>Total number of acquisitions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1161,7 +1191,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.total_image_count">
-<span class="sig-name descname"><span class="pre">total_image_count</span></span><a class="headerlink" href="#aslm.model.model.Model.total_image_count" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">total_image_count</span></span><a class="headerlink" href="#aslm.model.model.Model.total_image_count" title="Permalink to this definition"></a></dt>
 <dd><p>Total number of images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1172,7 +1202,7 @@ waveforms into the buffers of the DAQ cards.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.model.Model.virtual_microscopes">
-<span class="sig-name descname"><span class="pre">virtual_microscopes</span></span><a class="headerlink" href="#aslm.model.model.Model.virtual_microscopes" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">virtual_microscopes</span></span><a class="headerlink" href="#aslm.model.model.Model.virtual_microscopes" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionary of virtual microscopes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1188,7 +1218,10 @@ waveforms into the buffers of the DAQ cards.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="aslm.model.model.html" class="btn btn-neutral float-left" title="aslm.model.model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.waveforms.html" class="btn btn-neutral float-right" title="aslm.model.waveforms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

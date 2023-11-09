@@ -11,14 +11,17 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="aslm.model.device_startup_functions.start_daq" href="aslm.model.device_startup_functions.start_daq.html" />
+    <link rel="prev" title="aslm.model.device_startup_functions.load_zoom_connection" href="aslm.model.device_startup_functions.load_zoom_connection.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,13 +44,54 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.log_files.html">aslm.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="aslm.model.html">aslm.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.concurrency.html">aslm.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.auto_redial.html">aslm.model.device_startup_functions.auto_redial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.device_not_found.html">aslm.model.device_startup_functions.device_not_found</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.load_camera_connection.html">aslm.model.device_startup_functions.load_camera_connection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.load_devices.html">aslm.model.device_startup_functions.load_devices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.load_filter_wheel_connection.html">aslm.model.device_startup_functions.load_filter_wheel_connection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.load_stages.html">aslm.model.device_startup_functions.load_stages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.load_zoom_connection.html">aslm.model.device_startup_functions.load_zoom_connection</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">aslm.model.device_startup_functions.start_camera</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.start_daq.html">aslm.model.device_startup_functions.start_daq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.start_filter_wheel.html">aslm.model.device_startup_functions.start_filter_wheel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.start_galvo.html">aslm.model.device_startup_functions.start_galvo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.start_lasers.html">aslm.model.device_startup_functions.start_lasers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.start_remote_focus_device.html">aslm.model.device_startup_functions.start_remote_focus_device</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.start_shutter.html">aslm.model.device_startup_functions.start_shutter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.start_stage.html">aslm.model.device_startup_functions.start_stage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.start_zoom.html">aslm.model.device_startup_functions.start_zoom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.device_startup_functions.DummyDeviceConnection.html">aslm.model.device_startup_functions.DummyDeviceConnection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.model.html">aslm.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.waveforms.html">aslm.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.tools.html">aslm.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aslm.view.html">aslm.view</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -64,6 +108,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.html">aslm.model</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
       <li class="breadcrumb-item active">aslm.model.device_startup_functions.start_camera</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/_autosummary/aslm.model.device_startup_functions.start_camera.rst.txt" rel="nofollow"> View page source</a>
@@ -75,10 +122,10 @@
            <div itemprop="articleBody">
              
   <section id="aslm-model-device-startup-functions-start-camera">
-<h1>aslm.model.device_startup_functions.start_camera<a class="headerlink" href="#aslm-model-device-startup-functions-start-camera" title="Link to this heading"></a></h1>
+<h1>aslm.model.device_startup_functions.start_camera<a class="headerlink" href="#aslm-model-device-startup-functions-start-camera" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="aslm.model.device_startup_functions.start_camera">
-<span class="sig-prename descclassname"><span class="pre">aslm.model.device_startup_functions.</span></span><span class="sig-name descname"><span class="pre">start_camera</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.device_startup_functions.start_camera" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">aslm.model.device_startup_functions.</span></span><span class="sig-name descname"><span class="pre">start_camera</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.device_startup_functions.start_camera" title="Permalink to this definition"></a></dt>
 <dd><p>Initializes the camera class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -108,7 +155,10 @@
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="aslm.model.device_startup_functions.load_zoom_connection.html" class="btn btn-neutral float-left" title="aslm.model.device_startup_functions.load_zoom_connection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.device_startup_functions.start_daq.html" class="btn btn-neutral float-right" title="aslm.model.device_startup_functions.start_daq" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

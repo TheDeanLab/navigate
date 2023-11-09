@@ -90,4 +90,31 @@ class DichroicASI(DichroicBase):
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
-        print("ASI Dichroic Initialized")
+        self.configuration = configuration["configuration"]["microscopes"][
+            microscope_name]["dichroic"]
+        self.asi_axis = self.configuration["hardware"].get("axes", "S")
+        self.dichroics = self.configuration["available_dichroics"]
+        self.tiger_controller = device_connection
+
+        if self.tiger_controller is not None:
+            pass
+        else:
+            Warning("Tiger Controller not properly passed to the dichroic.")
+
+    def change_dichroic(self, dichroic_name):
+        """ Change the dichroic position.
+
+        Parameters
+        ----------
+        dichroic_name: str
+            A str of the dichroic name.
+        """
+
+        self.tiger_controller.move_axis(axis=self.asi_axis,
+                                        distance=self.dichroics[
+                                            dichroic_name
+                                        ]
+                                        )
+
+    def get_dichroic(self):
+        pass

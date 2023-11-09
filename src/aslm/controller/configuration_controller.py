@@ -125,12 +125,18 @@ class ConfigurationController:
         if self.microscope_config is None:
             return {}
 
+        # Mandatory settings
         setting = {
             "laser": self.lasers_info,
             "filter": list(
                 self.microscope_config["filter_wheel"]["available_filters"].keys()
             ),
         }
+        # Optional settings
+        if "dichroic" in self.microscope_config:
+            setting["dichroic"] = self.microscope_config["dichroic"][
+                "available_dichroics"
+            ].keys()
         return setting
 
     @property

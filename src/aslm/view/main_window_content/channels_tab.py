@@ -171,9 +171,7 @@ class ChannelCreator(ttk.Labelframe):
         self.label_text.append("Filter")
 
         # Dichroic Turret Dropdowns
-        dichroic = self.configuration["configuration"]["hardware"].get(
-            "dichroic_turret", None
-        )
+        dichroic = self.configuration["configuration"]["hardware"].get("dichroic", None)
         if dichroic is not None:
             self.dichroic_variables = []
             self.dichroic_pulldowns = []
@@ -305,7 +303,7 @@ class ChannelCreator(ttk.Labelframe):
                     ttk.Combobox(
                         self.frame_columns[counter],
                         textvariable=self.dichroic_variables[num],
-                        width=10,
+                        width=5,
                         font=tk.font.Font(size=11),
                     )
                 )

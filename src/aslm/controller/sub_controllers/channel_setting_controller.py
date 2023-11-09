@@ -90,6 +90,11 @@ class ChannelSettingController(GUIController):
     def set_mode(self, mode="stop"):
         """Set the mode of the channel setting controller.
 
+        This function toggles whether widgets are read only depending on the state of
+        the microscope. If the mode is 'live', then select widgets are read only.
+        This prevents the user from changing settings such as the camera exposure
+        during the middle of ane experiment, which would render the metadata pointless.
+
         Parameters
         ----------
         mode : str
@@ -116,6 +121,9 @@ class ChannelSettingController(GUIController):
                 self.view.filterwheel_pulldowns[i]["state"] = state
                 self.view.defocus_spins[i].config(state=state)
 
+            if "dichroic" in self.view.label_text:
+                self.view.dichroic_pulldowns[i]["state"] = state
+
     def initialize(self):
         """Populates the laser and filter wheel options in the View.
 
@@ -127,13 +135,20 @@ class ChannelSettingController(GUIController):
         for i in range(self.num):
             self.view.laser_pulldowns[i]["values"] = setting_dict["laser"]
             self.view.filterwheel_pulldowns[i]["values"] = setting_dict["filter"]
+
+            if "dichroic" in setting_dict:
+                self.view.dichroic_pulldowns[i]["values"] = setting_dict["dichroic"]
         self.show_verbose_info("channel has been initialized")
 
     def populate_experiment_values(self, setting_dict):
-        """Populates the View with the values from the setting dictionary.
+        """Populates the View with the values from the experiment.yaml file.
 
-        Set channel values according to channel id
-        the value should be a dict {
+        This sets the values of the view according to the last used settings,
+        thereby allowing the user to immediately start where they left off and not
+        have to reconfigure a bunch of settings.
+
+        Set channel values according to channel id the value should be a dict
+        {
         'channel_id': {
             'is_selected': True(False),
             'laser': ,
@@ -146,7 +161,8 @@ class ChannelSettingController(GUIController):
         Parameters
         ----------
         setting_dict : dict
-            Dictionary containing the values for the experiment.
+            Dictionary containing the values from the MicroscopeState portion of the
+            experiment.yaml file.
         """
         self.channel_setting_dict = setting_dict
         prefix = "channel_"
@@ -157,7 +173,21 @@ class ChannelSettingController(GUIController):
                 return
             channel_value = setting_dict[channel]
             for name in channel_vals:
-                channel_vals[name].set(channel_value[name])
+                # Optional variables
+                if name == "dichroic":
+                    if name in channel_value:
+                        # Retrieve the dichroic value from the experiment.yaml file
+                        channel_vals[name].set(channel_value[name])
+                    else:
+                        # If the dichroic value is not in the experiment.yaml file,
+                        # set it to the first value in the from the configuration
+                        # controller
+                        channel_vals[name].set(
+                            self.configuration_controller.channels_info[name][0]
+                        )
+                else:
+                    # Mandatory variables
+                    channel_vals[name].set(channel_value[name])
 
             # validate exposure_time, interval, laser_power
             self.view.exptime_pulldowns[channel_id].validate()
@@ -245,6 +275,11 @@ class ChannelSettingController(GUIController):
                 setting_dict["filter"] = channel_vals["filter"].get()
                 setting_dict["filter_position"] = self.get_index(
                     "filter", channel_vals["filter"].get()
+                )
+            elif widget_name == "dichroic":
+                setting_dict["dichroic"] = channel_vals["dichroic"].get()
+                setting_dict["dichroic_index"] = self.get_index(
+                    "dichroic", channel_vals["dichroic"].get()
                 )
             elif widget_name in [
                 "laser_power",
@@ -338,6 +373,8 @@ class ChannelSettingController(GUIController):
         """
         if index < 0 or index >= self.num:
             return {}
+
+        # Mandatory variables
         result = {
             "is_selected": self.view.channel_variables[index],
             "laser": self.view.laser_variables[index],
@@ -347,6 +384,10 @@ class ChannelSettingController(GUIController):
             "interval_time": self.view.interval_variables[index],
             "defocus": self.view.defocus_variables[index],
         }
+
+        # Optional variables
+        if "dichroic" in self.configuration_controller.channels_info:
+            result["dichroic"] = self.view.dichroic_variables[index]
         return result
 
     def get_index(self, dropdown_name, value):
@@ -372,6 +413,8 @@ class ChannelSettingController(GUIController):
             return -1
         if dropdown_name == "laser":
             return self.view.laser_pulldowns[0]["values"].index(value)
+        elif dropdown_name == "dichroic":
+            return self.view.dichroic_pulldowns[0]["values"].index(value)
         elif dropdown_name == "filter":
             return self.view.filterwheel_pulldowns[0]["values"].index(value)
         return -1

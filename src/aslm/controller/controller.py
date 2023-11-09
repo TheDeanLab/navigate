@@ -1076,6 +1076,10 @@ class Controller:
                 self.channels_tab_controller.is_multiposition_val.set(True)
                 self.channels_tab_controller.toggle_multiposition()
 
+            elif event == "disable_multiposition":
+                self.channels_tab_controller.is_multiposition_val.set(False)
+                self.channels_tab_controller.toggle_multiposition()
+
             elif event == "ilastik_mask":
                 # Display the ilastik mask
                 self.camera_view_controller.display_mask(mask=value)

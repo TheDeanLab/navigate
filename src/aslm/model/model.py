@@ -90,13 +90,11 @@ class Model:
 
     Model for Model-View-Controller Software Architecture."""
 
-    def __init__(self, USE_GPU, args, configuration=None, event_queue=None):
+    def __init__(self, args, configuration=None, event_queue=None):
         """Initialize the Model.
 
         Parameters
         ----------
-        USE_GPU : bool
-            Whether to use GPU.
         args : argparse.Namespace
             Command line arguments.
         configuration : dict

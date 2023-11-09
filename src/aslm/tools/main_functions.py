@@ -33,8 +33,10 @@
 # Standard Library Imports
 import argparse
 from pathlib import Path
-import platform
 
+# Third Party Imports
+
+# Local Imports
 from aslm.config import get_configuration_paths
 
 
@@ -104,9 +106,9 @@ def evaluate_parser_input_arguments(args):
         rest_api_path = args.rest_api_file
 
     if args.waveform_templates_file:
-        assert args.waveform_templates_file.exists(), "waveform_templates Path {} not valid".format(
-            args.waveform_templates_file
-        )
+        assert (
+            args.waveform_templates_file.exists()
+        ), "waveform_templates Path {} not valid".format(args.waveform_templates_file)
         waveform_templates_path = args.waveform_templates_file
 
     # Creating Loggers etc., they exist globally so no need to pass
@@ -126,37 +128,6 @@ def evaluate_parser_input_arguments(args):
         waveform_templates_path,
         logging_path,
     )
-
-
-def identify_gpu(args):
-    """Evaluate GPU Status for CUDA Analysis Routines
-
-    Parameters
-    ----------
-    args : object
-        argparse.Namespace object
-
-    Returns
-    -------
-    use_gpu : bool
-        True if GPU is available and user has requested it
-
-    Examples
-    --------
-    >>> args = argparse.Namespace()
-    >>> args.GPU = True
-    >>> identify_gpu(args)
-    True
-    """
-
-    use_gpu = False
-    if args.GPU and platform.system() != "Darwin":
-        import tensorflow as tf
-
-        number_gpus = len(tf.config.list_physical_devices("GPU"))
-        if number_gpus > 0:
-            use_gpu = True
-    return use_gpu
 
 
 def create_parser():
@@ -194,14 +165,6 @@ def create_parser():
         default=False,
         action="store_true",
         help="Enables debugging tool menu to be accessible.",
-    )
-
-    input_args.add_argument(
-        "--GPU",
-        required=False,
-        default=False,
-        action="store_true",
-        help="Forces software to use GPU for analytical operations.",
     )
 
     # Non-Default Configuration and Experiment Input Arguments

@@ -41,7 +41,11 @@ def model():
 
     from aslm.model.model import Model
     from multiprocessing import Manager, Queue
-    from aslm.config.config import load_configs, verify_experiment_config, verify_waveform_constants
+    from aslm.config.config import (
+        load_configs,
+        verify_experiment_config,
+        verify_waveform_constants,
+    )
 
     # Use configuration files that ship with the code base
     configuration_directory = Path.joinpath(
@@ -55,7 +59,7 @@ def model():
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
     event_queue = Queue()
-    
+
     manager = Manager()
 
     configuration = load_configs(
@@ -67,9 +71,8 @@ def model():
     )
     verify_experiment_config(manager, configuration)
     verify_waveform_constants(manager, configuration)
-    
+
     model = Model(
-        USE_GPU=False,
         args=SimpleNamespace(synthetic_hardware=True),
         configuration=configuration,
         event_queue=event_queue,
@@ -182,6 +185,7 @@ def test_change_resolution(model):
         assert model.active_microscope_name == scope
         assert model.active_microscope.zoom.zoomvalue == zoom
 
+
 def test_get_feature_list(model):
 
     feature_lists = model.feature_list
@@ -189,50 +193,69 @@ def test_get_feature_list(model):
     assert model.get_feature_list(0) == ""
     assert model.get_feature_list(len(feature_lists) + 1) == ""
 
-    from aslm.model.features.feature_related_functions import convert_str_to_feature_list
+    from aslm.model.features.feature_related_functions import (
+        convert_str_to_feature_list,
+    )
+
     for i in range(len(feature_lists)):
-        feature_str = model.get_feature_list(i+1)
+        feature_str = model.get_feature_list(i + 1)
         if "shared_list" not in feature_str:
             assert convert_str_to_feature_list(feature_str) == feature_lists[i]
+
 
 def test_load_feature_list_from_str(model):
     feature_lists = model.feature_list
 
-    l = len(feature_lists)
+    l = len(feature_lists)  # noqa
     model.load_feature_list_from_str('[{"name": PrepareNextChannel}]')
-    assert len(feature_lists) == l+1
-    from aslm.model.features.feature_related_functions import convert_feature_list_to_str
-    assert convert_feature_list_to_str(feature_lists[-1]) == '[{"name": PrepareNextChannel,},]'
+    assert len(feature_lists) == l + 1
+    from aslm.model.features.feature_related_functions import (
+        convert_feature_list_to_str,
+    )
+
+    assert (
+        convert_feature_list_to_str(feature_lists[-1])
+        == '[{"name": PrepareNextChannel,},]'
+    )
     del feature_lists[-1]
     feature_str = '[{"name": LoopByCount,"args": ([1, 2.0, True, False, \'abc\'],)},]'
     model.load_feature_list_from_str(feature_str)
-    assert len(feature_lists) == l+1
+    assert len(feature_lists) == l + 1
     assert convert_feature_list_to_str(feature_lists[-1]) == feature_str
     del feature_lists[-1]
 
 
 def test_load_feature_records(model):
     feature_lists = model.feature_list
-    l = len(feature_lists)
+    l = len(feature_lists)  # noqa
 
     from aslm.config.config import get_aslm_path
     from aslm.tools.file_functions import save_yaml_file, load_yaml_file
-    from aslm.model.features.feature_related_functions import convert_feature_list_to_str
+    from aslm.model.features.feature_related_functions import (
+        convert_feature_list_to_str,
+    )
 
     feature_lists_path = get_aslm_path() + "/feature_lists"
 
     if not os.path.exists(feature_lists_path):
         os.makedirs(feature_lists_path)
-    save_yaml_file(feature_lists_path,
-    {
-        "module_name": None,
-        "feature_list_name": "Test Feature List 1",
-        "feature_list": "[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3,)})]"
-    }, '__test_1.yml')
+    save_yaml_file(
+        feature_lists_path,
+        {
+            "module_name": None,
+            "feature_list_name": "Test Feature List 1",
+            "feature_list": "[({'name': PrepareNextChannel}, "
+            "{'name': LoopByCount, 'args': (3,)})]",
+        },
+        "__test_1.yml",
+    )
 
     model.load_feature_records()
-    assert len(feature_lists) == l+1
-    assert convert_feature_list_to_str(feature_lists[-1]) == '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,)},),]'
+    assert len(feature_lists) == l + 1
+    assert (
+        convert_feature_list_to_str(feature_lists[-1])
+        == '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,)},),]'
+    )
 
     del feature_lists[-1]
     os.remove(f"{feature_lists_path}/__test_1.yml")

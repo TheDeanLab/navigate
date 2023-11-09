@@ -77,6 +77,41 @@ You will likely have to register and agree to Photometrics terms.
 `Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits`_
 * Upon successfully installation, one should be able to acquire images with the manufacturer provided PVCamTest software.
 
+Dichroic Turret
+----------------
+
+ASI
+^^^^^^^^^^^^^^^^^^^^^
+
+**Hardware Configuration**::
+
+    hardware:
+      filter_wheel:
+        type: ASI
+        port: COM17
+        baudrate: 115200
+        number_of_wheels: 2
+      dichroic:
+        type: ASI
+        port: COM17
+        baudrate: 115200
+
+**Microscope Configuration**::
+
+    microscopes:
+      microscope_name:
+        dichroic:
+          hardware:
+            name: dichroic_turret
+            type: ASI
+            port: COM17
+            axes: [S]
+            baudrate: 115200
+          available_dichroics:
+            510LP: 0
+            570LP: 1
+            640LP: 2
+
 
 Voicecoil
 --------------

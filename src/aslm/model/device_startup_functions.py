@@ -103,6 +103,99 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
 
     return val
 
+def load_dichroic_connection(configuration, is_synthetic=False):
+    """Initializes the dichroic controller api class.
+
+    Parameters
+    ----------
+    configuration : multiprocessing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic: bool
+        Whether it is a synthetic hardware
+
+    Returns
+    -------
+    dichroic controller: class
+        Dichroic api class.
+
+    Examples
+    --------
+    >>> load_dichroic_connection(configuration, is_synthetic=False)
+    """
+
+    # Identify the dichroic type. Only synthetic and ASI supported.
+    if is_synthetic:
+        dichroic_type = "SyntheticDichroic"
+    else:
+        dichroic_type = configuration["configuration"]["hardware"]["dichroic"]["type"]
+
+    # Load the device connection.
+    if dichroic_type.lower() == "syntheticdichroic" or dichroic_type.lower() == "synthetic":
+        return DummyDeviceConnection()
+
+    elif dichroic_type == "ASI" and platform.system() == "Windows":
+        # Will need to identify shared devices (e.g., those with a common controller).
+
+        from aslm.model.devices.dichroic.dichroic_asi import (
+            build_ASI_dichroic_connection,
+        )
+        device_info = configuration["configuration"]["hardware"]["dichroic"]
+
+        tiger_controller = auto_redial(
+            build_ASI_dichroic_connection,
+            (device_info["port"], device_info["baudrate"], 0.25),
+            exception=Exception,
+        )
+        return tiger_controller
+    else:
+        device_not_found("Dichroic", dichroic_type)
+
+
+def start_dichroic(microscope_name, device_connection, configuration, is_synthetic=False):
+    """Initializes the dichroic class.
+
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocessing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
+
+    Returns
+    -------
+    Dichroic : class
+        Dichroic class.
+
+    Examples
+    --------
+    >>> start_dichroic(microscope_name, device_connection, configuration,
+        is_synthetic=False)
+    """
+    if device_connection is None:
+        device_not_found(microscope_name, "Dichroic")
+
+    if is_synthetic:
+        dichroic_type = "SyntheticDichroic"
+    else:
+        dichroic_type = configuration["configuration"]["microscopes"][microscope_name][
+            "dichroic"
+        ]["hardware"]["type"]
+
+    if dichroic_type == "ASI":
+        from aslm.model.devices.dichroic.dichroic_asi import DichroicASI
+        return DichroicASI(microscope_name, device_connection, configuration)
+
+    elif dichroic_type.lower() == "syntheticdichroic" or dichroic_type.lower() == "synthetic":
+        from aslm.model.devices.dichroic.dichroic_synthetic import SyntheticDichroic
+        return SyntheticDichroic(microscope_name, device_connection, configuration)
+
+    else:
+        device_not_found(microscope_name, "Dichroic", dichroic_type)
+
 
 def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
     """Initializes the camera api class.
@@ -980,6 +1073,14 @@ def load_devices(configuration, is_synthetic=False) -> dict:
         devices["filter_wheel"] = {}
         device = configuration["configuration"]["hardware"]["filter_wheel"]
         devices["filter_wheel"][device["type"]] = load_filter_wheel_connection(
+            configuration, is_synthetic
+        )
+
+    # load dichroic turret
+    if "dichroic" in configuration["configuration"]["hardware"].keys():
+        devices["dichroic"] = {}
+        device = configuration["configuration"]["hardware"]["dichroic"]
+        devices["filter_wheel"][device["type"]] = load_dichroic_connection(
             configuration, is_synthetic
         )
 

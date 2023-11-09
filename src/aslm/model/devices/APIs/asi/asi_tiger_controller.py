@@ -1,6 +1,7 @@
 # serialport.py
 from serial import Serial
 from serial import SerialException
+from serial import SerialTimeoutException
 from serial import EIGHTBITS
 from serial import PARITY_NONE
 from serial import STOPBITS_ONE
@@ -221,7 +222,11 @@ class TigerController:
         # send the serial command to the controller
         self.report_to_console(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
-        self.serial_port.write(command)
+        try:
+            self.serial_port.write(command)
+        except SerialTimeoutException as e:
+            print(f"Tiger Controller -- SerialTimeoutException: {e}")
+            pass
         # print(f"Sent Command: {command.decode(encoding='ascii')}")
 
     def read_response(self) -> str:

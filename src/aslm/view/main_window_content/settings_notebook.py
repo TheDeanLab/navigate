@@ -44,6 +44,7 @@ from aslm.view.main_window_content.camera_tab import CameraSettingsTab
 from aslm.view.main_window_content.channels_tab import ChannelsTab
 from aslm.view.main_window_content.stage_tab import StageControlTab
 from aslm.view.main_window_content.multiposition_tab import MultiPositionTab
+from aslm.view.main_window_content.robot_tab import RobotControlTab
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -108,6 +109,8 @@ class SettingsNotebook(DockableNotebook):
         # Creating Multiposition Table Tab
         self.multiposition_tab = MultiPositionTab(self)
 
+        #Creating Robot Control Tab
+        self.robot_control_tab = RobotControlTab(self)
         # TODO: Create a robot tab. @UTD
 
         # Tab list
@@ -116,6 +119,7 @@ class SettingsNotebook(DockableNotebook):
             self.camera_settings_tab,
             self.stage_control_tab,
             self.multiposition_tab,
+            self.robot_control_tab,
             # @UTD
         ]
         self.set_tablist(tab_list)
@@ -125,4 +129,5 @@ class SettingsNotebook(DockableNotebook):
         self.add(self.camera_settings_tab, text="Camera Settings", sticky=tk.NSEW)
         self.add(self.stage_control_tab, text="Stage Control", sticky=tk.NSEW)
         self.add(self.multiposition_tab, text="Multiposition", sticky=tk.NSEW)
+        self.add(self.robot_control_tab, text="Robot Control", sticky=tk.NSEW)
         # @UTD

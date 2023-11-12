@@ -44,43 +44,25 @@ from aslm.view.main_window_content.display_notebook import CameraTab
 
 
 class CameraViewPopupWindow:
-    """Popup window with waveform parameters for galvos, remote focusing, etc.
-
-    Parameters
-    ----------
-    root : tkinter.Tk
-        The root window that the popup will be attached to.
-    microscope_name : str
-        The name of the microscope that the popup is for.
-    *args
-        Variable length argument list.
-    **kwargs
-        Arbitrary keyword arguments.
-
-    Attributes
-    ----------
-    popup : PopUp
-        The popup window that will be created.
-    inputs : dict
-        Dictionary of all the input widgets.
-    buttons : dict
-        Dictionary of all the buttons.
-    camera_view : CameraTab
-        The camera view tab.
-
-    Methods
-    -------
-    get_variables()
-        Returns a dictionary of all the variables that are tied to each widget name.
-    get_widgets()
-        Returns the dictionary that holds the input widgets.
-    get_buttons()
-        Returns the dictionary that holds the buttons.
-    """
+    """Popup window with waveform parameters for galvos, remote focusing, etc."""
 
     def __init__(self, root, microscope_name, *args, **kwargs):
+        """Initialize the CameraViewPopupWindow class.
+
+        Parameters
+        ----------
+        root : tkinter.Tk
+            Root window of the application.
+        microscope_name : str
+            Name of the microscope.
+        args : list
+            List of arguments.
+        kwargs : dict
+            Dictionary of keyword arguments.
+        """
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
+        #: PopUp: Popup window for the camera view.
         self.popup = PopUp(
             root,
             f"{microscope_name} Additional Camera View",
@@ -103,11 +85,12 @@ class CameraViewPopupWindow:
         tk.Grid.columnconfigure(content_frame, "all", weight=1)
         tk.Grid.rowconfigure(content_frame, "all", weight=1)
 
-        """Creating the widgets for the popup"""
-        # Dictionary for all the variables
+        #: dict: Dictionary of all the input widgets.
         self.inputs = {}
+        #: dict: Dictionary of all the buttons.
         self.buttons = {}
 
+        #: CameraTab: Camera view tab.
         self.camera_view = CameraTab(content_frame)
         self.camera_view.is_popup = True
         self.camera_view.is_docked = False
@@ -121,8 +104,6 @@ class CameraViewPopupWindow:
         widget name.
 
         The key is the widget name, value is the variable associated.
-
-
 
         Returns
         -------
@@ -140,8 +121,6 @@ class CameraViewPopupWindow:
         This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
 
-
-
         Returns
         -------
         dict
@@ -154,8 +133,6 @@ class CameraViewPopupWindow:
 
         This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
-
-
 
         Returns
         -------

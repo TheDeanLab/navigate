@@ -41,31 +41,7 @@ from aslm.tools.image import create_arrow_image
 
 
 class ArrowLabel(tk.Label):
-    """A label that displays an arrow image.
-
-    Parameters
-    ----------
-    master : tk.Widget
-        The parent widget.
-    xys : list of tuples
-        The coordinates of the arrow.
-    direction : str
-        The direction of the arrow. One of "right", "left", "up", or "down".
-    image_width : int
-        The width of the image.
-    image_height : int
-        The height of the image.
-
-    Attributes
-    ----------
-    image : tk.PhotoImage
-        The image displayed by the label.
-
-    Methods
-    -------
-    None
-
-    """
+    """A label that displays an arrow image."""
 
     def __init__(
         self,
@@ -77,8 +53,28 @@ class ArrowLabel(tk.Label):
         image_height=200,
         **kwargs
     ):
+        """Initialize the ArrowLabel.
+
+        Parameters
+        ----------
+        master : tk.Widget
+            The parent widget.
+        *args : list
+            Additional positional arguments to pass to the tk.Label constructor.
+        xys : list of tuples
+            The coordinates of the arrow.
+        direction : str
+            The direction of the arrow. One of "right", "left", "up", or "down".
+        image_width : int
+            The width of the image.
+        image_height : int
+            The height of the image.
+        **kwargs : dict
+            Additional keyword arguments to pass to the tk.Label constructor.
+        """
         super().__init__(master, *args, **kwargs)
         img = create_arrow_image(xys, image_width, image_height, direction)
         image_gif = img.convert("P", palette=Image.ADAPTIVE)
+        #: ImageTk.PhotoImage: The image to display.
         self.image = ImageTk.PhotoImage(image_gif)
         self["image"] = self.image

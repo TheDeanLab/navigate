@@ -46,35 +46,23 @@ logger = logging.getLogger(p)
 
 
 class HelpPopup:
-    """Help Popup
-
-    Class creates the popup that provides list of hot keys.
-
-    Parameters
-    ----------
-    root : tkinter.Tk
-        The root window of the application.
-    *args
-        Variable length argument list.
-    **kwargs
-        Arbitrary keyword arguments.
-
-    Attributes
-    ----------
-    popup : aslm.view.custom_widgets.popup.PopUp
-        The popup window.
-    inputs : dict
-        Dictionary of all the variables.
-
-    Methods
-    -------
-    get_widgets()
-        Returns the widgets of the popup.
-    """
+    """Help Popup Window."""
 
     def __init__(self, root, *args, **kwargs):
+        """Initializes the Help Popup Window.
+
+        Parameters
+        ----------
+        root : tk.Tk
+            Root window.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+        """
+
         # Creating popup window with this name and size/placement, PopUp is a
-        # Toplevel window
+        #: PopUp: PopUp window class
         self.popup = PopUp(root, "Help", "+320+180", top=False, transient=False)
 
         # Creating content frame
@@ -85,7 +73,7 @@ class HelpPopup:
         tk.Grid.rowconfigure(content_frame, "all", weight=1)
 
         """Creating the widgets for the popup"""
-        # Dictionary for all the variables
+        #: dict:  Dictionary for all the variables
         self.inputs = {}
 
         # Label Lists
@@ -120,16 +108,16 @@ class HelpPopup:
         # Text for Main Window
         switch_tab = ttk.Label(main_win, text=text[4])
 
-        # Gridding Titles
+        # Griding Titles
         basic_title.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
         hotkey_title.grid(row=1, column=0, sticky=(tk.NSEW), padx=5, pady=5)
 
-        # Gridding subtitles
+        # Griding subtitles
         cam_view.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
         multitable.grid(row=1, column=0, sticky=(tk.NSEW), padx=5, pady=5)
         main_win.grid(row=2, column=0, sticky=(tk.NSEW), padx=5, pady=5)
 
-        # Gridding text
+        # Griding text
         left.grid(row=0, column=0, sticky=(tk.NSEW), padx=5, pady=5)
         right.grid(row=1, column=0, sticky=(tk.NSEW), padx=5, pady=5)
         mousewheel.grid(row=2, column=0, sticky=(tk.NSEW), padx=5, pady=5)
@@ -142,8 +130,6 @@ class HelpPopup:
 
     def get_widgets(self):
         """Returns the widgets of the popup.
-
-
 
         Returns
         -------

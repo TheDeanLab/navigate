@@ -69,61 +69,6 @@ class Tooltip:
         - to add customizable background color, padding, waittime and
           wraplength on creation
       by Alberto Vassena on 2016.11.05.
-
-    TODO: themes styles support
-
-    Parameters
-    ----------
-    widget : tkinter widget
-        The widget to which this tooltip is bound.
-    bg : str, optional
-        Background color for the tooltip. The default is "#FFFFEA".
-    pad : tuple, optional
-        Padding to be left around the text. The default is (5, 3, 5, 3).
-    text : str, optional
-        Text to be displayed in the tooltip. The default is "widget info".
-    waittime : int, optional
-        Delay in miliseconds before the tooltip shows up. The default is 400.
-    wraplength : int, optional
-        Wrap length for the tooltip text. The default is 250.
-
-    Attributes
-    ----------
-    widget : tkinter widget
-        The widget to which this tooltip is bound.
-    bg : str
-        Background color for the tooltip.
-    pad : tuple
-        Padding to be left around the text.
-    text : str
-        Text to be displayed in the tooltip.
-    waittime : int
-        Delay in miliseconds before the tooltip shows up.
-    wraplength : int
-        Wrap length for the tooltip text.
-    id : int
-        The id returned by tkinter after calling `after`.
-    tw : tkinter.Toplevel
-        The tooltip toplevel.
-
-    Methods
-    -------
-    onEnter(event=None)
-        Callback to be called when the mouse enters the widget.
-    onLeave(event=None)
-        Callback to be called when the mouse leaves the widget.
-    schedule()
-        Schedule the showing of the tooltip.
-    unschedule()
-        Unschedule the showing of the tooltip.
-    show()
-        Show the tooltip.
-    hide()
-        Hide the tooltip.
-
-    Returns
-    -------
-    None.
     """
 
     def __init__(
@@ -136,38 +81,100 @@ class Tooltip:
         waittime=400,
         wraplength=250
     ):
+        """Initialize the ToolTip.
+
+        Parameters
+        ----------
+        widget : tkinter widget
+            The widget to which this tooltip is bound.
+        bg : str, optional
+            Background color for the tooltip. The default is "#FFFFEA".
+        pad : tuple, optional
+            Padding to be left around the text. The default is (5, 3, 5, 3).
+        text : str, optional
+            Text to be displayed in the tooltip. The default is "widget info".
+        waittime : int, optional
+            Delay in miliseconds before the tooltip shows up. The default is 400.
+        wraplength : int, optional
+            Wrap length for the tooltip text. The default is 250.
+        """
+        #: int: Delay in miliseconds before the tooltip shows up.
         self.waittime = waittime  # in miliseconds, originally 500
+        #: int: Wrap length for the tooltip text.
         self.wraplength = wraplength  # in pixels, originally 180
+        #: tk.Widget: The widget to which this tooltip is bound.
         self.widget = widget
+        #: str: Text to be displayed in the tooltip.
         self.text = text
         # self.widget.bind("<Button-1>", self.onEnter)
         self.widget.bind("<Enter>", self.onEnter)
         self.widget.bind("<Leave>", self.onLeave)
         self.widget.bind("<ButtonPress>", self.onLeave)
+        #: str: Background color for the tooltip.
         self.bg = bg
+        #: tuple: Padding to be left around the text.
         self.pad = pad
+        #: int: The id of the scheduled event.
         self.id = None
+        #: tk.Toplevel: The tooltip toplevel.
         self.tw = None
 
     def onEnter(self, event=None):
+        """Called when the mouse enters the widget.
+
+        Parameters
+        ----------
+        event : tk.Event, optional
+            The event that called this function. The default is None.
+        """
         self.schedule()
 
     def onLeave(self, event=None):
+        """Called when the mouse leaves the widget.
+
+        Parameters
+        ----------
+        event : tk.Event, optional
+            The event that called this function. The default is None.
+        """
         self.unschedule()
         self.hide()
 
     def schedule(self):
+        """Schedule the event."""
         self.unschedule()
         self.id = self.widget.after(self.waittime, self.show)
 
     def unschedule(self):
+        """Unschedule the event."""
         id_ = self.id
         self.id = None
         if id_:
             self.widget.after_cancel(id_)
 
     def show(self):
+        """Display the tooltip."""
+
         def tip_pos_calculator(widget, label, *, tip_delta=(10, 5), pad=(5, 3, 5, 3)):
+            """Calculate the position of the tooltip on the screen.
+
+            Parameters
+            ----------
+            widget : tk.Widget
+                The widget to which this tooltip is bound.
+            label : tk.Label
+                The label containing the tooltip text.
+            tip_delta : tuple, optional
+                The offset of the tooltip from the mouse pointer.
+                The default is (10, 5).
+            pad : tuple, optional
+                Padding to be left around the text. The default is (5, 3, 5, 3).
+
+            Returns
+            -------
+            tuple
+                The position of the tooltip on the screen.
+            """
 
             w = widget
 
@@ -242,6 +249,7 @@ class Tooltip:
         self.tw.wm_geometry("+%d+%d" % (x, y))
 
     def hide(self):
+        """Hide the tooltip."""
         tw = self.tw
         if tw:
             tw.destroy()

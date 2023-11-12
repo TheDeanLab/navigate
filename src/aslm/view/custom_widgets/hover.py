@@ -61,71 +61,39 @@ class Hover(object):
 
     Examples of proper usage are within stage_control_tab.py for both LabelInput and
     regular usage
-
-    Parameters
-    ----------
-    widget  : bound widget.
-        The widget to which the hover instance is bound, usually the one on which
-        information is being provided
-    text    : str variable
-        Text to be displayed when the hover is shown (default set to None so the hover
-        will not show at all)
-    type    : str variable
-        Represents the current state of the hover and whether it is in use at any given
-        moment
-
-    Attributes
-    ----------
-    widget  : bound widget
-        The widget to which the hover instance is bound, usually the one on which
-        information is being provided
-    tipwindow   : tk.Toplevel
-        The window that is displayed when the hover is shown
-    id  : int
-        The id of the hover
-    x   : int
-        The x coordinate of the hover
-    y   : int
-        The y coordinate of the hover
-    text    : str
-        Text to be displayed when the hover is shown
-    description : str
-        Text to be displayed when the hover is shown as a description
-    type    : str
-        Represents the current state of the hover and whether it is in use at any given
-        moment
-
-    Methods
-    -------
-    getdescription()
-        Getter for description text
-    get_type()
-        Getter for the type
-    hide()
-        Event handler to hide the hover
-    hidetip()
-        Hides the hover
-    setdescription(text)
-        Setter for description text
-    show()
-        Event handler to show the hover
-    showtip(text)
-        Shows the hover
-    update_type(newtype)
-        Setter for the type
     """
 
     def __init__(self, widget=None, text=None, type="free"):
-        """Constructor for the Hover
+        """Initialize the Hover class
 
-        Initializes attributes and binds events
+        Initializes attributes and binds events.
+
+        Parameters
+        ----------
+        widget  : bound widget.
+            The widget to which the hover instance is bound, usually the one on which
+            information is being provided
+        text    : str variable
+            Text to be displayed when the hover is shown (default set to None so the
+            hover will not show at all)
+        type    : str variable
+            Represents the current state of the hover and whether it is in use at any
+            given moment
         """
+        #: tk.Widget: The widget to which the hover instance is bound
         self.widget = widget
+        #: tk.Toplevel: The hover window
         self.tipwindow = None
+        #: int: The id of the widget
         self.id = None
+        #: int: The x position of the widget
+        #: int: The y position of the widget
         self.x = self.y = 0
+        #: str: The text to be displayed when the hover is shown
         self.text = text
+        #: str: The current state of the hover
         self.description = None
+        #: str: The current state of the hover
         self.type = type
 
         # define event handling for showing and hiding the hover
@@ -142,7 +110,6 @@ class Hover(object):
         ----------
         text    : str
             Text to be displayed when hover is shown as a description
-
         """
         self.description = text
 
@@ -164,7 +131,6 @@ class Hover(object):
         ----------
         event   : event
             The event instance
-
         """
         if self.type == "free" and self.description is not None:
             self.type = "description"
@@ -177,7 +143,6 @@ class Hover(object):
         ----------
         event   : event
             The event instance
-
         """
         if self.type == "description":
             self.hidetip()
@@ -194,8 +159,6 @@ class Hover(object):
 
     def get_type(self):
         """Getter for the type
-
-
 
         Returns
         -------
@@ -250,7 +213,7 @@ class Hover(object):
 
         Parameters
         ----------
-        error    : str
+        text    : str
             Error message to be displayed
         """
         self.type = "error"

@@ -230,7 +230,7 @@ class StageControlTab(tk.Frame):
         tk.Grid.columnconfigure(self.stop_frame, "all", weight=1)
         tk.Grid.rowconfigure(self.stop_frame, "all", weight=1)
 
-        # Gridding out frames
+        # Griding out frames
         self.position_frame.grid(row=0, column=0, sticky=(tk.NSEW), padx=3, pady=3)
         self.xy_frame.grid(row=0, column=1, sticky=(tk.NSEW), padx=3, pady=3)
         self.z_frame.grid(row=0, column=2, sticky=(tk.NSEW), padx=3, pady=3)
@@ -510,7 +510,7 @@ class OtherAxisFrame(ttk.Labelframe):
             "Turn off Joystick Mode to enable",
         ]
 
-        # Gridding out buttons
+        # Griding out buttons
         other_axis_frame.up_btn.grid(row=0, column=0, pady=2)  # UP
         other_axis_frame.down_btn.grid(row=3, column=0, pady=2)  # DOWN
         other_axis_frame.increment_box.grid(row=2, column=0, pady=2)
@@ -905,7 +905,7 @@ class XYFrame(ttk.Labelframe):
         Zero XY is 21,22
         """
 
-        # Gridding out buttons
+        # Griding out buttons
         x_y_frame.up_y_btn.grid(
             row=0, column=2, rowspan=2, columnspan=2, padx=2, pady=2
         )  # UP
@@ -1035,7 +1035,7 @@ class StopFrame(ttk.Frame):
             self, bg="white", fg="black", text="Enable Joystick", width=15, height=2
         )
 
-        # Gridding out buttons
+        # Griding out buttons
         self.stop_btn.grid(row=0, column=0, rowspan=2, pady=2)
         self.joystick_btn.grid(row=2, column=0, rowspan=2, pady=2)
 

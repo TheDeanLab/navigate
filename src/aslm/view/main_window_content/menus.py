@@ -45,45 +45,27 @@ logger = logging.getLogger(p)
 
 #  Menubar class
 class Menubar(Menu):
-    """Menu bar class for GUI
-
-    Parameters
-    ----------
-    window : tkinter.Tk
-        Parent window for menu bar
-    *args : list
-        List of arguments
-    **kwargs : dict
-        Dictionary of arguments
-
-    Attributes
-    ----------
-    opsystem : str
-        Operating system of parent window
-    menu_file : tkinter.Menu
-        File menu
-    menu_multi_positions : tkinter.Menu
-        Multi-Position menu
-    menu_resolution : tkinter.Menu
-        Resolution menu
-    menu_autofocus : tkinter.Menu
-        Autofocus menu
-    menu_features : tkinter.Menu
-        Add-on Features menu
-    menu_help : tkinter.Menu
-        Help menu
-
-    Methods
-    -------
-    None
-    """
+    """Menu bar class for GUI"""
 
     def __init__(self, window, *args, **kwargs):
+        """Initialize the menu bar class.
+
+
+        Parameters
+        ----------
+        window : tkinter.Tk
+            Parent window for menu bar
+        *args : list
+            List of arguments
+        **kwargs : dict
+            Dictionary of arguments
+
+        """
 
         #  Init Menu with parent
         Menu.__init__(self, window, *args, **kwargs)
 
-        #  Creates operating system attribute
+        #: str: Operating system of computer
         self.opsystem = window.tk.call("tk", "windowingsystem")
 
         #  Prevents menu from tearing off bar
@@ -92,26 +74,26 @@ class Menubar(Menu):
         #  Linking menu to option of parent to this menu class
         window["menu"] = self
 
-        #  File Menu
+        #: Menu: File Menu
         self.menu_file = Menu(self)
         self.add_cascade(menu=self.menu_file, label="File")
 
-        #  Resolution Menu
+        #: Menu: Microscope Configuration Menu
         self.menu_resolution = Menu(self)
         self.add_cascade(menu=self.menu_resolution, label="Microscope Configuration")
 
-        #  Multi-Position Menu
+        #: Menu: Stage Control Menu
         self.menu_multi_positions = Menu(self)
         self.add_cascade(menu=self.menu_multi_positions, label="Stage Control")
 
-        # Autofocus Menu
+        #: Menu: Autofocus Menu
         self.menu_autofocus = Menu(self)
         self.add_cascade(menu=self.menu_autofocus, label="Autofocus")
 
-        # Add-on Features menu
+        #: Menu: Features Menu
         self.menu_features = Menu(self)
         self.add_cascade(menu=self.menu_features, label="Features")
 
-        # Window Menu
+        #: Menu: Window Menu
         self.menu_window = Menu(self)
         self.add_cascade(menu=self.menu_window, label="Window")

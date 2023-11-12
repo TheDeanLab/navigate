@@ -45,34 +45,20 @@ class ScrolledFrame(ttk.Frame):
 
     Based upon: https://web.archive.org/web/20170514022131id_/http://tkinter.unpythonic
     .net/wiki/VerticalScrolledFrame
-
-    Parameters
-    ----------
-    root : Tk top-level widget
-        Tkinter GUI instance to which this ScrolledFrame belongs.
-    *args
-        Additional arguments to pass to the ttk.Frame constructor.
-    **kw
-        Additional keyword arguments to pass to the ttk.Frame constructor.
-
-    Attributes
-    ----------
-    interior : ttk.Frame
-        The frame inside the scrollable canvas where widgets can be placed.
-
-    Methods
-    -------
-    __init__(self, root, *args, **kw):
-        Initialize the ScrolledFrame.
-
-    mouse_wheel(self, event):
-        Handle the mouse wheel event for scrolling.
-
-    _configure_interior(event):
-        Configure the interior frame based on size changes.
     """
 
     def __init__(self, parent, *args, **kw):
+        """Initialize the ScrolledFrame.
+
+        Parameters
+        ----------
+        root : Tk top-level widget
+            Tkinter GUI instance to which this ScrolledFrame belongs.
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kw
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
         ttk.Frame.__init__(self, parent, *args, **kw)
 
         # Create a canvas object and a vertical scrollbar for scrolling it.
@@ -84,6 +70,7 @@ class ScrolledFrame(ttk.Frame):
         hscrollbar.pack(
             fill=tk.constants.X, side=tk.constants.BOTTOM, expand=tk.constants.FALSE
         )
+        #: tk.Canvas: The canvas object for the ScrolledFrame.
         self.canvas = tk.Canvas(
             self,
             bd=0,
@@ -103,6 +90,7 @@ class ScrolledFrame(ttk.Frame):
         self.canvas.yview_moveto(0)
 
         # Create a frame inside the canvas which will be scrolled with it.
+        #: ttk.Frame: The interior frame of the ScrolledFrame.
         self.interior = interior = ttk.Frame(self.canvas)
         _ = self.canvas.create_window(0, 0, window=interior, anchor=tk.constants.NW)
 

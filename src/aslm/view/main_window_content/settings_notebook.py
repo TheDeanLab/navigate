@@ -59,6 +59,7 @@ class SettingsNotebook(DockableNotebook):
     - Camera Settings
     - Stage Control
     - Multiposition
+    - Robot Control
 
     Parameters
     ----------
@@ -81,6 +82,8 @@ class SettingsNotebook(DockableNotebook):
         The Stage Control tab
     multiposition_tab : MultiPositionTab
         The Multiposition tab
+    robot_tab : RobotControlTab
+        The Robot Control Tab
     tab_list : list
         A list of all the tabs
 

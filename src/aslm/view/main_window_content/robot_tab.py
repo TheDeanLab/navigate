@@ -76,3 +76,121 @@ class RobotControlTab(tk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
+         # Robot Initialization Buttons
+        self.robot_init = RobotInitialization(self)
+        self.robot_init.grid(
+            row=0, column=0, columnspan=2, sticky=tk.NSEW, padx=10, pady=10
+        )
+
+        # Quick Command Buttons
+        self.quick_command = QuickCommands(self)
+        self.quick_command.grid(
+            row=5, column=0, columnspan=2, sticky=tk.NSEW, padx=10, pady=10
+        )
+
+class RobotInitialization(tk.Frame):
+    """RobotInitialization
+
+    RobotInitialization is a frame that contains the widgets for initializing
+    robot movement.
+
+    Parameters
+    ----------
+    settings_tab : tk.Frame
+        The frame that contains the settings tab.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    buttons : dict
+        A dictionary of all the buttons that are tied to each widget name.
+        The key is the widget name, value is the button associated.
+
+    Methods
+    -------
+    """
+    def __init__(self, settings_tab, *args, **kwargs):
+        text_label = 'Robot Initialization'
+        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
+
+        # Formatting
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
+
+        # Initializing Button
+        self.buttons = {
+            "import": ttk.Button(self, text="Import"),
+            "connect": ttk.Button(self, text="Connect"),
+            "export": ttk.Button(self, text="Export"),
+            #add pause and play button
+        }
+        counter = 0
+        for key, button in self.buttons.items():
+            if counter == 0:
+                row, column = 0, 0
+            elif counter == 1:
+                row, column = 0, 1
+            elif counter == 2:
+                row, column = 0, 2
+
+            button.grid(
+                row=row, column=column, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6)
+            )
+            counter += 1
+
+class QuickCommands(tk.Frame):
+#change name to something more appropriate
+    """QuickCommands
+
+    QuickCommands is a frame that contains the widgets for initializing
+    robot movement.
+
+    Parameters
+    ----------
+    settings_tab : tk.Frame
+        The frame that contains the settings tab.
+    *args : tuple
+        Variable length argument list.
+    **kwargs : dict
+        Arbitrary keyword arguments.
+
+    Attributes
+    ----------
+    buttons : dict
+        A dictionary of all the buttons that are tied to each widget name.
+        The key is the widget name, value is the button associated.
+
+    Methods
+    -------
+    """
+    def __init__(self, settings_tab, *args, **kwargs):
+        text_label = 'Quick Commands'
+        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
+
+        # Formatting
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
+
+        # Initializing Button
+        self.buttons = {
+            "stop": ttk.Button(self, text="STOP"),
+            "sample_carousel": ttk.Button(self, text="Sample to carousel"),
+            "sample_microscope": ttk.Button(self, text="Sample to microscope"),
+            
+        }
+        counter = 0
+        for key, button in self.buttons.items():
+            if counter == 0:
+                row, column = 0, 0
+            elif counter == 1:
+                row, column = 0, 1
+            elif counter == 2:
+                row, column = 0, 2
+
+            button.grid(
+                row=row, column=column, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6)
+            )
+            counter += 1

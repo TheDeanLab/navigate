@@ -931,8 +931,6 @@ class Model:
         Can be used in acquisitions where changing waveforms are required,
         but there is additional overhead due to the need to write the
         waveforms into the buffers of the DAQ cards.
-
-        TODO: Cleanup.
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()

@@ -1174,6 +1174,7 @@ class ZStackAcquisition:
                 }
             ]
 
+
         # Setup next channel down here, to ensure defocus isn't merged into
         # restore f_pos, positions
         self.model.active_microscope.central_focus = None

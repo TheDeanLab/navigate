@@ -73,6 +73,12 @@ class DummyController:
         """
         from aslm.controller.configuration_controller import ConfigurationController
         from aslm.controller.sub_controllers import MenuController
+        from aslm.controller.sub_controllers.multi_position_controller import (
+            MultiPositionController,
+        )
+        from aslm.controller.sub_controllers.channels_tab_controller import (
+            ChannelsTabController,
+        )
 
         #: dict: The configuration dictionary.
         self.configuration = DummyModel().configuration
@@ -84,6 +90,12 @@ class DummyController:
         self.configuration_controller = ConfigurationController(self.configuration)
         #: MenuController: The menu controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
+        self.channels_tab_controller = ChannelsTabController(
+            self.view.settings.channels_tab, self
+        )
+        self.multiposition_tab_controller = MultiPositionController(
+            self.view.settings.multiposition_tab.multipoint_list, self
+        )
         #: dict: The stage positions.
         self.stage_pos = {}
         #: dict: The stage offset positions.

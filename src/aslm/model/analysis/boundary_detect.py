@@ -158,13 +158,33 @@ def binary_detect(
     variance : npt.ArrayLike
         Camera pixel variance map. Same size as image_data.
 
+    Returns
+    -------
+    boundary : list
+        List of boundaries of tissue by row of downsampled image.
+
     """
     m, n = img_data.shape
     m = int(m / width)
     n = int(n / width)
 
     def binary_search_func_left(row, left, right):
-        """Binary search function."""
+        """Binary search function.
+
+        Parameters
+        ----------
+        row : int
+            Row of image.
+        left : int
+            Left boundary of subimage.
+        right : int
+            Right boundary of subimage.
+
+        Returns
+        -------
+        int
+            Left boundary of subimage.
+        """
         while left < right:
             mid = (left + right) // 2
             if has_tissue(img_data, row, mid, width, offset, variance):
@@ -174,6 +194,22 @@ def binary_detect(
         return right
 
     def binary_search_func_right(row, left, right):
+        """Binary search function.
+
+        Parameters
+        ----------
+        row : int
+            Row of image.
+        left : int
+            Left boundary of subimage.
+        right : int
+            Right boundary of subimage.
+
+        Returns
+        -------
+        int
+            Right boundary of subimage.
+        """
         while left < right:
             mid = (left + right) // 2
             if has_tissue(img_data, row, mid, width, offset, variance):
@@ -183,6 +219,26 @@ def binary_detect(
         return right - 1
 
     def find_tissue_range(row, left, right):
+        """Find range of tissue.
+
+        Parameters
+        ----------
+        row : int
+            Row of image.
+        left : int
+            Left boundary of subimage.
+        right : int
+            Right boundary of subimage.
+
+        Returns
+        -------
+        int
+            Left boundary of subimage.
+        int
+            Middle boundary of subimage.
+        int
+            Right boundary of subimage.
+        """
         temp = [(left, right)]
         while temp:
             temp2 = []
@@ -198,6 +254,24 @@ def binary_detect(
         return -1, -1, -1
 
     def detect_row_boundary(row_id, left, right):
+        """Detect row boundary.
+
+        Parameters
+        ----------
+        row_id : int
+            Row of image.
+        left : int
+            Left boundary of subimage.
+        right : int
+            Right boundary of subimage.
+
+        Returns
+        -------
+        int
+            Left boundary of subimage.
+        int
+            Right boundary of subimage.
+        """
         is_tissue_left = has_tissue(img_data, row_id, left, width, offset, variance)
         is_tissue_right = has_tissue(img_data, row_id, right, width, offset, variance)
 
@@ -222,6 +296,24 @@ def binary_detect(
         ), binary_search_func_right(row_id, right_l, right_r)
 
     def expand_row(row_id, limits, direction, boundary):
+        """Expand row.
+
+        Parameters
+        ----------
+        row_id : int
+            Row of image.
+        limits : int
+            Limits of row.
+        direction : int
+            Direction of expansion.
+        boundary : dict
+            List of xy pixel positions indicating presence of tissue as values.
+
+        Returns
+        -------
+        dict
+            List of xy pixel positions indicating presence of tissue as values.
+        """
         for i in range(row_id, limits, direction):
             left, right = boundary[i][0], boundary[i][1]
             left = left - 1 if left > 0 else 0
@@ -269,6 +361,20 @@ def binary_detect(
 
 
 def map_boundary(boundary, direction=True):
+    """Map boundary to path
+
+    Parameters
+    ----------
+    boundary : list
+        List of xy pixel positions indicating presence of tissue as values.
+    direction : bool
+        Direction of path
+
+    Returns
+    -------
+    list
+        List of xy pixel positions indicating presence of tissue as values.
+    """
     if direction:
         start, end, step = 0, len(boundary), 1
         offset = -1
@@ -277,6 +383,25 @@ def map_boundary(boundary, direction=True):
         offset = 1
 
     def dp_shortest_path(start, end, step, offset=-1):
+        """Dynamic programming shortest path
+
+        Parameters
+        ----------
+        start : int
+            Start index.
+        end : int
+            End index.
+        step : int
+            Step size.
+        offset : int
+            Offset.
+
+        Returns
+        -------
+        list
+            List of xy pixel positions indicating presence of tissue as values.
+        """
+
         dp_path = []
         dp_cost = [0, 0]
         visited = False

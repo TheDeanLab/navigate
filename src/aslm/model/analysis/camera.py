@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -47,6 +48,14 @@ def compute_scmos_offset_and_variance_map(
     ----------
     image : npt.ArrayLike
         ZYX image of multiple dark camera frames, taken sequentially.
+
+    Returns
+    -------
+    offset_map : npt.ArrayLike
+        XY image of camera offset in the absence of signal.
+    variance_map : npt.ArrayLike
+        XY image of camera variance in the absence of signal.
+
     """
     offset_map = np.mean(image, axis=0).astype(image.dtype)
     variance_map = np.var(image, axis=0).astype(image.dtype)
@@ -68,6 +77,12 @@ def compute_flatfield_map(
         XY image of camera offset in the absence of signal.
     local : bool
         Compute the local flatfield map (as opposed to global).
+
+    Returns
+    -------
+    flatfield_map : npt.ArrayLike
+        XY image of flatfield map.
+
     """
     offset_image = np.mean(image, axis=0) - offset_map
     if local:
@@ -81,8 +96,8 @@ def compute_flatfield_map(
 
 def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=0.0, Nr=1.4, M=1.0):
     """
-    Using https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/sys/SCAS0134E_C13440-20CU_tec.pdf
-    the sCMOS mean noise sigma is given by
+    Using https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/
+    99_SALES_LIBRARY/sys/SCAS0134E_C13440-20CU_tec.pdf
 
     Parameters
     ----------
@@ -109,12 +124,24 @@ def compute_noise_sigma(Fn=1.0, qe=0.82, S=0.0, Ib=0.0, Nr=1.4, M=1.0):
 
 
 def compute_signal_to_noise(image, offset_map, variance_map):
-    """
-    Compute the SNR of an image from offset and variance maps.
+    """Compute the SNR of an image from offset and variance maps.
+
+    Parameters
+    ----------
+    image : np.array
+        Image to compute SNR of
+    offset_map : np.array
+        Offset map of camera
+    variance_map : np.array
+        Variance map of camera
+
+    Returns
+    -------
+    snr : np.array
+        SNR of image
     """
     S = image.astype(float) - offset_map.astype(float)
     S[S < 0] = 0  # clip
     N = np.sqrt(S + variance_map.astype(float) + 1.0)  # +1 to avoid div by zero error
-    # print(f"Image min: {image.min()} offset_map min: {offset_map.min()} S min: {S.min()} variance_map min: {variance_map.min()} N min: {N.min()}")
 
     return 1.0 * S / N

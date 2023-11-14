@@ -40,7 +40,7 @@ import numpy.typing as npt
 
 # Local imports
 from .metadata import XMLMetadata
-
+from aslm.tools.linear_algebra import affine_rotation, affine_shear
 
 class BigDataViewerMetadata(XMLMetadata):
     """Metadata for BigDataViewer files. XML spec in section 2.3 of
@@ -149,8 +149,8 @@ class BigDataViewerMetadata(XMLMetadata):
             }
 
         # Calculate shear and rotation transforms
-        self.calculate_shear_transform()
-        self.calculate_rotate_transform()
+        self.bdv_shear_transform()
+        self.bdv_rotate_transform()
 
         # Populate ViewSetups
         bdv_dict["SequenceDescription"]["ViewSetups"] = {}
@@ -324,103 +324,31 @@ class BigDataViewerMetadata(XMLMetadata):
 
         return x, y, z, theta, f
 
-    def calculate_shear_transform(self):
-        """Calculate the shear transform matrix.
-
-        Affine Transform for shear has the following form:
-
-        [1 hxy hxz, 0,
-        hyx 1 hyz, 0,
-        hzx hzy 1, 0]
-        """
+    def bdv_shear_transform(self):
+        """Calculate the shear transform matrix."""
         if self.shear_data:
+            self.shear_transform = affine_shear(
+                dz=self.dz,
+                dx=self.dx,
+                dy=self.dy,
+                dimension=self.shear_dimension,
+                angle=self.shear_angle
+            )[3]
             scaled_angle = np.multiply(
                 np.cos(np.deg2rad(self.shear_angle)),
                 [self.dy / self.dx, self.dz / self.dx, self.dz / self.dy],
             )
 
-            if self.shear_dimension == "XY" or self.shear_dimension == "YX":
-                self.shear_transform[0, 1] = scaled_angle[0]
-            elif self.shear_dimension == "XZ" or self.shear_dimension == "ZX":
-                self.shear_transform[0, 2] = scaled_angle[1]
-            elif self.shear_dimension == "YZ" or self.shear_dimension == "ZY":
-                self.shear_transform[1, 2] = scaled_angle[2]
-            else:
-                pass
 
-    def calculate_rotate_transform(self):
-        """Calculate the rotation transform matrix.
-
-        Affine transform for rotation has the following forms.
-
-        Rotation about x:
-        [1, 0, 0, 0,
-        0, cos(theta), -sin(theta), 0,
-        0, sin(theta), cos(theta), 0]
-
-        Rotation about Y:
-        [cos(theta), 0, sin(theta), 0,
-        0, 1, 0, 0,
-        -sin(theta), 0, cos(theta), 0,
-
-        Rotation about Z:
-        [cos(theta), -sin(theta), 0, 0,
-        sin(theta), cos(theta), 0, 0,
-        0, 0, 1, 0]
-        """
+    def bdv_rotate_transform(self):
+        """Calculate the BDV rotation transform matrix."""
         if self.rotate_data:
-            if self.rotate_angle_x != 0:
-                cosine_theta = np.cos(np.deg2rad(self.rotate_angle_x))
-                sin_theta = np.sin(np.deg2rad(self.rotate_angle_x))
-                x_transform = np.eye(3, 4)
-                x_transform[1, 1] = cosine_theta
-                x_transform[1, 2] = -sin_theta
-                x_transform[2, 1] = sin_theta
-                x_transform[2, 2] = cosine_theta
-            else:
-                x_transform = None
-
-            if self.rotate_angle_y != 0:
-                cosine_theta = np.cos(np.deg2rad(self.rotate_angle_y))
-                sin_theta = np.sin(np.deg2rad(self.rotate_angle_y))
-                y_transform = np.eye(3, 4)
-                y_transform[0, 0] = cosine_theta
-                y_transform[0, 2] = sin_theta
-                y_transform[2, 0] = -sin_theta
-                y_transform[2, 2] = cosine_theta
-            else:
-                y_transform = None
-
-            if self.rotate_angle_z != 0:
-                cosine_theta = np.cos(np.deg2rad(self.rotate_angle_z))
-                sin_theta = np.sin(np.deg2rad(self.rotate_angle_z))
-                z_transform = np.eye(3, 4)
-                z_transform[0, 0] = cosine_theta
-                z_transform[0, 1] = -sin_theta
-                z_transform[1, 0] = sin_theta
-                z_transform[1, 1] = cosine_theta
-            else:
-                z_transform = None
-
-            matrices = [x_transform, y_transform, z_transform]
-            matrices = [x for x in matrices if x is not None]
-            if len(matrices) == 0:
-                # self.rotate_data = True, but all angles are 0
-                self.rotate_transform = np.eye(3, 4)
-            if len(matrices) == 1:
-                # self.rotate_data = True, but one angle is non-zero
-                self.rotate_transform = matrices[0]
-            elif len(matrices) == 2:
-                # self.rotate_data = True, but two angles are non-zero
-                self.rotate_transform = np.matmul(matrices[0].T, matrices[1])[:3]
-            else:
-                # self.rotate_data = True, and all angles are non-zero
-                self.rotate_transform = np.matmul(matrices[0].T, matrices[1])[:3]
-                self.rotate_transform = np.matmul(self.rotate_transform.T, matrices[2])[
-                    :3
-                ]
+            self.rotate_transform = affine_rotation(
+                x=self.rotate_angle_x,
+                y=self.rotate_angle_y,
+                z=self.rotate_angle_z
+            )[3]
         else:
-            # self.rotate_data is False
             self.rotate_transform = np.eye(3, 4)
 
     def parse_xml(self, root: Union[str, ET.Element]) -> tuple:

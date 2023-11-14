@@ -32,6 +32,7 @@
 import random
 import pytest
 import os
+from unittest.mock import MagicMock
 
 
 @pytest.fixture(scope="module")
@@ -107,6 +108,36 @@ def test_single_acquisition(model):
     assert n_images == n_frames
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
+
+
+def test_multiposition_acquisition(model):
+
+    state = model.configuration["experiment"]["MicroscopeState"]
+    event_queue = model.event_queue
+
+    # Multiposition is True, and actually is True
+    state["is_multiposition"] = True
+    model.configuration["experiment"]["MultiPositions"] = [
+        {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}
+    ]
+    model.run_command("acquire")
+
+    # Check that the event queue was not called with the disable_multiposition statement
+    def check_queue(event):
+        while not event_queue.empty():
+            ev, _ = event_queue.get()
+            if ev == event:
+                return True
+        return False
+    assert check_queue("disable_multiposition") is False
+    assert state["is_multiposition"] is True
+
+    # Multiposition is True, but actually is False
+    model.configuration["experiment"]["MultiPositions"] = []
+    model.run_command("acquire")
+    # Check that the event queue is called with the disable_multiposition statement
+    assert check_queue("disable_multiposition") is True
+    assert state["is_multiposition"] is False
 
 
 def test_change_resolution(model):
@@ -187,7 +218,6 @@ def test_change_resolution(model):
 
 
 def test_get_feature_list(model):
-
     feature_lists = model.feature_list
 
     assert model.get_feature_list(0) == ""

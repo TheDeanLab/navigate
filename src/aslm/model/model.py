@@ -492,6 +492,15 @@ class Model:
                 "is_save"
             ]
 
+            # If multiposition is selected, verify that it is not empty.
+            if self.configuration["experiment"]["MicroscopeState"]["is_multiposition"]:
+                if len(self.configuration["experiment"]["MultiPositions"]) == 0:
+                    # Update the view and override the settings.
+                    self.event_queue.put(("disable_multiposition", None))
+                    self.configuration["experiment"]["MicroscopeState"][
+                        "is_multiposition"
+                    ] = False
+
             # Calculate waveforms, turn on lasers, etc.
             self.prepare_acquisition()
 
@@ -931,8 +940,6 @@ class Model:
         Can be used in acquisitions where changing waveforms are required,
         but there is additional overhead due to the need to write the
         waveforms into the buffers of the DAQ cards.
-
-        TODO: Cleanup.
         """
         if hasattr(self, "signal_container"):
             self.signal_container.run()

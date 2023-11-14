@@ -32,6 +32,7 @@
 import random
 import pytest
 import os
+from unittest.mock import MagicMock
 
 
 @pytest.fixture(scope="module")
@@ -107,6 +108,92 @@ def test_single_acquisition(model):
     assert n_images == n_frames
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
+
+
+def test_multiposition_acquisition():
+    from types import SimpleNamespace
+    from pathlib import Path
+
+    from aslm.model.model import Model
+    from multiprocessing import Manager
+    from aslm.config.config import (
+        load_configs,
+        verify_experiment_config,
+        verify_waveform_constants,
+    )
+
+    # Use configuration files that ship with the code base
+    configuration_directory = Path.joinpath(
+        Path(__file__).resolve().parent.parent.parent, "src", "aslm", "config"
+    )
+    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
+    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
+    waveform_constants_path = Path.joinpath(
+        configuration_directory, "waveform_constants.yml"
+    )
+    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
+
+    manager = Manager()
+
+    configuration = load_configs(
+        manager,
+        configuration=configuration_path,
+        experiment=experiment_path,
+        waveform_constants=waveform_constants_path,
+        rest_api_config=rest_api_path,
+    )
+    verify_experiment_config(manager, configuration)
+    verify_waveform_constants(manager, configuration)
+
+    event_queue = MagicMock()
+    event_queue.put = MagicMock()
+    event_queue.empty = MagicMock(return_value=True)
+
+    model = Model(
+        args=SimpleNamespace(synthetic_hardware=True),
+        configuration=configuration,
+        event_queue=event_queue,
+    )
+
+    state = model.configuration["experiment"]["MicroscopeState"]
+    assert model.is_acquiring is False
+
+    # Specify settings for multi-position acquisition
+    state["image_mode"] = "z-stack"
+    state["is_save"] = False
+
+    _ = model.create_pipe("show_img_pipe")
+
+    # Multiposition is True, and actually is True
+    state["is_multiposition"] = True
+    model.configuration["experiment"]["MultiPositions"] = [
+        {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}
+    ]
+    model.run_command("acquire")
+
+    # Check that the event queue was not called with the disable_multiposition statement
+    statement = ("disable_multiposition", None)
+    for call in event_queue.put.call_args_list:
+        positional_args, keyword_args = call
+        # Assuming the statement you're checking is the first positional argumen
+        if positional_args[0] == statement:
+            assert (
+                False
+            ), f"event_queue.put was called with the specific statement: {statement}"
+    assert state["is_multiposition"] is True
+
+    # Multiposition is True, but actually is False
+    model.configuration["experiment"]["MultiPositions"] = []
+    model.run_command("acquire")
+    # Check that the event queue is called with the disable_multiposition statement
+    for call in event_queue.put.call_args_list:
+        positional_args, keyword_args = call
+        # Assuming the statement you're checking is the first positional argumen
+        if positional_args[0] == statement:
+            assert (
+                True
+            ), f"event_queue.put was called with the specific statement: {statement}"
+    assert state["is_multiposition"] is False
 
 
 def test_change_resolution(model):
@@ -187,7 +274,6 @@ def test_change_resolution(model):
 
 
 def test_get_feature_list(model):
-
     feature_lists = model.feature_list
 
     assert model.get_feature_list(0) == ""

@@ -477,6 +477,10 @@ class TilingWizardController(GUIController):
         """
 
         def handler():
+            # Force us to get the current stage positions from the stage
+            self.parent_controller.parent_controller.execute("stop_stage")
+
+            # Now set the bounds
             pos = self.stage_position_vars[axis].get()
             self.widgets[axis + "_" + start_end].widget.set(pos)
             # if axis == "z":

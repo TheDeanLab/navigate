@@ -32,7 +32,6 @@
 #
 
 # Standard Library Imports
-import time
 import logging
 
 # Third Party Imports
@@ -480,13 +479,18 @@ class TilingWizardController(GUIController):
         def handler():
             # Force us to get the current stage positions from the stage
             self.parent_controller.parent_controller.execute("stop_stage")
-            time.sleep(0.01)  # give it a moment
 
-            # Now set the bounds
-            pos = self.stage_position_vars[axis].get()
-            self.widgets[axis + "_" + start_end].widget.set(pos)
-            # if axis == "z":
-            #     setattr(self, f"_f_{start_end}", self.stage_position_vars["f"].get())
+            def set_bounds(axis, start_end):
+                # Now set the bounds
+                pos = self.stage_position_vars[axis].get()
+                self.widgets[axis + "_" + start_end].widget.set(pos)
+                # if axis == "z":
+                #     setattr(self, f"_f_{start_end}",
+                #             self.stage_position_vars["f"].get())
+
+            self.parent_controller.parent_controller.view.after(
+                250, lambda: set_bounds(axis, start_end)
+            )
 
         return handler
 

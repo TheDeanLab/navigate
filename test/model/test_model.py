@@ -32,6 +32,7 @@
 import random
 import pytest
 import os
+from time import sleep
 
 
 @pytest.fixture(scope="module")
@@ -115,6 +116,10 @@ def test_multiposition_acquisition(model):
     This test is meant to confirm that if the multi position check box is set,
     but there aren't actually any positions in the multi-position table, that the
     acquisition proceeds as if it is not a multi position acquisition.
+
+    Sleep statements are used to ensure that the event queue has ample opportunity to
+    be populated with the disable_multiposition event. This is because the event queue
+    is a multiprocessing.Queue, which is not thread safe.
     """
     state = model.configuration["experiment"]["MicroscopeState"]
 
@@ -141,6 +146,7 @@ def test_multiposition_acquisition(model):
         {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}
     ]
     model.run_command("acquire")
+    sleep(1)
     assert (
         check_queue(event="disable_multiposition", event_queue=model.event_queue)
         is False
@@ -150,6 +156,7 @@ def test_multiposition_acquisition(model):
     # Multiposition is selected but not actually  True
     model.configuration["experiment"]["MultiPositions"] = []
     model.run_command("acquire")
+    sleep(1)
     # Check that the event queue is called with the disable_multiposition statement
     assert (
         check_queue(event="disable_multiposition", event_queue=model.event_queue)

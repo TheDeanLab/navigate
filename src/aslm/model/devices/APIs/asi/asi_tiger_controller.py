@@ -323,7 +323,15 @@ class TigerController:
                     self.default_axes_sequence,
                 )
             )
-            return {axis: float(pos[1 + i]) for i, axis in enumerate(axes_seq)}
+            # return {axis: float(pos[1 + i]) for i, axis in enumerate(axes_seq)}
+            axis_dict = {}
+            for i, axis in enumerate(axes_seq):
+                try:
+                    axis_dict[axis] = float(pos[1 + i])
+                except ValueError:
+                    # Report position failed. Don't crash, we can try again.
+                    pass
+            return axis_dict
         else:
             result = {}
             for axis in axes:

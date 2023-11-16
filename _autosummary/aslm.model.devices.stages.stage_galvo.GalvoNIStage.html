@@ -193,6 +193,12 @@ determine the correct voltage to send to the stage.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.galvo_min_voltage" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.galvo_min_voltage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">galvo_min_voltage</span></code></a></p></td>
 <td><p>minimum voltage for each axis</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.distance_threshold" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.distance_threshold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">distance_threshold</span></code></a></p></td>
+<td><p>Distance threshold for wait until delay</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_settle_duration" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_settle_duration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_settle_duration</span></code></a></p></td>
+<td><p>Stage settle duration in milliseconds.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes_mapping" title="aslm.model.devices.stages.stage_galvo.GalvoNIStage.axes_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes_mapping</span></code></a></p></td>
 <td><p>Mapping of software axes to hardware axes.</p></td>
 </tr>
@@ -450,6 +456,17 @@ Expect values in micrometers, except for theta, which is in degrees.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.distance_threshold">
+<span class="sig-name descname"><span class="pre">distance_threshold</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.distance_threshold" title="Permalink to this definition"></a></dt>
+<dd><p>Distance threshold for wait until delay</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.exposure_times">
 <span class="sig-name descname"><span class="pre">exposure_times</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.exposure_times" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionary of exposure times for each channel.</p>
@@ -555,6 +572,17 @@ Expect values in micrometers, except for theta, which is in degrees.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_settle_duration">
+<span class="sig-name descname"><span class="pre">stage_settle_duration</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_galvo.GalvoNIStage.stage_settle_duration" title="Permalink to this definition"></a></dt>
+<dd><p>Stage settle duration in milliseconds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>

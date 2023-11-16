@@ -52,6 +52,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#ni">NI</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pcie-6738">PCIe-6738</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pxi-6259">PXI-6259</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pxi-6723">PXI-6723</a></li>
 </ul>
 </li>
 </ul>
@@ -180,6 +181,13 @@ lasers on simultaneously, we could distribute the lasers across independent bank
 <h4>PXI-6259<a class="headerlink" href="#pxi-6259" title="Permalink to this heading"></a></h4>
 <p>The PXI-6259 can create one software-timed analog task per channel. As such, the
 galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
+</section>
+<section id="pxi-6723">
+<h4>PXI-6723<a class="headerlink" href="#pxi-6723" title="Permalink to this heading"></a></h4>
+<ul class="simple">
+<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">master_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">trigger_source</span></code> with a direct wire, commonly <code class="docutils literal notranslate"><span class="pre">PXI6723/port0/line1</span></code> and <code class="docutils literal notranslate"><span class="pre">/PXI6723/PFI0</span></code>. With an SCB-68A breakout box, connect pin 17 directly to pin 11.</p></li>
+<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">camera_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">Ext.</span> <span class="pre">Trigger</span></code> on the camera using the <code class="docutils literal notranslate"><span class="pre">CTR0Out</span></code> pin. With an SCB-68A breakout box, the positive lead is pin 2, the ground is pin 36.</p></li>
+</ul>
 </section>
 </section>
 </section>

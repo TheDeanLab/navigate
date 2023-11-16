@@ -39,6 +39,8 @@ aslm.model.devices.stages.stage\_galvo.GalvoNIStage
       ~GalvoNIStage.axes_channels
       ~GalvoNIStage.galvo_max_voltage
       ~GalvoNIStage.galvo_min_voltage
+      ~GalvoNIStage.distance_threshold
+      ~GalvoNIStage.stage_settle_duration
       ~GalvoNIStage.axes_mapping
       ~GalvoNIStage.daq
       ~GalvoNIStage.microscope_name

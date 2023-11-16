@@ -1,8 +1,6 @@
 Microscope Implementations
 ==========================
 
-Below are functioning implementations of the ASLM software.
-
 Multiscale Microscope
 ------------------------
 - Laser source - Omicron LightHUB Ultra. Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers. 561, which operates separately, requires the mixed modulation mode (Obis).
@@ -32,8 +30,13 @@ CT-ASLM-V1
 
 CT-ASLM-V2
 ------------
-- Laser source - Omicron LightHUB Ultra. Requires ACC operating mode with analog modulation enabled for 488 nm and 642 nm lasers. 561, which operates separately, requires the mixed modulation mode (Obis).
+- Laser source - Coherent OBIS 488, 561, and 647 nm.
 - Camera - Hamamatsu Flash 4.0 with frame grabbers.
+- Filter Wheel - Sutter Lambda 10-3
+- Stages - Sutter MP285 and PiezoJena 200 Micron Sample Scanning Piezo
+- DAQ - National Instruments PCIe-6738
+- Remote Focusing System - Equipment Solutions LFA-2010 Linear Focus Actuator
+- Galvo - Novanta CRS 4 KHz Resonant Galvo
 
 
 Spectral TIRF

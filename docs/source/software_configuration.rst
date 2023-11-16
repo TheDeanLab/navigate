@@ -1,5 +1,10 @@
-Software Configuration
+Configuration Overview
 =========================
+
+This section outlines the ``configuration.yaml``, ``experiment.yaml``,``rest_api_config.yaml``,  ``waveform_templates.yaml``, and ``waveform_constants.yaml``
+files. Once you are ready to configure your exact hardware, please see the :doc:`Supported Hardware
+<supported_hardware>` section.
+
 
 Configuration File
 ------------------

@@ -85,8 +85,8 @@ Configuration File
 
 Cameras
 ----------
-Hamamatsu Flash 4.0, Fusion, and Lightning
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Hamamatsu Flash 4.0
+^^^^^^^^^^^^^^^^^^^^
 * Insert the USB that came with the camera into the computer and install HCImageLive.
 * When prompted with the DCAM-API Setup
 
@@ -149,6 +149,14 @@ Configuration File
           y_pixels_step: 4
           x_pixels_min: 4
           y_pixels_min: 4
+
+Hamamatsu Fusion
+^^^^^^^^^^^^^^^^^^^^
+TBD...
+
+Hamamatsu Lightning
+^^^^^^^^^^^^^^^^^^^^
+TBD...
 
 Photometrics Iris 15
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -230,6 +238,9 @@ Optotune Focus Tunable Lens
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Device is controlled with an analog signal.
 
+Synthetic Remote Focus Device
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Stages
 ------------------------
 Our software empowers users with a flexible solution for configuring
@@ -248,11 +259,41 @@ stage to trigger the acquisition of every frame at precise intervals.  Important
 multi-channel imaging that is acquired in the per-stack mode, but less so for
 perZ-based acquisitions.
 
-FTP-2000 Stage.
-Whatever you do, don't change the F position. You will damage your
-stage.
+.. tip::
+    If you are using the FTP-2000 stage, you should not change the F stage axis. This will
+    differentially drive the two vertical posts, causing them to torque and potentially damage
+    one another.
 
-Sutter
+.. code-block:: yaml
+    hardware:
+      stage:
+        -
+          type: ASI
+          port: COM17
+          baudrate: 115200
+          controllername: 'C-884'
+          stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
+          refmode: FRF FRF FRF FRF FRF FRF
+          serial_number: 119060508
+        -
+
+    microscopes:
+        microscope:
+            stage:
+              hardware:
+                -
+                  name: ASI
+                  type: ASI
+                  serial_number: 119060508
+                  axes: [x, y, z]
+                  axes_mapping: [X, Y, Z]
+                  volts_per_micron: None
+                  axes_channels: None
+                  max: None
+                  min: None
+                -
+
+Sutter MP-285
 ^^^^^^^^^^^^^^^^^
 .. code-block:: yaml
     hardware:
@@ -261,7 +302,7 @@ Sutter
           type: MP285
           port: COM2
           timeout: 0.25
-          baudrate: 9600
+          baudrate: 115200
           serial_number: 0000
           stages: None
 
@@ -347,6 +388,35 @@ Synthetic Stage
                       max: 360
                       min: 0
 
+Dichroic Turret
+----------------------------
+ASI
+^^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: yaml
+    hardware:
+      dichroic:
+        type: ASI #synthetic #ASI
+        port: COM17
+        baudrate: 115200
+
+    microscopes:
+        microscope:
+            dichroic:
+              hardware:
+                name: ASI
+                type: ASI #synthetic #ASI
+                port: COM17
+                axes: [S]
+                baudrate: 115200
+              available_dichroics:
+                510LP: 0
+                570LP: 1
+                640LP: 2
+
+Synthetic Dichroic Turrett
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TBD.
+
 Filter Wheels
 ----------------------------
 Sutter
@@ -383,7 +453,7 @@ ASI
       filter_wheel:
         type: ASI
         port: COM10
-        baudrate: 9600
+        baudrate: 115200
         number_of_wheels: 1
 
     microscopes:
@@ -404,10 +474,17 @@ ASI
             Empty-3: 6
             Empty-4: 7
 
+Synthetic Filter Wheel
+^^^^^^^^^^^^^^^^^^^^^^
+TBD...
+
 Galvanometers
 ----------------------------
+
+DAQ Control
+^^^^^^^^^^^^^^^^^^^^^
 Multiple types of galvanometers have been used, including Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX
-Each of these devices are externally controlled via analog signals delivered from a dat acquisition card.
+Each of these devices are externally controlled via analog signals delivered from a data acquisition card.
 
 .. code-block:: yaml
     microscopes:
@@ -427,6 +504,9 @@ Each of these devices are externally controlled via analog signals delivered fro
             duty_cycle: 50
             phase: 1.57079 # pi/2
 
+Synthetic Galvanometer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TBD...
 
 Lasers
 ----------
@@ -461,8 +541,6 @@ The ``power`` entry is for analog modulation.
                 pulse_percent: 87
               - wavelength: 561...
 
-
-
 Coherent
 ^^^^^^^^^^^^^^^^^^^^^
 Future implementations of the software will enable a mixture of software and hardware control.
@@ -470,6 +548,9 @@ Future implementations of the software will enable a mixture of software and har
 Omicron
 ^^^^^^^^^^^^^^^^^^^^^
 Future implementations of the software will enable a mixture of software and hardware control.
+
+Synthetic Laser
+^^^^^^^^^^^^^^^^^^^^^
 
 Shutters
 -----------------------------
@@ -486,11 +567,22 @@ Thorlabs
             min: 0
             max: 5
 
+Synthetic Shutter
+^^^^^^^^^^^^^^^^^
+.. code-block:: yaml
+    hardware:
+        shutter:
+          hardware:
+            name: daq
+            type: synthetic
+            channel: PCIE6738/port0/line0
+            min: 0
+            max: 5
 
 Mechanical Zoom
 ---------------------------------
-Dynamixel
-^^^^^^^^^^^^
+Dynamixel Zoom
+^^^^^^^^^^^^^^^^
 .. code-block:: yaml
     hardware:
       zoom:
@@ -514,7 +606,31 @@ Dynamixel
             BABB:
               f:
                 36X: 0
+Synethetic Zoom
+^^^^^^^^^^^^^^^^
+.. code-block:: yaml
+    hardware:
+      zoom:
+        type: synthetic
+        servo_id: 1
+        port: COM18
+        baudrate: 1000000
 
+    microscopes:
+      microscope_name:
+        zoom:
+          hardware:
+            name: zoom
+            type: synthetic
+            servo_id: 1
+          position:
+            36X: 0
+          pixel_size:
+            36X: 0.180
+          stage_positions:
+            BABB:
+              f:
+                36X: 0
 
 Deformable Mirrors
 ------------------------

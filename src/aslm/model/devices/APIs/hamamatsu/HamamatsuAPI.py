@@ -1186,7 +1186,7 @@ class DCAM:
 
             # print("Frame Count - cap_info", cap_info.nFrameCount, frame_count)
             # print("Newest Frame Index - cap_info", cap_info.nNewestFrameIndex)
-            #
+
             if frame_count <= cap_info.nNewestFrameIndex + 1:
                 frame_idx_list = list(
                     range(
@@ -1195,6 +1195,21 @@ class DCAM:
                     )
                 )
             else:
+                if frame_count > self.number_of_frames:
+                    # We waited so long that we've missed at least a buffer's
+                    # worth of frames
+                    msg = (
+                        "Hamamatsu API - Dropping frames! Number of frames "
+                        f"since last poll {frame_count} exceeds buffer size  "
+                        f"{self.number_of_frames}. This is likely due to slow "
+                        "file saving."
+                    )
+                    logger.debug(msg)
+                    print(msg)
+
+                    # Update the frame count to grab the last N usable frames
+                    frame_count = self.number_of_frames
+
                 frame_idx_list = list(
                     range(
                         self.number_of_frames

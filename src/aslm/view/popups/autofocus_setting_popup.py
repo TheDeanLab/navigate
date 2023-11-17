@@ -51,43 +51,23 @@ logger = logging.getLogger(p)
 
 
 class AutofocusPopup:
-    """Class creates the popup to configure autofocus parameters.
-
-    Parameters
-    ----------
-    root : tkinter.Tk
-        The root window of the application.
-    *args
-        Variable length argument list.
-    **kwargs
-        Arbitrary keyword arguments.
-
-    Attributes
-    ----------
-    popup : aslm.view.custom_widgets.popup.PopUp
-        The popup window.
-    inputs : dict
-        Dictionary of all the input widgets.
-    setting_vars : list
-        List of booleans for the setting checkboxes.
-    autofocus_btn : ttk.Button
-        The autofocus button.
-    fig : matplotlib.figure.Figure
-        The matplotlib figure.
-    coarse : matplotlib.axes._subplots.AxesSubplot
-        The coarse autofocus subplot.
-    fine : matplotlib.axes._subplots.AxesSubplot
-        The fine autofocus subplot.
-
-    Methods
-    -------
-    get_widgets()
-        Returns the dictionary of input widgets.
-    """
+    """Class creates the popup to configure autofocus parameters."""
 
     def __init__(self, root, *args, **kwargs):
+        """Initialize the AutofocusPopup class.
+
+        Parameters
+        ----------
+        root : tk.Tk
+            Root window.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+        """
         # Creating popup window with this name and size/placement,
         # PopUp is a Toplevel window
+        #: PopUp: PopUp window
         self.popup = PopUp(
             root, "Autofocus Settings", "+320+180", top=False, transient=False
         )
@@ -100,7 +80,9 @@ class AutofocusPopup:
         device_frame.grid(row=0, columnspan=3, sticky=tk.NSEW)
 
         # Dictionary for all the variables
+        #: dict: Dictionary of all the input widgets.
         self.inputs = {}
+        #: dict: Dictionary of all the setting variables.
         self.setting_vars = {}
 
         self.inputs["device"] = LabelInput(
@@ -178,6 +160,7 @@ class AutofocusPopup:
             self.setting_vars[setting_names[i] + "_step_size"] = widget.get_variable()
 
         # Row 4, Autofocus Button
+        #: ttk.Button: Autofocus button.
         self.autofocus_btn = ttk.Button(content_frame, text="Autofocus")
         self.autofocus_btn.grid(
             row=starting_row_id + 4, column=2, padx=(0, 25), pady=(10, 10), sticky=tk.E
@@ -191,7 +174,9 @@ class AutofocusPopup:
         self.setting_vars["robust_fit"] = variable
 
         # Row 5, Plot
+        #: matplotlib.figure.Figure: Figure for the plot.
         self.fig = Figure(figsize=(5, 5), dpi=100)
+        #: matplotlib.axes.Axes: Axes for the plot.
         self.coarse = self.fig.add_subplot(111)
         self.coarse.set_title("Discrete Cosine Transform", fontsize=18)
         self.coarse.set_xlabel("Focus Stage Position", fontsize=16)
@@ -212,8 +197,6 @@ class AutofocusPopup:
 
     def get_widgets(self):
         """Returns the dictionary of input widgets.
-
-
 
         Returns
         -------

@@ -45,30 +45,34 @@ logger = logging.getLogger(p)
 
 
 class PopUp(tk.Toplevel):
+    """Generic Popup Window class
+
+    Creates the popup window based on the root window being passed,
+    title that you want the window to have and the size of the window.
+    Some important things to consider:
+    - Root has to be the main application window to work
+    - Name has to be a string
+    - Size also has to be a string in the format '600x400+320+180'
+    - 600x400 represents the pixel size
+    - +320 means 320 pixels from left edge, +180 means 180 pixels from top edge.
+    - If a '-' is used instead of '+' it will be from the opposite edge.
+    - Top is a boolean that if true means popup will always be on top of other
+    windows
+    - Transient is a boolean that if true means the main app will not be usable
+    until popup is closed
+    - The parent frame for any widgets you add to the popup will be retrieved
+    with the get_frame() function
+
+    https://stackoverflow.com/questions/28560209/transient-input-window
+    Above link is a resource for using popups.
+    Some helpful tips of an easy way to access the data inputted by a user into
+    the  popup
+    Also discusses transience of a popup (whether you can click out of the popup)
+
+    """
+
     def __init__(self, root, name, size, top=True, transient=True, *args, **kwargs):
-        """Generic Popup Window class
-
-        Creates the popup window based on the root window being passed,
-        title that you want the window to have and the size of the window.
-        Some important things to consider:
-        - Root has to be the main application window to work
-        - Name has to be a string
-        - Size also has to be a string in the format '600x400+320+180'
-        - 600x400 represents the pixel size
-        - +320 means 320 pixels from left edge, +180 means 180 pixels from top edge.
-        - If a '-' is used instead of '+' it will be from the opposite edge.
-        - Top is a boolean that if true means popup will always be on top of other
-        windows
-        - Transient is a boolean that if true means the main app will not be usable
-        until popup is closed
-        - The parent frame for any widgets you add to the popup will be retrieved
-        with the get_frame() function
-
-        https://stackoverflow.com/questions/28560209/transient-input-window
-        Above link is a resource for using popups.
-        Some helpful tips of an easy way to access the data inputted by a user into
-        the  popup
-        Also discusses transience of a popup (whether you can click out of the popup)
+        """Initialize Generic Popup Window class
 
         Parameters
         ----------
@@ -83,36 +87,11 @@ class PopUp(tk.Toplevel):
         transient : bool, optional
             If true, the main application will not be usable until the popup is closed,
             by default True
+        *args
+            Variable length argument list
+        **kwargs
+            Arbitrary keyword arguments
 
-        Attributes
-        ----------
-        content_frame : ttk.Frame
-            The parent frame for any widgets you add to the popup
-        title : str
-            The title of the popup window
-        geometry : str
-            The size of the popup window in the format '600x400+320+180'
-        columnconfigure : int, weight=int
-            The column configuration for the popup window
-        rowconfigure : int, weight=int
-            The row configuration for the popup window
-        resizable : bool, bool
-            If true, the user can resize the popup window
-        transient : tk.Tk
-            The main application window
-        wait_visibility : None
-            Can't grab until window appears, so we wait
-        grab_set : None
-            Ensures any input goes to this window
-
-        Methods
-        -------
-        get_frame()
-            Returns the parent frame for any widgets you add to the popup
-        dismiss()
-            Destroys the popup window
-        showup()
-            Shows the popup window
         """
         tk.Toplevel.__init__(self)
         # This starts the popup window config, and makes sure that any child widgets
@@ -137,6 +116,7 @@ class PopUp(tk.Toplevel):
             self.grab_set()  # Ensures any input goes to this window
 
         # Putting popup frame into toplevel window
+        #: ttk.Frame: The parent frame for any widgets you add to the popup
         self.content_frame = ttk.Frame(self)
         self.content_frame.grid(row=0, column=0, sticky=tk.NSEW)
 
@@ -144,10 +124,6 @@ class PopUp(tk.Toplevel):
         """Display popup as top-level window.
 
         This function is used to display the popup window as a top-level window.
-
-
-
-
         """
         self.deiconify()
         self.attributes("-topmost", 1)
@@ -157,10 +133,6 @@ class PopUp(tk.Toplevel):
 
         This function is used to release control back to the main window from the
         popup window.
-
-
-
-
         """
         self.grab_release()  # Ensures input can be anywhere now
         self.destroy()
@@ -171,8 +143,6 @@ class PopUp(tk.Toplevel):
 
         This function is used to return the parent frame for any widgets you add to the
         popup window.
-
-
 
         Returns
         -------

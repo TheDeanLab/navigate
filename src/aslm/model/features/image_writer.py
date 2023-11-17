@@ -105,6 +105,7 @@ class ImageWriter:
         self.data_buffer = (
             self.model.data_buffer if data_buffer is None else data_buffer
         )
+        self.number_of_frames = self.model.number_of_frames
         self.save_directory = ""
         self.sub_dir = sub_dir
         self.num_of_channels = len(
@@ -232,6 +233,12 @@ class ImageWriter:
         """
 
         for idx in frame_ids:
+            if (idx < 0) or (idx > (self.number_of_frames - 1)):
+                msg = f"Received invalid index {idx}. Skipping this frame."
+                logger.debug(msg)
+                print(msg)
+                continue
+
             # Identify channel, z, time, and position indices
             c_idx, z_idx, t_idx, p_idx = self.data_source._cztp_indices(
                 self.data_source._current_frame, self.data_source.metadata.per_stack

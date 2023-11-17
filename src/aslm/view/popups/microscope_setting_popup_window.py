@@ -47,47 +47,25 @@ logger = logging.getLogger(p)
 
 
 class MicroscopeSettingPopupWindow:
-    """Popup window with waveform parameters for galvos, remote focusing, etc.
-
-    Parameters
-    ----------
-    root : tkinter.Tk
-        The root window
-    microscope_info : dict
-        Dictionary of microscope information
-    *args
-        Arguments for the popup window
-    **kwargs
-        Keyword arguments for the popup window
-
-    Attributes
-    ----------
-    popup : aslm.view.custom_widgets.popup.PopUp
-        The popup window
-    inputs : dict
-        Dictionary of input widgets
-    buttons : dict
-        Dictionary of buttons
-    labels : list
-        List of labels for the input widgets
-    microscopes_frame : tkinter.Frame
-        Frame for the input widgets
-
-    Methods
-    -------
-    list_microscope_info(microscope_info)
-        List the microscope information
-    get_variables()
-        Get the variables from the input widgets
-    get_widgets()
-        Get the input widgets
-    get_buttons()
-        Get the buttons
-    """
+    """Popup window with waveform parameters for galvos, remote focusing, etc."""
 
     def __init__(self, root, microscope_info, *args, **kwargs):
+        """Initialize the popup window
+
+        Parameters
+        ----------
+        root : tkinter.Tk
+            Root window
+        microscope_info : dict
+            Dictionary of microscope information
+        *args :
+            Variable length argument list
+        **kwargs :
+            Arbitrary keyword arguments
+        """
+
         # Creating popup window with this name and size/placement, PopUp is a
-        # Toplevel window
+        #: PopUp: PopUp window class
         self.popup = PopUp(
             root, "Configure Microscopes", "+320+180", top=False, transient=False
         )
@@ -106,12 +84,14 @@ class MicroscopeSettingPopupWindow:
         tk.Grid.rowconfigure(content_frame, "all", weight=1)
 
         """Creating the widgets for the popup"""
-        # Dictionary for all the variables
+        #: dict: Dictionary of input widgets
         self.inputs = {}
+        #: dict: Dictionary of buttons
         self.buttons = {}
 
         # Frames for widgets
         label_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        #: ttk.Frame: Frame for microscope information
         self.microscopes_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
         button_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
 
@@ -120,6 +100,7 @@ class MicroscopeSettingPopupWindow:
         self.microscopes_frame.grid(row=0, column=1, sticky=tk.NSEW)
         button_frame.grid(row=1, column=1, sticky=tk.SE)
 
+        #: list: List of labels
         self.labels = ["Microscope Name"]
         for microscope_name in microscope_info:
             for k in microscope_info[microscope_name].keys():
@@ -194,8 +175,6 @@ class MicroscopeSettingPopupWindow:
 
         The key is the widget name, value is the variable associated.
 
-
-
         Returns
         -------
         dict
@@ -212,8 +191,6 @@ class MicroscopeSettingPopupWindow:
 
         The key is the widget name, value is the LabelInput class that has all the data.
 
-
-
         Returns
         -------
         dict
@@ -226,8 +203,6 @@ class MicroscopeSettingPopupWindow:
         """This function returns the dictionary that holds the buttons.
 
         The key is the button name, value is the button.
-
-
 
         Returns
         -------

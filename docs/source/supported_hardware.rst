@@ -51,6 +51,11 @@ PXI-6259
 The PXI-6259 can create one software-timed analog task per channel. As such, the
 galvo/remote focus/lasers can be attached to any of the analog output ports.
 
+PXI-6723
+""""""""""
+- Connect the ``master_trigger_out_line`` to the ``trigger_source`` with a direct wire, commonly ``PXI6723/port0/line1`` and ``/PXI6723/PFI0``. With an SCB-68A breakout box, connect pin 17 directly to pin 11.
+- Connect the ``camera_trigger_out_line`` to the ``Ext. Trigger`` on the camera using the ``CTR0Out`` pin. With an SCB-68A breakout box, the positive lead is pin 2, the ground is pin 36.
+
 
 Cameras
 ----------

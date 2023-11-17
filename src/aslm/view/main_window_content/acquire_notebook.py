@@ -44,46 +44,27 @@ logger = logging.getLogger(p)
 
 
 class AcquireBar(ttk.Frame):
-    """Acquire Bar
+    """Acquire Bar Class.
 
     Class for the acquisition bar found at the top of the main application window.
     Main function is to change acq setting and then call the acquisition top-
     level window
-
-    Parameters
-    ----------
-    top_frame : tk.Frame
-        The frame that the bar will be placed into
-    root : tk.Tk
-        The root window that the bar will be placed into
-    *args : tuple
-        Positional arguments for ttk.Frame
-    **kwargs : dict
-        Keyword arguments for ttk.Frame
-
-    Attributes
-    ----------
-    acquire_btn : ttk.Button
-        Button to start acquisition
-    pull_down : ttk.Combobox
-        Pull down menu to select acquisition type
-    progBar_frame : ttk.Frame
-        Frame to hold the progress bars
-    CurAcq : ttk.Progressbar
-        Progress bar for current acquisition
-    OvrAcq : ttk.Progressbar
-        Progress bar for overall acquisition
-    exit_btn : ttk.Button
-        Button to exit the application
-    stop_stage : ttk.Button
-        Button to stop the stage
-
-    Methods
-    -------
-
     """
 
     def __init__(self, top_frame, root, *args, **kwargs):
+        """Initialize Acquire Bar.
+
+        Parameters
+        ----------
+        top_frame : tk.Frame
+            Frame to place the acquire bar in.
+        root : tk.Tk
+            Root window of the application.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+        """
         #  Init bar with frame attr
         ttk.Frame.__init__(self, top_frame, *args, **kwargs)
 
@@ -95,23 +76,29 @@ class AcquireBar(ttk.Frame):
         self.grid(row=0, column=0)
 
         # Acquire Button
+        #: ttk.Button: Button to start acquisition
         self.acquire_btn = ttk.Button(self, text="Acquire")
 
         # Read Only Pull down menu: continuous, z-stack, single acquisition, projection.
+        #: tk.StringVar: Variable to hold the current option selected
         self.options = tk.StringVar()
+        #: ttk.Combobox: Pull down menu to select acquisition type
         self.pull_down = ttk.Combobox(self, textvariable=self.options)
         self.pull_down.state(["readonly"])
 
         #  Progress Bar: Current Acquisitions and Overall
+        #: ttk.Frame: Frame to hold the progress bars
         self.progBar_frame = ttk.Frame(self)
 
         #  This is used to hold and grid the two progress bars.Now when this is
-        #  loaded into Acbar the progress bars will follow
+        #  loaded into acquisition bar, the progress bars will follow
+        #: ttk.Progressbar: Progress bar for current acquisition
         self.CurAcq = ttk.Progressbar(
             self.progBar_frame, orient=tk.HORIZONTAL, length=200, mode="indeterminate"
         )
 
         #  Change mode to determinate and set steps for more intuitive usage
+        #: ttk.Progressbar: Progress bar for overall acquisition
         self.OvrAcq = ttk.Progressbar(
             self.progBar_frame, orient=tk.HORIZONTAL, length=200, mode="determinate"
         )
@@ -119,12 +106,14 @@ class AcquireBar(ttk.Frame):
         self.OvrAcq.grid(row=1, column=0)
 
         #  Exit Button
+        #: ttk.Button: Button to exit the application
         self.exit_btn = ttk.Button(self, text="Exit")
 
         # Stop Stage Button
+        #: ttk.Button: Button to stop the stage
         self.stop_stage = ttk.Button(self, text="Stop Stage")
 
-        #  Gridding out Bar
+        #  grid out Bar
         """
             0   1   2   3
         """

@@ -35,7 +35,7 @@ import copy
 
 import pytest
 import numpy as np
-from unittest.mock import MagicMock
+from unittest.mock import patch
 
 
 @pytest.fixture
@@ -369,3 +369,17 @@ def test_update_start_update_end_position(channels_tab_controller):
     assert configuration["experiment"]["MicroscopeState"]["start_focus"] == f_shift
     assert configuration["experiment"]["MicroscopeState"]["end_focus"] == -1 * f_shift
     stage_config["flip_z"] = False
+
+
+@pytest.mark.parametrize("is_multiposition", [True, False])
+def test_toggle_multiposition(channels_tab_controller, is_multiposition):
+    channels_tab_controller.populate_experiment_values()
+    channels_tab_controller.is_multiposition_val.set(is_multiposition)
+    with patch.object(channels_tab_controller, "update_timepoint_setting") as uts:
+        channels_tab_controller.toggle_multiposition()
+        assert channels_tab_controller.is_multiposition == is_multiposition
+        assert (
+            channels_tab_controller.microscope_state_dict["is_multiposition"]
+            == is_multiposition
+        )
+        uts.assert_called()

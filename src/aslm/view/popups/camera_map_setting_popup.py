@@ -43,43 +43,7 @@ from aslm.view.custom_widgets.popup import PopUp
 
 
 class CameraMapSettingPopup(PopUp):
-    """Popup to create and visualize camera offset and variance map generation.
-
-    Parameters
-    ----------
-    root : tk.Tk
-        Root window.
-    name : str, optional
-        Name of the popup, by default "Camera Map Settings"
-    size : str, optional
-        Size of the popup, by default "+320+180"
-    top : bool, optional
-        Whether the popup should be on top of the root window, by default True
-    transient : bool, optional
-        Whether the popup should be transient, by default True
-
-    Attributes
-    ----------
-    inputs : dict
-        Dictionary of input widgets.
-    file_name : tk.StringVar
-        String variable for the file name.
-    open_btn : ttk.Button
-        Button to open the file.
-    camera : tk.StringVar
-        String variable for the camera.
-    map_btn : ttk.Button
-        Button to create the maps.
-    fig : matplotlib.figure.Figure
-        Figure for the plot.
-    axs : matplotlib.axes.Axes
-        Axes for the plot.
-
-    Methods
-    -------
-    get_widgets()
-        Returns the input widgets.
-    """
+    """Popup to create and visualize camera offset and variance map generation."""
 
     def __init__(
         self,
@@ -91,12 +55,34 @@ class CameraMapSettingPopup(PopUp):
         *args,
         **kwargs
     ):
+        """Initialize the CameraMapSettingPopup.
+
+        Parameters
+        ----------
+        root : tk.Tk
+            Root window.
+        name : str, optional
+            Name of the popup, by default "Camera Map Settings".
+        size : str, optional
+            Size of the popup, by default "+320+180".
+        top : bool, optional
+            Whether the popup should be on top, by default True.
+        transient : bool, optional
+            Whether the popup should be transient, by default True.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+        """
         super().__init__(root, name, size, top, transient, *args, **kwargs)
 
+        #: dict: Dictionary of input widgets.
         self.inputs = {}
 
         title = ttk.Label(self.content_frame, text="File: ", padding=(2, 5, 0, 0))
         title.grid(row=0, column=0, sticky=(tk.NSEW))
+
+        #: tk.StringVar: File name.
         self.file_name = tk.StringVar()
         self.inputs["file_name"] = tk.Entry(
             self.content_frame, textvariable=self.file_name
@@ -105,17 +91,19 @@ class CameraMapSettingPopup(PopUp):
             row=0, column=1, sticky=tk.NSEW, padx=(0, 5), pady=(15, 0)
         )
 
+        #: ttk.Button: Open file button.
         self.open_btn = ttk.Button(self.content_frame, text="Open")
         self.open_btn.grid(row=0, column=2, pady=(0, 10))
 
         title = ttk.Label(self.content_frame, text="Camera: ", padding=(2, 5, 0, 0))
+        #: tk.StringVar: Camera name.
         self.camera = tk.StringVar()
         title.grid(row=0, column=3, sticky=(tk.NSEW))
         self.inputs["camera"] = ttk.OptionMenu(self.content_frame, self.camera)
         self.inputs["camera"].grid(
             row=0, column=4, sticky=tk.NSEW, padx=(0, 5), pady=(15, 0)
         )
-
+        #: ttk.Button: Create maps button.
         self.map_btn = ttk.Button(self.content_frame, text="Create maps")
         self.map_btn.grid(row=0, column=5, pady=(0, 10))
 
@@ -129,8 +117,6 @@ class CameraMapSettingPopup(PopUp):
 
     def get_widgets(self):
         """Get the input widgets.
-
-
 
         Returns
         -------

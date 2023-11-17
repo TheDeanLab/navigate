@@ -90,17 +90,6 @@ After completeting these steps you will only need to do the below to start the s
 
     If you are running Windows, you can create a desktop shortcut to ASLM by right-clicking the Desktop, navigating to New and then Shortcut and entering ``%windir%\system32\cmd.exe "/c" C:\path\to\miniconda\Scripts\activate.bat aslm && aslm`` into the location text box.
 
-GPU Dependencies
-----------------
-Some of the software routines for microscope feedback are accelerated using GPU computing.
-These require a CUDA GPU device that is compatible with TensorFlow (1.15), PyTorch (1.10.2), CuPy, ...
-`Excellent directions can be found for CuPy <https://docs.cupy.dev/en/stable/install.html>`_.
-    * `NVIDIA CUDA Version 11.2 <https://developer.nvidia.com/cuda-11.2.0-download-archive?target_os=Windows&target_arch=x86_64&target_version=10&target_type=exelocal>`_
-    * `cuDNN SDK 8.4.1 <https://developer.nvidia.com/rdp/cudnn-download>`_
-    * NVIDIA Graphics Driver >450.80.02
-    * TensorRT 7
-    * Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019
-
 Troubleshooting
 ---------------
 

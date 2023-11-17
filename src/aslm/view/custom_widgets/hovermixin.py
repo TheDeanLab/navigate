@@ -45,25 +45,18 @@ class HoverMixin:
 
     This class is meant to be mixed in with other widgets to add a hover attribute.
     Hover provides contextual information about the widget when the mouse is over it.
-
-    Parameters
-    ----------
-    *args
-        Additional arguments to pass to the ttk.Frame constructor.
-    **kwargs
-        Additional keyword arguments to pass to the ttk.Frame constructor.
-
-    Methods
-    -------
-    None
-
-    Attributes
-    ----------
-    hover : Hover
-        Hover object that is added to the widget
     """
 
     def __init__(self, *args, **kwargs):
+        """Initializes HoverMixin
+
+        Parameters
+        ----------
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kwargs
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
         super().__init__(*args, **kwargs)
         self.hover = Hover(self, text=None, type="free")
 
@@ -72,25 +65,18 @@ class HoverButton(HoverMixin, ttk.Button):
     """Adds hover attribute to ttk.Button
 
     This class is meant to be mixed in with other widgets to add a hover attribute
-
-    Parameters
-    ----------
-    *args
-        Additional arguments to pass to the ttk.Frame constructor.
-    **kwargs
-        Additional keyword arguments to pass to the ttk.Frame constructor.
-
-    Methods
-    -------
-    None
-
-    Attributes
-    ----------
-    hover : Hover
-        Hover object that is added to the widget
     """
 
     def __init__(self, *args, **kwargs):
+        """Initializes HoverButton
+
+        Parameters
+        ----------
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kwargs
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
         super().__init__(*args, **kwargs)
 
 
@@ -98,25 +84,18 @@ class HoverTkButton(HoverMixin, tk.Button):
     """Adds hover attribute to tk.Button
 
     This class is meant to be mixed in with other widgets to add a hover attribute
-
-    Parameters
-    ----------
-    *args
-        Additional arguments to pass to the ttk.Frame constructor.
-    **kwargs
-        Additional keyword arguments to pass to the ttk.Frame constructor.
-
-    Methods
-    -------
-    None
-
-    Attributes
-    ----------
-    hover : Hover
-        Hover object that is added to the widget
     """
 
     def __init__(self, *args, **kwargs):
+        """Initializes HoverTkButton
+
+        Parameters
+        ----------
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kwargs
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
         super().__init__(*args, **kwargs)
 
 
@@ -124,25 +103,18 @@ class HoverRadioButton(HoverMixin, ttk.Radiobutton):
     """Adds hover attribute to ttk.Radiobutton
 
     This class is meant to be mixed in with other widgets to add a hover attribute
-
-    Parameters
-    ----------
-    *args
-        Additional arguments to pass to the ttk.Frame constructor.
-    **kwargs
-        Additional keyword arguments to pass to the ttk.Frame constructor.
-
-    Methods
-    -------
-    None
-
-    Attributes
-    ----------
-    hover : Hover
-        Hover object that is added to the widget
     """
 
     def __init__(self, *args, **kwargs):
+        """Initializes HoverRadioButton
+
+        Parameters
+        ----------
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kwargs
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
         super().__init__(*args, **kwargs)
 
 
@@ -150,23 +122,16 @@ class HoverCheckButton(HoverMixin, ttk.Checkbutton):
     """Adds hover attribute to ttk.Checkbutton
 
     This class is meant to be mixed in with other widgets to add a hover attribute.
-
-    Parameters
-    ----------
-    *args
-        Additional arguments to pass to the ttk.Frame constructor.
-    **kwargs
-        Additional keyword arguments to pass to the ttk.Frame constructor.
-
-    Methods
-    -------
-    None
-
-    Attributes
-    ----------
-    hover : Hover
-        Hover object that is added to the widget
     """
 
     def __init__(self, *args, **kwargs):
+        """Initializes HoverCheckButton
+
+        Parameters
+        ----------
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kwargs
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
         super().__init__(*args, **kwargs)

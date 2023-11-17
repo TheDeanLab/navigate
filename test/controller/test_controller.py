@@ -36,7 +36,6 @@ def controller(tk_root):
     waveform_templates_path = Path.joinpath(
         configuration_directory, "waveform_templates.yml"
     )
-    use_gpu = False
     args = SimpleNamespace(synthetic_hardware=True)
 
     controller = Controller(
@@ -47,7 +46,6 @@ def controller(tk_root):
         waveform_constants_path,
         rest_api_path,
         waveform_templates_path,
-        use_gpu,
         args,
     )
 

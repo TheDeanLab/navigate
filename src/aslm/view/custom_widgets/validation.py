@@ -103,34 +103,6 @@ class ValidatedMixin:
     by the validatecommand attribute of the widget. They return True if the input
     is valid and False if it is not. They also set the error string to be displayed
     in the widget.
-
-    Parameters
-    ----------
-    value : str
-        The value of the widget
-    min_val : int
-        The minimum value of the widget
-    max_val : int
-        The maximum value of the widget
-    regex : str
-        The regex to validate the input against
-
-    Returns
-    -------
-    bool
-        True if the input is valid, False if it is not
-
-    Examples
-    --------
-    >>> widget = ttk.Entry()
-    >>> widget.config(
-    ...     validate='all',
-    ...     validatecommand=(widget.register(validate_float),
-    ...     '%P', '%s', '%i', '%S', '%v', '%V', '%W', '%d')
-    ... )
-    >>> widget.validate_float('1.0', '1.0', '0', '0', '1.0',
-    ...      'focusout', 'entry', '0')
-    True
     """
 
     # error_var
@@ -139,22 +111,24 @@ class ValidatedMixin:
 
         Parameters
         ----------
+        *args
+            Variable length argument list
         error_var : tk.StringVar
             The variable to store the error message in
             if error_var = None, creates its own variable
         **kwargs
             Keyword arguments to pass to the parent class
-
-
-
         """
+        #: tk.StringVar: The variable to store the error message in
         self.error = error_var or tk.StringVar()
 
         # Calls class that is mixed in with this class
         super().__init__(*args, **kwargs)
 
         # History for each widgets to undo and redo
+        #: list: The undo history of the widget
         self.undo_history = []
+        #: list: The redo history of the widget
         self.redo_history = []
 
         # Validation setup
@@ -177,7 +151,7 @@ class ValidatedMixin:
             # pass in all sub codes/data
             invalidcommand=(invalidcmd, "%P", "%s", "%S", "%V", "%i", "%d"),
         )
-
+        #: Hover: The hover bubble for the widget
         self.hover = Hover(self, text=None, type="free")
 
     def _toggle_error(self, on=False):
@@ -191,14 +165,6 @@ class ValidatedMixin:
         on : bool
             Whether to turn the error message on or off
 
-
-
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget._toggle_error(True)
-        >>> widget.cget('foreground')
-        'red'
         """
         self.config(foreground=("red" if on else "black"))
 
@@ -224,12 +190,6 @@ class ValidatedMixin:
         -------
         bool
             True if the input is valid, False if it is not
-
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget._validate('1.0', '1.0', '0', 'focusout', '0', '0')
-        True
         """
         self._toggle_error(False)  # Error is off
         self.error.set("")  # No error to start
@@ -255,7 +215,7 @@ class ValidatedMixin:
         return valid
 
     def _focusout_validate(self, **kwargs):
-        """Validate the input of the widget when focus is lost
+        """Validate the input of the widget when focus is lost.
 
         Parameters
         ----------
@@ -267,16 +227,11 @@ class ValidatedMixin:
         bool
             True if the input is valid, False if it is not
 
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget._focusout_validate(event='focusout')
-        True
         """
         return True
 
     def _key_validate(self, **kwargs):
-        """Validate the input of the widget when a key is pressed
+        """Validate the input of the widget when a key is pressed.
 
         Parameters
         ----------
@@ -288,12 +243,6 @@ class ValidatedMixin:
         bool
             True if the input is valid, False if it is not
 
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget._key_validate(proposed='1.0', current='1.0', char='0',
-        ... event='key', index='0', action='0')
-        True
         """
         return True
 
@@ -316,12 +265,6 @@ class ValidatedMixin:
         action : str
             The action being performed. 0 for delete, 1 for insert, -1 for other
 
-
-
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget._invalid('1.0', '1.0', '0', 'focusout', '0', '0')
         """
         if event == "focusout":
             self._focusout_invalid(event=event)
@@ -336,70 +279,42 @@ class ValidatedMixin:
             )
 
     def _focusout_invalid(self, **kwargs):
-        """Handle the invalid input of the widget when focus is lost
+        """Handle the invalid input of the widget when focus is lost.
 
         Parameters
         ----------
         **kwargs
             Keyword arguments to pass to the invalid function
 
-
-
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget._focusout_invalid(event='focusout')
         """
         self._toggle_error(True)
 
     def _key_invalid(self, **kwargs):
-        """Handle the invalid input of the widget when a key is pressed
+        """Handle the invalid input of the widget when a key is pressed.
 
         Parameters
         ----------
         **kwargs
             Keyword arguments to pass to the invalid function
 
-
-
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget._key_invalid(proposed='1.0', current='1.0', char='0',
-        ... event='key', index='0', action='0')
         """
         pass
 
     # Allows a manual check on entered values to be used whenever needed
     def trigger_focusout_validation(self):
-        """Trigger the focusout validation
-
-
-
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget.trigger_focusout_validation()
-        """
+        """Trigger the focusout validation of the widget"""
         valid = self._validate("", "", "", "focusout", "", "")
         if not valid:
             self._focusout_invalid(event="focusout")
         return valid
 
     def add_history(self, event):
-        """Add the current value to the history
+        """Add the current value to the history of the widget.
 
         Parameters
         ----------
         event : tk.Event
             The event that triggered the history addition
-
-
-
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget.add_history(tk.Event())
         """
         value = self.get()
         if value != "":
@@ -412,19 +327,12 @@ class ValidatedMixin:
                 self.undo_history.pop(0)
 
     def undo(self, event):
-        """Undo the last change
+        """Undo the last change to the widget.
 
         Parameters
         ----------
         event : tk.Event
             The event that triggered the undo
-
-
-
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget.undo(tk.Event())
         """
         if self.undo_history:
             # Get the redo value
@@ -451,19 +359,13 @@ class ValidatedMixin:
         return False
 
     def redo(self, event):
-        """Redo the last change
+        """Redo the last change that was undone.
 
         Parameters
         ----------
         event : tk.Event
             The event that triggered the redo
 
-
-
-        Examples
-        --------
-        >>> widget = ttk.Entry()
-        >>> widget.redo(tk.Event())
         """
         if self.redo_history:
             value = self.get()
@@ -479,36 +381,9 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
     """A validated entry widget
 
     Entry class that requires Entry
-    Can optionally pass in a precision, min value,
-    max value and a boolean for whether the
-    entry requires a value. The min_var, max_var
-    and focus_update_var are the same as a spinbox
-
-    Parameters
-    ----------
-    parent : tk.Widget
-        The parent widget
-    precision : int, optional
-        The precision of the entry, by default 0
-    min_var : tk.Variable, optional
-        The minimum value of the entry, by default None
-    max_var : tk.Variable, optional
-        The maximum value of the entry, by default None
-    required : bool, optional
-        Whether the entry requires a value, by default False
-    focus_update_var : tk.Variable, optional
-        The variable to update when focus is lost, by default None
-
-    Attributes
-    ----------
-    undo_history : list
-        The history of the entry
-    redo_history : list
-        The redo history of the entry
-
-    Examples
-    --------
-    >>> widget = ValidatedEntry(parent)
+    Can optionally pass in a precision, min value, max value and a boolean for
+    whether the entry requires a value. The min_var, max_var, and focus_update_var
+    are the same as a spinbox
     """
 
     def __init__(
@@ -523,26 +398,52 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         max="Infinity",
         **kwargs,
     ):
-        """Initialise the entry widget"""
+        """Initialise the entry widget
+
+        Parameters
+        ----------
+        parent : tk.Widget
+            The parent widget
+        precision : int, optional
+            The precision of the entry, by default 0
+        min_var : tk.Variable, optional
+            The minimum value of the entry, by default None
+        max_var : tk.Variable, optional
+            The maximum value of the entry, by default None
+        required : bool, optional
+            Whether the entry requires a value, by default False
+        focus_update_var : tk.Variable, optional
+            The variable to update when focus is lost, by default None
+        min : str, optional
+            The minimum value of the entry, by default "-Infinity"
+        max : str, optional
+            The maximum value of the entry, by default "Infinity"
+        **kwargs
+            Keyword arguments to pass to the entry
+        """
         super().__init__(*args, **kwargs)
+        #: Decimal: The resolution of the entry
         self.resolution = Decimal(precision)  # Number for precision given on creation
+        #: int: The precision of the entry
         self.precision = (
             self.resolution.normalize().as_tuple().exponent
         )  # Precision of number as exponent
+        #: tk.StringVar: The variable to store the value of the entry in
         self.variable = kwargs.get("textvariable") or tk.StringVar()
+        #: str: The minimum value of the entry
         self.min = min
+        #: str: The maximum value of the entry
         self.max = max
+        #: bool: Whether the entry requires a value
         self.required = required
 
     def set(self, value):
-        """Set the value of the entry
+        """Set the value of the entry to the given value.
 
         Parameters
         ----------
         value : str
             The value to set the entry to
-
-
 
         Examples
         --------
@@ -554,7 +455,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         # self.insert(0, value)
 
     def set_precision(self, prec):
-        """Set the precision of the entry
+        """Set the precision of the entry in decimal places.
 
         Given a precision it will update the spinboxes ability to handle more or less
         precision for validation. This is separate from the increment value.
@@ -563,8 +464,6 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         ----------
         prec : int
             The precision to set the entry to
-
-
 
         Examples
         --------
@@ -575,8 +474,6 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
 
     def _get_precision(self):
         """Get the precision of the entry
-
-
 
         Returns
         -------
@@ -593,7 +490,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         return (-1) * len(self.resolution[nums_after + 1 :])
 
     def _key_validate(self, char, index, current, proposed, action, **kwargs):
-        """Validate the input of the entry when a key is pressed
+        """Validate the input of the entry when a key is pressed.
 
         Parameters
         ----------
@@ -659,7 +556,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         return valid
 
     def _focusout_validate(self, event):
-        """Validate the input of the entry when focus is lost
+        """Validate the input of the entry when focus is lost.
 
         If entry widget is empty set the error string and return False
 
@@ -721,8 +618,6 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         event : tk.Event
             The event that triggered the update
 
-
-
         Examples
         --------
         >>> widget = ValidatedEntry(parent)
@@ -732,14 +627,12 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             self.focus_update_var.set(value)
 
     def _set_minimum(self, *args):
-        """Set the minimum value of the entry
+        """Set the minimum value of the entry when focus is lost.
 
         Parameters
         ----------
         *args
             Arguments to pass to the invalid function
-
-
         """
         current = self.get()
         try:
@@ -754,14 +647,12 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         self.trigger_focusout_validation()  # Revalidate with the new minimum
 
     def _set_maximum(self, *args):
-        """Set the maximum value of the entry
+        """Set the maximum value of the entry when focus is lost.
 
         Parameters
         ----------
         *args
-            Arguments to pass to the invalid function
-
-
+            Arguments to pass to the invalid function.
         """
         current = self.get()
         try:
@@ -776,7 +667,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         self.trigger_focusout_validation()  # Revalidate with the new maximum
 
     def _toggle_error(self, on=False):
-        """Toggle the error state of the entry
+        """Toggle the error state of the entry.
 
         Parameters
         ----------
@@ -793,7 +684,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
 
 
 class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
-    """A validated combobox
+    """A validated combobox.
 
     Parameters
     ----------
@@ -808,7 +699,7 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
     """
 
     def _key_validate(self, proposed, action, **kwargs):
-        """Validate the input of the combobox when a key is pressed
+        """Validate the input of the combobox when a key is pressed.
 
         Parameters
         ----------
@@ -845,7 +736,7 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
         return valid
 
     def _focusout_validate(self, **kwargs):
-        """Validate the input of the combobox when focus is lost
+        """Validate the input of the combobox when focus is lost and set the error.
 
         Parameters
         ----------
@@ -865,52 +756,15 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
 
 
 class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
-    """A spinbox that validates input and can be linked to other widgets
+    """A spinbox that validates input and can be linked to other widgets.
 
-    Deletion always allowed, digits always allowed,
-    if from < 0 '-' is allowed as first
-    char, if increment is decimal '.' allowed,
-    if proposed value is greater than to ignore
-    key if proposed value requires more
-    precision than increment, ignore key
-    On focus out, make sure number is a
-    valid number string and greater than from value
-    If given a min_var, max_var, or focus_update_var
-    then the spinbox range will update
-    dynamically when those valuse are changed
-    (can be used to link to other widgets)
-
-    Parameters
-    ----------
-    master : tk.Widget
-        The parent widget
-    from_ : int or float
-        The minimum value of the spinbox
-    to : int or float
-        The maximum value of the spinbox
-    increment : int or float
-        The increment of the spinbox
-    min_var : tk.Variable
-        A variable that will be used to update the minimum value of the spinbox
-    max_var : tk.Variable
-        A variable that will be used to update the maximum value of the spinbox
-    focus_update_var : tk.Variable
-        A variable that will be used to update the value of the spinbox when it loses
-        focus
-    no_negative : bool
-        If True, the spinbox will not allow negative values
-    no_decimal : bool
-        If True, the spinbox will not allow decimal values
-    required : bool
-        If True, the spinbox will require a value
-    precision : int
-        The number of decimal places allowed in the spinbox
-
-    Returns
-    -------
-    ValidatedSpinbox
-        A spinbox that validates input and can be linked to other widgets
-
+    Deletion always allowed, digits always allowed, if from < 0 '-' is allowed as first
+    char, if increment is decimal '.' allowed, if proposed value is greater than to
+    ignore key if proposed value requires more precision than increment, ignore key
+    On focus out, make sure number is a valid number string and greater than from value
+    If given a min_var, max_var, or focus_update_var, then the spinbox range will
+    update dynamically when those valuse are changed (can be used to link to other
+    widgets)
     """
 
     def __init__(
@@ -922,26 +776,59 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         required=False,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        """Initialize the spinbox
 
-        """ Initialize the spinbox """
+        Parameters
+        ----------
+        master : tk.Widget
+            The parent widget
+        from_ : int or float
+            The minimum value of the spinbox
+        to : int or float
+            The maximum value of the spinbox
+        increment : int or float
+            The increment of the spinbox
+        min_var : tk.Variable
+            A variable that will be used to update the minimum value of the spinbox
+        max_var : tk.Variable
+            A variable that will be used to update the maximum value of the spinbox
+        focus_update_var : tk.Variable
+            A variable that will be used to update the value of the spinbox when it
+            loses focus
+        no_negative : bool
+            If True, the spinbox will not allow negative values
+        no_decimal : bool
+            If True, the spinbox will not allow decimal values
+        required : bool
+            If True, the spinbox will require a value
+        precision : int
+            The number of decimal places allowed in the spinbox
+
+        """
+        super().__init__(*args, **kwargs)
+        #: Decimal: The resolution of the spinbox
         self.resolution = str(kwargs.get("increment", "1.0"))  # Number put into spinbox
+        #: int: The precision of the spinbox
         self.precision = self._get_precision()
+        #: tk.StringVar: The variable to store the value of the spinbox in
         self.variable = kwargs.get("textvariable") or tk.DoubleVar()
+        #: bool: Whether the spinbox requires a value
         self.required = required
 
         # Dynamic range checker
         if min_var:
+            #: str: The minimum value of the spinbox
             self.min_var = min_var
             self.min_var.trace_add("write", self._set_minimum)
         if max_var:
+            #: str: The maximum value of the spinbox
             self.max_var = max_var
             self.max_var.trace_add("write", self._set_maximum)
         self.focus_update_var = focus_update_var
         self.bind("<FocusOut>", self._set_focus_update_var)
 
     def set_precision(self, prec):
-        """Set the precision of the spinbox
+        """Set the precision of the spinbox in decimal places.
 
         Given a precision it will update the spinboxes ability to handle more or less
         precision for validation. This is separate from the increment value.
@@ -951,8 +838,6 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         prec : int
             The number of decimal places allowed in the spinbox
 
-
-
         Examples
         --------
         >>> spinbox.set_precision(2)
@@ -960,14 +845,12 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         self.precision = prec
 
     def _get_precision(self):
-        """Get the precision of the spinbox
+        """Get the precision of the spinbox in decimal places.
 
         Returns
         -------
         int
             The number of decimal places allowed in the spinbox
-
-
 
         Examples
         --------
@@ -978,7 +861,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         return (-1) * len(self.resolution[nums_after + 1 :])
 
     def _key_validate(self, char, index, current, proposed, action, **kwargs):
-        """Validate the key pressed
+        """Validate the key pressed in the spinbox.
 
         Parameters
         ----------
@@ -1049,7 +932,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         return valid
 
     def _focusout_validate(self, event):
-        """Validate the spinbox when it loses focus
+        """Validate the spinbox when it loses focus and set the error message.
 
         Parameters
         ----------
@@ -1110,14 +993,12 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
     # Gets current value of widget and if focus_update_var is present it sets it to the
     # same value
     def _set_focus_update_var(self, event):
-        """Set the focus update variable
+        """Set the focus update variable to the current value of the spinbox.
 
         Parameters
         ----------
         event : tk.Event
             The event that triggered the function
-
-
 
         Examples
         --------
@@ -1128,14 +1009,12 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             self.focus_update_var.set(value)
 
     def _set_minimum(self, *args):
-        """Set the minimum value of the spinbox
+        """Set the minimum value of the spinbox when focus is lost.
 
         Parameters
         ----------
         *args
             Additional arguments
-
-
 
         Examples
         --------
@@ -1154,14 +1033,12 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         self.trigger_focusout_validation()  # Revalidate with the new minimum
 
     def _set_maximum(self, *args):
-        """Set the maximum value of the spinbox
+        """Set the maximum value of the spinbox when focus is lost.
 
         Parameters
         ----------
         *args
             Additional arguments
-
-
 
         Examples
         --------
@@ -1180,14 +1057,12 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         self.trigger_focusout_validation()  # Revalidate with the new maximum
 
     def _toggle_error(self, on=False):
-        """Toggle the error message
+        """Toggle the error message of the spinbox.
 
         Parameters
         ----------
         on : bool, optional
             Whether to turn the error on or off, by default False
-
-
 
         Examples
         --------

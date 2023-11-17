@@ -34,8 +34,8 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 
    software_installation
    implementations
-   supported_hardware
    software_configuration
+   supported_hardware
    contributing/contributing_home
    feature_container/feature_container_home
    api

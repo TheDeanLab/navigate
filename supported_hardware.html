@@ -20,8 +20,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Software Configuration" href="software_configuration.html" />
-    <link rel="prev" title="Microscope Implementations" href="implementations.html" /> 
+    <link rel="next" title="Contributing to ASLM" href="contributing/contributing_home.html" />
+    <link rel="prev" title="Configuration Overview" href="software_configuration.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,64 +47,89 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Configuration Overview</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Supported Hardware</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#data-acquisition-card">Data Acquisition Card</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#ni">NI</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pcie-6738">PCIe-6738</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pxi-6259">PXI-6259</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pxi-6723">PXI-6723</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configuration-file">Configuration File</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#cameras">Cameras</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#hamamatsu-flash-4-0-fusion-and-lightning">Hamamatsu Flash 4.0, Fusion, and Lightning</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#photometrics-iris-15">Photometrics Iris 15</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hamamatsu-flash-4-0">Hamamatsu Flash 4.0</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Configuration File</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#voicecoil">Voicecoil</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#equipment-solutions">Equipment Solutions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hamamatsu-fusion">Hamamatsu Fusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hamamatsu-lightning">Hamamatsu Lightning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#photometrics-iris-15">Photometrics Iris 15</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Configuration File</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#remote-focusing-devices">Remote Focusing Devices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#equipment-solutions">Equipment Solutions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Configuration File</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#thorlabs-blink">Thorlabs BLINK</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optotune-focus-tunable-lens">Optotune Focus Tunable Lens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-remote-focus-device">Synthetic Remote Focus Device</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#stages">Stages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#asi-tiger-controller">ASI Tiger Controller</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sutter">Sutter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sutter-mp-285">Sutter MP-285</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#physik-instrumente">Physik Instrumente</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#thorlabs">Thorlabs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#analog-controlled-galvo-piezo-etc">Analog Controlled (Galvo/Piezo/etc.)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-stage">Synthetic Stage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dichroic-turret">Dichroic Turret</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#asi">ASI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-dichroic-turrett">Synthetic Dichroic Turrett</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#filter-wheels">Filter Wheels</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sutter">Sutter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">ASI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-filter-wheel">Synthetic Filter Wheel</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#galvanometers">Galvanometers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#daq-control">DAQ Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-galvanometer">Synthetic Galvanometer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#lasers">Lasers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">DAQ Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coherent">Coherent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#omicron">Omicron</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-laser">Synthetic Laser</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#shutters">Shutters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Thorlabs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-shutter">Synthetic Shutter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mechanical-zoom">Mechanical Zoom</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dynamixel-zoom">Dynamixel Zoom</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synethetic-zoom">Synethetic Zoom</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#deformable-mirrors">Deformable Mirrors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#imagine-optics">Imagine Optics</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#filter-wheels">Filter Wheels</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Sutter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#asi">ASI</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#galvanometers">Galvanometers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#cambridge-technologies-novanta">Cambridge Technologies/Novanta</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scannermax">ScannerMAX</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#lasers">Lasers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#coherent">Coherent</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#omicron">Omicron</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#shutters">Shutters</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Thorlabs</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#mechanical-zoom">Mechanical Zoom</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#dynamixel">Dynamixel</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Software Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -147,8 +172,8 @@ connect the PCIe or PXIe-based device to the computer. A functioning system shou
 and visible in the Windows Device Manager as a <strong>NI Data Acquisition Device</strong>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>To find the device pinouts for your NI-based data acquisition card, open up NI MAX, find the card under devices,
-right-click and select ‘device pinouts’.</p>
+<p>To find the device pin outs for your NI-based data acquisition card, open up NI MAX, find the card under devices,
+right-click and select ‘device pin outs’.</p>
 <p>Important: Should you use the SCB-68A breakout box, do not look at the pinout on the back of the cover.
 This is misleading. You must look at the device pinouts in NI MAX.</p>
 </div>
@@ -189,27 +214,41 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 <li><p>Connect the <code class="docutils literal notranslate"><span class="pre">camera_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">Ext.</span> <span class="pre">Trigger</span></code> on the camera using the <code class="docutils literal notranslate"><span class="pre">CTR0Out</span></code> pin. With an SCB-68A breakout box, the positive lead is pin 2, the ground is pin 36.</p></li>
 </ul>
 </section>
+<section id="configuration-file">
+<h4>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this heading"></a></h4>
+</section>
 </section>
 </section>
 <section id="cameras">
 <h2>Cameras<a class="headerlink" href="#cameras" title="Permalink to this heading"></a></h2>
-<section id="hamamatsu-flash-4-0-fusion-and-lightning">
-<h3>Hamamatsu Flash 4.0, Fusion, and Lightning<a class="headerlink" href="#hamamatsu-flash-4-0-fusion-and-lightning" title="Permalink to this heading"></a></h3>
+<section id="hamamatsu-flash-4-0">
+<h3>Hamamatsu Flash 4.0<a class="headerlink" href="#hamamatsu-flash-4-0" title="Permalink to this heading"></a></h3>
 <ul>
 <li><p>Insert the USB that came with the camera into the computer and install HCImageLive.</p></li>
 <li><p>When prompted with the DCAM-API Setup</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>Intall the Active Silicon Firebird drivers for the FrameGrabber</p></li>
+<li><p>Install the Active Silicon Firebird drivers for the FrameGrabber</p></li>
 <li><p>Select … next to the tools button, and install DCAM tools onto the computer.</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p>Shutdown the computer and intall the Hamamatsu frame grabber into an apporpriate PCIe-x16 slot on the motherboard.</p></li>
+<li><p>Shutdown the computer and install the Hamamatsu frame grabber into an appropriate PCIe-x16 slot on the motherboard.</p></li>
 <li><p>Turn on the computer and the camera, and confirm that it is functioning properly in HCImageLive or Excap (one of the DCAM tools installed)</p></li>
 <li><p>Connect the <cite>camera_trigger_out_line</cite> to the External Trigger of the Hamamatsu Camera. Commonly, this is done with a</p></li>
 </ul>
 <p>counter port, e.g., <code class="docutils literal notranslate"><span class="pre">/PXI6259/ctr0</span></code></p>
+<section id="id1">
+<h4>Configuration File<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
+</section>
+</section>
+<section id="hamamatsu-fusion">
+<h3>Hamamatsu Fusion<a class="headerlink" href="#hamamatsu-fusion" title="Permalink to this heading"></a></h3>
+<p>TBD…</p>
+</section>
+<section id="hamamatsu-lightning">
+<h3>Hamamatsu Lightning<a class="headerlink" href="#hamamatsu-lightning" title="Permalink to this heading"></a></h3>
+<p>TBD…</p>
 </section>
 <section id="photometrics-iris-15">
 <h3>Photometrics Iris 15<a class="headerlink" href="#photometrics-iris-15" title="Permalink to this heading"></a></h3>
@@ -220,12 +259,15 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 You will likely have to register and agree to Photometrics terms.
 * Perform the Full Installation of the PVCAM software.
 * Should a ‘Base Device’ still show up as unknown in the device manager, you may need to install the
-<a href="#id3"><span class="problematic" id="id4">`Broadcom PCI/PCIe Software Development Kit &lt;https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits`_</span></a>
+<a href="#id7"><span class="problematic" id="id8">`Broadcom PCI/PCIe Software Development Kit &lt;https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits`_</span></a>
 * Upon successfully installation, one should be able to acquire images with the manufacturer provided PVCamTest software.</p>
+<section id="id2">
+<h4>Configuration File<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
 </section>
 </section>
-<section id="voicecoil">
-<h2>Voicecoil<a class="headerlink" href="#voicecoil" title="Permalink to this heading"></a></h2>
+</section>
+<section id="remote-focusing-devices">
+<h2>Remote Focusing Devices<a class="headerlink" href="#remote-focusing-devices" title="Permalink to this heading"></a></h2>
 <p>Voice coils, also known as linear actuators, play a crucial role in implementing
 aberration-free remote focusing in ASLM. These electromagnetic actuators are used to
 control the axial position of the light-sheet and the sample relative to the
@@ -233,6 +275,10 @@ microscope objective lens. By precisely adjusting the axial position, the focal 
 can be shifted without moving the objective lens, thus enabling remote focusing.</p>
 <section id="equipment-solutions">
 <h3>Equipment Solutions<a class="headerlink" href="#equipment-solutions" title="Permalink to this heading"></a></h3>
+<p>Configuration can be variable. Many of the voice coils we have received require establishing serial
+communication with the device to explicitly place it in an analog control mode. More recently, Equipment
+Solutions has begun delivering devices that automatically initialize into an analog control mode, and thus
+no longer need the serial communication to be established.</p>
 <ul>
 <li><p><a class="reference external" href="https://www.equipsolutions.com/products/linear-servo-controllers/sca814-linear-servo-controller/">SCA814 Linear Servo Controller</a></p>
 <blockquote>
@@ -243,10 +289,20 @@ can be shifted without moving the objective lens, thus enabling remote focusing.
 </li>
 <li><p><a class="reference external" href="https://www.equipsolutions.com/products/linear-focus-actuators/lfa-2010-linear-focus-actuator/">LFA-2010 Linear Focus Actuator</a></p></li>
 </ul>
+<section id="id3">
+<h4>Configuration File<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
+</section>
 </section>
 <section id="thorlabs-blink">
 <h3>Thorlabs BLINK<a class="headerlink" href="#thorlabs-blink" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
+<p>The BLINK is a pneumatically actuated voice coil that is controlled with analog control signals.</p>
+</section>
+<section id="optotune-focus-tunable-lens">
+<h3>Optotune Focus Tunable Lens<a class="headerlink" href="#optotune-focus-tunable-lens" title="Permalink to this heading"></a></h3>
+<p>Device is controlled with an analog signal.</p>
+</section>
+<section id="synthetic-remote-focus-device">
+<h3>Synthetic Remote Focus Device<a class="headerlink" href="#synthetic-remote-focus-device" title="Permalink to this heading"></a></h3>
 </section>
 </section>
 <section id="stages">
@@ -265,13 +321,15 @@ synchronize the start of imaging, we use the encoder output pulsing mode of the 
 stage to trigger the acquisition of every frame at precise intervals.  Important for
 multi-channel imaging that is acquired in the per-stack mode, but less so for
 perZ-based acquisitions.</p>
-<p>FTP-2000 Stage.
-Whatever you do, don’t change the F position. You will damage your
-stage.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If you are using the FTP-2000 stage, you should not change the F stage axis. This will
+differentially drive the two vertical posts, causing them to torque and potentially damage
+one another.</p>
+</div>
 </section>
-<section id="sutter">
-<h3>Sutter<a class="headerlink" href="#sutter" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
+<section id="sutter-mp-285">
+<h3>Sutter MP-285<a class="headerlink" href="#sutter-mp-285" title="Permalink to this heading"></a></h3>
 </section>
 <section id="physik-instrumente">
 <h3>Physik Instrumente<a class="headerlink" href="#physik-instrumente" title="Permalink to this heading"></a></h3>
@@ -283,7 +341,82 @@ stage.</p>
 </section>
 <section id="analog-controlled-galvo-piezo-etc">
 <h3>Analog Controlled (Galvo/Piezo/etc.)<a class="headerlink" href="#analog-controlled-galvo-piezo-etc" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
+</section>
+<section id="synthetic-stage">
+<h3>Synthetic Stage<a class="headerlink" href="#synthetic-stage" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="dichroic-turret">
+<h2>Dichroic Turret<a class="headerlink" href="#dichroic-turret" title="Permalink to this heading"></a></h2>
+<section id="asi">
+<h3>ASI<a class="headerlink" href="#asi" title="Permalink to this heading"></a></h3>
+</section>
+<section id="synthetic-dichroic-turrett">
+<h3>Synthetic Dichroic Turrett<a class="headerlink" href="#synthetic-dichroic-turrett" title="Permalink to this heading"></a></h3>
+<p>TBD.</p>
+</section>
+</section>
+<section id="filter-wheels">
+<h2>Filter Wheels<a class="headerlink" href="#filter-wheels" title="Permalink to this heading"></a></h2>
+<section id="sutter">
+<h3>Sutter<a class="headerlink" href="#sutter" title="Permalink to this heading"></a></h3>
+</section>
+<section id="id4">
+<h3>ASI<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+</section>
+<section id="synthetic-filter-wheel">
+<h3>Synthetic Filter Wheel<a class="headerlink" href="#synthetic-filter-wheel" title="Permalink to this heading"></a></h3>
+<p>TBD…</p>
+</section>
+</section>
+<section id="galvanometers">
+<h2>Galvanometers<a class="headerlink" href="#galvanometers" title="Permalink to this heading"></a></h2>
+<section id="daq-control">
+<h3>DAQ Control<a class="headerlink" href="#daq-control" title="Permalink to this heading"></a></h3>
+<p>Multiple types of galvanometers have been used, including Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX
+Each of these devices are externally controlled via analog signals delivered from a data acquisition card.</p>
+</section>
+<section id="synthetic-galvanometer">
+<h3>Synthetic Galvanometer<a class="headerlink" href="#synthetic-galvanometer" title="Permalink to this heading"></a></h3>
+<p>TBD…</p>
+</section>
+</section>
+<section id="lasers">
+<h2>Lasers<a class="headerlink" href="#lasers" title="Permalink to this heading"></a></h2>
+<section id="id5">
+<h3>DAQ Control<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<p>Most lasers are controlled externally via mixed analog and digital modulation.
+The <code class="docutils literal notranslate"><span class="pre">onoff</span></code> entry is for digital modulation.
+The <code class="docutils literal notranslate"><span class="pre">power</span></code> entry is for analog modulation.</p>
+</section>
+<section id="coherent">
+<h3>Coherent<a class="headerlink" href="#coherent" title="Permalink to this heading"></a></h3>
+<p>Future implementations of the software will enable a mixture of software and hardware control.</p>
+</section>
+<section id="omicron">
+<h3>Omicron<a class="headerlink" href="#omicron" title="Permalink to this heading"></a></h3>
+<p>Future implementations of the software will enable a mixture of software and hardware control.</p>
+</section>
+<section id="synthetic-laser">
+<h3>Synthetic Laser<a class="headerlink" href="#synthetic-laser" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="shutters">
+<h2>Shutters<a class="headerlink" href="#shutters" title="Permalink to this heading"></a></h2>
+<section id="id6">
+<h3>Thorlabs<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+</section>
+<section id="synthetic-shutter">
+<h3>Synthetic Shutter<a class="headerlink" href="#synthetic-shutter" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="mechanical-zoom">
+<h2>Mechanical Zoom<a class="headerlink" href="#mechanical-zoom" title="Permalink to this heading"></a></h2>
+<section id="dynamixel-zoom">
+<h3>Dynamixel Zoom<a class="headerlink" href="#dynamixel-zoom" title="Permalink to this heading"></a></h3>
+</section>
+<section id="synethetic-zoom">
+<h3>Synethetic Zoom<a class="headerlink" href="#synethetic-zoom" title="Permalink to this heading"></a></h3>
 </section>
 </section>
 <section id="deformable-mirrors">
@@ -293,60 +426,14 @@ stage.</p>
 <p>In progress…</p>
 </section>
 </section>
-<section id="filter-wheels">
-<h2>Filter Wheels<a class="headerlink" href="#filter-wheels" title="Permalink to this heading"></a></h2>
-<section id="id1">
-<h3>Sutter<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
-</section>
-<section id="asi">
-<h3>ASI<a class="headerlink" href="#asi" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
-</section>
-</section>
-<section id="galvanometers">
-<h2>Galvanometers<a class="headerlink" href="#galvanometers" title="Permalink to this heading"></a></h2>
-<section id="cambridge-technologies-novanta">
-<h3>Cambridge Technologies/Novanta<a class="headerlink" href="#cambridge-technologies-novanta" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
-</section>
-<section id="scannermax">
-<h3>ScannerMAX<a class="headerlink" href="#scannermax" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
-</section>
-</section>
-<section id="lasers">
-<h2>Lasers<a class="headerlink" href="#lasers" title="Permalink to this heading"></a></h2>
-<section id="coherent">
-<h3>Coherent<a class="headerlink" href="#coherent" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
-</section>
-<section id="omicron">
-<h3>Omicron<a class="headerlink" href="#omicron" title="Permalink to this heading"></a></h3>
-</section>
-</section>
-<section id="shutters">
-<h2>Shutters<a class="headerlink" href="#shutters" title="Permalink to this heading"></a></h2>
-<section id="id2">
-<h3>Thorlabs<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
-</section>
-</section>
-<section id="mechanical-zoom">
-<h2>Mechanical Zoom<a class="headerlink" href="#mechanical-zoom" title="Permalink to this heading"></a></h2>
-<section id="dynamixel">
-<h3>Dynamixel<a class="headerlink" href="#dynamixel" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
-</section>
-</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="implementations.html" class="btn btn-neutral float-left" title="Microscope Implementations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="software_configuration.html" class="btn btn-neutral float-right" title="Software Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="software_configuration.html" class="btn btn-neutral float-left" title="Configuration Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="contributing/contributing_home.html" class="btn btn-neutral float-right" title="Contributing to ASLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

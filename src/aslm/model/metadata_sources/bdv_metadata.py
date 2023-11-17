@@ -42,6 +42,7 @@ import numpy.typing as npt
 from .metadata import XMLMetadata
 from aslm.tools.linear_algebra import affine_rotation, affine_shear
 
+
 class BigDataViewerMetadata(XMLMetadata):
     """Metadata for BigDataViewer files. XML spec in section 2.3 of
     https://arxiv.org/abs/1412.0488."""
@@ -325,29 +326,30 @@ class BigDataViewerMetadata(XMLMetadata):
         return x, y, z, theta, f
 
     def bdv_shear_transform(self):
-        """Calculate the shear transform matrix."""
+        """Calculate the shear transform matrix.
+
+        BDV-specific. Matrix provided is not (4,4), but (3,4).
+        """
         if self.shear_data:
             self.shear_transform = affine_shear(
                 dz=self.dz,
                 dx=self.dx,
                 dy=self.dy,
                 dimension=self.shear_dimension,
-                angle=self.shear_angle
-            )[3]
-            scaled_angle = np.multiply(
-                np.cos(np.deg2rad(self.shear_angle)),
-                [self.dy / self.dx, self.dz / self.dx, self.dz / self.dy],
-            )
-
+                angle=self.shear_angle,
+            )[:3]
+        else:
+            self.shear_transform = np.eye(3, 4)
 
     def bdv_rotate_transform(self):
-        """Calculate the BDV rotation transform matrix."""
+        """Calculate the BDV rotation transform matrix.
+
+        BDV-specific. Matrix provided is not (4,4), but (3,4).
+        """
         if self.rotate_data:
             self.rotate_transform = affine_rotation(
-                x=self.rotate_angle_x,
-                y=self.rotate_angle_y,
-                z=self.rotate_angle_z
-            )[3]
+                x=self.rotate_angle_x, y=self.rotate_angle_y, z=self.rotate_angle_z
+            )[:3]
         else:
             self.rotate_transform = np.eye(3, 4)
 

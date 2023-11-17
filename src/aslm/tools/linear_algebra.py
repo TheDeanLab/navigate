@@ -30,17 +30,15 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 #  Standard Imports
-import os
 
 # Third Party Imports
 import numpy as np
-import numpy.typing as npt
 
 # Local imports
 
 
 def affine_rotation(x=0, y=0, z=0):
-    """ Calculate the general 3D affine transform for rotation.
+    """Calculate the general 3D affine transform for rotation.
 
     Returns a rotation matrix for a rotation about the x, y, and z axes.
 
@@ -125,7 +123,7 @@ def affine_rotation(x=0, y=0, z=0):
 
 
 def affine_shear(dz, dy, dx, dimension="YZ", angle=0):
-    """ Calculate the general 3D affine transform for shear.
+    """Calculate the general 3D affine transform for shear.
 
     Returns a shear matrix for a shear about the x, y, and z axes.
 
@@ -154,7 +152,7 @@ def affine_shear(dz, dy, dx, dimension="YZ", angle=0):
     shear_transform : numpy.ndarray
         A 4x4 affine transformation matrix.
     """
-    shear_transform = np.eye(4,4)
+    shear_transform = np.eye(4, 4)
     if dz == 0 or dy == 0 or dx == 0 or angle == 0:
         return shear_transform
 
@@ -169,5 +167,4 @@ def affine_shear(dz, dy, dx, dimension="YZ", angle=0):
         shear_transform[0, 2] = scaled_angle[1]
     elif dimension.upper() == "YZ" or dimension.upper() == "ZY":
         shear_transform[1, 2] = scaled_angle[2]
-
     return shear_transform

@@ -73,10 +73,10 @@ class DAQBase:
 
         # Initialize Variables
         #: float: Sample rate of the DAQ
-        self.sample_rate = None
+        self.sample_rate = self.daq_parameters["sample_rate"]
 
         #: float: Sweep time of the DAQ
-        self.sweep_time = None
+        self.sweep_time = self.daq_parameters["sweep_time"]
 
         # Remote Focus Parameters
         #: dict: Dictionary of remote focus ramp falling percentages

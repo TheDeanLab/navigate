@@ -32,22 +32,61 @@
 
 # Standard Library Imports
 import tkinter as tk
-from tkinter import ttk, Grid
+from tkinter import ttk
 
 # Local Imports
 from aslm.view.custom_widgets.popup import PopUp
 from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
+
 class FeatureIcon(ttk.Button):
+    """Feature Icon Widget"""
+
     def __init__(self, parent, feature_name=""):
+        """Initialize the Feature Icon Widget
+
+        Parameters
+        ----------
+        parent : tk.Frame
+            Parent frame of the widget
+        feature_name : str
+            Name of the feature
+        """
         ttk.Button.__init__(self, parent, text=feature_name)
         self.configure(padding=(50, 50))
 
 
 class FeatureConfigPopup:
-    def __init__(self, root, *args, features=[], feature_name="", args_name=[], args_value=[], **kwargs):
+    """Feature Config Popup Widget"""
+
+    def __init__(
+        self,
+        root,
+        *args,
+        features=[],
+        feature_name="",
+        args_name=[],
+        args_value=[],
+        **kwargs
+    ):
+        """Initialize the Feature Config Popup Widget
+
+        Parameters
+        ----------
+        root : tk.Tk
+            Root window of the application
+        features : list
+            List of features
+        feature_name : str
+            Name of the feature
+        args_name : list
+            List of arguments name
+        args_value : list
+            List of arguments value
+        """
         # Creating popup window with this name and size/placement,
         # PopUp is a Toplevel window
+        #: PopUp: Popup window
         self.popup = PopUp(
             root, kwargs["title"], "+320+180", top=False, transient=False
         )
@@ -57,8 +96,9 @@ class FeatureConfigPopup:
         # Creating content frame
         content_frame = self.popup.get_frame()
 
+        #: list: List of input widgets
         self.inputs = []
-
+        #: LabelInput: Feature name widget
         self.feature_name_widget = LabelInput(
             parent=content_frame,
             label="Feature Name",
@@ -74,13 +114,27 @@ class FeatureConfigPopup:
         separator = ttk.Separator(content_frame)
         separator.grid(row=1, column=0, sticky=tk.NSEW, pady=10)
 
+        #: ttk.Frame: Parameter frame
         self.parameter_frame = ttk.Frame(content_frame)
         self.parameter_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=30, pady=30)
-        
+
         self.build_widgets(args_name, args_value, kwargs.get("parameter_config", {}))
 
     def build_widgets(self, args_name, args_value, parameter_config=None):
+        """Build widgets for the popup
+
+        Parameters
+        ----------
+        args_name : list
+            List of arguments name
+        args_value : list
+            List of arguments value
+        parameter_config : dict
+            Dictionary of parameter configuration
+        """
+        #: list: List of input widgets
         self.inputs = []
+        #: list: List of input widgets type
         self.inputs_type = []
 
         for child in self.parameter_frame.winfo_children():
@@ -98,7 +152,7 @@ class FeatureConfigPopup:
 
             temp = LabelInput(
                 parent=self.parameter_frame,
-                label=arg_name+":",
+                label=arg_name + ":",
                 label_args={"padding": (2, 5, 5, 0), "width": 20},
                 input_class=arg_input_class,
                 input_var=arg_input_var(),
@@ -107,24 +161,46 @@ class FeatureConfigPopup:
 
             self.inputs.append(temp)
             self.inputs_type.append(type(args_value[i]))
-            temp.grid(row=i+2, column=0, sticky=tk.NSEW, padx=30, pady=10)
+            temp.grid(row=i + 2, column=0, sticky=tk.NSEW, padx=30, pady=10)
             if arg_input_class is ttk.Combobox:
                 temp.set_values(values)
             temp.set(str(args_value[i]))
 
     def get_widgets(self):
+        """Get widgets
+
+        Returns
+        -------
+        list
+            List of input widgets
+        """
         return self.inputs
 
 
 class FeatureListPopup:
+    """Feature List Popup Widget"""
+
     def __init__(self, root, *args, **kwargs):
+        """Initialize the Feature List Popup Widget
+
+        Parameters
+        ----------
+        root : tk.Tk
+            Root window of the application
+        *args : list
+            List of arguments
+        **kwargs : dict
+            Dictionary of keyword arguments
+        """
         # Creating popup window with this name and size/placement,
         # PopUp is a Toplevel window
+        #: PopUp: Popup window
         self.popup = PopUp(
             root, kwargs["title"], "+320+180", top=False, transient=False
         )
         # Change background of popup window to white
         self.popup.configure(bg="white")
+        #: bool: Flag to indicate if the popup is for adding new list
         self.add_new_list_flag = False
         if kwargs["title"].startswith("Add"):
             self.add_new_list_flag = True
@@ -132,6 +208,7 @@ class FeatureListPopup:
         # Creating content frame
         content_frame = self.popup.get_frame()
 
+        #: dict: Dictionary of input widgets
         self.inputs = {}
         self.inputs["feature_list_name"] = LabelInput(
             parent=content_frame,
@@ -141,7 +218,9 @@ class FeatureListPopup:
             input_args={"width": 50},
         )
 
-        self.inputs["feature_list_name"].grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
+        self.inputs["feature_list_name"].grid(
+            row=0, column=0, sticky=tk.NSEW, padx=3, pady=3
+        )
 
         separator = ttk.Separator(content_frame)
         separator.grid(row=2, column=0, sticky=tk.NSEW, padx=3, pady=3)
@@ -153,10 +232,7 @@ class FeatureListPopup:
         self.feature_view_frame = ttk.Frame(canvas)
 
         self.feature_view_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(
-                scrollregion=canvas.bbox("all")
-            )
+            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
 
         canvas.create_window((0, 0), window=self.feature_view_frame, anchor="nw")
@@ -166,12 +242,12 @@ class FeatureListPopup:
         canvas.pack(side="top", fill="both", expand=True)
         scrollbar.pack(side="bottom", fill="x")
 
-
         separator = ttk.Separator(content_frame)
         separator.grid(row=4, column=0, sticky=tk.NSEW, padx=3, pady=3)
         self.inputs["content"] = tk.Text(content_frame, width=100, height=10)
         self.inputs["content"].grid(row=5, column=0, sticky=tk.NSEW, padx=10, pady=3)
 
+        #: dict: Dictionary of buttons
         self.buttons = {}
         button_frame = ttk.Frame(content_frame)
         button_frame.grid(row=6, column=0, sticky=tk.NSEW)
@@ -188,9 +264,36 @@ class FeatureListPopup:
 
 
 class FeatureAdvancedSettingPopup:
-    def __init__(self, root, *args, features=[], feature_name="", args_name=[], args_default_value=[], **kwargs):
+    """Feature Advanced Setting Popup Widget"""
+
+    def __init__(
+        self,
+        root,
+        *args,
+        features=[],
+        feature_name="",
+        args_name=[],
+        args_default_value=[],
+        **kwargs
+    ):
+        """Initialize the Feature Advanced Setting Popup Widget
+
+        Parameters
+        ----------
+        root : tk.Tk
+            Root window of the application
+        features : list
+            List of features
+        feature_name : str
+            Name of the feature
+        args_name : list
+            List of arguments name
+        args_default_value : list
+            List of arguments default value
+        """
         # Creating popup window with this name and size/placement,
         # PopUp is a Toplevel window
+        #: PopUp: Popup window
         self.popup = PopUp(
             root, kwargs["title"], "+320+180", top=False, transient=False
         )
@@ -200,7 +303,9 @@ class FeatureAdvancedSettingPopup:
         # Creating content frame
         content_frame = self.popup.get_frame()
 
+        #: dict: Dictionary of input widgets
         self.inputs = {}
+        #: dict: Dictionary of buttons
         self.buttons = {}
 
         self.feature_name_widget = LabelInput(
@@ -218,14 +323,27 @@ class FeatureAdvancedSettingPopup:
         separator = ttk.Separator(content_frame)
         separator.grid(row=1, column=0, sticky=tk.NSEW, pady=10)
 
+        #: ttk.Frame: Parameter frame
         self.parameter_frame = ttk.Frame(content_frame)
         self.parameter_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=30, pady=30)
-
+        #: dict: Dictionary of argument frames
         self.arg_frames = {}
 
     def build_widgets(self, args_name, parameter_config=None):
+        """Build widgets for the popup
+
+        Parameters
+        ----------
+        args_name : list
+            List of arguments name
+        parameter_config : dict
+            Dictionary of parameter configuration
+        """
+        #: dict: Dictionary of input widgets
         self.inputs = {}
+        #: dict: Dictionary of buttons
         self.buttons = {}
+        #: dict: Dictionary of argument frames
         self.arg_frames = {}
 
         for child in self.parameter_frame.winfo_children():
@@ -236,7 +354,7 @@ class FeatureAdvancedSettingPopup:
         for _, arg_name in enumerate(args_name):
             # ref_value, value, delete button, load button
             self.inputs[arg_name] = []
-            arg_label = ttk.Label(self.parameter_frame, text=arg_name+":")
+            arg_label = ttk.Label(self.parameter_frame, text=arg_name + ":")
             arg_label.grid(row=row_id, column=0, sticky=tk.NW)
             row_id += 1
             arg_frame = ttk.Frame(self.parameter_frame)
@@ -257,10 +375,21 @@ class FeatureAdvancedSettingPopup:
         if len(args_name) > 1:
             save_button = ttk.Button(self.parameter_frame, text="Save")
             save_button.grid(row=row_id, column=0, sticky=tk.NE, padx=3, pady=3)
+            #: ttk.Button: Save button
             self.save_button = save_button
 
-
     def add_new_row(self, arg_name, k="", v=""):
+        """Add new row to the popup
+
+        Parameters
+        ----------
+        arg_name : str
+            Name of the argument
+        k : str
+            Name of the function
+        v : str
+            Value of the function
+        """
         r = len(self.inputs[arg_name])
         arg_frame = self.arg_frames[arg_name]
         ref_value_entry = LabelInput(
@@ -286,11 +415,29 @@ class FeatureAdvancedSettingPopup:
         delete_button = ttk.Button(arg_frame, text="Delete")
         delete_button.grid(row=r, column=4, sticky=tk.NSEW, padx=3, pady=3)
         delete_button.config(command=self.delete_row(arg_name, r))
-        self.inputs[arg_name].append((ref_value_entry, value_entry, load_button, delete_button))
-    
+        self.inputs[arg_name].append(
+            (ref_value_entry, value_entry, load_button, delete_button)
+        )
+
     def delete_row(self, arg_name, r):
+        """Delete row from the popup
+
+        Parameters
+        ----------
+        arg_name : str
+            Name of the argument
+        r : int
+            Row number
+        """
 
         def func():
+            """Function to delete row from the popup
+
+            Returns
+            -------
+            func
+                Function to delete row from the popup
+            """
             for w in self.inputs[arg_name][r]:
                 w.grid_remove()
             self.inputs[arg_name][r] = None

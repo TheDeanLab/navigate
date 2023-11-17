@@ -47,49 +47,29 @@ logger = logging.getLogger(p)
 
 class DockableNotebook(ttk.Notebook):
     """Dockable Notebook that allows for tabs to be popped out into a separate
-    windows by right clicking on the tab. The tab must be selected before right
-    clicking.
-
-    Parameters
-    ----------
-    parent: Tk parent widget.
-        The parent widget being passed down for hierarchy and organization.
-        Typically a ttk.Frame or tk.Frame.
-    root : Tk top-level widget.
-        Tk.tk GUI instance.
-    *args :
-        Options for the ttk.Notebook class
-    **kwargs:
-        Keyword options for the ttk.Notebook class
-
-    Attributes
-    ----------
-    root : Tk top-level widget.
-        Tk.tk GUI instance.
-    tab_list : list
-        List of tab variables
-    menu : Tk Menu
-        Menu that pops up when right-clicking on a tab
-
-    Methods
-    -------
-    set_tablist(tab_list)
-        Setter for tab list
-    get_absolute_position()
-        This helps the popup menu appear where the mouse is right clicked.
-    find(event)
-        Will check if the proper widget element in the event is what we expect.
-        In this case its checking that the the label in the tab has been selected.
-    dismiss()
-        Dismisses the popup menu
-    popout()
-        Gets the currently selected tab, the tabs name and checks if the tab name is
-        in the tab list.
+    windows by right clicking on the tab. The tab must be selected before
+    right-clicking.
     """
 
     def __init__(self, parent, root, *args, **kwargs):
+        """Initialize Dockable Notebook
+
+        Parameters
+        ----------
+        parent: Tk parent widget.
+            The parent widget being passed down for hierarchy and organization.
+            Typically a ttk.Frame or tk.Frame.
+        root : Tk top-level widget.
+            Tk.tk GUI instance.
+        *args :
+            Options for the ttk.Notebook class
+        **kwargs:
+            Keyword options for the ttk.Notebook class
+        """
         ttk.Notebook.__init__(self, parent, *args, **kwargs)
+        #: tk.Tk: Tkinter root
         self.root = root
+        #: list: List of tab variables
         self.tab_list = []
 
         # Formatting
@@ -97,6 +77,7 @@ class DockableNotebook(ttk.Notebook):
         tk.Grid.rowconfigure(self, "all", weight=1)
 
         # Popup setup
+        #: tk.Menu: Tkinter menu
         self.menu = tk.Menu(self, tearoff=0)
         self.menu.add_command(label="Popout Tab", command=self.popout)
 
@@ -113,8 +94,6 @@ class DockableNotebook(ttk.Notebook):
         ----------
         tab_list: list
             List of tab variables
-
-
         """
         self.tab_list = tab_list
 
@@ -145,8 +124,6 @@ class DockableNotebook(ttk.Notebook):
         event: Tkinter event
             Holds information about the event that was triggered and caught by Tkinters
             event system
-
-
         """
         element = event.widget.identify(event.x, event.y)
         if "label" in element:
@@ -162,10 +139,6 @@ class DockableNotebook(ttk.Notebook):
         Gets the currently selected tab, the tabs name and checks if the tab name is
         in the tab list. If the tab is in the list, its removed from the list,
         hidden, and then passed to a new Top Level window.
-
-
-
-
         """
         # Get ref to correct tab to popout
         tab = self.select()
@@ -200,8 +173,6 @@ class DockableNotebook(ttk.Notebook):
             associated with this tab
         tab_text: string
             Name of the tab as it appears in the GUI
-
-
         """
         self.root.wm_forget(tab)
         tab.grid(row=0, column=0)

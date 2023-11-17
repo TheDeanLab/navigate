@@ -42,7 +42,6 @@ from aslm.controller.controller import Controller
 from aslm.log_files.log_functions import log_setup
 from aslm.view.splash_screen import SplashScreen
 from aslm.tools.main_functions import (
-    identify_gpu,
     evaluate_parser_input_arguments,
     create_parser,
 )
@@ -64,7 +63,6 @@ def main():
         --synthetic_hardware
         --sh
         --debug
-        --GPU
         --config_file
         --experiment_file
         --waveform_constants_path
@@ -99,7 +97,6 @@ def main():
     ) = evaluate_parser_input_arguments(args)
 
     log_setup("logging.yml", logging_path)
-    use_gpu = identify_gpu(args)
 
     Controller(
         root,
@@ -109,7 +106,6 @@ def main():
         waveform_constants_path,
         rest_api_path,
         waveform_templates_path,
-        use_gpu,
         args,
     )
     root.mainloop()
@@ -117,10 +113,5 @@ def main():
 
 if __name__ == "__main__":
     if platform.system() == "Darwin":
-        print(
-            "Apple OS Not Fully Supported. ",
-            "Tensorflow and CuPy based analysis is not possible. ",
-            "Please try Linux or Windows for this functionality",
-        )
-
+        print("Apple OS Not Fully Supported. ")
     main()

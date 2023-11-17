@@ -42,47 +42,17 @@ logger = logging.getLogger(p)
 
 
 class WaveformParameterPopupWindow:
-    """Popup window with waveform parameters for galvos, remote focusing, etc.
-
-    Parameters
-    ----------
-    root : tkinter.Tk
-        The root window.
-    configuration_controller : ConfigurationController
-        The configuration controller.
-    *args : tuple
-        Positional arguments.
-    **kwargs : dict
-        Keyword arguments.
-
-    Attributes
-    ----------
-    inputs : dict
-        The input widgets.
-    buttons : dict
-        The buttons.
-
-    Methods
-    -------
-    get_variables()
-        This function returns a dictionary of all the variables
-        that are tied to each widget name.
-        The key is the widget name, value is the variable associated.
-    get_widgets()
-        This function returns the dictionary that holds the input widgets.
-        The key is the widget name, value is the LabelInput class that has all the data.
-    get_buttons()
-        This function returns the dictionary that holds the buttons.
-        The key is the button name, value is the button.
-    """
+    """Popup window with waveform parameters for galvos, remote focusing, etc."""
 
     def __init__(self, root, configuration_controller, *args, **kwargs):
         # Creating popup window with this name and size/placement, PopUp is a
         # Toplevel window
+        #: PopUp: The popup window
         self.popup = PopUp(
             root, "Waveform Parameter Settings", "+320+180", top=False, transient=False
         )
 
+        #: configuration_controller: The configuration controller
         self.configuration_controller = configuration_controller
 
         # Storing the content frame of the popup, this will be the parent of
@@ -98,15 +68,19 @@ class WaveformParameterPopupWindow:
         tk.Grid.columnconfigure(content_frame, "all", weight=1)
         tk.Grid.rowconfigure(content_frame, "all", weight=1)
 
-        """Creating the widgets for the popup"""
-        # Dictionary for all the variables
+        #: dict: Dictionary for all the variables
         self.inputs = {}
+        #: dict: Dictionary for all the buttons
         self.buttons = {}
 
         # Frames for widgets
+        #: ttk.Frame: Frame for mode and magnification
         self.mode_mag_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        #: ttk.Frame: Frame for saving waveform parameters
         self.save_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        #: ttk.Frame: Frame for laser parameters
         self.laser_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
+        #: ttk.Frame: Frame for high/low resolution
         self.high_low_frame = ttk.Frame(content_frame, padding=(0, 0, 0, 0))
 
         # Griding Frames
@@ -283,8 +257,6 @@ class WaveformParameterPopupWindow:
         that are tied to each widget name.
         The key is the widget name, value is the variable associated.
 
-
-
         Returns
         -------
         dict
@@ -305,8 +277,6 @@ class WaveformParameterPopupWindow:
         This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
 
-
-
         Returns
         -------
         dict
@@ -323,8 +293,6 @@ class WaveformParameterPopupWindow:
 
         This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
-
-
 
         Returns
         -------

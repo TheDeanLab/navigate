@@ -33,6 +33,8 @@ import random
 import pytest
 import os
 
+# from time import sleep
+
 
 @pytest.fixture(scope="module")
 def model():
@@ -41,7 +43,11 @@ def model():
 
     from aslm.model.model import Model
     from multiprocessing import Manager, Queue
-    from aslm.config.config import load_configs, verify_experiment_config, verify_waveform_constants
+    from aslm.config.config import (
+        load_configs,
+        verify_experiment_config,
+        verify_waveform_constants,
+    )
 
     # Use configuration files that ship with the code base
     configuration_directory = Path.joinpath(
@@ -55,7 +61,7 @@ def model():
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
     event_queue = Queue()
-    
+
     manager = Manager()
 
     configuration = load_configs(
@@ -67,9 +73,8 @@ def model():
     )
     verify_experiment_config(manager, configuration)
     verify_waveform_constants(manager, configuration)
-    
+
     model = Model(
-        USE_GPU=False,
         args=SimpleNamespace(synthetic_hardware=True),
         configuration=configuration,
         event_queue=event_queue,
@@ -104,6 +109,61 @@ def test_single_acquisition(model):
     assert n_images == n_frames
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
+
+
+def test_multiposition_acquisition(model):
+    """Test that the multiposition acquisition works as expected.
+
+    This test is meant to confirm that if the multi position check box is set,
+    but there aren't actually any positions in the multi-position table, that the
+    acquisition proceeds as if it is not a multi position acquisition.
+
+    Sleep statements are used to ensure that the event queue has ample opportunity to
+    be populated with the disable_multiposition event. This is because the event queue
+    is a multiprocessing.Queue, which is not thread safe.
+    """
+    state = model.configuration["experiment"]["MicroscopeState"]
+
+    # def check_queue(event, event_queue):
+    #     """Check if the event queue contains the event. If it does, return True.
+    #     Otherwise, return False.
+    #
+    #     Parameters
+    #     ----------
+    #     event : str
+    #         The event to check for in the event queue.
+    #     event_queue : multiprocessing.Queue
+    #         The event queue to check.
+    #     """
+    #     while not event_queue.empty():
+    #         ev, _ = event_queue.get()
+    #         if ev == event:
+    #             return True
+    #     return False
+
+    # Multiposition is selected and actually is True
+    state["is_multiposition"] = True
+    model.configuration["experiment"]["MultiPositions"] = [
+        {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}
+    ]
+    model.run_command("acquire")
+    # sleep(1)
+    # assert (
+    #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
+    #     is False
+    # )
+    assert state["is_multiposition"] is True
+
+    # Multiposition is selected but not actually  True
+    model.configuration["experiment"]["MultiPositions"] = []
+    model.run_command("acquire")
+    # sleep(1)
+    # # Check that the event queue is called with the disable_multiposition statement
+    # assert (
+    #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
+    #     is True
+    # )
+    assert state["is_multiposition"] is False
 
 
 def test_change_resolution(model):
@@ -182,57 +242,76 @@ def test_change_resolution(model):
         assert model.active_microscope_name == scope
         assert model.active_microscope.zoom.zoomvalue == zoom
 
-def test_get_feature_list(model):
 
+def test_get_feature_list(model):
     feature_lists = model.feature_list
 
     assert model.get_feature_list(0) == ""
     assert model.get_feature_list(len(feature_lists) + 1) == ""
 
-    from aslm.model.features.feature_related_functions import convert_str_to_feature_list
+    from aslm.model.features.feature_related_functions import (
+        convert_str_to_feature_list,
+    )
+
     for i in range(len(feature_lists)):
-        feature_str = model.get_feature_list(i+1)
+        feature_str = model.get_feature_list(i + 1)
         if "shared_list" not in feature_str:
             assert convert_str_to_feature_list(feature_str) == feature_lists[i]
+
 
 def test_load_feature_list_from_str(model):
     feature_lists = model.feature_list
 
-    l = len(feature_lists)
+    l = len(feature_lists)  # noqa
     model.load_feature_list_from_str('[{"name": PrepareNextChannel}]')
-    assert len(feature_lists) == l+1
-    from aslm.model.features.feature_related_functions import convert_feature_list_to_str
-    assert convert_feature_list_to_str(feature_lists[-1]) == '[{"name": PrepareNextChannel,},]'
+    assert len(feature_lists) == l + 1
+    from aslm.model.features.feature_related_functions import (
+        convert_feature_list_to_str,
+    )
+
+    assert (
+        convert_feature_list_to_str(feature_lists[-1])
+        == '[{"name": PrepareNextChannel,},]'
+    )
     del feature_lists[-1]
     feature_str = '[{"name": LoopByCount,"args": ([1, 2.0, True, False, \'abc\'],)},]'
     model.load_feature_list_from_str(feature_str)
-    assert len(feature_lists) == l+1
+    assert len(feature_lists) == l + 1
     assert convert_feature_list_to_str(feature_lists[-1]) == feature_str
     del feature_lists[-1]
 
 
 def test_load_feature_records(model):
     feature_lists = model.feature_list
-    l = len(feature_lists)
+    l = len(feature_lists)  # noqa
 
     from aslm.config.config import get_aslm_path
     from aslm.tools.file_functions import save_yaml_file, load_yaml_file
-    from aslm.model.features.feature_related_functions import convert_feature_list_to_str
+    from aslm.model.features.feature_related_functions import (
+        convert_feature_list_to_str,
+    )
 
     feature_lists_path = get_aslm_path() + "/feature_lists"
 
     if not os.path.exists(feature_lists_path):
         os.makedirs(feature_lists_path)
-    save_yaml_file(feature_lists_path,
-    {
-        "module_name": None,
-        "feature_list_name": "Test Feature List 1",
-        "feature_list": "[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3,)})]"
-    }, '__test_1.yml')
+    save_yaml_file(
+        feature_lists_path,
+        {
+            "module_name": None,
+            "feature_list_name": "Test Feature List 1",
+            "feature_list": "[({'name': PrepareNextChannel}, "
+            "{'name': LoopByCount, 'args': (3,)})]",
+        },
+        "__test_1.yml",
+    )
 
     model.load_feature_records()
-    assert len(feature_lists) == l+1
-    assert convert_feature_list_to_str(feature_lists[-1]) == '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,)},),]'
+    assert len(feature_lists) == l + 1
+    assert (
+        convert_feature_list_to_str(feature_lists[-1])
+        == '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,)},),]'
+    )
 
     del feature_lists[-1]
     os.remove(f"{feature_lists_path}/__test_1.yml")

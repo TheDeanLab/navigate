@@ -51,41 +51,23 @@ logger = logging.getLogger(p)
 
 class AcquirePopUp:
     """Class creates the popup that is generated when the Acquire button is pressed and
-    Save File checkbox is selected.
-
-    Parameters
-    ----------
-    root : tkinter.Tk
-        The root window of the application
-    *args
-        Variable length argument list.
-    **kwargs
-        Arbitrary keyword arguments.
-
-    Attributes
-    ----------
-    popup : aslm.view.custom_widgets.popup.PopUp
-        The popup window
-    inputs : dict
-        Dictionary of all the inputs
-    buttons : dict
-        Dictionary of all the buttons
-    entries_label : tkinter.ttk.Label
-        Label for the entries
-
-    Methods
-    -------
-    get_variables()
-        Returns the variables of the popup
-    get_buttons()
-        Returns the buttons of the popup
-    get_widgets()
-        Returns the widgets of the popup
-    """
+    Save File checkbox is selected."""
 
     def __init__(self, root, *args, **kwargs):
+        """Initialize the AcquirePopUp class
+
+        Parameters
+        ----------
+        root : tk.Tk
+            The root window
+        *args
+            Variable length argument list
+        **kwargs
+            Arbitrary keyword arguments
+        """
         # Creating popup window with this name and size/placement, PopUp is a Toplevel
         # window
+        #: PopUp: The popup window
         self.popup = PopUp(
             root, "File Saving Dialog", "430x530+320+180", transient=True
         )
@@ -98,10 +80,13 @@ class AcquirePopUp:
         tk.Grid.rowconfigure(content_frame, "all", weight=1)
 
         # Dictionary for all the variables
+        #: dict: Dictionary of all the variables
         self.inputs = {}
+        #: dict: Dictionary of all the buttons
         self.buttons = {}
 
         # Label for entries
+        #: ttk.Label: Label for the entries
         self.entries_label = ttk.Label(
             content_frame, text="Please fill out the fields below"
         )
@@ -196,8 +181,6 @@ class AcquirePopUp:
 
         The key is the widget name, value is the variable associated.
 
-
-
         Returns
         -------
         dict
@@ -214,8 +197,6 @@ class AcquirePopUp:
         This function returns the dictionary that holds the input widgets.
         The key is the widget name, value is the LabelInput class that has all the data.
 
-
-
         Returns
         -------
         dict
@@ -228,8 +209,6 @@ class AcquirePopUp:
 
         This function returns the dictionary that holds the buttons.
         The key is the button name, value is the button.
-
-
 
         Returns
         -------

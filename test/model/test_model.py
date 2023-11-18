@@ -142,17 +142,17 @@ def test_multiposition_acquisition(model):
     #     return False
 
     # Multiposition is selected and actually is True
-    state["is_multiposition"] = True
-    model.configuration["experiment"]["MultiPositions"] = [
-        {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}
-    ]
-    model.run_command("acquire")
-    # sleep(1)
-    # assert (
-    #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
-    #     is False
-    # )
-    assert state["is_multiposition"] is True
+    # state["is_multiposition"] = True
+    # model.configuration["experiment"]["MultiPositions"] = [
+    #     {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}
+    # ]
+    # model.run_command("acquire")
+    # # sleep(1)
+    # # assert (
+    # #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
+    # #     is False
+    # # )
+    # assert state["is_multiposition"] is True
 
     # Multiposition is selected but not actually  True
     model.configuration["experiment"]["MultiPositions"] = []

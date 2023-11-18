@@ -36,6 +36,8 @@ from multiprocessing import Manager
 
 # from time import sleep
 
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
+
 manager = Manager()
 
 
@@ -112,6 +114,7 @@ def test_single_acquisition(model):
     model.release_pipe("show_img_pipe")
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test hangs entire workflow on GitHub.")
 def test_multiposition_acquisition(model):
     """Test that the multiposition acquisition works as expected.
 

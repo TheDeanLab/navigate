@@ -181,7 +181,6 @@ def test_multiposition_acquisition(model):
     )
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
-    assert False
 
 
 def test_change_resolution(model):

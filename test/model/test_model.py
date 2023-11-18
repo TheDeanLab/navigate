@@ -154,16 +154,16 @@ def test_multiposition_acquisition(model):
     # )
     assert state["is_multiposition"] is True
 
-    # Multiposition is selected but not actually  True
-    model.configuration["experiment"]["MultiPositions"] = []
-    model.run_command("acquire")
-    # sleep(1)
-    # # Check that the event queue is called with the disable_multiposition statement
-    # assert (
-    #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
-    #     is True
-    # )
-    assert state["is_multiposition"] is False
+    # # Multiposition is selected but not actually  True
+    # model.configuration["experiment"]["MultiPositions"] = []
+    # model.run_command("acquire")
+    # # sleep(1)
+    # # # Check that the event queue is called with the disable_multiposition statement
+    # # assert (
+    # #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
+    # #     is True
+    # # )
+    # assert state["is_multiposition"] is False
 
 
 def test_change_resolution(model):

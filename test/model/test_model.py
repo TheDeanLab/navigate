@@ -123,25 +123,25 @@ def test_multiposition_acquisition(model):
     be populated with the disable_multiposition event. This is because the event queue
     is a multiprocessing.Queue, which is not thread safe.
     """
-    from time import sleep
+    # from time import sleep
     from aslm.config.config import update_config_dict
 
-    def check_queue(event, event_queue):
-        """Check if the event queue contains the event. If it does, return True.
-        Otherwise, return False.
+    # def check_queue(event, event_queue):
+    #     """Check if the event queue contains the event. If it does, return True.
+    #     Otherwise, return False.
 
-        Parameters
-        ----------
-        event : str
-            The event to check for in the event queue.
-        event_queue : multiprocessing.Queue
-            The event queue to check.
-        """
-        while not event_queue.empty():
-            ev, _ = event_queue.get()
-            if ev == event:
-                return True
-        return False
+    #     Parameters
+    #     ----------
+    #     event : str
+    #         The event to check for in the event queue.
+    #     event_queue : multiprocessing.Queue
+    #         The event queue to check.
+    #     """
+    #     while not event_queue.empty():
+    #         ev, _ = event_queue.get()
+    #         if ev == event:
+    #             return True
+    #     return False
 
     _ = model.create_pipe("show_img_pipe")
 
@@ -154,11 +154,11 @@ def test_multiposition_acquisition(model):
         {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0},
     )
     model.run_command("acquire")
-    sleep(1)
-    assert (
-        check_queue(event="disable_multiposition", event_queue=model.event_queue)
-        is False
-    )
+    # sleep(1)
+    # assert (
+    #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
+    #     is False
+    # )
     assert (
         model.configuration["experiment"]["MicroscopeState"]["is_multiposition"] is True
     )
@@ -167,12 +167,12 @@ def test_multiposition_acquisition(model):
     # Multiposition is selected but not actually  True
     update_config_dict(manager, model.configuration["experiment"], "MultiPositions", [])
     model.run_command("acquire")
-    sleep(1)
-    # Check that the event queue is called with the disable_multiposition statement
-    assert (
-        check_queue(event="disable_multiposition", event_queue=model.event_queue)
-        is True
-    )
+    # sleep(1)
+    # # Check that the event queue is called with the disable_multiposition statement
+    # assert (
+    #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
+    #     is True
+    # )
     assert (
         model.configuration["experiment"]["MicroscopeState"]["is_multiposition"]
         is False

@@ -32,8 +32,11 @@
 import random
 import pytest
 import os
+from multiprocessing import Manager
 
 # from time import sleep
+
+manager = Manager()
 
 
 @pytest.fixture(scope="module")
@@ -42,7 +45,7 @@ def model():
     from pathlib import Path
 
     from aslm.model.model import Model
-    from multiprocessing import Manager, Queue
+    from multiprocessing import Queue
     from aslm.config.config import (
         load_configs,
         verify_experiment_config,
@@ -61,8 +64,6 @@ def model():
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
     event_queue = Queue()
-
-    manager = Manager()
 
     configuration = load_configs(
         manager,
@@ -122,6 +123,8 @@ def test_multiposition_acquisition(model):
     be populated with the disable_multiposition event. This is because the event queue
     is a multiprocessing.Queue, which is not thread safe.
     """
+    from aslm.config.config import update_config_dict
+
     state = model.configuration["experiment"]["MicroscopeState"]
 
     # def check_queue(event, event_queue):
@@ -143,9 +146,12 @@ def test_multiposition_acquisition(model):
 
     # Multiposition is selected and actually is True
     state["is_multiposition"] = True
-    model.configuration["experiment"]["MultiPositions"] = [
-        {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}
-    ]
+    update_config_dict(
+        manager,
+        model.configuration["experiment"],
+        "MultiPositions",
+        {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0},
+    )
     model.run_command("acquire")
     # sleep(1)
     # assert (
@@ -155,7 +161,7 @@ def test_multiposition_acquisition(model):
     assert state["is_multiposition"] is True
 
     # Multiposition is selected but not actually  True
-    model.configuration["experiment"]["MultiPositions"] = []
+    update_config_dict(manager, model.configuration["experiment"], "MultiPositions", [])
     model.run_command("acquire")
     # sleep(1)
     # # Check that the event queue is called with the disable_multiposition statement

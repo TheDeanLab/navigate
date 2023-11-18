@@ -151,9 +151,10 @@ def test_multiposition_acquisition(model):
         manager,
         model.configuration["experiment"],
         "MultiPositions",
-        {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0},
+        [{"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}],
     )
     model.run_command("acquire")
+
     # sleep(1)
     # assert (
     #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
@@ -166,6 +167,7 @@ def test_multiposition_acquisition(model):
 
     # Multiposition is selected but not actually  True
     update_config_dict(manager, model.configuration["experiment"], "MultiPositions", [])
+
     model.run_command("acquire")
     # sleep(1)
     # # Check that the event queue is called with the disable_multiposition statement
@@ -179,6 +181,7 @@ def test_multiposition_acquisition(model):
     )
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
+    assert False
 
 
 def test_change_resolution(model):

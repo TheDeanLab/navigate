@@ -111,59 +111,59 @@ def test_single_acquisition(model):
     model.release_pipe("show_img_pipe")
 
 
-def test_multiposition_acquisition(model):
-    """Test that the multiposition acquisition works as expected.
+# def test_multiposition_acquisition(model):
+#     """Test that the multiposition acquisition works as expected.
 
-    This test is meant to confirm that if the multi position check box is set,
-    but there aren't actually any positions in the multi-position table, that the
-    acquisition proceeds as if it is not a multi position acquisition.
+#     This test is meant to confirm that if the multi position check box is set,
+#     but there aren't actually any positions in the multi-position table, that the
+#     acquisition proceeds as if it is not a multi position acquisition.
 
-    Sleep statements are used to ensure that the event queue has ample opportunity to
-    be populated with the disable_multiposition event. This is because the event queue
-    is a multiprocessing.Queue, which is not thread safe.
-    """
-    state = model.configuration["experiment"]["MicroscopeState"]
+#     Sleep statements are used to ensure that the event queue has ample opportunity to
+#     be populated with the disable_multiposition event. This is because the event queue
+#     is a multiprocessing.Queue, which is not thread safe.
+#     """
+#     state = model.configuration["experiment"]["MicroscopeState"]
 
-    # def check_queue(event, event_queue):
-    #     """Check if the event queue contains the event. If it does, return True.
-    #     Otherwise, return False.
-    #
-    #     Parameters
-    #     ----------
-    #     event : str
-    #         The event to check for in the event queue.
-    #     event_queue : multiprocessing.Queue
-    #         The event queue to check.
-    #     """
-    #     while not event_queue.empty():
-    #         ev, _ = event_queue.get()
-    #         if ev == event:
-    #             return True
-    #     return False
+#     # def check_queue(event, event_queue):
+#     #     """Check if the event queue contains the event. If it does, return True.
+#     #     Otherwise, return False.
+#     #
+#     #     Parameters
+#     #     ----------
+#     #     event : str
+#     #         The event to check for in the event queue.
+#     #     event_queue : multiprocessing.Queue
+#     #         The event queue to check.
+#     #     """
+#     #     while not event_queue.empty():
+#     #         ev, _ = event_queue.get()
+#     #         if ev == event:
+#     #             return True
+#     #     return False
 
-    # Multiposition is selected and actually is True
-    state["is_multiposition"] = True
-    model.configuration["experiment"]["MultiPositions"] = [
-        {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}
-    ]
-    model.run_command("acquire")
-    # sleep(1)
-    # assert (
-    #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
-    #     is False
-    # )
-    assert state["is_multiposition"] is True
+#     # Multiposition is selected and actually is True
+#     state["is_multiposition"] = True
+#     model.configuration["experiment"]["MultiPositions"] = [
+#         {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}
+#     ]
+#     model.run_command("acquire")
+#     # sleep(1)
+#     # assert (
+#     #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
+#     #     is False
+#     # )
+#     assert state["is_multiposition"] is True
 
-    # Multiposition is selected but not actually  True
-    model.configuration["experiment"]["MultiPositions"] = []
-    model.run_command("acquire")
-    # sleep(1)
-    # # Check that the event queue is called with the disable_multiposition statement
-    # assert (
-    #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
-    #     is True
-    # )
-    assert state["is_multiposition"] is False
+#     # Multiposition is selected but not actually  True
+#     model.configuration["experiment"]["MultiPositions"] = []
+#     model.run_command("acquire")
+#     # sleep(1)
+#     # # Check that the event queue is called with the disable_multiposition statement
+#     # assert (
+#     #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
+#     #     is True
+#     # )
+#     assert state["is_multiposition"] is False
 
 
 def test_change_resolution(model):

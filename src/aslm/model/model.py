@@ -765,7 +765,6 @@ class Model:
         data_func : object
             Function to run on the acquired data.
         """
-        print("RUN DATA PROCESS STARTED")
         wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
@@ -775,7 +774,6 @@ class Model:
 
         while not self.stop_acquisition:
             if self.ask_to_pause_data_thread:
-                print("ASK TO PAUSE THREAD TRUE IF STATEMENT")
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
@@ -785,11 +783,9 @@ class Model:
             )
             # if there is at least one frame available
             if not frame_ids:
-                print(f"ASLM Model - Waiting {wait_num}")
                 self.logger.info(f"ASLM Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
-                    print(f"Camera time out wait_num = {wait_num}")
                     # Camera timeout, abort acquisition.
                     break
                 continue
@@ -952,54 +948,38 @@ class Model:
         but there is additional overhead due to the need to write the
         waveforms into the buffers of the DAQ cards.
         """
-        print("snap image beginning")
         if hasattr(self, "signal_container"):
-            print("hasstributes signal container")
             self.signal_container.run()
-            print("signal container running")
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
         stage_pos = self.get_stage_position()
-        print(f"got stage position = {stage_pos}")
         self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
         self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]
         self.data_buffer_positions[self.frame_id][2] = stage_pos["z_pos"]
         self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
         self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
-        print("Get buffer positions")
 
         # Run the acquisition
         try:
             self.active_microscope.turn_on_laser()
-            print("laser turned on")
-            print("DAQ Trigger Sent")
-            self.logger.info("DAQ Trigger Sent")
             self.active_microscope.daq.run_acquisition()
-            print("DAQ trigger running finished")
         except:  # noqa
-            print("DAQ trigger except")
             self.active_microscope.daq.stop_acquisition()
-            print("stop acquisiton except")
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}",
                 self.active_microscope.current_exposure_time,
             )
-            print("prepare acquisition except")
             self.active_microscope.daq.run_acquisition()
         finally:
             # Ensure the laser is turned off
-                print("run acquisition except")
-        self.active_microscope.turn_off_lasers()
-        print("lasers turned off")
+            self.active_microscope.turn_off_lasers()
 
         if hasattr(self, "signal_container"):
-            print("hasstributes signal container model snap image")
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
-        # print(f"*** snap image frame id = {self.frame_id}")
 
     def run_live_acquisition(self):
         """Stream live image to the GUI.
@@ -1027,7 +1007,6 @@ class Model:
             and not self.stop_send_signal
             and not self.stop_acquisition
         ):
-            print(f"run acquisition signal container end flag: {self.signal_container.end_flag}")
             self.snap_image()
             if not hasattr(self, "signal_container"):
                 return

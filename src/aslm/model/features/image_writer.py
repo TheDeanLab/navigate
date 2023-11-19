@@ -269,7 +269,6 @@ class ImageWriter:
                 image = self.data_buffer[idx]
             # Save data to disk
             try:
-                # print("Data Buffer Positions:", self.model.data_buffer_positions[idx])
                 self.data_source.write(
                     image,
                     x=self.model.data_buffer_positions[idx][0],

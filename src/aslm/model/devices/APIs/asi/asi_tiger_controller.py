@@ -229,7 +229,6 @@ class TigerController:
         except SerialTimeoutException as e:
             print(f"Tiger Controller -- SerialTimeoutException: {e}")
             pass
-        # print(f"Sent Command: {command.decode(encoding='ascii')}")
 
     def read_response(self) -> str:
         """
@@ -239,10 +238,8 @@ class TigerController:
         self.safe_to_write.set()
 
         response = response.decode(encoding="ascii")
-        # print(response)
         # Remove leading and trailing empty spaces
         self.report_to_console(f"Received Response: {response.strip()}")
-        # print(f"Received Response: {response.strip()}")
         if response.startswith(":N"):
             raise TigerException(response)
 
@@ -270,12 +267,8 @@ class TigerController:
 
     def move_axis(self, axis: str, distance: float) -> None:
         """Move the stage with an absolute move on one axis"""
-        print("move axis tiger controller")
-        # print(f"MOVE {axis}={round(distance, 6)}\r")
         self.send_command(f"MOVE {axis}={round(distance, 6)}\r")
-        # print("command sent")
         self.read_response()
-        # print(f"response = {self.read_response()}")
 
     def set_max_speed(self, axis: str, speed: float) -> None:
         """Set the speed on a specific axis. Speed is in mm/s."""
@@ -454,13 +447,8 @@ class TigerController:
         if enc_divide == 0:
             enc_divide = enc_divide_mm
         else:
-            enc_divide_v1 = int(enc_divide * enc_divide_mm)
-            enc_divide_v2 = np.ceil(enc_divide * enc_divide_mm)
-            enc_divide = enc_divide_v1
-        print("Encoder Divide in mm:", enc_divide_mm)
-        print("Set Encoder Divide int:", enc_divide_v1)
-        print("Set Encoder Divide np.ceil:",enc_divide_v2)
-            # enc_divide = env_divide_v1
+            enc_divide = int(enc_divide * enc_divide_mm)
+        
         command = (
             f"SCANR "
             f"X={round(start_position_mm, 6)} "

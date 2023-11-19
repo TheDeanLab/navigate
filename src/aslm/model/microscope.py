@@ -491,35 +491,27 @@ class Microscope:
         necessary, ensuring the hardware is ready for imaging the selected channel.
 
         """
-        print("prepare next microscope in microscope called")
         curr_channel = self.current_channel
-        print(f"curr_channel = {curr_channel}")
         prefix = "channel_"
         if self.current_channel == 0:
-            print(f"self_available_channels_0 = {self.available_channels[0]}")
             self.current_channel = self.available_channels[0]
         else:
             idx = (self.available_channels.index(self.current_channel) + 1) % len(
                 self.available_channels
             )
-            print(f"idx = {idx}")
             self.current_channel = self.available_channels[idx]
-            print(f"self.available_channels[idx] = {self.available_channels[idx]}")
         if curr_channel == self.current_channel:
             return
 
         channel_key = prefix + str(self.current_channel)
-        print(f"channel_key = {channel_key}")
         channel = self.configuration["experiment"]["MicroscopeState"]["channels"][
             channel_key
         ]
-        print(f"channel = {channel}")
         # Filter Wheel Settings.
         self.filter_wheel.set_filter(channel["filter"])
 
         # Camera Settings
         self.current_exposure_time = float(channel["camera_exposure_time"])
-        print(f"self.current_exposure_time = {self.current_exposure_time}")
         if (
             self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
             == "Light-Sheet"

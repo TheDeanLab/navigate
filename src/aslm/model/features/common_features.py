@@ -1299,10 +1299,7 @@ class ZStackAcquisition:
                 f"*** Zstack move stage: (z: {self.current_z_position}), "
                 f"(f: {self.current_focus_position})"
             )
-            print(
-                f"*** Zstack move stage: (z: {self.current_z_position}), "
-                f"(f: {self.current_focus_position})"
-            )
+            
 
 
             if self.should_pause_data_thread and not data_thread_is_paused:
@@ -1339,8 +1336,6 @@ class ZStackAcquisition:
         """
 
         # end this node
-        print("end signal")
-        print(f"self.need_to_move_z_position = {self.need_to_move_z_position}")
         if self.model.stop_acquisition:
             return True
 
@@ -1355,7 +1350,6 @@ class ZStackAcquisition:
 
         # in 'per_slice', move to next z position if all the channels have been acquired
         if self.need_to_move_z_position:
-            print(f"self.need_to_move_z_position = {self.need_to_move_z_position}, if statement")
             # next z, f position
             self.current_z_position += self.z_step_size
             self.current_focus_position += self.focus_step_size
@@ -1381,13 +1375,9 @@ class ZStackAcquisition:
 
             # after running through a z-stack, update channel
             if self.stack_cycling_mode == "per_stack":
-                print("in per stack if statment")
-                print(f"self.current_channel_in_list = {self.current_channel_in_list}")
-                print(f"self.need_to_move_new_position = {self.need_to_move_new_position}")
                 self.update_channel()
                 # if run through all the channels, move to next position
                 if self.current_channel_in_list == 0:
-                    print(f"channel list = 0, {self.current_channel_in_list}")
                     self.need_to_move_new_position = True
             else:
                 self.need_to_move_new_position = True
@@ -1680,8 +1670,6 @@ class ConProAcquisition:
             process.
         """
 
-        # print(f"Signal with time {self.offset_update_time} and offset "
-        #       f"{self.current_offset}")
         if self.model.stop_acquisition:
             return False
 
@@ -1689,13 +1677,11 @@ class ConProAcquisition:
             # update channel for each z position in 'per_slice'
             self.update_channel()
             self.need_update_offset = self.current_channel_in_list == 0
-            print("conpro per_stack")
 
         # in 'per_slice', update the offset if all the channels have been acquired
         if self.need_update_offset:
             # next z, f position
             # self.current_offset += self.offset_step_size
-            print("offset movement")
 
             # update offset moved time
             self.offset_update_time += 1
@@ -1719,7 +1705,6 @@ class ConProAcquisition:
             A boolean value indicating whether to end the current node.
         """
         # end this node
-        print("end signal started")
         if self.model.stop_acquisition:
             self.model.configuration["experiment"]["MicroscopeState"][
                 "offset_start"
@@ -1766,14 +1751,12 @@ class ConProAcquisition:
         bool
             A boolean value indicating whether metadata generation was successful.
         """
-        # print('This frame: z stack', self.model.frame_id)
         return True
 
     def update_channel(self):
         self.current_channel_in_list = (
             self.current_channel_in_list + 1
         ) % self.channels
-        print("Update Channel")
         self.model.active_microscope.prepare_next_channel()
 
 

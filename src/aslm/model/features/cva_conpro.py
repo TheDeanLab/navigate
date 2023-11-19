@@ -187,7 +187,9 @@ class CVACONPRO:
         # Calculate the actual step size in millimeters. 264 * 10^-6 mm
         step_size_mm = step_size_nm / 1 * 10**-6  # 264 * 10^-6 mm
         #TODO set max speed in configuration file
-        max_speed = 4.288497*2
+        # max_speed = 4.288497*2
+
+        
 
         # Set the start and end position of the scan in millimeters.
         # Retrieved from the GUI.
@@ -224,6 +226,14 @@ class CVACONPRO:
         
         self.asi_stage.wait_until_complete(self.axis)
         print("Stage wait until complete completed after scanr")
+
+        #TODO set max speed in configuration file
+        # max_speed = 4.288497*2
+        self.asi_stage.set_speed(percent=1)
+        max_speed = self.asi_stage.get_speed(axis=self.axis)
+        print(f"Axis {self.axis} Maximum Speed (mm/s): {max_speed}")
+        logger.debug(f"Axis {self.axis} Maximum Speed (mm/s): {max_speed}")
+
 
         
         self.asi_stage.set_speed(percent=0.0001/max_speed)

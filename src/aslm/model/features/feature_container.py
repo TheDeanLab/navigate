@@ -308,28 +308,34 @@ class SignalNode(TreeNode):
             self.is_initialized = True
 
         if not wait_response:
-            # print(self.node_name, 'running function:', self.node_funcs['main'])
+            print(self.node_name, 'running function:', self.node_funcs['main'])
             result = self.node_funcs["main"](*args)
             if self.need_response:
                 self.wait_response = True
                 return result, False
 
         elif self.wait_response:
-            # print(self.node_name, 'running response function:',
-            #       self.node_funcs['main-response'])
+            print(self.node_name, 'running response function:',
+                  self.node_funcs['main-response'])
+            print(f"args = {args}")
+            # print(f"result = {self.node_funcs["main-response"](*args)}")
             result = self.node_funcs["main-response"](*args)
+            # print(f"args = {args}")
+            print(f"result = {result}")
             self.wait_response = False
         elif self.device_related or self.need_response:
             return None, False
         else:
             # run(wait_response=True)
             result = self.node_funcs["main"](*args)
-
+        
         if (
             self.wait_response
             or self.node_type == "multi-step"
             and not self.node_funcs["end"]()
         ):
+            print(f"self.wait_response = {self.wait_response}")
+            print(f"result = {result}")
             return result, False
 
         self.is_initialized = False
@@ -700,16 +706,21 @@ class SignalContainer(Container):
           tracks the remaining executions of the control sequence.
         """
 
+        print("signal container run")
+        print(f"self.end_flag = {self.end_flag}")
         if self.end_flag or not self.root:
+            print(f"if self flag = {self.end_flag}")
             self.end_flag = True
             return
         if not self.curr_node:
             self.curr_node = self.root
         while self.curr_node:
+            print((f"running signal node: {self.curr_node.node_name}"))
             logger.debug(f"running signal node: {self.curr_node.node_name}")
             try:
                 result, is_end = self.curr_node.run(*args, wait_response=wait_response)
             except Exception:
+                print(f"SignalContainer - {traceback.format_exc()}")
                 logger.debug(f"SignalContainer - {traceback.format_exc()}")
                 self.end_flag = True
                 self.cleanup()
@@ -717,6 +728,7 @@ class SignalContainer(Container):
             if not is_end:
                 return
             if result and self.curr_node.child:
+                print(f"Signal running child of {self.curr_node.node_name} ")
                 logger.debug(f"Signal running child of {self.curr_node.node_name} ")
                 self.curr_node = self.curr_node.child
             elif self.curr_node.sibling:

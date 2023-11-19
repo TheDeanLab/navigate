@@ -36,15 +36,14 @@ import logging
 import multiprocessing as mp
 import time
 import os
+import traceback
 
 # Third Party Imports
 
 # Local Imports
 from aslm.model.concurrency.concurrency_tools import SharedNDArray
 from aslm.model.features.autofocus import Autofocus
-from aslm.model.features.constant_velocity_acquisition import (
-    ConstantVelocityAcquisition,
-)
+from aslm.model.features.cva_conpro import CVACONPRO
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
@@ -346,7 +345,7 @@ class Model:
             "confocal-projection": [
                 {"name": PrepareNextChannel},
             ],
-            "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
+            "CVACONPRO": [{"name": CVACONPRO}],
             "customized": [],
         }
         self.load_feature_records()
@@ -526,7 +525,7 @@ class Model:
             if self.imaging_mode == "projection":
                 self.move_stage({"z_abs": 0})
 
-            if self.imaging_mode == "live" or self.imaging_mode == "projection":
+            if self.imaging_mode == "live" or self.imaging_mode == "projection" or self.imaging_mode == "CVATTL":
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:
                 self.signal_thread = threading.Thread(target=self.run_acquisition)
@@ -677,7 +676,7 @@ class Model:
 
             if hasattr(self, "signal_container"):
                 self.signal_container.end_flag = True
-            if self.imaging_mode == "ConstantVelocityAcquisition":
+            if self.imaging_mode == "CVACONPRO":
                 self.active_microscope.stages["z"].stop()
             if self.signal_thread:
                 self.signal_thread.join()
@@ -766,17 +765,17 @@ class Model:
         data_func : object
             Function to run on the acquired data.
         """
-
+        print("RUN DATA PROCESS STARTED")
         wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
         # whether acquire specific number of frames.
         count_frame = num_of_frames > 0
-
         start_time = time.time()
 
         while not self.stop_acquisition:
             if self.ask_to_pause_data_thread:
+                print("ASK TO PAUSE THREAD TRUE IF STATEMENT")
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
@@ -786,9 +785,11 @@ class Model:
             )
             # if there is at least one frame available
             if not frame_ids:
+                print(f"ASLM Model - Waiting {wait_num}")
                 self.logger.info(f"ASLM Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
+                    print(f"Camera time out wait_num = {wait_num}")
                     # Camera timeout, abort acquisition.
                     break
                 continue
@@ -810,7 +811,14 @@ class Model:
                     self.logger.info("ASLM Model - Data container is closed.")
                     self.stop_acquisition = True
                     break
+                # If not constant_velocity_acquisition_mode
                 self.data_container.run(frame_ids)
+                # if constant_velocity_acquisition mode
+                    # if self.number_triggers = 0
+                        # Throw away the frame.
+                        # self.number_triggers += 1
+                    # else:
+                        # Pass frame through data container.
 
             # show image
             self.logger.info(f"ASLM Model - Sent through pipe{frame_ids[0]}")
@@ -823,12 +831,15 @@ class Model:
         self.show_img_pipe.send("stop")
         self.logger.info("ASLM Model - Data thread stopped.")
         self.logger.info(f"ASLM Model - Received frames in total: {acquired_frame_num}")
+        # self.acquired_frame_num = acquired_frame_num
+        # return self.acquired_frame_num
 
         # release the lock when data thread ends
         if self.pause_data_ready_lock.locked():
             self.pause_data_ready_lock.release()
 
         self.end_acquisition()  # Need this to turn off the lasers/close the shutters
+        return acquired_frame_num
 
     def pause_data_thread(self):
         """Pause the data thread.
@@ -941,38 +952,54 @@ class Model:
         but there is additional overhead due to the need to write the
         waveforms into the buffers of the DAQ cards.
         """
+        print("snap image beginning")
         if hasattr(self, "signal_container"):
+            print("hasstributes signal container")
             self.signal_container.run()
+            print("signal container running")
 
         # Stash current position, channel, timepoint. Do this here, because signal
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
         stage_pos = self.get_stage_position()
+        print(f"got stage position = {stage_pos}")
         self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
         self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]
         self.data_buffer_positions[self.frame_id][2] = stage_pos["z_pos"]
         self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
         self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
+        print("Get buffer positions")
 
         # Run the acquisition
         try:
             self.active_microscope.turn_on_laser()
+            print("laser turned on")
+            print("DAQ Trigger Sent")
+            self.logger.info("DAQ Trigger Sent")
             self.active_microscope.daq.run_acquisition()
+            print("DAQ trigger running finished")
         except:  # noqa
+            print("DAQ trigger except")
             self.active_microscope.daq.stop_acquisition()
+            print("stop acquisiton except")
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}",
                 self.active_microscope.current_exposure_time,
             )
+            print("prepare acquisition except")
             self.active_microscope.daq.run_acquisition()
         finally:
             # Ensure the laser is turned off
-            self.active_microscope.turn_off_lasers()
+                print("run acquisition except")
+        self.active_microscope.turn_off_lasers()
+        print("lasers turned off")
 
         if hasattr(self, "signal_container"):
+            print("hasstributes signal container model snap image")
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames
+        # print(f"*** snap image frame id = {self.frame_id}")
 
     def run_live_acquisition(self):
         """Stream live image to the GUI.
@@ -1000,6 +1027,7 @@ class Model:
             and not self.stop_send_signal
             and not self.stop_acquisition
         ):
+            print(f"run acquisition signal container end flag: {self.signal_container.end_flag}")
             self.snap_image()
             if not hasattr(self, "signal_container"):
                 return

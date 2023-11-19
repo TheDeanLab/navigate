@@ -44,6 +44,7 @@ from aslm.model.devices.APIs.asi.asi_tiger_controller import (
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+import time
 
 
 def build_ASI_Stage_connection(com_port, baud_rate=115200):
@@ -250,7 +251,9 @@ class ASIStage(StageBase):
                 )
             else:
                 # The 10 is to account for the ASI units, 1/10 of a micron
+                print("stage moving function called")
                 self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
+                print("stage moved")
 
         except TigerException as e:
             print(
@@ -404,7 +407,7 @@ class ASIStage(StageBase):
         end_position_mm: float
             scan end position
         enc_divide: float
-            an output pulse will occur every enc_divide number of encoder counts
+            Step size desired.
         axis: str
             fast axis name
 
@@ -416,9 +419,53 @@ class ASIStage(StageBase):
         try:
             axis = self.axes_mapping[axis]
             self.tiger_controller.scanr(
-                start_position_mm, end_position_mm, enc_divide, axis
+                start_position_mm,
+                end_position_mm,
+                enc_divide,
+                axis
             )
-        except TigerException:
+        except TigerException as e:
+            logger.exception(f"TigerException: {e}")
+            print(logger.exception())
+            return False
+        except KeyError as e:
+            logger.exception(f"ASI Stage - KeyError in scanr: {e}")
+            return False
+        return True
+    
+    def scanv(self, start_position_mm, end_position_mm, number_of_lines, overshoot, axis="z"):
+        """Set scan range
+
+        Parameters
+        ----------
+        start_position_mm: float
+            scan start position
+        end_position_mm: float
+            scan end position
+        number of lines: int
+            number of steps.
+        overshoot: float
+            overshoot_time ms    
+        axis: str
+            fast axis name
+
+        Returns
+        -------
+        success: bool
+            Was the setting successful?
+        """
+        try:
+            axis = self.axes_mapping[axis]
+            self.tiger_controller.scanv(
+                start_position_mm,
+                end_position_mm,
+                number_of_lines,
+                overshoot,
+                axis
+            )
+        except TigerException as e:
+            logger.exception(f"TigerException: {e}")
+            print(logger.exception())
             return False
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in scanr: {e}")
@@ -442,7 +489,8 @@ class ASIStage(StageBase):
         try:
             axis = self.axes_mapping[axis]
             self.tiger_controller.start_scan(axis)
-        except TigerException:
+        except TigerException as e:
+            logger.exception(f"TigerException: {e}")
             return False
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in start_scan: {e}")
@@ -455,3 +503,24 @@ class ASIStage(StageBase):
             self.tiger_controller.stop_scan()
         except TigerException as e:
             logger.exception("ASI Stage Exception", e)
+
+    # def get_axis_busy(self, axis):
+
+    def wait_until_complete(self, axis):
+        try:
+            while self.tiger_controller.is_axis_busy(axis):
+                tempvar = self.tiger_controller.is_axis_busy(axis)
+                tempvar2 = self.get_axis_position(axis)
+                print(f"stage busy = {tempvar}")
+                print(f"Current Position:",{tempvar2})
+                time.sleep(0.1)
+        except TigerException as e:
+            print(f"ASI Stage Exception {e}")
+            logger.exception(f"ASI Stage Exception {e}")
+            return False
+        return True
+
+    # def wait_until_complete(self):
+    #     """ Wait until all axes have stopped moving."""
+    #     while self.tiger_controller.is_moving():
+    #         pass

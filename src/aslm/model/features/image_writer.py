@@ -232,6 +232,10 @@ class ImageWriter:
 
         """
 
+        # self.data_source.set_metadata_from_configuration_experiment(
+        #     self.model.configuration
+        # )
+
         for idx in frame_ids:
             if (idx < 0) or (idx > (self.number_of_frames - 1)):
                 msg = f"Received invalid index {idx}. Skipping this frame."
@@ -265,6 +269,7 @@ class ImageWriter:
                 image = self.data_buffer[idx]
             # Save data to disk
             try:
+                # print("Data Buffer Positions:", self.model.data_buffer_positions[idx])
                 self.data_source.write(
                     image,
                     x=self.model.data_buffer_positions[idx][0],

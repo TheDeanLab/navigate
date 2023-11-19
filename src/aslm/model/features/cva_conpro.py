@@ -37,6 +37,10 @@ import logging
 import numpy as np
 import re
 from aslm.model.features.image_writer import ImageWriter
+# from aslm.model import data_sources
+# from aslm.model.data_sources import data_source
+# # from aslm.model.data_sources import D
+# import os
 
 
 p = __name__.split(".")[1]
@@ -46,18 +50,9 @@ logger = logging.getLogger(p)
 
 
 class CVACONPRO:
-    # def __init__(self, model, axis='z', saving_flag=False, saving_dir="cva"):
     def __init__(self, model, axis='z', saving_flag=False, saving_dir="cva"):
         self.model = model
 
-        # Update stage position
-        # self.model.active_microscope.ask_stage_for_position = True
-        # stage_positions = self.model.active_microscope.get_stage_position()
-        # success = self.model.active_microscope.move_stage(
-        #     pos_dict=stage_positions,
-        #     wait_until_done=True,
-        #     update_focus=False)
-        # print("Moving stages successful:", success)
 
         self.axis = axis
         self.default_speed = None
@@ -88,6 +83,8 @@ class CVACONPRO:
             "node": {"node_type": "multi-step", "device_related": True},
         }
 
+       
+
     def pre_func_signal(self):
         """Prepare the constant velocity acquisition.
 
@@ -110,19 +107,9 @@ class CVACONPRO:
         -------
         None
         """
-
-        # Inject new trigger source.
-        # self.model.active_microscope.prepare_next_channel()
-        # # TODO: retrieve this parameter from configuration file
- 
-        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
-        # self.model.active_microscope.daq.number_triggers = 0
-        # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
         
-        print("**** CVA TTL STARTED pre signal func****") 
-        print("pre func initiated")
+        print("**** CVA TTL STARTED pre signal func initiated****") 
         self.asi_stage = self.model.active_microscope.stages[self.axis]
-        print("self.asi stage")
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
         self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
         self.channels = microscope_state["selected_channels"]
@@ -134,12 +121,7 @@ class CVACONPRO:
         self.end_signal_temp = 0
 
 
-        # get the current exposure time for that channel.
-        # exposure_time = float( 
-        #     self.model.configuration["experiment"][
-        #         "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
-        #         "camera_exposure_time"]) / 1000.0
-        # self.model.active_microscope.current_channel = 2
+        # get the current exposure time for channel channel.
         readout_time = self.model.active_microscope.get_readout_time()
         print("readout time calculated")
         print(f"*** readout time = {readout_time} s")
@@ -169,11 +151,7 @@ class CVACONPRO:
         print(f"*** Scaling Factor = {scaling_factor}")
         logger.info(f"*** current sweep time: {current_sweep_time}")
         logger.info(f"*** sweep time scaling: {scaling_factor}")
-        # self.sweep_time = current_sweep_time
-        # logger.debug(f"running signal node: {self.curr_node.node_name}")
-
-        # print("*** current exposure time:", self.model.active_microscope.current_channel, exposure_time)
-
+        
         # Calculate Stage Velocity
         encoder_resolution = 10 # nm
         minimum_encoder_divide = encoder_resolution*4 # nm
@@ -191,11 +169,7 @@ class CVACONPRO:
         
         print("*** step size um:", desired_sampling_um)
         logger.info(f"*** step size um: {desired_sampling_um}")
-        
-
-        
-        # logger.debug("*** step size um:", desired_sampling_um)
-
+    
         # The stage is at 45 degrees relative to the optical axes.
         step_size = (desired_sampling * 2) / np.sqrt(2)  # 45 degrees, 226 nm
         print("Desired Axial Sampling:", desired_sampling)
@@ -277,19 +251,14 @@ class CVACONPRO:
             abs(self.stop_position_um - self.start_position_um) / self.actual_mechanical_step_size_um)
         
 
-        # expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
         expected_frames_v1 = np.ceil(((new_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
         expected_frames = int(np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time))
-        print(f"*** Expected Frames V1:{expected_frames_v1}")
-        print(f"*** Expected Frames: {expected_frames}")
+        print(f"*** Expected Frames from zsteps:{expected_frames_v1}")
+        print(f"*** Expected Frames from start and stop position: {expected_frames}")
         print(f"*** new_z_steps = {new_z_steps}")
         logger.info(f"*** Expected Frames: {expected_frames}")
         self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPRO"
-        # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(np.ceil(int(expected_frames)/2))
-        # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
-
         self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = expected_frames
-        # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
         self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = 1
 
         self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"]
@@ -305,6 +274,10 @@ class CVACONPRO:
         logger.info(f"Expand Frames = {Expand_frames}") 
         self.model.configuration["experiment"]["MicroscopeState"]["number_z_steps"] = expected_frames
         
+        # Updates metadata for saving each channel with the correct number of frames
+        # self.file_type = self.model.configuration["experiment"]["Saving"]["file_type"]
+        # self.data_source = data_sources.get_data_source(self.file_type)
+        # self.data_source.set_metadata_from_configuration_experiment(self.model.configuration)   
         
         self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
@@ -326,14 +299,7 @@ class CVACONPRO:
         posw = self.asi_stage.get_axis_position(self.axis)
         print(f"current position = {posw}, start position = {self.start_position_um}")
         self.asi_stage.start_scan(self.axis)
-        # self.asi_stage.stop_scan()
         print("scan started")
-
-        # while abs(posw - self.stop_position_um)>1:
-        #         posw = self.asi_stage.get_axis_position(self.axis)
-        #         print(f"current position = {posw}, start position of scan = {self.start_position_um}")
-        #         logger.info(f"current position = {posw}, start position of scan = {self.start_position_um}")  
-        #         time.sleep(0.1)
  
     def end_func_signal(self):
         print("in end_func_signal")
@@ -400,8 +366,6 @@ class CVACONPRO:
             print(f"current channel = {self.model.active_microscope.current_channel}")
             self.model.active_microscope.prepare_next_channel()
             print("channel prepared after model")
-            # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
-            # print(f"external trigger set to {self.model.active_microscope.daq.external_trigger}")
 
             self.model.resume_data_thread()
             print("DATA THREAD RESUMED IN CHANNEL")

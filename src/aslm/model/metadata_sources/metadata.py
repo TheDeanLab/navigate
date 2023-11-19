@@ -123,26 +123,6 @@ class Metadata:
             )
             or (
                 self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "ConstantVelocityAcquisition"
-            )
-            or (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "CVASINGLEWAVE"
-            )
-            # or (
-            #     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            #     == "CVACONPRO"
-            # )
-            or (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "CVACONT"
-            )
-            or (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "CVACONPROMULTICHANNEL"
-            )
-            or (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                 == "customized"
             )
         ):
@@ -157,18 +137,7 @@ class Metadata:
                 self.configuration["experiment"]["MicroscopeState"]["n_plane"]
             )
         elif (self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "CVATTL"):
-            testvar = self.configuration["waveform_templates"]["CVACONPRO"]["expand"]
-            testvar2 = self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
-            # print(f"METADATA shape expand frames = {testvar}")
-            # print(f"METADATA zstep shape = {testvar2}")    
-            self.shape_z = int(testvar2)
-        elif (self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "CVACONPRO"):
-            # testvar = self.configuration["waveform_templates"]["CVACONPRO"]["expand"]
-            # testvar2 = self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
-            # # print(f"METADATA shape expand frames = {testvar}")
-            # # print(f"METADATA zstep shape = {testvar2}")    
+                == "CVACONPRO"):  
             self.shape_z = int(self.configuration["experiment"]["MicroscopeState"]["number_z_steps"])    
         else:
             self.shape_z = 1

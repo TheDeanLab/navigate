@@ -32,37 +32,86 @@
 
 import pytest
 
-#local imports
+# local imports
 from aslm.model.features.feature_related_functions import *
+
 
 @pytest.mark.parametrize(
     "feature_list_str, expected_list",
-    [("", None),
-     ("[]", []),
-     ("[{'name': PrepareNextChannel}]", [{"name": PrepareNextChannel}]),
-     ("[{'name': NonExistFeature}]", None),
-     ("[({'name': PrepareNextChannel}, {'name': LoopByCount})]", [({"name": PrepareNextChannel}, {"name": LoopByCount})]),
-     ("[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3,)})]", [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})]),
-     ("[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': 3})]", [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})]),
-     ("[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3)})]", [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})]),
-     ("[(({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3)}))]", [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})]),
-     ("[{'name': ZStackAcquisition, 'args': (True, False, 'zstack',)}]", [{"name": ZStackAcquisition, "args": (True, False, "zstack",)}])
-    ]
+    [
+        ("", None),
+        ("[]", []),
+        ("[{'name': PrepareNextChannel}]", [{"name": PrepareNextChannel}]),
+        ("[{'name': NonExistFeature}]", None),
+        (
+            "[({'name': PrepareNextChannel}, {'name': LoopByCount})]",
+            [({"name": PrepareNextChannel}, {"name": LoopByCount})],
+        ),
+        (
+            "[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3,)})]",
+            [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})],
+        ),
+        (
+            "[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': 3})]",
+            [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})],
+        ),
+        (
+            "[({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3)})]",
+            [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})],
+        ),
+        (
+            "[(({'name': PrepareNextChannel}, {'name': LoopByCount, 'args': (3)}))]",
+            [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})],
+        ),
+        (
+            "[{'name': ZStackAcquisition, 'args': (True, False, 'zstack',)}]",
+            [
+                {
+                    "name": ZStackAcquisition,
+                    "args": (
+                        True,
+                        False,
+                        "zstack",
+                    ),
+                }
+            ],
+        ),
+    ],
 )
 def test_convert_str_to_feature_list(feature_list_str, expected_list):
     feature_list = convert_str_to_feature_list(feature_list_str)
 
     assert feature_list == expected_list
 
+
 @pytest.mark.parametrize(
     "feature_list, expected_str",
-    [(None, "[]"),
-     ([], "[]"),
-     ([{"name": PrepareNextChannel}], '[{"name": PrepareNextChannel,},]'),
-     ([({"name": PrepareNextChannel}, {"name": LoopByCount})], '[({"name": PrepareNextChannel,},{"name": LoopByCount,},),]'),
-     ([({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})], '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,)},),]'),
-     ([{"name": ZStackAcquisition, "args": (True, False, "zstack",)}], '[{"name": ZStackAcquisition,"args": (True,False,"zstack",)},]')
-    ]
+    [
+        (None, "[]"),
+        ([], "[]"),
+        ([{"name": PrepareNextChannel}], '[{"name": PrepareNextChannel,},]'),
+        (
+            [({"name": PrepareNextChannel}, {"name": LoopByCount})],
+            '[({"name": PrepareNextChannel,},{"name": LoopByCount,},),]',
+        ),
+        (
+            [({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})],
+            '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,)},),]',
+        ),
+        (
+            [
+                {
+                    "name": ZStackAcquisition,
+                    "args": (
+                        True,
+                        False,
+                        "zstack",
+                    ),
+                }
+            ],
+            '[{"name": ZStackAcquisition,"args": (True,False,"zstack",)},]',
+        ),
+    ],
 )
 def test_convert_feature_list_to_str(feature_list, expected_str):
     feature_str = convert_feature_list_to_str(feature_list)

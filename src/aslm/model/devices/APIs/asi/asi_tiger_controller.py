@@ -10,7 +10,6 @@ import threading
 
 import time
 
-import numpy as np
 
 class TigerException(Exception):
     """
@@ -423,7 +422,7 @@ class TigerController:
         self.send_command(f"SPEED {axis}?")
         response = self.read_response()
         return float(response.split("=")[1])
-    
+
     def get_encoder_counts_per_mm(self, axis: str):
         """
         Get encoder counts pre mm of axis
@@ -448,7 +447,7 @@ class TigerController:
             enc_divide = enc_divide_mm
         else:
             enc_divide = int(enc_divide * enc_divide_mm)
-        
+
         command = (
             f"SCANR "
             f"X={round(start_position_mm, 6)} "
@@ -466,7 +465,7 @@ class TigerController:
         number_of_lines: float,
         overshoot: float = 1.0,
         axis: str = "X",
-    ):  
+    ):
         command = (
             f"SCANV "
             f"X={round(start_position_mm, 6)} "
@@ -477,9 +476,7 @@ class TigerController:
 
         self.send_command(command)
         self.read_response()
-        
 
-    
     def start_scan(self, axis: str, is_single_axis_scan: bool = True):
         """
         Start scan
@@ -494,7 +491,7 @@ class TigerController:
 
         # Not sure if this requires an S
         # self.send_command(f"SCAN S")
-        self.send_command(f"SCAN")
+        self.send_command("SCAN")
         # self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
         self.read_response()
 
@@ -506,7 +503,7 @@ class TigerController:
         self.read_response()
 
     def is_moving(self):
-        """ Check to see if the stage is moving.
+        """Check to see if the stage is moving.
 
         Sends the command / which is equivalent to STATUS
 
@@ -529,10 +526,10 @@ class TigerController:
             time.sleep(sleep_time)
 
         self.send_command("/")
-        response = self.read_response().rstrip().rstrip('\r\n')
+        response = self.read_response().rstrip().rstrip("\r\n")
         if response == "ACK":
             self.send_command("/")
-            response = self.read_response().rstrip().rstrip('\r\n')
+            response = self.read_response().rstrip().rstrip("\r\n")
         if response == "B":
             return True
         elif response == "N":

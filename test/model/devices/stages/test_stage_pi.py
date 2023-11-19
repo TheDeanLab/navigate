@@ -40,6 +40,7 @@ from pipython import GCSError
 # Local Imports
 from aslm.model.devices.stages.stage_pi import PIStage
 
+
 class MockPIStage:
     def __init__(self):
         self.axes = [1, 2, 3, 4, 5]
@@ -60,7 +61,7 @@ class MockPIStage:
                 raise GCSError
             pos[str(axis)] = getattr(self, f"{axis}_abs")
         return pos
-    
+
     def STP(self, noraise=True):
         pass
 
@@ -70,21 +71,21 @@ class MockPIStage:
 
 class TestStagePI:
     """Unit Test for PI Stage Class"""
+
     @pytest.fixture(autouse=True)
-    def setup_class(self, stage_configuration, random_single_axis_test, random_multiple_axes_test):
+    def setup_class(
+        self, stage_configuration, random_single_axis_test, random_multiple_axes_test
+    ):
         self.microscope_name = "Mesoscale"
         self.configuration = {
             "configuration": {
-                "microscopes": {
-                    self.microscope_name: stage_configuration
-                }
+                "microscopes": {self.microscope_name: stage_configuration}
             }
         }
         self.stage_configuration = stage_configuration
         self.stage_configuration["stage"]["hardware"]["type"] = "PI"
         self.random_single_axis_test = random_single_axis_test
         self.random_multiple_axes_test = random_multiple_axes_test
-
 
     def test_stage_attributes(self):
         stage = PIStage(self.microscope_name, None, self.configuration)
@@ -137,8 +138,14 @@ class TestStagePI:
             assert hasattr(stage, f"{axis}_min")
             assert hasattr(stage, f"{axis}_max")
             assert getattr(stage, f"{axis}_pos") == 0
-            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
-            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
+            assert (
+                getattr(stage, f"{axis}_min")
+                == self.stage_configuration["stage"][f"{axis}_min"]
+            )
+            assert (
+                getattr(stage, f"{axis}_max")
+                == self.stage_configuration["stage"][f"{axis}_max"]
+            )
 
         if axes_mapping is None:
             # using default mapping which is hard coded in stage_pi.py
@@ -173,10 +180,7 @@ class TestStagePI:
     )
     def test_report_position(self, axes, axes_mapping):
         PI_device = MockPIStage()
-        device_connection = {
-            "pi_tools": PI_device,
-            "pi_device": PI_device
-        }
+        device_connection = {"pi_tools": PI_device, "pi_device": PI_device}
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
         stage = PIStage(self.microscope_name, device_connection, self.configuration)
@@ -187,13 +191,12 @@ class TestStagePI:
                 pos = random.randrange(-100, 500)
                 pos_dict[f"{axis}_pos"] = float(pos)
                 if axis != "theta":
-                    setattr(PI_device, f"{stage.axes_mapping[axis]}_abs", pos/1000)
+                    setattr(PI_device, f"{stage.axes_mapping[axis]}_abs", pos / 1000)
                 else:
                     setattr(PI_device, f"{stage.axes_mapping[axis]}_abs", float(pos))
             temp_pos = stage.report_position()
             assert pos_dict == temp_pos
-            
-    
+
     @pytest.mark.parametrize(
         "axes, axes_mapping",
         [
@@ -215,10 +218,7 @@ class TestStagePI:
     )
     def test_move_axis_absolute(self, axes, axes_mapping):
         PI_device = MockPIStage()
-        device_connection = {
-            "pi_tools": PI_device,
-            "pi_device": PI_device
-        }
+        device_connection = {"pi_tools": PI_device, "pi_device": PI_device}
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
         stage = PIStage(self.microscope_name, device_connection, self.configuration)
@@ -247,14 +247,10 @@ class TestStagePI:
     )
     def test_move_absolute(self, axes, axes_mapping):
         PI_device = MockPIStage()
-        device_connection = {
-            "pi_tools": PI_device,
-            "pi_device": PI_device
-        }
+        device_connection = {"pi_tools": PI_device, "pi_device": PI_device}
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
         stage = PIStage(self.microscope_name, device_connection, self.configuration)
         self.random_multiple_axes_test(stage)
         stage.stage_limits = False
         self.random_multiple_axes_test(stage)
-    

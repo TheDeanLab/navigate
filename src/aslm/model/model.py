@@ -36,7 +36,6 @@ import logging
 import multiprocessing as mp
 import time
 import os
-import traceback
 
 # Third Party Imports
 
@@ -525,7 +524,11 @@ class Model:
             if self.imaging_mode == "projection":
                 self.move_stage({"z_abs": 0})
 
-            if self.imaging_mode == "live" or self.imaging_mode == "projection" or self.imaging_mode == "CVATTL":
+            if (
+                self.imaging_mode == "live"
+                or self.imaging_mode == "projection"
+                or self.imaging_mode == "CVATTL"
+            ):
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:
                 self.signal_thread = threading.Thread(target=self.run_acquisition)
@@ -810,11 +813,11 @@ class Model:
                 # If not constant_velocity_acquisition_mode
                 self.data_container.run(frame_ids)
                 # if constant_velocity_acquisition mode
-                    # if self.number_triggers = 0
-                        # Throw away the frame.
-                        # self.number_triggers += 1
-                    # else:
-                        # Pass frame through data container.
+                # if self.number_triggers = 0
+                # Throw away the frame.
+                # self.number_triggers += 1
+                # else:
+                # Pass frame through data container.
 
             # show image
             self.logger.info(f"ASLM Model - Sent through pipe{frame_ids[0]}")

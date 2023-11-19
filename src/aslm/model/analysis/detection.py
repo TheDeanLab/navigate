@@ -32,14 +32,13 @@
 # Third Party Modules
 import numpy as np
 from skimage.filters import threshold_otsu
-from skimage.morphology import dilation, erosion, remove_small_objects
+from skimage.morphology import dilation, erosion
 from skimage.measure import label, regionprops
-from skimage.feature import blob_log, blob_dog, blob_doh
+from skimage.feature import blob_log, blob_dog
 from scipy.ndimage import gaussian_filter, binary_fill_holes
 from scipy import ndimage, signal
 import matplotlib.pyplot as plt
 import logging
-from pathlib import Path
 
 # Logger Setup
 p = __name__.split(".")[1]

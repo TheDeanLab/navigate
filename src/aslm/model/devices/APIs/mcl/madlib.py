@@ -26,7 +26,7 @@ MadlibErrorCodeDescription = {
     MadlibErrorCode.MCL_INVALID_HANDLE: "Invalid axis handle",
 }
 
-# TODO: 'z' and 'f' have the same number? 
+# TODO: 'z' and 'f' have the same number?
 axes = {"x": 1, "y": 2, "z": 3, "f": 3, "aux": 4}
 
 

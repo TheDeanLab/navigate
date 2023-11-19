@@ -17,7 +17,6 @@ import signal
 
 # Sharing memory between child processes is tricky:
 import ctypes as C
-from pathlib import Path
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -1081,7 +1080,6 @@ class _Tests:
             raise UserWarning("No exceptions raised." "Expected some RuntimeErrors")
 
     def test_proxy_with_lock_with_waitlist(self):
-        import time
 
         try:
             from tqdm import tqdm
@@ -1177,7 +1175,7 @@ class _Tests:
                     f" Did not match expected output:\n"
                     f'     "{repr(expected_output)}"\n'
                 )
-        except Exception as e:
+        except Exception:
             print("v" * 80)
             print(traceback.format_exc().strip("\n"))
             print("^" * 80)
@@ -1186,7 +1184,7 @@ class _Tests:
             if printed_output.getvalue():
                 for l in printed_output.getvalue().strip("\n").split("\n"):
                     print(f"   {l}")
-            print(f'{f"> Success <":-^80s}')
+            print(f'{"> Success <":-^80s}')
 
     def _summarize_results(self):
         fill = "#" if self.passed == self.tests else "!"

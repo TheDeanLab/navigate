@@ -34,7 +34,9 @@ class TestLaserNI(unittest.TestCase):
             waveform_templates=waveform_templates_path,
         )
 
-        self.microscope_name = self.configuration["configuration"]["microscopes"].keys()[0]
+        self.microscope_name = self.configuration["configuration"][
+            "microscopes"
+        ].keys()[0]
         self.device_connection = None
         laser_id = 0
 
@@ -90,4 +92,3 @@ class TestLaserNI(unittest.TestCase):
         )
 
         assert self.laser._current_intensity == self.current_intensity
-        

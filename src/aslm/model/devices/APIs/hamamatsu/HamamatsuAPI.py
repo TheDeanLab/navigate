@@ -770,7 +770,7 @@ class DCAM:
                 # print("error message: ", DCAMERR(errvalue))
             except:  # noqa
                 pass
-                #self.logger.debug(f"error message: {errvalue}")
+                # self.logger.debug(f"error message: {errvalue}")
                 # print("error message: ", errvalue)
             return False
 

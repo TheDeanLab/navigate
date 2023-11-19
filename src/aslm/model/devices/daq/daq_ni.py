@@ -113,7 +113,9 @@ class NIDAQ(DAQBase):
         external_trigger : nidaqmx.Task
             Task for external triggering
         """
-        self.trigger_mode = "self-trigger" if external_trigger is None else "external-trigger"
+        self.trigger_mode = (
+            "self-trigger" if external_trigger is None else "external-trigger"
+        )
         self.external_trigger = external_trigger
         # self.asi_stage = self.model.active_microscope.stages[self.axis]
 
@@ -121,7 +123,8 @@ class NIDAQ(DAQBase):
         if self.trigger_mode == "self-trigger":
             self.create_master_trigger_task()
             trigger_source = self.configuration["configuration"]["microscopes"][
-            self.microscope_name]["daq"]["trigger_source"]
+                self.microscope_name
+            ]["daq"]["trigger_source"]
 
             # set camera task trigger source
             try:
@@ -139,9 +142,8 @@ class NIDAQ(DAQBase):
                 except:
                     (print(traceback.format_exc()))
                 self.analog_output_tasks[
-                    board_name].triggers.start_trigger.cfg_dig_edge_start_trig(
-                    trigger_source
-                )
+                    board_name
+                ].triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
                 self.analog_output_tasks[board_name].register_done_event(None)
 
         else:
@@ -155,7 +157,8 @@ class NIDAQ(DAQBase):
             self.master_trigger_task = None
             # camera task trigger source
             self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
-                self.external_trigger)
+                self.external_trigger
+            )
 
             # change camera task to so that it can be triggered again.
             self.camera_trigger_task.triggers.start_trigger.retriggerable = False
@@ -164,7 +167,8 @@ class NIDAQ(DAQBase):
             for board_name in self.analog_output_tasks.keys():
                 task = self.analog_output_tasks[board_name]
                 task.triggers.start_trigger.cfg_dig_edge_start_trig(
-                    self.external_trigger)
+                    self.external_trigger
+                )
                 task.register_done_event(None)
                 task.register_done_event(self.restart_analog_task_callback_func(task))
 
@@ -229,8 +233,8 @@ class NIDAQ(DAQBase):
             sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
             samps_per_chan=camera_waveform_repeat_num,
         )
-            # sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
-            # samps_per_chan=camera_waveform_repeat_num)
+        # sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
+        # samps_per_chan=camera_waveform_repeat_num)
 
     def create_master_trigger_task(self):
         """Set up the DO master trigger task."""
@@ -339,10 +343,14 @@ class NIDAQ(DAQBase):
         exposure_time : float
             Camera exposure duration.
         """
-        waveform_template_name = self.configuration['experiment']['MicroscopeState'][
-            "waveform_template"]
+        waveform_template_name = self.configuration["experiment"]["MicroscopeState"][
+            "waveform_template"
+        ]
         logger.info(f"Waveform Template Name: {waveform_template_name}")
-        self.waveform_repeat_num, self.waveform_expand_num = get_waveform_template_parameters(
+        (
+            self.waveform_repeat_num,
+            self.waveform_expand_num,
+        ) = get_waveform_template_parameters(
             waveform_template_name,
             self.configuration["waveform_templates"],
             self.configuration["experiment"]["MicroscopeState"],
@@ -377,7 +385,7 @@ class NIDAQ(DAQBase):
             self.camera_trigger_task.start()
             for task in self.analog_output_tasks.values():
                 task.start()
-        
+
         if self.trigger_mode == "self-trigger":
             self.master_trigger_task.write(
                 [False, True, True, True, False], auto_start=True
@@ -409,7 +417,7 @@ class NIDAQ(DAQBase):
 
         Stop all tasks and close them.
         """
-        try:            
+        try:
             if self.trigger_mode == "self-trigger":
                 self.camera_trigger_task.stop()
                 self.camera_trigger_task.close()
@@ -422,7 +430,7 @@ class NIDAQ(DAQBase):
                     self.external_trigger = None
                 else:
                     self.external_trigger = None
-            
+
             if self.trigger_mode == "self-trigger":
                 self.master_trigger_task.stop()
                 self.master_trigger_task.close()

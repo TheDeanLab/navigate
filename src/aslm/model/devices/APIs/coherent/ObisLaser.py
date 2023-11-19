@@ -4,10 +4,9 @@ OBIS561, 150 mW, is COM4
 Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
 """
 import logging
-from pathlib import Path
 
 import serial
-from time import time, sleep
+from time import sleep
 
 from aslm.model.devices.lasers.LaserBase import LaserBase
 

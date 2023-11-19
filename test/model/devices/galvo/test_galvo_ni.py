@@ -156,7 +156,7 @@ class TestGalvoNI(unittest.TestCase):
 
         assert type(waveforms) == dict
         self.device_connection.assert_not_called()
-        
+
         for channel_key, channel_setting in self.configuration["experiment"][
             "MicroscopeState"
         ]["channels"].items():

@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 import serial
 import re
@@ -78,7 +77,7 @@ class LuxxLaser(LaserBase):
 
             # Close the port
             self.laser.close()
-            logger.debug(f"Port closed")
+            logger.debug("Port closed")
 
         except serial.SerialException:
             print("Could not close the port")

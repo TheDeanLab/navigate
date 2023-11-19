@@ -1,4 +1,4 @@
- # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
 #
 
 # Standard Library Imports
-import time
 import logging
+
 # Third Party Imports
 import numpy as np
-import re 
+import re
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -46,7 +46,7 @@ logger = logging.getLogger(p)
 class CVACONPROMULTICHANNEL:
     """Class for acquiring data using the ASI internal encoder."""
 
-    def __init__(self, model, axis='z'):
+    def __init__(self, model, axis="z"):
         self.model = model
         self.axis = axis
         self.default_speed = None
@@ -92,10 +92,10 @@ class CVACONPROMULTICHANNEL:
         # Inject new trigger source.
         # self.model.active_microscope.prepare_next_channel()
         # # TODO: retrieve this parameter from configuration file
- 
+
         # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1")
         # self.model.active_microscope.daq.number_triggers = 0
-         
+
         print("pre func initiated")
         self.asi_stage = self.model.active_microscope.stages[self.axis]
         print("self.asi stage")
@@ -103,7 +103,7 @@ class CVACONPROMULTICHANNEL:
         self.end_channel = False
 
         # get the current exposure time for that channel.
-        # exposure_time = float( 
+        # exposure_time = float(
         #     self.model.configuration["experiment"][
         #         "MicroscopeState"]["channels"][f"channel_{self.model.active_microscope.current_channel}"][
         #         "camera_exposure_time"]) / 1000.0
@@ -111,18 +111,25 @@ class CVACONPROMULTICHANNEL:
         readout_time = self.model.active_microscope.get_readout_time()
         print("readout time calculated")
         print(f"*** readout time = {readout_time} s")
-        exposure_times, sweep_times = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
+        (
+            exposure_times,
+            sweep_times,
+        ) = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
         print("sweep times and exposure times calculated")
         print(f"exposure time = {exposure_times}")
         print(f"sweep time = {sweep_times}")
         channel_name = next(iter(sweep_times))
         channel_name = str(channel_name)
-        channel_num = re.findall(r'[\d.]+',channel_name)
+        channel_num = re.findall(r"[\d.]+", channel_name)
         channel_num = int(channel_num[0])
         self.model.active_microscope.current_channel = channel_num
         print(f"channel_{self.model.active_microscope.current_channel}")
-        current_sweep_time = sweep_times[f"channel_{self.model.active_microscope.current_channel}"]
-        current_expsure_time = exposure_times[f"channel_{self.model.active_microscope.current_channel}"]
+        current_sweep_time = sweep_times[
+            f"channel_{self.model.active_microscope.current_channel}"
+        ]
+        current_expsure_time = exposure_times[
+            f"channel_{self.model.active_microscope.current_channel}"
+        ]
         self.current_sweep_time = current_sweep_time
         self.current_exposure_time = current_expsure_time
         self.readout_time = readout_time
@@ -131,7 +138,7 @@ class CVACONPROMULTICHANNEL:
 
         # Provide just a bit of breathing room for the sweep time...
         current_sweep_time = current_sweep_time * scaling_factor
-        
+
         print("*** current sweep time:", current_sweep_time)
         logger.info(f"*** current sweep time: {current_sweep_time}")
         logger.info(f"*** sweep time scaling: {scaling_factor}")
@@ -141,25 +148,26 @@ class CVACONPROMULTICHANNEL:
         # print("*** current exposure time:", self.model.active_microscope.current_channel, exposure_time)
 
         # Calculate Stage Velocity
-        encoder_resolution = 10 # nm
-        minimum_encoder_divide = encoder_resolution*4 # nm
+        encoder_resolution = 10  # nm
+        minimum_encoder_divide = encoder_resolution * 4  # nm
 
         # Get step size from the GUI. For now, assume 160 nm.
         # Default units should probably be microns I believe. Confirm.
         # desired_sampling = 160  # nm
-        desired_sampling = float(
-            self.model.configuration[
-                "experiment"]["MicroscopeState"]["step_size"]) * 1000.0
-        
+        desired_sampling = (
+            float(
+                self.model.configuration["experiment"]["MicroscopeState"]["step_size"]
+            )
+            * 1000.0
+        )
+
         desired_sampling_um = float(
-            self.model.configuration[
-                "experiment"]["MicroscopeState"]["step_size"])
-        
+            self.model.configuration["experiment"]["MicroscopeState"]["step_size"]
+        )
+
         print("*** step size um:", desired_sampling_um)
         logger.info(f"*** step size um: {desired_sampling_um}")
-        
 
-        
         # logger.debug("*** step size um:", desired_sampling_um)
 
         # The stage is at 45 degrees relative to the optical axes.
@@ -178,32 +186,40 @@ class CVACONPROMULTICHANNEL:
 
         # Calculate the actual step size in millimeters. 264 * 10^-6 mm
         step_size_mm = step_size_nm / 1 * 10**-6  # 264 * 10^-6 mm
-        #TODO set max speed in configuration file
-        max_speed = 4.288497*2
+        # TODO set max speed in configuration file
+        max_speed = 4.288497 * 2
 
         # Set the start and end position of the scan in millimeters.
         # Retrieved from the GUI.
         # Set Stage Limits - Units in millimeters
         # microns to mm
-        self.start_position = float(
-            self.model.configuration[
-                "experiment"]["MicroscopeState"]["abs_z_start"]) / 1000.0
-        self.stop_position = float(
-            self.model.configuration[
-                "experiment"]["MicroscopeState"]["abs_z_end"]) / 1000.0
+        self.start_position = (
+            float(
+                self.model.configuration["experiment"]["MicroscopeState"]["abs_z_start"]
+            )
+            / 1000.0
+        )
+        self.stop_position = (
+            float(
+                self.model.configuration["experiment"]["MicroscopeState"]["abs_z_end"]
+            )
+            / 1000.0
+        )
         self.number_z_steps = float(
-            self.model.configuration[
-                "experiment"]["MicroscopeState"]["number_z_steps"])
-        
+            self.model.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
+        )
+
         logger.info(f"*** z start position: {self.start_position}")
         logger.info(f"*** z end position: {self.stop_position}")
         logger.info(f"*** Expected number of steps: {self.number_z_steps}")
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {pos}")
         print(f"Start position = {self.start_position*1000}")
-        
+
         # move to start position:
-        self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+        self.asi_stage.move_axis_absolute(
+            self.axis, self.start_position * 1000.0, wait_until_done=True
+        )
         posw = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {posw}")
         print(f"Start position = {self.start_position*1000}")
@@ -216,9 +232,9 @@ class CVACONPROMULTICHANNEL:
 
         # basic speed - essentially the minimum speed value permitted by the
         # stage, of which subsequent values are multiples of.
-        self.asi_stage.set_speed(percent=0.0001/max_speed)
+        self.asi_stage.set_speed(percent=0.0001 / max_speed)
         basic_speed = self.asi_stage.get_speed(self.axis)  # mm/s
-        print("Basic Speed = ",basic_speed)
+        print("Basic Speed = ", basic_speed)
 
         # TODO: set the speed from GUI? step size?
         # Calculate the stage velocity in mm/seconds. 5.28 * 10^-3 s
@@ -227,49 +243,70 @@ class CVACONPROMULTICHANNEL:
         # get exposure time
         # expected_speed = step_size / exposure_time
         expected_speed = step_size_mm / current_sweep_time
-        print("Expected velocity = ",expected_speed)
+        print("Expected velocity = ", expected_speed)
 
-        self.asi_stage.set_speed(percent=expected_speed/max_speed)
+        self.asi_stage.set_speed(percent=expected_speed / max_speed)
         stage_velocity = self.asi_stage.get_speed(self.axis)
         print("Final stage velocity, (mm/s):", stage_velocity)
-        print("Encoder divide step size = ",step_size_mm)
+        print("Encoder divide step size = ", step_size_mm)
         logger.info(f"*** Expected stage velocity, (mm/s): {expected_speed}")
         logger.info(f"*** Final stage velocity, (mm/s): {stage_velocity}")
 
         # expected_frames = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
-        expected_frames_v1 = np.ceil(((self.number_z_steps * step_size_mm)/stage_velocity)/current_sweep_time)
-        expected_frames = int(np.ceil(abs(self.start_position - self.stop_position)/stage_velocity/current_sweep_time))
+        expected_frames_v1 = np.ceil(
+            ((self.number_z_steps * step_size_mm) / stage_velocity) / current_sweep_time
+        )
+        expected_frames = int(
+            np.ceil(
+                abs(self.start_position - self.stop_position)
+                / stage_velocity
+                / current_sweep_time
+            )
+        )
         print(f"*** Expected Frames V1:{expected_frames_v1}")
         print(f"*** Expected Frames: {expected_frames}")
         logger.info(f"*** Expected Frames: {expected_frames}")
-        self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "CVACONPROMULTICHANNEL" 
+        self.model.configuration["experiment"]["MicroscopeState"][
+            "waveform_template"
+        ] = "CVACONPROMULTICHANNEL"
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(np.ceil(int(expected_frames)/2))
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"] = int(expected_frames)
 
-        self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"]["expand"] = expected_frames
+        self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"][
+            "expand"
+        ] = expected_frames
         # self.model.configuration["waveform_templates"]["CVACONPRO"]["repeat"] = int(expected_frames)
-        self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"]["repeat"] = 1
+        self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"][
+            "repeat"
+        ] = 1
 
-        self.repeat_waveform = self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"]["repeat"]
-        self.expand_waveform = self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"]["expand"]
+        self.repeat_waveform = self.model.configuration["waveform_templates"][
+            "CVACONPROMULTICHANNEL"
+        ]["repeat"]
+        self.expand_waveform = self.model.configuration["waveform_templates"][
+            "CVACONPROMULTICHANNEL"
+        ]["expand"]
         print(f"repeat num = {self.repeat_waveform}")
         print(f"expand num = {self.expand_waveform}")
-        Expand_frames = float(self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"]["expand"])
+        Expand_frames = float(
+            self.model.configuration["waveform_templates"]["CVACONPROMULTICHANNEL"][
+                "expand"
+            ]
+        )
         self.expected_frames = expected_frames  # np.ceil(expected_frames/(self.repeat_waveform*self.expand_waveform))
         print("waveforms obtained from config")
         print(f"Expand Frames = {Expand_frames}")
         print(f"Self Expected Frames test = {self.expected_frames}")
         logger.info(f"Self Expected Frames test = {self.expected_frames}")
-        logger.info(f"Expand Frames = {Expand_frames}") 
-        
+        logger.info(f"Expand Frames = {Expand_frames}")
+
         self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
         # #   ms calculated v2 {self.waveform_dict}")
         self.model.active_microscope.prepare_next_channel()
         # print("microscope channel prepared")
         # self.model.active_microscope.current_channel = 0
-        
-        
+
         # print("stage moving to stop position at speed")
         # posw = self.asi_stage.get_axis_position(self.axis)
         # print(f"before scan to stop Current Position = {posw}")
@@ -293,12 +330,11 @@ class CVACONPROMULTICHANNEL:
             #         self.model.configuration[
             #             "experiment"]["MicroscopeState"][
             #             "start_focus"])) / 45397.6,
-            axis=self.axis
+            axis=self.axis,
         )
 
         # Start the daq acquisition.  Basically places all of the waveforms in a ready
         # state so that they will be run one time when the trigger is received.
-        
 
         # Start the stage scan.  Also get this functionality into the ASI stage class.
         self.asi_stage.start_scan(self.axis)
@@ -315,8 +351,6 @@ class CVACONPROMULTICHANNEL:
         #     self.model.active_microscope.daq.run_acquisition()
         #     print("microscope running after sleep")
 
-        
-
         # time.sleep(5) #seconds
         # # self.model.active_microscope.daq.set_external_trigger("/PXI6259/PFI1",self.asi_stage)
         # pos = self.asi_stage.get_axis_position(self.axis)
@@ -327,13 +361,11 @@ class CVACONPROMULTICHANNEL:
         # TODO: wait time to be more reasonable
         # time.sleep(5)
 
-
         # Stage starts to move and sends a trigger to the DAQ.
         # HOw do we know how many images to acquire?
-       
-       
-       # acquired_frame_num = self.model.active_microscope.run_data_process()
-        # print(f"frames run data process init = {acquired_frame_num}") 
+
+    # acquired_frame_num = self.model.active_microscope.run_data_process()
+    # print(f"frames run data process init = {acquired_frame_num}")
 
     def end_func_signal(self):
         print("in end_func_signal")
@@ -344,7 +376,7 @@ class CVACONPROMULTICHANNEL:
         if self.end_channel:
             # Update channel
             return True
-        # acquired_frame_num_v2 = self.model.active_microscope.run_data_process() 
+        # acquired_frame_num_v2 = self.model.active_microscope.run_data_process()
         # pos = self.asi_stage.get_axis_position(self.axis)
         # print(f"Current Position = {pos}")
         # logger.info(f"Current Position = {pos}")
@@ -370,20 +402,16 @@ class CVACONPROMULTICHANNEL:
         #         print(f"End Expected Frames = {self.expected_frames}")
         #         return True
 
-        
         # pos_temp = []
         # lengthframes = 2
-        
+
         # pos_temp.append(pos)
-        
+
         # TODO: after scan, the stage will go back to the start position and stop sending out triggers.
-        
-        
-       
-            
+
         # elif pos_temp(2)-pos_temp(1):
-        #     print("testdataset") 
-        #     return True 
+        #     print("testdataset")
+        #     return True
         # TODO: wait time to be more reasonable
         # time.sleep(5)
         print("returning False from end_func_signal")
@@ -407,17 +435,19 @@ class CVACONPROMULTICHANNEL:
         # self.asi_stage.set_speed(0.9)
         print("speed set")
         end_speed = self.asi_stage.get_speed(self.axis)  # mm/s
-        print("end Speed = ",end_speed)
+        print("end Speed = ", end_speed)
         self.asi_stage.stop()
         print("stage stop")
-        
+
         print("external trigger none")
         # return to start position
         # self.start_position = float(
         #     self.model.configuration[
         #         "experiment"]["MicroscopeState"]["abs_z_start"])
         # self.asi_stage.move_absolute({f"{self.axis}_abs: {self.start_position}"})
-        self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+        self.asi_stage.move_axis_absolute(
+            self.axis, self.start_position * 1000.0, wait_until_done=True
+        )
         print("stage moved to original position")
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {pos}")
@@ -435,9 +465,11 @@ class CVACONPROMULTICHANNEL:
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Received: {self.received_frames} Expected: {self.expected_frames}")
         print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
-        logger.info(f"Received: {self.received_frames} Expected: {self.expected_frames}")
+        logger.info(
+            f"Received: {self.received_frames} Expected: {self.expected_frames}"
+        )
         logger.info(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
         self.end_channel = self.received_frames >= self.expected_frames
         # If channel is ended, but there are more channels to go, return False
-        # If channel is ended and this was the last channel, return True  
+        # If channel is ended and this was the last channel, return True
         return self.end_channel

@@ -1174,7 +1174,6 @@ class ZStackAcquisition:
                 }
             ]
 
-
         # Setup next channel down here, to ensure defocus isn't merged into
         # restore f_pos, positions
         self.model.active_microscope.central_focus = None
@@ -1299,8 +1298,6 @@ class ZStackAcquisition:
                 f"*** Zstack move stage: (z: {self.current_z_position}), "
                 f"(f: {self.current_focus_position})"
             )
-            
-
 
             if self.should_pause_data_thread and not data_thread_is_paused:
                 self.model.pause_data_thread()
@@ -1607,8 +1604,8 @@ class ConProAcquisition:
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
- 
-        self.model.move_stage({"z_abs": 0 })
+
+        self.model.move_stage({"z_abs": 0})
 
     def pre_signal_func(self):
         """

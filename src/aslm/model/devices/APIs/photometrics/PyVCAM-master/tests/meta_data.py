@@ -3,7 +3,7 @@ import numpy as np
 
 from pyvcam import pvc
 from pyvcam.camera import Camera
-from pyvcam import constants
+
 
 def main():
     pvc.init_pvcam()
@@ -19,11 +19,15 @@ def main():
     while cnt < num_frames:
         frame, fps, frame_count = cam.poll_frame()
 
-        low = np.amin(frame['pixel_data'])
-        high = np.amax(frame['pixel_data'])
-        average = np.average(frame['pixel_data'])
+        low = np.amin(frame["pixel_data"])
+        high = np.amax(frame["pixel_data"])
+        average = np.average(frame["pixel_data"])
 
-        print('Min:{}\tMax:{}\tAverage:{:.0f}\tFrame Rate: {:.1f}\tFrame Count: {:.0f}\n'.format(low, high, average, fps, frame_count))
+        print(
+            "Min:{}\tMax:{}\tAverage:{:.0f}\tFrame Rate: {:.1f}\tFrame Count: {:.0f}\n".format(
+                low, high, average, fps, frame_count
+            )
+        )
         cnt += 1
 
         time.sleep(0.05)
@@ -32,7 +36,7 @@ def main():
     cam.close()
     pvc.uninit_pvcam()
 
-    print('Total frames: {}\n'.format(cnt))
+    print("Total frames: {}\n".format(cnt))
 
 
 if __name__ == "__main__":

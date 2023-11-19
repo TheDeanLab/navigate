@@ -180,9 +180,9 @@ class OMETIFFMetadata(XMLMetadata):
                 # if they are both moving along the same physical dimension
                 if self._coupled_axes is not None:
                     for leader, follower in self._coupled_axes:
-                        view[leader] += view[follower] / float(getattr(
-                            self, f"d{follower.lower()}"
-                        ))
+                        view[leader] += view[follower] / float(
+                            getattr(self, f"d{follower.lower()}")
+                        )
 
                 d = {
                     "DeltaT": dt,

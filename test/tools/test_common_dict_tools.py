@@ -63,6 +63,7 @@ def create_mock_stage_target():
     }
     return target
 
+
 class UpdateStageDictTestCase(unittest.TestCase):
     def test_update_single_axis(self):
         target = create_mock_stage_target()

@@ -169,7 +169,6 @@ class RemoteFocusBase:
                         zoom
                     ][channel["laser"]].get("percent_smoothing", 0.0)
                 )
-                  
 
                 # Remote Focus Parameters
                 temp = waveform_constants["remote_focus_constants"][imaging_mode][zoom][

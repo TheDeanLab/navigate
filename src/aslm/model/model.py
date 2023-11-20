@@ -36,7 +36,6 @@ import logging
 import multiprocessing as mp
 import time
 import os
-import traceback
 
 # Third Party Imports
 
@@ -807,14 +806,14 @@ class Model:
                     self.logger.info("ASLM Model - Data container is closed.")
                     self.stop_acquisition = True
                     break
-                # If not constant_velocity_acquisition_mode
+
                 self.data_container.run(frame_ids)
-                # if constant_velocity_acquisition mode
-                    # if self.number_triggers = 0
-                        # Throw away the frame.
-                        # self.number_triggers += 1
-                    # else:
-                        # Pass frame through data container.
+
+                # if self.number_triggers = 0
+                # Throw away the frame.
+                # self.number_triggers += 1
+                # else:
+                # Pass frame through data container.
 
             # show image
             self.logger.info(f"ASLM Model - Sent through pipe{frame_ids[0]}")
@@ -827,15 +826,12 @@ class Model:
         self.show_img_pipe.send("stop")
         self.logger.info("ASLM Model - Data thread stopped.")
         self.logger.info(f"ASLM Model - Received frames in total: {acquired_frame_num}")
-        # self.acquired_frame_num = acquired_frame_num
-        # return self.acquired_frame_num
 
         # release the lock when data thread ends
         if self.pause_data_ready_lock.locked():
             self.pause_data_ready_lock.release()
 
         self.end_acquisition()  # Need this to turn off the lasers/close the shutters
-        return acquired_frame_num
 
     def pause_data_thread(self):
         """Pause the data thread.

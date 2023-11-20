@@ -232,10 +232,6 @@ class ImageWriter:
 
         """
 
-        # self.data_source.set_metadata_from_configuration_experiment(
-        #     self.model.configuration
-        # )
-
         for idx in frame_ids:
             if (idx < 0) or (idx > (self.number_of_frames - 1)):
                 msg = f"Received invalid index {idx}. Skipping this frame."

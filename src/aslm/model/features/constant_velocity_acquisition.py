@@ -49,7 +49,7 @@ logger = logging.getLogger(p)
 # Local imports
 
 
-class CVACONPRO:
+class CONSTANTVELOCITYACQUISITION:
     def __init__(self, model, axis='z', saving_flag=False, saving_dir="cva"):
         self.model = model
 

@@ -72,28 +72,6 @@ class LabelInput(ttk.Frame):
                input_args={"from_": 0.5, "to": 100, "increment": 0.1},
                label_args={"height": 2, "width": 4})
 
-
-    Parameters
-    ----------
-    parent : tk.Frame
-        The parent frame that the widget will be placed in
-    label_pos : str
-        The position of the label, defaults to left
-    input_class : tk.Widget
-        The type of widget to be used, defaults to entry
-    input_var : tk.Variable
-        The variable to be used for the widget
-    input_args : dict
-        The arguments to be passed to the widget
-    label_args : dict
-        The arguments to be passed to the label
-    kwargs : dict
-        The keyword arguments to be passed to the super constructor
-
-    Returns
-    -------
-    None
-
     """
 
     def __init__(
@@ -107,6 +85,27 @@ class LabelInput(ttk.Frame):
         label_args=None,
         **kwargs,
     ):
+        """Initialize LabelInput widget
+
+        Parameters
+        ----------
+        parent : tk widget
+            The parent widget of the LabelInput widget
+        label_pos : str, optional
+            The position of the label, by default "left"
+        label : str, optional
+            The text of the label, by default ""
+        input_class : tk widget, optional
+            The type of input widget, by default ttk.Entry
+        input_var : tk variable, optional
+            The variable of the input widget, by default None
+        input_args : dict, optional
+            The arguments of the input widget, by default None
+        label_args : dict, optional
+            The arguments of the label widget, by default None
+        **kwargs : dict
+            The arguments of the parent widget, by default None
+        """
         # Calls frame constructor using parent and keyword args
         super().__init__(parent, **kwargs)
 
@@ -119,7 +118,9 @@ class LabelInput(ttk.Frame):
 
         # same for variable of the input, typically this will be a Tk style var
         # like StringVar which can be accessed by any widget in the app
+        #: tk.Variable: The variable of the input widget
         self.variable = input_var
+        #: tk.Widget: The widget of the input widget
         self.input_class = input_class
 
         """ Create widgets based on their type, considering formatting differences."""
@@ -135,11 +136,13 @@ class LabelInput(ttk.Frame):
             input_args["text"] = label
             input_args["variable"] = input_var
         else:
+            #: ttk.Label: The label of the input widget
             self.label = ttk.Label(self, text=label, **label_args)
             self.label.grid(row=0, column=0, sticky=(tk.W + tk.E))
             input_args["textvariable"] = input_var
 
         """Call the passed widget type constructor with the passed args"""
+        #: tk.Widget: The widget of the input widget
         self.widget = input_class(self, **input_args)
 
         """Specify label position"""
@@ -209,8 +212,6 @@ class LabelInput(ttk.Frame):
         value : str
             The value to set the input widget to
 
-
-
         Examples
         --------
         >>> self.set(value)
@@ -262,8 +263,6 @@ class LabelInput(ttk.Frame):
         values : list
             list of values to be set in the widget
 
-
-
         Examples
         --------
         >>> widget.set_values(['a', 'b', 'c'])
@@ -301,8 +300,6 @@ class LabelInput(ttk.Frame):
             right padding
         down : int
             down padding
-
-
 
         Examples
         --------

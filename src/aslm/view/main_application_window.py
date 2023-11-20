@@ -89,20 +89,37 @@ class MainApp(ttk.Frame):
     """
 
     def __init__(self, root, configuration, *args, **kwargs):
+        """Initiates the main application window
+
+        Parameters
+        ----------
+        root : tk.Tk
+            The main window of the application
+        configuration : dict
+            The configuration dictionary for the application
+        *args
+            Variable length argument list
+        **kwargs
+            Arbitrary keyword arguments
+        """
 
         # Inits this class as a frame subclass with the root as its parent
+        #: ScrolledFrame: The scrollable version of the main frame for the application
         self.scroll_frame = ScrolledFrame(root)
         self.scroll_frame.grid(row=0, column=0, sticky=tk.NSEW)
 
         ttk.Frame.__init__(self, self.scroll_frame.interior, *args, **kwargs)
 
         # Initialize Logger
+        #: logging.Logger: The logger for this class
         self.logger = logging.getLogger(p)
 
         # This starts the main window config, and makes sure that any child
         # widgets can be resized with the window
+        #: tk.Tk: The main window of the application
         self.root = root
         self.root.title("Autonomous Software for Light Microscopy")
+        #: dict: The configuration dictionary for the application
         self.configuration = configuration
 
         # keep icons relative to view directory structure
@@ -118,18 +135,23 @@ class MainApp(ttk.Frame):
         tk.Grid.rowconfigure(root, "all", weight=1)
 
         # Creating and linking menu to main window/app
+        #: Menubar: The menu bar for the application
         self.menubar = Menubar(root)
 
         # Top Frame Acquire Bar
+        #: ttk.Frame: The top frame of the application
         self.top_frame = ttk.Frame(self)
 
         # Left Frame Notebook 1 setup
+        #: ttk.Frame: The left frame of the application
         self.frame_left = ttk.Frame(self)
 
         # Top right Frame Notebook 2 setup
+        #: ttk.Frame: The top right frame of the application
         self.frame_top_right = ttk.Frame(self)
 
         # Bottom right Frame Notebook 3 setup
+        #: ttk.Frame: The bottom right frame of the application
         self.frame_bottom_right = ttk.Frame(self)
 
         # Grid out foundational frames
@@ -143,8 +165,11 @@ class MainApp(ttk.Frame):
 
         # Putting Notebooks into frames, tabs are held within the class of each
         # notebook
+        #: SettingsNotebook: The settings notebook for the application
         self.settings = SettingsNotebook(
             frame_left=self.frame_left, root=self.root, configuration=self.configuration
         )
+        #: CameraNotebook: The camera notebook for the application
         self.camera_waveform = CameraNotebook(self.frame_top_right, root=self.root)
+        #: AcquireBar: The acquire bar for the application
         self.acqbar = AcquireBar(self.top_frame, root=self.root)

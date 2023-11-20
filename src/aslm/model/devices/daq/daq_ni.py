@@ -241,7 +241,9 @@ class NIDAQ(DAQBase):
             Channel key for analog output.
         """
         n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
-        if len(n_samples) > 1:
+        if len(n_samples) == 0:
+            return
+        elif len(n_samples) > 1:
             logger.debug(
                 "NI DAQ - Different number of samples provided for each analog"
                 "channel. Defaulting to the minimum number of samples provided."

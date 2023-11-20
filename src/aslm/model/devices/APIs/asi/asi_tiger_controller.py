@@ -1,6 +1,7 @@
 # serialport.py
 from serial import Serial
 from serial import SerialException
+from serial import SerialTimeoutException
 from serial import EIGHTBITS
 from serial import PARITY_NONE
 from serial import STOPBITS_ONE
@@ -221,7 +222,11 @@ class TigerController:
         # send the serial command to the controller
         self.report_to_console(cmd)
         command = bytes(f"{cmd}\r", encoding="ascii")
-        self.serial_port.write(command)
+        try:
+            self.serial_port.write(command)
+        except SerialTimeoutException as e:
+            print(f"Tiger Controller -- SerialTimeoutException: {e}")
+            pass
         # print(f"Sent Command: {command.decode(encoding='ascii')}")
 
     def read_response(self) -> str:
@@ -318,7 +323,15 @@ class TigerController:
                     self.default_axes_sequence,
                 )
             )
-            return {axis: float(pos[1 + i]) for i, axis in enumerate(axes_seq)}
+            # return {axis: float(pos[1 + i]) for i, axis in enumerate(axes_seq)}
+            axis_dict = {}
+            for i, axis in enumerate(axes_seq):
+                try:
+                    axis_dict[axis] = float(pos[1 + i])
+                except ValueError:
+                    # Report position failed. Don't crash, we can try again.
+                    pass
+            return axis_dict
         else:
             result = {}
             for axis in axes:

@@ -46,47 +46,23 @@ logger = logging.getLogger(p)
 
 
 class ilastik_setting_popup:
-    """Popup window for setting up ilastik segmentation
-
-    Parameters
-    ----------
-    root : tkinter.Tk
-        Root window
-    *args
-        Arguments
-    **kwargs
-        Keyword arguments
-
-    Attributes
-    ----------
-    popup : PopUp
-        Popup window
-    project_name_var : tkinter.StringVar
-        Variable for project name
-    load_project_btn : ttk.Button
-        Button for loading project
-    label_frame : ttk.Frame
-        Frame for label selection
-    show_on_gui : tkinter.Checkbutton
-        Checkbutton for showing segmentation on GUI
-    mark_position : tkinter.Checkbutton
-        Checkbutton for marking position
-    confirm_btn : ttk.Button
-        Button for confirming setting
-
-    Methods
-    -------
-    get_buttons()
-        Get all buttons
-    get_widgets()
-        Get all widgets
-    get_variables()
-        Get all variables
-    """
+    """Popup window for setting up ilastik segmentation settings."""
 
     def __init__(self, root, *args, **kwargs):
+        """Initialize the popup window
+
+        Parameters
+        ----------
+        root : tkinter.Tk
+            Root window
+        *args :
+            Variable length argument list
+        **kwargs :
+            Arbitrary keyword arguments
+        """
+
         # Creating popup window with this name and size/placement, PopUp is a
-        # Toplevel window
+        #: PopUp: PopUp window class
         self.popup = PopUp(
             root, "Ilastik Settings", "+320+180", top=False, transient=True
         )
@@ -94,6 +70,7 @@ class ilastik_setting_popup:
         # Creating content frame
         content_frame = self.popup.get_frame()
 
+        #: tkinter.StringVar: Variable for project name
         self.project_name_var = tkinter.StringVar(
             value="Please select an ilastik pixelclassification project file!"
         )
@@ -105,6 +82,7 @@ class ilastik_setting_popup:
             state="readonly",
         )
         project_name_entry.grid(row=1, column=0, pady=(10, 10), padx=(0, 10))
+        #: ttk.Button: Button for loading ilastik project
         self.load_project_btn = ttk.Button(
             content_frame, text="Load Ilastik Project", width=30
         )
@@ -113,6 +91,7 @@ class ilastik_setting_popup:
         tkinter.Label(content_frame, text="Select all target labels:").grid(
             row=2, sticky=NW
         )
+        #: ttk.Frame: Frame for labels
         self.label_frame = ttk.Frame(content_frame, padding="3 3 12 12")
         self.label_frame.grid(row=3, columnspan=2, sticky=NSEW)
         default_colors = ["red", "#0082c8", "#ffe119"]
@@ -130,18 +109,20 @@ class ilastik_setting_popup:
         tkinter.Label(content_frame, text="Choose the way to use segmentation:").grid(
             row=4, sticky=NW
         )
+        #: tkinter.Checkbutton: Checkbutton for showing segmentation
         self.show_on_gui = tkinter.Checkbutton(content_frame, text="Show Segmentation")
         self.show_on_gui.grid(row=5, column=0, padx=(20, 0), pady=(10, 20), sticky="W")
+
+        #: tkinter.Checkbutton: Checkbutton for marking position
         self.mark_position = tkinter.Checkbutton(content_frame, text="Mark Position")
         self.mark_position.grid(row=5, column=1, padx=(0, 0), pady=(10, 20), sticky="W")
 
+        #: ttk.Button: Button for confirming setting
         self.confirm_btn = ttk.Button(content_frame, text="Confirm Setting", width=30)
         self.confirm_btn.grid(row=7, column=1, sticky="SE", padx=(0, 10), pady=(0, 10))
 
     def get_buttons(self):
         """Get all buttons
-
-
 
         Returns
         -------
@@ -153,8 +134,6 @@ class ilastik_setting_popup:
     def get_variables(self):
         """Get all variables
 
-
-
         Returns
         -------
         dict
@@ -164,8 +143,6 @@ class ilastik_setting_popup:
 
     def get_widgets(self):
         """Get all widgets
-
-
 
         Returns
         -------

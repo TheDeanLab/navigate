@@ -44,14 +44,23 @@ class SplashScreen(tk.Toplevel):
 
     Briefly shows a splash screen upon loading the software.
     Centered depending upon the host computer being used.
-
-    Parameters
-    tk.Toplevel : tk window
-        Top level GUI.
-
     """
 
     def __init__(self, root, imgDir, *args, **kargs):
+        """Initialize the SplashScreen.
+
+        Parameters
+        ----------
+        root : Tk top-level widget
+            Tkinter GUI instance to which this SplashScreen belongs.
+        imgDir : str
+            Path to the image to display on the splash screen.
+        *args
+            Additional arguments to pass to the tk.Toplevel constructor.
+        **kargs
+            Additional keyword arguments to pass to the tk.Toplevel constructor.
+        """
+
         tk.Toplevel.__init__(self, root)
         # without navigation panel
         self.overrideredirect(True)

@@ -358,7 +358,7 @@ class ConstantVelocityAcquisition:
             
             if self.current_channel_in_list>0:
                 print("PAUSING DATA THREAD IF STATEMENT IN CHANNEL")
-                self.model.pause_data_thread
+                self.model.pause_data_thread()
                 print("DATA THREAD PAUSED IN CHANNEL")
 
             self.asi_stage.set_speed(percent=0.5)

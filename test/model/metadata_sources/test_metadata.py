@@ -95,7 +95,10 @@ def test_metadata_set_stack_order_from_configuration_experiment(
         assert md._per_stack is True
     elif image_mode == "confocal-projection" and conpro_cycling_mode == "per_stack":
         assert md._per_stack is True
-    elif image_mode == "ConstantVelocityAcquisition" and stack_cycling_mode == "per_stack":
+    elif (
+        image_mode == "ConstantVelocityAcquisition"
+        and stack_cycling_mode == "per_stack"
+    ):
         assert md._per_stack is True
     else:
         assert md._per_stack is False

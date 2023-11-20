@@ -153,7 +153,7 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
             from pyvcam.camera import Camera
 
             pvc.init_pvcam()
-            camera_names = Camera.get_available_camera_names()
+            # camera_names = Camera.get_available_camera_names()
             camera_toopen = Camera.select_camera(camera_connection)
             camera_toopen.open()
             return camera_toopen

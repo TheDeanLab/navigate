@@ -127,7 +127,6 @@ class RemoteFocusBase:
             Waveform for the remote focus device.
         """
 
-       
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         waveform_constants = self.configuration["waveform_constants"]
@@ -171,7 +170,7 @@ class RemoteFocusBase:
                     self.sweep_time = (self.sweep_time - duty_cycle_wait_duration) / (
                         1 + ps / 100
                     ) + duty_cycle_wait_duration
-                  
+
                 # Remote Focus Parameters
                 temp = waveform_constants["remote_focus_constants"][imaging_mode][zoom][
                     laser

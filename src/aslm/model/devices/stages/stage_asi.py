@@ -31,6 +31,7 @@
 
 # Standard Imports
 import logging
+import time
 
 # Third Party Imports
 
@@ -44,7 +45,6 @@ from aslm.model.devices.APIs.asi.asi_tiger_controller import (
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
-import time
 
 
 def build_ASI_Stage_connection(com_port, baud_rate=115200):
@@ -175,7 +175,7 @@ class ASIStage(StageBase):
         else:
             # Force cast axes to uppercase
             self.axes_mapping = {k: v.upper() for k, v in self.axes_mapping.items()}
-            
+
         self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
         # Set feedback alignment values - Default to 85 if not specified
@@ -209,14 +209,15 @@ class ASIStage(StageBase):
                 )
                 / 2
             )
-            # If this is changing, the stage must be power cycled for these changes to take effect.
+            # If this is changing, the stage must be power cycled for these changes to
+            # take effect.
             for ax in self.asi_axes.keys():
                 if self.asi_axes[ax] == "theta":
                     self.tiger_controller.set_finishing_accuracy(ax, 0.003013)
                     self.tiger_controller.set_error(ax, 0.1)
                 else:
                     self.tiger_controller.set_finishing_accuracy(ax, finishing_accuracy)
-                    self.tiger_controller.set_error(ax, 1.2*finishing_accuracy)
+                    self.tiger_controller.set_error(ax, 1.2 * finishing_accuracy)
 
             # Set backlash to 0 (less accurate)
             for ax in self.asi_axes.keys():
@@ -226,7 +227,6 @@ class ASIStage(StageBase):
 
             # Speed optimizations - Set speed to 90% of maximum on each axis
             self.set_speed(percent=0.9)
-
 
     def __del__(self):
         """Delete the ASI Stage connection."""
@@ -308,7 +308,9 @@ class ASIStage(StageBase):
         # Move stage
         try:
             if axis == "theta":
-                self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 1000)
+                self.tiger_controller.move_axis(
+                    self.axes_mapping[axis], axis_abs * 1000
+                )
             else:
                 # The 10 is to account for the ASI units, 1/10 of a micron
                 self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
@@ -320,7 +322,7 @@ class ASIStage(StageBase):
             )
             logger.exception("ASI Stage Exception", e)
             return False
-        
+
         if wait_until_done:
             self.tiger_controller.wait_for_device()
         return True
@@ -376,7 +378,8 @@ class ASIStage(StageBase):
 
         # This is to account for the asi 1/10 of a micron units
         pos_dict = {
-            self.axes_mapping[axis]: pos * 1000 if axis == "theta" else pos * 10 for axis, pos in abs_pos_dict.items()
+            self.axes_mapping[axis]: pos * 1000 if axis == "theta" else pos * 10
+            for axis, pos in abs_pos_dict.items()
         }
         try:
             self.tiger_controller.move(pos_dict)
@@ -476,10 +479,7 @@ class ASIStage(StageBase):
         try:
             axis = self.axes_mapping[axis]
             self.tiger_controller.scanr(
-                start_position_mm,
-                end_position_mm,
-                enc_divide,
-                axis
+                start_position_mm, end_position_mm, enc_divide, axis
             )
         except TigerException as e:
             logger.exception(f"TigerException: {e}")
@@ -493,8 +493,10 @@ class ASIStage(StageBase):
 
         return True
         # return True
-    
-    def scanv(self, start_position_mm, end_position_mm, number_of_lines, overshoot, axis="z"):
+
+    def scanv(
+        self, start_position_mm, end_position_mm, number_of_lines, overshoot, axis="z"
+    ):
         """Set scan range
 
         Parameters
@@ -506,7 +508,7 @@ class ASIStage(StageBase):
         number of lines: int
             number of steps.
         overshoot: float
-            overshoot_time ms    
+            overshoot_time ms
         axis: str
             fast axis name
 
@@ -518,11 +520,7 @@ class ASIStage(StageBase):
         try:
             axis = self.axes_mapping[axis]
             self.tiger_controller.scanv(
-                start_position_mm,
-                end_position_mm,
-                number_of_lines,
-                overshoot,
-                axis
+                start_position_mm, end_position_mm, number_of_lines, overshoot, axis
             )
         except TigerException as e:
             logger.exception(f"TigerException: {e}")

@@ -49,7 +49,7 @@ logger = logging.getLogger(p)
 # Local imports
 
 
-class CONSTANTVELOCITYACQUISITION:
+class CVACONPRO:
     def __init__(self, model, axis='z', saving_flag=False, saving_dir="cva"):
         self.model = model
 
@@ -108,7 +108,7 @@ class CONSTANTVELOCITYACQUISITION:
         None
         """
         
-        print("**** CONSTANTVELOCITYACQUISITION STARTED pre signal func initiated****") 
+        print("**** CVA TTL STARTED pre signal func initiated****") 
         self.asi_stage = self.model.active_microscope.stages[self.axis]
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
         self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
@@ -176,14 +176,18 @@ class CONSTANTVELOCITYACQUISITION:
         print("Desired Step Size of Stage:", step_size)
 
         # Calculate the desired encoder divide. Must be multiple of
+        # minimum_encoder_divide. 2.6 encoder divides, round up to 3.
+        # *** WHY IS THIS DIVIDE BY 2? TO CORRECT STEP SIZE ABOVE?
         desired_encoder_divide = np.ceil(step_size / minimum_encoder_divide)
         print("*** desired encoder divide:", desired_encoder_divide)
-
+        # Calculate the actual step size in nanometers. 264 nm.
         step_size_nm = desired_encoder_divide * minimum_encoder_divide
         print("Actual Step Size of Stage:", step_size_nm)
 
-        # Calculate the actual step size in millimeters. 
-        step_size_mm = step_size_nm / 10**-6 
+        # Calculate the actual step size in millimeters. 264 * 10^-6 mm
+        step_size_mm = step_size_nm / 1 * 10**-6  # 264 * 10^-6 mm
+        #TODO set max speed in configuration file
+        # max_speed = 4.288497*2
 
         
 
@@ -287,6 +291,7 @@ class CONSTANTVELOCITYACQUISITION:
         
         self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
+        # #   ms calculated v2 {self.waveform_dict}")
         self.model.active_microscope.daq.external_trigger = "/PXI6259/PFI1"
         print(f"external trigger set to {self.model.active_microscope.daq.external_trigger}")
         self.model.active_microscope.prepare_next_channel()
@@ -353,7 +358,7 @@ class CONSTANTVELOCITYACQUISITION:
             
             if self.current_channel_in_list>0:
                 print("PAUSING DATA THREAD IF STATEMENT IN CHANNEL")
-                self.model.pause_data_thread()
+                self.model.pause_data_thread
                 print("DATA THREAD PAUSED IN CHANNEL")
 
             self.asi_stage.set_speed(percent=0.5)
@@ -396,11 +401,24 @@ class CONSTANTVELOCITYACQUISITION:
         print("end Speed = ",end_speed)
         self.asi_stage.stop()
         print("stage stop")
+        # print("external trigger none")
+        # return to start position
+        # self.start_position = float(
+        #     self.model.configuration[
+        #         "experiment"]["MicroscopeState"]["abs_z_start"])
+        # self.asi_stage.move_absolute({f"{self.axis}_abs: {self.start_position}"})
+        
+        # self.asi_stage.move_axis_absolute(self.axis, self.start_position * 1000.0, wait_until_done=True)
+        # print("stage moved to original position")
+        # pos = self.asi_stage.get_axis_position(self.axis)
+        # print(f"Current Position = {pos}")
+        # print(f"start position = {self.start_position*1000}")
         
         
         self.asi_stage.wait_until_complete(self.axis)
         print("Stage wait until complete completed after update scan")
             
+
         # self.asi_stage.stop_scan()
         # print("stage stop scan")
         print("DAQ STOP ACQUISITION CALLED CLEAN UP")
@@ -429,10 +447,13 @@ class CONSTANTVELOCITYACQUISITION:
         print(f"total frames = {self.total_frames}")
 
     def in_data_func(self, frame_ids):
+        # print(f"frame_ids = {len(frame_ids)}")
         self.received_frames += len(frame_ids)
         if self.image_writer is not None:
             self.image_writer.save_image(frame_ids)
-        
+        # self.received_frames_v2 = self.received_frames
+        # self.recieved_frames_v2 += self.recieved_frames
+        # print(f"received_Frames v2: {self.recieved_frames_v2}")
 
     def end_data_func(self):
         pos = self.asi_stage.get_axis_position(self.axis)
@@ -444,6 +465,7 @@ class CONSTANTVELOCITYACQUISITION:
         print(f"Received: {self.received_frames} Per Channel: {expected_channel} Expected Total: {self.total_frames} Channel = {self.end_signal_temp + 1} of {self.channels}")
         print(f"time remaining per channel min: {time_remaining_per_channel}, time remaining total min: {time_remaining_total}")
         logger.info(f"Received: {self.received_frames} Per Channel: {expected_channel} Expected Total: {self.total_frames}")
+        # print(f"Received V2: {self.received_frames_v2} Expected: {self.expected_frames}")
         print(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
         logger.info(f"Position: {pos} Stop Position: {self.stop_position*1000} ")
         self.end_acquisition = self.received_frames >= self.total_frames

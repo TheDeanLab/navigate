@@ -43,7 +43,7 @@ import traceback
 # Local Imports
 from aslm.model.concurrency.concurrency_tools import SharedNDArray
 from aslm.model.features.autofocus import Autofocus
-from aslm.model.features.cva_conpro import CONSTANTVELOCITYACQUISITION
+from aslm.model.features.cva_conpro import CVACONPRO
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
@@ -345,7 +345,7 @@ class Model:
             "confocal-projection": [
                 {"name": PrepareNextChannel},
             ],
-            "CONSTANTVELOCITYACQUISITION": [{"name": CONSTANTVELOCITYACQUISITION}],
+            "CVACONPRO": [{"name": CVACONPRO}],
             "customized": [],
         }
         self.load_feature_records()
@@ -525,7 +525,7 @@ class Model:
             if self.imaging_mode == "projection":
                 self.move_stage({"z_abs": 0})
 
-            if self.imaging_mode == "live" or self.imaging_mode == "projection":
+            if self.imaging_mode == "live" or self.imaging_mode == "projection" or self.imaging_mode == "CVATTL":
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:
                 self.signal_thread = threading.Thread(target=self.run_acquisition)

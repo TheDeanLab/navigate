@@ -137,7 +137,7 @@ class Metadata:
                 self.configuration["experiment"]["MicroscopeState"]["n_plane"]
             )
         elif (self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "CVACONPRO"):  
+                == "ConstantVelocityAcquisition"):  
             self.shape_z = int(self.configuration["experiment"]["MicroscopeState"]["number_z_steps"])    
         else:
             self.shape_z = 1
@@ -199,7 +199,7 @@ class Metadata:
         ) or (self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
             == "per_stack"
             and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "CVACONPRO"
+            == "ConstantVelocityAcquisition"
         )
 
     @property

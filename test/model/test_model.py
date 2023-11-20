@@ -32,8 +32,13 @@
 import random
 import pytest
 import os
+from multiprocessing import Manager
 
 # from time import sleep
+
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
+
+manager = Manager()
 
 
 @pytest.fixture(scope="module")
@@ -42,7 +47,7 @@ def model():
     from pathlib import Path
 
     from aslm.model.model import Model
-    from multiprocessing import Manager, Queue
+    from multiprocessing import Queue
     from aslm.config.config import (
         load_configs,
         verify_experiment_config,
@@ -61,8 +66,6 @@ def model():
     rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
     event_queue = Queue()
-
-    manager = Manager()
 
     configuration = load_configs(
         manager,
@@ -111,6 +114,7 @@ def test_single_acquisition(model):
     model.release_pipe("show_img_pipe")
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test hangs entire workflow on GitHub.")
 def test_multiposition_acquisition(model):
     """Test that the multiposition acquisition works as expected.
 
@@ -122,12 +126,13 @@ def test_multiposition_acquisition(model):
     be populated with the disable_multiposition event. This is because the event queue
     is a multiprocessing.Queue, which is not thread safe.
     """
-    state = model.configuration["experiment"]["MicroscopeState"]
+    # from time import sleep
+    from aslm.config.config import update_config_dict
 
     # def check_queue(event, event_queue):
     #     """Check if the event queue contains the event. If it does, return True.
     #     Otherwise, return False.
-    #
+
     #     Parameters
     #     ----------
     #     event : str
@@ -141,21 +146,31 @@ def test_multiposition_acquisition(model):
     #             return True
     #     return False
 
+    _ = model.create_pipe("show_img_pipe")
+
     # Multiposition is selected and actually is True
-    state["is_multiposition"] = True
-    model.configuration["experiment"]["MultiPositions"] = [
-        {"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}
-    ]
+    model.configuration["experiment"]["MicroscopeState"]["is_multiposition"] = True
+    update_config_dict(
+        manager,
+        model.configuration["experiment"],
+        "MultiPositions",
+        [{"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}],
+    )
     model.run_command("acquire")
+
     # sleep(1)
     # assert (
     #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
     #     is False
     # )
-    assert state["is_multiposition"] is True
+    assert (
+        model.configuration["experiment"]["MicroscopeState"]["is_multiposition"] is True
+    )
+    model.data_thread.join()
 
     # Multiposition is selected but not actually  True
-    model.configuration["experiment"]["MultiPositions"] = []
+    update_config_dict(manager, model.configuration["experiment"], "MultiPositions", [])
+
     model.run_command("acquire")
     # sleep(1)
     # # Check that the event queue is called with the disable_multiposition statement
@@ -163,7 +178,12 @@ def test_multiposition_acquisition(model):
     #     check_queue(event="disable_multiposition", event_queue=model.event_queue)
     #     is True
     # )
-    assert state["is_multiposition"] is False
+    assert (
+        model.configuration["experiment"]["MicroscopeState"]["is_multiposition"]
+        is False
+    )
+    model.data_thread.join()
+    model.release_pipe("show_img_pipe")
 
 
 def test_change_resolution(model):

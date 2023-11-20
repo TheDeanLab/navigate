@@ -809,12 +809,6 @@ class Model:
 
                 self.data_container.run(frame_ids)
 
-                # if self.number_triggers = 0
-                # Throw away the frame.
-                # self.number_triggers += 1
-                # else:
-                # Pass frame through data container.
-
             # show image
             self.logger.info(f"ASLM Model - Sent through pipe{frame_ids[0]}")
             self.show_img_pipe.send(frame_ids[-1])

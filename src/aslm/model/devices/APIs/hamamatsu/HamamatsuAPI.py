@@ -765,13 +765,9 @@ class DCAM:
         """
         if errvalue < 0:
             try:
-                pass
-                # self.logger.debug(f"error message: {DCAMERR(errvalue)}")
-                # print("error message: ", DCAMERR(errvalue))
-            except:  # noqa
-                pass
-                # self.logger.debug(f"error message: {errvalue}")
-                # print("error message: ", errvalue)
+                logger.debug(f"error message: {DCAMERR(errvalue)}")
+            except Exception:
+                logger.debug(f"error message: {errvalue}")
             return False
 
         return True
@@ -844,8 +840,6 @@ class DCAM:
         if ret is False:
             print("Camera dev_open failed")
             return False
-        else:
-            pass
 
         self.__hdcam = c_void_p(paramopen.hdcam)
 

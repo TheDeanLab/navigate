@@ -117,7 +117,6 @@ class NIDAQ(DAQBase):
             "self-trigger" if external_trigger is None else "external-trigger"
         )
         self.external_trigger = external_trigger
-        # self.asi_stage = self.model.active_microscope.stages[self.axis]
 
         # change trigger mode during acquisition in a feature
         if self.trigger_mode == "self-trigger":
@@ -130,7 +129,10 @@ class NIDAQ(DAQBase):
             try:
                 self.camera_trigger_task.stop()
             except Exception:
-                print(traceback.format_exc())
+                print(
+                    f"DAQ NI - Error switching the camera trigger source: "
+                    f"{traceback.format_exc()}"
+                )
             self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
                 trigger_source
             )
@@ -140,7 +142,10 @@ class NIDAQ(DAQBase):
                 try:
                     self.analog_output_tasks[board_name].stop()
                 except Exception:
-                    (print(traceback.format_exc()))
+                    print(
+                        f"DAQ NI - Error stopping analog output tasks: "
+                        f"{traceback.format_exc()}"
+                    )
                 self.analog_output_tasks[
                     board_name
                 ].triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
@@ -153,7 +158,10 @@ class NIDAQ(DAQBase):
                     self.master_trigger_task.stop()
                     self.master_trigger_task.close()
                 except Exception:
-                    print(traceback.format_exc())
+                    print(
+                        f"DAQ NI - Error stopping master trigger task: "
+                        f"{traceback.format_exc()}"
+                    )
             self.master_trigger_task = None
             # camera task trigger source
             self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
@@ -187,7 +195,6 @@ class NIDAQ(DAQBase):
             Callback function
         """
 
-        # self.asi_stage = self.model.active_microscope.stages[self.axis]
         def callback_func(task_handle, status, callback_data):
             try:
                 logger.info("Analog Tasks Restarted")
@@ -438,8 +445,7 @@ class NIDAQ(DAQBase):
                 task.close()
 
         except (AttributeError, nidaqmx.errors.DaqError):
-            print(traceback.format_exc())
-            pass
+            print(f"Error stopping acquisition: {traceback.format_exc()}")
 
         if self.wait_to_run_lock.locked():
             self.wait_to_run_lock.release()
@@ -520,13 +526,16 @@ class NIDAQ(DAQBase):
             ).squeeze()
             self.analog_output_tasks[board_name].write(waveforms)
         except Exception:
-            print(traceback.format_exc())
+            print(f"DAQ NI - Could not update analog task: {traceback.format_exc()}")
             for board in self.analog_output_tasks.keys():
                 try:
                     self.analog_output_tasks[board].stop()
                     self.analog_output_tasks[board].close()
                 except Exception:
-                    print(traceback.format_exc())
+                    print(
+                        f"DAQ NI - Could not stop analog tasks: "
+                        f"{traceback.format_exc()}"
+                    )
 
             self.create_analog_output_tasks(self.current_channel_key)
 

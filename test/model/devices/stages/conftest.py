@@ -36,31 +36,30 @@ import random
 # Third Party Imports
 import pytest
 
-
 @pytest.fixture(scope="module")
 def stage_configuration():
     return {
-        "stage": {
-            "hardware": {
-                "name": "stage",
-                "type": "",
-                "port": "COM10",
-                "baudrate": 115200,
-                "serial_number": 123456,
-                "axes": ["x", "y", "z", "f", "theta"],
-            },
-            "x_max": 100,
-            "x_min": -10,
-            "y_max": 200,
-            "y_min": -20,
-            "z_max": 300,
-            "z_min": -30,
-            "f_max": 400,
-            "f_min": -40,
-            "theta_max": 360,
-            "theta_min": 0,
+            "stage": {
+                "hardware": {
+                    "name": "stage",
+                    "type": "",
+                    "port": "COM10",
+                    "baudrate": 115200,
+                    "serial_number": 123456,
+                    "axes": ["x", "y", "z", "f", "theta"]
+                },
+                "x_max": 100,
+                "x_min": -10,
+                "y_max": 200,
+                "y_min": -20,
+                "z_max": 300,
+                "z_min": -30,
+                "f_max": 400,
+                "f_min": -40,
+                "theta_max": 360,
+                "theta_min": 0
+            }
         }
-    }
 
 
 @pytest.fixture
@@ -109,7 +108,7 @@ def random_multiple_axes_test(stage_configuration):
 
     def _verify_move_absolute(stage):
         axes_mapping = stage.axes_mapping
-
+        
         # move one axis inside supported axes
         stage_pos = stage.report_position()
         for pos_dict in pos_sequence:
@@ -117,7 +116,9 @@ def random_multiple_axes_test(stage_configuration):
             pos = pos_dict[axis]
             axis_min = stage_configuration["stage"][f"{axis}_min"]
             axis_max = stage_configuration["stage"][f"{axis}_max"]
-            move_dict = {f"{axis}_abs": pos}
+            move_dict = {
+                f"{axis}_abs": pos
+            }
             stage.move_absolute(move_dict)
             temp_pos = stage.report_position()
             if not stage.stage_limits or (pos >= axis_min and pos <= axis_max):
@@ -130,7 +131,7 @@ def random_multiple_axes_test(stage_configuration):
             move_dict = {}
             for axis in axes_mapping.keys():
                 move_dict[f"{axis}_abs"] = pos_dict[axis]
-
+            
             stage.move_absolute(move_dict)
             temp_pos = stage.report_position()
             for axis in axes_mapping:
@@ -144,9 +145,7 @@ def random_multiple_axes_test(stage_configuration):
         # move all axes (including supported axes and non-supported axes)
         stage_pos = stage.report_position()
         for pos_dict in pos_sequence:
-            move_dict = dict(
-                map(lambda axis: (f"{axis}_abs", pos_dict[axis]), pos_dict)
-            )
+            move_dict = dict(map(lambda axis: (f"{axis}_abs", pos_dict[axis]), pos_dict))
             stage.move_absolute(move_dict)
             temp_pos = stage.report_position()
             for axis in axes_mapping:
@@ -156,5 +155,5 @@ def random_multiple_axes_test(stage_configuration):
                 if not stage.stage_limits or (pos >= axis_min and pos <= axis_max):
                     stage_pos[f"{axis}_pos"] = pos
             assert stage_pos == temp_pos
-
+    
     return _verify_move_absolute

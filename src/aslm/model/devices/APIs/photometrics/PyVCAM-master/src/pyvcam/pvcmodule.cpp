@@ -101,7 +101,7 @@ public:
         frameSize_ = frameSize;
         return frameBuffer_ != NULL;
     }
-
+    
     void cleanUpFrameBuffer()
     {
 #ifdef _WIN32
@@ -949,7 +949,7 @@ pvc_get_frame(PyObject *self, PyObject *args)
 
         // Toggle newData_ flag unless we are in sequence mode and another frame is available
         camInstance.newData_ = camInstance.seqMode_ && !camInstance.frameQueue_.empty();
-
+        
         PyObject *frameDict = PyDict_New();
         PyObject* roiDataList = PyList_New(0);
         const int NUM_DIMS = 2;

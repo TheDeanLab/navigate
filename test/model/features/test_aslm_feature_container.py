@@ -142,9 +142,7 @@ class DummyFeature:
             self.model.signal_records.append((self.target_frame_id, self.feature_name))
         if self.has_response_func:
             self.wait_lock.acquire()
-            print(
-                self.feature_name, ": wait lock is acquired!!!!", self.target_frame_id
-            )
+            print(self.feature_name, ": wait lock is acquired!!!!", self.target_frame_id)
 
         return True
 
@@ -174,10 +172,7 @@ class DummyFeature:
             # random Yes/No
             self.response_value = random.randint(0, 1)
             print(
-                self.feature_name,
-                ": wait lock is released!(data)",
-                frame_ids,
-                self.response_value,
+                self.feature_name, ": wait lock is released!(data)", frame_ids, self.response_value
             )
             self.wait_lock.release()
             return self.response_value
@@ -729,9 +724,7 @@ class TestFeatureContainer(unittest.TestCase):
 
         print("----multi-step function")
         feature.clear()
-        node = SignalNode(
-            "test_1", func_dict, device_related=True, node_type="multi-step"
-        )
+        node = SignalNode("test_1", func_dict, device_related=True, node_type="multi-step")
         # node.node_type = "multi-step"
         func_dict["main-response"] = dummy_True
         # assert func_dict.get("main-response", None) == None

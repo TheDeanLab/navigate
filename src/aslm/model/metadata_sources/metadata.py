@@ -117,11 +117,14 @@ class Metadata:
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
         if (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "z-stack"
-        ) or (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "customized"
+            (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "z-stack"
+            )
+            or (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "customized"
+            )
         ):
             self.shape_z = int(
                 self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
@@ -133,13 +136,9 @@ class Metadata:
             self.shape_z = int(
                 self.configuration["experiment"]["MicroscopeState"]["n_plane"]
             )
-        elif (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "CVACONPRO"
-        ):
-            self.shape_z = int(
-                self.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
-            )
+        elif (self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                == "CVACONPRO"):  
+            self.shape_z = int(self.configuration["experiment"]["MicroscopeState"]["number_z_steps"])    
         else:
             self.shape_z = 1
         self.shape_t = int(state["timepoints"])
@@ -186,34 +185,21 @@ class Metadata:
     def set_stack_order_from_configuration_experiment(self) -> None:
         state = self.configuration["experiment"]["MicroscopeState"]
         self._per_stack = (
-            (
-                state["stack_cycling_mode"] == "per_stack"
-                and state["image_mode"] == "z-stack"
-            )
-            or (
-                self.configuration["experiment"]["MicroscopeState"][
-                    "conpro_cycling_mode"
-                ]
-                == "per_stack"
-                and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "confocal-projection"
-            )
-            or (
-                self.configuration["experiment"]["MicroscopeState"][
-                    "stack_cycling_mode"
-                ]
-                == "per_stack"
-                and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "CVATTL"
-            )
-            or (
-                self.configuration["experiment"]["MicroscopeState"][
-                    "stack_cycling_mode"
-                ]
-                == "per_stack"
-                and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                == "CVACONPRO"
-            )
+            state["stack_cycling_mode"] == "per_stack"
+            and state["image_mode"] == "z-stack"
+        ) or (
+            self.configuration["experiment"]["MicroscopeState"]["conpro_cycling_mode"]
+            == "per_stack"
+            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "confocal-projection"
+        ) or (self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
+            == "per_stack"
+            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "CVATTL"
+        ) or (self.configuration["experiment"]["MicroscopeState"]["stack_cycling_mode"]
+            == "per_stack"
+            and self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "CVACONPRO"
         )
 
     @property

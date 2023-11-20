@@ -164,9 +164,7 @@ class DummyModelToTestFeatures:
         return dict(map(lambda axis: (axis + "_pos", stage_pos[axis]), axes))
 
     def __getattr__(self, __name: str):
-        return RecordObj(
-            __name, self.signal_records, self.frame_id, self.frame_id_completed
-        )
+        return RecordObj(__name, self.signal_records, self.frame_id, self.frame_id_completed)
 
 
 @pytest.fixture(scope="module")

@@ -103,6 +103,5 @@ class TestWaveformConstants(unittest.TestCase):
         other_constants = data["other_constants"].keys()
         assert "remote_focus_settle_duration" in other_constants
 
-
 if __name__ == "__main__":
     unittest.main()

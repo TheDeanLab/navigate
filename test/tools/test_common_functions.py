@@ -129,12 +129,13 @@ class CopyProxyObjectTestCase(unittest.TestCase):
 
 
 class TestLoadModuleFromFile(unittest.TestCase):
+
     def setUp(self):
         dummy_module = """
 class DummyModule:
     def __init__(self):
         self.dummy_variable = "hello"
-
+    
     def dummy_function(self):
         print(self.dummy_variable)
 
@@ -146,9 +147,7 @@ class DummyModule:
         os.remove("dummy_module.py")
 
     def test_load_module(self):
-        module = common_functions.load_module_from_file(
-            "DummyModule", "./dummy_module.py"
-        )
+        module = common_functions.load_module_from_file("DummyModule", "./dummy_module.py")
         self.assertIsNotNone(module)
         self.assertTrue(hasattr(module, "DummyModule"))
         self.assertTrue(hasattr(module.DummyModule, "dummy_function"))
@@ -156,10 +155,7 @@ class DummyModule:
     def test_invalid_module_file(self):
 
         with self.assertRaises(FileNotFoundError):
-            common_functions.load_module_from_file(
-                "nonexistent_module", "./dummy_module2.py"
-            )
-
+            common_functions.load_module_from_file("nonexistent_module", "./dummy_module2.py")
 
 if __name__ == "__main__":
     unittest.main()

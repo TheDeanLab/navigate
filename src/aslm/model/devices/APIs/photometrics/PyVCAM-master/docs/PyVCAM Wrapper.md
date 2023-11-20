@@ -52,23 +52,23 @@
       - [setup.py Create Wheels Package Command](#setuppy-create-wheels-package-command)
 
 ## src
-Where the source code of the pyvcam module is located. In addition to the code for the module, any additional scripts that are used to help write the module are included as well. The most notable helper script that is not included in the module is constants_generator.py, which generates the constants.py module by parsing the pvcam header file.
+Where the source code of the pyvcam module is located. In addition to the code for the module, any additional scripts that are used to help write the module are included as well. The most notable helper script that is not included in the module is constants_generator.py, which generates the constants.py module by parsing the pvcam header file. 
 
 ## pyvcam
-The directory that contains the source code to the pyvcam module. These are the files installed when users install the module.
+The directory that contains the source code to the pyvcam module. These are the files installed when users install the module. 
 
 ### camera.py
-The camera.py module contains the Camera python class which is used to abstract the need to manually maintain, alter, and remember camera settings through PVCAM.
+The camera.py module contains the Camera python class which is used to abstract the need to manually maintain, alter, and remember camera settings through PVCAM. 
 
 #### Create Camera Example
 This will create a camera object using the first camera that is found that can then be used to interact with the camera
 
 ```
-from pyvcam import pvc
-from pyvcam.camera import Camera
+from pyvcam import pvc 
+from pyvcam.camera import Camera   
 
-pvc.init_pvcam()                   # Initialize PVCAM
-cam = next(Camera.detect_camera()) # Use generator to find first camera.
+pvc.init_pvcam()                   # Initialize PVCAM 
+cam = next(Camera.detect_camera()) # Use generator to find first camera. 
 cam.open()                         # Open the camera.
 ```
 
@@ -100,7 +100,7 @@ cam.open()                         # Open the camera.
 | ------------- | ------------- |
 | \_\_init__ | (Magic Method) The Camera's constructor. Note that this method should not be used in the construction of a Camera. Instead, use the detect_camera class method to generate Camera classes of the currently available cameras connected to the current system.	|
 | \_\_repr__ | (Magic Method) Returns the name of the Camera.|
-| get_available_camera_names | Return a list of cameras connected to the system. Use this method in conjunction with select_camera. Refer to multi_camera.py for a usage example. |
+| get_available_camera_names | Return a list of cameras connected to the system. Use this method in conjunction with select_camera. Refer to multi_camera.py for a usage example. |  
 | detect_camera | (Class method) Generator that yields a Camera object for a camera connected to the system. For an example of how to call detect_camera, refer to the code sample for creating a camera. |
 | select_camera | (Class method) Generator that yields a Camera object for the camera that matches the provided name. Use this method in conjunction with get_available_camera_names. Refer to multi_camera.py for a usage example. |
 | open | Opens a Camera. Will set __handle to the correct value and __is_open to True if a successful call to PVCAM's open camera function is made. A RuntimeError will be raised if the call to PVCAM fails. For more information about how Python interacts with the PVCAM library, refer to the pvcmodule.cpp section of these notes.	|
@@ -152,15 +152,15 @@ cam.open()                         # Open the camera.
 | _set_dtype | This method sets the __dtype attribute for numpy pixel data based on current port and speed settings. <br><br>**Parameters:**<br><ul><li>None</li></ul>|
 | _update_mode | This method updates the mode of the camera, which is the bit-wise or between exposure mode and expose out mode. It also sets up a temporary sequence to the exposure mode and expose out mode getters will read as expected. This should really only be called internally (and automatically) when exposure mode or expose out mode is modified.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 
-#### Getters/Setters of Camera:
-All getters and setters can be accessed using the example below. There is one large implementation point to make note of:
+#### Getters/Setters of Camera: 
+All getters and setters can be accessed using the example below. There is one large implementation point to make note of: 
 <ul><li>All getters/setters are accessed by attribute. This means that it will appear that we are accessing instance variables from a camera, but in reality, these getters/setters are making specially formatted calls to the Camera method get_param/set_param. These getters/setters make use of the property decorator that is built into Python. The reasoning behind the usage of the property decorator is that attributes will change dynamically during a Camera's lifetime and in order to abstract PVCAM as far away from the end user as possible, the property decorator allows for users to intuitively view and change camera settings. The downside to this approach is that when a new parameter is required, an associated getter/setter needs to be written and tested. Another downside to this implementation is that attribute lookup time is not instant; instead, a call must be made to the pvcmodule wrapper which will then call PVCAM, which will then return a result to the wrapper, which will finally return the result to the user. The time it takes is currently considered insignificant, but if this were to become an issue, the code could be refactored such that all attributes also have instance variables which are changed only when set_param or their associated setter is called on them. </li></ul>
 
 
 ##### Using Getters/Setters
 ```
-# Assume cam is an already constructed camera.
-curr_gain = cam.gain  # To call getter, simply access it by attribute from the camera.
+# Assume cam is an already constructed camera.  
+curr_gain = cam.gain  # To call getter, simply access it by attribute from the camera. 
 ```
 ##### List of Getters/Setters
 | Attribute     | Getter/Setter Description    |
@@ -215,32 +215,32 @@ curr_gain = cam.gain  # To call getter, simply access it by attribute from the c
 | vtm_exp_time | (Getter and Setter): **Warning: Camera specific setting. Not all camera's support this attribute. If an unsupported camera attempts to access it's readout_port, an AttributeError will be raised.**<br><br> Returns/ changes the variable timed exposure time the camera uses for the "Variable Timed" exposure mode. |
 
 ### constants.py
-constants.py is a large data file that contains various camera settings and internal PVCAM structures used to map meaningful variable names to predefined integer values that camera firmware interprets as settings.
-This file is not (and should never be) constructed by hand. Instead, use the most recent version of pvcam.h and run constants_generator.py to build/rebuild this file. A more detailed explanation can be found under the constants_generator.py section, but the basic concept is that pvcam.h is parsed line by line, finding all predefined constants, enums, and structs to grant Python users access to the necessary data to perform basic PVCAM functions that have multiple settings.
-There are four main sections to this file that are found following a formatted comment like this ### <SECTION_NAME> ###:
+constants.py is a large data file that contains various camera settings and internal PVCAM structures used to map meaningful variable names to predefined integer values that camera firmware interprets as settings. 
+This file is not (and should never be) constructed by hand. Instead, use the most recent version of pvcam.h and run constants_generator.py to build/rebuild this file. A more detailed explanation can be found under the constants_generator.py section, but the basic concept is that pvcam.h is parsed line by line, finding all predefined constants, enums, and structs to grant Python users access to the necessary data to perform basic PVCAM functions that have multiple settings. 
+There are four main sections to this file that are found following a formatted comment like this ### <SECTION_NAME> ###: 
 1. Defines
-   1. Much of the necessary data from pvcam.h is saved as C preprocessor macros which are easy to strip from the file and construct a Python variable who's name is the macros name and the value is what the macro expands to.
-   2.  Macros can be thought of as Python variables in this case, as none (of the necessary macros) in pvcam.h expand to more than a literal.
+   1. Much of the necessary data from pvcam.h is saved as C preprocessor macros which are easy to strip from the file and construct a Python variable who's name is the macros name and the value is what the macro expands to. 
+   2.  Macros can be thought of as Python variables in this case, as none (of the necessary macros) in pvcam.h expand to more than a literal. 
 2. Enums
-   1. Enums (also known as enumerated types) are data types that contain named members used to identify certain integer values. Typically, if no values are specified, the first member will be assigned the value 0, and the successor will be 1+ the value of their predecessor. However, you can specify specific numbers for all members.
+   1. Enums (also known as enumerated types) are data types that contain named members used to identify certain integer values. Typically, if no values are specified, the first member will be assigned the value 0, and the successor will be 1+ the value of their predecessor. However, you can specify specific numbers for all members. 
    2. Vanilla Python has no enum type (it must be imported; see documentation here), and even still Python's enum class behaves somewhat differently in terms of accessing members. Instead, we will insert a comment above all enumerated types and have their members just be simple Python variables who's values where the integer assigned to them in the pvcam.h file.
 3. Structs
    1. While not used (yet), structs are preserved as Python classes. No testing/implementation has been done with these, so results may be unexpected if implemented.
 4. Added By Hand
-   1. These are quality of life/readability dictionaries that map named settings of various camera modes to their pvcam.h integer value. These allow for fast look-up and intuitive setting changes for end users.
+   1. These are quality of life/readability dictionaries that map named settings of various camera modes to their pvcam.h integer value. These allow for fast look-up and intuitive setting changes for end users. 
 
 ### pvcmodule.cpp
-pvcmodule.cpp is a set of C++ functions that make use of and extend the Python C-API known as a Python Extension Module. The need for a Python extension module is two-fold: first to allow communication between the static PVCAM library and Python scripts, and second for fast acquisition and conversion from native C types (namely C arrays of pixel data) to Python data types.
-The extension module needs to be compiled, so it will be necessary to have a C/C++ compiler to successfully install this application. The module will be compiled into a shared-object library, which can then be imported from Python; read more here.
+pvcmodule.cpp is a set of C++ functions that make use of and extend the Python C-API known as a Python Extension Module. The need for a Python extension module is two-fold: first to allow communication between the static PVCAM library and Python scripts, and second for fast acquisition and conversion from native C types (namely C arrays of pixel data) to Python data types. 
+The extension module needs to be compiled, so it will be necessary to have a C/C++ compiler to successfully install this application. The module will be compiled into a shared-object library, which can then be imported from Python; read more here. 
 
-#### General Structure of a pvcmodule Function
-The functions for a pvcmodule function usually follow a three step process:
-1. Retrieve data/query from Python script
-2. Process acquired data
+#### General Structure of a pvcmodule Function 
+The functions for a pvcmodule function usually follow a three step process: 
+1. Retrieve data/query from Python script 
+2. Process acquired data 
 3. Return data to Python scrip
 
 #### Retrieving Data
-Functions receive data dynamically through use of parameters, and the pvcmodule's functions are no different. However, the Python API states that all data is of type PyObject, which the C/C++ programming language offer no builtin support for. In addition to, each Python-facing function must only have two arguments: PyObject *self (a pointer to the instance of whichever Python object called this C function) and PyObject *args (a Python tuple object that contains all of the arguments passed into the C function call). However, we can make use of the PyArg_ParseTuple (see example here) function from the Python API to easily coerce the Python objects from the args tuple to their respective C type. In order for the conversion to occur, we must specify which type we want to coerce each Python argument to using a formatted string (see second argument for PyArg_ParseTuple). Each character in the formatted string are known as "format units" and are interpreted in the same order that the variables for the coerced C data are provided. Find below a small list of C data types and their corresponding format units.
+Functions receive data dynamically through use of parameters, and the pvcmodule's functions are no different. However, the Python API states that all data is of type PyObject, which the C/C++ programming language offer no builtin support for. In addition to, each Python-facing function must only have two arguments: PyObject *self (a pointer to the instance of whichever Python object called this C function) and PyObject *args (a Python tuple object that contains all of the arguments passed into the C function call). However, we can make use of the PyArg_ParseTuple (see example here) function from the Python API to easily coerce the Python objects from the args tuple to their respective C type. In order for the conversion to occur, we must specify which type we want to coerce each Python argument to using a formatted string (see second argument for PyArg_ParseTuple). Each character in the formatted string are known as "format units" and are interpreted in the same order that the variables for the coerced C data are provided. Find below a small list of C data types and their corresponding format units. 
 
 | C Type         | Character Representation |
 | -------------- | ------------------------ |
@@ -251,53 +251,53 @@ Functions receive data dynamically through use of parameters, and the pvcmodule'
 | string (char*) | s                        |
 | PyObject       | O                        |
 
-#### Arguments of PyArg_ParseTuple
-1. args (PyObject *) A Python tuple object that contains the arguments from the Python function call. For example, if a function call from Python is made: my_c_func(1, "test"), the args tuple would contain two PyObject pointers: one to the Python integer 1 and another to the Python Unicode-String "test".
-2. format (char *) A String containing the format units for all of the arguments found in the args in the same order in which they appear in the tuple. Going off of the example from the previous argument, the desired formatted string would be "is": 'i' for the integer 1, and 's' for the string "test".
+#### Arguments of PyArg_ParseTuple 
+1. args (PyObject *) A Python tuple object that contains the arguments from the Python function call. For example, if a function call from Python is made: my_c_func(1, "test"), the args tuple would contain two PyObject pointers: one to the Python integer 1 and another to the Python Unicode-String "test". 
+2. format (char *) A String containing the format units for all of the arguments found in the args in the same order in which they appear in the tuple. Going off of the example from the previous argument, the desired formatted string would be "is": 'i' for the integer 1, and 's' for the string "test". 
 
 In addition to these two arguments, addresses to the variables in which the coerced C data should be stored must also be passed as arguments to the PyArg_ParseTuple call. (See example for more details).
 
 #### PyArg_ParseTuple Example
 ```
-static PyObject *example(PyObject *self, PyObject *args) {
-	int myNum;
-    char *myString;
-    PyArg_ParseTuple(args, "is", &myNum, &myString);
-    printf("myNum: %d\n", myNum);        // Prints "myNum: 1"
-    printf("myString: %s\n", myString);  // Prints "myString: test"
-    Py_RETURN_NONE;
-    }
+static PyObject *example(PyObject *self, PyObject *args) {     
+	int myNum;     
+    char *myString; 
+    PyArg_ParseTuple(args, "is", &myNum, &myString);     
+    printf("myNum: %d\n", myNum);        // Prints "myNum: 1"     
+    printf("myString: %s\n", myString);  // Prints "myString: test"     
+    Py_RETURN_NONE; 
+    } 
 ```
 
-#### Processing Acquired Data
-Using the data supplied by the Python function call, we can now perform normal camera operations using PVCAM library function calls. The most common form of processing acquired data is to read the camera handle from the arguments provided, then performing a camera operation (changing/reading settings, getting images, etc.) using the acquired handle to identify which camera to perform the action on.
+#### Processing Acquired Data 
+Using the data supplied by the Python function call, we can now perform normal camera operations using PVCAM library function calls. The most common form of processing acquired data is to read the camera handle from the arguments provided, then performing a camera operation (changing/reading settings, getting images, etc.) using the acquired handle to identify which camera to perform the action on. 
 
-Generally speaking, this part of the function should be very similar to writing normal C/C++ modules that use the PVCAM library. If there is any confusion about how to write C/C++ code to make calls to PVCAM, refer to the PvcamCodeSamples found in the Examples directory of the PVCAM SDK.
+Generally speaking, this part of the function should be very similar to writing normal C/C++ modules that use the PVCAM library. If there is any confusion about how to write C/C++ code to make calls to PVCAM, refer to the PvcamCodeSamples found in the Examples directory of the PVCAM SDK. 
 
 Sometimes, processing data from a Python function call may entail answering a query. If this is the case, we need to specify what to return, and how to convert it into a corresponding Python type.
 
-#### Return Data to a Python Script
-Similar to how issues arose when passing data from the Python function call to the C/C++ module, there is no simple casting solution to convert C/C++ data types to Python data types when returning from a function.
+#### Return Data to a Python Script 
+Similar to how issues arose when passing data from the Python function call to the C/C++ module, there is no simple casting solution to convert C/C++ data types to Python data types when returning from a function. 
 
-Thankfully, there are some functions that were included in the Python header file included at the top of each module to allow us to cast data to an equivalent Python type.
+Thankfully, there are some functions that were included in the Python header file included at the top of each module to allow us to cast data to an equivalent Python type. 
 
-#### Cast to Python Type
+#### Cast to Python Type 
 ```
-{
-char *myString = "ika";
-return PyUnicode_FromString(myString); // Returns a Python string back to the calling function.
+{     
+char *myString = "ika";     
+return PyUnicode_FromString(myString); // Returns a Python string back to the calling function. 
 }
 ```
 
-There is one small catch, however. All Python functions must return an object; there is no such thing as a "void" function. This means that we must always return something in our C/C++ modules as well (which we can tell by looking at the signature!)
+There is one small catch, however. All Python functions must return an object; there is no such thing as a "void" function. This means that we must always return something in our C/C++ modules as well (which we can tell by looking at the signature!) 
 If you wish to return None, simply use the Py_RETURN_NONE macro (see the PyArg_ParseTuple example for a visual representation).
 
-#### Functions of pvcmodule.cpp
+#### Functions of pvcmodule.cpp 
 **Note:** All functions will always have the PyObject *self and PyObject *args parameters. When parameters are listed, they are the Python parameters that are passed into the module.
 
 | Function Name | Description |
 | ------------- | ----------- |
-| NewFrameHandler | Call-back function registered with PVCAM when a new frame is available. |
+| NewFrameHandler | Call-back function registered with PVCAM when a new frame is available. | 
 | check_meta_data_enabled | Given a camera handle, checks if meta data is enabled. <br><br>**Parameters:**<br><ul><li>Python int (camera handle) </li></ul>|
 | is_avail | Given a camera handle, checks if the parameter ID is available. <br><br>**Parameters:**<br><ul><li>Python int (camera handle). </li><li>Python int (parameter ID). </li></ul>|
 | pvc_abort | Given a camera handle, aborts any ongoing acquisition and de-registers the frame handler callback function. <br><br>**Parameters:**<br><ul><li>Python int (camera handle). </li> |
@@ -330,7 +330,7 @@ If you wish to return None, simply use the Py_RETURN_NONE macro (see the PyArg_P
 
 
 #### The Method Table
-All functions that need to be exposed to Python programs need to be included in the method table. The method table is partially responsible for allowing Python programs to call functions from an extension module. It does this by creating a list of PyMethodDef structs with a sentinel struct at the end of the list. The list of method definitions are then passed to the PyModuleDef struct, which contains the necessary information to construct the module.
+All functions that need to be exposed to Python programs need to be included in the method table. The method table is partially responsible for allowing Python programs to call functions from an extension module. It does this by creating a list of PyMethodDef structs with a sentinel struct at the end of the list. The list of method definitions are then passed to the PyModuleDef struct, which contains the necessary information to construct the module. 
 
 The method table is a list of PyMethodDef structs, which have the following four fields:
 
@@ -341,7 +341,7 @@ The method table is a list of PyMethodDef structs, which have the following four
 | ml_flags   | int         | Flag bits indicating how the call to the function should be constructed |
 | ml_doc     | char *      | Points to the contents of the docstring for the method.                 |
 
-All docstrings for the functions inside of pvcmodule.cpp are statically defined in the pvcmodule.h file.
+All docstrings for the functions inside of pvcmodule.cpp are statically defined in the pvcmodule.h file. 
 
 #### The Module Definition
 The PyModuleDef structure contains all of the information required to create the top-level module object.
@@ -355,84 +355,84 @@ The PyModuleDef structure contains all of the information required to create the
 | m_methods  | PyMethodDef*     | pointer to the method table. Can be NULL if no functions are present.    |
 
 After creating the module definition structure, it can then be passed into the module creation function.
-#### Module Creation
-The module initialization function will create and return the module object directly.
+#### Module Creation 
+The module initialization function will create and return the module object directly. 
 
-To initialize a module, write the PyInit_{modulename} function, which calls and returns the value of PyModule_Create. See example below:
+To initialize a module, write the PyInit_{modulename} function, which calls and returns the value of PyModule_Create. See example below: 
 
-#### Creating Extension Module
+#### Creating Extension Module 
 ```
-PyMODINIT_FUNC
-PyInit_pvc(void)
+PyMODINIT_FUNC 
+PyInit_pvc(void) 
 }
-return PyModule_Create(&pvcmodule);
-}
+return PyModule_Create(&pvcmodule); 
+} 
 ```
 
-### constants_generator.py
-The purpose of the constants_generator.py file is to easily construct a new constants.py data file should the file become tainted or a new version of PVCAM is released.
+### constants_generator.py 
+The purpose of the constants_generator.py file is to easily construct a new constants.py data file should the file become tainted or a new version of PVCAM is released. 
 
 The script targets three main parts of the header file: the predefined macros, the enums, and the structs.
 
-#### Requirements
-The constants generator targets the install location of the PVCAM SDK on your machine, meaning that the script will fail to run if you do not have the SDK installed.
+#### Requirements 
+The constants generator targets the install location of the PVCAM SDK on your machine, meaning that the script will fail to run if you do not have the SDK installed. 
 
-#### Running the Script
-In order to run the script, ensure that you are running it from /PyVCAM/pyvcam/src/, or else it will fail to find the correct directory to write the generated constants.py file to.
+#### Running the Script 
+In order to run the script, ensure that you are running it from /PyVCAM/pyvcam/src/, or else it will fail to find the correct directory to write the generated constants.py file to. 
 
 The script can be run using the following command when you are in the correct directory: python constants_generator.py
 ***
 ## tests
 The tests directory contains unit tests to ensure the quality of the code of the module and to also include some basic examples on how to perform basic operations on a camera.
 
-### change_settings_test.py (needs camera_settings.py)
-change_settings_test.py is used to show one way of keeping camera settings in one file and importing them to update a camera's settings in another file.
+### change_settings_test.py (needs camera_settings.py) 
+change_settings_test.py is used to show one way of keeping camera settings in one file and importing them to update a camera's settings in another file. 
 
 This allows the user to quickly change the settings they wish to test on a camera without having to dig through a large testing script and manually changing the settings within it.
 
 **Note:** camera_settings.py needs to be included in the same directory in order to run this test.
 
 ### check_frame_status.py
-check_frame_status.py is used to demonstrate how to querry frame status for both live and sequence acquisition modes.
+check_frame_status.py is used to demonstrate how to querry frame status for both live and sequence acquisition modes. 
 
-### live_mode.py
-live_mode.py is used to demonstrate how to peroform live frame acquistion using the advanced frame acquistion features of PyVCAM.
+### live_mode.py 
+live_mode.py is used to demonstrate how to peroform live frame acquistion using the advanced frame acquistion features of PyVCAM. 
 
-### meta_data.py
-meta_data.py is used to demonstrate how to enable frame meta data. Meta data is only supported when using the advanced frame acquistion features of PyVCAM.
+### meta_data.py 
+meta_data.py is used to demonstrate how to enable frame meta data. Meta data is only supported when using the advanced frame acquistion features of PyVCAM. 
 
-### multi_camera.py
-multi_camera.py is used to demonstrate how control acquire from multiple cameras simultaneously.
+### multi_camera.py 
+multi_camera.py is used to demonstrate how control acquire from multiple cameras simultaneously. 
 
-### multi_rois.py
-multi_camera.py is used to demonstrate how control acquire multiple regions of interest.
+### multi_rois.py 
+multi_camera.py is used to demonstrate how control acquire multiple regions of interest. 
 
-### newest_frame.py
-newest_frame.py is used to demonstrate how to acquire both the newest frame using the optional parameter to poll_frame.
+### newest_frame.py 
+newest_frame.py is used to demonstrate how to acquire both the newest frame using the optional parameter to poll_frame. 
 
-### seq_mode.py
-seq_mode.py is used to demonstrate how to perform sequence frame acquistion using the advanced frame acquistion features of PyVCAM.
+### seq_mode.py 
+seq_mode.py is used to demonstrate how to perform sequence frame acquistion using the advanced frame acquistion features of PyVCAM. 
 
-### single_image_polling.py
-single_image_polling.py is used to demonstrate how to collect single frames from a camera, starting from the detection and opening of an available camera to calling the get_frame function.
+### single_image_polling.py 
+single_image_polling.py is used to demonstrate how to collect single frames from a camera, starting from the detection and opening of an available camera to calling the get_frame function. 
 
 Note that this test does not display the frame; only saves it locally to a variable and prints a few pixel points from it. If you want an example of how to quickly display a frame, see single_image_polling_show.py.
 
 ### single_image_polling_show.py
-single_image_polling_show.py is used to demonstrate how to collect a single frame from a camera and use matplotlib's pyplot subpackage in order to display the captured frame.
+single_image_polling_show.py is used to demonstrate how to collect a single frame from a camera and use matplotlib's pyplot subpackage in order to display the captured frame. 
 
-**Note:** The test reverses the camera's sensor size when reshaping the array. This is because the camera sensor size tuple is row x column, and the shape of a numpy array is specified by column x row.
+**Note:** The test reverses the camera's sensor size when reshaping the array. This is because the camera sensor size tuple is row x column, and the shape of a numpy array is specified by column x row. 
 
 ### stream_to_disk.py
-stream_to_disk.py is used to demonstrate how to stream frames directly to disk from a PVCAM C++ call-back.
+stream_to_disk.py is used to demonstrate how to stream frames directly to disk from a PVCAM C++ call-back. 
 
-### sw_trigger.py
-sw_trigger.py is used to demonstrate how to perform a software trigger using two Python threads, one to configure acquisition and one to perform the trigger.
+### sw_trigger.py 
+sw_trigger.py is used to demonstrate how to perform a software trigger using two Python threads, one to configure acquisition and one to perform the trigger. 
 
 ### test_camera.py
-test_camera.py contains the unit tests for this module. It tests the getting, setting, and edge cases of all available settings.
+test_camera.py contains the unit tests for this module. It tests the getting, setting, and edge cases of all available settings. 
 
-All unit tests can be run from the command line using the command python -m unittest discover
+All unit tests can be run from the command line using the command python -m unittest discover 
 ***
 ## setup.py
 setup.py is the installer script for this module. Once the package has been downloaded, navigate the the src directory to run the setup script.
@@ -448,12 +448,13 @@ setup.py is the installer script for this module. Once the package has been down
 | libs | List of libraries that can be found from the lib_dirs list that are needed for the compilation of the python extension module. |
 | ext_module | List of Extension objects that model a Python extension module that include: <ul><li>The name of the module (pyvcam.pvc) </li><li>Where the source code is located </li><li>All necessary include directories </li><li>All necessary library directories </li><li>All necessary libraries </li></ul>|
 
-### Installing the Package
+### Installing the Package 
 When you are ready to install the package, navigate to the directory that contains setup.py and run:
-#### setup.py Install Command
+#### setup.py Install Command  
 python setup.py install
 
-### Creating a PyVCAM Wheel Package
+### Creating a PyVCAM Wheel Package 
 To create a PyVCAM Wheel package, navigate to the directory that contains setup.py and run:
-#### setup.py Create Wheels Package Command
+#### setup.py Create Wheels Package Command  
 python setup.py dist bdist_wheel
+

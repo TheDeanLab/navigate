@@ -65,10 +65,8 @@ def text_array(text: str, offset: tuple = (0, 0)):
     return np.array(im, dtype=bool)
 
 
-def create_arrow_image(
-    xys, image_width=300, image_height=200, direction="right", image=None
-):
-    """Create/Update a Image Object
+def create_arrow_image(xys, image_width=300, image_height=200, direction="right", image=None):
+    """Create/Update a Image Object 
 
     Draw lines and arrows in a Image ojbect
 
@@ -95,23 +93,23 @@ def create_arrow_image(
         image = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
     # draw line
-    for i in range(len(xys) - 1):
-        draw.line([xys[i], xys[i + 1]], fill="black", width=2)
-
+    for i in range(len(xys)-1):
+        draw.line([xys[i], xys[i+1]], fill="black", width=2)
+    
     # draw arrow
     circle_x, circle_y = xys[-1]
     if direction == "right":
-        bounding_circle = ((circle_x - 10, circle_y), 10)
+        bounding_circle = ((circle_x-10, circle_y), 10)
         rotation = 270
     elif direction == "left":
-        bounding_circle = ((circle_x + 10, circle_y), 10)
+        bounding_circle = ((circle_x+10, circle_y), 10)
         rotation = 90
     elif direction == "up":
-        bounding_circle = ((circle_x, circle_y + 10), 10)
+        bounding_circle = ((circle_x, circle_y+10), 10)
         rotation = 0
     elif direction == "down":
-        bounding_circle = ((circle_x, circle_y - 10), 10)
+        bounding_circle = ((circle_x, circle_y-10), 10)
         rotation = 180
     draw.regular_polygon(bounding_circle, n_sides=3, rotation=rotation, fill="black")
-
+    
     return image

@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 #  Standard Imports
+import sys
 import os
 from typing import Optional, Union
 import xml.etree.ElementTree as ET
@@ -198,6 +199,7 @@ class BigDataViewerMetadata(XMLMetadata):
 
         # Set the transform positions
         xp, yp, zp = x / self.dx, y / self.dy, z / self.dz
+
 
         # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
         # if they are both moving along the same physical dimension

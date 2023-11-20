@@ -321,7 +321,7 @@ class SignalNode(TreeNode):
         else:
             # run(wait_response=True)
             result = self.node_funcs["main"](*args)
-
+        
         if (
             self.wait_response
             or self.node_type == "multi-step"

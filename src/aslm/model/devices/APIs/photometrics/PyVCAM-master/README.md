@@ -15,19 +15,19 @@ Follow the instructions below to get PyVCAM up and running on your machine for d
 
 
 ### Installing
-When you are ready to install the wrapper use your command prompt to navigate into the directory that contains
-setup.py and run ```python setup.py install```
+When you are ready to install the wrapper use your command prompt to navigate into the directory that contains 
+setup.py and run ```python setup.py install``` 
 
 
 ### How to use the wrapper
 #### Create Camera Example
 This will create a camera object using the first camera that is found that can then be used to interact with the camera.
 ```
-from pyvcam import pvc
-from pyvcam.camera import Camera
+from pyvcam import pvc 
+from pyvcam.camera import Camera   
 
-pvc.init_pvcam()                   # Initialize PVCAM
-cam = next(Camera.detect_camera()) # Use generator to find first camera.
+pvc.init_pvcam()                   # Initialize PVCAM 
+cam = next(Camera.detect_camera()) # Use generator to find first camera. 
 cam.open()                         # Open the camera.
 ```
 

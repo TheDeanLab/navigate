@@ -192,27 +192,23 @@ class TestMenuController(unittest.TestCase):
         class MockWidget:
             def __int__(self):
                 self.value = False
-
             def set(self, value):
                 self.value = value
-
             def get(self):
                 return self.value
-
+            
         channel_tab_controller = MagicMock()
-        self.menu_controller.parent_controller.channels_tab_controller = (
-            channel_tab_controller
-        )
-        channel_tab_controller.timepoint_vals = {"is_save": MockWidget()}
-        self.menu_controller.view.settings.channels_tab.stack_timepoint_frame.save_data.get = MagicMock(
-            return_value=False
-        )
+        self.menu_controller.parent_controller.channels_tab_controller = channel_tab_controller
+        channel_tab_controller.timepoint_vals = {
+            "is_save": MockWidget()
+        }
+        self.menu_controller.view.settings.channels_tab.stack_timepoint_frame\
+            .save_data.get = MagicMock(return_value = False)
         self.menu_controller.toggle_save()
         assert channel_tab_controller.timepoint_vals["is_save"].get() == True
 
-        self.menu_controller.view.settings.channels_tab.stack_timepoint_frame.save_data.get = MagicMock(
-            return_value=True
-        )
+        self.menu_controller.view.settings.channels_tab.stack_timepoint_frame\
+            .save_data.get = MagicMock(return_value=True)
         self.menu_controller.toggle_save()
         assert channel_tab_controller.timepoint_vals["is_save"].get() == False
 

@@ -14,6 +14,5 @@ def main():
     cam.close()
     pvc.uninit_pvcam()
 
-
 if __name__ == "__main__":
     main()

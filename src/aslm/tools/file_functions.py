@@ -104,7 +104,6 @@ def create_save_path(saving_settings):
 
     return save_directory
 
-
 def load_yaml_file(file_path):
     """Load YAML file from Disk
 
@@ -129,6 +128,7 @@ def load_yaml_file(file_path):
             print(f"Can't load yaml file: {file_path} - {yaml_error}")
             return None
     return config_data
+
 
 
 def save_yaml_file(file_directory, content_dict, filename="experiment.yml"):

@@ -43,17 +43,18 @@ from aslm.model.dummy import DummyModel
 
 class TestStageBase:
     """Unit Test for StageBase Class"""
-
     @pytest.fixture(autouse=True)
     def setup_class(self, stage_configuration):
         self.microscope_name = "Mesoscale"
         self.configuration = {
             "configuration": {
-                "microscopes": {self.microscope_name: stage_configuration}
+                "microscopes": {
+                    self.microscope_name: stage_configuration
+                }
             }
         }
         self.stage_configuration = stage_configuration
-
+        
     @pytest.mark.parametrize(
         "axes, axes_mapping",
         [
@@ -84,14 +85,8 @@ class TestStageBase:
             assert hasattr(stage, f"{axis}_min")
             assert hasattr(stage, f"{axis}_max")
             assert getattr(stage, f"{axis}_pos") == 0
-            assert (
-                getattr(stage, f"{axis}_min")
-                == self.stage_configuration["stage"][f"{axis}_min"]
-            )
-            assert (
-                getattr(stage, f"{axis}_max")
-                == self.stage_configuration["stage"][f"{axis}_max"]
-            )
+            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
+            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
 
         if axes_mapping is None:
             assert stage.axes_mapping == {}
@@ -202,6 +197,8 @@ class TestStageBase:
 
         assert stage.verify_abs_position(move_dict) == abs_dict
 
+
+
         # turn off stage_limits
         stage.stage_limits = False
         axis = random.choice(axes)
@@ -227,9 +224,7 @@ class TestStageBase:
         stage.stage_limits = False
         assert stage.verify_abs_position(move_dict) == abs_dict
 
-        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping[
-            :-1
-        ]
+        self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping[:-1]
         stage = StageBase(self.microscope_name, None, self.configuration)
         abs_dict.pop(axes[-1])
 

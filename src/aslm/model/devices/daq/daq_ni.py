@@ -423,18 +423,8 @@ class NIDAQ(DAQBase):
         Stop all tasks and close them.
         """
         try:
-            if self.trigger_mode == "self-trigger":
-                self.camera_trigger_task.stop()
-                self.camera_trigger_task.close()
-            if self.trigger_mode == "external-trigger":
-                if self.camera_trigger_task is None:
-                    pass
-                if self.camera_trigger_task is not None:
-                    self.camera_trigger_task.stop()
-                    self.camera_trigger_task.close()
-                    self.external_trigger = None
-                else:
-                    self.external_trigger = None
+            self.camera_trigger_task.stop()
+            self.camera_trigger_task.close()
 
             if self.trigger_mode == "self-trigger":
                 self.master_trigger_task.stop()
@@ -445,7 +435,7 @@ class NIDAQ(DAQBase):
                 task.close()
 
         except (AttributeError, nidaqmx.errors.DaqError):
-            print(f"Error stopping acquisition: {traceback.format_exc()}")
+            pass
 
         if self.wait_to_run_lock.locked():
             self.wait_to_run_lock.release()

@@ -171,6 +171,11 @@ class ASIStage(StageBase):
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
+        #: Mapping of axes to ASI axes
+        else:
+            # Force cast axes to uppercase
+            self.axes_mapping = {k: v.upper() for k, v in self.axes_mapping.items()}
+            
         self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
         # Set feedback alignment values - Default to 85 if not specified

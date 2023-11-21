@@ -41,16 +41,15 @@ import pytest
 # Local Imports
 from aslm.view.main_application_window import MainApp
 
+# Import pytest Fixtures
+from test.controller.test_controller import controller
+
 
 @pytest.mark.skip('_tkinter.TclError: image "pyimage43" doesn\'t exist')
 def test_mainapp():
     """
     Tests that the main application and all its widgets gets created and does not
     throw any exceptions. Test will fail if any exceptions.
-
-    Parameters
-    ----------
-    None
 
     Returns
     -------
@@ -91,5 +90,5 @@ class TestMainApplicationWindowWithPatch(unittest.TestCase):
         self, mock_settings_notebook, mock_joinpath
     ):
         # Create an instance of main_application_window
-        MainApp(self.root)
+        MainApp(root=self.root, configuration=controller)
         self.root.update()

@@ -35,8 +35,6 @@ import logging
 
 # Third Party Imports
 import numpy as np
-
-# import re
 from aslm.model.features.image_writer import ImageWriter
 
 # from aslm.model import data_sources
@@ -128,10 +126,6 @@ class ConstantVelocityAcquisition:
         print(f"sweep time = {sweep_times}")
         channel_name = next(iter(sweep_times))
 
-        # channel_name = str(channel_name)
-        # channel_num = re.findall(r"[\d.]+", channel_name)
-        # channel_num = int(channel_num[0])
-
         channel_num = int(channel_name.split("_")[1])
         self.model.active_microscope.current_channel = channel_num
         print(f"channel_{self.model.active_microscope.current_channel}")
@@ -193,8 +187,6 @@ class ConstantVelocityAcquisition:
 
         # Calculate the actual step size in millimeters. 264 * 10^-6 mm
         step_size_mm = step_size_nm * 10**-6  # 264 * 10^-6 mm
-        # TODO set max speed in configuration file
-        # max_speed = 4.288497*2
 
         # Set the start and end position of the scan in millimeters.
         # Retrieved from the GUI.
@@ -265,7 +257,6 @@ class ConstantVelocityAcquisition:
 
         actual_mechanical_step_size_mm = stage_velocity * self.current_sweep_time
         self.actual_mechanical_step_size_um = actual_mechanical_step_size_mm * 1000
-        # self.desired_mechanical_step_size_mm = desired_mechanical_step_size_mm
         new_z_steps = np.floor(
             abs(self.stop_position_um - self.start_position_um)
             / self.actual_mechanical_step_size_um
@@ -306,7 +297,6 @@ class ConstantVelocityAcquisition:
         )
         self.expected_frames = expected_frames
         # np.ceil(expected_frames/(self.repeat_waveform*self.expand_waveform))
-        print("waveforms obtained from config")
         print(f"Expand Frames = {expand_frames}")
         print(f"Self Expected Frames test = {self.expected_frames}")
         logger.info(f"Self Expected Frames test = {self.expected_frames}")
@@ -322,7 +312,6 @@ class ConstantVelocityAcquisition:
 
         self.model.active_microscope.current_channel = 0
         self.waveform_dict = self.model.active_microscope.calculate_all_waveform()
-        # #   ms calculated v2 {self.waveform_dict}")
         self.model.active_microscope.daq.external_trigger = "/PXI6259/PFI1"
         print(
             f"external trigger set to "

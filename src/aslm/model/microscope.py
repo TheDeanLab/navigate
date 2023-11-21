@@ -627,6 +627,8 @@ class Microscope:
         for stage, axes in self.stages_list:
             stage.stop()
 
+        self.central_focus = self.get_stage_position().get("f_pos", self.central_focus)
+
     def get_stage_position(self):
         """Get stage position.
 

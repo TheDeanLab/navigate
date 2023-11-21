@@ -35,7 +35,8 @@ import logging
 
 # Third Party Imports
 import numpy as np
-import re
+
+# import re
 from aslm.model.features.image_writer import ImageWriter
 
 # from aslm.model import data_sources
@@ -126,9 +127,12 @@ class ConstantVelocityAcquisition:
         print(f"exposure time = {exposure_times}")
         print(f"sweep time = {sweep_times}")
         channel_name = next(iter(sweep_times))
-        channel_name = str(channel_name)
-        channel_num = re.findall(r"[\d.]+", channel_name)
-        channel_num = int(channel_num[0])
+
+        # channel_name = str(channel_name)
+        # channel_num = re.findall(r"[\d.]+", channel_name)
+        # channel_num = int(channel_num[0])
+
+        channel_num = int(channel_name.split("_")[1])
         self.model.active_microscope.current_channel = channel_num
         print(f"channel_{self.model.active_microscope.current_channel}")
         current_sweep_time = sweep_times[
@@ -188,7 +192,7 @@ class ConstantVelocityAcquisition:
         print("Actual Step Size of Stage:", step_size_nm)
 
         # Calculate the actual step size in millimeters. 264 * 10^-6 mm
-        step_size_mm = step_size_nm / 1 * 10**-6  # 264 * 10^-6 mm
+        step_size_mm = step_size_nm * 10**-6  # 264 * 10^-6 mm
         # TODO set max speed in configuration file
         # max_speed = 4.288497*2
 
@@ -297,16 +301,16 @@ class ConstantVelocityAcquisition:
         ]["expand"]
         print(f"repeat num = {self.repeat_waveform}")
         print(f"expand num = {self.expand_waveform}")
-        Expand_frames = float(
+        expand_frames = float(
             self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"]
         )
         self.expected_frames = expected_frames
         # np.ceil(expected_frames/(self.repeat_waveform*self.expand_waveform))
         print("waveforms obtained from config")
-        print(f"Expand Frames = {Expand_frames}")
+        print(f"Expand Frames = {expand_frames}")
         print(f"Self Expected Frames test = {self.expected_frames}")
         logger.info(f"Self Expected Frames test = {self.expected_frames}")
-        logger.info(f"Expand Frames = {Expand_frames}")
+        logger.info(f"Expand Frames = {expand_frames}")
         self.model.configuration["experiment"]["MicroscopeState"][
             "number_z_steps"
         ] = expected_frames

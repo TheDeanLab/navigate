@@ -180,10 +180,6 @@ class Metadata:
             )
             or (
                 state["stack_cycling_mode"] == "per_stack"
-                and state["image_mode"] == "CVATTL"
-            )
-            or (
-                state["stack_cycling_mode"] == "per_stack"
                 and state["image_mode"] == "ConstantVelocityAcquisition"
             )
         )

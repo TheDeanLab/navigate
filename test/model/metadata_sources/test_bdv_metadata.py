@@ -44,8 +44,8 @@ def test_bdv_metadata(ext):
 
     # Confirm that the shear/rotation transforms are identity matrices by default
     # even after calling calculate_shear_transform and calculate_rotate_transform
-    md.calculate_shear_transform()
-    md.calculate_rotate_transform()
+    md.bdv_shear_transform()
+    md.bdv_rotate_transform()
     assert np.all(md.shear_transform == np.eye(3, 4))
     assert np.all(md.rotate_transform == np.eye(3, 4))
 
@@ -54,14 +54,14 @@ def test_bdv_metadata(ext):
     md.shear_dimension = "XZ"
     md.shear_angle = 15
     md.dx, md.dy, md.dz = 1, 1, 1
-    md.calculate_shear_transform()
+    md.bdv_shear_transform()
     assert md.shear_transform[0, 2] == np.cos(np.deg2rad(15))
 
     md.rotate_data = True
     md.rotate_angle_x = 15
     md.rotate_angle_y = 0
     md.rotate_angle_z = 0
-    md.calculate_rotate_transform()
+    md.bdv_rotate_transform()
     assert md.rotate_transform[1, 1] == np.cos(np.deg2rad(15))
     assert md.rotate_transform[1, 2] == -np.sin(np.deg2rad(15))
     assert md.rotate_transform[2, 1] == np.sin(np.deg2rad(15))

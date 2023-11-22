@@ -327,7 +327,7 @@ class TigerController:
             for i, axis in enumerate(axes_seq):
                 try:
                     axis_dict[axis] = float(pos[1 + i])
-                except ValueError:
+                except (ValueError, IndexError):
                     # Report position failed. Don't crash, we can try again.
                     pass
             return axis_dict

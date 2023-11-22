@@ -2,8 +2,7 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only
-# (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -32,6 +31,8 @@
 
 # Standard Library Imports
 from queue import Queue
+import numpy as np
+import time
 import random
 
 
@@ -58,13 +59,14 @@ class Dummy_Detective:
 
     def signal_response_func(self):
         frame_ids, r = self.detection_queue.get()
+        print("******Signal detective get:", frame_ids, self.model.frame_id)
         return r
 
     def is_target_frame(self, frame_ids):
         try:
             if self.target_frame_id < 0:
                 self.target_frame_id = self.frame_queue.get()
-        except Exception:
+        except:
             return False
         return self.target_frame_id in frame_ids
 

@@ -102,6 +102,7 @@ class DummyModelToTestFeatures:
     def signal_func(self):
         self.signal_container.reset()
         while not self.signal_container.end_flag:
+            print("**** sending out signal!", self.frame_id)
             if self.signal_container:
                 self.signal_container.run()
 
@@ -163,9 +164,7 @@ class DummyModelToTestFeatures:
         return dict(map(lambda axis: (axis + "_pos", stage_pos[axis]), axes))
 
     def __getattr__(self, __name: str):
-        return RecordObj(
-            __name, self.signal_records, self.frame_id, self.frame_id_completed
-        )
+        return RecordObj(__name, self.signal_records, self.frame_id, self.frame_id_completed)
 
 
 @pytest.fixture(scope="module")

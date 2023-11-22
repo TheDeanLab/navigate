@@ -42,9 +42,7 @@ import os
 # Local Imports
 from aslm.model.concurrency.concurrency_tools import SharedNDArray
 from aslm.model.features.autofocus import Autofocus
-from aslm.model.features.constant_velocity_acquisition import (
-    ConstantVelocityAcquisition,
-)
+from aslm.model.features.cva_conpro import ConstantVelocityAcquisition
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
@@ -618,6 +616,7 @@ class Model:
             Args[0]: device name
             Args[1]: device reference
             """
+            print("*** autofocus args:", *args)
             autofocus = Autofocus(self, *args)
             autofocus.run()
         elif command == "load_feature":

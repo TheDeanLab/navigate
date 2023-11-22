@@ -93,7 +93,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#dichroic-turret">Dichroic Turret</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#asi">ASI</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#synthetic-dichroic-turrett">Synthetic Dichroic Turrett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-dichroic-turret">Synthetic Dichroic Turret</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#filter-wheels">Filter Wheels</a><ul>
@@ -216,6 +216,29 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 </section>
 <section id="configuration-file">
 <h4>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this heading"></a></h4>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">daq</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">daq</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daq</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+<span class="w">      </span><span class="nt">sample_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
+<span class="w">      </span><span class="nt">sweep_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+
+<span class="w">      </span><span class="c1"># triggers</span>
+<span class="w">      </span><span class="nt">master_trigger_out_line</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PCI6738/port0/line1</span><span class="w"> </span><span class="c1"># Should exactly match both name and port</span>
+<span class="w">      </span><span class="nt">camera_trigger_out_line</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PCI6738/ctr0</span><span class="w"> </span><span class="c1"># Should exactly match both name and port</span>
+<span class="w">      </span><span class="nt">trigger_source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PCI6738/PFI0</span><span class="w"> </span><span class="c1"># Should exactly match both name and port</span>
+
+<span class="w">      </span><span class="c1"># Digital Laser Outputs</span>
+<span class="w">      </span><span class="nt">laser_port_switcher</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PCI6738/port0/line0</span>
+<span class="w">      </span><span class="nt">laser_switch_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
 </section>
 </section>
 </section>
@@ -240,6 +263,55 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 <p>counter port, e.g., <code class="docutils literal notranslate"><span class="pre">/PXI6259/ctr0</span></code></p>
 <section id="id1">
 <h4>Configuration File<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span><span class="w"> </span><span class="c1"># First Camera</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302153</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span><span class="w"> </span><span class="c1"># Second Camera</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302153</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">camera</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span>
+<span class="w">        </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302153</span>
+<span class="w">      </span><span class="nt">x_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048.0</span>
+<span class="w">      </span><span class="nt">y_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048.0</span>
+<span class="w">      </span><span class="nt">flip_x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">      </span><span class="nt">flip_y</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">      </span><span class="nt">pixel_size_in_microns</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6.5</span>
+<span class="w">      </span><span class="nt">subsampling</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">sensor_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Normal</span><span class="w">  </span><span class="c1"># 12 for progressive, 1 for normal. Normal/Light-Sheet</span>
+<span class="w">      </span><span class="nt">readout_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Top-to-Bottom</span><span class="w">  </span><span class="c1"># Top-to-Bottom&#39;, &#39;Bottom-to-Top&#39;</span>
+<span class="w">      </span><span class="nt">lightsheet_rolling_shutter_width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">608</span>
+<span class="w">      </span><span class="nt">defect_correct_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">binning</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1x1</span>
+<span class="w">      </span><span class="nt">readout_speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">      </span><span class="nt">trigger_active</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">trigger_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w"> </span><span class="c1"># external light-sheet mode</span>
+<span class="w">      </span><span class="nt">trigger_polarity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span><span class="w">  </span><span class="c1"># positive pulse</span>
+<span class="w">      </span><span class="nt">trigger_source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span><span class="w">  </span><span class="c1"># 2 = external, 3 = software.</span>
+<span class="w">      </span><span class="nt">exposure_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w"> </span><span class="c1"># Use milliseconds throughout.</span>
+<span class="w">      </span><span class="nt">delay_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">      </span><span class="nt">pulse_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">line_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.000075</span>
+<span class="w">      </span><span class="nt">display_acquisition_subsampling</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">      </span><span class="nt">average_frame_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.969</span>
+<span class="w">      </span><span class="nt">frames_to_average</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">exposure_time_range</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">x_pixels_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">      </span><span class="nt">y_pixels_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">      </span><span class="nt">x_pixels_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">      </span><span class="nt">y_pixels_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="hamamatsu-fusion">
@@ -248,7 +320,46 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 </section>
 <section id="hamamatsu-lightning">
 <h3>Hamamatsu Lightning<a class="headerlink" href="#hamamatsu-lightning" title="Permalink to this heading"></a></h3>
-<p>TBD…</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrcaLightning</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">000035</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">camera</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrcaLightning</span><span class="w"> </span><span class="c1">#SyntheticCamera</span>
+<span class="w">            </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">000035</span>
+<span class="w">          </span><span class="nt">x_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4608.0</span>
+<span class="w">          </span><span class="nt">y_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2592.0</span>
+<span class="w">          </span><span class="nt">pixel_size_in_microns</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.5</span>
+<span class="w">          </span><span class="nt">subsampling</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">sensor_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Normal</span><span class="w">  </span><span class="c1"># 12 for progressive, 1 for normal.</span>
+<span class="w">          </span><span class="nt">readout_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bottom-to-Top</span><span class="w">  </span><span class="c1"># Top-to-Bottom&#39;, &#39;Bottom-to-Top&#39;</span>
+<span class="w">          </span><span class="nt">lightsheet_rolling_shutter_width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">608</span>
+<span class="w">          </span><span class="nt">defect_correct_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">          </span><span class="nt">binning</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1x1</span>
+<span class="w">          </span><span class="nt">readout_speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0x7FFFFFFF</span>
+<span class="w">          </span><span class="nt">trigger_active</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">          </span><span class="nt">trigger_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w"> </span><span class="c1"># external light-sheet mode</span>
+<span class="w">          </span><span class="nt">trigger_polarity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span><span class="w">  </span><span class="c1"># positive pulse</span>
+<span class="w">          </span><span class="nt">trigger_source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span><span class="w">  </span><span class="c1"># 2 = external, 3 = software.</span>
+<span class="w">          </span><span class="nt">exposure_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w"> </span><span class="c1"># Use milliseconds throughout.</span>
+<span class="w">          </span><span class="nt">delay_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span><span class="w"> </span><span class="c1">#5.0</span>
+<span class="w">          </span><span class="nt">pulse_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">line_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.000075</span>
+<span class="w">          </span><span class="nt">display_acquisition_subsampling</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">          </span><span class="nt">average_frame_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.969</span>
+<span class="w">          </span><span class="nt">frames_to_average</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">exposure_time_range</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</pre></div>
+</div>
 </section>
 <section id="photometrics-iris-15">
 <h3>Photometrics Iris 15<a class="headerlink" href="#photometrics-iris-15" title="Permalink to this heading"></a></h3>
@@ -263,6 +374,21 @@ You will likely have to register and agree to Photometrics terms.
 * Upon successfully installation, one should be able to acquire images with the manufacturer provided PVCamTest software.</p>
 <section id="id2">
 <h4>Configuration File<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Photometrics</span>
+<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">TBD...</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">camera</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Photometrics</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">TBD...</span>
+</pre></div>
+</div>
 </section>
 </section>
 </section>
@@ -291,6 +417,24 @@ no longer need the serial communication to be established.</p>
 </ul>
 <section id="id3">
 <h4>Configuration File<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">remote_focus_device</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">remote_focus</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EquipmentSolutions</span>
+<span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PCI6738/ao2</span>
+<span class="w">        </span><span class="nt">comport</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM7</span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5</span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">delay_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7.5</span>
+<span class="w">      </span><span class="nt">ramp_rising_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">85</span>
+<span class="w">      </span><span class="nt">ramp_falling_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.0</span>
+<span class="w">      </span><span class="nt">amplitude</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">      </span><span class="nt">offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.3</span>
+<span class="w">      </span><span class="nt">smoothing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="thorlabs-blink">
@@ -327,13 +471,126 @@ perZ-based acquisitions.</p>
 differentially drive the two vertical posts, causing them to torque and potentially damage
 one another.</p>
 </div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM17</span>
+<span class="w">      </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
+<span class="w">      </span><span class="nt">controllername</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;C-884&#39;</span>
+<span class="w">      </span><span class="nt">stages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE</span>
+<span class="w">      </span><span class="nt">refmode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FRF FRF FRF FRF FRF FRF</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">119060508</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">microscope</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">              </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">              </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">119060508</span>
+<span class="w">              </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">]</span>
+<span class="w">              </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">X</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">Y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">Z</span><span class="p p-Indicator">]</span>
+<span class="w">              </span><span class="nt">volts_per_micron</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">              </span><span class="nt">axes_channels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">              </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">              </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">            </span><span class="p p-Indicator">-</span>
+</pre></div>
+</div>
 </section>
 <section id="sutter-mp-285">
 <h3>Sutter MP-285<a class="headerlink" href="#sutter-mp-285" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MP285</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM2</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span>
+<span class="w">      </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
+<span class="w">      </span><span class="nt">stages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span>
+<span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage1</span>
+<span class="w">                  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MP285</span>
+<span class="w">                  </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
+<span class="w">                  </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
+<span class="w">                  </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">x</span><span class="p p-Indicator">]</span>
+<span class="w">                  </span><span class="nt">volts_per_micron</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">                  </span><span class="nt">axes_channels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">                  </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25000</span>
+<span class="w">                  </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                </span><span class="p p-Indicator">-</span>
+<span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</pre></div>
+</div>
 </section>
 <section id="physik-instrumente">
 <h3>Physik Instrumente<a class="headerlink" href="#physik-instrumente" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PI</span>
+<span class="w">      </span><span class="nt">controllername</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">C-884</span>
+<span class="w">      </span><span class="nt">stages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE</span>
+<span class="w">      </span><span class="nt">refmode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FRF FRF FRF FRF FRF FRF</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">119060508</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PI</span>
+<span class="w">            </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">119060508</span>
+<span class="w">            </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">theta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">y_unload_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">          </span><span class="nt">y_load_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90000</span>
+
+<span class="w">          </span><span class="nt">startfocus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">75000</span>
+<span class="w">          </span><span class="nt">x_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
+<span class="w">          </span><span class="nt">x_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-100000</span>
+<span class="w">          </span><span class="nt">y_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
+<span class="w">          </span><span class="nt">y_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-100000</span>
+<span class="w">          </span><span class="nt">z_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
+<span class="w">          </span><span class="nt">z_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-100000</span>
+<span class="w">          </span><span class="nt">f_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
+<span class="w">          </span><span class="nt">f_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">theta_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">360</span>
+<span class="w">          </span><span class="nt">theta_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+
+<span class="w">          </span><span class="nt">x_rot_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span>
+<span class="w">          </span><span class="nt">y_rot_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span>
+<span class="w">          </span><span class="nt">z_rot_position</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span>
+
+<span class="w">          </span><span class="nt">x_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">          </span><span class="nt">y_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">          </span><span class="nt">z_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">          </span><span class="nt">theta_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">          </span><span class="nt">f_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+
+<span class="w">          </span><span class="nt">position</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">x_pos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25250</span>
+<span class="w">            </span><span class="nt">y_pos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40000</span>
+<span class="w">            </span><span class="nt">z_pos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40000</span>
+<span class="w">            </span><span class="nt">f_pos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">70000</span>
+<span class="w">            </span><span class="nt">theta_pos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">velocity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+
+<span class="w">          </span><span class="nt">x_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">y_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">z_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">f_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">theta_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+</pre></div>
+</div>
 </section>
 <section id="thorlabs">
 <h3>Thorlabs<a class="headerlink" href="#thorlabs" title="Permalink to this heading"></a></h3>
@@ -341,18 +598,92 @@ one another.</p>
 </section>
 <section id="analog-controlled-galvo-piezo-etc">
 <h3>Analog Controlled (Galvo/Piezo/etc.)<a class="headerlink" href="#analog-controlled-galvo-piezo-etc" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GalvoNIStage</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM9999</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span>
+<span class="w">      </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
+<span class="w">      </span><span class="nt">stages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">      </span><span class="nt">distance_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">      </span><span class="nt">settle_duration_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span>
+<span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage3</span>
+<span class="w">                  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GalvoNIStage</span>
+<span class="w">                  </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
+<span class="w">                  </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">z</span><span class="p p-Indicator">]</span>
+<span class="w">                  </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">PCI6738/ao6</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1">#48/49</span>
+<span class="w">                  </span><span class="nt">volts_per_micron</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05*x</span>
+<span class="w">                  </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">                  </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                  </span><span class="nt">distance_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                  </span><span class="nt">settle_duration_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+</pre></div>
+</div>
 </section>
 <section id="synthetic-stage">
 <h3>Synthetic Stage<a class="headerlink" href="#synthetic-stage" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syntheticstage</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM9999</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span>
+<span class="w">      </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
+<span class="w">      </span><span class="nt">stages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span>
+<span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage2</span>
+<span class="w">                  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syntheticstage</span>
+<span class="w">                  </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
+<span class="w">                  </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">theta</span><span class="p p-Indicator">]</span>
+<span class="w">                  </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">theta</span><span class="p p-Indicator">]</span>
+<span class="w">                  </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">360</span>
+<span class="w">                  </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="dichroic-turret">
 <h2>Dichroic Turret<a class="headerlink" href="#dichroic-turret" title="Permalink to this heading"></a></h2>
 <section id="asi">
 <h3>ASI<a class="headerlink" href="#asi" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dichroic</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span><span class="w"> </span><span class="c1">#synthetic #ASI</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM17</span>
+<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">microscope</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">dichroic</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span><span class="w"> </span><span class="c1">#synthetic #ASI</span>
+<span class="w">            </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM17</span>
+<span class="w">            </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">S</span><span class="p p-Indicator">]</span>
+<span class="w">            </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
+<span class="w">          </span><span class="nt">available_dichroics</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">510LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">            </span><span class="nt">570LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">            </span><span class="nt">640LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
 </section>
-<section id="synthetic-dichroic-turrett">
-<h3>Synthetic Dichroic Turrett<a class="headerlink" href="#synthetic-dichroic-turrett" title="Permalink to this heading"></a></h3>
+<section id="synthetic-dichroic-turret">
+<h3>Synthetic Dichroic Turret<a class="headerlink" href="#synthetic-dichroic-turret" title="Permalink to this heading"></a></h3>
 <p>TBD.</p>
 </section>
 </section>
@@ -360,9 +691,61 @@ one another.</p>
 <h2>Filter Wheels<a class="headerlink" href="#filter-wheels" title="Permalink to this heading"></a></h2>
 <section id="sutter">
 <h3>Sutter<a class="headerlink" href="#sutter" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">filter_wheel</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM10</span>
+<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
+<span class="w">    </span><span class="nt">number_of_wheels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">filter_wheel</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filter_wheel</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span>
+<span class="w">        </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.030</span><span class="w"> </span><span class="c1"># in seconds</span>
+<span class="w">      </span><span class="nt">available_filters</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">Empty-1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">525-30</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">600-52</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">        </span><span class="nt">670-30</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">        </span><span class="nt">647-LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">        </span><span class="nt">Empty-2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="nt">Empty-3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
+<span class="w">        </span><span class="nt">Empty-4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
+</pre></div>
+</div>
 </section>
 <section id="id4">
 <h3>ASI<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">filter_wheel</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM10</span>
+<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
+<span class="w">    </span><span class="nt">number_of_wheels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">filter_wheel</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filter_wheel</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">        </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.030</span><span class="w"> </span><span class="c1"># in seconds</span>
+<span class="w">      </span><span class="nt">available_filters</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">Empty-1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">525-30</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">600-52</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">        </span><span class="nt">670-30</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">        </span><span class="nt">647-LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">        </span><span class="nt">Empty-2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="nt">Empty-3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
+<span class="w">        </span><span class="nt">Empty-4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
+</pre></div>
+</div>
 </section>
 <section id="synthetic-filter-wheel">
 <h3>Synthetic Filter Wheel<a class="headerlink" href="#synthetic-filter-wheel" title="Permalink to this heading"></a></h3>
@@ -375,6 +758,24 @@ one another.</p>
 <h3>DAQ Control<a class="headerlink" href="#daq-control" title="Permalink to this heading"></a></h3>
 <p>Multiple types of galvanometers have been used, including Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX
 Each of these devices are externally controlled via analog signals delivered from a data acquisition card.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">galvo</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daq</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+<span class="w">          </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PCI6738/ao0</span>
+<span class="w">          </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5</span>
+<span class="w">          </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="nt">waveform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sawtooth</span>
+<span class="w">        </span><span class="nt">frequency</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">99.9</span>
+<span class="w">        </span><span class="nt">amplitude</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.5</span>
+<span class="w">        </span><span class="nt">offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">        </span><span class="nt">duty_cycle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="w">        </span><span class="nt">phase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.57079</span><span class="w"> </span><span class="c1"># pi/2</span>
+</pre></div>
+</div>
 </section>
 <section id="synthetic-galvanometer">
 <h3>Synthetic Galvanometer<a class="headerlink" href="#synthetic-galvanometer" title="Permalink to this heading"></a></h3>
@@ -388,6 +789,31 @@ Each of these devices are externally controlled via analog signals delivered fro
 <p>Most lasers are controlled externally via mixed analog and digital modulation.
 The <code class="docutils literal notranslate"><span class="pre">onoff</span></code> entry is for digital modulation.
 The <code class="docutils literal notranslate"><span class="pre">power</span></code> entry is for analog modulation.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">lasers</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">wavelength</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">488</span>
+<span class="w">            </span><span class="nt">onoff</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daq</span>
+<span class="w">                </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+<span class="w">                </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PCI6738/port1/line5</span><span class="w"> </span><span class="c1"># 7/41</span>
+<span class="w">                </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">            </span><span class="nt">power</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daq</span>
+<span class="w">                </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+<span class="w">                </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PCI6738/ao8</span><span class="w"> </span><span class="c1">#1  # 44/11</span>
+<span class="w">                </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Obis</span>
+<span class="w">            </span><span class="nt">index</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">            </span><span class="nt">delay_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">            </span><span class="nt">pulse_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">87</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">wavelength</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">561...</span>
+</pre></div>
+</div>
 </section>
 <section id="coherent">
 <h3>Coherent<a class="headerlink" href="#coherent" title="Permalink to this heading"></a></h3>
@@ -405,18 +831,87 @@ The <code class="docutils literal notranslate"><span class="pre">power</span></c
 <h2>Shutters<a class="headerlink" href="#shutters" title="Permalink to this heading"></a></h2>
 <section id="id6">
 <h3>Thorlabs<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">shutter</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daq</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SyntheticShutter</span>
+<span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PCI6738/port0/line10</span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+</pre></div>
+</div>
 </section>
 <section id="synthetic-shutter">
 <h3>Synthetic Shutter<a class="headerlink" href="#synthetic-shutter" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">shutter</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daq</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synthetic</span>
+<span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PCIE6738/port0/line0</span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="mechanical-zoom">
 <h2>Mechanical Zoom<a class="headerlink" href="#mechanical-zoom" title="Permalink to this heading"></a></h2>
 <section id="dynamixel-zoom">
 <h3>Dynamixel Zoom<a class="headerlink" href="#dynamixel-zoom" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">zoom</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synthetic</span>
+<span class="w">    </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM18</span>
+<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">zoom</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">zoom</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synthetic</span>
+<span class="w">        </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">position</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">36X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">      </span><span class="nt">pixel_size</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">36X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.180</span>
+<span class="w">      </span><span class="nt">stage_positions</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">BABB</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">f</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">36X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+</pre></div>
+</div>
 </section>
 <section id="synethetic-zoom">
 <h3>Synethetic Zoom<a class="headerlink" href="#synethetic-zoom" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">zoom</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synthetic</span>
+<span class="w">    </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM18</span>
+<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">zoom</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">zoom</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synthetic</span>
+<span class="w">        </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">position</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">36X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">      </span><span class="nt">pixel_size</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">36X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.180</span>
+<span class="w">      </span><span class="nt">stage_positions</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">BABB</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">f</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">36X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="deformable-mirrors">

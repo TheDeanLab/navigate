@@ -46,7 +46,7 @@ from test.controller.test_controller import controller
 
 
 @pytest.mark.skip('_tkinter.TclError: image "pyimage43" doesn\'t exist')
-def test_mainapp():
+def test_mainapp(controller):
     """
     Tests that the main application and all its widgets gets created and does not
     throw any exceptions. Test will fail if any exceptions.
@@ -57,7 +57,7 @@ def test_mainapp():
         True or False as to whether the test passed
     """
     root = tk.Tk()
-    main_app = MainApp(root)
+    main_app = MainApp(root=root, configuration=controller.configuration)
     root.update()
     bool = isinstance(main_app, MainApp)
     root.destroy()

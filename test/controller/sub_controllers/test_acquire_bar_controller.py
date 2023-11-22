@@ -86,9 +86,6 @@ class TestAcquireBarController:
     def test_init(self):
         """Tests the initialization of the AcquireBarController class
 
-
-
-
         Raises
         ------
         AssertionError
@@ -98,9 +95,6 @@ class TestAcquireBarController:
 
     def test_attr(self):
         """Tests the attributes of the AcquireBarController class
-
-
-
 
         Raises
         ------
@@ -133,7 +127,6 @@ class TestAcquireBarController:
             Expected mode of the progress bar
         value_expected : int
             Expected value of the progress bar
-
 
         Raises
         ------
@@ -238,7 +231,6 @@ class TestAcquireBarController:
         expected_state : str
             Expected state of the progress bar
 
-
         Raises
         ------
         AssertionError
@@ -317,7 +309,6 @@ class TestAcquireBarController:
         mode : str
             Mode of the progress bar
 
-
         Raises
         ------
         AssertionError
@@ -330,7 +321,6 @@ class TestAcquireBarController:
 
     def test_set_save(self):
         """Tests the set_save method of the AcquireBarController class
-
 
         Raises
         ------
@@ -350,7 +340,6 @@ class TestAcquireBarController:
 
     def test_stop_acquire(self):
         """Tests the stop_acquire method of the AcquireBarController class
-
 
         Raises
         ------
@@ -382,7 +371,6 @@ class TestAcquireBarController:
         expected_mode : str
             Expected state of the progress bar
 
-
         Raises
         ------
         AssertionError
@@ -412,7 +400,6 @@ class TestAcquireBarController:
 
     def test_populate_experiment_values(self):
         """Tests the populate_experiment_values method of the AcquireBarController class
-
 
         Raises
         ------
@@ -483,7 +470,6 @@ class TestAcquireBarController:
             List of file types to save as
         choice : str
             Choice of the user in the popup window
-
 
         Raises
         ------
@@ -634,6 +620,13 @@ class TestAcquireBarController:
                     )
 
     def test_frequent_start_and_stop_acquisition(self):
+        """Tests the frequent start and stop of acquisition
+
+        Raises
+        ------
+        AssertionError
+            If the frequent start and stop of acquisition is not correct
+        """
         # set up
         self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
         self.acquire_bar_controller.view.acquire_btn.configure(text="Acquire")

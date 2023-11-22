@@ -111,6 +111,7 @@ class Microscope:
         if is_virtual:
             return
 
+        # Mandatory Devices
         device_ref_dict = {
             "camera": ["type", "serial_number"],
             "filter_wheel": ["type"],
@@ -119,8 +120,14 @@ class Microscope:
             "remote_focus_device": ["type", "channel"],
             "galvo": ["type", "channel"],
             "lasers": ["wavelength"],
-            "dichroic": ["type"]
         }
+
+        # Optional Devices
+        if "dichroic" in self.configuration["configuration"]["hardware"]:
+            self.dichroic_enabled = True
+            device_ref_dict["dichroic"] = ["type"]
+        else:
+            self.dichroic_enabled = False
 
         # TODO: Create more general way to have devices with shared controllers.
 
@@ -142,7 +149,8 @@ class Microscope:
                 device_name=device_name, device_name_dict=device_name_dict
             )
 
-            # device_config_list: all of the device configurations (e.g., x_pixels, y_pixels, defect_correct_mode)
+            # device_config_list: all of the device configurations (e.g., x_pixels,
+            # y_pixels, defect_correct_mode)
             for i, device in enumerate(device_config_list):
                 device_ref_name = None
                 if "hardware" in device.keys():
@@ -683,7 +691,7 @@ class Microscope:
         device_config_list = []
         device_name_list = []
 
-        #daq, dichroic, camera, stage, remote_focus_device, galvo, filter_wheel, etc.
+        # daq, dichroic, camera, stage, remote_focus_device, galvo, filter_wheel, etc.
         devices = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ][device_name]

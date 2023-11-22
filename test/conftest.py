@@ -37,6 +37,7 @@ import tkinter as tk
 import pytest
 
 # Local Imports
+from test.controller.test_controller import controller  # noqa
 
 
 @pytest.fixture(scope="package")
@@ -62,7 +63,7 @@ def tk_root():
 
 
 @pytest.fixture(scope="session")
-def dummy_view(tk_root):
+def dummy_view(tk_root, controller):  # noqa
     """Dummy view for testing.
 
     Creates a dummy view for the controller tests.
@@ -73,7 +74,7 @@ def dummy_view(tk_root):
     """
     from aslm.view.main_application_window import MainApp
 
-    view = MainApp(tk_root)
+    view = MainApp(root=tk_root, configuration=controller.configuration)
     tk_root.update()
     yield view
 
@@ -91,8 +92,7 @@ def dummy_controller(dummy_view):
     """
     from aslm.model.dummy import DummyController
 
-    controller = DummyController(dummy_view)
-    return controller
+    return DummyController(dummy_view)
 
 
 # @pytest.fixture(scope="package")

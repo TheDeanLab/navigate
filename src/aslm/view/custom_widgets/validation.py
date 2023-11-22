@@ -954,8 +954,8 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         max_val = self.cget("to")
         min_val = self.cget("from")
         try:
-            max_val = Decimal(max_val)
-            min_val = Decimal(min_val)
+            max_val = Decimal(str(max_val))
+            min_val = Decimal(str(min_val))
         except InvalidOperation:
             err_str = f"Either {min_val} or {max_val} couldn't be cast to a Decimal."
             logger.warning(err_str)
@@ -973,7 +973,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             return True
 
         try:
-            value = Decimal(value)
+            value = Decimal(str(value))
         except InvalidOperation:
             self.error.set("Invalid Number Provided: {}".format(value))
             return False

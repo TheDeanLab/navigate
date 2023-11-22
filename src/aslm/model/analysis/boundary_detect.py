@@ -29,14 +29,17 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard library imports
 import math
 from typing import Optional
 
+# Third party imports
 from skimage import filters
 from skimage.transform import downscale_local_mean
 import numpy as np
 import numpy.typing as npt
 
+# Local application imports
 # from aslm.model.analysis.camera import compute_signal_to_noise
 
 
@@ -144,10 +147,9 @@ def binary_detect(
     Perform a binary search for tissue on an image. Return locations of pixels
     containing tissue.
 
-
     Parameters
     ----------
-    image_data : npt.ArrayLike
+    img_data : npt.ArrayLike
         Image
     boundary : dict
         List of xy pixel positions indicating presence of tissue as values.
@@ -158,13 +160,32 @@ def binary_detect(
     variance : npt.ArrayLike
         Camera pixel variance map. Same size as image_data.
 
+    Returns
+    -------
+    boundary : list
+        List of boundaries of tissue by row of downsampled image.
     """
     m, n = img_data.shape
     m = int(m / width)
     n = int(n / width)
 
     def binary_search_func_left(row, left, right):
-        """Binary search function."""
+        """Binary search function.
+
+        Parameters
+        ----------
+        row : int
+            Row index of image.
+        left : int
+            Leftmost column index of subimage.
+        right : int
+            Rightmost column index of subimage.
+
+        Returns
+        -------
+        int
+            Leftmost column index of subimage.
+        """
         while left < right:
             mid = (left + right) // 2
             if has_tissue(img_data, row, mid, width, offset, variance):
@@ -174,6 +195,23 @@ def binary_detect(
         return right
 
     def binary_search_func_right(row, left, right):
+        """Binary search function.
+
+        Parameters
+        ----------
+        row : int
+            Row index of image.
+        left : int
+            Leftmost column index of subimage.
+        right : int
+            Rightmost column index of subimage.
+
+        Returns
+        -------
+        int
+            Rightmost column index of subimage.
+        """
+
         while left < right:
             mid = (left + right) // 2
             if has_tissue(img_data, row, mid, width, offset, variance):
@@ -183,6 +221,27 @@ def binary_detect(
         return right - 1
 
     def find_tissue_range(row, left, right):
+        """Find range of tissue in image.
+
+        Parameters
+        ----------
+        row : int
+            Row index of image.
+        left : int
+            Leftmost column index of subimage.
+        right : int
+            Rightmost column index of subimage.
+
+        Returns
+        -------
+        int
+            Leftmost column index of subimage.
+        int
+            Middle column index of subimage.
+        int
+            Rightmost column index of subimage.
+        """
+
         temp = [(left, right)]
         while temp:
             temp2 = []
@@ -198,6 +257,24 @@ def binary_detect(
         return -1, -1, -1
 
     def detect_row_boundary(row_id, left, right):
+        """Detect row boundary.
+
+        Parameters
+        ----------
+        row_id : int
+            Row index of image.
+        left : int
+            Leftmost column index of subimage.
+        right : int
+            Rightmost column index of subimage.
+
+        Returns
+        -------
+        int
+            Leftmost column index of subimage.
+        int
+            Rightmost column index of subimage.
+        """
         is_tissue_left = has_tissue(img_data, row_id, left, width, offset, variance)
         is_tissue_right = has_tissue(img_data, row_id, right, width, offset, variance)
 
@@ -222,6 +299,25 @@ def binary_detect(
         ), binary_search_func_right(row_id, right_l, right_r)
 
     def expand_row(row_id, limits, direction, boundary):
+        """Expand row.
+
+        Parameters
+        ----------
+        row_id : int
+            Row index of image.
+        limits : int
+            Limits of row.
+        direction : int
+            Direction of row.
+        boundary : list
+            List of boundaries of tissue by row of downsampled image.
+
+        Returns
+        -------
+        new_boundary : list
+            List of boundaries of tissue by row of downsampled image.
+        """
+
         for i in range(row_id, limits, direction):
             left, right = boundary[i][0], boundary[i][1]
             left = left - 1 if left > 0 else 0
@@ -269,6 +365,20 @@ def binary_detect(
 
 
 def map_boundary(boundary, direction=True):
+    """Map boundary to a path.
+
+    Parameters
+    ----------
+    boundary : list
+        List of boundaries of tissue by row of downsampled image.
+    direction : bool
+        Direction of path.
+
+    Returns
+    -------
+    path : list
+        List of boundaries of tissue by row of downsampled image.
+    """
     if direction:
         start, end, step = 0, len(boundary), 1
         offset = -1
@@ -277,6 +387,20 @@ def map_boundary(boundary, direction=True):
         offset = 1
 
     def dp_shortest_path(start, end, step, offset=-1):
+        """Dynamic programming shortest path.
+
+        Parameters
+        ----------
+        start : int
+            Starting index.
+        end : int
+            Ending index.
+
+        Returns
+        -------
+        path : list
+            List of boundaries of tissue by row of downsampled image.
+        """
         dp_path = []
         dp_cost = [0, 0]
         visited = False

@@ -349,6 +349,8 @@ class ConstantVelocityAcquisition:
         self.end_signal_temp += 1
         print(f"self.end_signal_temp = {self.end_signal_temp}")
         print(f"DAQ Trigger SENT test = {self.end_signal_temp>0}")
+        self.asi_stage.wait_until_complete(self.axis)
+        print("Stage wait until complete completed end signal")
         if (
             self.model.stop_acquisition
             or self.end_acquisition
@@ -391,10 +393,10 @@ class ConstantVelocityAcquisition:
             self.model.pause_data_thread()
             print("DATA THREAD PAUSED IN CHANNEL")
 
-        self.asi_stage.set_speed(percent=0.5)
-        print("Stage speed set")
-        self.asi_stage.wait_until_complete(self.axis)
-        print("Stage wait until complete completed")
+        # self.asi_stage.set_speed(percent=0.5)
+        # print("Stage speed set")
+        # self.asi_stage.wait_until_complete(self.axis)
+        # print("Stage wait until complete completed")
 
         if self.current_channel_in_list == 0:
             print("if current channel is zero statement")
@@ -424,13 +426,13 @@ class ConstantVelocityAcquisition:
         print("Clean up called")
         # self.asi_stage.set_speed({self.axis: self.default_speed})
         self.asi_stage.set_speed(percent=0.5)
-
-        # self.asi_stage.set_speed(0.9)
         print("speed set")
-        end_speed = self.asi_stage.get_speed(self.axis)  # mm/s
-        print("end Speed = ", end_speed)
-        self.asi_stage.stop()
-        print("stage stop")
+
+        # end_speed = self.asi_stage.get_speed(self.axis)  # mm/s
+        # print("end Speed = ", end_speed)
+        # self.asi_stage.stop()
+        # print("stage stop")
+
         # print("external trigger none")
         # return to start position
         # self.start_position = float(

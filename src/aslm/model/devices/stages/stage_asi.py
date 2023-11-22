@@ -504,6 +504,9 @@ class ASIStage(StageBase):
 
     def wait_until_complete(self, axis):
         try:
+            print("wait until complete try")
+            tiger_busy = self.tiger_controller.is_axis_busy(axis)
+            print(f"is axis busy = {tiger_busy}")
             while self.tiger_controller.is_axis_busy(axis):
                 time.sleep(0.1)
         except TigerException as e:

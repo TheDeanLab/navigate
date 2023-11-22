@@ -129,7 +129,7 @@ class NIDAQ(DAQBase):
             try:
                 self.camera_trigger_task.stop()
             except Exception:
-                print(
+                logger.debug(
                     f"DAQ NI - Error switching the camera trigger source: "
                     f"{traceback.format_exc()}"
                 )
@@ -142,7 +142,7 @@ class NIDAQ(DAQBase):
                 try:
                     self.analog_output_tasks[board_name].stop()
                 except Exception:
-                    print(
+                    logger.debug(
                         f"DAQ NI - Error stopping analog output tasks: "
                         f"{traceback.format_exc()}"
                     )
@@ -158,7 +158,7 @@ class NIDAQ(DAQBase):
                     self.master_trigger_task.stop()
                     self.master_trigger_task.close()
                 except Exception:
-                    print(
+                    logger.debug(
                         f"DAQ NI - Error stopping master trigger task: "
                         f"{traceback.format_exc()}"
                     )
@@ -201,8 +201,9 @@ class NIDAQ(DAQBase):
                 task.stop()
                 task.start()
             except Exception:
-                print(traceback.format_exc())
-                print("*** there is some error when restarting the analog task")
+                logger.debug(
+                    f"DAQ NI - Analog task restart failed {traceback.format_exc()}"
+                )
             return status
 
         return callback_func
@@ -400,21 +401,19 @@ class NIDAQ(DAQBase):
             for task in self.analog_output_tasks.values():
                 if self.trigger_mode == "self-trigger":
                     task.wait_until_done()
-                try:
-                    task.stop()
-                except Exception:
-                    print(traceback.format_exc())
+                task.stop()
         except Exception:
             # when triggered from external triggers, sometimes the camera trigger task
             # is done but not actually done, there will a DAQ WARNING message
-            print(traceback.format_exc())
+            logger.debug(
+                f"DAQ NI - Wait until tasks done failed - {traceback.format_exc()}"
+            )
             pass
         try:
             self.camera_trigger_task.stop()
             if self.trigger_mode == "self-trigger":
                 self.master_trigger_task.stop()
         except nidaqmx.DaqError:
-            print(traceback.format_exc())
             pass
 
     def stop_acquisition(self):
@@ -516,13 +515,15 @@ class NIDAQ(DAQBase):
             ).squeeze()
             self.analog_output_tasks[board_name].write(waveforms)
         except Exception:
-            print(f"DAQ NI - Could not update analog task: {traceback.format_exc()}")
+            logger.debug(
+                f"DAQ NI - Could not update analog task: {traceback.format_exc()}"
+            )
             for board in self.analog_output_tasks.keys():
                 try:
                     self.analog_output_tasks[board].stop()
                     self.analog_output_tasks[board].close()
                 except Exception:
-                    print(
+                    logger.debug(
                         f"DAQ NI - Could not stop analog tasks: "
                         f"{traceback.format_exc()}"
                     )

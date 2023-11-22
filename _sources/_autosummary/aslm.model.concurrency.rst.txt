@@ -29,5 +29,4 @@ aslm.model.concurrency
    :recursive:
 
    aslm.model.concurrency.concurrency_tools
-   aslm.model.concurrency.proxy_objects
 

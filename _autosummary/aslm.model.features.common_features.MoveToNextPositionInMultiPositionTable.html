@@ -126,46 +126,6 @@
 table.</p>
 <p>This class provides functionality to move to the next position in a multi-position
 table and control the data thread accordingly.</p>
-<section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for position control.</p>
-</dd>
-</dl>
-</section>
-<section id="attributes">
-<h2>Attributes:<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model associated with the position control.</p>
-</dd>
-<dt>config_table<span class="classifier">dict</span></dt><dd><p>A dictionary defining the configuration for the position control process. It
-contains the following keys:
-- “signal”: Configuration for the signal acquisition stage, including main
-execution and cleanup.
-- “node”: Configuration related to node type and device.</p>
-</dd>
-<dt>pre_z<span class="classifier">float or None</span></dt><dd><p>The previous z-position.</p>
-</dd>
-<dt>current_idx<span class="classifier">int</span></dt><dd><p>The current index in the multi-position table.</p>
-</dd>
-<dt>multiposition_table<span class="classifier">list</span></dt><dd><p>The multi-position table containing position information.</p>
-</dd>
-<dt>position_count<span class="classifier">int</span></dt><dd><p>The count of positions in the multi-position table.</p>
-</dd>
-<dt>stage_distance_threshold<span class="classifier">int</span></dt><dd><p>The threshold for stage distance to decide whether to pause the data thread.</p>
-</dd>
-</dl>
-</section>
-<section id="methods">
-<h2>Methods:<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>signal_func():</dt><dd><p>Move to the next position in the multi-position table and control the data
-thread.</p>
-</dd>
-<dt>cleanup():</dt><dd><p>Cleanup method to resume the data thread.</p>
-</dd>
-</dl>
-</section>
 <section id="notes">
 <h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
 <ul class="simple">
@@ -190,13 +150,21 @@ management.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the MoveToNextPositionInMultiPositionTable class.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for position control.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__" title="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model)</p></td>
-<td><p></p></td>
+<td><p>Initialize the MoveToNextPositionInMultiPositionTable class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.cleanup" title="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a>()</p></td>
 <td><p>Cleanup method to resume the data thread.</p></td>
@@ -206,19 +174,37 @@ management.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.model" title="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>The microscope model associated with position control.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.config_table" title="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<td><p>A dictionary defining the configuration for the position control</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.pre_z" title="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.pre_z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_z</span></code></a></p></td>
+<td><p>The current index of the position being acquired in the multi-position</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.current_idx" title="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.current_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_idx</span></code></a></p></td>
+<td><p>The current index of the position being acquired in the multi-position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.multiposition_table" title="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.multiposition_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiposition_table</span></code></a></p></td>
+<td><p>A dictionary defining the configuration for the position control</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.position_count" title="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.position_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">position_count</span></code></a></p></td>
+<td><p>The total number of positions in the multi-position table.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.stage_distance_threshold" title="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.stage_distance_threshold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_distance_threshold</span></code></a></p></td>
+<td><p>The stage distance threshold for pausing the data thread.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.cleanup">
 <span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.cleanup" title="Permalink to this definition"></a></dt>
 <dd><p>Cleanup method to resume the data thread.</p>
 <p>This method is responsible for resuming the data thread after position control.</p>
-<section id="id1">
-<h3>Parameters:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="returns">
-<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -229,17 +215,90 @@ thread.</p>
 <p>This method advances to the next position in the multi-position table,
 controls the data thread based on stage distance thresholds, and updates
 position-related information.</p>
-<section id="id2">
-<h3>Parameters:<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="id3">
-<h3>Returns:<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>bool</dt><dd><p>A boolean value indicating whether to continue the position control process.</p>
 </dd>
 </dl>
 </section>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.config_table">
+<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.config_table" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the configuration for the position control</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.current_idx">
+<span class="sig-name descname"><span class="pre">current_idx</span></span><a class="headerlink" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.current_idx" title="Permalink to this definition"></a></dt>
+<dd><p>The current index of the position being acquired in the multi-position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.model" title="Permalink to this definition"></a></dt>
+<dd><p>The microscope model associated with position control.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MicroscopeModel</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.multiposition_table">
+<span class="sig-name descname"><span class="pre">multiposition_table</span></span><a class="headerlink" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.multiposition_table" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the configuration for the position control</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.position_count">
+<span class="sig-name descname"><span class="pre">position_count</span></span><a class="headerlink" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.position_count" title="Permalink to this definition"></a></dt>
+<dd><p>The total number of positions in the multi-position table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.pre_z">
+<span class="sig-name descname"><span class="pre">pre_z</span></span><a class="headerlink" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.pre_z" title="Permalink to this definition"></a></dt>
+<dd><p>The current index of the position being acquired in the multi-position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.stage_distance_threshold">
+<span class="sig-name descname"><span class="pre">stage_distance_threshold</span></span><a class="headerlink" href="#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.stage_distance_threshold" title="Permalink to this definition"></a></dt>
+<dd><p>The stage distance threshold for pausing the data thread.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

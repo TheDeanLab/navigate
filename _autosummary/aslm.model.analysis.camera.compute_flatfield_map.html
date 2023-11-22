@@ -59,7 +59,6 @@
 <li class="toctree-l3 current"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.boundary_detect.html">aslm.model.analysis.boundary_detect</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.analysis.camera.html">aslm.model.analysis.camera</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.detection.html">aslm.model.analysis.detection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.image_contrast.html">aslm.model.analysis.image_contrast</a></li>
 </ul>
 </li>
@@ -123,6 +122,12 @@ an sCMOS camera.</p>
 <li><p><strong>offset_map</strong> (<em>np.ArrayLike</em>) – XY image of camera offset in the absence of signal.</p></li>
 <li><p><strong>local</strong> (<em>bool</em>) – Compute the local flatfield map (as opposed to global).</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>flatfield_map</strong> – XY image of flatfield map.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>npt.ArrayLike</p>
 </dd>
 </dl>
 </dd></dl>

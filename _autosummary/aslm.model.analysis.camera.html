@@ -59,7 +59,6 @@
 <li class="toctree-l3 current"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.boundary_detect.html">aslm.model.analysis.boundary_detect</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">aslm.model.analysis.camera</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.detection.html">aslm.model.analysis.detection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.image_contrast.html">aslm.model.analysis.image_contrast</a></li>
 </ul>
 </li>
@@ -117,13 +116,13 @@
 <td><p>Compute the flatfield map for an evenly-illuminated set of frames from an sCMOS camera.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="aslm.model.analysis.camera.compute_noise_sigma.html#aslm.model.analysis.camera.compute_noise_sigma" title="aslm.model.analysis.camera.compute_noise_sigma"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_noise_sigma</span></code></a>([Fn, qe, S, Ib, Nr, M])</p></td>
-<td><p>Using <a class="reference external" href="https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/sys/SCAS0134E_C13440-20CU_tec.pdf">https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/sys/SCAS0134E_C13440-20CU_tec.pdf</a> the sCMOS mean noise sigma is given by</p></td>
+<td><p>Compute the noise model for an sCMOS camera.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="aslm.model.analysis.camera.compute_scmos_offset_and_variance_map.html#aslm.model.analysis.camera.compute_scmos_offset_and_variance_map" title="aslm.model.analysis.camera.compute_scmos_offset_and_variance_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_scmos_offset_and_variance_map</span></code></a>(image)</p></td>
 <td><p>Compute the offset and variance map of an sCMOS camera.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="aslm.model.analysis.camera.compute_signal_to_noise.html#aslm.model.analysis.camera.compute_signal_to_noise" title="aslm.model.analysis.camera.compute_signal_to_noise"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_signal_to_noise</span></code></a>(image, offset_map, ...)</p></td>
-<td><p>Compute the SNR of an image from offset and variance maps.</p></td>
+<td><p>Compute the signal-to-noise ratio of an image from offset and variance maps.</p></td>
 </tr>
 </tbody>
 </table>

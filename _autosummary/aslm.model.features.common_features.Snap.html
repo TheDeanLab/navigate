@@ -125,31 +125,6 @@
 <p>Snap class for capturing data frames using a microscope.</p>
 <p>This class provides functionality to capture data frames using a microscope
 and log information about the camera and frame IDs.</p>
-<section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for data capture.</p>
-</dd>
-</dl>
-</section>
-<section id="attributes">
-<h2>Attributes:<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model associated with the data capture.</p>
-</dd>
-<dt>config_table<span class="classifier">dict</span></dt><dd><p>A dictionary defining the configuration for the data capture process. It
-contains the following key:
-- “data”: Configuration for the data capture stage.</p>
-</dd>
-</dl>
-</section>
-<section id="methods">
-<h2>Methods:<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>data_func(frame_ids):</dt><dd><p>Capture data frames and log camera information.</p>
-</dd>
-</dl>
-</section>
 <section id="notes">
 <h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
 <ul class="simple">
@@ -171,16 +146,35 @@ contains the following key:
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.common_features.Snap.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.Snap.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the Snap class.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for data capture.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.Snap.__init__" title="aslm.model.features.common_features.Snap.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model)</p></td>
-<td><p></p></td>
+<td><p>Initialize the Snap class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.Snap.data_func" title="aslm.model.features.common_features.Snap.data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_func</span></code></a>(frame_ids)</p></td>
 <td><p>Capture data frames and log camera information.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.Snap.model" title="aslm.model.features.common_features.Snap.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>The microscope model associated with the data capture.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.Snap.config_table" title="aslm.model.features.common_features.Snap.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<td><p>A dictionary defining the configuration for the data capture process.</p></td>
 </tr>
 </tbody>
 </table>
@@ -204,6 +198,28 @@ about the active camera and the provided frame IDs.</p>
 </dd>
 </dl>
 </section>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.Snap.config_table">
+<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#aslm.model.features.common_features.Snap.config_table" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the configuration for the data capture process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.Snap.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#aslm.model.features.common_features.Snap.model" title="Permalink to this definition"></a></dt>
+<dd><p>The microscope model associated with the data capture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MicroscopeModel</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

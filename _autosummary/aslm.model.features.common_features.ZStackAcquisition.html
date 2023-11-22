@@ -126,92 +126,6 @@
 <p>This class provides functionality to control z-stack acquisition, including managing
 z and focus positions, acquiring image data, and handling multi-channel
 acquisitions.</p>
-<section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for z-stack acquisition control.</p>
-</dd>
-<dt>get_origin<span class="classifier">bool, optional</span></dt><dd><p>Flag to determine whether to get the z and focus origin positions.
-Default is False.</p>
-</dd>
-<dt>saving_flag<span class="classifier">bool, optional</span></dt><dd><p>Flag to enable image saving during z-stack acquisition. Default is False.</p>
-</dd>
-<dt>saving_dir<span class="classifier">str, optional</span></dt><dd><p>The sub-directory for saving z-stack images. Default is “z-stack”.</p>
-</dd>
-</dl>
-</section>
-<section id="attributes">
-<h2>Attributes:<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h2>
-<dl>
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model associated with z-stack acquisition control.</p>
-</dd>
-<dt>get_origin<span class="classifier">bool</span></dt><dd><p>Flag indicating whether to get the z and focus origin positions.</p>
-</dd>
-<dt>number_z_steps<span class="classifier">int</span></dt><dd><p>The total number of z-steps in the z-stack.</p>
-</dd>
-<dt>start_z_position<span class="classifier">float</span></dt><dd><p>The starting z position for the z-stack.</p>
-</dd>
-<dt>start_focus<span class="classifier">float</span></dt><dd><p>The starting focus position for the z-stack.</p>
-</dd>
-<dt>z_step_size<span class="classifier">float</span></dt><dd><p>The step size for z movement during the z-stack.</p>
-</dd>
-<dt>focus_step_size<span class="classifier">float</span></dt><dd><p>The step size for focus adjustment during the z-stack.</p>
-</dd>
-<dt>positions<span class="classifier">dict or list</span></dt><dd><p>The positions to be acquired in the z-stack, including x, y, z, theta, and
-focus.</p>
-</dd>
-<dt>current_position_idx<span class="classifier">int</span></dt><dd><p>The current index of the position being acquired in the z-stack.</p>
-</dd>
-<dt>current_z_position<span class="classifier">float</span></dt><dd><p>The current z position during z-stack acquisition.</p>
-</dd>
-<dt>current_focus_position<span class="classifier">float</span></dt><dd><p>The current focus position during z-stack acquisition.</p>
-</dd>
-<dt>need_to_move_new_position<span class="classifier">bool</span></dt><dd><p>Flag indicating whether a new position needs to be moved to.</p>
-</dd>
-<dt>need_to_move_z_position<span class="classifier">bool</span></dt><dd><p>Flag indicating whether the z position needs to be moved.</p>
-</dd>
-<dt>z_position_moved_time<span class="classifier">int</span></dt><dd><p>The number of times the z position has been moved in the z-stack.</p>
-</dd>
-<dt>stack_cycling_mode<span class="classifier">str</span></dt><dd><p>The mode for cycling through stacks (e.g., “per_stack”).</p>
-</dd>
-<dt>channels<span class="classifier">int</span></dt><dd><p>The number of channels in multi-channel acquisition.</p>
-</dd>
-<dt>image_writer<span class="classifier">ImageWriter or None</span></dt><dd><p>An optional ImageWriter instance for saving z-stack images.</p>
-</dd>
-<dt>config_table<span class="classifier">dict</span></dt><dd><p>A dictionary defining the configuration for the z-stack acquisition process. It
-contains the following keys:
-- “signal”: Configuration for the signal acquisition stage, including
-initialization, main execution, and signal end.
-- “data”: Configuration for data acquisition, including initialization, main
-data handling, end of data acquisition, and data cleanup.
-- “node”: Configuration related to node type, indicating “multi-step” and</p>
-<blockquote>
-<div><p>“device_related”.</p>
-</div></blockquote>
-</dd>
-</dl>
-</section>
-<section id="methods">
-<h2>Methods:<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>pre_signal_func():</dt><dd><p>Initialize z-stack acquisition parameters before the signal stage.</p>
-</dd>
-<dt>signal_func():</dt><dd><p>Control z-stack acquisition, move positions, and manage data threads.</p>
-</dd>
-<dt>signal_end():</dt><dd><p>Handle the end of the signal stage and position cycling.</p>
-</dd>
-<dt>update_channel():</dt><dd><p>Update the active channel during multi-channel acquisition.</p>
-</dd>
-<dt>pre_data_func():</dt><dd><p>Initialize data-related parameters before data acquisition.</p>
-</dd>
-<dt>in_data_func(frame_ids):</dt><dd><p>Handle incoming data frames during data acquisition.</p>
-</dd>
-<dt>end_data_func():</dt><dd><p>Check if all expected data frames have been received.</p>
-</dd>
-<dt>cleanup_data_func():</dt><dd><p>Perform cleanup actions after data acquisition, if image saving is enabled.</p>
-</dd>
-</dl>
-</section>
 <section id="notes">
 <h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
 <ul class="simple">
@@ -229,13 +143,28 @@ data handling, end of data acquisition, and data cleanup.
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'z-stack'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the ZStackAcquisition class.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for z-stack acquisition control.</p>
+</dd>
+<dt>get_origin<span class="classifier">bool, optional</span></dt><dd><p>Flag to determine whether to get the z and focus origin positions.
+Default is False.</p>
+</dd>
+<dt>saving_flag<span class="classifier">bool, optional</span></dt><dd><p>Flag to enable image saving during z-stack acquisition. Default is False.</p>
+</dd>
+<dt>saving_dir<span class="classifier">str, optional</span></dt><dd><p>The sub-directory for saving z-stack images. Default is “z-stack”.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.__init__" title="aslm.model.features.common_features.ZStackAcquisition.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, get_origin, saving_flag, ...])</p></td>
-<td><p></p></td>
+<td><p>Initialize the ZStackAcquisition class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.cleanup_data_func" title="aslm.model.features.common_features.ZStackAcquisition.cleanup_data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup_data_func</span></code></a>()</p></td>
 <td><p>Perform cleanup actions after data acquisition, if image saving is enabled.</p></td>
@@ -263,6 +192,68 @@ data handling, end of data acquisition, and data cleanup.
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.model" title="aslm.model.features.common_features.ZStackAcquisition.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>The microscope model associated with z-stack acquisition.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.get_origin" title="aslm.model.features.common_features.ZStackAcquisition.get_origin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_origin</span></code></a></p></td>
+<td><p>Flag to determine whether to get the z and focus origin positions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.number_z_steps" title="aslm.model.features.common_features.ZStackAcquisition.number_z_steps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_z_steps</span></code></a></p></td>
+<td><p>The number of z steps in the z-stack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.start_z_position" title="aslm.model.features.common_features.ZStackAcquisition.start_z_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_z_position</span></code></a></p></td>
+<td><p>The start z position for the z-stack.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.start_focus" title="aslm.model.features.common_features.ZStackAcquisition.start_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_focus</span></code></a></p></td>
+<td><p>The start focus position for the z-stack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.z_step_size" title="aslm.model.features.common_features.ZStackAcquisition.z_step_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_step_size</span></code></a></p></td>
+<td><p>The z step size for the z-stack.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.focus_step_size" title="aslm.model.features.common_features.ZStackAcquisition.focus_step_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">focus_step_size</span></code></a></p></td>
+<td><p>The z stack distance for the z-stack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.positions" title="aslm.model.features.common_features.ZStackAcquisition.positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">positions</span></code></a></p></td>
+<td><p>A dictionary defining the multi-position table for z-stack acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.current_position_idx" title="aslm.model.features.common_features.ZStackAcquisition.current_position_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_position_idx</span></code></a></p></td>
+<td><p>The current index of the position being acquired in the multi-position</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.current_z_position" title="aslm.model.features.common_features.ZStackAcquisition.current_z_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_z_position</span></code></a></p></td>
+<td><p>The z position of the channel being acquired in the z-stack</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.current_focus_position" title="aslm.model.features.common_features.ZStackAcquisition.current_focus_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_focus_position</span></code></a></p></td>
+<td><p>The f position of the channel being acquired in the z-stack</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.need_to_move_new_position" title="aslm.model.features.common_features.ZStackAcquisition.need_to_move_new_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_to_move_new_position</span></code></a></p></td>
+<td><p>Flag to determine whether to move to a new position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.need_to_move_z_position" title="aslm.model.features.common_features.ZStackAcquisition.need_to_move_z_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_to_move_z_position</span></code></a></p></td>
+<td><p>Flag to determine whether to move the z position</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.z_position_moved_time" title="aslm.model.features.common_features.ZStackAcquisition.z_position_moved_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_position_moved_time</span></code></a></p></td>
+<td><p>The number of times the z position has been moved</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.defocus" title="aslm.model.features.common_features.ZStackAcquisition.defocus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">defocus</span></code></a></p></td>
+<td><p>A dictionary defining the defocus values between channels</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.stack_cycling_mode" title="aslm.model.features.common_features.ZStackAcquisition.stack_cycling_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack_cycling_mode</span></code></a></p></td>
+<td><p>The stack cycling mode for z-stack acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.channels" title="aslm.model.features.common_features.ZStackAcquisition.channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">channels</span></code></a></p></td>
+<td><p>The number of channels in the z-stack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.image_writer" title="aslm.model.features.common_features.ZStackAcquisition.image_writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_writer</span></code></a></p></td>
+<td><p>An image writer object for saving z-stack images.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ZStackAcquisition.config_table" title="aslm.model.features.common_features.ZStackAcquisition.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<td><p>A dictionary defining the configuration for the z-stack acquisition</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.cleanup_data_func">
 <span class="sig-name descname"><span class="pre">cleanup_data_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.cleanup_data_func" title="Permalink to this definition"></a></dt>
@@ -271,14 +262,6 @@ data handling, end of data acquisition, and data cleanup.
 <dt>This method performs cleanup actions after data acquisition, such as cleaning up</dt><dd><p>image writing, if image saving is enabled.</p>
 </dd>
 </dl>
-<section id="id1">
-<h3>Parameters:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="returns">
-<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -287,12 +270,8 @@ data handling, end of data acquisition, and data cleanup.
 <dd><p>Check if all expected data frames have been received.</p>
 <p>This method checks whether all expected data frames have been received during
 data acquisition.</p>
-<section id="id2">
-<h3>Parameters:<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="id3">
-<h3>Returns:<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>bool</dt><dd><p>A boolean value indicating whether all expected data frames have been
 received.</p>
@@ -307,16 +286,12 @@ received.</p>
 <dd><p>Handle incoming data frames during data acquisition.</p>
 <p>This method handles incoming data frames during data acquisition, updating the
 count of received frames and saving images if enabled.</p>
-<section id="id4">
-<h3>Parameters:<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<section id="id1">
+<h3>Parameters:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>frame_ids<span class="classifier">list</span></dt><dd><p>A list of frame IDs received during data acquisition.</p>
 </dd>
 </dl>
-</section>
-<section id="id5">
-<h3>Returns:<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
-<p>None</p>
 </section>
 </dd></dl>
 
@@ -326,14 +301,6 @@ count of received frames and saving images if enabled.</p>
 <dd><p>Initialize data-related parameters before data acquisition.</p>
 <p>This method initializes data-related parameters before data acquisition,
 including the count of received and expected frames.</p>
-<section id="id6">
-<h3>Parameters:<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="id7">
-<h3>Returns:<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -342,14 +309,6 @@ including the count of received and expected frames.</p>
 <dd><p>Initialize z-stack acquisition parameters before the signal stage.</p>
 <p>This method initializes z-stack acquisition parameters, including position,
 focus, and data thread management, before the signal stage.</p>
-<section id="id8">
-<h3>Parameters:<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="id9">
-<h3>Returns:<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -358,12 +317,8 @@ focus, and data thread management, before the signal stage.</p>
 <dd><p>Handle the end of the signal stage and position cycling.</p>
 <p>This method handles the end of the signal stage, including position cycling and
 channel updates for multi-channel acquisitions.</p>
-<section id="id10">
-<h3>Parameters:<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="id11">
-<h3>Returns:<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h3>
+<section id="id2">
+<h3>Returns:<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>bool</dt><dd><p>A boolean value indicating whether to end the current node.</p>
 </dd>
@@ -378,12 +333,8 @@ channel updates for multi-channel acquisitions.</p>
 <p>This method controls the z-stack acquisition process, including moving positions
 and focus, managing data threads, and handling data acquisition during the
 signal stage.</p>
-<section id="id12">
-<h3>Parameters:<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="id13">
-<h3>Returns:<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
+<section id="id3">
+<h3>Returns:<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>bool</dt><dd><p>A boolean value indicating whether to continue the z-stack acquisition
 process.</p>
@@ -398,14 +349,215 @@ process.</p>
 <dd><p>Update the active channel during multi-channel acquisition.</p>
 <p>This method updates the active channel for multi-channel acquisitions, allowing
 cycling through channels.</p>
-<section id="id14">
-<h3>Parameters:<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="id15">
-<h3>Returns:<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.channels">
+<span class="sig-name descname"><span class="pre">channels</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.channels" title="Permalink to this definition"></a></dt>
+<dd><p>The number of channels in the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.config_table">
+<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.config_table" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the configuration for the z-stack acquisition</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.current_focus_position">
+<span class="sig-name descname"><span class="pre">current_focus_position</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.current_focus_position" title="Permalink to this definition"></a></dt>
+<dd><p>The f position of the channel being acquired in the z-stack</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.current_position_idx">
+<span class="sig-name descname"><span class="pre">current_position_idx</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.current_position_idx" title="Permalink to this definition"></a></dt>
+<dd><p>The current index of the position being acquired in the multi-position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.current_z_position">
+<span class="sig-name descname"><span class="pre">current_z_position</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.current_z_position" title="Permalink to this definition"></a></dt>
+<dd><p>The z position of the channel being acquired in the z-stack</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.defocus">
+<span class="sig-name descname"><span class="pre">defocus</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.defocus" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the defocus values between channels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.focus_step_size">
+<span class="sig-name descname"><span class="pre">focus_step_size</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.focus_step_size" title="Permalink to this definition"></a></dt>
+<dd><p>The z stack distance for the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.get_origin">
+<span class="sig-name descname"><span class="pre">get_origin</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.get_origin" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to determine whether to get the z and focus origin positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.image_writer">
+<span class="sig-name descname"><span class="pre">image_writer</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.image_writer" title="Permalink to this definition"></a></dt>
+<dd><p>An image writer object for saving z-stack images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter" title="aslm.model.features.image_writer.ImageWriter">ImageWriter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.model" title="Permalink to this definition"></a></dt>
+<dd><p>The microscope model associated with z-stack acquisition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MicroscopeModel</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.need_to_move_new_position">
+<span class="sig-name descname"><span class="pre">need_to_move_new_position</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.need_to_move_new_position" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to determine whether to move to a new position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.need_to_move_z_position">
+<span class="sig-name descname"><span class="pre">need_to_move_z_position</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.need_to_move_z_position" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to determine whether to move the z position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.number_z_steps">
+<span class="sig-name descname"><span class="pre">number_z_steps</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.number_z_steps" title="Permalink to this definition"></a></dt>
+<dd><p>The number of z steps in the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.positions">
+<span class="sig-name descname"><span class="pre">positions</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.positions" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the multi-position table for z-stack acquisition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.stack_cycling_mode">
+<span class="sig-name descname"><span class="pre">stack_cycling_mode</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.stack_cycling_mode" title="Permalink to this definition"></a></dt>
+<dd><p>The stack cycling mode for z-stack acquisition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.start_focus">
+<span class="sig-name descname"><span class="pre">start_focus</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.start_focus" title="Permalink to this definition"></a></dt>
+<dd><p>The start focus position for the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.start_z_position">
+<span class="sig-name descname"><span class="pre">start_z_position</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.start_z_position" title="Permalink to this definition"></a></dt>
+<dd><p>The start z position for the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.z_position_moved_time">
+<span class="sig-name descname"><span class="pre">z_position_moved_time</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.z_position_moved_time" title="Permalink to this definition"></a></dt>
+<dd><p>The number of times the z position has been moved</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ZStackAcquisition.z_step_size">
+<span class="sig-name descname"><span class="pre">z_step_size</span></span><a class="headerlink" href="#aslm.model.features.common_features.ZStackAcquisition.z_step_size" title="Permalink to this definition"></a></dt>
+<dd><p>The z step size for the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

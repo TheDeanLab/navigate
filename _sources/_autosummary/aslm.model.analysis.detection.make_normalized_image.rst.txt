@@ -1,6 +1,0 @@
-aslm.model.analysis.detection.make\_normalized\_image
-=====================================================
-
-.. currentmodule:: aslm.model.analysis.detection
-
-.. autofunction:: make_normalized_image

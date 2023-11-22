@@ -59,7 +59,6 @@
 <li class="toctree-l3 current"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.boundary_detect.html">aslm.model.analysis.boundary_detect</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.analysis.camera.html">aslm.model.analysis.camera</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.detection.html">aslm.model.analysis.detection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.image_contrast.html">aslm.model.analysis.image_contrast</a></li>
 </ul>
 </li>
@@ -114,7 +113,9 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="aslm.model.analysis.camera.compute_noise_sigma">
 <span class="sig-prename descclassname"><span class="pre">aslm.model.analysis.camera.</span></span><span class="sig-name descname"><span class="pre">compute_noise_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.82</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.analysis.camera.compute_noise_sigma" title="Permalink to this definition"></a></dt>
-<dd><p>Using <a class="reference external" href="https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/sys/SCAS0134E_C13440-20CU_tec.pdf">https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/sys/SCAS0134E_C13440-20CU_tec.pdf</a>
+<dd><p>Compute the noise model for an sCMOS camera.</p>
+<p>Using <a class="reference external" href="https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/">https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/</a>
+99_SALES_LIBRARY/sys/SCAS0134E_C13440-20CU_tec.pdf
 the sCMOS mean noise sigma is given by</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

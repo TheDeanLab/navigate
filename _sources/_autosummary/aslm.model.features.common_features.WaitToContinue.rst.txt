@@ -27,4 +27,14 @@ aslm.model.features.common\_features.WaitToContinue
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~WaitToContinue.model
+      ~WaitToContinue.pause_signal_lock
+      ~WaitToContinue.pause_data_lock
+      ~WaitToContinue.first_enter_node
+      ~WaitToContinue.config_table
+   
    

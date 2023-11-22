@@ -30,4 +30,28 @@ aslm.model.features.common\_features.ZStackAcquisition
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ZStackAcquisition.model
+      ~ZStackAcquisition.get_origin
+      ~ZStackAcquisition.number_z_steps
+      ~ZStackAcquisition.start_z_position
+      ~ZStackAcquisition.start_focus
+      ~ZStackAcquisition.z_step_size
+      ~ZStackAcquisition.focus_step_size
+      ~ZStackAcquisition.positions
+      ~ZStackAcquisition.current_position_idx
+      ~ZStackAcquisition.current_z_position
+      ~ZStackAcquisition.current_focus_position
+      ~ZStackAcquisition.need_to_move_new_position
+      ~ZStackAcquisition.need_to_move_z_position
+      ~ZStackAcquisition.z_position_moved_time
+      ~ZStackAcquisition.defocus
+      ~ZStackAcquisition.stack_cycling_mode
+      ~ZStackAcquisition.channels
+      ~ZStackAcquisition.image_writer
+      ~ZStackAcquisition.config_table
+   
    

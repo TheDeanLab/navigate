@@ -1,6 +1,0 @@
-aslm.model.analysis.detection.combine\_images
-=============================================
-
-.. currentmodule:: aslm.model.analysis.detection
-
-.. autofunction:: combine_images

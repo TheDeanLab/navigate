@@ -1,6 +1,0 @@
-aslm.model.analysis.detection.make\_sphere\_3D
-==============================================
-
-.. currentmodule:: aslm.model.analysis.detection
-
-.. autofunction:: make_sphere_3D

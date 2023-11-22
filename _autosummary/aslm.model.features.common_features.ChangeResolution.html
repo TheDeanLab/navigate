@@ -125,42 +125,6 @@
 <p>ChangeResolution class for modifying the resolution mode of a microscope.</p>
 <p>This class provides functionality to change the resolution mode of a microscope by
 reconfiguring the microscope settings and updating the active microscope.</p>
-<section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for resolution mode changes.</p>
-</dd>
-<dt>resolution_mode<span class="classifier">str, optional</span></dt><dd><p>The desired resolution mode to set for the microscope. Default is “high”.</p>
-</dd>
-<dt>zoom_value<span class="classifier">str, optional</span></dt><dd><p>The zoom value to set for the microscope. Default is “N/A”.</p>
-</dd>
-</dl>
-</section>
-<section id="attributes">
-<h2>Attributes:<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model associated with the resolution mode change.</p>
-</dd>
-<dt>config_table<span class="classifier">dict</span></dt><dd><p>A dictionary defining the configuration for the resolution change process.
-It contains the following keys:
-- “signal”: Configuration for the signal acquisition stage.
-- “node”: Configuration related to node type and device.</p>
-</dd>
-<dt>resolution_mode<span class="classifier">str</span></dt><dd><p>The current resolution mode to be set for the microscope.</p>
-</dd>
-<dt>zoom_value<span class="classifier">str</span></dt><dd><p>The zoom value to be set for the microscope.</p>
-</dd>
-</dl>
-</section>
-<section id="methods">
-<h2>Methods:<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>signal_func():</dt><dd><p>Perform actions to change the resolution mode and update the active microscope.</p>
-</dd>
-<dt>cleanup():</dt><dd><p>Perform cleanup actions if needed.</p>
-</dd>
-</dl>
-</section>
 <section id="notes">
 <h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
 <ul class="simple">
@@ -187,13 +151,25 @@ be adjusted to modify the microscope’s configuration.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.common_features.ChangeResolution.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'high'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N/A'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.ChangeResolution.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the ChangeResolution class.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for resolution mode changes.</p>
+</dd>
+<dt>resolution_mode<span class="classifier">str, optional</span></dt><dd><p>The desired resolution mode to set for the microscope. Default is “high”.</p>
+</dd>
+<dt>zoom_value<span class="classifier">str, optional</span></dt><dd><p>The zoom value to set for the microscope. Default is “N/A”.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ChangeResolution.__init__" title="aslm.model.features.common_features.ChangeResolution.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, resolution_mode, zoom_value])</p></td>
-<td><p></p></td>
+<td><p>Initialize the ChangeResolution class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ChangeResolution.cleanup" title="aslm.model.features.common_features.ChangeResolution.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a>()</p></td>
 <td><p>Perform cleanup actions if needed.</p></td>
@@ -203,20 +179,29 @@ be adjusted to modify the microscope’s configuration.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ChangeResolution.model" title="aslm.model.features.common_features.ChangeResolution.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>The microscope model associated with the resolution change.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ChangeResolution.config_table" title="aslm.model.features.common_features.ChangeResolution.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<td><p>A dictionary defining the configuration for the resolution change</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ChangeResolution.resolution_mode" title="aslm.model.features.common_features.ChangeResolution.resolution_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolution_mode</span></code></a></p></td>
+<td><p>The desired resolution mode to set for the microscope.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.ChangeResolution.zoom_value" title="aslm.model.features.common_features.ChangeResolution.zoom_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zoom_value</span></code></a></p></td>
+<td><p>The zoom value to set for the microscope.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.common_features.ChangeResolution.cleanup">
 <span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.ChangeResolution.cleanup" title="Permalink to this definition"></a></dt>
 <dd><p>Perform cleanup actions if needed.</p>
 <p>This method is responsible for performing cleanup actions if required after the
 resolution change process.</p>
-<section id="id1">
-<h3>Parameters:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="returns">
-<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -229,17 +214,57 @@ resolution change process.</p>
 resuming data acquisition.</p>
 </dd>
 </dl>
-<section id="id2">
-<h3>Parameters:<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="id3">
-<h3>Returns:<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>bool</dt><dd><p>A boolean value indicating the success of the resolution change process.</p>
 </dd>
 </dl>
 </section>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ChangeResolution.config_table">
+<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#aslm.model.features.common_features.ChangeResolution.config_table" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the configuration for the resolution change</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ChangeResolution.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#aslm.model.features.common_features.ChangeResolution.model" title="Permalink to this definition"></a></dt>
+<dd><p>The microscope model associated with the resolution change.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MicroscopeModel</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ChangeResolution.resolution_mode">
+<span class="sig-name descname"><span class="pre">resolution_mode</span></span><a class="headerlink" href="#aslm.model.features.common_features.ChangeResolution.resolution_mode" title="Permalink to this definition"></a></dt>
+<dd><p>The desired resolution mode to set for the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.ChangeResolution.zoom_value">
+<span class="sig-name descname"><span class="pre">zoom_value</span></span><a class="headerlink" href="#aslm.model.features.common_features.ChangeResolution.zoom_value" title="Permalink to this definition"></a></dt>
+<dd><p>The zoom value to set for the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

@@ -1,6 +1,0 @@
-aslm.model.analysis.detection.add\_median\_border
-=================================================
-
-.. currentmodule:: aslm.model.analysis.detection
-
-.. autofunction:: add_median_border

@@ -59,7 +59,6 @@
 <li class="toctree-l3 current"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.boundary_detect.html">aslm.model.analysis.boundary_detect</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.analysis.camera.html">aslm.model.analysis.camera</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.detection.html">aslm.model.analysis.detection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.image_contrast.html">aslm.model.analysis.image_contrast</a></li>
 </ul>
 </li>
@@ -118,6 +117,12 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>image</strong> (<em>npt.ArrayLike</em>) – ZYX image of multiple dark camera frames, taken sequentially.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>offset_map</strong> – XY image of camera offset in the absence of signal.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>npt.ArrayLike</p>
 </dd>
 </dl>
 </dd></dl>

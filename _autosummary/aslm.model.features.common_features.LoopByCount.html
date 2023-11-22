@@ -125,47 +125,6 @@
 <p>LoopByCount class for controlling signal and data acquisition loops.</p>
 <p>This class provides functionality to control signal and data acquisition loops by
 specifying the number of steps or frames to execute.</p>
-<section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for loop control.</p>
-</dd>
-<dt>steps<span class="classifier">int or str, optional</span></dt><dd><p>The number of steps or a configuration reference to determine the loop count.
-Default is 1.</p>
-</dd>
-</dl>
-</section>
-<section id="attributes">
-<h2>Attributes:<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model associated with the loop control.</p>
-</dd>
-<dt>step_by_frame<span class="classifier">bool</span></dt><dd><p>A flag indicating whether the loop control is based on frames (True) or steps
-(False).</p>
-</dd>
-<dt>steps<span class="classifier">int</span></dt><dd><p>The total number of steps or frames to execute.</p>
-</dd>
-<dt>signals<span class="classifier">int</span></dt><dd><p>The remaining number of signal acquisition steps.</p>
-</dd>
-<dt>data_frames<span class="classifier">int</span></dt><dd><p>The remaining number of data acquisition frames.</p>
-</dd>
-<dt>config_table<span class="classifier">dict</span></dt><dd><p>A dictionary defining the configuration for the loop control process. It
-ontains the
-following keys:
-- “signal”: Configuration for signal acquisition loop control.
-- “data”: Configuration for data acquisition loop control.</p>
-</dd>
-</dl>
-</section>
-<section id="methods">
-<h2>Methods:<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>signal_func():</dt><dd><p>Control the signal acquisition loop and update the remaining steps.</p>
-</dd>
-<dt>data_func(frame_ids):</dt><dd><p>Control the data acquisition loop and update the remaining frames or steps.</p>
-</dd>
-</dl>
-</section>
 <section id="notes">
 <h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
 <ul class="simple">
@@ -192,19 +151,53 @@ dynamically determining it from configuration references.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.common_features.LoopByCount.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.LoopByCount.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the LoopByCount class.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for loop control.</p>
+</dd>
+<dt>steps<span class="classifier">int or str, optional</span></dt><dd><p>The number of steps or a configuration reference to determine the loop
+count. Default is 1.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.LoopByCount.__init__" title="aslm.model.features.common_features.LoopByCount.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, steps])</p></td>
-<td><p></p></td>
+<td><p>Initialize the LoopByCount class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.LoopByCount.data_func" title="aslm.model.features.common_features.LoopByCount.data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_func</span></code></a>(frame_ids)</p></td>
 <td><p>Control the data acquisition loop and update the remaining frames or steps.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.LoopByCount.signal_func" title="aslm.model.features.common_features.LoopByCount.signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_func</span></code></a>()</p></td>
 <td><p>Control the signal acquisition loop and update the remaining steps.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.LoopByCount.model" title="aslm.model.features.common_features.LoopByCount.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>The microscope model associated with the loop control.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.LoopByCount.step_by_frame" title="aslm.model.features.common_features.LoopByCount.step_by_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step_by_frame</span></code></a></p></td>
+<td><p>A boolean value indicating whether to step by frame or by step.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.LoopByCount.steps" title="aslm.model.features.common_features.LoopByCount.steps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">steps</span></code></a></p></td>
+<td><p>The remaining number of steps or frames.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.LoopByCount.signals" title="aslm.model.features.common_features.LoopByCount.signals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signals</span></code></a></p></td>
+<td><p>The remaining number of steps.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.LoopByCount.data_frames" title="aslm.model.features.common_features.LoopByCount.data_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_frames</span></code></a></p></td>
+<td><p>The remaining number of frames.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.LoopByCount.config_table" title="aslm.model.features.common_features.LoopByCount.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<td><p>A dictionary defining the configuration for the loop control process.</p></td>
 </tr>
 </tbody>
 </table>
@@ -235,22 +228,82 @@ the remaining count.</p>
 <dt class="sig sig-object py" id="aslm.model.features.common_features.LoopByCount.signal_func">
 <span class="sig-name descname"><span class="pre">signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.LoopByCount.signal_func" title="Permalink to this definition"></a></dt>
 <dd><p>Control the signal acquisition loop and update the remaining steps.</p>
-<dl class="simple">
-<dt>This method controls the signal acquisition loop by decrementing the remaining</dt><dd><p>steps. It determines whether to continue the loop or exit based on the
+<p>This method controls the signal acquisition loop by decrementing the remaining
+steps. It determines whether to continue the loop or exit based on the
 remaining count.</p>
-</dd>
-</dl>
 <section id="id2">
-<h3>Parameters:<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="id3">
-<h3>Returns:<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<h3>Returns:<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>bool</dt><dd><p>A boolean value indicating whether to continue the loop.</p>
 </dd>
 </dl>
 </section>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.LoopByCount.config_table">
+<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#aslm.model.features.common_features.LoopByCount.config_table" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the configuration for the loop control process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.LoopByCount.data_frames">
+<span class="sig-name descname"><span class="pre">data_frames</span></span><a class="headerlink" href="#aslm.model.features.common_features.LoopByCount.data_frames" title="Permalink to this definition"></a></dt>
+<dd><p>The remaining number of frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.LoopByCount.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#aslm.model.features.common_features.LoopByCount.model" title="Permalink to this definition"></a></dt>
+<dd><p>The microscope model associated with the loop control.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MicroscopeModel</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.LoopByCount.signals">
+<span class="sig-name descname"><span class="pre">signals</span></span><a class="headerlink" href="#aslm.model.features.common_features.LoopByCount.signals" title="Permalink to this definition"></a></dt>
+<dd><p>The remaining number of steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.LoopByCount.step_by_frame">
+<span class="sig-name descname"><span class="pre">step_by_frame</span></span><a class="headerlink" href="#aslm.model.features.common_features.LoopByCount.step_by_frame" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean value indicating whether to step by frame or by step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.common_features.LoopByCount.steps">
+<span class="sig-name descname"><span class="pre">steps</span></span><a class="headerlink" href="#aslm.model.features.common_features.LoopByCount.steps" title="Permalink to this definition"></a></dt>
+<dd><p>The remaining number of steps or frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

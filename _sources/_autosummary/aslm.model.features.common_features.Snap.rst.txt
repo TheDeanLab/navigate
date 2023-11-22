@@ -23,4 +23,11 @@ aslm.model.features.common\_features.Snap
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Snap.model
+      ~Snap.config_table
+   
    

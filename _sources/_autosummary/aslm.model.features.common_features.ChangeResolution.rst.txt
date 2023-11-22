@@ -24,4 +24,13 @@ aslm.model.features.common\_features.ChangeResolution
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ChangeResolution.model
+      ~ChangeResolution.config_table
+      ~ChangeResolution.resolution_mode
+      ~ChangeResolution.zoom_value
+   
    

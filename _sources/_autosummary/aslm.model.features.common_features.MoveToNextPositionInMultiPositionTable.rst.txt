@@ -24,4 +24,16 @@ aslm.model.features.common\_features.MoveToNextPositionInMultiPositionTable
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MoveToNextPositionInMultiPositionTable.model
+      ~MoveToNextPositionInMultiPositionTable.config_table
+      ~MoveToNextPositionInMultiPositionTable.pre_z
+      ~MoveToNextPositionInMultiPositionTable.current_idx
+      ~MoveToNextPositionInMultiPositionTable.multiposition_table
+      ~MoveToNextPositionInMultiPositionTable.position_count
+      ~MoveToNextPositionInMultiPositionTable.stage_distance_threshold
+   
    

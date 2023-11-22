@@ -27,4 +27,21 @@ aslm.model.features.common\_features.ConProAcquisition
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConProAcquisition.model
+      ~ConProAcquisition.scanrange
+      ~ConProAcquisition.n_plane
+      ~ConProAcquisition.offset_start
+      ~ConProAcquisition.offset_end
+      ~ConProAcquisition.offset_step_size
+      ~ConProAcquisition.timepoints
+      ~ConProAcquisition.need_to_move_new_plane
+      ~ConProAcquisition.offset_update_time
+      ~ConProAcquisition.conpro_cycling_mode
+      ~ConProAcquisition.channels
+      ~ConProAcquisition.config_table
+   
    

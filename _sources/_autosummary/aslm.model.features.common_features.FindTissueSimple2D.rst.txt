@@ -23,4 +23,14 @@ aslm.model.features.common\_features.FindTissueSimple2D
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FindTissueSimple2D.model
+      ~FindTissueSimple2D.config_table
+      ~FindTissueSimple2D.overlap
+      ~FindTissueSimple2D.target_resolution
+      ~FindTissueSimple2D.target_zoom
+   
    

@@ -24,4 +24,15 @@ aslm.model.features.common\_features.LoopByCount
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LoopByCount.model
+      ~LoopByCount.step_by_frame
+      ~LoopByCount.steps
+      ~LoopByCount.signals
+      ~LoopByCount.data_frames
+      ~LoopByCount.config_table
+   
    

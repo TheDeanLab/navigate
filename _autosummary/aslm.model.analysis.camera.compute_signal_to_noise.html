@@ -20,7 +20,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="aslm.model.analysis.detection" href="aslm.model.analysis.detection.html" />
+    <link rel="next" title="aslm.model.analysis.image_contrast" href="aslm.model.analysis.image_contrast.html" />
     <link rel="prev" title="aslm.model.analysis.camera.compute_scmos_offset_and_variance_map" href="aslm.model.analysis.camera.compute_scmos_offset_and_variance_map.html" /> 
 </head>
 
@@ -59,7 +59,6 @@
 <li class="toctree-l3 current"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.boundary_detect.html">aslm.model.analysis.boundary_detect</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.analysis.camera.html">aslm.model.analysis.camera</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.detection.html">aslm.model.analysis.detection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.image_contrast.html">aslm.model.analysis.image_contrast</a></li>
 </ul>
 </li>
@@ -114,7 +113,22 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="aslm.model.analysis.camera.compute_signal_to_noise">
 <span class="sig-prename descclassname"><span class="pre">aslm.model.analysis.camera.</span></span><span class="sig-name descname"><span class="pre">compute_signal_to_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance_map</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.analysis.camera.compute_signal_to_noise" title="Permalink to this definition"></a></dt>
-<dd><p>Compute the SNR of an image from offset and variance maps.</p>
+<dd><p>Compute the signal-to-noise ratio of an image from offset and variance maps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>np.array</em>) – ZYX image of camera frames.</p></li>
+<li><p><strong>offset_map</strong> (<em>np.array</em>) – XY image of camera offset in the absence of signal.</p></li>
+<li><p><strong>variance_map</strong> (<em>np.array</em>) – XY image of camera variance in the absence of signal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>snr</strong> – XY image of signal-to-noise ratio.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -124,7 +138,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="aslm.model.analysis.camera.compute_scmos_offset_and_variance_map.html" class="btn btn-neutral float-left" title="aslm.model.analysis.camera.compute_scmos_offset_and_variance_map" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="aslm.model.analysis.detection.html" class="btn btn-neutral float-right" title="aslm.model.analysis.detection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="aslm.model.analysis.image_contrast.html" class="btn btn-neutral float-right" title="aslm.model.analysis.image_contrast" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

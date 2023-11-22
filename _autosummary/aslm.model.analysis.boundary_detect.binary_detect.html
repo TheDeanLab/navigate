@@ -59,7 +59,6 @@
 <li class="toctree-l3 current"><a class="reference internal" href="aslm.model.analysis.html">aslm.model.analysis</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.analysis.boundary_detect.html">aslm.model.analysis.boundary_detect</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.camera.html">aslm.model.analysis.camera</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.detection.html">aslm.model.analysis.detection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.analysis.image_contrast.html">aslm.model.analysis.image_contrast</a></li>
 </ul>
 </li>
@@ -119,12 +118,18 @@ containing tissue.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>image_data</strong> (<em>npt.ArrayLike</em>) – Image</p></li>
+<li><p><strong>img_data</strong> (<em>npt.ArrayLike</em>) – Image</p></li>
 <li><p><strong>boundary</strong> (<em>dict</em>) – List of xy pixel positions indicating presence of tissue as values.</p></li>
 <li><p><strong>width</strong> (<em>int</em>) – Width of subimage. Must be smaller than min(image_data.shape[:1])</p></li>
 <li><p><strong>offset</strong> (<em>npt.ArrayLike</em>) – Camera pixel offset map. Same size as image_data.</p></li>
 <li><p><strong>variance</strong> (<em>npt.ArrayLike</em>) – Camera pixel variance map. Same size as image_data.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>boundary</strong> – List of boundaries of tissue by row of downsampled image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>

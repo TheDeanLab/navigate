@@ -23,4 +23,11 @@ aslm.model.features.common\_features.PrepareNextChannel
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PrepareNextChannel.model
+      ~PrepareNextChannel.config_table
+   
    

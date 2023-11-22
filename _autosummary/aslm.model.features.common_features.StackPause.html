@@ -126,40 +126,6 @@
 <p>This class provides functionality to pause stack acquisition for a specified
 number of timepoints or based on a defined pause time. It manages the data thread
 accordingly.</p>
-<section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for stack acquisition control.</p>
-</dd>
-<dt>pause_num<span class="classifier">int or str, optional</span></dt><dd><dl class="simple">
-<dt>The number of timepoints to pause stack acquisition or a configuration reference</dt><dd><p>to determine the pause count dynamically. Default is
-“experiment.MicroscopeState.timepoints”.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</section>
-<section id="attributes">
-<h2>Attributes:<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model associated with stack acquisition control.</p>
-</dd>
-<dt>pause_num<span class="classifier">int</span></dt><dd><p>The remaining number of timepoints to pause stack acquisition.</p>
-</dd>
-<dt>config_table<span class="classifier">dict</span></dt><dd><p>A dictionary defining the configuration for the stack pause control process.
-It contains the following key:
-- “signal”: Configuration for the signal acquisition stage.</p>
-</dd>
-</dl>
-</section>
-<section id="methods">
-<h2>Methods:<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>signal_func():</dt><dd><p>Pause stack acquisition based on timepoints or pause time and manage the data
-thread.</p>
-</dd>
-</dl>
-</section>
 <section id="notes">
 <h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
 <ul class="simple">
@@ -181,13 +147,25 @@ thread.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.common_features.StackPause.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pause_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'experiment.MicroscopeState.timepoints'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.StackPause.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the StackPause class.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for stack acquisition control.</p>
+</dd>
+<dt>pause_num<span class="classifier">int or str, optional</span></dt><dd><p>The number of timepoints to pause stack acquisition or a configuration
+reference to determine the pause count dynamically. Default is
+“experiment.MicroscopeState.timepoints”.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.common_features.StackPause.__init__" title="aslm.model.features.common_features.StackPause.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, pause_num])</p></td>
-<td><p></p></td>
+<td><p>Initialize the StackPause class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.common_features.StackPause.signal_func" title="aslm.model.features.common_features.StackPause.signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_func</span></code></a>()</p></td>
 <td><p>Pause stack acquisition based on timepoints or pause time and manage the data thread.</p></td>
@@ -197,18 +175,10 @@ thread.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.common_features.StackPause.signal_func">
 <span class="sig-name descname"><span class="pre">signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.common_features.StackPause.signal_func" title="Permalink to this definition"></a></dt>
-<dd><p>Pause stack acquisition based on timepoints or pause time and manage the data
-thread.</p>
+<dd><p>Pause stack acquisition based on timepoints or pause time and manage the
+data thread.</p>
 <p>This method pauses stack acquisition based on the remaining timepoints or
 defined pause time. It manages the data thread accordingly during the pause.</p>
-<section id="id1">
-<h3>Parameters:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
-<section id="returns">
-<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
 </dd></dl>
 
 </section>

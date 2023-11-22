@@ -21,14 +21,10 @@ aslm.model.concurrency.concurrency\_tools
    
       CustodyThread
       FancyThread
-      MyTestClass
       ObjectInSubprocess
       PoliteThread
       ResultThread
       SharedNDArray
-      TestObjectInSubprocess
-      TestResultThreadAndCustodyThread
-      TestSharedNDArray
    
    
 

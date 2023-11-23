@@ -52,47 +52,33 @@ class BigDataViewerDataSource(DataSource):
     multi-resolution pyramid format, with each resolution level subdivided into
     32x32x1 blocks. The number of blocks in each dimension is determined by the
     shape of the data and the resolution level.
-
-    Parameters
-    ----------
-    file_name : str
-        The name of the file to write to.
-    mode : str
-        The mode to open the file in. Must be "w" for write or "r" for read.
-
-    Attributes
-    ----------
-    image : h5py.File or zarr.N5Store
-        The file object.
-    setup : function
-        The function to call to set up the file.
-    ds_name : function
-        The function to call to get the dataset name.
-    metadata : BigDataViewerMetadata
-        The metadata for the file.
-
-    Methods
-    -------
-    set_metadata_from_configuration_experiment(configuration)
-        Sets the metadata from a configuration experiment.
-    write(data, **kw)
-        Writes data to the file.
-    read()
-        Reads data from the file.
-    close()
-        Closes the file.
     """
 
     def __init__(self, file_name: str = None, mode: str = "w") -> None:
+        """Initializes the BigDataViewerDataSource.
+
+        Parameters
+        ----------
+        file_name : str
+            The name of the file to write to.
+        mode : str
+            The mode to open the file in. Must be "w" for write or "r" for read.
+        """
+        #: np.array: The resolution of each down-sampled pyramid level.
         self._resolutions = np.array(
             [[1, 1, 1], [2, 2, 1], [4, 4, 1], [8, 8, 1]], dtype=int
         )
+        #: np.array: The number of subdivisions in each dimension.
         self._subdivisions = None
+        #: np.array: The shape of the image.
         self._shapes = None
+        #: np.array: The image.
         self.image = None
+        #: list: The views.
         self._views = []
+        #: zarr.N5Store: The N5 store.
         self.__store = None
-
+        #: str: The file type.
         self.__file_type = os.path.splitext(os.path.basename(file_name))[-1][1:].lower()
         if self.__file_type not in ["h5", "n5"]:
             raise ValueError(f"Unknown file type {self.__file_type}.")
@@ -104,13 +90,13 @@ class BigDataViewerDataSource(DataSource):
             self.ds_name = self._n5_ds_name
 
         # self._current_frame = 0
+        #: BigDataViewerMetadata: The metadata.
         self.metadata = BigDataViewerMetadata()
 
         super().__init__(file_name, mode)
 
     def __getitem__(self, keys):
-        """
-        Magic method to get slice requests passed by, e.g., ds[:,2:3,...].
+        """Magic method to get slice requests passed by, e.g., ds[:,2:3,...].
         Allows arbitrary slicing of dataset via calls to get_slice().
 
         Order is xycztps where x, y, z are Cartesian indices, c is channel,
@@ -149,7 +135,18 @@ class BigDataViewerDataSource(DataSource):
             length -= 1
 
         def ensure_iter(pos):
-            """Ensure the input is iterable."""
+            """Ensure the input is iterable.
+
+            Parameters
+            ----------
+            pos : int
+                The position.
+
+            Returns
+            -------
+            range
+                The range.
+            """
             if length > pos:
                 try:
                     val = keys[pos]
@@ -166,8 +163,17 @@ class BigDataViewerDataSource(DataSource):
                 return range(self.shape[pos])
 
         def ensure_slice(pos):
-            """
-            Ensure the input is a slice or a single integer.
+            """Ensure the input is a slice or a single integer.
+
+            Parameters
+            ----------
+            pos : int
+                The position.
+
+            Returns
+            -------
+            slice
+                The slice.
             """
             # TODO: Handle list as input
             if length > pos:
@@ -209,7 +215,20 @@ class BigDataViewerDataSource(DataSource):
             return self.get_slice(xs, ys, cs[0], zs, ts[0], ps[0], subdiv)
 
         def slice_len(sl, n):
-            """Calculate the length of the slice over an array of size n."""
+            """Calculate the length of the slice over an array of size n.
+
+            Parameters
+            ----------
+            sl : slice
+                The slice.
+            n : int
+                The size of the array.
+
+            Returns
+            -------
+            int
+                The length of the slice.
+            """
             sx = sl.indices(n)
             return (sx[1] - sx[0]) // sx[2]
 
@@ -235,8 +254,7 @@ class BigDataViewerDataSource(DataSource):
         return sliced_ds
 
     def get_slice(self, x, y, c, z=0, t=0, p=0, subdiv=0):
-        """
-        Get a single slice of the dataset.
+        """Get a single slice of the dataset.
 
         Parameters
         ----------

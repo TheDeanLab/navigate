@@ -46,54 +46,37 @@ from ..metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
 
 class TiffDataSource(DataSource):
-    """Data source for TIFF files.
-
-    Parameters
-    ----------
-    file_name : str
-        Path to file.
-    mode : str
-        File mode. "r" for read, "w" for write.
-    is_bigtiff : bool
-        Is this a bigtiff file?
-
-    Attributes
-    ----------
-    image : tifffile.TiffFile
-        Tiff file object.
-    metadata : Metadata
-        Metadata object.
-    save_directory : str
-        Directory to save files to.
-
-    Methods
-    -------
-    read()
-        Read data from file.
-    write(data, **kw)
-        Write data to file.
-    generate_image_name(current_channel, current_time_point)
-        Generate a string for the filename.
-    close
-        Close the file.
-
-    """
+    """Data source for TIFF files."""
 
     def __init__(
         self, file_name: str = "", mode: str = "w", is_bigtiff: bool = False
     ) -> None:
+        """Initialize a TIFF data source.
+
+        Parameters
+        ----------
+        file_name : str
+            Path to file.
+        mode : str
+            File mode. "r" for read, "w" for write.
+        is_bigtiff : bool
+            Is this a bigtiff file?
+        """
+        #: np.ndarray: Image data
         self.image = None
         self._write_mode = None
         self._views = []
 
         super().__init__(file_name, mode)
 
+        #: str: Directory to save the data to.
         self.save_directory = Path(self.file_name).parent
 
         # Is this an OME-TIFF?
         # TODO: check the header, rather than use the file extension
         if self.file_name.endswith(".ome.tiff") or self.file_name.endswith(".ome.tif"):
             self._is_ome = True
+            #: Metadata: Metadata object
             self.metadata = OMETIFFMetadata()
         else:
             self._is_ome = False
@@ -111,28 +94,56 @@ class TiffDataSource(DataSource):
 
     @property
     def data(self) -> npt.ArrayLike:
-        self.mode = "r"
+        """Return the image data as a numpy array.
 
+        Returns
+        -------
+        npt.ArrayLike
+            Image data.
+        """
+        self.mode = "r"
         return self.image.asarray()
 
     @property
     def is_bigtiff(self) -> bool:
+        """Is this a bigtiff file?
+
+        Returns
+        -------
+        bool
+            Is this a bigtiff file?
+        """
         if self._write_mode:
             return self._is_bigtiff
         else:
             return self.image.is_bigtiff
 
     def set_bigtiff(self, is_bigtiff: bool) -> None:
+        """Set whether this is a bigtiff file.
+
+        Parameters
+        ----------
+        is_bigtiff : bool
+            Is this a bigtiff file?
+        """
         self._is_bigtiff = is_bigtiff
 
     @property
     def is_ome(self) -> bool:
+        """Is this an OME-TIFF file?
+
+        Returns
+        -------
+        bool
+            Is this an OME-TIFF file?
+        """
         if self._write_mode:
             return self._is_ome
         else:
             return self.image.is_ome
 
     def read(self) -> None:
+        """Read a tiff file."""
         self.image = tifffile.TiffFile(self.file_name)
 
         # TODO: Parse metadata
@@ -155,8 +166,6 @@ class TiffDataSource(DataSource):
             Data to write to file.
         kw : dict
             Keyword arguments to pass to tifffile.imsave.
-
-
         """
         self.mode = "w"
 
@@ -198,9 +207,19 @@ class TiffDataSource(DataSource):
             self.close(True)
 
     def generate_image_name(self, current_channel, current_time_point):
-        """
-        #  Generates a string for the filename
-        #  e.g., CH00_000000.tif
+        """Generates a string for the filename, e.g., CH00_000000.tif
+
+        Parameters
+        ----------
+        current_channel : int
+            Current channel index.
+        current_time_point : int
+            Current time point index.
+
+        Returns
+        -------
+        str
+            Image name.
         """
         ext = ".ome" if self.is_ome else ""
         ext += ".tiff" if self.__double_f else ".tif"
@@ -250,6 +269,7 @@ class TiffDataSource(DataSource):
             self.uid.append(str(uuid.uuid4()))
 
     def _mode_checks(self) -> None:
+        """Check that the mode is valid."""
         self._write_mode = self._mode == "w"
         self.close()  # if anything was already open, close it
         if self._write_mode:
@@ -261,6 +281,13 @@ class TiffDataSource(DataSource):
         self._closed = False
 
     def close(self, internal=False) -> None:
+        """Close the file.
+
+        Parameters
+        ----------
+        internal : bool
+            Internal flag. Do not close if True.
+        """
         if self._closed and not internal:
             return
         if self.image is None:

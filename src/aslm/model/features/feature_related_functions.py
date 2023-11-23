@@ -65,30 +65,11 @@ from aslm.tools.common_functions import load_module_from_file
 
 
 class SharedList(list):
-    """
-    Custom list class with a name attribute for sharing data.
+    """Custom list class with a name attribute for sharing data.
 
     This class extends the built-in list class to provide an additional attribute
     called 'name' for identifying and sharing lists of data. It is particularly
     useful when sharing data between different parts of a program.
-
-    Parameters:
-    ----------
-    value : iterable, optional
-        Initial values for the list (default is an empty list).
-    name : str, optional
-        A name to identify the shared list (default is 'shared_list__').
-
-    Attributes:
-    ----------
-    __name__ : str
-        A name to identify the shared list.
-
-    Methods:
-    --------
-    __str__():
-        Returns a string representation of the shared list, including its type,
-        name, and current values.
 
     Notes:
     ------
@@ -115,8 +96,7 @@ class SharedList(list):
         self.__name__ = name
 
     def __str__(self):
-        """
-        Return a string representation of the shared list.
+        """Return a string representation of the shared list.
 
         Returns:
         -------
@@ -149,8 +129,7 @@ def convert_str_to_feature_list(content: str):
     """
 
     def convert_args_to_tuple(feature_list):
-        """
-        Recursively convert 'args' within a feature list to tuples.
+        """Recursively convert 'args' within a feature list to tuples.
 
         This function takes a feature list, which is typically used for specifying
         configuration options, and ensures that all 'args' elements within the list
@@ -201,8 +180,7 @@ def convert_str_to_feature_list(content: str):
 
 
 def convert_feature_list_to_str(feature_list):
-    """
-    Convert a feature list to its string representation.
+    """Convert a feature list to its string representation.
 
     This function takes a feature list, which is typically used for specifying
     configuration options, and converts it to its string representation. The
@@ -259,6 +237,7 @@ def convert_feature_list_to_str(feature_list):
     result = "["
 
     def f(feature_list):
+        """Recursively convert a feature list to its string representation."""
         if not feature_list:
             return
         nonlocal result
@@ -295,8 +274,7 @@ def convert_feature_list_to_str(feature_list):
 def load_dynamic_parameter_functions(
     feature_list: list, feature_parameter_setting_path: str
 ):
-    """
-    Load dynamic parameter functions into a feature list.
+    """Load dynamic parameter functions into a feature list.
 
     This function takes a feature list and a path to the parameter setting files
     and dynamically updates the feature list with parameter values specified in

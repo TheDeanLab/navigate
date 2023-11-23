@@ -49,6 +49,8 @@ logger = logging.getLogger(p)
 
 
 class ImageWriter:
+    """Class for saving acquired data to disk."""
+
     def __init__(self, model, data_buffer=None, sub_dir="", image_name=None):
         """Class for saving acquired data to disk.
 
@@ -64,50 +66,26 @@ class ImageWriter:
             indicating where to save data
         image_name : str
             Name of the image to be saved. If None, a name will be generated
-
-        Methods
-        -------
-        close()
-            Close the data source.
-        generate_image_name(channel, ext)
-            Generate a file name for saving data.
-        generate_meta_data()
-            Generate meta data for saving data.
-        save_image()
-            Save image to disk.
-
-        Attributes
-        ----------
-        config_table : dict
-            Dictionary of functions to call for each configuration.
-        current_time_point : int
-            Current time point for saving data.
-        data_buffer : [SharedNDArray]
-            Data buffer for saving data.
-        data_source : aslm.model.data_sources.DataSource
-            Data source for saving data to disk.
-        file_type : str
-            File type for saving data.
-        mip : np.ndarray
-            Maximum intensity projection image.
-        mip_directory : str
-            Directory for saving maximum intensity projection images.
-        model : aslm.model.model.Model
-            ASLM Model class for controlling hardware/acquisition.
-        num_of_channels : int
-            Number of channels in the experiment.
-        save_directory : str
-            Directory for saving data to disk.
-        sub_dir : str
-            Sub-directory of self.model.configuration['experiment']
         """
+        #: aslm.model.model.Model: ASLM Model class for controlling
+        # hardware/acquisition.
         self.model = model
+
+        #: [SharedNDArray]: Data buffer for saving data.
         self.data_buffer = (
             self.model.data_buffer if data_buffer is None else data_buffer
         )
+
+        #: int : Number of frames in the experiment.
         self.number_of_frames = self.model.number_of_frames
+
+        #: str : Directory for saving data to disk.
         self.save_directory = ""
+
+        #: str : Sub-directory for saving data to disk.
         self.sub_dir = sub_dir
+
+        #: int : Number of channels in the experiment.
         self.num_of_channels = len(
             [
                 k
@@ -117,6 +95,8 @@ class ImageWriter:
                 if v["is_selected"]
             ]
         )
+
+        #: int : Number of positions in the experiment.
         self.num_of_positions = (
             self.model.configuration["experiment"]["MicroscopeState"][
                 "multiposition_count"
@@ -127,21 +107,26 @@ class ImageWriter:
             else 1
         )
 
+        #: int : Number of time points in the experiment.
         self.num_of_timepoints = self.model.configuration["experiment"][
             "MicroscopeState"
         ]["timepoints"]
 
+        #: int : Number of z-slices in the experiment.
         self.num_of_slices = self.model.configuration["experiment"]["MicroscopeState"][
             "number_z_steps"
         ]
 
+        #: int : Current time point for saving data.
         self.current_time_point = 0
+
+        #: dict : Dictionary of functions to call for each configuration.
         self.config_table = {
             "signal": {},
             "data": {"main": self.save_image, "cleanup": self.close},
         }
 
-        # 32 vs 64-bit file format.
+        #: bool: Is 32 vs 64-bit file format.
         self.big_tiff = False
 
         # create the save directory if it doesn't already exist
@@ -169,7 +154,10 @@ class ImageWriter:
             logger.exception(e)
 
         # create the MIP directory if it doesn't already exist
+        #: np.ndarray : Maximum intensity projection image.
         self.mip = None
+
+        #: str : Directory for saving maximum intensity projection images.
         self.mip_directory = os.path.join(self.save_directory, "MIP")
         try:
             if not os.path.exists(self.mip_directory):
@@ -191,6 +179,7 @@ class ImageWriter:
             logger.exception(e)
 
         # Set up the file name and path in the save directory
+        #: str : File type for saving data.
         self.file_type = self.model.configuration["experiment"]["Saving"]["file_type"]
         current_channel = self.model.active_microscope.current_channel
         ext = "." + self.file_type.lower().replace(" ", ".").replace("-", ".")
@@ -199,6 +188,7 @@ class ImageWriter:
         file_name = os.path.join(self.save_directory, image_name)
 
         # Initialize data source, pointing to the new file name
+        #: aslm.model.data_sources.DataSource : Data source for saving data to disk.
         self.data_source = data_sources.get_data_source(self.file_type)(
             file_name=file_name
         )
@@ -228,8 +218,6 @@ class ImageWriter:
         ----------
         frame_ids : int
             Index into self.model.data_buffer.
-
-
         """
 
         for idx in frame_ids:
@@ -305,8 +293,7 @@ class ImageWriter:
                 return
 
     def generate_image_name(self, current_channel, ext=".tif"):
-        """
-        Generates a string for the filename, e.g., CH00_000000.tif.
+        """Generates a string for the filename, e.g., CH00_000000.tif.
 
         Parameters
         ----------
@@ -322,7 +309,6 @@ class ImageWriter:
         -------
         str
             File name, e.g., CH00_000000.tif
-
         """
         image_name = (
             "CH0"
@@ -350,10 +336,6 @@ class ImageWriter:
 
     def close(self):
         """Close the data source we are writing to.
-
-
-
-
 
         Examples
         --------

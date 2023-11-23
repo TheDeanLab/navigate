@@ -221,7 +221,25 @@ class Microscope:
 
             if device_ref_name not in devices_dict["stages"]:
                 logger.debug("stage has not been loaded!")
-                raise Exception("no stage device!")
+                raise Exception(
+                    "Stage not found. \n"
+                    "This often arises when the configuration.yaml file is "
+                    "incorrectly specified. Please check the "
+                    "configuration.yaml file and try again. Things to "
+                    "check include: \n",
+                    "1. If no stage is physically connected to the "
+                    "microscope, one must still be listed in the "
+                    "configuration.yaml file. We recommend that you use a"
+                    "`SyntheticStage`. \n"
+                    "2. If a stage is physically connected to the "
+                    "microscope, make sure that it is corrected defined in "
+                    "both the `hardware` and `microscopes` sections of the "
+                    "configuration.yaml file. Importantly, name, "
+                    "type, and serial numbers must match.\n"
+                    "3. You may be using a stage that is not supported by "
+                    "ASLM. Please check the list of supported stages in "
+                    "the documentation.",
+                )
 
             # SHARED DEVICES
             if device_ref_name.startswith("GalvoNIStage"):

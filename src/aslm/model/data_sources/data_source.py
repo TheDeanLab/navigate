@@ -42,10 +42,9 @@ from multiprocessing.managers import DictProxy
 
 class DataSource:
     def __init__(self, file_name: str = "", mode: str = "w") -> None:
-        """
-        Base class for data sources, which can be of arbitrary file type.
-        This implements read and write methods for accessing each data source.
+        """Base class for data sources, which can be of arbitrary file type.
 
+        This implements read and write methods for accessing each data source.
         We expect to open the file for read or write during initialization.
 
         file_name  stores the name of the file to read/write from
@@ -61,74 +60,37 @@ class DataSource:
             Name of the file to read/write from.
         mode : str
             Mode to open the file in. Can be 'r' or 'w'.
-
-        Attributes
-        ----------
-        logger : logging.Logger
-            Logger for this class.
-        file_name : str
-            Name of the file to read/write from.
-        metadata : npt.ArrayLike
-            Pointer to the metadata.
-        bits : int
-            Number of bits per pixel.
-        dx : float
-            Pixel size in x dimension (microns).
-        dy : float
-            Pixel size in y dimension (microns).
-        dz : float
-            Pixel size in z dimension (microns).
-        dt : float
-            Time displacement (seconds).
-        dc : float
-            Step size between channels (always 1)
-        shape_x : int
-            Size of the data source in x dimension.
-        shape_y : int
-            Size of the data source in y dimension.
-        shape_z : int
-            Size of the data source in z dimension.
-        shape_t : int
-            Size of the data source in t dimension.
-        shape_c : int
-            Size of the data source in c dimension.
-        positions : int
-            Number of positions in the data source.
-        mode : str
-            Mode to open the file in. Can be 'r' or 'w'.
-
-        Methods
-        -------
-        nbytes()
-            Return the size of the data source in bytes.
-        mode()
-            Return the mode of the data source.
-        voxel_size()
-            Return the voxel size in x, y, z dimensions.
-        shape()
-            Return the shape of the data source in XYCZT format.
-        set_metadata_from_configuration_experiment(configuration)
-            Set the metadata from the microscope configuration.
-        read()
-            Read data from file.
-        write(data, **kw)
-            Write data to file.
-        close()
-            Clean up any leftover file pointers, etc.
-
         """
+        #: logging.Logger: Logger for this class.
         self.logger = logging.getLogger(__name__.split(".")[1])
+        #: str: Name of the file to read/write from.
         self.file_name = file_name
         if not hasattr(self, "metadata"):
+            #: npt.ArrayLike: Pointer to the metadata.
             self.metadata = None  # Expect a metadata object
+        #: str: Mode to open the file in. Can be 'r' or 'w'.
         self._mode = None
+        #: bool: Has the data source been closed?
         self._closed = True
+        #: int: Number of bits per pixel.
         self.bits = 16
 
+        #: float: Pixel size in x dimension (microns).
+        #: float: Pixel size in y dimension (microns).
+        #: float: Pixel size in z dimension (microns).
         self.dx, self.dy, self.dz = 1, 1, 1  # pixel sizes (um)
+
+        #: float: The time interval between frames (seconds).
         self.dt = 1  # time displacement (s)
+
+        #: float: Step size between channels (always 1)
         self.dc = 1  # step size between channels, should always be 1
-        # shape
+
+        #: int: Size of the data source in x dimension.
+        #: int: Size of the data source in y dimension.
+        #: int: Size of the data source in z dimension.
+        #: int: Size of the data source in t dimension.
+        #: int: Size of the data source in c dimension.
         self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = (
             1,
             1,
@@ -136,15 +98,26 @@ class DataSource:
             1,
             1,
         )
+        #: int: Number of positions in the data source.
         self.positions = 1
+
+        #: str: Mode to open the file in. Can be 'r' or 'w'.
         self.mode = mode
+
+        #: int: Current frame number.
         self._current_frame = 0
 
     @property
     def nbytes(self) -> int:
         """Getter for the size of this data source in bytes."
 
-        Does not account for pyramidal data sources.
+        Does not account for pyramidal data sources. That process is handled by the
+        bdv_data_source class, which is a child of this class.
+
+        Returns
+        -------
+        int
+            Size of this data source in bytes.
         """
         total_bits = (
             self.shape_x
@@ -177,7 +150,6 @@ class DataSource:
         ----------
         mode_str : str
             Mode to set the data source to. Can be 'r' or 'w'.
-
         """
         if mode_str == self._mode:
             return
@@ -192,8 +164,6 @@ class DataSource:
     def data(self) -> npt.ArrayLike:
         """Return array representation of data stored in data source.
 
-
-
         Returns
         -------
         npt.ArrayLike
@@ -203,7 +173,6 @@ class DataSource:
         ------
         NotImplementedError
             If not implemented in a derived class.
-
         """
         raise NotImplementedError("Implemented in a derived class.")
 
@@ -215,7 +184,6 @@ class DataSource:
         -------
         tuple
             Voxel size in x, y, z dimensions.
-
         """
         return (self.dx, self.dy, self.dz)
 
@@ -227,7 +195,6 @@ class DataSource:
         -------
         tuple
             Shape of the data source in XYCZT format.
-
         """
         return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
 
@@ -240,13 +207,13 @@ class DataSource:
         ----------
         configuration : DictProxy
             Configuration experiment.
-
         """
 
         self.metadata.configuration = configuration
         self.get_shape_from_metadata()
 
     def get_shape_from_metadata(self):
+        """Get the shape of the data source from the metadata."""
         # pull new values from the metadata
         self.dx, self.dy, self.dz = self.metadata.voxel_size
         (
@@ -282,7 +249,6 @@ class DataSource:
             Index of time position
         p : int
             Index of multi-position position.
-
         """
         # If z-stacking, if multi-position
         if self.shape_z > 1:
@@ -311,6 +277,16 @@ class DataSource:
         return c, z, t, p
 
     def _check_shape(self, max_frame: int = 0, per_stack: bool = True):
+        """Check if we've closed this prior to completion.
+
+        Parameters
+        ----------
+        max_frame : int
+            Maximum frame number.
+        per_stack : bool
+            Acquisition mode. Either per_stack of per_channel.
+        """
+
         # Check if we've closed this prior to completion
         c, z, t, p = self._cztp_indices(max_frame, per_stack)
         # print(f"max_frame: {max_frame} c: {c} z: {z} t: {t} p: {p}")
@@ -357,7 +333,6 @@ class DataSource:
         ------
         NotImplementedError
             If not implemented in a derived class.
-
         """
         raise NotImplementedError("Implemented in a derived class.")
 
@@ -368,7 +343,6 @@ class DataSource:
         ------
         NotImplementedError
             If not implemented in a derived class.
-
         """
         raise NotImplementedError("Implemented in a derived class.")
 

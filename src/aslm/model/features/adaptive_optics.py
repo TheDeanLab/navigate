@@ -87,6 +87,7 @@ class TonyWilson:
         self.done_itr = False
         self.laser = None
         self.laser_power = 0
+        self.start_time = 0
         
         self.model = model
         self.mirror_controller = self.model.active_microscope.mirror.mirror_controller
@@ -192,6 +193,9 @@ class TonyWilson:
 
     def pre_func_signal(self):
         # initialize the mirror and coef lists, etc
+
+        # Timing
+        self.start_time = time.time() # this only works here...
 
         # mirror_settings = self.model.configuration['experiment']['MirrorParameters']
         tw_settings = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']
@@ -553,6 +557,11 @@ class TonyWilson:
             self.model.stop_acquisition = True
             self.model.end_acquisition()
             print('Ending acquisition...')
+            try:
+                stop_time = time.time()
+                print(f'Total runtime:\t{(stop_time - self.start_time):.3f} sec')
+            except Exception as e:
+                print(e)
 
         try:
             if self.done_itr:

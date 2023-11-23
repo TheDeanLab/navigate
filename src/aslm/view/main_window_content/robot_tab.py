@@ -149,10 +149,8 @@ class RobotInitialization(tk.Frame):
                 row=row, column=column, sticky=tk.NSEW, padx=(4, 1), pady=(4, 6)
             )
             counter += 1
-
-
+    
 class MoveSequence(tk.Frame):
-#change name to something more appropriate
     """MoveSequence
 
     MoveSequence is a frame that contains the widgets for initializing

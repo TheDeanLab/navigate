@@ -42,9 +42,7 @@ import os
 # Local Imports
 from aslm.model.concurrency.concurrency_tools import SharedNDArray
 from aslm.model.features.autofocus import Autofocus
-from aslm.model.features.constant_velocity_acquisition import (
-    ConstantVelocityAcquisition,
-)
+from aslm.model.features.cva_conpro import ConstantVelocityAcquisition
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
@@ -766,13 +764,11 @@ class Model:
         data_func : object
             Function to run on the acquired data.
         """
-
         wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
         # whether acquire specific number of frames.
         count_frame = num_of_frames > 0
-
         start_time = time.time()
 
         while not self.stop_acquisition:
@@ -810,6 +806,7 @@ class Model:
                     self.logger.info("ASLM Model - Data container is closed.")
                     self.stop_acquisition = True
                     break
+
                 self.data_container.run(frame_ids)
 
             # show image

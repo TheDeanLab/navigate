@@ -1019,6 +1019,7 @@ class ZStackAcquisition:
                 f"*** Zstack move stage: (z: {self.current_z_position}), "
                 f"(f: {self.current_focus_position})"
             )
+
             if self.should_pause_data_thread and not data_thread_is_paused:
                 self.model.pause_data_thread()
 
@@ -1296,8 +1297,6 @@ class ConProAcquisition:
             process.
         """
 
-        # print(f"Signal with time {self.offset_update_time} and offset "
-        #       f"{self.current_offset}")
         if self.model.stop_acquisition:
             return False
 
@@ -1373,7 +1372,6 @@ class ConProAcquisition:
         bool
             A boolean value indicating whether metadata generation was successful.
         """
-        # print('This frame: z stack', self.model.frame_id)
         return True
 
     def update_channel(self):

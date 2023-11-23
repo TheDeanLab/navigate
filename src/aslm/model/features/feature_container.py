@@ -308,15 +308,12 @@ class SignalNode(TreeNode):
             self.is_initialized = True
 
         if not wait_response:
-            # print(self.node_name, 'running function:', self.node_funcs['main'])
             result = self.node_funcs["main"](*args)
             if self.need_response:
                 self.wait_response = True
                 return result, False
 
         elif self.wait_response:
-            # print(self.node_name, 'running response function:',
-            #       self.node_funcs['main-response'])
             result = self.node_funcs["main-response"](*args)
             self.wait_response = False
         elif self.device_related or self.need_response:
@@ -830,12 +827,9 @@ class DataContainer(Container):
                     self.end_flag = True
                     self.cleanup()
                     return
-            # print('Data running node:', self.curr_node.node_name,
-            #       'get result:', result)
             if not is_end:
                 return
             if result and self.curr_node.child:
-                # print('Data running child of', self.curr_node.node_name)
                 self.curr_node = self.curr_node.child
             elif self.curr_node.sibling:
                 self.curr_node = self.curr_node.sibling

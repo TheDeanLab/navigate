@@ -31,6 +31,7 @@
 
 # Standard Imports
 import logging
+import time
 
 # Third Party Imports
 
@@ -75,11 +76,12 @@ class ASIStage(StageBase):
     """Applied Scientific Instrumentation (ASI) Stage Class
 
     ASI Documentation: http://asiimaging.com/docs/products/serial_commands
+
     ASI Quick Start Guide: http://asiimaging.com/docs/command_quick_start
 
     Note
     ----
-        ASI firmware requires all distances to be in a 10th of a micron.
+    ASI firmware requires all distances to be in a 10th of a micron.
 
     Warning
     -------
@@ -107,12 +109,13 @@ class ASIStage(StageBase):
         if not self.axes_mapping:
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
-            }  #: Mapping of axes to ASI axes
+            }
+        #: Mapping of axes to ASI axes
         else:
             # Force cast axes to uppercase
             self.axes_mapping = {k: v.upper() for k, v in self.axes_mapping.items()}
+
         self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
-        #: ASI stage axes
 
         # Set feedback alignment values - Default to 85 if not specified
         if self.stage_feedback is None:
@@ -123,7 +126,7 @@ class ASIStage(StageBase):
                 for axis, self.stage_feedback in zip(self.asi_axes, self.stage_feedback)
             }
 
-        self.tiger_controller = device_connection  #: ASI Stage connection
+        self.tiger_controller = device_connection
         if device_connection is not None:
             # Set feedback alignment values
             for ax, aa in feedback_alignment.items():
@@ -145,8 +148,8 @@ class ASIStage(StageBase):
                 )
                 / 2
             )
-            # If this is changing, the stage must be power cycled
-            # for these changes to take effect.
+            # If this is changing, the stage must be power cycled for these changes to
+            # take effect.
             for ax in self.asi_axes.keys():
                 if self.asi_axes[ax] == "theta":
                     self.tiger_controller.set_finishing_accuracy(ax, 0.003013)
@@ -171,7 +174,6 @@ class ASIStage(StageBase):
                 self.tiger_controller.disconnect_from_serial()
                 logger.debug("ASI stage connection closed")
         except (AttributeError, BaseException) as e:
-            print("Error while disconnecting the ASI stage")
             logger.exception("ASI Stage Exception", e)
             raise
 
@@ -210,7 +212,6 @@ class ASIStage(StageBase):
                 else:
                     setattr(self, f"{ax}_pos", float(pos) / 10.0)
         except TigerException as e:
-            print("Failed to report ASI Stage Position")
             logger.exception("ASI Stage Exception", e)
 
         return self.get_position_dict()
@@ -240,6 +241,7 @@ class ASIStage(StageBase):
 
         axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
+            print("axis abs false")
             return False
 
         # Move stage
@@ -404,7 +406,7 @@ class ASIStage(StageBase):
         end_position_mm: float
             scan end position
         enc_divide: float
-            an output pulse will occur every enc_divide number of encoder counts
+            Step size desired.
         axis: str
             fast axis name
 
@@ -418,7 +420,50 @@ class ASIStage(StageBase):
             self.tiger_controller.scanr(
                 start_position_mm, end_position_mm, enc_divide, axis
             )
-        except TigerException:
+        except TigerException as e:
+            logger.exception(f"TigerException: {e}")
+            print(logger.exception())
+            return False
+        except KeyError as e:
+            logger.exception(f"ASI Stage - KeyError in scanr: {e}")
+            return False
+        # if wait_until_done:
+        #     self.tiger_controller.wait_for_device()
+
+        return True
+        # return True
+
+    def scanv(
+        self, start_position_mm, end_position_mm, number_of_lines, overshoot, axis="z"
+    ):
+        """Set scan range
+
+        Parameters
+        ----------
+        start_position_mm: float
+            scan start position
+        end_position_mm: float
+            scan end position
+        number of lines: int
+            number of steps.
+        overshoot: float
+            overshoot_time ms
+        axis: str
+            fast axis name
+
+        Returns
+        -------
+        success: bool
+            Was the setting successful?
+        """
+        try:
+            axis = self.axes_mapping[axis]
+            self.tiger_controller.scanv(
+                start_position_mm, end_position_mm, number_of_lines, overshoot, axis
+            )
+        except TigerException as e:
+            logger.exception(f"TigerException: {e}")
+            print(logger.exception())
             return False
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in scanr: {e}")
@@ -442,7 +487,8 @@ class ASIStage(StageBase):
         try:
             axis = self.axes_mapping[axis]
             self.tiger_controller.start_scan(axis)
-        except TigerException:
+        except TigerException as e:
+            logger.exception(f"TigerException: {e}")
             return False
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in start_scan: {e}")
@@ -455,3 +501,13 @@ class ASIStage(StageBase):
             self.tiger_controller.stop_scan()
         except TigerException as e:
             logger.exception("ASI Stage Exception", e)
+
+    def wait_until_complete(self, axis):
+        try:
+            while self.tiger_controller.is_axis_busy(axis):
+                time.sleep(0.1)
+        except TigerException as e:
+            print(f"ASI Stage Exception {e}")
+            logger.exception(f"ASI Stage Exception {e}")
+            return False
+        return True

@@ -20,6 +20,12 @@ class TigerException(Exception):
     """
 
     def __init__(self, code: str):
+        """Initialize the TigerException class
+        Parameters
+        ----------
+        code : str
+            Error code received from Tiger Console
+        """
 
         self.error_codes = {
             ":N-1": "Unknown Command (Not Issued in TG-1000)",
@@ -34,7 +40,7 @@ class TigerException(Exception):
             ":N-7": "Invalid Card Address",
             ":N-21": "Serial Command halted by the HALT command",
         }
-
+        #: str: Error code received from Tiger Console
         self.code = code
         self.message = self.error_codes[
             code
@@ -44,31 +50,56 @@ class TigerException(Exception):
         )  # Sends message to base exception constructor for python purposes
 
     def __str__(self):
-        # Overrides base Exception string to be displayed in traceback
+        """Overrides base Exception string to be displayed
+        in traceback"""
         return f"{self.code} -> {self.message}"
 
 
 class TigerController:
-    """
-    A utility class for managing a RS232 serial connection using the pyserial library.
-
-    """
+    """Tiger Controller class"""
 
     def __init__(self, com_port: str, baud_rate: int, verbose: bool = False):
+
+        """Initialize the Tiger Controller class
+
+
+        Parameters
+        ----------
+        com_port : str
+            COM port of the Tiger Controller
+        baud_rate : int
+            Baud rate of the Tiger Controller
+        verbose : bool
+            If True, will print out messages to the console
+
+        """
+        #: Serial: Serial port object
         self.serial_port = Serial()
+        #: str: COM port of the Tiger Controller
         self.com_port = com_port
+        #: int: Baud rate of the Tiger Controller
         self.baud_rate = baud_rate
+        #: bool: If True, will print out messages to the console
         self.verbose = verbose
+        #: list[str]: Default axes sequence of the Tiger Controller
         self.default_axes_sequence = None
+        #: list[float]: Maximum speeds of the Tiger Controller
         self._max_speeds = None
+        #: threading.Event: Event to indicate if it is safe to write to the serial port
         self.safe_to_write = threading.Event()
+        #: threading.Event.set(): Set the safe_to_write event
         self.safe_to_write.set()
+        #: float: Last time a command was sent to the Tiger Controller
         self._last_cmd_send_time = time.perf_counter()
 
     @staticmethod
     def scan_ports() -> list[str]:
-        """
+        """Scans for available COM ports
         Returns a sorted list of COM ports.
+        Returns
+        -------
+        list[str]
+            Sorted list of COM ports
         """
         com_ports = [port.device for port in list_ports.comports()]
         com_ports.sort(key=lambda value: int(value[3:]))
@@ -83,6 +114,17 @@ class TigerController:
     ) -> None:
         """
         Connect to the serial port.
+
+        Parameters
+        ----------
+        rx_size : int
+            Size of the rx buffer
+        tx_size : int
+            Size of the tx buffer
+        read_timeout : int
+            Read timeout in seconds
+        write_timeout : int
+            Write timeout in seconds
         """
         self.serial_port.port = self.com_port
         self.serial_port.baudrate = self.baud_rate
@@ -119,7 +161,13 @@ class TigerController:
             self.default_axes_sequence = self.get_default_motor_axis_sequence()
 
     def get_default_motor_axis_sequence(self) -> None:
-        # get default motor axes sequence
+        """Get the default motor axis sequence from the ASI device
+
+        Returns
+        -------
+        list[str]
+            Default motor axis sequence
+        """
         self.send_command("BU X")
         response = self.read_response()
         lines = response.split("\r")
@@ -136,14 +184,20 @@ class TigerController:
     ##### TODO: Modify these to accept dictionaries and send a
     #           single command for all axes
     def set_feedback_alignment(self, axis, aa):
+        """Set the stage feedback alignment.
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        """
         self.send_command(f"AA {axis}={aa}\r")
         self.read_response()
         self.send_command(f"AZ {axis}\r")
         self.read_response()
 
     def set_backlash(self, axis, val):
-        """
-        Enable/disable stage backlash correction.
+        """Enable/disable stage backlash correction.
 
         Parameters
         ----------
@@ -156,8 +210,7 @@ class TigerController:
         self.read_response()
 
     def set_finishing_accuracy(self, axis, ac):
-        """
-        Set the stage finishing accuracy.
+        """Set the stage finishing accuracy.
 
         Parameters
         ----------
@@ -186,23 +239,29 @@ class TigerController:
     ##### END TODO #####
 
     def disconnect_from_serial(self) -> None:
-        """
-        Disconnect from the serial port if it's open.
-        """
+        """Disconnect from the serial port if it's open."""
         if self.is_open():
             self.serial_port.close()
             self.report_to_console("Disconnected from the serial port.")
 
     def is_open(self) -> bool:
-        """
-        Returns True if the serial port exists and is open.
+        """Returns True if the serial port exists and is open.
+
+        Returns
+        -------
+        bool
+            True if the serial port exists and is open
         """
         # short circuits if serial port is None
         return self.serial_port and self.serial_port.is_open
 
     def report_to_console(self, message: str) -> None:
-        """
-        Print message to the output device, usually the console.
+        """Print message to the output device, usually the console.
+
+        Parameters
+        ----------
+        message : str
+            Message to print to the output device
         """
         # useful if we want to output data to something other than the console
         # (ui element etc)
@@ -210,8 +269,12 @@ class TigerController:
             print(message)
 
     def send_command(self, cmd: bytes) -> None:
-        """
-        Send a serial command to the device.
+        """Send a serial command to the device.
+
+        Parameters
+        ----------
+        cmd : bytes
+            Serial command to send to the device
         """
         # always reset the buffers before a new command is sent
         self.safe_to_write.wait()
@@ -230,8 +293,12 @@ class TigerController:
             pass
 
     def read_response(self) -> str:
-        """
-        Read a line from the serial response.
+        """Read a line from the serial response.
+
+        Returns
+        -------
+        str
+            Response from the serial port
         """
         response = self.serial_port.readline()
         self.safe_to_write.set()
@@ -244,20 +311,42 @@ class TigerController:
 
         return response  # in case we want to read the response
 
-    # Basic Serial Commands for the Stage
-
     def moverel(self, x: int = 0, y: int = 0, z: int = 0) -> None:
-        """Move the stage with a relative move on multiple axes"""
+        """Move the stage with a relative move on multiple axes.
+
+        Parameters
+        ----------
+        x : int
+            Relative move on the x-axis
+        y : int
+            Relative move on the y-axis
+        z : int
+            Relative move on the z-axis
+        """
         self.send_command(f"MOVREL X={x} Y={y} Z={z}\r")
         self.read_response()
 
     def moverel_axis(self, axis: str, distance: float) -> None:
-        """Move the stage with a relative move on one axis"""
+        """Move the stage with a relative move on one axis
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        distance : float
+            Relative move distance
+        """
         self.send_command(f"MOVREL {axis}={round(distance, 6)}\r")
         self.read_response()
 
     def move(self, pos_dict) -> None:
-        """Move the stage with an absolute move on multiple axes"""
+        """Move the stage with an absolute move on multiple axes
+
+        Parameters
+        ----------
+        pos_dict : dict
+            Dictionary of the form {axis: position}
+        """
         pos_str = " ".join(
             [f"{axis}={round(pos, 6)}" for axis, pos in pos_dict.items()]
         )
@@ -265,17 +354,43 @@ class TigerController:
         self.read_response()
 
     def move_axis(self, axis: str, distance: float) -> None:
-        """Move the stage with an absolute move on one axis"""
+        """Move the stage with an absolute move on one axis
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        distance : float
+            Absolute move distance
+        """
         self.send_command(f"MOVE {axis}={round(distance, 6)}\r")
         self.read_response()
 
     def set_max_speed(self, axis: str, speed: float) -> None:
-        """Set the speed on a specific axis. Speed is in mm/s."""
+        """Set the speed on a specific axis. Speed is in mm/s.
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        speed : float
+            Speed in mm/s
+        """
         self.send_command(f"SPEED {axis}={speed}\r")
         self.read_response()
 
     def get_axis_position(self, axis: str) -> int:
-        """Return the position of the stage in ASI units (tenths of microns)."""
+        """Return the position of the stage in ASI units (tenths of microns).
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        Returns
+        -------
+        int
+            Position of the stage in ASI units
+        """
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
         # try:
@@ -285,7 +400,17 @@ class TigerController:
         return pos
 
     def get_axis_position_um(self, axis: str) -> float:
-        """Return the position of the stage in microns."""
+        """Return the position of the stage in microns.
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        Returns
+        -------
+        float
+            Position of the stage in microns
+        """
         self.send_command(f"WHERE {axis}\r")
         response = self.read_response()
         return float(response.split(" ")[1]) / 10.0
@@ -302,6 +427,11 @@ class TigerController:
         are passed in.
 
         See https://asiimaging.com/docs/products/serial_commands#commandwhere_w
+
+        Parameters
+        ----------
+        axes : list[str]
+            List of axes to query
 
         Returns
         -------
@@ -340,13 +470,29 @@ class TigerController:
     # Utility Functions
 
     def is_axis_busy(self, axis: str) -> bool:
-        """Returns True if the axis is busy."""
+        """Returns True if the axis is busy.
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        Returns
+        -------
+        bool
+            True if the axis is busy
+        """
         self.send_command(f"RS {axis}?\r")
         res = self.read_response()
         return "B" in res
 
     def is_device_busy(self) -> bool:
-        """Returns True if any axis is busy."""
+        """Returns True if any axis is busy.
+
+        Returns
+        -------
+        bool
+            True if any axis is busy
+        """
         self.send_command("/")
         res = self.read_response()
         return "B" in res
@@ -355,7 +501,7 @@ class TigerController:
         """Waits for the all motors to stop moving.
 
         timeout : float
-            Timeout in seconds.
+            Timeout in seconds. Default is 1.75 seconds.
         """
         if self.verbose:
             print("Waiting for device...")
@@ -373,9 +519,7 @@ class TigerController:
             print(f"Waited {waiting_time:.2f} s")
 
     def stop(self):
-        """
-        Stop all stage movement immediately
-        """
+        """Stop all stage movement immediately"""
 
         self.send_command("HALT")
         self.read_response()
@@ -383,14 +527,25 @@ class TigerController:
             print("ASI Stages stopped successfully")
 
     def set_speed(self, speed_dict):
-        """
-        Set speed
+        """Set speed
+
+        Parameters
+        ----------
+        speed_dict : dict
+            Dictionary of the form {axis: speed}
         """
         axes = " ".join([f"{x}={round(v, 6)}" for x, v in speed_dict.items()])
         self.send_command(f"S {axes}")
         self.read_response()
 
     def set_speed_as_percent_max(self, pct):
+        """Set speed as a percentage of the maximum speed
+
+        Parameters
+        ----------
+        pct : float
+            Percentage of the maximum speed
+        """
         if self.default_axes_sequence is None:
             raise TigerException(
                 "Unable to query system for axis sequence. Cannot set speed."
@@ -416,16 +571,29 @@ class TigerController:
         self.read_response()
 
     def get_speed(self, axis: str):
-        """
-        Get speed
+        """Get speed
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
         """
         self.send_command(f"SPEED {axis}?")
         response = self.read_response()
         return float(response.split("=")[1])
 
     def get_encoder_counts_per_mm(self, axis: str):
-        """
-        Get encoder counts pre mm of axis
+        """Get encoder counts pre mm of axis
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+
+        Returns
+        -------
+        float
+            Encoder counts per mm of axis
         """
 
         self.send_command(f"CNTS {axis}?")
@@ -439,8 +607,18 @@ class TigerController:
         enc_divide: float = 0,
         axis: str = "X",
     ):
-        """
-        Set scan range.
+        """Set scanr operation mode.
+
+        Parameters
+        ----------
+        start_position_mm : float
+            Start position in mm
+        end_position_mm : float
+            End position in mm
+        enc_divide : float
+            Encoder divide
+        axis : str
+            Stage axis
         """
         enc_divide_mm = self.get_encoder_counts_per_mm(axis)
         if enc_divide == 0:
@@ -466,6 +644,21 @@ class TigerController:
         overshoot: float = 1.0,
         axis: str = "X",
     ):
+        """Set scanv operation mode.
+
+        Parameters
+        ----------
+        start_position_mm : float
+            Start position in mm
+        end_position_mm : float
+            End position in mm
+        number_of_lines : float
+            Number of lines
+        overshoot : float
+            Overshoot
+        axis : str
+            Stage axis
+        """
         command = (
             f"SCANV "
             f"X={round(start_position_mm, 6)} "
@@ -481,24 +674,18 @@ class TigerController:
         """
         Start scan
 
-        axis: 'X' or 'Y'
-        is_single_axis_scan: True for single axis scan
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        is_single_axis_scan : bool
+            If True, will only scan on one axis
         """
-        # fast_axis_id = 0 if axis == "X" else 1
-        # slow_axis_id = 1 - fast_axis_id
-        # if is_single_axis_scan:
-        #     slow_axis_id = 9
-
-        # Not sure if this requires an S
-        # self.send_command(f"SCAN S")
         self.send_command("SCAN")
-        # self.send_command(f"SCAN S Y={fast_axis_id} Z={slow_axis_id}")
         self.read_response()
 
     def stop_scan(self):
-        """
-        Stop scan.
-        """
+        """Stop scan."""
         self.send_command("SCAN P")
         self.read_response()
 
@@ -536,14 +723,17 @@ class TigerController:
             return False
         else:
             print("WARNING: WAIT UNTIL DONE RECEIVED NO RESPONSE")
-            # act as if the stage is not moving.
             return False
 
     # Basic Serial Commands for Filter Wheels
 
     def send_filter_wheel_command(self, cmd) -> None:
-        """
-        Send a serial command to the filter wheel.
+        """Send a serial command to the filter wheel.
+
+        Parameters
+        ----------
+        cmd : str
+            Serial command to send to the filter wheel
         """
 
         # send the serial command to the controller

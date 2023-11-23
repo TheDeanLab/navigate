@@ -118,8 +118,8 @@ class Metadata:
         )
         if (
             (state["image_mode"] == "z-stack")
-            or (state["image_mode"] == "ConstantVelocityAcquisition")
             or (state["image_mode"] == "customized")
+            or (state["image_mode"] == "ConstantVelocityAcquisition")
         ):
             self.shape_z = int(state["number_z_steps"])
         elif state["image_mode"] == "confocal-projection":
@@ -148,7 +148,7 @@ class Metadata:
         # if they are both moving along the same physical dimension
         self._coupled_axes = scope["stage"].get("coupled_axes", None)
 
-        print(f"Coupled axes: {self._coupled_axes} {type(self._coupled_axes)}")
+        # print(f"Coupled axes: {self._coupled_axes} {type(self._coupled_axes)}")
 
         # safety
         assert (self._coupled_axes is None) or isinstance(self._coupled_axes, DictProxy)
@@ -157,10 +157,10 @@ class Metadata:
         # additional axis, to ensure we keep track of the step size
         if self._coupled_axes is not None:
             for leader, follower in self._coupled_axes.items():
-                print(leader, follower)
+                # print(leader, follower)
                 assert leader.lower() in "xyzct"  # safety
                 if getattr(self, f"d{follower.lower()}", None) is None:
-                    print(state.get(f"{follower.lower()}_step_size", 1))
+                    # print(state.get(f"{follower.lower()}_step_size", 1))
                     setattr(
                         self,
                         f"d{follower.lower()}",
@@ -170,11 +170,18 @@ class Metadata:
     def set_stack_order_from_configuration_experiment(self) -> None:
         state = self.configuration["experiment"]["MicroscopeState"]
         self._per_stack = (
-            state["stack_cycling_mode"] == "per_stack"
-            and state["image_mode"] == "z-stack"
-        ) or (
-            state["conpro_cycling_mode"] == "per_stack"
-            and state["image_mode"] == "confocal-projection"
+            (
+                state["stack_cycling_mode"] == "per_stack"
+                and state["image_mode"] == "z-stack"
+            )
+            or (
+                state["conpro_cycling_mode"] == "per_stack"
+                and state["image_mode"] == "confocal-projection"
+            )
+            or (
+                state["stack_cycling_mode"] == "per_stack"
+                and state["image_mode"] == "ConstantVelocityAcquisition"
+            )
         )
 
     @property

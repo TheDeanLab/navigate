@@ -33,6 +33,7 @@
 # Standard Imports
 import logging
 from threading import Lock
+import traceback
 
 # Third Party Imports
 import nidaqmx
@@ -123,15 +124,28 @@ class NIDAQ(DAQBase):
             trigger_source = self.configuration["configuration"]["microscopes"][
                 self.microscope_name
             ]["daq"]["trigger_source"]
+
             # set camera task trigger source
-            self.camera_trigger_task.stop()
+            try:
+                self.camera_trigger_task.stop()
+            except Exception:
+                logger.debug(
+                    f"DAQ NI - Error switching the camera trigger source: "
+                    f"{traceback.format_exc()}"
+                )
             self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
                 trigger_source
             )
             self.camera_trigger_task.triggers.start_trigger.retriggerable = False
             # set analog task trigger source
             for board_name in self.analog_output_tasks.keys():
-                self.analog_output_tasks[board_name].stop()
+                try:
+                    self.analog_output_tasks[board_name].stop()
+                except Exception:
+                    logger.debug(
+                        f"DAQ NI - Error stopping analog output tasks: "
+                        f"{traceback.format_exc()}"
+                    )
                 self.analog_output_tasks[
                     board_name
                 ].triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source)
@@ -140,15 +154,23 @@ class NIDAQ(DAQBase):
         else:
             # close master trigger task
             if self.master_trigger_task:
-                self.master_trigger_task.stop()
-                self.master_trigger_task.close()
+                try:
+                    self.master_trigger_task.stop()
+                    self.master_trigger_task.close()
+                except Exception:
+                    logger.debug(
+                        f"DAQ NI - Error stopping master trigger task: "
+                        f"{traceback.format_exc()}"
+                    )
             self.master_trigger_task = None
             # camera task trigger source
             self.camera_trigger_task.triggers.start_trigger.cfg_dig_edge_start_trig(
                 self.external_trigger
             )
-            # change camera task to regeneratable.
-            self.camera_trigger_task.triggers.start_trigger.retriggerable = True
+
+            # change camera task to so that it can be triggered again.
+            self.camera_trigger_task.triggers.start_trigger.retriggerable = False
+
             # add callback function to analog tasks
             for board_name in self.analog_output_tasks.keys():
                 task = self.analog_output_tasks[board_name]
@@ -175,10 +197,13 @@ class NIDAQ(DAQBase):
 
         def callback_func(task_handle, status, callback_data):
             try:
+                logger.info("Analog Tasks Restarted")
                 task.stop()
                 task.start()
             except Exception:
-                print("*** there is some error when restarting the analog task")
+                logger.debug(
+                    f"DAQ NI - Analog task restart failed {traceback.format_exc()}"
+                )
             return status
 
         return callback_func
@@ -268,6 +293,7 @@ class NIDAQ(DAQBase):
             sample_rates = list(
                 set([v["sample_rate"] for v in self.analog_outputs.values()])
             )
+
             if len(sample_rates) > 1:
                 logger.debug(
                     "NI DAQ - Different sample rates provided for each analog channel."
@@ -325,6 +351,7 @@ class NIDAQ(DAQBase):
         waveform_template_name = self.configuration["experiment"]["MicroscopeState"][
             "waveform_template"
         ]
+        logger.info(f"Waveform Template Name: {waveform_template_name}")
         (
             self.waveform_repeat_num,
             self.waveform_expand_num,
@@ -333,9 +360,12 @@ class NIDAQ(DAQBase):
             self.configuration["waveform_templates"],
             self.configuration["experiment"]["MicroscopeState"],
         )
+
+        logger.info(f"Waveform Expand Num = {self.waveform_expand_num}")
+        logger.info(f"Waveform Repeat Num = {self.waveform_repeat_num}")
+
         self.create_camera_task(exposure_time)
         self.create_analog_output_tasks(channel_key)
-
         self.current_channel_key = channel_key
         self.is_updating_analog_task = False
         if self.wait_to_run_lock.locked():
@@ -365,22 +395,26 @@ class NIDAQ(DAQBase):
             self.master_trigger_task.write(
                 [False, True, True, True, False], auto_start=True
             )
+
         try:
-            self.camera_trigger_task.wait_until_done()
+            self.camera_trigger_task.wait_until_done(timeout=10000)
             for task in self.analog_output_tasks.values():
-                task.wait_until_done()
                 if self.trigger_mode == "self-trigger":
-                    task.stop()
+                    task.wait_until_done()
+                task.stop()
         except Exception:
-            # when triggered from external triggers, sometimes the camera trigger
-            # task is done but not actually done, there will a DAQ WARNING message
+            # when triggered from external triggers, sometimes the camera trigger task
+            # is done but not actually done, there will a DAQ WARNING message
+            logger.debug(
+                f"DAQ NI - Wait until tasks done failed - {traceback.format_exc()}"
+            )
             pass
-        if self.trigger_mode == "self-trigger":
-            try:
-                self.camera_trigger_task.stop()
+        try:
+            self.camera_trigger_task.stop()
+            if self.trigger_mode == "self-trigger":
                 self.master_trigger_task.stop()
-            except nidaqmx.DaqError:
-                pass
+        except nidaqmx.DaqError:
+            pass
 
     def stop_acquisition(self):
         """Stop Acquisition.
@@ -481,12 +515,20 @@ class NIDAQ(DAQBase):
             ).squeeze()
             self.analog_output_tasks[board_name].write(waveforms)
         except Exception:
+            logger.debug(
+                f"DAQ NI - Could not update analog task: {traceback.format_exc()}"
+            )
             for board in self.analog_output_tasks.keys():
-                self.analog_output_tasks[board].stop()
-                self.analog_output_tasks[board].close()
+                try:
+                    self.analog_output_tasks[board].stop()
+                    self.analog_output_tasks[board].close()
+                except Exception:
+                    logger.debug(
+                        f"DAQ NI - Could not stop analog tasks: "
+                        f"{traceback.format_exc()}"
+                    )
 
             self.create_analog_output_tasks(self.current_channel_key)
-            print("create new daq analog output task because DAQmx Write failed!")
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()

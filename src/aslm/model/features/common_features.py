@@ -50,42 +50,6 @@ class ChangeResolution:
     This class provides functionality to change the resolution mode of a microscope by
     reconfiguring the microscope settings and updating the active microscope.
 
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for resolution mode changes.
-
-    resolution_mode : str, optional
-        The desired resolution mode to set for the microscope. Default is "high".
-
-    zoom_value : str, optional
-        The zoom value to set for the microscope. Default is "N/A".
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with the resolution mode change.
-
-    config_table : dict
-        A dictionary defining the configuration for the resolution change process.
-        It contains the following keys:
-        - "signal": Configuration for the signal acquisition stage.
-        - "node": Configuration related to node type and device.
-
-    resolution_mode : str
-        The current resolution mode to be set for the microscope.
-
-    zoom_value : str
-        The zoom value to be set for the microscope.
-
-    Methods:
-    --------
-    signal_func():
-        Perform actions to change the resolution mode and update the active microscope.
-
-    cleanup():
-        Perform cleanup actions if needed.
-
     Notes:
     ------
     - This class is used to change the resolution mode of a microscope by updating the
@@ -106,14 +70,31 @@ class ChangeResolution:
     """
 
     def __init__(self, model, resolution_mode="high", zoom_value="N/A"):
+        """Initialize the ChangeResolution class.
+
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for resolution mode changes.
+        resolution_mode : str, optional
+            The desired resolution mode to set for the microscope. Default is "high".
+        zoom_value : str, optional
+            The zoom value to set for the microscope. Default is "N/A".
+        """
+        #: MicroscopeModel: The microscope model associated with the resolution change.
         self.model = model
 
+        #: dict: A dictionary defining the configuration for the resolution change
         self.config_table = {
             "signal": {"main": self.signal_func, "cleanup": self.cleanup},
             "node": {"device_related": True},
         }
 
+        #: str: The desired resolution mode to set for the microscope.
         self.resolution_mode = resolution_mode
+
+        #: str: The zoom value to set for the microscope.
         self.zoom_value = zoom_value
 
     def signal_func(self):
@@ -123,10 +104,6 @@ class ChangeResolution:
         This method carries out actions to change the resolution mode of the microscope
          by reconfiguring the microscope settings, updating the active microscope, and
          resuming data acquisition.
-
-        Parameters:
-        ----------
-        None
 
         Returns:
         -------
@@ -157,19 +134,10 @@ class ChangeResolution:
         return True
 
     def cleanup(self):
-        """
-        Perform cleanup actions if needed.
+        """Perform cleanup actions if needed.
 
         This method is responsible for performing cleanup actions if required after the
         resolution change process.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         self.model.resume_data_thread()
 
@@ -179,26 +147,6 @@ class Snap:
 
     This class provides functionality to capture data frames using a microscope
     and log information about the camera and frame IDs.
-
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for data capture.
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with the data capture.
-
-    config_table : dict
-        A dictionary defining the configuration for the data capture process. It
-        contains the following key:
-        - "data": Configuration for the data capture stage.
-
-    Methods:
-    --------
-    data_func(frame_ids):
-        Capture data frames and log camera information.
 
     Notes:
     ------
@@ -216,8 +164,17 @@ class Snap:
     """
 
     def __init__(self, model):
+        """Initialize the Snap class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for data capture.
+        """
+        #: MicroscopeModel: The microscope model associated with the data capture.
         self.model = model
 
+        #: dict: A dictionary defining the configuration for the data capture process.
         self.config_table = {"data": {"main": self.data_func}}
 
     def data_func(self, frame_ids):
@@ -248,51 +205,6 @@ class WaitToContinue:
     This feature is used to synchronize signal and data acquisition processes, allowing
     the faster one to wait until the other one ends.
 
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for synchronization.
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with the synchronization process.
-
-    pause_signal_lock : threading.Lock
-        A lock used to control the synchronization of the signal acquisition process.
-
-    pause_data_lock : threading.Lock
-        A lock used to control the synchronization of the data acquisition process.
-
-    first_enter_node : VariableWithLock
-        A variable with lock that tracks which process (signal or data) enters the node
-        first.
-
-    config_table : dict
-        A dictionary defining the configuration for the synchronization process. It
-        contains the following keys:
-        - "signal": Configuration for the signal acquisition stage, including
-        initialization, main execution, and cleanup.
-        - "data": Configuration for the data acquisition stage, including
-        initialization, main execution, and cleanup.
-
-    Methods:
-    --------
-    pre_signal_func():
-        Prepare for the signal acquisition stage and synchronize with data acquisition.
-
-    signal_func():
-        Synchronize signal acquisition and release locks.
-
-    pre_data_func():
-        Prepare for the data acquisition stage and synchronize with signal acquisition.
-
-    data_func(frame_ids):
-        Synchronize data acquisition and release locks.
-
-    cleanup():
-        Release any remaining locks during cleanup.
-
     Notes:
     ------
     - This class is used to synchronize signal and data acquisition processes in a
@@ -314,11 +226,26 @@ class WaitToContinue:
     """
 
     def __init__(self, model):
+        """Initialize the WaitToContinue class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for synchronization.
+        """
+        #: MicroscopeModel: The microscope model associated with the synchronization.
         self.model = model
+
+        #: Lock: A lock for the signal acquisition process.
         self.pause_signal_lock = Lock()
+
+        #: Lock: A lock for the data acquisition process.
         self.pause_data_lock = Lock()
+
+        #: VariableWithLock: A variable to track which process enters the node first.
         self.first_enter_node = VariableWithLock(str)
 
+        #: dict: A dictionary defining the configuration for the synchronization
         self.config_table = {
             "signal": {
                 "init": self.pre_signal_func,
@@ -333,19 +260,11 @@ class WaitToContinue:
         }
 
     def pre_signal_func(self):
-        """
-        Prepare for the signal acquisition stage and synchronize with data acquisition.
+        """Prepare for the signal acquisition stage and synchronize with data
+        acquisition.
 
         This method prepares for the signal acquisition stage and synchronizes with
         the data acquisition process, ensuring that the slower process proceeds first.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         with self.first_enter_node as first_enter_node:
             if first_enter_node.value == "":
@@ -357,15 +276,10 @@ class WaitToContinue:
                     self.pause_data_lock.release()
 
     def signal_func(self):
-        """
-        Synchronize signal acquisition and release locks.
+        """Synchronize signal acquisition and release locks.
 
         This method synchronizes the signal acquisition process with data acquisition
         and releases any locks held.
-
-        Parameters:
-        ----------
-        None
 
         Returns:
         -------
@@ -382,19 +296,11 @@ class WaitToContinue:
         return True
 
     def pre_data_func(self):
-        """
-        Prepare for the data acquisition stage and synchronize with signal acquisition.
+        """Prepare for the data acquisition stage and synchronize with signal
+        acquisition.
 
         This method prepares for the data acquisition stage and synchronizes with the
         signal acquisition process, ensuring that the slower process proceeds first.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         with self.first_enter_node as first_enter_node:
             if first_enter_node.value == "":
@@ -408,8 +314,7 @@ class WaitToContinue:
                     self.pause_signal_lock.release()
 
     def data_func(self, frame_ids):
-        """
-        Synchronize data acquisition and release locks.
+        """Synchronize data acquisition and release locks.
 
         This method synchronizes the data acquisition process with signal acquisition
         and releases any locks held.
@@ -434,18 +339,9 @@ class WaitToContinue:
         return True
 
     def cleanup(self):
-        """
-        Release any remaining locks during cleanup.
+        """Release any remaining locks during cleanup.
 
         This method releases any locks that may still be held during cleanup.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         if self.pause_signal_lock.locked():
             self.pause_signal_lock.release()
@@ -454,53 +350,10 @@ class WaitToContinue:
 
 
 class LoopByCount:
-    """
-    LoopByCount class for controlling signal and data acquisition loops.
+    """LoopByCount class for controlling signal and data acquisition loops.
 
     This class provides functionality to control signal and data acquisition loops by
     specifying the number of steps or frames to execute.
-
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for loop control.
-
-    steps : int or str, optional
-        The number of steps or a configuration reference to determine the loop count.
-        Default is 1.
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with the loop control.
-
-    step_by_frame : bool
-        A flag indicating whether the loop control is based on frames (True) or steps
-        (False).
-
-    steps : int
-        The total number of steps or frames to execute.
-
-    signals : int
-        The remaining number of signal acquisition steps.
-
-    data_frames : int
-        The remaining number of data acquisition frames.
-
-    config_table : dict
-        A dictionary defining the configuration for the loop control process. It
-        ontains the
-        following keys:
-        - "signal": Configuration for signal acquisition loop control.
-        - "data": Configuration for data acquisition loop control.
-
-    Methods:
-    --------
-    signal_func():
-        Control the signal acquisition loop and update the remaining steps.
-
-    data_func(frame_ids):
-        Control the data acquisition loop and update the remaining frames or steps.
 
     Notes:
     ------
@@ -521,8 +374,23 @@ class LoopByCount:
     """
 
     def __init__(self, model, steps=1):
+        """Initialize the LoopByCount class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for loop control.
+        steps : int or str, optional
+            The number of steps or a configuration reference to determine the loop
+            count. Default is 1.
+        """
+        #: MicroscopeModel: The microscope model associated with the loop control.
         self.model = model
+
+        #: bool: A boolean value indicating whether to step by frame or by step.
         self.step_by_frame = True
+
+        #: int: The remaining number of steps or frames.
         self.steps = steps
         if type(steps) is str:
             self.step_by_frame = False
@@ -533,25 +401,24 @@ class LoopByCount:
             except:  # noqa
                 self.steps = 1
 
+        #: int: The remaining number of steps.
         self.signals = self.steps
+
+        #: int: The remaining number of frames.
         self.data_frames = self.steps
 
+        #: dict: A dictionary defining the configuration for the loop control process.
         self.config_table = {
             "signal": {"main": self.signal_func},
             "data": {"main": self.data_func},
         }
 
     def signal_func(self):
-        """
-        Control the signal acquisition loop and update the remaining steps.
+        """Control the signal acquisition loop and update the remaining steps.
 
         This method controls the signal acquisition loop by decrementing the remaining
-         steps. It determines whether to continue the loop or exit based on the
-         remaining count.
-
-        Parameters:
-        ----------
-        None
+        steps. It determines whether to continue the loop or exit based on the
+        remaining count.
 
         Returns:
         -------
@@ -565,8 +432,7 @@ class LoopByCount:
         return True
 
     def data_func(self, frame_ids):
-        """
-        Control the data acquisition loop and update the remaining frames or steps.
+        """Control the data acquisition loop and update the remaining frames or steps.
 
         This method controls the data acquisition loop by decrementing the remaining
         frames or steps. It determines whether to continue the loop or exit based on
@@ -593,32 +459,11 @@ class LoopByCount:
 
 
 class PrepareNextChannel:
-    """
-    PrepareNextChannel class for preparing microscopes for the next imaging channel.
+    """PrepareNextChannel class for preparing microscopes for the next imaging channel.
 
     This class provides functionality to prepare multiple microscopes, including virtual
     microscopes and the primary microscope, for the next imaging channel during
     microscopy experiments.
-
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for channel preparation.
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with the channel preparation.
-
-    config_table : dict
-        A dictionary defining the configuration for the channel preparation process.
-        It contains the following key:
-        - "signal": Configuration for the signal acquisition stage.
-
-    Methods:
-    --------
-    signal_func():
-        Prepare virtual and active microscopes for the next imaging channel.
 
     Notes:
     ------
@@ -637,19 +482,24 @@ class PrepareNextChannel:
     """
 
     def __init__(self, model):
-        self.model = model
-        self.config_table = {"signal": {"main": self.signal_func}}
-
-    def signal_func(self):
-        """
-        Prepare virtual and active microscopes for the next imaging channel.
-
-        This method prepares virtual microscopes, if any, followed by the active
-        microscope for the next imaging channel.
+        """Initialize the PrepareNextChannel class.
 
         Parameters:
         ----------
-        None
+        model : MicroscopeModel
+            The microscope model object used for channel preparation.
+        """
+        #: MicroscopeModel: Microscope model associated with the channel preparation.
+        self.model = model
+
+        #: dict: A dictionary defining the configuration for the channel preparation
+        self.config_table = {"signal": {"main": self.signal_func}}
+
+    def signal_func(self):
+        """Prepare virtual and active microscopes for the next imaging channel.
+
+        This method prepares virtual microscopes, if any, followed by the active
+        microscope for the next imaging channel.
 
         Returns:
         -------
@@ -666,53 +516,11 @@ class PrepareNextChannel:
 
 
 class MoveToNextPositionInMultiPositionTable:
-    """
-    MoveToNextPositionInMultiPositionTable class for advancing in a multi-position
+    """MoveToNextPositionInMultiPositionTable class for advancing in a multi-position
     table.
 
     This class provides functionality to move to the next position in a multi-position
     table and control the data thread accordingly.
-
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for position control.
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with the position control.
-
-    config_table : dict
-        A dictionary defining the configuration for the position control process. It
-        contains the following keys:
-        - "signal": Configuration for the signal acquisition stage, including main
-        execution and cleanup.
-        - "node": Configuration related to node type and device.
-
-    pre_z : float or None
-        The previous z-position.
-
-    current_idx : int
-        The current index in the multi-position table.
-
-    multiposition_table : list
-        The multi-position table containing position information.
-
-    position_count : int
-        The count of positions in the multi-position table.
-
-    stage_distance_threshold : int
-        The threshold for stage distance to decide whether to pause the data thread.
-
-    Methods:
-    --------
-    signal_func():
-        Move to the next position in the multi-position table and control the data
-        thread.
-
-    cleanup():
-        Cleanup method to resume the data thread.
 
     Notes:
     ------
@@ -731,7 +539,17 @@ class MoveToNextPositionInMultiPositionTable:
     """
 
     def __init__(self, model):
+        """Initialize the MoveToNextPositionInMultiPositionTable class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for position control.
+        """
+        #: MicroscopeModel: The microscope model associated with position control.
         self.model = model
+
+        #: dict: A dictionary defining the configuration for the position control
         self.config_table = {
             "signal": {
                 "main": self.signal_func,
@@ -739,28 +557,33 @@ class MoveToNextPositionInMultiPositionTable:
             },
             "node": {"device_related": True},
         }
+
+        #: int: The current index of the position being acquired in the multi-position
         self.pre_z = None
+
+        #: int: The current index of the position being acquired in the multi-position
         self.current_idx = 0
+
+        #: dict: A dictionary defining the configuration for the position control
         self.multiposition_table = self.model.configuration["experiment"][
             "MultiPositions"
         ]
+
+        #: int: The total number of positions in the multi-position table.
         self.position_count = self.model.configuration["experiment"]["MicroscopeState"][
             "multiposition_count"
         ]
+
+        #: int: The stage distance threshold for pausing the data thread.
         self.stage_distance_threshold = 1000
 
     def signal_func(self):
-        """
-        Move to the next position in the multi-position table and control the data
+        """Move to the next position in the multi-position table and control the data
         thread.
 
         This method advances to the next position in the multi-position table,
         controls the data thread based on stage distance thresholds, and updates
         position-related information.
-
-        Parameters:
-        ----------
-        None
 
         Returns:
         -------
@@ -810,58 +633,19 @@ class MoveToNextPositionInMultiPositionTable:
             return True
 
     def cleanup(self):
-        """
-        Cleanup method to resume the data thread.
+        """Cleanup method to resume the data thread.
 
         This method is responsible for resuming the data thread after position control.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         self.model.resume_data_thread()
 
 
 class StackPause:
-    """
-    StackPause class for pausing stack acquisition.
+    """StackPause class for pausing stack acquisition.
 
     This class provides functionality to pause stack acquisition for a specified
     number of timepoints or based on a defined pause time. It manages the data thread
     accordingly.
-
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for stack acquisition control.
-
-    pause_num : int or str, optional
-        The number of timepoints to pause stack acquisition or a configuration reference
-         to determine the pause count dynamically. Default is
-         "experiment.MicroscopeState.timepoints".
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with stack acquisition control.
-
-    pause_num : int
-        The remaining number of timepoints to pause stack acquisition.
-
-    config_table : dict
-        A dictionary defining the configuration for the stack pause control process.
-        It contains the following key:
-        - "signal": Configuration for the signal acquisition stage.
-
-    Methods:
-    --------
-    signal_func():
-        Pause stack acquisition based on timepoints or pause time and manage the data
-        thread.
 
     Notes:
     ------
@@ -879,6 +663,18 @@ class StackPause:
     """
 
     def __init__(self, model, pause_num="experiment.MicroscopeState.timepoints"):
+        """Initialize the StackPause class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for stack acquisition control.
+
+        pause_num : int or str, optional
+            The number of timepoints to pause stack acquisition or a configuration
+            reference to determine the pause count dynamically. Default is
+            "experiment.MicroscopeState.timepoints".
+        """
         self.model = model
         self.pause_num = pause_num
         if type(pause_num) is str:
@@ -891,20 +687,11 @@ class StackPause:
         self.config_table = {"signal": {"main": self.signal_func}}
 
     def signal_func(self):
-        """
-        Pause stack acquisition based on timepoints or pause time and manage the data
-        thread.
+        """Pause stack acquisition based on timepoints or pause time and manage the
+        data thread.
 
         This method pauses stack acquisition based on the remaining timepoints or
         defined pause time. It manages the data thread accordingly during the pause.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         self.pause_num -= 1
         if self.pause_num <= 0:
@@ -945,111 +732,6 @@ class ZStackAcquisition:
     z and focus positions, acquiring image data, and handling multi-channel
     acquisitions.
 
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for z-stack acquisition control.
-
-    get_origin : bool, optional
-        Flag to determine whether to get the z and focus origin positions.
-        Default is False.
-
-    saving_flag : bool, optional
-        Flag to enable image saving during z-stack acquisition. Default is False.
-
-    saving_dir : str, optional
-        The sub-directory for saving z-stack images. Default is "z-stack".
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with z-stack acquisition control.
-
-    get_origin : bool
-        Flag indicating whether to get the z and focus origin positions.
-
-    number_z_steps : int
-        The total number of z-steps in the z-stack.
-
-    start_z_position : float
-        The starting z position for the z-stack.
-
-    start_focus : float
-        The starting focus position for the z-stack.
-
-    z_step_size : float
-        The step size for z movement during the z-stack.
-
-    focus_step_size : float
-        The step size for focus adjustment during the z-stack.
-
-    positions : dict or list
-        The positions to be acquired in the z-stack, including x, y, z, theta, and
-        focus.
-
-    current_position_idx : int
-        The current index of the position being acquired in the z-stack.
-
-    current_z_position : float
-        The current z position during z-stack acquisition.
-
-    current_focus_position : float
-        The current focus position during z-stack acquisition.
-
-    need_to_move_new_position : bool
-        Flag indicating whether a new position needs to be moved to.
-
-    need_to_move_z_position : bool
-        Flag indicating whether the z position needs to be moved.
-
-    z_position_moved_time : int
-        The number of times the z position has been moved in the z-stack.
-
-    stack_cycling_mode : str
-        The mode for cycling through stacks (e.g., "per_stack").
-
-    channels : int
-        The number of channels in multi-channel acquisition.
-
-    image_writer : ImageWriter or None
-        An optional ImageWriter instance for saving z-stack images.
-
-    config_table : dict
-        A dictionary defining the configuration for the z-stack acquisition process. It
-        contains the following keys:
-        - "signal": Configuration for the signal acquisition stage, including
-        initialization, main execution, and signal end.
-        - "data": Configuration for data acquisition, including initialization, main
-        data handling, end of data acquisition, and data cleanup.
-        - "node": Configuration related to node type, indicating "multi-step" and
-         "device_related".
-
-    Methods:
-    --------
-    pre_signal_func():
-        Initialize z-stack acquisition parameters before the signal stage.
-
-    signal_func():
-        Control z-stack acquisition, move positions, and manage data threads.
-
-    signal_end():
-        Handle the end of the signal stage and position cycling.
-
-    update_channel():
-        Update the active channel during multi-channel acquisition.
-
-    pre_data_func():
-        Initialize data-related parameters before data acquisition.
-
-    in_data_func(frame_ids):
-        Handle incoming data frames during data acquisition.
-
-    end_data_func():
-        Check if all expected data frames have been received.
-
-    cleanup_data_func():
-        Perform cleanup actions after data acquisition, if image saving is enabled.
-
     Notes:
     ------
     - This class is used to control z-stack acquisition during microscopy experiments,
@@ -1065,31 +747,78 @@ class ZStackAcquisition:
     def __init__(
         self, model, get_origin=False, saving_flag=False, saving_dir="z-stack"
     ):
+        """Initialize the ZStackAcquisition class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for z-stack acquisition control.
+        get_origin : bool, optional
+            Flag to determine whether to get the z and focus origin positions.
+            Default is False.
+        saving_flag : bool, optional
+            Flag to enable image saving during z-stack acquisition. Default is False.
+        saving_dir : str, optional
+            The sub-directory for saving z-stack images. Default is "z-stack".
+
+        """
+        #: MicroscopeModel: The microscope model associated with z-stack acquisition.
         self.model = model
+
+        #: bool: Flag to determine whether to get the z and focus origin positions.
         self.get_origin = get_origin
 
+        #: int: The number of z steps in the z-stack.
         self.number_z_steps = 0
+
+        #: float: The start z position for the z-stack.
         self.start_z_position = 0
+
+        #: float: The start focus position for the z-stack.
         self.start_focus = 0
+
+        #: float: The z step size for the z-stack.
         self.z_step_size = 0
+
+        #: float: The z stack distance for the z-stack.
         self.focus_step_size = 0
 
+        #: dict: A dictionary defining the multi-position table for z-stack acquisition.
         self.positions = {}
+
+        #: int: The current index of the position being acquired in the multi-position
         self.current_position_idx = 0
+
+        #: int: The z position of the channel being acquired in the z-stack
         self.current_z_position = 0
+
+        #: int: The f position of the channel being acquired in the z-stack
         self.current_focus_position = 0
+
+        #: bool: Flag to determine whether to move to a new position
         self.need_to_move_new_position = True
+
+        #: bool: Flag to determine whether to move the z position
         self.need_to_move_z_position = True
+
+        #: int: The number of times the z position has been moved
         self.z_position_moved_time = 0
+
+        #: dict: A dictionary defining the defocus values between channels
         self.defocus = None
 
+        #: str: The stack cycling mode for z-stack acquisition.
         self.stack_cycling_mode = "per_stack"
+
+        #: int: The number of channels in the z-stack.
         self.channels = 1
 
+        #: ImageWriter: An image writer object for saving z-stack images.
         self.image_writer = None
         if saving_flag:
             self.image_writer = ImageWriter(model, sub_dir=saving_dir)
 
+        #: dict: A dictionary defining the configuration for the z-stack acquisition
         self.config_table = {
             "signal": {
                 "init": self.pre_signal_func,
@@ -1106,19 +835,10 @@ class ZStackAcquisition:
         }
 
     def pre_signal_func(self):
-        """
-        Initialize z-stack acquisition parameters before the signal stage.
+        """Initialize z-stack acquisition parameters before the signal stage.
 
         This method initializes z-stack acquisition parameters, including position,
         focus, and data thread management, before the signal stage.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
 
@@ -1126,12 +846,14 @@ class ZStackAcquisition:
 
         # get available channels
         self.channels = microscope_state["selected_channels"]
+        #: int: The current channel being acquired in the z-stack
         self.current_channel_in_list = 0
 
         self.number_z_steps = int(microscope_state["number_z_steps"])
         self.start_z_position = float(microscope_state["start_position"])
         # end_z_position = float(microscope_state["end_position"])
         self.z_step_size = float(microscope_state["step_size"])
+        #: float: The z stack distance for the z-stack.
         self.z_stack_distance = abs(
             self.start_z_position - float(microscope_state["end_position"])
         )
@@ -1139,12 +861,15 @@ class ZStackAcquisition:
         self.start_focus = float(microscope_state["start_focus"])
         end_focus = float(microscope_state["end_focus"])
         self.focus_step_size = (end_focus - self.start_focus) / self.number_z_steps
+        #: float: The focus stack distance for the z-stack.
         self.f_stack_distance = abs(end_focus - self.start_focus)
 
         # restore z, f
         pos_dict = self.model.get_stage_position()
         self.model.logger.debug(f"**** ZStack get stage position: {pos_dict}")
+        #: float: The z position of the channel being acquired in the z-stack
         self.restore_z = pos_dict["z_pos"]
+        #: float: The f position of the channel being acquired in the z-stack
         self.restore_f = pos_dict["f_pos"]
 
         if bool(microscope_state["is_multiposition"]):
@@ -1174,7 +899,6 @@ class ZStackAcquisition:
                 }
             ]
 
-
         # Setup next channel down here, to ensure defocus isn't merged into
         # restore f_pos, positions
         self.model.active_microscope.central_focus = None
@@ -1189,6 +913,7 @@ class ZStackAcquisition:
         self.z_position_moved_time = 0
         self.need_to_move_new_position = True
         self.need_to_move_z_position = True
+        #: bool: Flag to determine whether to pause the data thread.
         self.should_pause_data_thread = False
         # TODO: distance > 1000 should not be hardcoded and somehow related to
         #  different kinds of stage devices.
@@ -1201,16 +926,11 @@ class ZStackAcquisition:
         ]
 
     def signal_func(self):
-        """
-        Control z-stack acquisition, move positions, and manage data threads.
+        """Control z-stack acquisition, move positions, and manage data threads.
 
         This method controls the z-stack acquisition process, including moving positions
         and focus, managing data threads, and handling data acquisition during the
         signal stage.
-
-        Parameters:
-        ----------
-        None
 
         Returns:
         -------
@@ -1299,6 +1019,7 @@ class ZStackAcquisition:
                 f"*** Zstack move stage: (z: {self.current_z_position}), "
                 f"(f: {self.current_focus_position})"
             )
+
             if self.should_pause_data_thread and not data_thread_is_paused:
                 self.model.pause_data_thread()
 
@@ -1316,15 +1037,10 @@ class ZStackAcquisition:
         return True
 
     def signal_end(self):
-        """
-        Handle the end of the signal stage and position cycling.
+        """Handle the end of the signal stage and position cycling.
 
         This method handles the end of the signal stage, including position cycling and
         channel updates for multi-channel acquisitions.
-
-        Parameters:
-        ----------
-        None
 
         Returns:
         -------
@@ -1395,19 +1111,10 @@ class ZStackAcquisition:
         return False
 
     def update_channel(self):
-        """
-        Update the active channel during multi-channel acquisition.
+        """Update the active channel during multi-channel acquisition.
 
         This method updates the active channel for multi-channel acquisitions, allowing
         cycling through channels.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         self.current_channel_in_list = (
             self.current_channel_in_list + 1
@@ -1417,27 +1124,17 @@ class ZStackAcquisition:
             self.current_focus_position += self.defocus[self.current_channel_in_list]
 
     def pre_data_func(self):
-        """
-        Initialize data-related parameters before data acquisition.
+        """Initialize data-related parameters before data acquisition.
 
         This method initializes data-related parameters before data acquisition,
         including the count of received and expected frames.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
 
         self.received_frames = 0
         self.total_frames = self.channels * self.number_z_steps * len(self.positions)
 
     def in_data_func(self, frame_ids):
-        """
-        Handle incoming data frames during data acquisition.
+        """Handle incoming data frames during data acquisition.
 
         This method handles incoming data frames during data acquisition, updating the
         count of received frames and saving images if enabled.
@@ -1447,24 +1144,16 @@ class ZStackAcquisition:
         frame_ids : list
             A list of frame IDs received during data acquisition.
 
-        Returns:
-        -------
-        None
         """
         self.received_frames += len(frame_ids)
         if self.image_writer is not None:
             self.image_writer.save_image(frame_ids)
 
     def end_data_func(self):
-        """
-        Check if all expected data frames have been received.
+        """Check if all expected data frames have been received.
 
         This method checks whether all expected data frames have been received during
         data acquisition.
-
-        Parameters:
-        ----------
-        None
 
         Returns:
         -------
@@ -1476,19 +1165,10 @@ class ZStackAcquisition:
         return self.received_frames >= self.total_frames
 
     def cleanup_data_func(self):
-        """
-        Perform cleanup actions after data acquisition, if image saving is enabled.
+        """Perform cleanup actions after data acquisition, if image saving is enabled.
 
         This method performs cleanup actions after data acquisition, such as cleaning up
          image writing, if image saving is enabled.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         if self.image_writer:
             self.image_writer.cleanup()
@@ -1499,71 +1179,6 @@ class ConProAcquisition:
 
     This class provides functionality to control continuous acquisition, including
     managing scan range, offsets, channels, and signal acquisition.
-
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for continuous acquisition control.
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with continuous acquisition control.
-
-    scanrange : float
-        The scan range for continuous acquisition.
-
-    n_plane : int
-        The number of planes in the continuous acquisition.
-
-    offset_start : float
-        The starting offset for continuous acquisition.
-
-    offset_end : float
-        The ending offset for continuous acquisition.
-
-    offset_step_size : float
-        The step size for offset adjustments during continuous acquisition.
-
-    timepoints : int
-        The number of timepoints for continuous acquisition.
-
-    need_to_move_new_plane : bool
-        Flag indicating whether a new plane needs to be moved to.
-
-    offset_update_time : int
-        The number of times the offset has been updated.
-
-    conpro_cycling_mode : str
-        The mode for cycling through continuous acquisition (e.g., "per_stack").
-
-    channels : list
-        A list of channels for continuous acquisition.
-
-    config_table : dict
-        A dictionary defining the configuration for the continuous acquisition process.
-        It contains the following keys:
-        - "signal": Configuration for the signal acquisition stage, including
-        initialization, main execution, and signal end.
-        - "node": Configuration related to node type, indicating "multi-step" and
-        "device_related".
-
-    Methods:
-    --------
-    pre_signal_func():
-        Initialize continuous acquisition parameters before the signal stage.
-
-    signal_func():
-        Control continuous acquisition and update offsets.
-
-    signal_end():
-        Handle the end of the signal stage and offset cycling.
-
-    generate_meta_data(*args):
-        Generate metadata for acquired frames.
-
-    update_channel():
-        Update the active channel during continuous acquisition.
 
     Notes:
     ------
@@ -1580,22 +1195,48 @@ class ConProAcquisition:
     """
 
     def __init__(self, model):
+        """Initialize the ConProAcquisition class.
 
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for continuous acquisition control.
+        """
+
+        #: MicroscopeModel: The microscope model associated with continuous acquisition.
         self.model = model
 
+        #: float: The scan range for confocal projection acquisition.
         self.scanrange = 0
+
+        #: float: The number of planes for confocal projection acquisition.
         self.n_plane = 0
+
+        #: float: The start offset for confocal projection acquisition.
         self.offset_start = 0
+
+        #: float: The end offset for confocal projection acquisition.
         self.offset_end = 0
+
+        #: float: The offset step size for confocal projection acquisition.
         self.offset_step_size = 0
+
+        #: float: The number of timepoints for confocal projection acquisition.
         self.timepoints = 0
 
+        #: bool: Flag to determine whether to move to a new plane
         self.need_to_move_new_plane = True
+
+        #: float: The time for updating the offset.
         self.offset_update_time = 0
 
+        #: str: The stack cycling mode for confocal projection acquisition.
         self.conpro_cycling_mode = "per_stack"
+
+        #: int: The number of channels in the confocal projection.
         self.channels = [1]
 
+        #: dict: A dictionary defining the configuration for the confocal projection
         self.config_table = {
             "signal": {
                 "init": self.pre_signal_func,
@@ -1608,19 +1249,10 @@ class ConProAcquisition:
         self.model.move_stage({"z_abs": 0})
 
     def pre_signal_func(self):
-        """
-        Initialize continuous acquisition parameters before the signal stage.
+        """Initialize continuous acquisition parameters before the signal stage.
 
         This method initializes continuous acquisition parameters, including scan range,
         offsets, channels, and offset updates, before the signal stage.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
 
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
@@ -1628,11 +1260,13 @@ class ConProAcquisition:
         self.conpro_cycling_mode = microscope_state["conpro_cycling_mode"]
         # get available channels
         self.channels = microscope_state["selected_channels"]
+        #: int: The current channel being acquired in the z-stack
         self.current_channel_in_list = 0
 
         self.n_plane = int(microscope_state["n_plane"])
-
+        #: float: The starting offset for confocal projection acquisition.
         self.start_offset = float(copy.copy(microscope_state["offset_start"]))
+        #: float: The ending offset for confocal projection acquisition.
         self.end_offset = float(copy.copy(microscope_state["offset_end"]))
         if self.n_plane == 1:
             self.offset_step_size = 0
@@ -1642,23 +1276,19 @@ class ConProAcquisition:
             )
 
         self.timepoints = 1  # int(microscope_state['timepoints'])
-
+        #: bool: Flat to determine whether the offset needs to be updated.
         self.need_update_offset = True
+        #: float: The current offset for confocal projection acquisition.
         self.current_offset = self.start_offset
         self.offset_update_time = 0
 
         # self.model.move_stage({'z_abs': 0})
 
     def signal_func(self):
-        """
-        Control continuous acquisition and update offsets.
+        """Control continuous acquisition and update offsets.
 
         This method controls the continuous acquisition process, including updating
         offsets and managing signal acquisition during the signal stage.
-
-        Parameters:
-        ----------
-        None
 
         Returns:
         -------
@@ -1667,8 +1297,6 @@ class ConProAcquisition:
             process.
         """
 
-        # print(f"Signal with time {self.offset_update_time} and offset "
-        #       f"{self.current_offset}")
         if self.model.stop_acquisition:
             return False
 
@@ -1688,15 +1316,10 @@ class ConProAcquisition:
         return True
 
     def signal_end(self):
-        """
-        Handle the end of the signal stage and offset cycling.
+        """Handle the end of the signal stage and offset cycling.
 
         This method handles the end of the signal stage, including offset cycling and
         timepoint updates for continuous acquisition.
-
-        Parameters:
-        ----------
-        None
 
         Returns:
         -------
@@ -1734,8 +1357,7 @@ class ConProAcquisition:
         return False
 
     def generate_meta_data(self, *args):
-        """
-        Generate metadata for acquired frames.
+        """Generate metadata for acquired frames.
 
         This method generates metadata for frames acquired during continuous
         acquisition.
@@ -1750,10 +1372,14 @@ class ConProAcquisition:
         bool
             A boolean value indicating whether metadata generation was successful.
         """
-        # print('This frame: z stack', self.model.frame_id)
         return True
 
     def update_channel(self):
+        """Update the active channel during multi-channel acquisition.
+
+        This method updates the active channel for multi-channel acquisitions, allowing
+        cycling through channels.
+        """
         self.current_channel_in_list = (
             self.current_channel_in_list + 1
         ) % self.channels
@@ -1761,66 +1387,12 @@ class ConProAcquisition:
 
 
 class FindTissueSimple2D:
-    """
-    FindTissueSimple2D class for detecting tissue and gridding out the imaging space in
-    2D.
+    """FindTissueSimple2D class for detecting tissue and gridding out the imaging
+    space in  2D.
 
     This class is responsible for detecting tissue, thresholding, and gridding out the
     space for 2D imaging. It processes acquired frames to determine regions of
     interest (tissue), calculates offsets, and generates grid positions for imaging.
-
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for tissue detection and gridding.
-
-    overlap : float, optional
-        The overlap percentage between grid tiles. Default is 0.1 (10%).
-
-    target_resolution : str, optional
-        The target resolution for imaging (e.g., "Nanoscale"). Default is
-        "Nanoscale".
-
-    target_zoom : str, optional
-        The target zoom level for imaging. Default is "N/A".
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with tissue detection and gridding.
-
-    config_table : dict
-        A dictionary defining the configuration for the tissue detection and
-        gridding process. It contains the following keys:
-        - "signal": An empty dictionary for signal-related configurations.
-        - "data": Configuration for the main data processing function.
-
-    overlap : float
-        The overlap percentage between grid tiles.
-
-    target_resolution : str
-        The target resolution for imaging.
-
-    target_zoom : str
-        The target zoom level for imaging.
-
-    Methods:
-    --------
-    data_func(frame_ids):
-        Process acquired frames for tissue detection, thresholding, and grid
-        calculation.
-
-    Notes:
-    ------
-    - This class is used for preprocessing images acquired during microscopy
-    experiments.It detects tissue regions, applies thresholding, and calculates grid
-    positions for imaging.
-
-    - The `config_table` attribute defines the configuration for data processing,
-    including the main data processing function.
-
-    - The `overlap` parameter controls the overlap between grid tiles, affecting the
-    grid layout for imaging.
     """
 
     def __init__(
@@ -1830,20 +1402,37 @@ class FindTissueSimple2D:
         target_resolution="Nanoscale",
         target_zoom="N/A",
     ):
+        """Initialize the FindTissueSimple2D class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for tissue detection and gridding.
+        overlap : float, optional
+            The overlap percentage between grid tiles. Default is 0.1 (10%).
+        target_resolution : str, optional
+            The target resolution for imaging (e.g., "Nanoscale"). Default is
+            "Nanoscale".
+        target_zoom : str, optional
+            The target zoom level for imaging. Default is "N/A".
         """
-        Detect tissue and grid out the space to image.
-        """
+        #: MicroscopeModel: The microscope model associated with tissue detection and
         self.model = model
 
+        #: dict: A dictionary defining the configuration for tissue detection and
         self.config_table = {"signal": {}, "data": {"main": self.data_func}}
 
+        #: float: The overlap percentage between grid tiles.
         self.overlap = overlap
+
+        #: str: The target resolution for imaging (e.g., "Nanoscale").
         self.target_resolution = target_resolution
+
+        #: str: The target zoom level for imaging.
         self.target_zoom = target_zoom
 
     def data_func(self, frame_ids):
-        """
-        Process acquired frames for tissue detection, thresholding, and grid
+        """Process acquired frames for tissue detection, thresholding, and grid
         calculation.
 
         This method processes acquired frames to detect tissue regions, apply
@@ -1859,10 +1448,6 @@ class FindTissueSimple2D:
         ----------
         frame_ids : list
             A list of frame IDs corresponding to acquired frames.
-
-        Returns:
-        -------
-        None
         """
 
         from skimage import filters

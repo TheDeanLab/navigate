@@ -103,6 +103,7 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
 
     return val
 
+
 def load_dichroic_connection(configuration, is_synthetic=False):
     """Initializes the dichroic controller api class.
 
@@ -130,7 +131,10 @@ def load_dichroic_connection(configuration, is_synthetic=False):
         dichroic_type = configuration["configuration"]["hardware"]["dichroic"]["type"]
 
     # Load the device connection.
-    if dichroic_type.lower() == "syntheticdichroic" or dichroic_type.lower() == "synthetic":
+    if (
+        dichroic_type.lower() == "syntheticdichroic"
+        or dichroic_type.lower() == "synthetic"
+    ):
         return DummyDeviceConnection()
 
     elif dichroic_type == "ASI" and platform.system() == "Windows":
@@ -139,6 +143,7 @@ def load_dichroic_connection(configuration, is_synthetic=False):
         from aslm.model.devices.dichroic.dichroic_asi import (
             build_ASI_dichroic_connection,
         )
+
         device_info = configuration["configuration"]["hardware"]["dichroic"]
 
         tiger_controller = auto_redial(
@@ -151,7 +156,9 @@ def load_dichroic_connection(configuration, is_synthetic=False):
         device_not_found("Dichroic", dichroic_type)
 
 
-def start_dichroic(microscope_name, device_connection, configuration, is_synthetic=False):
+def start_dichroic(
+    microscope_name, device_connection, configuration, is_synthetic=False
+):
     """Initializes the dichroic class.
 
     Parameters
@@ -187,10 +194,15 @@ def start_dichroic(microscope_name, device_connection, configuration, is_synthet
 
     if dichroic_type == "ASI":
         from aslm.model.devices.dichroic.dichroic_asi import DichroicASI
+
         return DichroicASI(microscope_name, device_connection, configuration)
 
-    elif dichroic_type.lower() == "syntheticdichroic" or dichroic_type.lower() == "synthetic":
+    elif (
+        dichroic_type.lower() == "syntheticdichroic"
+        or dichroic_type.lower() == "synthetic"
+    ):
         from aslm.model.devices.dichroic.dichroic_synthetic import SyntheticDichroic
+
         return SyntheticDichroic(microscope_name, device_connection, configuration)
 
     else:
@@ -246,7 +258,6 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
             from pyvcam.camera import Camera
 
             pvc.init_pvcam()
-            camera_names = Camera.get_available_camera_names()
             camera_toopen = Camera.select_camera(camera_connection)
             camera_toopen.open()
             return camera_toopen
@@ -1078,17 +1089,21 @@ def load_devices(configuration, is_synthetic=False) -> dict:
     if "dichroic" in configuration["configuration"]["hardware"].keys():
         devices["dichroic"] = {}
         device = configuration["configuration"]["hardware"]["dichroic"]
-        filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"].get("type", None)
+        filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"].get(
+            "type", None
+        )
 
         if (filter_wheel == "ASI") and (device["type"] == "ASI"):
             # Devices share a common controller.
-            devices["dichroic"][device["type"]] = devices["filter_wheel"][device["type"]]
+            devices["dichroic"][device["type"]] = devices["filter_wheel"][
+                device["type"]
+            ]
 
         else:
             # No common controller exists. Must create new device connection.
             devices["dichroic"][device["type"]] = load_dichroic_connection(
                 configuration, is_synthetic
-        )
+            )
 
     # load zoom
     if "zoom" in configuration["configuration"]["hardware"].keys():

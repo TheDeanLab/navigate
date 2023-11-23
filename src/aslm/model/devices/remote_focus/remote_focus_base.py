@@ -127,7 +127,6 @@ class RemoteFocusBase:
             Waveform for the remote focus device.
         """
 
-        # calculate waveform
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         waveform_constants = self.configuration["waveform_constants"]

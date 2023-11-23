@@ -41,7 +41,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e '.[docs]'
+          pip install -e .[docs]
 
       - name: Build docs
         run: |

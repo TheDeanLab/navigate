@@ -80,8 +80,8 @@ class AcquireBarController(GUIController):
             "Alignment": "alignment",
             "Projection": "projection",
             "Confocal-Projection": "confocal-projection",
-            "ConstantVelocityAcquisition": "ConstantVelocityAcquisition",
             "Customized": "customized",
+            "Constant Velocity Acquistion": "ConstantVelocityAcquisition",
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
@@ -167,7 +167,11 @@ class AcquireBarController(GUIController):
                     self.view.CurAcq.start()
                     self.view.OvrAcq.start()
 
-                elif mode == "z-stack" or mode == "confocal-projection":
+                elif (
+                    mode == "z-stack"
+                    or mode == "confocal-projection"
+                    or mode == "ConstantVelocityAcquisition"
+                ):
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )

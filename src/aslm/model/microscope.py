@@ -392,6 +392,7 @@ class Microscope:
         galvo_waveform = [
             self.galvo[k].adjust(exposure_times, sweep_times) for k in self.galvo
         ]
+
         # TODO: calculate waveform for galvo stage
         for stage, axes in self.stages_list:
             if type(stage) == GalvoNIStage:
@@ -544,8 +545,8 @@ class Microscope:
         # self.lasers[str(self.laser_wavelength[self.current_laser_index])].turn_on()
 
         # stop daq before writing new waveform
+        # When called the first time, throws an error.
         self.daq.stop_acquisition()
-        # prepare daq: write waveform
         self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
 
         # Add Defocus term
@@ -630,6 +631,8 @@ class Microscope:
 
         for stage, axes in self.stages_list:
             stage.stop()
+
+        self.central_focus = self.get_stage_position().get("f_pos", self.central_focus)
 
     def get_stage_position(self):
         """Get stage position.

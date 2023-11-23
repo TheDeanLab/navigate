@@ -60,6 +60,7 @@ Configuration File
 """""""""""""""""""
 
 .. code-block:: yaml
+
     hardware:
       daq:
         type: NI
@@ -102,6 +103,7 @@ Configuration File
 """""""""""""""""""
 
 .. code-block:: yaml
+
     hardware:
       camera:
         -
@@ -156,7 +158,47 @@ TBD...
 
 Hamamatsu Lightning
 ^^^^^^^^^^^^^^^^^^^^
-TBD...
+
+.. code-block:: yaml
+
+    hardware:
+      camera:
+        -
+          type:  HamamatsuOrcaLightning
+          serial_number: 000035
+
+    microscopes:
+        microscope_name:
+            camera:
+              hardware:
+                name: camera
+                type: HamamatsuOrcaLightning #SyntheticCamera
+                serial_number: 000035
+              x_pixels: 4608.0
+              y_pixels: 2592.0
+              pixel_size_in_microns: 5.5
+              subsampling: [1, 2, 4]
+              sensor_mode: Normal  # 12 for progressive, 1 for normal.
+              readout_direction: Bottom-to-Top  # Top-to-Bottom', 'Bottom-to-Top'
+              lightsheet_rolling_shutter_width: 608
+              defect_correct_mode: 2.0
+              binning: 1x1
+              readout_speed: 0x7FFFFFFF
+              trigger_active: 1.0
+              trigger_mode: 1.0 # external light-sheet mode
+              trigger_polarity: 2.0  # positive pulse
+              trigger_source: 2.0  # 2 = external, 3 = software.
+              exposure_time: 20 # Use milliseconds throughout.
+              delay_percent: 8 #5.0
+              pulse_percent: 1
+              line_interval: 0.000075
+              display_acquisition_subsampling: 4
+              average_frame_rate: 4.969
+              frames_to_average: 1
+              exposure_time_range:
+                min: 1
+                max: 1000
+                step: 1
 
 Photometrics Iris 15
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -208,6 +250,7 @@ Configuration File
 """""""""""""""""""
 
 .. code-block:: yaml
+
     hardware:
       camera:
         -
@@ -247,6 +290,7 @@ Configuration File
 """""""""""""""""""
 
 .. code-block:: yaml
+
     microscopes:
       microscope_name:
         remote_focus_device:
@@ -300,6 +344,7 @@ perZ-based acquisitions.
     one another.
 
 .. code-block:: yaml
+
     hardware:
       stage:
         -
@@ -331,6 +376,7 @@ perZ-based acquisitions.
 Sutter MP-285
 ^^^^^^^^^^^^^^^^^
 .. code-block:: yaml
+
     hardware:
         stage:
         -
@@ -360,7 +406,64 @@ Sutter MP-285
 
 Physik Instrumente
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-In progress...
+
+.. code-block:: yaml
+
+    hardware:
+      stage:
+        -
+          type: PI
+          controllername: C-884
+          stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
+          refmode: FRF FRF FRF FRF FRF FRF
+          serial_number: 119060508
+        -
+    microscopes:
+        microscope_name:
+            stage:
+              hardware:
+                name: stage
+                type: PI
+                serial_number: 119060508
+                axes: [x, y, z, theta, f]
+              y_unload_position: 10000
+              y_load_position: 90000
+
+              startfocus: 75000
+              x_max: 100000
+              x_min: -100000
+              y_max: 100000
+              y_min: -100000
+              z_max: 100000
+              z_min: -100000
+              f_max: 100000
+              f_min: 0
+              theta_max: 360
+              theta_min: 0
+
+              x_rot_position: 2000
+              y_rot_position: 2000
+              z_rot_position: 2000
+
+              x_step: 500
+              y_step: 500
+              z_step: 500
+              theta_step: 30
+              f_step: 500
+
+              position:
+                x_pos: 25250
+                y_pos: 40000
+                z_pos: 40000
+                f_pos: 70000
+                theta_pos: 0
+              velocity: 1000
+
+              x_offset: 0
+              y_offset: 0
+              z_offset: 0
+              f_offset: 0
+              theta_offset: 0
 
 Thorlabs
 ^^^^^
@@ -368,7 +471,9 @@ In progress...
 
 Analog Controlled (Galvo/Piezo/etc.)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. code-block:: yaml
+
     hardware:
         stage:
         -
@@ -399,7 +504,9 @@ Analog Controlled (Galvo/Piezo/etc.)
 
 Synthetic Stage
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. code-block:: yaml
+
     hardware:
         stage:
         -
@@ -428,6 +535,7 @@ Dichroic Turret
 ASI
 ^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: yaml
+
     hardware:
       dichroic:
         type: ASI #synthetic #ASI
@@ -448,7 +556,7 @@ ASI
                 570LP: 1
                 640LP: 2
 
-Synthetic Dichroic Turrett
+Synthetic Dichroic Turret
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 TBD.
 
@@ -457,6 +565,7 @@ Filter Wheels
 Sutter
 ^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: yaml
+
     hardware:
       filter_wheel:
         type: ASI
@@ -484,6 +593,7 @@ Sutter
 ASI
 ^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: yaml
+
     hardware:
       filter_wheel:
         type: ASI
@@ -522,6 +632,7 @@ Multiple types of galvanometers have been used, including Cambridge Technologies
 Each of these devices are externally controlled via analog signals delivered from a data acquisition card.
 
 .. code-block:: yaml
+
     microscopes:
       microscope_name:
         galvo:
@@ -552,6 +663,7 @@ The ``onoff`` entry is for digital modulation.
 The ``power`` entry is for analog modulation.
 
 .. code-block:: yaml
+
     microscopes:
         microscope_name:
             lasers:
@@ -592,6 +704,7 @@ Shutters
 Thorlabs
 ^^^^^^^^^^^^
 .. code-block:: yaml
+
     microscopes:
       microscope_name:
         shutter:
@@ -605,6 +718,7 @@ Thorlabs
 Synthetic Shutter
 ^^^^^^^^^^^^^^^^^
 .. code-block:: yaml
+
     hardware:
         shutter:
           hardware:
@@ -619,6 +733,7 @@ Mechanical Zoom
 Dynamixel Zoom
 ^^^^^^^^^^^^^^^^
 .. code-block:: yaml
+
     hardware:
       zoom:
         type: synthetic
@@ -644,6 +759,7 @@ Dynamixel Zoom
 Synethetic Zoom
 ^^^^^^^^^^^^^^^^
 .. code-block:: yaml
+
     hardware:
       zoom:
         type: synthetic

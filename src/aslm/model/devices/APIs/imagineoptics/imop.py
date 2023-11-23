@@ -2,6 +2,7 @@ import os
 import ctypes as ct
 import numpy as np
 import pandas as pd
+import time
 
 from .enums import *
 
@@ -245,23 +246,44 @@ class IMOP_Mirror:
         if coefs.dtype is not np.float32:
             coefs = coefs.astype(np.float32)
 
-        self.modal_coef.set_data(coefs, np.arange(1,self.n_modes+1).astype(np.uint32), self.n_modes, self.pupil)
+        try:
+            self.modal_coef.set_data(coefs, np.arange(1,self.n_modes+1).astype(np.uint32), self.n_modes, self.pupil)
+        except Exception as modal_coef_exception:
+            print("modal_coef.set_data failed...\n", modal_coef_exception)
+
+        try:
+            self.haso_slopes.new_from_modal_coef(self.modal_coef, self.mirror.haso_config_file_path)
+        except Exception as haso_exception:
+            print("haso_slopes.new_from_modal_coef failed...\n", haso_exception)        
         
-        self.haso_slopes.new_from_modal_coef(self.modal_coef, self.mirror.haso_config_file_path)
-        
-        delta_commands = self.corrdata_manager.compute_delta_command_from_delta_slopes(self.haso_slopes, np.zeros(self.mirror.n_actuators).astype(np.float32))
+        try:
+            delta_commands = self.corrdata_manager.compute_delta_command_from_delta_slopes(self.haso_slopes, np.zeros(self.mirror.n_actuators).astype(np.float32))
+        except Exception as delta_commands_exception:
+            print("corrdata_manager.compute_delta_command_from_delta_slopes failed...\n", delta_commands_exception) 
+
         self.last_delta_commands = delta_commands
         
         new_positions = self.position_flat + delta_commands
 
-        self.mirror.move_absolute(new_positions)
+        try:
+            self.mirror.move_absolute(new_positions)
+        except Exception as move_exception:
+            print("mirror.move_absolute failed...\n", move_exception)
 
         if wait:
-            while True:
-                pos_check = self.mirror.check_absolute_positions(new_positions)
-                if pos_check == 0:
+            # while True:
+            #     pos_check = self.mirror.check_absolute_positions(new_positions)
+            #     if pos_check == 0:
+            #         break
+            #     print(f'Positions not yet satisfied! >> flag: {pos_check}')
+            timeout = 1000
+            t = 0
+            while (self.get_modal_coefs()[0] != coefs).any():
+                t += 1
+                if t == timeout:
+                    print("Ran out of time...")
                     break
-                print(f'Positions not yet satisfied! >> flag: {pos_check}')
+                time.sleep(0.001)
 
     def update_delta_commands(self):
         self.last_delta_commands = self.mirror.get_current_positions() - self.position_flat

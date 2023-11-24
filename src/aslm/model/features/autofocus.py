@@ -81,82 +81,61 @@ class Autofocus:
     is then compared to the maximum entropy and the position is saved if it is
     higher. The autofocus_pos_queue is then filled with the next position to
     move to. If the autofocus_pos_queue is empty, the autofocus is finished.
-
-    Attributes
-    ----------
-    autofocus_frame_queue : Queue
-        Queue containing the frames to be processed.
-    autofocus_pos_queue : Queue
-        Queue containing the positions to move to.
-    max_entropy : float
-        Maximum entropy of the image.
-    f_frame_id : int
-        Frame ID of the frame with the maximum entropy.
-    frame_num : int
-        Number of frames to be processed.
-    init_pos : float
-        Initial position of the stage.
-    f_pos : float
-        Position of the stage with the maximum entropy.
-    focus_pos : float
-        Position of the stage with the maximum entropy.
-    target_frame_id : int
-        Frame ID of the frame to be processed.
-    get_frames_num : int
-        Number of frames to be processed.
-    plot_data : list
-        List containing the entropy of the image for each frame.
-    total_frame_num : int
-        Total number of frames to be processed.
-    fine_step_size : float
-        Step size of the fine autofocus.
-    fine_pos_offset : float
-        Offset of the fine autofocus.
-    coarse_step_size : float
-        Step size of the coarse autofocus.
-    coarse_steps : int
-        Number of steps of the coarse autofocus.
-    signal_id : int
-        ID of the frame to be processed.
-    target_channel : int
-        Channel of the image to be processed.
-
-    Methods
-    -------
-    run()
-        Run the autofocus data process.
     """
 
     def __init__(self, model, device="stage", device_ref="f"):
+        """Initialize the Autofocus class.
+
+        Parameters
+        ----------
+        model : Model
+            Model object
+        device : str
+            Device name
+        device_ref : str
+            Device reference
+        """
+        #: Model: Model object
         self.model = model
+        #: float: Maximum entropy
         self.max_entropy = None
+        #: int: Frame id
         self.f_frame_id = None
+        #: int: Number of frames
         self.frame_num = None
-
+        #: float: Initial position
         self.init_pos = None
+        #: float: Focus position
         self.f_pos = None
+        #: float: Focus position
         self.focus_pos = None
-
+        #: int: Target frame id
         self.target_frame_id = None
+        #: int: Number of frames
         self.get_frames_num = None
+        #: list: Plot data
         self.plot_data = None
+        #: int: Total frame number
         self.total_frame_num = None
-
+        #: float: Fine step size
         self.fine_step_size = None
+        #: float: Fine position offset
         self.fine_pos_offset = None
-
+        #: float: Coarse step size
         self.coarse_step_size = None
+        #: int: Coarse steps
         self.coarse_steps = None
-
+        #: int: Signal id
         self.signal_id = None
 
-        # Queue
+        #: Queue: Autofocus frame queue
         self.autofocus_frame_queue = Queue()
+        #: Queue: Autofocus position queue
         self.autofocus_pos_queue = Queue()
 
-        # target channel
+        #: int: Target channel
         self.target_channel = 1
-
+        #: dict: Configuration table
         self.config_table = {
             "signal": {
                 "init": self.pre_func_signal,
@@ -170,13 +149,13 @@ class Autofocus:
             },
             "node": {"node_type": "multi-step", "device_related": True},
         }
+        #: str: Device name
         self.device = device
+        #: str: Device reference
         self.device_ref = device_ref
 
     def run(self):
         """Run the Autofocusing Routine
-
-
 
         Returns
         -------
@@ -224,8 +203,6 @@ class Autofocus:
 
     def get_autofocus_frame_num(self):
         """Calculate how many frames are needed to get the best focus position.
-
-
 
         Returns
         -------
@@ -388,9 +365,12 @@ class Autofocus:
         Parameters
         ----------
         frame_ids : list
-            List of frame ids to be processed
+            List of frame ids to be processed.
 
-
+        Returns
+        -------
+        frame_ids : list
+            List of frame ids to be processed.
         """
 
         self.get_frames_num += len(frame_ids)
@@ -445,7 +425,13 @@ class Autofocus:
             return frame_ids
 
     def end_func_data(self):
-        """End the autofocus routine."""
+        """End the autofocus routine.
+
+        Returns
+        -------
+        bool
+            True if the autofocus routine is finished.
+        """
         if self.get_frames_num <= self.total_frame_num:
             return False
 
@@ -512,12 +498,14 @@ class Autofocus:
         TODO: Current values for amplitude, sigma, and alpha are hard-coded. Fitting
         is unfortunately unstable.
 
-
-
         Returns
         -------
-        self.focus_pos : float
+        fit_data : list
+            Autofocus data
+        focus_position : float
             Focus position
+        r_squared : float
+            R-Squared value
         """
 
         # Convert plot data to numpy array

@@ -47,23 +47,40 @@ logger = logging.getLogger(p)
 
 class Metadata:
     def __init__(self) -> None:
-        """
+        """Metadata class
+
         Store and convert internal representation of metadata (configuration,
         experiment, etc.) to alternative file types.
 
-        Concept and some of the code borrowed from python-microscopy
-        (https://github.com/python-microscopy/python-microscopy/).
+        Note
+        ----
+            Concept and some of the code borrowed from python-microscopy
+            (https://github.com/python-microscopy/python-microscopy/).
         """
+        #: dict: Configuration dictionary
         self._configuration = None
+
+        #: float: Pixel size in x (um)
+        #: float: Pixel size in y (um)
+        #: float: Pixel size in z (um)
         self.dx, self.dy, self.dz = 1, 1, 1  # pixel sizes (um)
-        self.dt = 1  # time displacement (s)
-        self.dc = 1  # step size between channels, should always be 1
+
+        #: float: Time displacement (s)
+        self.dt = 1
+
+        #: int: Step size between channels, should always be 1
+        self.dc = 1
+
         self._order = "XYCZT"
         self._per_stack = True
         self._multiposition = False
         self._coupled_axes = None
 
-        # shape
+        #: int: Shape of the data in x
+        #: int: Shape of the data in y
+        #: int: Shape of the data in z
+        #: int: Shape of the data in t
+        #: int: Shape of the data in c
         self.shape_x, self.shape_y, self.shape_z, self.shape_t, self.shape_c = (
             1,
             1,
@@ -71,24 +88,49 @@ class Metadata:
             1,
             1,
         )
+
+        #: int: Number of positions
         self.positions = 1
 
+        #: str: Active microscope
         self.active_microscope = None
 
     @property
     def configuration(self) -> Optional[DictProxy]:
+        """Return configuration dictionary
+
+        Returns
+        -------
+        Optional[DictProxy]
+            Configuration dictionary
+        """
         return self._configuration
 
     @configuration.setter
     def configuration(self, configuration: DictProxy) -> None:
+        """Set configuration dictionary
+
+        Parameters
+        ----------
+        configuration : DictProxy
+            Configuration dictionary
+        """
         self._configuration = configuration
         self.set_from_configuration_experiment()
 
     @property
     def per_stack(self) -> bool:
+        """Return per stack
+
+        Returns
+        -------
+        bool
+            True if per stack, False otherwise
+        """
         return self._per_stack
 
     def set_from_configuration_experiment(self) -> None:
+        """Set from configuration experiment"""
         if (
             self.configuration.get("experiment") is not None
             and self.configuration.get("configuration") is not None
@@ -100,6 +142,7 @@ class Metadata:
             self.set_stack_order_from_configuration_experiment()
 
     def set_shape_from_configuration_experiment(self) -> None:
+        """Set shape from configuration experiment"""
         state = self.configuration["experiment"]["MicroscopeState"]
         scope = self.configuration["configuration"]["microscopes"][
             self.active_microscope
@@ -168,6 +211,7 @@ class Metadata:
                     )
 
     def set_stack_order_from_configuration_experiment(self) -> None:
+        """Set stack order from configuration experiment"""
         state = self.configuration["experiment"]["MicroscopeState"]
         self._per_stack = (
             (
@@ -186,17 +230,30 @@ class Metadata:
 
     @property
     def voxel_size(self) -> tuple:
-        """Return voxel size"""
+        """Return voxel size
+
+        Returns
+        -------
+        tuple
+            Voxel size
+        """
         return (self.dx, self.dy, self.dz)
 
     @property
     def shape(self) -> tuple:
-        """Return shape as XYCZT."""
+        """Return shape as XYCZT.
+
+        Returns
+        -------
+        tuple
+            Shape as XYCZT
+        """
         return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
 
 
 class XMLMetadata(Metadata):
-    """
+    """XML Metadata
+
     This is a base class for dealing with metadata that is stored as an XML, e.g. in
     OME-TIFF or BigDataViewer. There are multiple methods for storing XML. In OME-TIFF,
     the XML is stored in the header of the first OME-TIFF file in a directory. In
@@ -213,7 +270,17 @@ class XMLMetadata(Metadata):
         self, file_name: str, file_type: str, root: Optional[str] = None, **kw
     ) -> None:
         """Write to XML file. Assumes we do not include the XML header in our nested
-        metadata dictionary."""
+        metadata dictionary.
+
+        Parameters
+        ----------
+        file_name : str
+            File name
+        file_type : str
+            File type
+        root : Optional[str], optional
+            Root, by default None
+        """
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n'  # XML file header
         xml += (
             f"<!-- Created by ASLM, "
@@ -230,6 +297,20 @@ class XMLMetadata(Metadata):
     def to_xml(self, file_type: str, root: Optional[str] = None, **kw) -> str:
         """
         Convert stored metadata to XML
+
+        Parameters
+        ----------
+        file_type : str
+            File type
+        root : Optional[str], optional
+            Root, by default None
+        **kw
+            Keyword arguments
+
+        Returns
+        -------
+        str
+            XML string
         """
         xml = ""
         try:

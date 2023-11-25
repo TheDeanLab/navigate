@@ -107,6 +107,9 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
 def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
     """Initializes the camera api class.
 
+    Load camera information from the configuration file. Proper camera types include
+    HamamatsuOrca, HamamatsuOrcaLightning, Photometrics, and SyntheticCamera.
+
     Parameters
     ----------
     configuration : multiprocessing.managers.DictProxy
@@ -147,8 +150,25 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
     elif cam_type == "Photometrics":
 
         def import_photometrics(camera_connection):
-            # To make this work, please install the SDK at https://www.photometrics.com/support/download/pvcam-sdk
-            # and go to APIs/photometrics/PyVCAM-master and run python setup.py install
+            """Import Photometrics API and Initialize Camera Controller.
+
+            Parameters
+            ----------
+            camera_connection : str
+                Camera connection string
+
+            Returns
+            -------
+            camera_toopen : object
+                Camera object.
+
+            Note
+            ----
+                To make this work, please install the SDK at
+                https://www.photometrics.com/support/download/pvcam-sdk
+                and go to APIs/photometrics/PyVCAM-master and run python setup.py
+                install
+            """
             from pyvcam import pvc
             from pyvcam.camera import Camera
 
@@ -230,6 +250,9 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
 
 def load_stages(configuration, is_synthetic=False):
     """Initializes the stage class on a dedicated thread.
+
+    Stage information is pulled from the configuration file. Proper stage types include
+    PI, MP285, Thorlabs, MCL, ASI, GalvoNIStage, and SyntheticStage.
 
     Parameters
     ----------
@@ -363,7 +386,8 @@ def load_stages(configuration, is_synthetic=False):
 def start_stage(
     microscope_name, device_connection, configuration, id=0, is_synthetic=False
 ):
-    """Initializes the Stage class.
+    """Initializes the Stage class. Proper stage types include PI, MP285, Thorlabs, MCL,
+    ASI, GalvoNIStage, and SyntheticStage.
 
     Parameters
     ----------
@@ -440,6 +464,9 @@ def start_stage(
 def load_zoom_connection(configuration, is_synthetic=False):
     """Initializes the Zoom class on a dedicated thread.
 
+    Load zoom information from the configuration file. Proper zoom types include
+    DynamixelZoom and SyntheticZoom.
+
     Parameters
     ----------
     configuration : multiprocesing.managers.DictProxy
@@ -479,6 +506,8 @@ def load_zoom_connection(configuration, is_synthetic=False):
 
 def start_zoom(microscope_name, device_connection, configuration, is_synthetic=False):
     """Initializes the zoom class on a dedicated thread.
+
+    Initializes the zoom: DynamixelZoom and SyntheticZoom.
 
     Parameters
     ----------
@@ -531,6 +560,9 @@ def start_zoom(microscope_name, device_connection, configuration, is_synthetic=F
 
 def load_filter_wheel_connection(configuration, is_synthetic=False):
     """Initializes the Filter Wheel class on a dedicated thread.
+
+    Load filter wheel information from the configuration file. Proper filter wheel types
+    include SutterFilterWheel, ASI, and SyntheticFilterWheel.
 
     Parameters
     ----------
@@ -588,6 +620,8 @@ def start_filter_wheel(
     microscope_name, device_connection, configuration, is_synthetic=False
 ):
     """Initializes the filter wheel class on a dedicated thread.
+
+    Initializes the filter wheel: SutterFilterWheel, ASI, and SyntheticFilterWheel.
 
     Parameters
     ----------
@@ -649,6 +683,9 @@ def start_filter_wheel(
 
 def start_daq(configuration, is_synthetic=False):
     """Initializes the data acquisition (DAQ) class on a dedicated thread.
+
+    Load daq information from the configuration file. Proper daq types include NI and
+    SyntheticDAQ.
 
     Parameters
     ----------
@@ -747,7 +784,8 @@ def start_lasers(
 ):
     """Initializes the lasers.
 
-    Initializes the Laser Switching, Analog, and Digital DAQ Outputs.
+    Loads the lasers from the configuration file. Proper laser types include NI and
+    SyntheticLaser. Initializes the Laser Switching, Analog, and Digital DAQ Outputs.
 
     Parameters
     ----------
@@ -801,7 +839,8 @@ def start_remote_focus_device(
 ):
     """Initializes the remote focus class.
 
-    Initializes the Remote Focusing Device.
+    Initializes the Remote Focusing Device. Proper remote focus types include
+    NI, EquipmentSolutions, and SyntheticRemoteFocus.
 
     Parameters
     ----------
@@ -865,7 +904,7 @@ def start_galvo(
 ):
     """Initializes the Galvo class.
 
-    Initializes the Galvo Device.
+    Initializes the Galvo Device. Proper galvo types include NI and SyntheticGalvo.
 
     Parameters
     ----------

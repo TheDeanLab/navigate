@@ -37,8 +37,13 @@ from aslm import __version__, __commit__
 
 
 class OMETIFFMetadata(XMLMetadata):
-    """Metadata for OME-TIFF files. OME-XML spec at
-    https://docs.openmicroscopy.org/ome-model/6.3.1/ome-xml/index.html."""
+    """Metadata for OME-TIFF files.
+
+    Note
+    ----
+        OME-XML spec at
+        https://docs.openmicroscopy.org/ome-model/6.3.1/ome-xml/index.html.
+    """
 
     def ome_tiff_xml_dict(
         self,
@@ -50,8 +55,23 @@ class OMETIFFMetadata(XMLMetadata):
         **kw,
     ):
         """
-        Generates dictionary with same heirarchical structure as OME-XML. Useful for
+        Generates dictionary with same hierarchical structure as OME-XML. Useful for
         OME-TIFF and OME-XML.
+
+        Parameters
+        ----------
+        c : int, optional
+            Channel index, by default 0
+        t : int, optional
+            Time point index, by default 0
+        file_name : Union[str, list, None], optional
+            File name or list of file names, by default None
+        uid : Union[str, list, None], optional
+            Unique identifier or list of unique identifiers, by default None
+        views : Optional[list], optional
+            List of views, by default None
+        kw : dict, optional
+            Additional keyword arguments, by default None
 
         Returns
         -------
@@ -180,9 +200,9 @@ class OMETIFFMetadata(XMLMetadata):
                 # if they are both moving along the same physical dimension
                 if self._coupled_axes is not None:
                     for leader, follower in self._coupled_axes:
-                        view[leader] += view[follower] / float(getattr(
-                            self, f"d{follower.lower()}"
-                        ))
+                        view[leader] += view[follower] / float(
+                            getattr(self, f"d{follower.lower()}")
+                        )
 
                 d = {
                     "DeltaT": dt,
@@ -204,9 +224,38 @@ class OMETIFFMetadata(XMLMetadata):
         root: Optional[str] = "OME",
         **kw,
     ) -> None:
+        """Write OME-XML to file.
+
+        Parameters
+        ----------
+        file_name : str
+            File name
+        file_type : str, optional
+            File type, by default "OME-TIFF"
+        root : Optional[str], optional
+            Root element, by default "OME"
+        kw : dict, optional
+            Additional keyword arguments, by default None
+        """
         return super().write_xml(file_name, file_type=file_type, root=root, **kw)
 
     def to_xml(
         self, file_type: str = "OME-TIFF", root: Optional[str] = "OME", **kw
     ) -> str:
+        """Convert OME-XML to string.
+
+        Parameters
+        ----------
+        file_type : str, optional
+            File type, by default "OME-TIFF"
+        root : Optional[str], optional
+            Root element, by default "OME"
+        kw : dict, optional
+            Additional keyword arguments, by default None
+
+        Returns
+        -------
+        str
+            OME-XML string
+        """
         return super().to_xml(file_type, root=root, **kw)

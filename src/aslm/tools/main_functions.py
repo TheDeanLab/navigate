@@ -160,7 +160,6 @@ def create_parser():
 
     input_args.add_argument(
         "-d",
-        "--debug",
         required=False,
         default=False,
         action="store_true",

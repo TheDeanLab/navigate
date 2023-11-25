@@ -49,7 +49,7 @@ class TestMain(unittest.TestCase):
         parser = create_parser()
 
         # Boolean arguments
-        input_arguments = ["-sh", "--synthetic_hardware", "-d", "--debug"]
+        input_arguments = ["-sh", "--synthetic_hardware"]
         for arg in input_arguments:
             parser.parse_args([arg])
 

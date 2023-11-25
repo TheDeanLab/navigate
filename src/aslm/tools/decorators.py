@@ -56,6 +56,7 @@ def function_timer(func):
 
     return wrap_func
 
+
 class FeatureList(object):
     def __init__(self, func):
         self._feature_list = func

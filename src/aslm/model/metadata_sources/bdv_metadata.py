@@ -30,7 +30,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 #  Standard Imports
-import sys
 import os
 from typing import Optional, Union
 import xml.etree.ElementTree as ET
@@ -44,8 +43,13 @@ from .metadata import XMLMetadata
 
 
 class BigDataViewerMetadata(XMLMetadata):
-    """Metadata for BigDataViewer files. XML spec in section 2.3 of
-    https://arxiv.org/abs/1412.0488."""
+    """Metadata for BigDataViewer files.
+
+    Note
+    ----
+        XML spec in section 2.3 of https://arxiv.org/abs/1412.0488.
+
+    """
 
     def __init__(self) -> None:
         """Initialize the BigDataViewer metadata object."""
@@ -54,6 +58,23 @@ class BigDataViewerMetadata(XMLMetadata):
     def bdv_xml_dict(
         self, file_name: Union[str, list, None], views: list, **kw
     ) -> dict:
+        """Create a BigDataViewer XML dictionary from a list of views.
+
+        Parameters
+        ----------
+        file_name : str
+            The file name of the file to be written.
+        views : list
+            A list of dictionaries containing metadata for each view.
+        **kw
+            Additional keyword arguments.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the XML metadata.
+
+        """
         # Header
         bdv_dict = {"version": 0.2}
 
@@ -194,12 +215,30 @@ class BigDataViewerMetadata(XMLMetadata):
     def stage_positions_to_affine_matrix(
         self, x: float, y: float, z: float, theta: float, f: Optional[float] = None
     ) -> npt.ArrayLike:
-        """Convert stage positions to an affine matrix. Ignore theta, focus for now."""
+        """Convert stage positions to an affine matrix.
+
+        Ignore theta, focus for now.
+
+        Parameters
+        ----------
+        x : float
+            The x position of the stage.
+        y : float
+            The y position of the stage.
+        z : float
+            The z position of the stage.
+        theta : float
+            The theta position of the stage.
+
+        Returns
+        -------
+        npt.ArrayLike
+            An affine matrix.
+        """
         arr = np.eye(3, 4)
 
         # Set the transform positions
         xp, yp, zp = x / self.dx, y / self.dy, z / self.dz
-
 
         # Allow additional axes (e.g. f) to couple onto existing axes (e.g. z)
         # if they are both moving along the same physical dimension
@@ -230,7 +269,19 @@ class BigDataViewerMetadata(XMLMetadata):
 
     def affine_matrix_to_stage_positions(self, mat: npt.ArrayLike) -> tuple:
         """
-        Convert affine matrix back into stage positions. Ignore theta, focus for now.
+        Convert affine matrix back into stage positions.
+
+        Ignore theta, focus for now.
+
+        Parameters
+        ----------
+        mat : npt.ArrayLike
+            An affine matrix.
+
+        Returns
+        -------
+        tuple
+            A tuple of stage positions.
         """
         y, x, z = mat[:, 3] * np.array([self.dy, self.dx, self.dz])
         theta, f = None, None
@@ -238,7 +289,18 @@ class BigDataViewerMetadata(XMLMetadata):
         return x, y, z, theta, f
 
     def parse_xml(self, root: Union[str, ET.Element]) -> tuple:
-        """Parse a BigDataViewer XML file into our metadata format."""
+        """Parse a BigDataViewer XML file into our metadata format.
+
+        Parameters
+        ----------
+        root : Union[str, ET.Element]
+            The root of the XML tree.
+
+        Returns
+        -------
+        tuple
+            A tuple containing the file path, setups, and transforms.
+        """
 
         # Open the file, if present
         if isinstance(root, str) and os.path.isfile(root):
@@ -336,6 +398,17 @@ class BigDataViewerMetadata(XMLMetadata):
         return file_path, setups, transforms
 
     def write_xml(self, file_name: str, views: list) -> None:
+        """Write BigDataViewer XML metadata.
+
+        Parameters
+        ----------
+        file_name : str
+            The file name of the file to be written.
+        views : list
+            A list of dictionaries containing metadata for each view.
+
+        """
+
         return super().write_xml(
             file_name, file_type="bdv", root="SpimData", views=views
         )

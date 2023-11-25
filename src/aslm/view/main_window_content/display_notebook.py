@@ -72,11 +72,9 @@ class CameraNotebook(DockableNotebook):
         # Putting notebook 2 into top right frame
         self.grid(row=0, column=0)
 
-        # Creating the camera tab
         #: CameraTab: The camera tab.
         self.camera_tab = CameraTab(self)
 
-        # Creating the waveform settings tab
         #: WaveformTab: The waveform settings tab.
         self.waveform_tab = WaveformTab(self)
 
@@ -114,36 +112,37 @@ class CameraTab(tk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        #  Frame that will hold camera image
         #: tk.Frame: The frame that will hold the camera image.
         self.cam_image = ttk.Frame(self)
         self.cam_image.grid(row=0, column=0, rowspan=3, sticky=tk.NSEW)
 
-        # Frame for the Image View
         #: Bool: The popup flag.
         self.is_popup = False
+
         #: Bool: The docked flag.
         self.is_docked = True
+
         #: int: The width of the canvas.
         #: int: The height of the canvas.
         self.canvas_width, self.canvas_height = 512, 512
+
         #: tk.Canvas: The canvas that will hold the camera image.
         self.canvas = tk.Canvas(
             self.cam_image, width=self.canvas_width, height=self.canvas_height
         )
         self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
         #: matplotlib.figure.Figure: The figure that will hold the camera image.
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
+
         #: matplotlib.backends.backend_tkagg.FigureCanvasTkAgg: The canvas that will
         # hold the camera image.
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
-        #  Frame for scale settings/palette color
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
         self.scale_palette = IntensityFrame(self)
         self.scale_palette.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
-        # Slider
         #: tk.Scale: The slider that will hold the slice index.
         self.slider = tk.Scale(
             self,
@@ -157,12 +156,10 @@ class CameraTab(tk.Frame):
         self.slider.configure(state="disabled")  # 'normal'
         self.slider.grid(row=3, column=0, sticky=tk.NSEW, padx=5, pady=5)
 
-        #  Frame for camera selection and counts
         #: MetricsFrame: The frame that will hold the camera selection and counts.
         self.image_metrics = MetricsFrame(self)
         self.image_metrics.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
-        # Frame for controlling the live display functionality.
         #: RenderFrame: The frame that will hold the live display functionality.
         self.live_frame = RenderFrame(self)
         self.live_frame.grid(row=2, column=1, sticky=tk.NSEW, padx=5, pady=5)
@@ -193,6 +190,7 @@ class RenderFrame(ttk.Labelframe):
 
         #: tk.StringVar: The variable that holds the live display functionality.
         self.live_var = tk.StringVar()
+
         #: ttk.Combobox: The combobox that holds the live display functionality.
         self.live = ttk.Combobox(
             self, textvariable=self.live_var, state="readonly", width=6
@@ -259,6 +257,7 @@ class WaveformTab(tk.Frame):
 
         #: int: The index of the tab.
         self.index = 1
+
         #: bool: The popup flag.
         self.is_docked = True
 
@@ -272,6 +271,7 @@ class WaveformTab(tk.Frame):
 
         #: matplotlib.figure.Figure: The figure that will hold the waveform plots.
         self.fig = Figure(figsize=(6, 6), dpi=100)
+
         #: matplotlib.backends.backend_tkagg.FigureCanvasTkAgg: The canvas that will
         # hold the waveform plots.
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.waveform_plots)
@@ -305,7 +305,6 @@ class WaveformSettingsFrame(ttk.Labelframe):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Dictionary for widgets
         #: dict: The dictionary that holds the widgets.
         self.inputs = {}
 
@@ -476,6 +475,7 @@ class IntensityFrame(ttk.Labelframe):
             "Rainbow",
             "SNR",
         ]
+
         #: list: The list of maplotlib LUT names.
         self.color_values = [
             "gist_gray",
@@ -483,6 +483,7 @@ class IntensityFrame(ttk.Labelframe):
             "afmhot",
             "RdBu_r",
         ]
+
         #: tk.StringVar: The variable that holds the LUT.
         self.color = tk.StringVar()
         for i in range(len(self.color_labels)):
@@ -499,6 +500,7 @@ class IntensityFrame(ttk.Labelframe):
 
         #: tk.BooleanVar: The variable that holds the flip xy flag.
         self.transpose = tk.BooleanVar()
+
         #: str: The name of the flip xy flag.
         self.trans = "Flip XY"
         self.inputs[self.trans] = LabelInput(
@@ -513,10 +515,13 @@ class IntensityFrame(ttk.Labelframe):
 
         #: tk.BooleanVar: The variable that holds the autoscale flag.
         self.autoscale = tk.BooleanVar()
+
         #: str: The name of the autoscale flag.
         self.auto = "Autoscale"
+
         #: list: The list of min and max counts.
         self.minmax = ["Min Counts", "Max Counts"]
+
         #: list: The list of min and max names.
         self.minmax_names = ["Min", "Max"]
         self.inputs[self.auto] = LabelInput(

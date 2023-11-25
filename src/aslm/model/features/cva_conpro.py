@@ -331,6 +331,9 @@ class ConstantVelocityAcquisition:
         print("original stage speed set")
         posw = self.asi_stage.get_axis_position(self.axis)
         print(f"current position = {posw}, start position = {self.start_position_um}")
+        logger.info(
+            f"current position = {posw}, start position = {self.start_position_um}"
+        )
         self.asi_stage.start_scan(self.axis)
         print("scan started")
 

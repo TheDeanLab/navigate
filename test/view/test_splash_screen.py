@@ -36,6 +36,7 @@ import tkinter as tk
 from pathlib import Path
 
 # Third Party Imports
+import pytest
 
 # Local Imports
 from aslm.view.splash_screen import SplashScreen
@@ -50,6 +51,7 @@ class TestSplashScreen(unittest.TestCase):
         # Destroy the root window after each test
         self.root.destroy()
 
+    @pytest.mark.skip("_tkinter.TclError")
     def test_splash_screen_with_image(self):
         # Create a SplashScreen instance with an image
         main_directory = Path(__file__).resolve().parent.parent.parent

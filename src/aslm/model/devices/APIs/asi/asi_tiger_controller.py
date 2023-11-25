@@ -15,7 +15,7 @@ class TigerException(Exception):
     """
     Exception raised when error code from Tiger Console is received.
 
-    Atrributes:
+    Attributes:
         - command: error code received from Tiger Console
     """
 
@@ -27,6 +27,7 @@ class TigerException(Exception):
             Error code received from Tiger Console
         """
 
+        #: dict: Dictionary of error codes and their corresponding error messages
         self.error_codes = {
             ":N-1": "Unknown Command (Not Issued in TG-1000)",
             ":N-2": "Unrecognized Axis Parameter (valid axes are dependent on the "
@@ -42,12 +43,13 @@ class TigerException(Exception):
         }
         #: str: Error code received from Tiger Console
         self.code = code
-        self.message = self.error_codes[
-            code
-        ]  # Gets the proper message based on error code received.
-        super().__init__(
-            self.message
-        )  # Sends message to base exception constructor for python purposes
+
+        #: str: Error message
+        self.message = self.error_codes[code]
+
+        # Gets the proper message based on error code received.
+        super().__init__(self.message)
+        # Sends message to base exception constructor for python purposes
 
     def __str__(self):
         """Overrides base Exception string to be displayed
@@ -59,7 +61,6 @@ class TigerController:
     """Tiger Controller class"""
 
     def __init__(self, com_port: str, baud_rate: int, verbose: bool = False):
-
         """Initialize the Tiger Controller class
 
 
@@ -95,7 +96,9 @@ class TigerController:
     @staticmethod
     def scan_ports() -> list[str]:
         """Scans for available COM ports
+
         Returns a sorted list of COM ports.
+
         Returns
         -------
         list[str]
@@ -158,6 +161,8 @@ class TigerController:
             self.report_to_console(
                 f"Serial port = {self.com_port} :: Baud rate = {self.baud_rate}"
             )
+
+            #: list[str]: Default axes sequence of the Tiger Controller
             self.default_axes_sequence = self.get_default_motor_axis_sequence()
 
     def get_default_motor_axis_sequence(self) -> None:

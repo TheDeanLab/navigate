@@ -54,7 +54,7 @@ class ChannelsTab(tk.Frame):
     """
 
     def __init__(self, setntbk, *args, **kwargs):
-        """Initilization of the Channels Tab
+        """Initialization of the Channels Tab
 
         Parameters
         ----------
@@ -69,49 +69,45 @@ class ChannelsTab(tk.Frame):
         # Init Frame
         tk.Frame.__init__(self, setntbk, *args, **kwargs)
 
+        #: int: The index of the tab
         self.index = 0
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Channel Settings
-        #: The frame that holds the channel settings
+        #: ChannelCreator: The frame that holds the channel settings
         self.channel_widgets_frame = ChannelCreator(self)
         self.channel_widgets_frame.grid(
             row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
-        # Stack Acquisition Settings
-        #: The frame that holds the stack acquisition settings
+        #: StackAcquisitionFrame: The frame that holds the stack acquisition settings
         self.stack_acq_frame = StackAcquisitionFrame(self)
         self.stack_acq_frame.grid(
             row=1, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
-        # Time Settings
-        #: The frame that holds the time settings
+        #: StackTimePointFrame: The frame that holds the time settings
         self.stack_timepoint_frame = StackTimePointFrame(self)
         self.stack_timepoint_frame.grid(
             row=3, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
         )
 
-        # Multipoint Enable
-        #: The frame that holds the multipoint settings
+        #: MultiPointFrame: The frame that holds the multipoint settings
         self.multipoint_frame = MultiPointFrame(self)
         self.multipoint_frame.grid(
             row=4, column=0, columnspan=1, sticky=tk.NSEW, padx=10, pady=10
         )
 
-        # Quick Launch Buttons
-        #: The frame that holds the quick launch buttons
+        #: QuickLaunchFrame: The frame that holds the quick launch buttons
         self.quick_launch = QuickLaunchFrame(self)
         self.quick_launch.grid(
             row=4, column=1, columnspan=2, sticky=tk.NSEW, padx=10, pady=10
         )
 
-        # Confocal Projection Settings
-        #: The frame that holds the confocal projection settings
+        #: ConfocalProjectionFrame: The frame that holds the confocal projection
+        # settings
         self.conpro_acq_frame = ConfocalProjectionFrame(self)
         self.conpro_acq_frame.grid(
             row=5, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
@@ -137,7 +133,6 @@ class ChannelCreator(ttk.Labelframe):
         **kwargs : dict
             Keyword arguments for ttk.Labelframe
         """
-        #  Init Frame
         #: str: The title of the frame
         self.title = "Channel Settings"
         ttk.Labelframe.__init__(self, channels_tab, text=self.title, *args, **kwargs)
@@ -150,51 +145,49 @@ class ChannelCreator(ttk.Labelframe):
         #  TODO refactor using dicts for variables and one for widgets,
         #   allow access to arrays via a key. might be overly complicated.
         #   Below way is clear just a bit repetitive
-        #  Channel Checkbuttons
+
         #: list: List of the variables for the channel checkbuttons
         self.channel_variables = []
+
         #: list: List of the channel checkbuttons
         self.channel_checks = []
 
-        #  Laser Dropdowns
         #: list: List of the variables for the laser dropdowns
         self.laser_variables = []
+
         #: list: List of the laser dropdowns
         self.laser_pulldowns = []
 
-        #  LaserPower Dropdowns
         #: list: List of the variables for the laser power dropdowns
         self.laserpower_variables = []
+
         #: list: List of the laser power dropdowns
         self.laserpower_pulldowns = []
 
-        #  FilterWheel Dropdowns
         #: list: List of the variables for the filterwheel dropdowns
         self.filterwheel_variables = []
+
         #: list: List of the filterwheel dropdowns
         self.filterwheel_pulldowns = []
 
-        #  Exposure Time Dropdowns
         #: list: List of the variables for the exposure time dropdowns
         self.exptime_variables = []
+
         #: list: List of the exposure time dropdowns
         self.exptime_pulldowns = []
 
-        #  Time Interval Spinboxes
         #: list: List of the variables for the time interval spinboxes
         self.interval_variables = []
+
         #: list: List of the time interval spinboxes
         self.interval_spins = []
 
-        # Defocus Spinboxes
         #: list: List of the variables for the defocus spinboxes
         self.defocus_variables = []
+
         #: list: List of the defocus spinboxes
         self.defocus_spins = []
 
-        #  Channel Creation
-
-        #  Grids labels them across the top row of each column
         #: list: List of the labels for the columns
         self.label_text = [
             "Channel",
@@ -205,8 +198,10 @@ class ChannelCreator(ttk.Labelframe):
             "Interval",
             "Defocus",
         ]
+
         #: list: List of the labels for the columns
         self.labels = []
+
         #: list: List of the frames for the columns
         self.frame_columns = []
 
@@ -353,7 +348,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
     """This class is the frame that holds the stack acquisition settings."""
 
     def __init__(self, settings_tab, *args, **kwargs):
-        """Initilization of the Stack Acquisition Frame
+        """Initialization of the Stack Acquisition Frame
 
         Parameters
         ----------
@@ -372,15 +367,15 @@ class StackAcquisitionFrame(ttk.Labelframe):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Dictionary for widgets and buttons
         #: dict: Dictionary of the widgets in the frame
         self.inputs = {}
+
         #: dict: Dictionary of the buttons in the frame
         self.buttons = {}
 
-        # Frames for widgets
         #: tkinter.Frame: The frame that holds the position and slice settings
         self.pos_slice = ttk.Frame(self)
+
         #: tkinter.Frame: The frame that holds the laser cycling settings
         self.cycling = ttk.Frame(self)
 
@@ -391,6 +386,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
         # Start Pos Frame (Vertically oriented)
         start_names = ["start_position", "start_focus"]
         start_labels = ["Pos", "Foc"]
+
         #: tkinter.Label: The label for the start position frame
         self.start_label = ttk.Label(self.pos_slice, text="Start")
         self.start_label.grid(row=0, column=0, sticky="S")
@@ -416,6 +412,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
         # End Pos Frame (Vertically Oriented)
         end_names = ["end_position", "end_focus"]
         end_labels = ["Pos", "Foc"]
+
         #: tkinter.Label: The label for the end position
         self.end_label = ttk.Label(self.pos_slice, text="End")
         self.end_label.grid(row=0, column=1, sticky="S")

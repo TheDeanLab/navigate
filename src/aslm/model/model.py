@@ -140,7 +140,7 @@ class Model:
         #: float: Pre-exposure time in milliseconds
         self.pre_exposure_time = 0  # milliseconds
         #: int: Number of timeouts before aborting acquisition.
-        self.camera_wait_iterations = 20  # Thread waits this * 500 ms before it ends
+        self.camera_wait_iterations = 100  # Thread waits this * 500 ms before it ends
         #: float: Time before acquisition.
         self.start_time = None
         #: object: Data buffer.
@@ -875,6 +875,7 @@ class Model:
             # if there is at least one frame available
             if not frame_ids:
                 self.logger.info(f"ASLM Model - Waiting {wait_num}")
+                print(f"ASLM Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
                     # Camera timeout, abort acquisition.

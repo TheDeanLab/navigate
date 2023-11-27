@@ -92,6 +92,8 @@ def test_get_aslm_path():
 def test_get_aslm_path_windows(monkeypatch):
     """Test that the ASLM path is a string."""
     monkeypatch.setattr(config.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(config.os, "getenv", lambda x: "LOCALAPPDATA")
+    monkeypatch.setattr(config.os.path, "exists", lambda x: True)
     assert isinstance(config.get_aslm_path(), str)
     path_string = config.get_aslm_path()
     assert ".ASLM" in path_string
@@ -100,6 +102,8 @@ def test_get_aslm_path_windows(monkeypatch):
 def test_get_aslm_path_mac(monkeypatch):
     """Test that the ASLM path is a string."""
     monkeypatch.setattr(config.platform, "system", lambda: "Darwin")
+    monkeypatch.setattr(config.os, "getenv", lambda x: "HOME")
+    monkeypatch.setattr(config.os.path, "exists", lambda x: True)
     assert isinstance(config.get_aslm_path(), str)
     path_string = config.get_aslm_path()
     assert ".ASLM" in path_string

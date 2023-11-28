@@ -49,3 +49,6 @@ class SyntheticMirror(MirrorBase):
     def __init__(self, microscope_name, device_connection, configuration):
         super().__init__(microscope_name, device_connection, configuration)
         pass
+
+    def flat(self):
+        pass

@@ -7,12 +7,8 @@ import time
 from .enums import *
 
 basepath = 'D:\\WaveKitX64'
-# wfc_config_file_path = os.path.join(basepath, 'MirrorFiles', 'WaveFrontCorrector_Mirao52-e_0259.dat')
-# haso_config_file_path = os.path.join(basepath, 'MirrorFiles', 'HASO4_first_7458.dat')
 
 imop_lib = ct.windll.LoadLibrary(os.path.join(basepath, 'C', 'Lib', 'c_interface_vc100_x64.dll'))
-# mode_names = ['x-tilt','y-tilt','defocus','obliq. asm.','vert. asm.','vert. coma','horiz. coma','vert. tre.','obliq. tre.','spherical','vert. 2nd asm.','horiz. 2nd asm.','vert. quad.','obliq. quad.']
-# mode_names = ['piston', 'x-tilt','y-tilt','defocus','obliq. asm.','vert. asm.','vert. coma','horiz. coma','spherical','vert. tre.','obliq. tre.','vert. 2nd asm.','horiz. 2nd asm.','vert. quad.','obliq. quad.']
 
 mode_names = [
     "Vert. Tilt",
@@ -48,42 +44,6 @@ mode_names = [
     "Vert. 9th Asm.",
     "Oblq. 9th Asm."
     ]
-
-"""
-    MODE NAMES:
-    1   Vert. Tilt
-    2   Horz. Tilt
-    3   Defocus
-    4   Vert. Asm.
-    5   Oblq. Asm.
-    6   Vert. Coma
-    7   Horz. Coma
-    8   3rd Spherical
-    9   Vert. Tre.
-    10  Horz. Tre.
-    11  Vert. 5th Asm.
-    12  Oblq. 5th Asm.
-    13  Vert. 5th Coma
-    14  Horz. 5th Coma
-    15  5th Spherical
-    16  Vert. Tetra.
-    17  Oblq. Tetra.
-    18  Vert. 7th Tre.
-    19  Horz. 7th Tre.
-    20  Vert. 7th Asm.
-    21  Oblq. 7th Asm.
-    22  Vert. 7th Coma
-    23  Horz. 7th Coma
-    24  7th Spherical
-    25  Vert. Penta.
-    26  Horz. Penta.
-    27  Vert. 9th Tetra.
-    28  Oblq. 9th Tetra.
-    29  Vert. 9th Tre.
-    30  Horz. 9th Tre.
-    31  Vert. 9th Asm.
-    32  Oblq. 9th Asm.
-"""
 
 # ctypes utility functions:
 def char_p(s):    
@@ -140,26 +100,12 @@ class Pointer:
     def __call__(self):
         return self.pointer
 
-'''
-Imop_Pupil_SetData
-
-Imop_PupilCompute_FitZernikePupil
-
-Imop_HasoSlopes_NewFromModalCoef
-Imop_HasoSlopes_Delete
-'''
 class IMOP_Mirror:
     
     def __init__(self,
                  wfc_config_file_path=os.path.join(basepath, 'MirrorFiles', 'WaveFrontCorrector_Mirao52-e_0259.dat'),
                  haso_config_file_path=os.path.join(basepath, 'MirrorFiles', 'HASO4_first_7458.dat'),
-                 #positions_file_path=os.path.join(basepath, 'Matlab', 'FlouresceinJuly19th22_3iter.wcs'),
-                 #positions_file_path=os.path.join(basepath, 'MirrorFiles', 'FEP-tube-2022-11-10.wcs'),
-                 #positions_file_path=os.path.join(basepath, 'MirrorFiles', 'Louis-2022-11-03.wcs'),
-                 #positions_file_path=os.path.join(basepath, 'MirrorFiles', 'Fluorescein-2022-11-15.wcs'),
                  positions_file_path=os.path.join(basepath, 'MirrorFiles', 'OPMv3_SysCorr_517nm_20230324.wcs'),
-                 #positions_file_path=os.path.join(basepath, 'MirrorFiles', 'best.wcs'),
-                 #interaction_matrix_file_path=os.path.join(basepath, 'MirrorFiles', 'OlympusJuly5.aoc'),
                  interaction_matrix_file_path=os.path.join(basepath, 'MirrorFiles', 'VAST_Sept_2023_b.aoc'),
                  n_modes=32
                  ):
@@ -223,8 +169,6 @@ class IMOP_Mirror:
         self.last_delta_commands = np.zeros(self.mirror.n_actuators, dtype=np.float32)
 
     def flat(self):
-        # self.mirror.move_absolute(self.position_flat)
-
         self.display_modes(np.zeros(self.n_modes, dtype=np.float32))
 
     def zero_flatness(self):
@@ -271,11 +215,7 @@ class IMOP_Mirror:
             print("mirror.move_absolute failed...\n", move_exception)
 
         if wait:
-            # while True:
-            #     pos_check = self.mirror.check_absolute_positions(new_positions)
-            #     if pos_check == 0:
-            #         break
-            #     print(f'Positions not yet satisfied! >> flag: {pos_check}')
+            # TODO: doesn't work very well...
             timeout = 1000
             t = 0
             while (self.get_modal_coefs()[0] != coefs).any():
@@ -334,7 +274,6 @@ class IMOP_Mirror:
             mode_save_path = wcs_save_path.split('.')[0] + '.json'
             coefs, coef_inds = self.get_modal_coefs()
             mode_dict = {}
-            # for i, c_idx in enumerate(coef_inds):
             for c in coef_inds:
                 mode_dict[mode_names[c-1]] = f'{coefs[c-1]:.4f}'
  

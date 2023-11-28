@@ -764,6 +764,7 @@ class Model:
         data_func : object
             Function to run on the acquired data.
         """
+        print("run data process started")
         wait_num = self.camera_wait_iterations
         acquired_frame_num = 0
 
@@ -783,6 +784,7 @@ class Model:
             # if there is at least one frame available
             if not frame_ids:
                 self.logger.info(f"ASLM Model - Waiting {wait_num}")
+                print(f"ASLM Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
                     # Camera timeout, abort acquisition.
@@ -817,8 +819,10 @@ class Model:
                 self.logger.info("ASLM Model - Loop stop condition met.")
                 self.stop_acquisition = True
 
+        print("whle loop stopped self.stop_acquisition false")
         self.show_img_pipe.send("stop")
         self.logger.info("ASLM Model - Data thread stopped.")
+        print("ASLM Model - Data thread stopped.")
         self.logger.info(f"ASLM Model - Received frames in total: {acquired_frame_num}")
 
         # release the lock when data thread ends
@@ -954,10 +958,15 @@ class Model:
 
         # Run the acquisition
         try:
+            print("DAQ Trigger SENT")
             self.active_microscope.turn_on_laser()
+            print("Lasers turned on")
             self.active_microscope.daq.run_acquisition()
+            print("Run acquisition finished")
         except:  # noqa
+            print("DAQ Trigger except")
             self.active_microscope.daq.stop_acquisition()
+            print("DAQ ACQUISITON STOPPED")
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}",
                 self.active_microscope.current_exposure_time,
@@ -968,6 +977,7 @@ class Model:
             self.active_microscope.turn_off_lasers()
 
         if hasattr(self, "signal_container"):
+            print("if hasattr run signal container")
             self.signal_container.run(wait_response=True)
 
         self.frame_id = (self.frame_id + 1) % self.number_of_frames

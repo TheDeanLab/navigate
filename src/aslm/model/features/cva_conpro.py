@@ -219,16 +219,18 @@ class ConstantVelocityAcquisition:
         print(f"Start position = {self.start_position*1000}")
 
         self.step_size_mm = step_size_mm
+
         self.asi_stage.scanr(
             start_position_mm=self.start_position,
             end_position_mm=self.stop_position,
             enc_divide=self.step_size_mm,
             axis=self.axis,
         )
-        print("scan r initalized update channel")
+        print("scan r initalized")
 
         self.asi_stage.wait_until_complete(self.axis)
-        print("Stage wait until complete completed after scanr")
+        # print("Stage wait until complete
+        #       completed after scanr")
 
         # TODO set max speed in configuration file
         # max_speed = 4.288497*2
@@ -322,8 +324,8 @@ class ConstantVelocityAcquisition:
         posw = self.asi_stage.get_axis_position(self.axis)
         print(f"current position = {posw}, start position = {self.start_position_um}")
 
-        self.model.resume_data_thread()
-        print("DATA THREAD RESUMED")
+        # self.model.resume_data_thread()
+        # print("DATA THREAD RESUMED")
 
     def main_func_signal(self):
         print("main function started")
@@ -453,9 +455,11 @@ class ConstantVelocityAcquisition:
 
         # self.asi_stage.stop_scan()
         # print("stage stop scan")
-        print("DAQ STOP ACQUISITION CALLED CLEAN UP")
-        self.model.active_microscope.daq.stop_acquisition()
-        print("DAQ STOP ACQUISITION FINISHED CLEAN UP")
+
+        # print("DAQ STOP ACQUISITION CALLED CLEAN UP")
+        # self.model.active_microscope.daq.stop_acquisition()
+        # print("DAQ STOP ACQUISITION FINISHED CLEAN UP")
+
         self.model.configuration["experiment"]["MicroscopeState"][
             "waveform_template"
         ] = "Default"
@@ -465,6 +469,7 @@ class ConstantVelocityAcquisition:
             f"self.model.active_microscope.current_channel = "
             f"{self.model.active_microscope.current_channel})"
         )
+
         self.model.active_microscope.daq.external_trigger = None
         print("external trigger set to none")
         print("DAQ set external trigger to none called")

@@ -93,7 +93,7 @@ class TonyWilson:
         self.mirror_controller = self.model.active_microscope.mirror.mirror_controller
 
         self.n_modes = self.mirror_controller.n_modes
-        # self.change_coef = list(range(2, self.n_modes))
+
         self.change_coef = []
         modes_armed_dict = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['modes_armed']
         self.mode_names = modes_armed_dict.keys()
@@ -111,7 +111,6 @@ class TonyWilson:
 
         self.metric = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['metric']
 
-        # self.best_coefs_overall = np.zeros(self.n_modes, dtype=np.float32)
         self.best_coefs_overall = deepcopy(self.best_coefs)
         self.best_metric = 0.0
         self.coef_sweep = None
@@ -254,6 +253,8 @@ class TonyWilson:
             frames_done = self.tw_data_queue.get_nowait()[0]
         except:
             frames_done = 0
+
+        # if self.signal_id <= frames_done:
 
         step = self.signal_id % self.n_steps
         coef = int(self.signal_id/self.n_steps) % self.n_coefs
@@ -475,6 +476,7 @@ class TonyWilson:
                 if self.f_frame_id not in frame_ids:
                     out_str += f"\tFrame ID {self.f_frame_id} was not in the frame queue...\n"
                     break
+                    # self.f_frame_id -= 1
             except Exception:
                 out_str += "\tStill waiting tw_frame_queue...\n"
                 break

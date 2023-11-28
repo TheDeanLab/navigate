@@ -62,3 +62,5 @@ class MirrorBase:
         self.configuration = configuration
         self.mirror_controller = device_connection
         self.mirror_parameters = self.configuration['configuration']['microscopes'][microscope_name]['mirror']
+
+        self.is_synthetic = False

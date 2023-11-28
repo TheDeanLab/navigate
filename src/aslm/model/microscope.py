@@ -265,7 +265,8 @@ class Microscope:
             self.stages_list.append((stage, list(device_config["axes"])))
         
         # flatten the mirror
-        self.mirror.flat()
+        if not self.mirror.is_synthetic:
+            self.mirror.flat()
 
         # connect daq and camera in synthetic mode
         if is_synthetic:

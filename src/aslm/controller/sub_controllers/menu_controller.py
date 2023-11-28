@@ -478,11 +478,10 @@ class MenuController(GUIController):
         )
 
         # add adaptive optics as standalone pop-up for now (if mirror is real, otherwise don't)
-        if not self.parent_controller.model.active_microscope.mirror.is_synthetic:
-            self.view.menubar.menu_features.add_separator()
-            self.view.menubar.menu_features.add_command(
-                label="Adaptive Optics", command=self.popup_adaptiveoptics
-            )
+        self.view.menubar.menu_features.add_separator()
+        self.view.menubar.menu_features.add_command(
+            label="Adaptive Optics", command=self.popup_adaptiveoptics
+        )
 
         self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(

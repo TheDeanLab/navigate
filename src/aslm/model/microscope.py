@@ -119,6 +119,7 @@ class Microscope:
             "remote_focus_device": ["type", "channel"],
             "galvo": ["type", "channel"],
             "lasers": ["wavelength"],
+            "mirror": ["type"]
         }
 
         # TODO: This cannot be pulled into the repo.
@@ -207,6 +208,23 @@ class Microscope:
                         else getattr(self, device_name)
                     )
 
+        # cameras (handle camera list similar to stages...)
+        # camera_devices = self.configuration['configuration']['microscopes'][self.microscope_name]['camera']['hardware']
+        # if type(camera_devices) != ListProxy:
+        #     camera_devices = [camera_devices]
+        # for i, device_config in enumerate(camera_devices):
+        #     device_ref_name = build_ref_name('_', device_config['type'], device_config['serial_number'])            
+        #     if device_ref_name not in devices_dict['camera']:
+        #         logger.debug(f'Camera {device_ref_name} has not been loaded!')
+        #         raise Exception('No camera device!')
+        #     print(f"{device_ref_name} : {devices_dict['camera'][device_ref_name]}")
+        #     self.cameras[device_ref_name] = start_camera(self.microscope_name, devices_dict['camera'][device_ref_name], self.configuration, i, is_synthetic)
+
+        # self.camera = list(self.cameras.values())[0] # just use the first one for now...
+
+        # print('>>> Use Camera:')
+        # print(self.camera.camera_controller._serial_number)
+
         # stages
         stage_devices = self.configuration["configuration"]["microscopes"][
             self.microscope_name
@@ -262,6 +280,9 @@ class Microscope:
                 self.info[f"stage_{axis}"] = device_ref_name
 
             self.stages_list.append((stage, list(device_config["axes"])))
+        
+        # flatten the mirror
+        self.mirror.flat()
 
         # connect daq and camera in synthetic mode
         if is_synthetic:

@@ -690,7 +690,7 @@ dcamcap_transferinfo = __dll.dcamcap_transferinfo
 dcamwait_start = __dll.dcamwait_start
 dcamwait_abort = __dll.dcamwait_abort
 dcamcap_firetrigger = __dll.dcamcap_firetrigger
-dcamdev_setdata = __dll.dcamdev_setdata
+# dcamdev_setdata = __dll.dcamdev_setdata
 dcamdev_getstring = __dll.dcamdev_getstring
 
 

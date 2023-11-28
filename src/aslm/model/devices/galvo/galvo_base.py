@@ -189,6 +189,20 @@ class GalvoBase:
                         offset=galvo_offset,
                         phase=self.device_config["phase"],
                     )
+                elif self.galvo_waveform == "halfsaw":
+                    new_wave = sawtooth(
+                        sample_rate=self.sample_rate,
+                        sweep_time=self.sweep_time,
+                        frequency=galvo_frequency,
+                        amplitude=galvo_amplitude,
+                        offset=galvo_offset,
+                        phase=(self.camera_delay_percent / 100) * exposure_time,
+                    )
+                    # delay_samples = int((self.camera_delay_percent/100) * (exposure_time/2) * self.sample_rate)
+                    # half_samples = int(len(new_wave)/2)
+                    half_samples = new_wave.argmax() if galvo_amplitude > 0 else new_wave.argmin()
+                    new_wave[:half_samples] = -galvo_offset
+                    self.waveform_dict[channel_key] = new_wave
                 else:
                     print("Unknown Galvo waveform specified in configuration file.")
                     self.waveform_dict[channel_key] = None

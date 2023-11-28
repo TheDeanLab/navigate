@@ -150,7 +150,9 @@ class TonyWilson:
         frame_num = self.get_tw_frame_num()
         if frame_num < 1:
             return
-        self.model.prepare_acquisition()  # Opens correct shutter and puts all signals to false
+        
+        # Opens correct shutter and puts all signals to false
+        self.model.prepare_acquisition()  
         self.model.active_microscope.prepare_next_channel()
 
         # load signal and data containers
@@ -194,9 +196,8 @@ class TonyWilson:
         # initialize the mirror and coef lists, etc
 
         # Timing
-        self.start_time = time.time() # this only works here...
+        self.start_time = time.time()
 
-        # mirror_settings = self.model.configuration['experiment']['MirrorParameters']
         tw_settings = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']
 
         self.done_all = False
@@ -204,13 +205,6 @@ class TonyWilson:
         self.n_iter = tw_settings['iterations']
         self.n_steps = tw_settings['steps']
         self.coef_amp = tw_settings['amplitude']
-
-        # curr_channel = self.model.active_microscope.current_channel
-        # self.laser = self.model.active_microscope.lasers[str(self.model.active_microscope.laser_wavelength[curr_channel])]
-
-        # initalize coefs to current
-        """ numpy arrays screw up the threading...? need to use SharedNDArray? """
-        # self.best_coefs = SharedNDArray(shape=(self.n_modes,), dtype=np.float32)
 
         self.coef_sweep = np.linspace(-self.coef_amp, self.coef_amp, self.n_steps).astype(np.float32)
 
@@ -220,41 +214,10 @@ class TonyWilson:
 
         print(f"Total frame num: {self.total_frame_num}")
 
-        # print(f'pre_func_signal\t>>>\t{tw_settings}\ttotal_frame_num={self.total_frame_num}')
-
     def in_func_signal(self):
-        # print("IN_FUNC_SIGNAL CALLED")
-        # update everything
-        
-        """
-        Only PUT into frame_queue
-        Only GET from data_queue
-        """
-
         out_str = f'in_func_signal\n'
 
         out_str += f'\tSignal:\t{self.signal_id}\n'
-
-        # just update the mirror...
-        # while True:
-        #     try:
-        #         frames_done = self.tw_data_queue.get_nowait()
-        #     except:
-        #         out_str += '\tStill waiting for tw_data_queue...\n'
-        #         break   
-            
-            # out_str += f'\tFrames:\t{last_frame_ids}\n'
-
-            # out_str += f'\tDone:\t{frames_done}\n'
-            # if self.signal_id > frames_done[-1]:
-            #     break
-
-        try:
-            frames_done = self.tw_data_queue.get_nowait()[0]
-        except:
-            frames_done = 0
-
-        # if self.signal_id <= frames_done:
 
         step = self.signal_id % self.n_steps
         coef = int(self.signal_id/self.n_steps) % self.n_coefs
@@ -272,23 +235,10 @@ class TonyWilson:
 
         out_str += f"\tApply:\t[{' '.join([f'{c:.2f}' for c in (applied_coefs)])}]\n"
 
-        # out_str += f"\tPos:\t{self.mirror_controller.mirror.check_absolute_positions(coef_arr + self.best_coefs)}\n"
-
-        """
-            MAJOR ISSUE:
-            The modal coefs being sent to the mirror are not being applied after the first iteration.
-            Added a [quick fix] below, but will want to go into mirror.display_modes and solve the problem...
-
-            Seems to work more smoothly with lower exposure time... what does this mean???
-        """
-        self.mirror_controller.flat() # Flattening the mirror before applying the coefs solves this... weird...
-        
+        # Update the mirror...
+        self.mirror_controller.flat()   
         try:
-            # if self.mirror_controller.mirror.check_absolute_positions(coef_arr + self.best_coefs):
             self.mirror_controller.display_modes(applied_coefs)
-            # time.sleep(0.025)
-            # else:
-            #     return
         except Exception as e:
             print(e)
             return
@@ -303,30 +253,6 @@ class TonyWilson:
         except Exception as e:
             print(e)
             return
-        
-        # else:
-        #     continue
-
-                # OLD CODE...
-                # while True:
-                #     # only increment the mirror if you've recieved new_data from the data_queue
-                #     try:
-                #         plot_data = self.tw_data_queue.get_nowait()[0]
-                #     except:
-                #         break   
-
-                #     step = self.signal_id % self.n_steps
-                #     coef = int(self.signal_id/self.n_steps) % self.n_coefs
-                #     itr = int(self.signal_id/self.n_steps/self.n_coefs) % self.n_iter
-
-                #     coef_arr = np.zeros(self.n_modes, dtype=np.float32)
-                #     c = self.change_coef[coef]
-                #     coef_arr[c] = self.coef_sweep[step]
-
-                #     self.mirror_controller.display_modes(coef_arr + self.best_coefs)
-
-                #     # if step == int(self.n_steps/2):
-                #     #     self.best_peaks.append(plot_data[-1])
 
         self.model.logger.debug(
             f"*** TonyWilson > in_func_signal :: iter: {itr}\tcoef: {coef}\tstep: {step}"
@@ -335,36 +261,7 @@ class TonyWilson:
         self.model.logger.debug(
             f"*** TonyWilson > in_func_signal :: display_modes: [{coef_str}]"
         )
-
-                #     self.signal_id += 1
-
-                #     # if coef == 0 and step == 0 and itr > 0:
-                #     #     self.coef_sweep *= 0.9
-
-        # if coef == self.n_coefs-1:
-        #     if step == self.n_steps-1:
-                
-        #         self.coef_sweep *= 0.95
-        #         self.done_itr = True
-        #         out_str += f'\tDone iteration {itr}!\n'
-
-        #         if itr == self.n_iter-1:
-        #             self.done_all = True
-        #             out_str += '\tDone all!!!\n'
-
-                #     self.tw_frame_queue.put((self.model.frame_id, self.total_frame_num - self.signal_id, itr, coef, step, coef_arr)) # put frame_id in the Queue
-        # try:
-        #     frames_done = self.tw_data_queue.get_nowait()[0]
         
-        #     if self.signal_id > frames_done:
-        #         self.signal_id -= 1
-        #         return False
-        # except:
-        #     pass
-        
-        """
-            Quick Fix
-        """
         if ((applied_coefs == curr_mirror_coefs).all() or (applied_coefs == 0).all()):
             self.signal_id += 1
 
@@ -409,11 +306,6 @@ class TonyWilson:
 
         self.frames_done = 0
 
-    """
-    c = y_min
-    2*a*x_max + b = 0
-    """
-
     def process_data(self, coef, mode='poly'):
         self.y = self.plot_data
         
@@ -448,13 +340,7 @@ class TonyWilson:
         self.plot_data = []
 
     def in_func_data(self, frame_ids=[]):
-        # print("IN_FUNC_DATA CALLED")
         self.get_frames_num += len(frame_ids)
-
-        """
-        Only GET from frame_queue
-        Only PUT into data_queue
-        """
         
         out_str = 'in_func_data\n'
 
@@ -470,13 +356,11 @@ class TonyWilson:
                         self.frame_num, 
                         itr, 
                         coef, 
-                        step, 
-                        # coef_arr
+                        step
                     ) = self.tw_frame_queue.get_nowait()
                 if self.f_frame_id not in frame_ids:
                     out_str += f"\tFrame ID {self.f_frame_id} was not in the frame queue...\n"
                     break
-                    # self.f_frame_id -= 1
             except Exception:
                 out_str += "\tStill waiting tw_frame_queue...\n"
                 break
@@ -491,19 +375,6 @@ class TonyWilson:
                 new_data = img.mean()
             elif self.metric == 'DCT Shannon Entropy':
                 new_data = img_contrast.fast_normalized_dct_shannon_entropy(img, 3)[0]
-
-            """
-                From model_debug log... might hint at why data_thread keeps crashing...
-
-                2023-11-21 18:49:30,388 - model - DEBUG - feature_container: DataContainer - Traceback (most recent call last):
-                    File "c:\\users\\vastopmv3\\documents\\github\\aslm\\src\\aslm\\model\\features\\feature_container.py", line 245, in run
-                        result, is_end = self.curr_node.run(*args)
-                    File "c:\\users\\vastopmv3\\documents\\github\\aslm\\src\\aslm\\model\\features\\feature_container.py", line 156, in run
-                        result = self.node_funcs["main"](*args)
-                    File "c:\\users\\vastopmv3\\documents\\github\\aslm\\src\\aslm\\model\\features\\adaptive_optics.py", line 482, in in_func_data
-                        self.process_data(coef, mode='poly')
-                    UnboundLocalError: local variable 'coef' referenced before assignment
-            """
 
             if len(self.plot_data) == self.n_steps:
                 self.process_data(coef, mode='poly')

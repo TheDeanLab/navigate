@@ -6,11 +6,11 @@ This is a case study in using the software to image with a `mesoSPIM BT microsco
 Setting the beam parameters
 ---------------------------
 
-#. Go to the :guilabel:`Channels` tab. Choose the wavelength you want to align. Set the laser's :guilabel:`Power` to 100.0. Change :guilabel:`Filter` to an "Empty" option.
+#. Go to the :guilabel:`Channels` tab. Choose the wavelength you want to align. Set the laser's :guilabel:`Power` to `100.0`. Change :guilabel:`Filter` to an "Empty" option.
 #. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup named :guilabel:`Waveform Parameter Settings` will appear. Make sure the :guilabel:`Mode` matches "mesoSPIM BT" and the :guilabel:`Magnification` matches the magnification of the objective you are using.
-#. :guilabel:`Galvo 0` digitally sweeps the beam across the field of view. To align the axially-swept light sheet parameters, set the :guilabel:`Galvo 0` :guilabel:`Amplitude`` to 0.0. Set the :guilabel:`Offset` so that the beam is centered in the field of view. Click the :guilabel:`Camera View` to toggle the crosshairs, which indicate the center of the field of view. Adjust the :guilabel:`F` (focus) value in the :guilabel:`Stage Control` panel until the beam is as thin/focused as possible.
+#. :guilabel:`Galvo 0` digitally sweeps the beam across the field of view. To align the axially-swept light sheet parameters, set the :guilabel:`Galvo 0` :guilabel:`Amplitude` to `0.0`. Set the :guilabel:`Offset` so that the beam is centered in the field of view. Click the :guilabel:`Camera View` to toggle the crosshairs, which indicate the center of the field of view. Adjust the :guilabel:`F` (focus) value in the :guilabel:`Stage Control` panel until the beam is as thin/focused as possible.
 #. The empty filter makes us susceptible to seeing particles scattering light in the chamber. This can effect the software's autoscaling routine. To ensure we are looking at the beam correctly, uncheck :guilabel:`Autoscale` and set the :guilabel:`Min Counts` and :guilabel:`Max Counts` so the beam is visible, but not saturating the display.
-#. Set the wavelength's :guilabel:`Amplitude` to 0.0. Set the wavelength's :guilabel:`Offset` so that the beam is focused in the center of the field of view.
+#. Set the wavelength's :guilabel:`Amplitude` to `0.0`. Set the wavelength's :guilabel:`Offset` so that the beam is focused in the center of the field of view.
 #. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
 #. Once the beam is straight, slowly change the wavelength's :guilabel:`Offset` until the beam has an even thickness across the field of view.
 #. Slowly increase :guilabel:`Galvo 0`'s :guilabel:`Amplitude` until the entire field of view is just covered by the swept beam.
@@ -30,7 +30,7 @@ Loading and finding the sample
 
 Imaging a Z-Stack
 -----------------
-#. Go to a shallow Z-position in the sample. Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (\mu m)` press :guilabel:`Set Start Pos/Foc`.
+#. Go to a shallow Z-position in the sample. Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)` press :guilabel:`Set Start Pos/Foc`.
 #. Go to a deep Z-position in the sample. Press :guilabel:`Set End Pos/Foc`.
 #. Select "Z-Stack" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`.
 #. Enter the sample parameters in the :guilabel:`File Saving Dialog` that pops up. Press :guilabel:`Acquire Data`.
@@ -38,7 +38,7 @@ Imaging a Z-Stack
 Tiling a sample larger than the field of view
 ---------------------------------------------
 
-This assumes you have already set the start and end positions in :guilabel:`Stack Acquistion Settings (\mu m)` (see :ref:`Imaging a Z-Stack <z_stack>`).
+This assumes you have already set the start and end positions in :guilabel:`Stack Acquistion Settings (um)` (see :ref:`Imaging a Z-Stack <z_stack>`).
 
 #. Under the :guilabel:`Channels` tab, press :guilabel:`Launch Tiling Wizard`.
 #. Go to thickest part of the sample. Navigate to the lower bound of the x-axis and press :guilabel:`Set X Start`. Navigate to the upper bound of the x-axis and press :guilabel:`Set X End`. Repeat for all axes except for focus.

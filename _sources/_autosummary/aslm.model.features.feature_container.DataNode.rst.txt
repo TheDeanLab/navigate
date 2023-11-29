@@ -24,4 +24,16 @@ aslm.model.features.feature\_container.DataNode
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DataNode.is_marked
+      ~DataNode.node_name
+      ~DataNode.node_funcs
+      ~DataNode.node_type
+      ~DataNode.device_related
+      ~DataNode.need_response
+      ~DataNode.is_initialized
+   
    

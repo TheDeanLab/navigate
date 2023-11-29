@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>aslm.model.features.feature_container.SignalContainer &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -51,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
@@ -66,8 +69,7 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.auto_tile_scan.html">aslm.model.features.auto_tile_scan</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.autofocus.html">aslm.model.features.autofocus</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.common_features.html">aslm.model.features.common_features</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.constant_velocity_acquisition.html">aslm.model.features.constant_velocity_acquisition</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.dummy_detective.html">aslm.model.features.dummy_detective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.cva_conpro.html">aslm.model.features.cva_conpro</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.features.feature_container.html">aslm.model.features.feature_container</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.feature_related_functions.html">aslm.model.features.feature_related_functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.image_writer.html">aslm.model.features.image_writer</a></li>
@@ -126,47 +128,6 @@
 <p>This class is a specialized container for managing control sequences that consist
 of signal-based nodes. It extends the functionality of the base <cite>Container</cite> class
 and provides methods for running signal-based control sequences.</p>
-<section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>root<span class="classifier">TreeNode or None, optional</span></dt><dd><p>The root node of the control sequence tree. Default is None.</p>
-</dd>
-<dt>cleanup_list<span class="classifier">list of TreeNode, optional</span></dt><dd><p>A list of nodes containing ‘cleanup’ functions to be executed when the
-container is closed. Default is an empty list.</p>
-</dd>
-<dt>number_of_execution<span class="classifier">int, optional</span></dt><dd><p>The number of times the control sequence should be executed. Default is 1.</p>
-</dd>
-</dl>
-</section>
-<section id="attributes">
-<h2>Attributes:<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>root<span class="classifier">TreeNode or None</span></dt><dd><p>The root node of the control sequence tree.</p>
-</dd>
-<dt>curr_node<span class="classifier">TreeNode or None</span></dt><dd><p>The currently running node in the control sequence.</p>
-</dd>
-<dt>end_flag<span class="classifier">bool</span></dt><dd><p>A flag indicating whether the control sequence execution should stop.</p>
-</dd>
-<dt>cleanup_list<span class="classifier">list of TreeNode</span></dt><dd><p>A list of nodes containing ‘cleanup’ functions to be executed when the
-container is closed.</p>
-</dd>
-<dt>is_closed<span class="classifier">bool</span></dt><dd><p>A boolean indicating whether the container is closed.</p>
-</dd>
-<dt>number_of_execution<span class="classifier">int</span></dt><dd><p>The total number of times the control sequence should be executed.</p>
-</dd>
-<dt>remaining_number_of_execution<span class="classifier">int</span></dt><dd><p>The remaining number of executions of the control sequence.</p>
-</dd>
-</dl>
-</section>
-<section id="methods">
-<h2>Methods:<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>reset():</dt><dd><p>Reset the container’s state, including the current node and end flag.</p>
-</dd>
-<dt>run(<a href="#id1"><span class="problematic" id="id2">*</span></a>args, wait_response=False):</dt><dd><p>Run the signal-based control sequence.</p>
-</dd>
-</dl>
-</section>
 <section id="notes">
 <h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
 <ul class="simple">
@@ -181,13 +142,26 @@ track of the remaining executions.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.feature_container.SignalContainer.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_execution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.feature_container.SignalContainer.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the SignalContainer object.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>root<span class="classifier">TreeNode or None, optional</span></dt><dd><p>The root node of the control sequence tree. Default is None.</p>
+</dd>
+<dt>cleanup_list<span class="classifier">list of TreeNode, optional</span></dt><dd><p>A list of nodes containing ‘cleanup’ functions to be executed when the
+container is closed. Default is an empty list.</p>
+</dd>
+<dt>number_of_execution<span class="classifier">int, optional</span></dt><dd><p>The number of times the control sequence should be executed. Default is 1.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.SignalContainer.__init__" title="aslm.model.features.feature_container.SignalContainer.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([root, cleanup_list, ...])</p></td>
-<td><p></p></td>
+<td><p>Initialize the SignalContainer object.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.SignalContainer.cleanup" title="aslm.model.features.feature_container.SignalContainer.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a>()</p></td>
 <td><p>Execute 'cleanup' functions for specified nodes in the tree.</p></td>
@@ -197,6 +171,17 @@ track of the remaining executions.</p></li>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.SignalContainer.run" title="aslm.model.features.feature_container.SignalContainer.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>(*args[, wait_response])</p></td>
 <td><p>Run the signal-based control sequence.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.SignalContainer.number_of_execution" title="aslm.model.features.feature_container.SignalContainer.number_of_execution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_execution</span></code></a></p></td>
+<td><p>The total number of times the control sequence should be executed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.SignalContainer.remaining_number_of_execution" title="aslm.model.features.feature_container.SignalContainer.remaining_number_of_execution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remaining_number_of_execution</span></code></a></p></td>
+<td><p>The remaining number of executions of the control sequence.</p></td>
 </tr>
 </tbody>
 </table>
@@ -227,18 +212,18 @@ the beginning.</p>
 <p>This method runs the signal-based control sequence by iterating through its
 nodes and executing them in order. It manages the execution of nodes and
 handles transitions between nodes based on their logic.</p>
-<section id="id3">
-<h3>Parameters:<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<section id="id1">
+<h3>Parameters:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <dl class="simple">
-<dt><a href="#id4"><span class="problematic" id="id5">*</span></a>args<span class="classifier">arguments</span></dt><dd><p>Optional arguments to pass to the control sequence nodes.</p>
+<dt><a href="#id2"><span class="problematic" id="id3">*</span></a>args<span class="classifier">arguments</span></dt><dd><p>Optional arguments to pass to the control sequence nodes.</p>
 </dd>
 <dt>wait_response<span class="classifier">bool, optional</span></dt><dd><p>A flag indicating whether to wait for responses during execution.
 Default is False.</p>
 </dd>
 </dl>
 </section>
-<section id="id6">
-<h3>Notes:<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<section id="id4">
+<h3>Notes:<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>The <cite>run</cite> method is responsible for executing the control sequence nodes in
 the order defined by the control sequence tree.</p></li>
@@ -246,6 +231,72 @@ the order defined by the control sequence tree.</p></li>
 tracks the remaining executions of the control sequence.</p></li>
 </ul>
 </section>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.SignalContainer.curr_node">
+<span class="sig-name descname"><span class="pre">curr_node</span></span><a class="headerlink" href="#aslm.model.features.feature_container.SignalContainer.curr_node" title="Permalink to this definition"></a></dt>
+<dd><p>The currently running node in the control sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="aslm.model.features.feature_container.TreeNode.html#aslm.model.features.feature_container.TreeNode" title="aslm.model.features.feature_container.TreeNode">TreeNode</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.SignalContainer.end_flag">
+<span class="sig-name descname"><span class="pre">end_flag</span></span><a class="headerlink" href="#aslm.model.features.feature_container.SignalContainer.end_flag" title="Permalink to this definition"></a></dt>
+<dd><p>A flag indicating whether the control sequence execution should stop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.SignalContainer.is_closed">
+<span class="sig-name descname"><span class="pre">is_closed</span></span><a class="headerlink" href="#aslm.model.features.feature_container.SignalContainer.is_closed" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean indicating whether the container is closed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.SignalContainer.number_of_execution">
+<span class="sig-name descname"><span class="pre">number_of_execution</span></span><a class="headerlink" href="#aslm.model.features.feature_container.SignalContainer.number_of_execution" title="Permalink to this definition"></a></dt>
+<dd><p>The total number of times the control sequence should be executed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.SignalContainer.remaining_number_of_execution">
+<span class="sig-name descname"><span class="pre">remaining_number_of_execution</span></span><a class="headerlink" href="#aslm.model.features.feature_container.SignalContainer.remaining_number_of_execution" title="Permalink to this definition"></a></dt>
+<dd><p>The remaining number of executions of the control sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.SignalContainer.root">
+<span class="sig-name descname"><span class="pre">root</span></span><a class="headerlink" href="#aslm.model.features.feature_container.SignalContainer.root" title="Permalink to this definition"></a></dt>
+<dd><p>The root node of the control sequence tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="aslm.model.features.feature_container.TreeNode.html#aslm.model.features.feature_container.TreeNode" title="aslm.model.features.feature_container.TreeNode">TreeNode</a> or None</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

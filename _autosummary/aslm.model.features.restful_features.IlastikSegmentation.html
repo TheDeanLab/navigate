@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>aslm.model.features.restful_features.IlastikSegmentation &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -51,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
@@ -66,8 +69,7 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.auto_tile_scan.html">aslm.model.features.auto_tile_scan</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.autofocus.html">aslm.model.features.autofocus</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.common_features.html">aslm.model.features.common_features</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.constant_velocity_acquisition.html">aslm.model.features.constant_velocity_acquisition</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.dummy_detective.html">aslm.model.features.dummy_detective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.cva_conpro.html">aslm.model.features.cva_conpro</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.feature_container.html">aslm.model.features.feature_container</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.feature_related_functions.html">aslm.model.features.feature_related_functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.image_writer.html">aslm.model.features.image_writer</a></li>
@@ -122,31 +124,195 @@
 <dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.features.restful_features.</span></span><span class="sig-name descname"><span class="pre">IlastikSegmentation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Ilastik segmentation class.</p>
+<p>Uses Ilastik REST API to perform segmentation in a separate process.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize Ilastik segmentation class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="aslm.model.model.Model.html#aslm.model.model.Model" title="aslm.model.model.Model"><em>Model</em></a>) – Model object</p>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.__init__" title="aslm.model.features.restful_features.IlastikSegmentation.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model)</p></td>
-<td><p></p></td>
+<td><p>Initialize Ilastik segmentation class.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_func</span></code>(frame_ids)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.data_func" title="aslm.model.features.restful_features.IlastikSegmentation.data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_func</span></code></a>(frame_ids)</p></td>
+<td><p>Perform Ilastik segmentation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_func</span></code>(*args)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.init_func" title="aslm.model.features.restful_features.IlastikSegmentation.init_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_func</span></code></a>(*args)</p></td>
+<td><p>Initialize Ilastik segmentation.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mark_position</span></code>(mask)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.mark_position" title="aslm.model.features.restful_features.IlastikSegmentation.mark_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mark_position</span></code></a>(mask)</p></td>
+<td><p>Mark position based on the segmentation mask.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_setting</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.update_setting" title="aslm.model.features.restful_features.IlastikSegmentation.update_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_setting</span></code></a>()</p></td>
+<td><p>Update Ilastik segmentation settings.</p></td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.model" title="aslm.model.features.restful_features.IlastikSegmentation.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>Model object</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.service_url" title="aslm.model.features.restful_features.IlastikSegmentation.service_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">service_url</span></code></a></p></td>
+<td><p>url of the service</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.project_file" title="aslm.model.features.restful_features.IlastikSegmentation.project_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_file</span></code></a></p></td>
+<td><p>project file for Ilastik segmentation</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.resolution" title="aslm.model.features.restful_features.IlastikSegmentation.resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolution</span></code></a></p></td>
+<td><p>resolution of the current microscope</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.zoom" title="aslm.model.features.restful_features.IlastikSegmentation.zoom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zoom</span></code></a></p></td>
+<td><p>zoom of the current microscope</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.pieces_num" title="aslm.model.features.restful_features.IlastikSegmentation.pieces_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pieces_num</span></code></a></p></td>
+<td><p>number of pieces</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.pieces_size" title="aslm.model.features.restful_features.IlastikSegmentation.pieces_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pieces_size</span></code></a></p></td>
+<td><p>size of pieces</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.restful_features.IlastikSegmentation.config_table" title="aslm.model.features.restful_features.IlastikSegmentation.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<td><p>configuration table</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.data_func">
+<span class="sig-name descname"><span class="pre">data_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.data_func" title="Permalink to this definition"></a></dt>
+<dd><p>Perform Ilastik segmentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>frame_ids</strong> (<em>list</em>) – list of frame ids</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.init_func">
+<span class="sig-name descname"><span class="pre">init_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.init_func" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize Ilastik segmentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>list</em>) – list of arguments</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.mark_position">
+<span class="sig-name descname"><span class="pre">mark_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.mark_position" title="Permalink to this definition"></a></dt>
+<dd><p>Mark position based on the segmentation mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mask</strong> (<em>numpy.ndarray</em>) – segmentation mask</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.update_setting">
+<span class="sig-name descname"><span class="pre">update_setting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.update_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Update Ilastik segmentation settings.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.config_table">
+<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.config_table" title="Permalink to this definition"></a></dt>
+<dd><p>configuration table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.model" title="Permalink to this definition"></a></dt>
+<dd><p>Model object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>aslm.model.Model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.pieces_num">
+<span class="sig-name descname"><span class="pre">pieces_num</span></span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.pieces_num" title="Permalink to this definition"></a></dt>
+<dd><p>number of pieces</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.pieces_size">
+<span class="sig-name descname"><span class="pre">pieces_size</span></span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.pieces_size" title="Permalink to this definition"></a></dt>
+<dd><p>size of pieces</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.project_file">
+<span class="sig-name descname"><span class="pre">project_file</span></span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.project_file" title="Permalink to this definition"></a></dt>
+<dd><p>project file for Ilastik segmentation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.resolution">
+<span class="sig-name descname"><span class="pre">resolution</span></span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.resolution" title="Permalink to this definition"></a></dt>
+<dd><p>resolution of the current microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.service_url">
+<span class="sig-name descname"><span class="pre">service_url</span></span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.service_url" title="Permalink to this definition"></a></dt>
+<dd><p>url of the service</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.restful_features.IlastikSegmentation.zoom">
+<span class="sig-name descname"><span class="pre">zoom</span></span><a class="headerlink" href="#aslm.model.features.restful_features.IlastikSegmentation.zoom" title="Permalink to this definition"></a></dt>
+<dd><p>zoom of the current microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

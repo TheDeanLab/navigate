@@ -26,12 +26,14 @@ aslm.model.devices.stages.stage\_asi.ASIStage
       ~ASIStage.move_axis_absolute
       ~ASIStage.report_position
       ~ASIStage.scanr
+      ~ASIStage.scanv
       ~ASIStage.set_speed
       ~ASIStage.start_scan
       ~ASIStage.stop
       ~ASIStage.stop_scan
       ~ASIStage.verify_abs_position
       ~ASIStage.verify_move
+      ~ASIStage.wait_until_complete
    
    
 
@@ -41,10 +43,9 @@ aslm.model.devices.stages.stage\_asi.ASIStage
 
    .. autosummary::
    
-      ~ASIStage.axes_mapping
-      ~ASIStage.tiger_controller
       ~ASIStage.axes
       ~ASIStage.stage_feedback
+      ~ASIStage.axes_mapping
       ~ASIStage.stage_limits
    
    

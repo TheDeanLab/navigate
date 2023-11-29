@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>aslm.model.devices.stages.stage_asi.ASIStage &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -51,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
@@ -124,8 +127,8 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.devices.stages.stage_asi.</span></span><span class="sig-name descname"><span class="pre">ASIStage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="aslm.model.devices.stages.stage_base.StageBase.html#aslm.model.devices.stages.stage_base.StageBase" title="aslm.model.devices.stages.stage_base.StageBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">StageBase</span></code></a></p>
 <p>Applied Scientific Instrumentation (ASI) Stage Class</p>
-<p>ASI Documentation: <a class="reference external" href="http://asiimaging.com/docs/products/serial_commands">http://asiimaging.com/docs/products/serial_commands</a>
-ASI Quick Start Guide: <a class="reference external" href="http://asiimaging.com/docs/command_quick_start">http://asiimaging.com/docs/command_quick_start</a></p>
+<p>ASI Documentation: <a class="reference external" href="http://asiimaging.com/docs/products/serial_commands">http://asiimaging.com/docs/products/serial_commands</a></p>
+<p>ASI Quick Start Guide: <a class="reference external" href="http://asiimaging.com/docs/command_quick_start">http://asiimaging.com/docs/command_quick_start</a></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>ASI firmware requires all distances to be in a 10th of a micron.</p>
@@ -184,35 +187,35 @@ change both stilt positions simultaneously.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.scanr" title="aslm.model.devices.stages.stage_asi.ASIStage.scanr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanr</span></code></a>(start_position_mm, end_position_mm, ...)</p></td>
 <td><p>Set scan range</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.set_speed" title="aslm.model.devices.stages.stage_asi.ASIStage.set_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_speed</span></code></a>([velocity_dict, percent])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.scanv" title="aslm.model.devices.stages.stage_asi.ASIStage.scanv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanv</span></code></a>(start_position_mm, end_position_mm, ...)</p></td>
+<td><p>Set scan range</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.set_speed" title="aslm.model.devices.stages.stage_asi.ASIStage.set_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_speed</span></code></a>([velocity_dict, percent])</p></td>
 <td><p>Set scan velocity.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.start_scan" title="aslm.model.devices.stages.stage_asi.ASIStage.start_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_scan</span></code></a>(axis)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.start_scan" title="aslm.model.devices.stages.stage_asi.ASIStage.start_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_scan</span></code></a>(axis)</p></td>
 <td><p>Start scan state machine</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.stop" title="aslm.model.devices.stages.stage_asi.ASIStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.stop" title="aslm.model.devices.stages.stage_asi.ASIStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
 <td><p>Stop all stage movement abruptly.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.stop_scan" title="aslm.model.devices.stages.stage_asi.ASIStage.stop_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_scan</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.stop_scan" title="aslm.model.devices.stages.stage_asi.ASIStage.stop_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_scan</span></code></a>()</p></td>
 <td><p>Stop scan</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.verify_abs_position" title="aslm.model.devices.stages.stage_asi.ASIStage.verify_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_abs_position</span></code></a>(move_dictionary[, is_strict])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.verify_abs_position" title="aslm.model.devices.stages.stage_asi.ASIStage.verify_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_abs_position</span></code></a>(move_dictionary[, is_strict])</p></td>
 <td><p>Ensure the requested moving positions are within axes bounds</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.verify_move" title="aslm.model.devices.stages.stage_asi.ASIStage.verify_move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_move</span></code></a>(move_dictionary)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.verify_move" title="aslm.model.devices.stages.stage_asi.ASIStage.verify_move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_move</span></code></a>(move_dictionary)</p></td>
 <td><p>Don't submit a move command for axes that aren't moving.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_until_complete</span></code>(axis)</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.axes_mapping" title="aslm.model.devices.stages.stage_asi.ASIStage.axes_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes_mapping</span></code></a></p></td>
-<td><p>Mapping of axes to ASI axes</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.devices.stages.stage_asi.ASIStage.tiger_controller" title="aslm.model.devices.stages.stage_asi.ASIStage.tiger_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tiger_controller</span></code></a></p></td>
-<td><p>ASI Stage connection</p></td>
-</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -352,7 +355,30 @@ position dictionary.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>start_position_mm</strong> (<em>float</em>) – scan start position</p></li>
 <li><p><strong>end_position_mm</strong> (<em>float</em>) – scan end position</p></li>
-<li><p><strong>enc_divide</strong> (<em>float</em>) – an output pulse will occur every enc_divide number of encoder counts</p></li>
+<li><p><strong>enc_divide</strong> (<em>float</em>) – Step size desired.</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – fast axis name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Was the setting successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.scanv">
+<span class="sig-name descname"><span class="pre">scanv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_position_mm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_position_mm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overshoot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'z'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.scanv" title="Permalink to this definition"></a></dt>
+<dd><p>Set scan range</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_position_mm</strong> (<em>float</em>) – scan start position</p></li>
+<li><p><strong>end_position_mm</strong> (<em>float</em>) – scan end position</p></li>
+<li><p><strong>lines</strong> (<em>number of</em>) – number of steps.</p></li>
+<li><p><strong>overshoot</strong> (<em>float</em>) – overshoot_time ms</p></li>
 <li><p><strong>axis</strong> (<em>str</em>) – fast axis name</p></li>
 </ul>
 </dd>
@@ -473,7 +499,9 @@ in degrees.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.axes_mapping">
 <span class="sig-name descname"><span class="pre">axes_mapping</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.axes_mapping" title="Permalink to this definition"></a></dt>
-<dd><p>Mapping of axes to ASI axes</p>
+<dd><p>Initial setting for all positions
+self.x_pos, self.y_pos etc are the true axis positions, no matter whether
+the stages are zeroed or not. All units are in microns.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -496,12 +524,6 @@ in degrees.</p>
 <dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.devices.stages.stage_asi.ASIStage.tiger_controller">
-<span class="sig-name descname"><span class="pre">tiger_controller</span></span><a class="headerlink" href="#aslm.model.devices.stages.stage_asi.ASIStage.tiger_controller" title="Permalink to this definition"></a></dt>
-<dd><p>ASI Stage connection</p>
 </dd></dl>
 
 </dd></dl>

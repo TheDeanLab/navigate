@@ -39,5 +39,17 @@ aslm.model.metadata\_sources.bdv\_metadata.BigDataViewerMetadata
       ~BigDataViewerMetadata.per_stack
       ~BigDataViewerMetadata.shape
       ~BigDataViewerMetadata.voxel_size
+      ~BigDataViewerMetadata.dx
+      ~BigDataViewerMetadata.dy
+      ~BigDataViewerMetadata.dz
+      ~BigDataViewerMetadata.dt
+      ~BigDataViewerMetadata.dc
+      ~BigDataViewerMetadata.shape_x
+      ~BigDataViewerMetadata.shape_y
+      ~BigDataViewerMetadata.shape_z
+      ~BigDataViewerMetadata.shape_t
+      ~BigDataViewerMetadata.shape_c
+      ~BigDataViewerMetadata.positions
+      ~BigDataViewerMetadata.active_microscope
    
    

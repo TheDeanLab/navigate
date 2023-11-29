@@ -1,6 +1,0 @@
-aslm.tools.beams.fit\_gaussian\_beam\_mse
-=========================================
-
-.. currentmodule:: aslm.tools.beams
-
-.. autofunction:: fit_gaussian_beam_mse

@@ -1,7 +1,7 @@
-aslm.model.features.dummy\_detective
-====================================
+aslm.model.features.cva\_conpro
+===============================
 
-.. automodule:: aslm.model.features.dummy_detective
+.. automodule:: aslm.model.features.cva_conpro
 
    
    
@@ -19,7 +19,7 @@ aslm.model.features.dummy\_detective
       :toctree:
       :template: custom_class.rst
    
-      Dummy_Detective
+      ConstantVelocityAcquisition
    
    
 

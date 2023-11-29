@@ -28,4 +28,12 @@ aslm.model.features.remove\_empty\_tiles.DetectTissueInStack
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DetectTissueInStack.model
+      ~DetectTissueInStack.planes
+      ~DetectTissueInStack.detect_func
+   
    

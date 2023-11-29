@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>aslm.model.metadata_sources.metadata.Metadata &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -51,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
@@ -117,37 +120,41 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Store and convert internal representation of metadata (configuration,
+<dd><p>Metadata class</p>
+<p>Store and convert internal representation of metadata (configuration,
 experiment, etc.) to alternative file types.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <p>Concept and some of the code borrowed from python-microscopy
 (<a class="reference external" href="https://github.com/python-microscopy/python-microscopy/">https://github.com/python-microscopy/python-microscopy/</a>).</p>
+</div>
 </dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.__init__" title="aslm.model.metadata_sources.metadata.Metadata.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
-<td><p>Store and convert internal representation of metadata (configuration, experiment, etc.) to alternative file types.</p></td>
+<td><p>Metadata class</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_from_configuration_experiment</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.set_from_configuration_experiment" title="aslm.model.metadata_sources.metadata.Metadata.set_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_from_configuration_experiment</span></code></a>()</p></td>
+<td><p>Set from configuration experiment</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_shape_from_configuration_experiment</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.set_shape_from_configuration_experiment" title="aslm.model.metadata_sources.metadata.Metadata.set_shape_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_shape_from_configuration_experiment</span></code></a>()</p></td>
+<td><p>Set shape from configuration experiment</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_stack_order_from_configuration_experiment</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.set_stack_order_from_configuration_experiment" title="aslm.model.metadata_sources.metadata.Metadata.set_stack_order_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_stack_order_from_configuration_experiment</span></code></a>()</p></td>
+<td><p>Set stack order from configuration experiment</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.configuration" title="aslm.model.metadata_sources.metadata.Metadata.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Return configuration dictionary</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">per_stack</span></code></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.per_stack" title="aslm.model.metadata_sources.metadata.Metadata.per_stack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">per_stack</span></code></a></p></td>
+<td><p>Return per stack</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.shape" title="aslm.model.metadata_sources.metadata.Metadata.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></p></td>
 <td><p>Return shape as XYCZT.</p></td>
@@ -155,18 +162,274 @@ experiment, etc.) to alternative file types.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.voxel_size" title="aslm.model.metadata_sources.metadata.Metadata.voxel_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">voxel_size</span></code></a></p></td>
 <td><p>Return voxel size</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.dx" title="aslm.model.metadata_sources.metadata.Metadata.dx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dx</span></code></a></p></td>
+<td><p>Pixel size in x (um) float: Pixel size in y (um) float: Pixel size in z (um)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.dy" title="aslm.model.metadata_sources.metadata.Metadata.dy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dy</span></code></a></p></td>
+<td><p>Pixel size in x (um) float: Pixel size in y (um) float: Pixel size in z (um)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.dz" title="aslm.model.metadata_sources.metadata.Metadata.dz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dz</span></code></a></p></td>
+<td><p>Pixel size in x (um) float: Pixel size in y (um) float: Pixel size in z (um)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.dt" title="aslm.model.metadata_sources.metadata.Metadata.dt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dt</span></code></a></p></td>
+<td><p>Time displacement (s)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.dc" title="aslm.model.metadata_sources.metadata.Metadata.dc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dc</span></code></a></p></td>
+<td><p>Step size between channels, should always be 1</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.shape_x" title="aslm.model.metadata_sources.metadata.Metadata.shape_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape_x</span></code></a></p></td>
+<td><p>Shape of the data in x int: Shape of the data in y int: Shape of the data in z int: Shape of the data in t int: Shape of the data in c</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.shape_y" title="aslm.model.metadata_sources.metadata.Metadata.shape_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape_y</span></code></a></p></td>
+<td><p>Shape of the data in x int: Shape of the data in y int: Shape of the data in z int: Shape of the data in t int: Shape of the data in c</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.shape_z" title="aslm.model.metadata_sources.metadata.Metadata.shape_z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape_z</span></code></a></p></td>
+<td><p>Shape of the data in x int: Shape of the data in y int: Shape of the data in z int: Shape of the data in t int: Shape of the data in c</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.shape_t" title="aslm.model.metadata_sources.metadata.Metadata.shape_t"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape_t</span></code></a></p></td>
+<td><p>Shape of the data in x int: Shape of the data in y int: Shape of the data in z int: Shape of the data in t int: Shape of the data in c</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.shape_c" title="aslm.model.metadata_sources.metadata.Metadata.shape_c"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape_c</span></code></a></p></td>
+<td><p>Shape of the data in x int: Shape of the data in y int: Shape of the data in z int: Shape of the data in t int: Shape of the data in c</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.positions" title="aslm.model.metadata_sources.metadata.Metadata.positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">positions</span></code></a></p></td>
+<td><p>Number of positions</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.metadata_sources.metadata.Metadata.active_microscope" title="aslm.model.metadata_sources.metadata.Metadata.active_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_microscope</span></code></a></p></td>
+<td><p>Active microscope</p></td>
+</tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.set_from_configuration_experiment">
+<span class="sig-name descname"><span class="pre">set_from_configuration_experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.set_from_configuration_experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Set from configuration experiment</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.set_shape_from_configuration_experiment">
+<span class="sig-name descname"><span class="pre">set_shape_from_configuration_experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.set_shape_from_configuration_experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Set shape from configuration experiment</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.set_stack_order_from_configuration_experiment">
+<span class="sig-name descname"><span class="pre">set_stack_order_from_configuration_experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.set_stack_order_from_configuration_experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Set stack order from configuration experiment</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.active_microscope">
+<span class="sig-name descname"><span class="pre">active_microscope</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.active_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>Active microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.configuration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">configuration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">DictProxy</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Return configuration dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Configuration dictionary</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Optional[DictProxy]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.dc">
+<span class="sig-name descname"><span class="pre">dc</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.dc" title="Permalink to this definition"></a></dt>
+<dd><p>Step size between channels, should always be 1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.dt">
+<span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.dt" title="Permalink to this definition"></a></dt>
+<dd><p>Time displacement (s)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.dx">
+<span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.dx" title="Permalink to this definition"></a></dt>
+<dd><p>Pixel size in x (um)
+float: Pixel size in y (um)
+float: Pixel size in z (um)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.dy">
+<span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.dy" title="Permalink to this definition"></a></dt>
+<dd><p>Pixel size in x (um)
+float: Pixel size in y (um)
+float: Pixel size in z (um)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.dz">
+<span class="sig-name descname"><span class="pre">dz</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.dz" title="Permalink to this definition"></a></dt>
+<dd><p>Pixel size in x (um)
+float: Pixel size in y (um)
+float: Pixel size in z (um)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.per_stack">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">per_stack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.per_stack" title="Permalink to this definition"></a></dt>
+<dd><p>Return per stack</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if per stack, False otherwise</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.positions">
+<span class="sig-name descname"><span class="pre">positions</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.positions" title="Permalink to this definition"></a></dt>
+<dd><p>Number of positions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.shape">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></em><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.shape" title="Permalink to this definition"></a></dt>
 <dd><p>Return shape as XYCZT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Shape as XYCZT</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.shape_c">
+<span class="sig-name descname"><span class="pre">shape_c</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.shape_c" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.shape_t">
+<span class="sig-name descname"><span class="pre">shape_t</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.shape_t" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.shape_x">
+<span class="sig-name descname"><span class="pre">shape_x</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.shape_x" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.shape_y">
+<span class="sig-name descname"><span class="pre">shape_y</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.shape_y" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.shape_z">
+<span class="sig-name descname"><span class="pre">shape_z</span></span><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.shape_z" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="aslm.model.metadata_sources.metadata.Metadata.voxel_size">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">voxel_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></em><a class="headerlink" href="#aslm.model.metadata_sources.metadata.Metadata.voxel_size" title="Permalink to this definition"></a></dt>
 <dd><p>Return voxel size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Voxel size</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

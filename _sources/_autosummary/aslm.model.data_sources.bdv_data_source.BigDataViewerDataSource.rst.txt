@@ -40,5 +40,21 @@ aslm.model.data\_sources.bdv\_data\_source.BigDataViewerDataSource
       ~BigDataViewerDataSource.shapes
       ~BigDataViewerDataSource.subdivisions
       ~BigDataViewerDataSource.voxel_size
+      ~BigDataViewerDataSource.image
+      ~BigDataViewerDataSource.metadata
+      ~BigDataViewerDataSource.logger
+      ~BigDataViewerDataSource.file_name
+      ~BigDataViewerDataSource.bits
+      ~BigDataViewerDataSource.dx
+      ~BigDataViewerDataSource.dy
+      ~BigDataViewerDataSource.dz
+      ~BigDataViewerDataSource.dt
+      ~BigDataViewerDataSource.dc
+      ~BigDataViewerDataSource.shape_x
+      ~BigDataViewerDataSource.shape_y
+      ~BigDataViewerDataSource.shape_z
+      ~BigDataViewerDataSource.shape_t
+      ~BigDataViewerDataSource.shape_c
+      ~BigDataViewerDataSource.positions
    
    

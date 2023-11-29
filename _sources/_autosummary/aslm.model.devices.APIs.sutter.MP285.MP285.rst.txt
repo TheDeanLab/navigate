@@ -1,0 +1,40 @@
+aslm.model.devices.APIs.sutter.MP285.MP285
+==========================================
+
+.. currentmodule:: aslm.model.devices.APIs.sutter.MP285
+
+.. autoclass:: MP285
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MP285.__init__
+      ~MP285.close
+      ~MP285.connect_to_serial
+      ~MP285.convert_microns_to_microsteps
+      ~MP285.convert_microsteps_to_microns
+      ~MP285.disconnect_from_serial
+      ~MP285.flush_buffers
+      ~MP285.get_controller_status
+      ~MP285.get_current_position
+      ~MP285.interrupt_move
+      ~MP285.move_to_specified_position
+      ~MP285.refresh_display
+      ~MP285.reset_controller
+      ~MP285.safe_write
+      ~MP285.set_absolute_mode
+      ~MP285.set_resolution_and_velocity
+   
+   
+
+   
+   
+   

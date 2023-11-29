@@ -33,5 +33,17 @@ aslm.model.metadata\_sources.metadata.Metadata
       ~Metadata.per_stack
       ~Metadata.shape
       ~Metadata.voxel_size
+      ~Metadata.dx
+      ~Metadata.dy
+      ~Metadata.dz
+      ~Metadata.dt
+      ~Metadata.dc
+      ~Metadata.shape_x
+      ~Metadata.shape_y
+      ~Metadata.shape_z
+      ~Metadata.shape_t
+      ~Metadata.shape_c
+      ~Metadata.positions
+      ~Metadata.active_microscope
    
    

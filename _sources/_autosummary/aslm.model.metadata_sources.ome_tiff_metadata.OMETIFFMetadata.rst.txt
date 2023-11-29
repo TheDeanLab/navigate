@@ -36,5 +36,17 @@ aslm.model.metadata\_sources.ome\_tiff\_metadata.OMETIFFMetadata
       ~OMETIFFMetadata.per_stack
       ~OMETIFFMetadata.shape
       ~OMETIFFMetadata.voxel_size
+      ~OMETIFFMetadata.dx
+      ~OMETIFFMetadata.dy
+      ~OMETIFFMetadata.dz
+      ~OMETIFFMetadata.dt
+      ~OMETIFFMetadata.dc
+      ~OMETIFFMetadata.shape_x
+      ~OMETIFFMetadata.shape_y
+      ~OMETIFFMetadata.shape_z
+      ~OMETIFFMetadata.shape_t
+      ~OMETIFFMetadata.shape_c
+      ~OMETIFFMetadata.positions
+      ~OMETIFFMetadata.active_microscope
    
    

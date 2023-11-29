@@ -26,4 +26,17 @@ aslm.model.features.restful\_features.IlastikSegmentation
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~IlastikSegmentation.model
+      ~IlastikSegmentation.service_url
+      ~IlastikSegmentation.project_file
+      ~IlastikSegmentation.resolution
+      ~IlastikSegmentation.zoom
+      ~IlastikSegmentation.pieces_num
+      ~IlastikSegmentation.pieces_size
+      ~IlastikSegmentation.config_table
+   
    

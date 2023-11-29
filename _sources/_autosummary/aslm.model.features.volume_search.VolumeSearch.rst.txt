@@ -30,4 +30,31 @@ aslm.model.features.volume\_search.VolumeSearch
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~VolumeSearch.model
+      ~VolumeSearch.target_resolution
+      ~VolumeSearch.target_zoom
+      ~VolumeSearch.z_steps
+      ~VolumeSearch.z_step_size
+      ~VolumeSearch.z_pos
+      ~VolumeSearch.f_step_size
+      ~VolumeSearch.f_pos
+      ~VolumeSearch.f_offset
+      ~VolumeSearch.curr_z_index
+      ~VolumeSearch.sinx
+      ~VolumeSearch.siny
+      ~VolumeSearch.overlap
+      ~VolumeSearch.has_tissue_queue
+      ~VolumeSearch.direction
+      ~VolumeSearch.has_tissue
+      ~VolumeSearch.first_boundary
+      ~VolumeSearch.pre_boundary
+      ~VolumeSearch.end_flag
+      ~VolumeSearch.config_table
+      ~VolumeSearch.debug
+      ~VolumeSearch.volumes_selected
+   
    

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Index &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -48,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
@@ -137,6 +140,8 @@
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.__init__">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.device_startup_functions.DummyDeviceConnection.html#aslm.model.device_startup_functions.DummyDeviceConnection.__init__">(aslm.model.device_startup_functions.DummyDeviceConnection method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.__init__">(aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.devices.camera.camera_base.CameraBase.html#aslm.model.devices.camera.camera_base.CameraBase.__init__">(aslm.model.devices.camera.camera_base.CameraBase method)</a>
 </li>
@@ -234,9 +239,7 @@
 </li>
         <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.__init__">(aslm.model.features.common_features.ZStackAcquisition method)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition.html#aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition.__init__">(aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition method)</a>
-</li>
-        <li><a href="_autosummary/aslm.model.features.dummy_detective.Dummy_Detective.html#aslm.model.features.dummy_detective.Dummy_Detective.__init__">(aslm.model.features.dummy_detective.Dummy_Detective method)</a>
+        <li><a href="_autosummary/aslm.model.features.cva_conpro.ConstantVelocityAcquisition.html#aslm.model.features.cva_conpro.ConstantVelocityAcquisition.__init__">(aslm.model.features.cva_conpro.ConstantVelocityAcquisition method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.features.feature_container.Container.html#aslm.model.features.feature_container.Container.__init__">(aslm.model.features.feature_container.Container method)</a>
 </li>
@@ -296,6 +299,14 @@
       <li><a href="_autosummary/aslm.model.dummy.DummyModel.html#aslm.model.dummy.DummyModel.active_microscope">active_microscope (aslm.model.dummy.DummyModel attribute)</a>
 
       <ul>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.active_microscope">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.active_microscope">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.active_microscope">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.active_microscope">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
+</li>
         <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.active_microscope">(aslm.model.model.Model attribute)</a>
 </li>
       </ul></li>
@@ -540,6 +551,20 @@
 </li>
       </ul></li>
       <li>
+    aslm.model.devices.APIs.sutter
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.devices.APIs.sutter.html#module-aslm.model.devices.APIs.sutter">module</a>
+</li>
+      </ul></li>
+      <li>
+    aslm.model.devices.APIs.sutter.MP285
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.html#module-aslm.model.devices.APIs.sutter.MP285">module</a>
+</li>
+      </ul></li>
+      <li>
     aslm.model.devices.camera
 
       <ul>
@@ -686,6 +711,8 @@
         <li><a href="_autosummary/aslm.model.devices.remote_focus.html#module-aslm.model.devices.remote_focus">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     aslm.model.devices.remote_focus.remote_focus_base
 
@@ -707,8 +734,6 @@
         <li><a href="_autosummary/aslm.model.devices.shutter.html#module-aslm.model.devices.shutter">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     aslm.model.devices.shutter.laser_shutter_base
 
@@ -850,17 +875,10 @@
 </li>
       </ul></li>
       <li>
-    aslm.model.features.constant_velocity_acquisition
+    aslm.model.features.cva_conpro
 
       <ul>
-        <li><a href="_autosummary/aslm.model.features.constant_velocity_acquisition.html#module-aslm.model.features.constant_velocity_acquisition">module</a>
-</li>
-      </ul></li>
-      <li>
-    aslm.model.features.dummy_detective
-
-      <ul>
-        <li><a href="_autosummary/aslm.model.features.dummy_detective.html#module-aslm.model.features.dummy_detective">module</a>
+        <li><a href="_autosummary/aslm.model.features.cva_conpro.html#module-aslm.model.features.cva_conpro">module</a>
 </li>
       </ul></li>
       <li>
@@ -962,13 +980,6 @@
 </li>
       </ul></li>
       <li>
-    aslm.tools.beams
-
-      <ul>
-        <li><a href="_autosummary/aslm.tools.beams.html#module-aslm.tools.beams">module</a>
-</li>
-      </ul></li>
-      <li>
     aslm.tools.common_dict_tools
 
       <ul>
@@ -1025,13 +1036,6 @@
 </li>
       </ul></li>
       <li>
-    aslm.tools.project_stats
-
-      <ul>
-        <li><a href="_autosummary/aslm.tools.project_stats.html#module-aslm.tools.project_stats">module</a>
-</li>
-      </ul></li>
-      <li>
     aslm.tools.sdf
 
       <ul>
@@ -1085,6 +1089,8 @@
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.astype">astype() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.device_startup_functions.auto_redial.html#aslm.model.device_startup_functions.auto_redial">auto_redial() (in module aslm.model.device_startup_functions)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.auto_tile_scan.CalculateFocusRange.html#aslm.model.features.auto_tile_scan.CalculateFocusRange.autofocus">autofocus (aslm.model.features.auto_tile_scan.CalculateFocusRange attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus">Autofocus (class in aslm.model.features.autofocus)</a>
 </li>
@@ -1148,7 +1154,11 @@
         <li><a href="_autosummary/aslm.model.devices.filter_wheel.filter_wheel_sutter.build_filter_wheel_connection.html#aslm.model.devices.filter_wheel.filter_wheel_sutter.baudrate">(in module aslm.model.devices.filter_wheel.filter_wheel_sutter)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_xml_dict">bdv_xml_dict() (aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata method)</a>
+</li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.BEHAVED">BEHAVED (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.big_tiff">big_tiff (aslm.model.features.image_writer.ImageWriter attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource">BigDataViewerDataSource (class in aslm.model.data_sources.bdv_data_source)</a>
 </li>
@@ -1168,10 +1178,10 @@
       </ul></li>
       <li><a href="_autosummary/aslm.tools.sdf.box.html#aslm.tools.sdf.box">box() (in module aslm.tools.sdf)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.devices.stages.stage_asi.build_ASI_Stage_connection.html#aslm.model.devices.stages.stage_asi.build_ASI_Stage_connection">build_ASI_Stage_connection() (in module aslm.model.devices.stages.stage_asi)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/aslm.model.devices.stages.stage_asi.build_ASI_Stage_connection.html#aslm.model.devices.stages.stage_asi.build_ASI_Stage_connection">build_ASI_Stage_connection() (in module aslm.model.devices.stages.stage_asi)</a>
+</li>
       <li><a href="_autosummary/aslm.model.devices.zoom.zoom_dynamixel.build_dynamixel_zoom_connection.html#aslm.model.devices.zoom.zoom_dynamixel.build_dynamixel_zoom_connection">build_dynamixel_zoom_connection() (in module aslm.model.devices.zoom.zoom_dynamixel)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.filter_wheel.filter_wheel_asi.build_filter_wheel_connection.html#aslm.model.devices.filter_wheel.filter_wheel_asi.build_filter_wheel_connection">build_filter_wheel_connection() (in module aslm.model.devices.filter_wheel.filter_wheel_asi)</a>
@@ -1373,7 +1383,7 @@
 </li>
         <li><a href="_autosummary/aslm.model.features.common_features.WaitToContinue.html#aslm.model.features.common_features.WaitToContinue.cleanup">(aslm.model.features.common_features.WaitToContinue method)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition.html#aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition.cleanup">(aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition method)</a>
+        <li><a href="_autosummary/aslm.model.features.cva_conpro.ConstantVelocityAcquisition.html#aslm.model.features.cva_conpro.ConstantVelocityAcquisition.cleanup">(aslm.model.features.cva_conpro.ConstantVelocityAcquisition method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.features.feature_container.Container.html#aslm.model.features.feature_container.Container.cleanup">(aslm.model.features.feature_container.Container method)</a>
 </li>
@@ -1381,8 +1391,12 @@
 </li>
         <li><a href="_autosummary/aslm.model.features.feature_container.SignalContainer.html#aslm.model.features.feature_container.SignalContainer.cleanup">(aslm.model.features.feature_container.SignalContainer method)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.cleanup">(aslm.model.features.volume_search.VolumeSearch method)</a>
+</li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.cleanup_data_func">cleanup_data_func() (aslm.model.features.common_features.ZStackAcquisition method)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.cva_conpro.ConstantVelocityAcquisition.html#aslm.model.features.cva_conpro.ConstantVelocityAcquisition.cleanup_data_function">cleanup_data_function() (aslm.model.features.cva_conpro.ConstantVelocityAcquisition method)</a>
 </li>
       <li><a href="_autosummary/aslm.controller.thread_pool.SynchronizedThreadPool.html#aslm.controller.thread_pool.SynchronizedThreadPool.clear">clear() (aslm.controller.thread_pool.SynchronizedThreadPool method)</a>
 
@@ -1396,12 +1410,14 @@
       </ul></li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.clip">clip() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.close">close() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id5">[1]</a>, <a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id6">[2]</a>
+      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.close">close() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.close">(aslm.model.data_sources.data_source.DataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#id1">[1]</a>
+        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.close">(aslm.model.data_sources.data_source.DataSource method)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.close">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id4">[1]</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id5">[2]</a>
+        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.close">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.close">(aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.devices.filter_wheel.filter_wheel_asi.ASIFilterWheel.html#aslm.model.devices.filter_wheel.filter_wheel_asi.ASIFilterWheel.close">(aslm.model.devices.filter_wheel.filter_wheel_asi.ASIFilterWheel method)</a>
 </li>
@@ -1429,7 +1445,7 @@
 </li>
         <li><a href="_autosummary/aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.html#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.close">(aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage method)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.close">(aslm.model.features.image_writer.ImageWriter method)</a>, <a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#id0">[1]</a>
+        <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.close">(aslm.model.features.image_writer.ImageWriter method)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.devices.camera.camera_base.CameraBase.html#aslm.model.devices.camera.camera_base.CameraBase.close_camera">close_camera() (aslm.model.devices.camera.camera_base.CameraBase method)</a>
@@ -1444,8 +1460,6 @@
         <li><a href="_autosummary/aslm.model.devices.camera.camera_synthetic.SyntheticCamera.html#aslm.model.devices.camera.camera_synthetic.SyntheticCamera.close_camera">(aslm.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca.html#aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca.close_image_series">close_image_series() (aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca method)</a>
 
       <ul>
@@ -1456,6 +1470,8 @@
         <li><a href="_autosummary/aslm.model.devices.camera.camera_synthetic.SyntheticCamera.html#aslm.model.devices.camera.camera_synthetic.SyntheticCamera.close_image_series">(aslm.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.devices.shutter.laser_shutter_base.ShutterBase.html#aslm.model.devices.shutter.laser_shutter_base.ShutterBase.close_shutter">close_shutter() (aslm.model.devices.shutter.laser_shutter_base.ShutterBase method)</a>
 
       <ul>
@@ -1500,9 +1516,11 @@
 </li>
       <li><a href="_autosummary/aslm.tools.multipos_table_tools.compute_tiles_from_bounding_box.html#aslm.tools.multipos_table_tools.compute_tiles_from_bounding_box">compute_tiles_from_bounding_box() (in module aslm.tools.multipos_table_tools)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.features.common_features.ChangeResolution.html#aslm.model.features.common_features.ChangeResolution.config_table">config_table (aslm.model.features.common_features.ChangeResolution attribute)</a>
+      <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.config_table">config_table (aslm.model.features.autofocus.Autofocus attribute)</a>
 
       <ul>
+        <li><a href="_autosummary/aslm.model.features.common_features.ChangeResolution.html#aslm.model.features.common_features.ChangeResolution.config_table">(aslm.model.features.common_features.ChangeResolution attribute)</a>
+</li>
         <li><a href="_autosummary/aslm.model.features.common_features.ConProAcquisition.html#aslm.model.features.common_features.ConProAcquisition.config_table">(aslm.model.features.common_features.ConProAcquisition attribute)</a>
 </li>
         <li><a href="_autosummary/aslm.model.features.common_features.FindTissueSimple2D.html#aslm.model.features.common_features.FindTissueSimple2D.config_table">(aslm.model.features.common_features.FindTissueSimple2D attribute)</a>
@@ -1520,6 +1538,10 @@
         <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.config_table">(aslm.model.features.common_features.ZStackAcquisition attribute)</a>
 </li>
         <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.config_table">(aslm.model.features.image_writer.ImageWriter attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.config_table">(aslm.model.features.restful_features.IlastikSegmentation attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.config_table">(aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.controller.configuration_controller.ConfigurationController.html#aslm.controller.configuration_controller.ConfigurationController.configuration">configuration (aslm.controller.configuration_controller.ConfigurationController attribute)</a>
@@ -1565,6 +1587,14 @@
 </li>
         <li><a href="_autosummary/aslm.model.dummy.DummyModel.html#aslm.model.dummy.DummyModel.configuration">(aslm.model.dummy.DummyModel attribute)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.configuration">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata property)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.configuration">(aslm.model.metadata_sources.metadata.Metadata property)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.configuration">(aslm.model.metadata_sources.metadata.XMLMetadata property)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.configuration">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata property)</a>
+</li>
         <li><a href="_autosummary/aslm.model.microscope.Microscope.html#aslm.model.microscope.Microscope.configuration">(aslm.model.microscope.Microscope attribute)</a>
 </li>
         <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.configuration">(aslm.model.model.Model attribute)</a>
@@ -1582,11 +1612,15 @@
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.ConProAcquisition.html#aslm.model.features.common_features.ConProAcquisition">ConProAcquisition (class in aslm.model.features.common_features)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition.html#aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition">ConstantVelocityAcquisition (class in aslm.model.features.constant_velocity_acquisition)</a>
+      <li><a href="_autosummary/aslm.model.features.cva_conpro.ConstantVelocityAcquisition.html#aslm.model.features.cva_conpro.ConstantVelocityAcquisition">ConstantVelocityAcquisition (class in aslm.model.features.cva_conpro)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.feature_container.Container.html#aslm.model.features.feature_container.Container">Container (class in aslm.model.features.feature_container)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.feature_related_functions.convert_feature_list_to_str.html#aslm.model.features.feature_related_functions.convert_feature_list_to_str">convert_feature_list_to_str() (in module aslm.model.features.feature_related_functions)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.convert_microns_to_microsteps">convert_microns_to_microsteps() (aslm.model.devices.APIs.sutter.MP285.MP285 static method)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.convert_microsteps_to_microns">convert_microsteps_to_microns() (aslm.model.devices.APIs.sutter.MP285.MP285 static method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.feature_related_functions.convert_str_to_feature_list.html#aslm.model.features.feature_related_functions.convert_str_to_feature_list">convert_str_to_feature_list() (in module aslm.model.features.feature_related_functions)</a>
 </li>
@@ -1599,8 +1633,6 @@
       <li><a href="_autosummary/aslm.tools.common_functions.copy_proxy_object.html#aslm.tools.common_functions.copy_proxy_object">copy_proxy_object() (in module aslm.tools.common_functions)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.feature_related_functions.SharedList.html#aslm.model.features.feature_related_functions.SharedList.count">count() (aslm.model.features.feature_related_functions.SharedList method)</a>
-</li>
-      <li><a href="_autosummary/aslm.tools.project_stats.countlines.html#aslm.tools.project_stats.countlines">countlines() (in module aslm.tools.project_stats)</a>
 </li>
       <li><a href="_autosummary/aslm.tools.image.create_arrow_image.html#aslm.tools.image.create_arrow_image">create_arrow_image() (in module aslm.tools.image)</a>
 </li>
@@ -1625,6 +1657,16 @@
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.cumprod">cumprod() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.cumsum">cumsum() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.Container.html#aslm.model.features.feature_container.Container.curr_node">curr_node (aslm.model.features.feature_container.Container attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.feature_container.DataContainer.html#aslm.model.features.feature_container.DataContainer.curr_node">(aslm.model.features.feature_container.DataContainer attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.feature_container.SignalContainer.html#aslm.model.features.feature_container.SignalContainer.curr_node">(aslm.model.features.feature_container.SignalContainer attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.curr_z_index">curr_z_index (aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.dummy.DummyMicroscope.html#aslm.model.dummy.DummyMicroscope.current_channel">current_channel (aslm.model.dummy.DummyMicroscope attribute)</a>
 
@@ -1729,6 +1771,10 @@
 </li>
         <li><a href="_autosummary/aslm.model.features.common_features.WaitToContinue.html#aslm.model.features.common_features.WaitToContinue.data_func">(aslm.model.features.common_features.WaitToContinue method)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.data_func">(aslm.model.features.restful_features.IlastikSegmentation method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.data_func">(aslm.model.features.volume_search.VolumeSearch method)</a>
+</li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.dummy.DummyModel.html#aslm.model.dummy.DummyModel.data_pipe">data_pipe (aslm.model.dummy.DummyModel attribute)</a>
 </li>
@@ -1755,8 +1801,18 @@
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.dc">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dc">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.dc">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.dc">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.dc">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
+</li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.waveforms.dc_value.html#aslm.model.waveforms.dc_value">dc_value() (in module aslm.model.waveforms)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.debug">debug (aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.stages.stage_synthetic.SyntheticStage.html#aslm.model.devices.stages.stage_synthetic.SyntheticStage.default_speed">default_speed (aslm.model.devices.stages.stage_synthetic.SyntheticStage attribute)</a>
 </li>
@@ -1764,22 +1820,32 @@
 </li>
       <li><a href="_autosummary/aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.html#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.delay_matrix">delay_matrix (aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.tools.file_functions.delete_folder.html#aslm.tools.file_functions.delete_folder">delete_folder() (in module aslm.tools.file_functions)</a>
 </li>
       <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.destroy_virtual_microscope">destroy_virtual_microscope() (aslm.model.model.Model method)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.DetectTissueInStack.html#aslm.model.features.remove_empty_tiles.DetectTissueInStack.detect_func">detect_func (aslm.model.features.remove_empty_tiles.DetectTissueInStack attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.html#aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.detect_func">(aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord attribute)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.detect_tissue.html#aslm.model.features.remove_empty_tiles.detect_tissue">detect_tissue() (in module aslm.model.features.remove_empty_tiles)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.detect_tissue2.html#aslm.model.features.remove_empty_tiles.detect_tissue2">detect_tissue2() (in module aslm.model.features.remove_empty_tiles)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.DetectTissueInStack.html#aslm.model.features.remove_empty_tiles.DetectTissueInStack">DetectTissueInStack (class in aslm.model.features.remove_empty_tiles)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.html#aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord">DetectTissueInStackAndRecord (class in aslm.model.features.remove_empty_tiles)</a>
 </li>
       <li><a href="_autosummary/aslm.model.dummy.DummyModel.html#aslm.model.dummy.DummyModel.device">device (aslm.model.dummy.DummyModel attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.device">(aslm.model.features.autofocus.Autofocus attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.devices.stages.stage_sutter.SutterStage.html#aslm.model.devices.stages.stage_sutter.SutterStage.device_axes">device_axes (aslm.model.devices.stages.stage_sutter.SutterStage attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.galvo.galvo_base.GalvoBase.html#aslm.model.devices.galvo.galvo_base.GalvoBase.device_config">device_config (aslm.model.devices.galvo.galvo_base.GalvoBase attribute)</a>
@@ -1798,15 +1864,25 @@
       </ul></li>
       <li><a href="_autosummary/aslm.model.device_startup_functions.device_not_found.html#aslm.model.device_startup_functions.device_not_found">device_not_found() (in module aslm.model.device_startup_functions)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.device_ref">device_ref (aslm.model.features.autofocus.Autofocus attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.DataNode.html#aslm.model.features.feature_container.DataNode.device_related">device_related (aslm.model.features.feature_container.DataNode attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.feature_container.SignalNode.html#aslm.model.features.feature_container.SignalNode.device_related">(aslm.model.features.feature_container.SignalNode attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.feature_container.TreeNode.html#aslm.model.features.feature_container.TreeNode.device_related">(aslm.model.features.feature_container.TreeNode attribute)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.diagonal">diagonal() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
       <li><a href="_autosummary/aslm.tools.xml_tools.dict_to_xml.html#aslm.tools.xml_tools.dict_to_xml">dict_to_xml() (in module aslm.tools.xml_tools)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.direction">direction (aslm.model.features.volume_search.VolumeSearch attribute)</a>
+</li>
       <li><a href="_autosummary/aslm.model.devices.stages.stage_galvo.GalvoNIStage.html#aslm.model.devices.stages.stage_galvo.GalvoNIStage.distance_threshold">distance_threshold (aslm.model.devices.stages.stage_galvo.GalvoNIStage attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.volume_search.draw_box.html#aslm.model.features.volume_search.draw_box">draw_box() (in module aslm.model.features.volume_search)</a>
-</li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.ds_name">ds_name (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.dt">dt (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
 
@@ -1815,10 +1891,16 @@
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.dt">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dt">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.dt">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.dt">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.dt">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
+</li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.dtype">dtype (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
-</li>
-      <li><a href="_autosummary/aslm.model.features.dummy_detective.Dummy_Detective.html#aslm.model.features.dummy_detective.Dummy_Detective">Dummy_Detective (class in aslm.model.features.dummy_detective)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.feature_container.dummy_func.html#aslm.model.features.feature_container.dummy_func">dummy_func() (in module aslm.model.features.feature_container)</a>
 </li>
@@ -1845,6 +1927,14 @@
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.dx">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dx">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.dx">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.dx">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.dx">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
+</li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.dy">dy (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
 
@@ -1852,6 +1942,14 @@
         <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.dy">(aslm.model.data_sources.data_source.DataSource attribute)</a>
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.dy">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dy">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.dy">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.dy">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.dy">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.html#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.dynamixel">dynamixel (aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom attribute)</a>
@@ -1864,6 +1962,14 @@
         <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.dz">(aslm.model.data_sources.data_source.DataSource attribute)</a>
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.dz">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dz">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.dz">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.dz">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.dz">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1885,7 +1991,21 @@
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.end_data_func">end_data_func() (aslm.model.features.common_features.ZStackAcquisition method)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.end_data_func">(aslm.model.features.volume_search.VolumeSearch method)</a>
 </li>
+      </ul></li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.Container.html#aslm.model.features.feature_container.Container.end_flag">end_flag (aslm.model.features.feature_container.Container attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.feature_container.DataContainer.html#aslm.model.features.feature_container.DataContainer.end_flag">(aslm.model.features.feature_container.DataContainer attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.feature_container.SignalContainer.html#aslm.model.features.feature_container.SignalContainer.end_flag">(aslm.model.features.feature_container.SignalContainer attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.end_flag">(aslm.model.features.volume_search.VolumeSearch attribute)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.features.auto_tile_scan.CalculateFocusRange.html#aslm.model.features.auto_tile_scan.CalculateFocusRange.end_func_data">end_func_data() (aslm.model.features.auto_tile_scan.CalculateFocusRange method)</a>
 
       <ul>
@@ -1928,9 +2048,17 @@
 </li>
       <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.f_frame_id">f_frame_id (aslm.model.features.autofocus.Autofocus attribute)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.f_pos">f_pos (aslm.model.features.autofocus.Autofocus attribute)</a>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.f_offset">f_offset (aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.f_pos">f_pos (aslm.model.features.autofocus.Autofocus attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.f_pos">(aslm.model.features.volume_search.VolumeSearch attribute)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.f_position">f_position (aslm.model.model.Model attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.f_step_size">f_step_size (aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.FancyThread.html#aslm.model.concurrency.concurrency_tools.FancyThread">FancyThread (in module aslm.model.concurrency.concurrency_tools)</a>
 </li>
@@ -1998,17 +2126,17 @@
 </li>
       <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.fine_step_size">fine_step_size (aslm.model.features.autofocus.Autofocus attribute)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.first_boundary">first_boundary (aslm.model.features.volume_search.VolumeSearch attribute)</a>
+</li>
       <li><a href="_autosummary/aslm.model.features.common_features.WaitToContinue.html#aslm.model.features.common_features.WaitToContinue.first_enter_node">first_enter_node (aslm.model.features.common_features.WaitToContinue attribute)</a>
-</li>
-      <li><a href="_autosummary/aslm.tools.beams.fit_gaussian_beam_error.html#aslm.tools.beams.fit_gaussian_beam_error">fit_gaussian_beam_error() (in module aslm.tools.beams)</a>
-</li>
-      <li><a href="_autosummary/aslm.tools.beams.fit_gaussian_beam_mse.html#aslm.tools.beams.fit_gaussian_beam_mse">fit_gaussian_beam_mse() (in module aslm.tools.beams)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.flags">flags (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.flat">flat (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.flatten">flatten() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.flush_buffers">flush_buffers() (aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.FNC">FNC (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 </li>
@@ -2080,12 +2208,10 @@
 </li>
       <li><a href="_autosummary/aslm.model.devices.stages.stage_galvo.GalvoNIStage.html#aslm.model.devices.stages.stage_galvo.GalvoNIStage">GalvoNIStage (class in aslm.model.devices.stages.stage_galvo)</a>
 </li>
-      <li><a href="_autosummary/aslm.tools.beams.gaussian_beam.html#aslm.tools.beams.gaussian_beam">gaussian_beam() (in module aslm.tools.beams)</a>
-</li>
-      <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.generate_image_name">generate_image_name() (aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id6">[1]</a>
+      <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.generate_image_name">generate_image_name() (aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.generate_image_name">(aslm.model.features.image_writer.ImageWriter method)</a>, <a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#id1">[1]</a>
+        <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.generate_image_name">(aslm.model.features.image_writer.ImageWriter method)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.dummy.DummyDevice.html#aslm.model.dummy.DummyDevice.generate_message">generate_message() (aslm.model.dummy.DummyDevice method)</a>
@@ -2093,7 +2219,7 @@
       <li><a href="_autosummary/aslm.model.features.common_features.ConProAcquisition.html#aslm.model.features.common_features.ConProAcquisition.generate_meta_data">generate_meta_data() (aslm.model.features.common_features.ConProAcquisition method)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.generate_meta_data">(aslm.model.features.image_writer.ImageWriter method)</a>, <a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#id2">[1]</a>
+        <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.generate_meta_data">(aslm.model.features.image_writer.ImageWriter method)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.devices.camera.camera_synthetic.SyntheticCamera.html#aslm.model.devices.camera.camera_synthetic.SyntheticCamera.generate_new_frame">generate_new_frame() (aslm.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
@@ -2131,6 +2257,10 @@
       <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.get_camera_line_interval_and_exposure_time">get_camera_line_interval_and_exposure_time() (aslm.model.model.Model method)</a>
 </li>
       <li><a href="_autosummary/aslm.config.config.get_configuration_paths.html#aslm.config.config.get_configuration_paths">get_configuration_paths() (in module aslm.config.config)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.get_controller_status">get_controller_status() (aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.get_current_position">get_current_position() (aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.get_data_buffer">get_data_buffer() (aslm.model.model.Model method)</a>
 </li>
@@ -2224,6 +2354,14 @@
         <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.ResultThread.html#aslm.model.concurrency.concurrency_tools.ResultThread.get_result">(aslm.model.concurrency.concurrency_tools.ResultThread method)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.get_shape_from_metadata">get_shape_from_metadata() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.get_shape_from_metadata">(aslm.model.data_sources.data_source.DataSource method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.get_shape_from_metadata">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.get_slice">get_slice() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.stages.stage_asi.ASIStage.html#aslm.model.devices.stages.stage_asi.ASIStage.get_speed">get_speed() (aslm.model.devices.stages.stage_asi.ASIStage method)</a>
@@ -2270,11 +2408,15 @@
 </li>
       <li><a href="_autosummary/aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.html#aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning">HamamatsuOrcaLightning (class in aslm.model.devices.camera.camera_hamamatsu)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.devices.stages.stage_mcl.MCLStage.html#aslm.model.devices.stages.stage_mcl.MCLStage.handle">handle (aslm.model.devices.stages.stage_mcl.MCLStage attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.has_tissue">has_tissue (aslm.model.features.volume_search.VolumeSearch attribute)</a>
+</li>
       <li><a href="_autosummary/aslm.model.analysis.boundary_detect.has_tissue.html#aslm.model.analysis.boundary_detect.has_tissue">has_tissue() (in module aslm.model.analysis.boundary_detect)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.has_tissue_queue">has_tissue_queue (aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2354,9 +2496,11 @@
 </li>
       <li><a href="_autosummary/aslm.model.microscope.Microscope.html#aslm.model.microscope.Microscope.info">info (aslm.model.microscope.Microscope attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.init_data_func">init_data_func() (aslm.model.features.volume_search.VolumeSearch method)</a>
+</li>
       <li><a href="_autosummary/aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.html#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.init_finished">init_finished (aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.init_func">init_func() (aslm.model.features.restful_features.IlastikSegmentation method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.init_pos">init_pos (aslm.model.features.autofocus.Autofocus attribute)</a>
 </li>
@@ -2370,6 +2514,8 @@
         <li><a href="_autosummary/aslm.model.devices.camera.camera_synthetic.SyntheticCamera.html#aslm.model.devices.camera.camera_synthetic.SyntheticCamera.initialize_image_series">(aslm.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.devices.lasers.laser_base.LaserBase.html#aslm.model.devices.lasers.laser_base.LaserBase.initialize_laser">initialize_laser() (aslm.model.devices.lasers.laser_base.LaserBase method)</a>
 
       <ul>
@@ -2377,6 +2523,8 @@
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.features.feature_related_functions.SharedList.html#aslm.model.features.feature_related_functions.SharedList.insert">insert() (aslm.model.features.feature_related_functions.SharedList method)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.interrupt_move">interrupt_move() (aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.camera.camera_base.CameraBase.html#aslm.model.devices.camera.camera_base.CameraBase.is_acquiring">is_acquiring (aslm.model.devices.camera.camera_base.CameraBase attribute)</a>
 
@@ -2400,7 +2548,29 @@
         <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.ResultThread.html#aslm.model.concurrency.concurrency_tools.ResultThread.is_alive">(aslm.model.concurrency.concurrency_tools.ResultThread method)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.is_bigtiff">is_bigtiff (aslm.model.data_sources.tiff_data_source.TiffDataSource property)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.Container.html#aslm.model.features.feature_container.Container.is_closed">is_closed (aslm.model.features.feature_container.Container attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.feature_container.DataContainer.html#aslm.model.features.feature_container.DataContainer.is_closed">(aslm.model.features.feature_container.DataContainer attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.feature_container.SignalContainer.html#aslm.model.features.feature_container.SignalContainer.is_closed">(aslm.model.features.feature_container.SignalContainer attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.DataNode.html#aslm.model.features.feature_container.DataNode.is_initialized">is_initialized (aslm.model.features.feature_container.DataNode attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.feature_container.SignalNode.html#aslm.model.features.feature_container.SignalNode.is_initialized">(aslm.model.features.feature_container.SignalNode attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.feature_container.TreeNode.html#aslm.model.features.feature_container.TreeNode.is_initialized">(aslm.model.features.feature_container.TreeNode attribute)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.is_live">is_live (aslm.model.model.Model attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.DataNode.html#aslm.model.features.feature_container.DataNode.is_marked">is_marked (aslm.model.features.feature_container.DataNode attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.is_ome">is_ome (aslm.model.data_sources.tiff_data_source.TiffDataSource property)</a>
 </li>
       <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.is_save">is_save (aslm.model.model.Model attribute)</a>
 </li>
@@ -2542,6 +2712,8 @@
 </li>
       <li><a href="_autosummary/aslm.model.analysis.boundary_detect.map_boundary.html#aslm.model.analysis.boundary_detect.map_boundary">map_boundary() (in module aslm.model.analysis.boundary_detect)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.mark_position">mark_position() (aslm.model.features.restful_features.IlastikSegmentation method)</a>
+</li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.max">max() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.max_entropy">max_entropy (aslm.model.features.autofocus.Autofocus attribute)</a>
@@ -2582,12 +2754,12 @@
 </li>
       <li><a href="_autosummary/aslm.model.dummy.DummyController.html#aslm.model.dummy.DummyController.menu_controller">menu_controller (aslm.model.dummy.DummyController attribute)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.metadata">metadata (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>, <a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id0">[1]</a>
+      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.metadata">metadata (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
 
       <ul>
         <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.metadata">(aslm.model.data_sources.data_source.DataSource attribute)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.metadata">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id0">[1]</a>
+        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.metadata">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata">Metadata (class in aslm.model.metadata_sources.metadata)</a>
@@ -2658,31 +2830,21 @@
 </li>
       <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.mip_directory">mip_directory (aslm.model.features.image_writer.ImageWriter attribute)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.mode">mode (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
+      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.mode">mode (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource property)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id10">(aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource property)</a>
+        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.mode">(aslm.model.data_sources.data_source.DataSource property)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.mode">(aslm.model.data_sources.data_source.DataSource attribute)</a>
-</li>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#id5">(aslm.model.data_sources.data_source.DataSource property)</a>
-</li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.mode">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
-</li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id10">(aslm.model.data_sources.tiff_data_source.TiffDataSource property)</a>
+        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.mode">(aslm.model.data_sources.tiff_data_source.TiffDataSource property)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id1">mode() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
+      <li><a href="_autosummary/aslm.model.features.auto_tile_scan.CalculateFocusRange.html#aslm.model.features.auto_tile_scan.CalculateFocusRange.model">model (aslm.model.features.auto_tile_scan.CalculateFocusRange attribute)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#id0">(aslm.model.data_sources.data_source.DataSource method)</a>
+        <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.model">(aslm.model.features.autofocus.Autofocus attribute)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id1">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
+        <li><a href="_autosummary/aslm.model.features.common_features.ChangeResolution.html#aslm.model.features.common_features.ChangeResolution.model">(aslm.model.features.common_features.ChangeResolution attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="_autosummary/aslm.model.features.common_features.ChangeResolution.html#aslm.model.features.common_features.ChangeResolution.model">model (aslm.model.features.common_features.ChangeResolution attribute)</a>
-
-      <ul>
         <li><a href="_autosummary/aslm.model.features.common_features.ConProAcquisition.html#aslm.model.features.common_features.ConProAcquisition.model">(aslm.model.features.common_features.ConProAcquisition attribute)</a>
 </li>
         <li><a href="_autosummary/aslm.model.features.common_features.FindTissueSimple2D.html#aslm.model.features.common_features.FindTissueSimple2D.model">(aslm.model.features.common_features.FindTissueSimple2D attribute)</a>
@@ -2699,7 +2861,15 @@
 </li>
         <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.model">(aslm.model.features.common_features.ZStackAcquisition attribute)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.model">(aslm.model.features.image_writer.ImageWriter attribute)</a>
+        <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.DetectTissueInStack.html#aslm.model.features.remove_empty_tiles.DetectTissueInStack.model">(aslm.model.features.remove_empty_tiles.DetectTissueInStack attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.html#aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.model">(aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.RemoveEmptyPositions.html#aslm.model.features.remove_empty_tiles.RemoveEmptyPositions.model">(aslm.model.features.remove_empty_tiles.RemoveEmptyPositions attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.model">(aslm.model.features.restful_features.IlastikSegmentation attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.model">(aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model">Model (class in aslm.model.model)</a>
@@ -2759,6 +2929,10 @@
         <li><a href="_autosummary/aslm.model.devices.APIs.dynamixel.dynamixel_functions.html#module-aslm.model.devices.APIs.dynamixel.dynamixel_functions">aslm.model.devices.APIs.dynamixel.dynamixel_functions</a>
 </li>
         <li><a href="_autosummary/aslm.model.devices.APIs.omicron.html#module-aslm.model.devices.APIs.omicron">aslm.model.devices.APIs.omicron</a>
+</li>
+        <li><a href="_autosummary/aslm.model.devices.APIs.sutter.html#module-aslm.model.devices.APIs.sutter">aslm.model.devices.APIs.sutter</a>
+</li>
+        <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.html#module-aslm.model.devices.APIs.sutter.MP285">aslm.model.devices.APIs.sutter.MP285</a>
 </li>
         <li><a href="_autosummary/aslm.model.devices.camera.html#module-aslm.model.devices.camera">aslm.model.devices.camera</a>
 </li>
@@ -2848,9 +3022,7 @@
 </li>
         <li><a href="_autosummary/aslm.model.features.common_features.html#module-aslm.model.features.common_features">aslm.model.features.common_features</a>
 </li>
-        <li><a href="_autosummary/aslm.model.features.constant_velocity_acquisition.html#module-aslm.model.features.constant_velocity_acquisition">aslm.model.features.constant_velocity_acquisition</a>
-</li>
-        <li><a href="_autosummary/aslm.model.features.dummy_detective.html#module-aslm.model.features.dummy_detective">aslm.model.features.dummy_detective</a>
+        <li><a href="_autosummary/aslm.model.features.cva_conpro.html#module-aslm.model.features.cva_conpro">aslm.model.features.cva_conpro</a>
 </li>
         <li><a href="_autosummary/aslm.model.features.feature_container.html#module-aslm.model.features.feature_container">aslm.model.features.feature_container</a>
 </li>
@@ -2880,8 +3052,6 @@
 </li>
         <li><a href="_autosummary/aslm.tools.html#module-aslm.tools">aslm.tools</a>
 </li>
-        <li><a href="_autosummary/aslm.tools.beams.html#module-aslm.tools.beams">aslm.tools.beams</a>
-</li>
         <li><a href="_autosummary/aslm.tools.common_dict_tools.html#module-aslm.tools.common_dict_tools">aslm.tools.common_dict_tools</a>
 </li>
         <li><a href="_autosummary/aslm.tools.common_functions.html#module-aslm.tools.common_functions">aslm.tools.common_functions</a>
@@ -2897,8 +3067,6 @@
         <li><a href="_autosummary/aslm.tools.main_functions.html#module-aslm.tools.main_functions">aslm.tools.main_functions</a>
 </li>
         <li><a href="_autosummary/aslm.tools.multipos_table_tools.html#module-aslm.tools.multipos_table_tools">aslm.tools.multipos_table_tools</a>
-</li>
-        <li><a href="_autosummary/aslm.tools.project_stats.html#module-aslm.tools.project_stats">aslm.tools.project_stats</a>
 </li>
         <li><a href="_autosummary/aslm.tools.sdf.html#module-aslm.tools.sdf">aslm.tools.sdf</a>
 </li>
@@ -2969,9 +3137,13 @@
       </ul></li>
       <li><a href="_autosummary/aslm.model.microscope.Microscope.html#aslm.model.microscope.Microscope.move_stage_offset">move_stage_offset() (aslm.model.microscope.Microscope method)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.move_to_specified_position">move_to_specified_position() (aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
+</li>
       <li><a href="_autosummary/aslm.controller.thread_pool.SynchronizedThreadPool.html#aslm.controller.thread_pool.SynchronizedThreadPool.moveToDelete">moveToDelete() (aslm.controller.thread_pool.SynchronizedThreadPool method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.html#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable">MoveToNextPositionInMultiPositionTable (class in aslm.model.features.common_features)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285">MP285 (class in aslm.model.devices.APIs.sutter.MP285)</a>
 </li>
       <li><a href="_autosummary/aslm.model.dummy.DummyDevice.html#aslm.model.dummy.DummyDevice.msg_count">msg_count (aslm.model.dummy.DummyDevice attribute)</a>
 </li>
@@ -3004,25 +3176,23 @@
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.nbytes">nbytes (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id11">(aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource property)</a>
+        <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.nbytes">(aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource property)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#id6">(aslm.model.data_sources.data_source.DataSource property)</a>
+        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.nbytes">(aslm.model.data_sources.data_source.DataSource property)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id11">(aslm.model.data_sources.tiff_data_source.TiffDataSource property)</a>
-</li>
-      </ul></li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.nbytes">nbytes() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
-
-      <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.nbytes">(aslm.model.data_sources.data_source.DataSource method)</a>
-</li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.nbytes">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
+        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.nbytes">(aslm.model.data_sources.tiff_data_source.TiffDataSource property)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.ndim">ndim (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/aslm.model.features.feature_container.DataNode.html#aslm.model.features.feature_container.DataNode.need_response">need_response (aslm.model.features.feature_container.DataNode attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.feature_container.SignalNode.html#aslm.model.features.feature_container.SignalNode.need_response">(aslm.model.features.feature_container.SignalNode attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.feature_container.TreeNode.html#aslm.model.features.feature_container.TreeNode.need_response">(aslm.model.features.feature_container.TreeNode attribute)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.features.common_features.ConProAcquisition.html#aslm.model.features.common_features.ConProAcquisition.need_to_move_new_plane">need_to_move_new_plane (aslm.model.features.common_features.ConProAcquisition attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.need_to_move_new_position">need_to_move_new_position (aslm.model.features.common_features.ZStackAcquisition attribute)</a>
@@ -3031,6 +3201,32 @@
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.newbyteorder">newbyteorder() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.DataNode.html#aslm.model.features.feature_container.DataNode.node_funcs">node_funcs (aslm.model.features.feature_container.DataNode attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.feature_container.SignalNode.html#aslm.model.features.feature_container.SignalNode.node_funcs">(aslm.model.features.feature_container.SignalNode attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.feature_container.TreeNode.html#aslm.model.features.feature_container.TreeNode.node_funcs">(aslm.model.features.feature_container.TreeNode attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/aslm.model.features.feature_container.DataNode.html#aslm.model.features.feature_container.DataNode.node_name">node_name (aslm.model.features.feature_container.DataNode attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.feature_container.SignalNode.html#aslm.model.features.feature_container.SignalNode.node_name">(aslm.model.features.feature_container.SignalNode attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.feature_container.TreeNode.html#aslm.model.features.feature_container.TreeNode.node_name">(aslm.model.features.feature_container.TreeNode attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.DataNode.html#aslm.model.features.feature_container.DataNode.node_type">node_type (aslm.model.features.feature_container.DataNode attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.feature_container.SignalNode.html#aslm.model.features.feature_container.SignalNode.node_type">(aslm.model.features.feature_container.SignalNode attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.feature_container.TreeNode.html#aslm.model.features.feature_container.TreeNode.node_type">(aslm.model.features.feature_container.TreeNode attribute)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.log_files.filters.NonPerfFilter.html#aslm.log_files.filters.NonPerfFilter">NonPerfFilter (class in aslm.log_files.filters)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.nonzero">nonzero() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
@@ -3039,7 +3235,15 @@
 </li>
       <li><a href="_autosummary/aslm.model.devices.camera.camera_synthetic.SyntheticCamera.html#aslm.model.devices.camera.camera_synthetic.SyntheticCamera.num_of_frame">num_of_frame (aslm.model.devices.camera.camera_synthetic.SyntheticCamera attribute)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.num_of_positions">num_of_positions (aslm.model.features.image_writer.ImageWriter attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.num_of_slices">num_of_slices (aslm.model.features.image_writer.ImageWriter attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.num_of_timepoints">num_of_timepoints (aslm.model.features.image_writer.ImageWriter attribute)</a>
+</li>
       <li><a href="_autosummary/aslm.controller.configuration_controller.ConfigurationController.html#aslm.controller.configuration_controller.ConfigurationController.number_of_channels">number_of_channels (aslm.controller.configuration_controller.ConfigurationController property)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.SignalContainer.html#aslm.model.features.feature_container.SignalContainer.number_of_execution">number_of_execution (aslm.model.features.feature_container.SignalContainer attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.filter_wheel.filter_wheel_asi.ASIFilterWheel.html#aslm.model.devices.filter_wheel.filter_wheel_asi.ASIFilterWheel.number_of_filter_wheels">number_of_filter_wheels (aslm.model.devices.filter_wheel.filter_wheel_asi.ASIFilterWheel attribute)</a>
 
@@ -3052,6 +3256,8 @@
       <li><a href="_autosummary/aslm.model.dummy.DummyModel.html#aslm.model.dummy.DummyModel.number_of_frames">number_of_frames (aslm.model.dummy.DummyModel attribute)</a>
 
       <ul>
+        <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.number_of_frames">(aslm.model.features.image_writer.ImageWriter attribute)</a>
+</li>
         <li><a href="_autosummary/aslm.model.microscope.Microscope.html#aslm.model.microscope.Microscope.number_of_frames">(aslm.model.microscope.Microscope attribute)</a>
 </li>
         <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.number_of_frames">(aslm.model.model.Model attribute)</a>
@@ -3085,10 +3291,10 @@
       </ul></li>
       <li><a href="_autosummary/aslm.model.features.common_features.ConProAcquisition.html#aslm.model.features.common_features.ConProAcquisition.offset_end">offset_end (aslm.model.features.common_features.ConProAcquisition attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.features.common_features.ConProAcquisition.html#aslm.model.features.common_features.ConProAcquisition.offset_start">offset_start (aslm.model.features.common_features.ConProAcquisition attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.features.common_features.ConProAcquisition.html#aslm.model.features.common_features.ConProAcquisition.offset_step_size">offset_step_size (aslm.model.features.common_features.ConProAcquisition attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.ConProAcquisition.html#aslm.model.features.common_features.ConProAcquisition.offset_update_time">offset_update_time (aslm.model.features.common_features.ConProAcquisition attribute)</a>
@@ -3106,7 +3312,11 @@
       <li><a href="_autosummary/aslm.model.dummy.DummyDevice.html#aslm.model.dummy.DummyDevice.out_port">out_port (aslm.model.dummy.DummyDevice attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.FindTissueSimple2D.html#aslm.model.features.common_features.FindTissueSimple2D.overlap">overlap (aslm.model.features.common_features.FindTissueSimple2D attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.overlap">(aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.OWNDATA">OWNDATA (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 </li>
   </ul></td>
@@ -3133,6 +3343,16 @@
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.WaitToContinue.html#aslm.model.features.common_features.WaitToContinue.pause_signal_lock">pause_signal_lock (aslm.model.features.common_features.WaitToContinue attribute)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.per_stack">per_stack (aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata property)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.per_stack">(aslm.model.metadata_sources.metadata.Metadata property)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.per_stack">(aslm.model.metadata_sources.metadata.XMLMetadata property)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.per_stack">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata property)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase.html#aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase.percent_smoothing">percent_smoothing (aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase attribute)</a>
 
       <ul>
@@ -3149,8 +3369,18 @@
 </li>
       <li><a href="_autosummary/aslm.model.devices.stages.stage_pi.PIStage.html#aslm.model.devices.stages.stage_pi.PIStage.pi_tools">pi_tools (aslm.model.devices.stages.stage_pi.PIStage attribute)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.pieces_num">pieces_num (aslm.model.features.restful_features.IlastikSegmentation attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.pieces_size">pieces_size (aslm.model.features.restful_features.IlastikSegmentation attribute)</a>
+</li>
       <li><a href="_autosummary/aslm.model.devices.stages.stage_pi.PIStage.html#aslm.model.devices.stages.stage_pi.PIStage">PIStage (class in aslm.model.devices.stages.stage_pi)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.DetectTissueInStack.html#aslm.model.features.remove_empty_tiles.DetectTissueInStack.planes">planes (aslm.model.features.remove_empty_tiles.DetectTissueInStack attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.html#aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.planes">(aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord attribute)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.plot_data">plot_data (aslm.model.features.autofocus.Autofocus attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.plot_pipe">plot_pipe (aslm.model.model.Model attribute)</a>
@@ -3167,6 +3397,12 @@
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.html#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.position_count">position_count (aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable attribute)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.html#aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.position_records">position_records (aslm.model.features.remove_empty_tiles.DetectTissueInStackAndRecord attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.RemoveEmptyPositions.html#aslm.model.features.remove_empty_tiles.RemoveEmptyPositions.position_records">(aslm.model.features.remove_empty_tiles.RemoveEmptyPositions attribute)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.positions">positions (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
 
       <ul>
@@ -3176,8 +3412,20 @@
 </li>
         <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.positions">(aslm.model.features.common_features.ZStackAcquisition attribute)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.positions">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.positions">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.positions">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.positions">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.features.autofocus.power_tent.html#aslm.model.features.autofocus.power_tent">power_tent() (in module aslm.model.features.autofocus)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.pre_boundary">pre_boundary (aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.WaitToContinue.html#aslm.model.features.common_features.WaitToContinue.pre_data_func">pre_data_func() (aslm.model.features.common_features.WaitToContinue method)</a>
 
@@ -3185,8 +3433,6 @@
         <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.pre_data_func">(aslm.model.features.common_features.ZStackAcquisition method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.pre_exposure_time">pre_exposure_time (aslm.model.model.Model attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.camera.camera_synthetic.SyntheticCamera.html#aslm.model.devices.camera.camera_synthetic.SyntheticCamera.pre_frame_idx">pre_frame_idx (aslm.model.devices.camera.camera_synthetic.SyntheticCamera attribute)</a>
@@ -3206,7 +3452,7 @@
       <ul>
         <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.pre_func_signal">(aslm.model.features.autofocus.Autofocus method)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition.html#aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition.pre_func_signal">(aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition method)</a>
+        <li><a href="_autosummary/aslm.model.features.cva_conpro.ConstantVelocityAcquisition.html#aslm.model.features.cva_conpro.ConstantVelocityAcquisition.pre_func_signal">(aslm.model.features.cva_conpro.ConstantVelocityAcquisition method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.DetectTissueInStack.html#aslm.model.features.remove_empty_tiles.DetectTissueInStack.pre_func_signal">(aslm.model.features.remove_empty_tiles.DetectTissueInStack method)</a>
 </li>
@@ -3219,6 +3465,8 @@
         <li><a href="_autosummary/aslm.model.features.common_features.WaitToContinue.html#aslm.model.features.common_features.WaitToContinue.pre_signal_func">(aslm.model.features.common_features.WaitToContinue method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.pre_signal_func">(aslm.model.features.common_features.ZStackAcquisition method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.pre_signal_func">(aslm.model.features.volume_search.VolumeSearch method)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.html#aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable.pre_z">pre_z (aslm.model.features.common_features.MoveToNextPositionInMultiPositionTable attribute)</a>
@@ -3249,6 +3497,8 @@
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.prod">prod() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.project_file">project_file (aslm.model.features.restful_features.IlastikSegmentation attribute)</a>
+</li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.ptp">ptp() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.put">put() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
@@ -3263,12 +3513,12 @@
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.ravel">ravel() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.read">read() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id3">[1]</a>, <a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id7">[2]</a>
+      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.read">read() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.read">(aslm.model.data_sources.data_source.DataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#id2">[1]</a>
+        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.read">(aslm.model.data_sources.data_source.DataSource method)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.read">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id2">[1]</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id7">[2]</a>
+        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.read">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.html#aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.read">(aslm.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel method)</a>
 </li>
@@ -3287,9 +3537,13 @@
       </ul></li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.real">real (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.refresh_display">refresh_display() (aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
+</li>
       <li><a href="_autosummary/aslm.controller.thread_pool.SynchronizedThreadPool.html#aslm.controller.thread_pool.SynchronizedThreadPool.registerResource">registerResource() (aslm.controller.thread_pool.SynchronizedThreadPool method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.release_pipe">release_pipe() (aslm.model.model.Model method)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.SignalContainer.html#aslm.model.features.feature_container.SignalContainer.remaining_number_of_execution">remaining_number_of_execution (aslm.model.features.feature_container.SignalContainer attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase.html#aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase.remote_focus_delay">remote_focus_delay (aslm.model.devices.remote_focus.remote_focus_base.RemoteFocusBase attribute)</a>
 
@@ -3377,12 +3631,18 @@
         <li><a href="_autosummary/aslm.model.features.feature_container.SignalContainer.html#aslm.model.features.feature_container.SignalContainer.reset">(aslm.model.features.feature_container.SignalContainer method)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.reset_controller">reset_controller() (aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
+</li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.reshape">reshape() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.resize">resize() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.stages.stage_sutter.SutterStage.html#aslm.model.devices.stages.stage_sutter.SutterStage.resolution">resolution (aslm.model.devices.stages.stage_sutter.SutterStage attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.resolution">(aslm.model.features.restful_features.IlastikSegmentation attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.features.common_features.ChangeResolution.html#aslm.model.features.common_features.ChangeResolution.resolution_mode">resolution_mode (aslm.model.features.common_features.ChangeResolution attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.resolutions">resolutions (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource property)</a>
@@ -3399,6 +3659,14 @@
 </li>
       <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.robust_autofocus">robust_autofocus() (aslm.model.features.autofocus.Autofocus method)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.feature_container.Container.html#aslm.model.features.feature_container.Container.root">root (aslm.model.features.feature_container.Container attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.feature_container.DataContainer.html#aslm.model.features.feature_container.DataContainer.root">(aslm.model.features.feature_container.DataContainer attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.features.feature_container.SignalContainer.html#aslm.model.features.feature_container.SignalContainer.root">(aslm.model.features.feature_container.SignalContainer attribute)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.round">round() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
       <li><a href="_autosummary/aslm.controller.thread_pool.SelfLockThread.html#aslm.controller.thread_pool.SelfLockThread.run">run() (aslm.controller.thread_pool.SelfLockThread method)</a>
@@ -3408,7 +3676,7 @@
 </li>
         <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.ResultThread.html#aslm.model.concurrency.concurrency_tools.ResultThread.run">(aslm.model.concurrency.concurrency_tools.ResultThread method)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.run">(aslm.model.features.autofocus.Autofocus method)</a>, <a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#id0">[1]</a>
+        <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.run">(aslm.model.features.autofocus.Autofocus method)</a>
 </li>
         <li><a href="_autosummary/aslm.model.features.feature_container.DataContainer.html#aslm.model.features.feature_container.DataContainer.run">(aslm.model.features.feature_container.DataContainer method)</a>
 </li>
@@ -3471,7 +3739,7 @@
         <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.save_directory">(aslm.model.features.image_writer.ImageWriter attribute)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.save_image">save_image() (aslm.model.features.image_writer.ImageWriter method)</a>, <a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#id3">[1]</a>
+      <li><a href="_autosummary/aslm.model.features.image_writer.ImageWriter.html#aslm.model.features.image_writer.ImageWriter.save_image">save_image() (aslm.model.features.image_writer.ImageWriter method)</a>
 </li>
       <li><a href="_autosummary/aslm.tools.file_functions.save_yaml_file.html#aslm.tools.file_functions.save_yaml_file">save_yaml_file() (in module aslm.tools.file_functions)</a>
 </li>
@@ -3484,6 +3752,8 @@
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.features.common_features.ConProAcquisition.html#aslm.model.features.common_features.ConProAcquisition.scanrange">scanrange (aslm.model.features.common_features.ConProAcquisition attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.devices.stages.stage_asi.ASIStage.html#aslm.model.devices.stages.stage_asi.ASIStage.scanv">scanv() (aslm.model.devices.stages.stage_asi.ASIStage method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.searchsorted">searchsorted() (aslm.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
@@ -3509,6 +3779,12 @@
         <li><a href="_autosummary/aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.html#aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.serial_number">(aslm.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage attribute)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.service_url">service_url (aslm.model.features.restful_features.IlastikSegmentation attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.set_absolute_mode">set_absolute_mode() (aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.set_bigtiff">set_bigtiff() (aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
+</li>
       <li><a href="_autosummary/aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca.html#aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca.set_binning">set_binning() (aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca method)</a>
 
       <ul>
@@ -3539,6 +3815,16 @@
         <li><a href="_autosummary/aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.html#aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.set_filter">(aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel method)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_from_configuration_experiment">set_from_configuration_experiment() (aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata method)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.set_from_configuration_experiment">(aslm.model.metadata_sources.metadata.Metadata method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.set_from_configuration_experiment">(aslm.model.metadata_sources.metadata.XMLMetadata method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.set_from_configuration_experiment">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata method)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca.html#aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca.set_line_interval">set_line_interval() (aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca method)</a>
 
       <ul>
@@ -3549,12 +3835,12 @@
         <li><a href="_autosummary/aslm.model.devices.camera.camera_synthetic.SyntheticCamera.html#aslm.model.devices.camera.camera_synthetic.SyntheticCamera.set_line_interval">(aslm.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.set_metadata_from_configuration_experiment">set_metadata_from_configuration_experiment() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id2">[1]</a>, <a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id8">[2]</a>
+      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.set_metadata_from_configuration_experiment">set_metadata_from_configuration_experiment() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.set_metadata_from_configuration_experiment">(aslm.model.data_sources.data_source.DataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#id3">[1]</a>
+        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.set_metadata_from_configuration_experiment">(aslm.model.data_sources.data_source.DataSource method)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.set_metadata_from_configuration_experiment">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id8">[1]</a>
+        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.set_metadata_from_configuration_experiment">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.devices.lasers.laser_base.LaserBase.html#aslm.model.devices.lasers.laser_base.LaserBase.set_power">set_power() (aslm.model.devices.lasers.laser_base.LaserBase method)</a>
@@ -3585,6 +3871,8 @@
         <li><a href="_autosummary/aslm.model.devices.camera.camera_synthetic.SyntheticCamera.html#aslm.model.devices.camera.camera_synthetic.SyntheticCamera.set_readout_direction">(aslm.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/aslm.model.devices.APIs.sutter.MP285.MP285.html#aslm.model.devices.APIs.sutter.MP285.MP285.set_resolution_and_velocity">set_resolution_and_velocity() (aslm.model.devices.APIs.sutter.MP285.MP285 method)</a>
+</li>
       <li><a href="_autosummary/aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca.html#aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca.set_ROI">set_ROI() (aslm.model.devices.camera.camera_hamamatsu.HamamatsuOrca method)</a>
 
       <ul>
@@ -3605,10 +3893,30 @@
         <li><a href="_autosummary/aslm.model.devices.camera.camera_synthetic.SyntheticCamera.html#aslm.model.devices.camera.camera_synthetic.SyntheticCamera.set_sensor_mode">(aslm.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_shape_from_configuration_experiment">set_shape_from_configuration_experiment() (aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata method)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.set_shape_from_configuration_experiment">(aslm.model.metadata_sources.metadata.Metadata method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.set_shape_from_configuration_experiment">(aslm.model.metadata_sources.metadata.XMLMetadata method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.set_shape_from_configuration_experiment">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata method)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.devices.stages.stage_asi.ASIStage.html#aslm.model.devices.stages.stage_asi.ASIStage.set_speed">set_speed() (aslm.model.devices.stages.stage_asi.ASIStage method)</a>
 
       <ul>
         <li><a href="_autosummary/aslm.model.devices.stages.stage_synthetic.SyntheticStage.html#aslm.model.devices.stages.stage_synthetic.SyntheticStage.set_speed">(aslm.model.devices.stages.stage_synthetic.SyntheticStage method)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_stack_order_from_configuration_experiment">set_stack_order_from_configuration_experiment() (aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata method)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.set_stack_order_from_configuration_experiment">(aslm.model.metadata_sources.metadata.Metadata method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.set_stack_order_from_configuration_experiment">(aslm.model.metadata_sources.metadata.XMLMetadata method)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.set_stack_order_from_configuration_experiment">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata method)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.devices.zoom.zoom_base.ZoomBase.html#aslm.model.devices.zoom.zoom_base.ZoomBase.set_zoom">set_zoom() (aslm.model.devices.zoom.zoom_base.ZoomBase method)</a>
@@ -3639,18 +3947,16 @@
         <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.ResultThread.html#aslm.model.concurrency.concurrency_tools.ResultThread.setName">(aslm.model.concurrency.concurrency_tools.ResultThread method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.setup">setup (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
-</li>
       <li><a href="_autosummary/aslm.model.dummy.DummyDevice.html#aslm.model.dummy.DummyDevice.setup">setup() (aslm.model.dummy.DummyDevice method)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.shape">shape (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id12">(aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource property)</a>
+        <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.shape">(aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource property)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#id7">(aslm.model.data_sources.data_source.DataSource property)</a>
+        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.shape">(aslm.model.data_sources.data_source.DataSource property)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id12">(aslm.model.data_sources.tiff_data_source.TiffDataSource property)</a>
+        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.shape">(aslm.model.data_sources.tiff_data_source.TiffDataSource property)</a>
 </li>
         <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata property)</a>
 </li>
@@ -3663,20 +3969,20 @@
         <li><a href="_autosummary/aslm.tools.image_loaders.LazyTiff.html#aslm.tools.image_loaders.LazyTiff.shape">(aslm.tools.image_loaders.LazyTiff property)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.shape">shape() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
-
-      <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.shape">(aslm.model.data_sources.data_source.DataSource method)</a>
-</li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.shape">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
-</li>
-      </ul></li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.shape_c">shape_c (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
 
       <ul>
         <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.shape_c">(aslm.model.data_sources.data_source.DataSource attribute)</a>
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.shape_c">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_c">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.shape_c">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.shape_c">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.shape_c">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.shape_t">shape_t (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
@@ -3686,6 +3992,14 @@
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.shape_t">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_t">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.shape_t">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.shape_t">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.shape_t">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
+</li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.shape_x">shape_x (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
 
@@ -3693,6 +4007,14 @@
         <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.shape_x">(aslm.model.data_sources.data_source.DataSource attribute)</a>
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.shape_x">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_x">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.shape_x">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.shape_x">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.shape_x">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.shape_y">shape_y (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
@@ -3702,6 +4024,14 @@
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.shape_y">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_y">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.shape_y">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.shape_y">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.shape_y">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
+</li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.shape_z">shape_z (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
 
@@ -3709,6 +4039,14 @@
         <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.shape_z">(aslm.model.data_sources.data_source.DataSource attribute)</a>
 </li>
         <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.shape_z">(aslm.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_z">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.Metadata.html#aslm.model.metadata_sources.metadata.Metadata.shape_z">(aslm.model.metadata_sources.metadata.Metadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.shape_z">(aslm.model.metadata_sources.metadata.XMLMetadata attribute)</a>
+</li>
+        <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.shape_z">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.shapes">shapes (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource property)</a>
@@ -3736,7 +4074,11 @@
       <ul>
         <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.signal_end">(aslm.model.features.common_features.ZStackAcquisition method)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.signal_end">(aslm.model.features.volume_search.VolumeSearch method)</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.dummy.DummyModel.html#aslm.model.dummy.DummyModel.signal_func">signal_func() (aslm.model.dummy.DummyModel method)</a>
 
       <ul>
@@ -3758,6 +4100,8 @@
 </li>
         <li><a href="_autosummary/aslm.model.features.remove_empty_tiles.RemoveEmptyPositions.html#aslm.model.features.remove_empty_tiles.RemoveEmptyPositions.signal_func">(aslm.model.features.remove_empty_tiles.RemoveEmptyPositions method)</a>
 </li>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.signal_func">(aslm.model.features.volume_search.VolumeSearch method)</a>
+</li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.signal_id">signal_id (aslm.model.features.autofocus.Autofocus attribute)</a>
 </li>
@@ -3765,14 +4109,14 @@
 </li>
       <li><a href="_autosummary/aslm.model.dummy.DummyModel.html#aslm.model.dummy.DummyModel.signal_records">signal_records (aslm.model.dummy.DummyModel attribute)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.signal_response_func">signal_response_func() (aslm.model.features.volume_search.VolumeSearch method)</a>
+</li>
       <li><a href="_autosummary/aslm.model.dummy.DummyModel.html#aslm.model.dummy.DummyModel.signal_thread">signal_thread (aslm.model.dummy.DummyModel attribute)</a>
 
       <ul>
         <li><a href="_autosummary/aslm.model.model.Model.html#aslm.model.model.Model.signal_thread">(aslm.model.model.Model attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.features.feature_container.SignalContainer.html#aslm.model.features.feature_container.SignalContainer">SignalContainer (class in aslm.model.features.feature_container)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.feature_container.SignalNode.html#aslm.model.features.feature_container.SignalNode">SignalNode (class in aslm.model.features.feature_container)</a>
@@ -3784,6 +4128,10 @@
       <li><a href="_autosummary/aslm.model.waveforms.sine_wave.html#aslm.model.waveforms.sine_wave">sine_wave() (in module aslm.model.waveforms)</a>
 </li>
       <li><a href="_autosummary/aslm.model.waveforms.single_pulse.html#aslm.model.waveforms.single_pulse">single_pulse() (in module aslm.model.waveforms)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.sinx">sinx (aslm.model.features.volume_search.VolumeSearch attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.siny">siny (aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.concurrency.concurrency_tools.SharedNDArray.html#aslm.model.concurrency.concurrency_tools.SharedNDArray.size">size (aslm.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 </li>
@@ -4098,9 +4446,17 @@
       <li><a href="_autosummary/aslm.model.features.autofocus.Autofocus.html#aslm.model.features.autofocus.Autofocus.target_frame_id">target_frame_id (aslm.model.features.autofocus.Autofocus attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.FindTissueSimple2D.html#aslm.model.features.common_features.FindTissueSimple2D.target_resolution">target_resolution (aslm.model.features.common_features.FindTissueSimple2D attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.target_resolution">(aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.features.common_features.FindTissueSimple2D.html#aslm.model.features.common_features.FindTissueSimple2D.target_zoom">target_zoom (aslm.model.features.common_features.FindTissueSimple2D attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.target_zoom">(aslm.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/aslm.model.microscope.Microscope.html#aslm.model.microscope.Microscope.terminate">terminate() (aslm.model.microscope.Microscope method)</a>
 
       <ul>
@@ -4115,12 +4471,8 @@
 </li>
       <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource">TiffDataSource (class in aslm.model.data_sources.tiff_data_source)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.devices.stages.stage_asi.ASIStage.html#aslm.model.devices.stages.stage_asi.ASIStage.tiger_controller">tiger_controller (aslm.model.devices.stages.stage_asi.ASIStage attribute)</a>
-
-      <ul>
-        <li><a href="_autosummary/aslm.model.microscope.Microscope.html#aslm.model.microscope.Microscope.tiger_controller">(aslm.model.microscope.Microscope attribute)</a>
+      <li><a href="_autosummary/aslm.model.microscope.Microscope.html#aslm.model.microscope.Microscope.tiger_controller">tiger_controller (aslm.model.microscope.Microscope attribute)</a>
 </li>
-      </ul></li>
       <li><a href="_autosummary/aslm.model.dummy.DummyDevice.html#aslm.model.dummy.DummyDevice.timecost">timecost (aslm.model.dummy.DummyDevice attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.html#aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom.timeout">timeout (aslm.model.devices.zoom.zoom_dynamixel.DynamixelZoom attribute)</a>
@@ -4225,6 +4577,8 @@
 </li>
       <li><a href="_autosummary/aslm.log_files.log_functions.update_nested_dict.html#aslm.log_files.log_functions.update_nested_dict">update_nested_dict() (in module aslm.log_files.log_functions)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.update_setting">update_setting() (aslm.model.features.restful_features.IlastikSegmentation method)</a>
+</li>
       <li><a href="_autosummary/aslm.tools.common_dict_tools.update_stage_dict.html#aslm.tools.common_dict_tools.update_stage_dict">update_stage_dict() (in module aslm.tools.common_dict_tools)</a>
 </li>
       <li><a href="_autosummary/aslm.model.microscope.Microscope.html#aslm.model.microscope.Microscope.update_stage_limits">update_stage_limits() (aslm.model.microscope.Microscope method)</a>
@@ -4275,10 +4629,10 @@
       </ul></li>
       <li><a href="_autosummary/aslm.config.config.verify_experiment_config.html#aslm.config.config.verify_experiment_config">verify_experiment_config() (in module aslm.config.config)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.devices.stages.stage_asi.ASIStage.html#aslm.model.devices.stages.stage_asi.ASIStage.verify_move">verify_move() (aslm.model.devices.stages.stage_asi.ASIStage method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/aslm.model.devices.stages.stage_asi.ASIStage.html#aslm.model.devices.stages.stage_asi.ASIStage.verify_move">verify_move() (aslm.model.devices.stages.stage_asi.ASIStage method)</a>
+</li>
       <li><a href="_autosummary/aslm.config.config.verify_waveform_constants.html#aslm.config.config.verify_waveform_constants">verify_waveform_constants() (in module aslm.config.config)</a>
 </li>
       <li><a href="_autosummary/aslm.model.dummy.DummyController.html#aslm.model.dummy.DummyController.view">view (aslm.model.dummy.DummyController attribute)</a>
@@ -4291,14 +4645,16 @@
 </li>
       <li><a href="_autosummary/aslm.tools.sdf.volume_from_sdf.html#aslm.tools.sdf.volume_from_sdf">volume_from_sdf() (in module aslm.tools.sdf)</a>
 </li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.volumes_selected">volumes_selected (aslm.model.features.volume_search.VolumeSearch attribute)</a>
+</li>
       <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch">VolumeSearch (class in aslm.model.features.volume_search)</a>
 </li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id13">voxel_size (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource property)</a>
+      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.voxel_size">voxel_size (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource property)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#id8">(aslm.model.data_sources.data_source.DataSource property)</a>
+        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.voxel_size">(aslm.model.data_sources.data_source.DataSource property)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id13">(aslm.model.data_sources.tiff_data_source.TiffDataSource property)</a>
+        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.voxel_size">(aslm.model.data_sources.tiff_data_source.TiffDataSource property)</a>
 </li>
         <li><a href="_autosummary/aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.voxel_size">(aslm.model.metadata_sources.bdv_metadata.BigDataViewerMetadata property)</a>
 </li>
@@ -4307,14 +4663,6 @@
         <li><a href="_autosummary/aslm.model.metadata_sources.metadata.XMLMetadata.html#aslm.model.metadata_sources.metadata.XMLMetadata.voxel_size">(aslm.model.metadata_sources.metadata.XMLMetadata property)</a>
 </li>
         <li><a href="_autosummary/aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.voxel_size">(aslm.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata property)</a>
-</li>
-      </ul></li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.voxel_size">voxel_size() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
-
-      <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.voxel_size">(aslm.model.data_sources.data_source.DataSource method)</a>
-</li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.voxel_size">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -4389,12 +4737,12 @@
         <li><a href="_autosummary/aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.html#aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.wheel_position">(aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel attribute)</a>, <a href="_autosummary/aslm.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.html#id1">[1]</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.write">write() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id4">[1]</a>, <a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#id9">[2]</a>
+      <li><a href="_autosummary/aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource.write">write() (aslm.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
 
       <ul>
-        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.write">(aslm.model.data_sources.data_source.DataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#id4">[1]</a>
+        <li><a href="_autosummary/aslm.model.data_sources.data_source.DataSource.html#aslm.model.data_sources.data_source.DataSource.write">(aslm.model.data_sources.data_source.DataSource method)</a>
 </li>
-        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.write">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id3">[1]</a>, <a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#id9">[2]</a>
+        <li><a href="_autosummary/aslm.model.data_sources.tiff_data_source.TiffDataSource.html#aslm.model.data_sources.tiff_data_source.TiffDataSource.write">(aslm.model.data_sources.tiff_data_source.TiffDataSource method)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.html#aslm.model.devices.daq.daq_synthetic.SyntheticDAQ.write_waveforms_to_tasks">write_waveforms_to_tasks() (aslm.model.devices.daq.daq_synthetic.SyntheticDAQ method)</a>
@@ -4457,12 +4805,24 @@
 <h2 id="Z">Z</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.z_pos">z_pos (aslm.model.features.volume_search.VolumeSearch attribute)</a>
+</li>
       <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.z_position_moved_time">z_position_moved_time (aslm.model.features.common_features.ZStackAcquisition attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.ZStackAcquisition.html#aslm.model.features.common_features.ZStackAcquisition.z_step_size">z_step_size (aslm.model.features.common_features.ZStackAcquisition attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.z_step_size">(aslm.model.features.volume_search.VolumeSearch attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/aslm.model.features.volume_search.VolumeSearch.html#aslm.model.features.volume_search.VolumeSearch.z_steps">z_steps (aslm.model.features.volume_search.VolumeSearch attribute)</a>
+</li>
+      <li><a href="_autosummary/aslm.model.features.restful_features.IlastikSegmentation.html#aslm.model.features.restful_features.IlastikSegmentation.zoom">zoom (aslm.model.features.restful_features.IlastikSegmentation attribute)</a>
 </li>
       <li><a href="_autosummary/aslm.model.features.common_features.ChangeResolution.html#aslm.model.features.common_features.ChangeResolution.zoom_value">zoom_value (aslm.model.features.common_features.ChangeResolution attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.devices.zoom.zoom_base.ZoomBase.html#aslm.model.devices.zoom.zoom_base.ZoomBase">ZoomBase (class in aslm.model.devices.zoom.zoom_base)</a>
 </li>
       <li><a href="_autosummary/aslm.model.devices.zoom.zoom_base.ZoomBase.html#aslm.model.devices.zoom.zoom_base.ZoomBase.zoomdict">zoomdict (aslm.model.devices.zoom.zoom_base.ZoomBase attribute)</a>
@@ -4473,8 +4833,6 @@
         <li><a href="_autosummary/aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.html#aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom.zoomdict">(aslm.model.devices.zoom.zoom_synthetic.SyntheticZoom attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/aslm.model.devices.zoom.zoom_base.ZoomBase.html#aslm.model.devices.zoom.zoom_base.ZoomBase.zoomvalue">zoomvalue (aslm.model.devices.zoom.zoom_base.ZoomBase attribute)</a>
 
       <ul>

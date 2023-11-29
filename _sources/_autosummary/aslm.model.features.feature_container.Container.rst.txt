@@ -24,4 +24,13 @@ aslm.model.features.feature\_container.Container
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Container.root
+      ~Container.curr_node
+      ~Container.end_flag
+      ~Container.is_closed
+   
    

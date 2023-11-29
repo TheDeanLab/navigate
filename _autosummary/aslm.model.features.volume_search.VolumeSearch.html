@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>aslm.model.features.volume_search.VolumeSearch &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -51,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
@@ -66,8 +69,7 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.auto_tile_scan.html">aslm.model.features.auto_tile_scan</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.autofocus.html">aslm.model.features.autofocus</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.common_features.html">aslm.model.features.common_features</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.constant_velocity_acquisition.html">aslm.model.features.constant_velocity_acquisition</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.dummy_detective.html">aslm.model.features.dummy_detective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.cva_conpro.html">aslm.model.features.cva_conpro</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.feature_container.html">aslm.model.features.feature_container</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.feature_related_functions.html">aslm.model.features.feature_related_functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.image_writer.html">aslm.model.features.image_writer</a></li>
@@ -122,15 +124,17 @@
 <dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aslm.model.features.volume_search.</span></span><span class="sig-name descname"><span class="pre">VolumeSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Nanoscale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N/A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Nanoscale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N/A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Find the outer boundary of a tissue, moving the stage through z. Assumes
+<p>VolumeSearch.</p>
+<p>Find the outer boundary of a tissue, moving the stage through z. Assumes
 there is no tissue out-of-frame in the x,y-directions.</p>
 <p>Construct a list of stage positions that will tile the entire tissue
 boundary in x,y,z at target_resolution, target_zoom. Current resolution
 and zoom is self.model.active_microscope_name and
 self.model.configuration[“experiment”][“MicroscopeState”][“zoom”].</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Nanoscale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N/A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize VolumeSearch</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -141,6 +145,7 @@ of tissue</p></li>
 <li><p><strong>flipx</strong> (<em>bool</em>) – Flip the direction in which new tiles are added.</p></li>
 <li><p><strong>flipy</strong> (<em>bool</em>) – Flip the direction in which new tiles are added.</p></li>
 <li><p><strong>overlap</strong> (<em>float</em>) – Value between 0 and 1 indicating percent overlap of tiles.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – If True, save debug images to disk.</p></li>
 </ul>
 </dd>
 </dl>
@@ -150,34 +155,443 @@ of tissue</p></li>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.__init__" title="aslm.model.features.volume_search.VolumeSearch.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, target_resolution, ...])</p></td>
-<td><p>Find the outer boundary of a tissue, moving the stage through z.</p></td>
+<td><p>Initialize VolumeSearch</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.cleanup" title="aslm.model.features.volume_search.VolumeSearch.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a>()</p></td>
+<td><p>Cleanup function</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_func</span></code>(frame_ids)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.data_func" title="aslm.model.features.volume_search.VolumeSearch.data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_func</span></code></a>(frame_ids)</p></td>
+<td><p>Data function.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_data_func</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.end_data_func" title="aslm.model.features.volume_search.VolumeSearch.end_data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_data_func</span></code></a>()</p></td>
+<td><p>End data function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_data_func</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.init_data_func" title="aslm.model.features.volume_search.VolumeSearch.init_data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_data_func</span></code></a>()</p></td>
+<td><p>Initialize data function</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_signal_func</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.pre_signal_func" title="aslm.model.features.volume_search.VolumeSearch.pre_signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_signal_func</span></code></a>()</p></td>
+<td><p>Initialize signal function</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_end</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.signal_end" title="aslm.model.features.volume_search.VolumeSearch.signal_end"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_end</span></code></a>()</p></td>
+<td><p>Signal end function.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_func</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.signal_func" title="aslm.model.features.volume_search.VolumeSearch.signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_func</span></code></a>()</p></td>
+<td><p>Signal function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_response_func</span></code>(*args)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.signal_response_func" title="aslm.model.features.volume_search.VolumeSearch.signal_response_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_response_func</span></code></a>(*args)</p></td>
+<td><p>Signal response function.</p></td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.model" title="aslm.model.features.volume_search.VolumeSearch.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>ASLM Model</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.target_resolution" title="aslm.model.features.volume_search.VolumeSearch.target_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">target_resolution</span></code></a></p></td>
+<td><p>Name of microscope to use for tiled imaging of tissue</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.target_zoom" title="aslm.model.features.volume_search.VolumeSearch.target_zoom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">target_zoom</span></code></a></p></td>
+<td><p>Resolution of microscope (target_resolution) to use for tiled imaging</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.z_steps" title="aslm.model.features.volume_search.VolumeSearch.z_steps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_steps</span></code></a></p></td>
+<td><p>Number of z-steps to take</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.z_step_size" title="aslm.model.features.volume_search.VolumeSearch.z_step_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_step_size</span></code></a></p></td>
+<td><p>Size of z-step</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.z_pos" title="aslm.model.features.volume_search.VolumeSearch.z_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_pos</span></code></a></p></td>
+<td><p>Current z-position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.f_step_size" title="aslm.model.features.volume_search.VolumeSearch.f_step_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_step_size</span></code></a></p></td>
+<td><p>Size of focus step</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.f_pos" title="aslm.model.features.volume_search.VolumeSearch.f_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_pos</span></code></a></p></td>
+<td><p>Current focus position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.f_offset" title="aslm.model.features.volume_search.VolumeSearch.f_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_offset</span></code></a></p></td>
+<td><p>Current z-index</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.curr_z_index" title="aslm.model.features.volume_search.VolumeSearch.curr_z_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curr_z_index</span></code></a></p></td>
+<td><p>Current z-index</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.sinx" title="aslm.model.features.volume_search.VolumeSearch.sinx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sinx</span></code></a></p></td>
+<td><p>1 if flipx is False, -1 if flipx is True</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.siny" title="aslm.model.features.volume_search.VolumeSearch.siny"><code class="xref py py-obj docutils literal notranslate"><span class="pre">siny</span></code></a></p></td>
+<td><p>1 if flipy is False, -1 if flipy is True</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.overlap" title="aslm.model.features.volume_search.VolumeSearch.overlap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">overlap</span></code></a></p></td>
+<td><p>Percent overlap of tiles</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.has_tissue_queue" title="aslm.model.features.volume_search.VolumeSearch.has_tissue_queue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_tissue_queue</span></code></a></p></td>
+<td><p>Queue for communicating whether tissue was found</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.direction" title="aslm.model.features.volume_search.VolumeSearch.direction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">direction</span></code></a></p></td>
+<td><p>1 if moving up, -1 if moving down</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.has_tissue" title="aslm.model.features.volume_search.VolumeSearch.has_tissue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_tissue</span></code></a></p></td>
+<td><p>True if tissue was found</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.first_boundary" title="aslm.model.features.volume_search.VolumeSearch.first_boundary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">first_boundary</span></code></a></p></td>
+<td><p>Boundary of tissue</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.pre_boundary" title="aslm.model.features.volume_search.VolumeSearch.pre_boundary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_boundary</span></code></a></p></td>
+<td><p>Boundary of tissue</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.end_flag" title="aslm.model.features.volume_search.VolumeSearch.end_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_flag</span></code></a></p></td>
+<td><p>True if the search is complete</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.config_table" title="aslm.model.features.volume_search.VolumeSearch.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<td><p>Feature configuration</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.debug" title="aslm.model.features.volume_search.VolumeSearch.debug"><code class="xref py py-obj docutils literal notranslate"><span class="pre">debug</span></code></a></p></td>
+<td><p>True if debug mode is enabled</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.volume_search.VolumeSearch.volumes_selected" title="aslm.model.features.volume_search.VolumeSearch.volumes_selected"><code class="xref py py-obj docutils literal notranslate"><span class="pre">volumes_selected</span></code></a></p></td>
+<td><p>Debug image</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.cleanup">
+<span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.cleanup" title="Permalink to this definition"></a></dt>
+<dd><p>Cleanup function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.data_func">
+<span class="sig-name descname"><span class="pre">data_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.data_func" title="Permalink to this definition"></a></dt>
+<dd><p>Data function.</p>
+<p>Find the tissue boundary in the current frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>frame_ids</strong> (<em>list</em>) – List of frame ids to process.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the data function should be called again.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.end_data_func">
+<span class="sig-name descname"><span class="pre">end_data_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.end_data_func" title="Permalink to this definition"></a></dt>
+<dd><p>End data function.</p>
+<p>Map the tissue boundary to stage positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the search is complete.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.init_data_func">
+<span class="sig-name descname"><span class="pre">init_data_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.init_data_func" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize data function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.pre_signal_func">
+<span class="sig-name descname"><span class="pre">pre_signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.pre_signal_func" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize signal function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.signal_end">
+<span class="sig-name descname"><span class="pre">signal_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.signal_end" title="Permalink to this definition"></a></dt>
+<dd><p>Signal end function.</p>
+<p>Check if the search is complete.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the search is complete.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.signal_func">
+<span class="sig-name descname"><span class="pre">signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.signal_func" title="Permalink to this definition"></a></dt>
+<dd><p>Signal function.</p>
+<p>Move the stage to the next z-position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the signal function should be called again.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.signal_response_func">
+<span class="sig-name descname"><span class="pre">signal_response_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.signal_response_func" title="Permalink to this definition"></a></dt>
+<dd><p>Signal response function.</p>
+<p>Check if tissue was found. If not, move the stage to the next z-position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the signal function should be called again.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.config_table">
+<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.config_table" title="Permalink to this definition"></a></dt>
+<dd><p>Feature configuration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.curr_z_index">
+<span class="sig-name descname"><span class="pre">curr_z_index</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.curr_z_index" title="Permalink to this definition"></a></dt>
+<dd><p>Current z-index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.debug" title="Permalink to this definition"></a></dt>
+<dd><p>True if debug mode is enabled</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.direction">
+<span class="sig-name descname"><span class="pre">direction</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.direction" title="Permalink to this definition"></a></dt>
+<dd><p>1 if moving up, -1 if moving down</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.end_flag">
+<span class="sig-name descname"><span class="pre">end_flag</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.end_flag" title="Permalink to this definition"></a></dt>
+<dd><p>True if the search is complete</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.f_offset">
+<span class="sig-name descname"><span class="pre">f_offset</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.f_offset" title="Permalink to this definition"></a></dt>
+<dd><p>Current z-index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.f_pos">
+<span class="sig-name descname"><span class="pre">f_pos</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.f_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Current focus position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.f_step_size">
+<span class="sig-name descname"><span class="pre">f_step_size</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.f_step_size" title="Permalink to this definition"></a></dt>
+<dd><p>Size of focus step</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.first_boundary">
+<span class="sig-name descname"><span class="pre">first_boundary</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.first_boundary" title="Permalink to this definition"></a></dt>
+<dd><p>Boundary of tissue</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.has_tissue">
+<span class="sig-name descname"><span class="pre">has_tissue</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.has_tissue" title="Permalink to this definition"></a></dt>
+<dd><p>True if tissue was found</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.has_tissue_queue">
+<span class="sig-name descname"><span class="pre">has_tissue_queue</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.has_tissue_queue" title="Permalink to this definition"></a></dt>
+<dd><p>Queue for communicating whether tissue was found</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Queue</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.model" title="Permalink to this definition"></a></dt>
+<dd><p>ASLM Model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="aslm.model.model.Model.html#aslm.model.model.Model" title="aslm.model.model.Model">aslm.model.model.Model</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.overlap">
+<span class="sig-name descname"><span class="pre">overlap</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.overlap" title="Permalink to this definition"></a></dt>
+<dd><p>Percent overlap of tiles</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.pre_boundary">
+<span class="sig-name descname"><span class="pre">pre_boundary</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.pre_boundary" title="Permalink to this definition"></a></dt>
+<dd><p>Boundary of tissue</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.sinx">
+<span class="sig-name descname"><span class="pre">sinx</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.sinx" title="Permalink to this definition"></a></dt>
+<dd><p>1 if flipx is False, -1 if flipx is True</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.siny">
+<span class="sig-name descname"><span class="pre">siny</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.siny" title="Permalink to this definition"></a></dt>
+<dd><p>1 if flipy is False, -1 if flipy is True</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.target_resolution">
+<span class="sig-name descname"><span class="pre">target_resolution</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.target_resolution" title="Permalink to this definition"></a></dt>
+<dd><p>Name of microscope to use for tiled imaging of tissue</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.target_zoom">
+<span class="sig-name descname"><span class="pre">target_zoom</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.target_zoom" title="Permalink to this definition"></a></dt>
+<dd><p>Resolution of microscope (target_resolution) to use for tiled imaging</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.volumes_selected">
+<span class="sig-name descname"><span class="pre">volumes_selected</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.volumes_selected" title="Permalink to this definition"></a></dt>
+<dd><p>Debug image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.z_pos">
+<span class="sig-name descname"><span class="pre">z_pos</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.z_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Current z-position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.z_step_size">
+<span class="sig-name descname"><span class="pre">z_step_size</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.z_step_size" title="Permalink to this definition"></a></dt>
+<dd><p>Size of z-step</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.volume_search.VolumeSearch.z_steps">
+<span class="sig-name descname"><span class="pre">z_steps</span></span><a class="headerlink" href="#aslm.model.features.volume_search.VolumeSearch.z_steps" title="Permalink to this definition"></a></dt>
+<dd><p>Number of z-steps to take</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

@@ -27,4 +27,24 @@ aslm.model.features.image\_writer.ImageWriter
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ImageWriter.data_buffer
+      ~ImageWriter.number_of_frames
+      ~ImageWriter.save_directory
+      ~ImageWriter.sub_dir
+      ~ImageWriter.num_of_channels
+      ~ImageWriter.num_of_positions
+      ~ImageWriter.num_of_timepoints
+      ~ImageWriter.num_of_slices
+      ~ImageWriter.current_time_point
+      ~ImageWriter.config_table
+      ~ImageWriter.big_tiff
+      ~ImageWriter.mip
+      ~ImageWriter.mip_directory
+      ~ImageWriter.file_type
+      ~ImageWriter.data_source
+   
    

@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>aslm.model.features.autofocus.Autofocus &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -51,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
@@ -66,8 +69,7 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.auto_tile_scan.html">aslm.model.features.auto_tile_scan</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.features.autofocus.html">aslm.model.features.autofocus</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.common_features.html">aslm.model.features.common_features</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.constant_velocity_acquisition.html">aslm.model.features.constant_velocity_acquisition</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.dummy_detective.html">aslm.model.features.dummy_detective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.cva_conpro.html">aslm.model.features.cva_conpro</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.feature_container.html">aslm.model.features.feature_container</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.feature_related_functions.html">aslm.model.features.feature_related_functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.image_writer.html">aslm.model.features.image_writer</a></li>
@@ -128,220 +130,26 @@ autofocus_frame_queue and calculate the entropy of the image. The entropy
 is then compared to the maximum entropy and the position is saved if it is
 higher. The autofocus_pos_queue is then filled with the next position to
 move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.autofocus_frame_queue">
-<span class="sig-name descname"><span class="pre">autofocus_frame_queue</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.autofocus_frame_queue" title="Permalink to this definition"></a></dt>
-<dd><p>Queue containing the frames to be processed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Queue</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.autofocus_pos_queue">
-<span class="sig-name descname"><span class="pre">autofocus_pos_queue</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.autofocus_pos_queue" title="Permalink to this definition"></a></dt>
-<dd><p>Queue containing the positions to move to.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Queue</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.max_entropy">
-<span class="sig-name descname"><span class="pre">max_entropy</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.max_entropy" title="Permalink to this definition"></a></dt>
-<dd><p>Maximum entropy of the image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.f_frame_id">
-<span class="sig-name descname"><span class="pre">f_frame_id</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.f_frame_id" title="Permalink to this definition"></a></dt>
-<dd><p>Frame ID of the frame with the maximum entropy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.frame_num">
-<span class="sig-name descname"><span class="pre">frame_num</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.frame_num" title="Permalink to this definition"></a></dt>
-<dd><p>Number of frames to be processed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.init_pos">
-<span class="sig-name descname"><span class="pre">init_pos</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.init_pos" title="Permalink to this definition"></a></dt>
-<dd><p>Initial position of the stage.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.f_pos">
-<span class="sig-name descname"><span class="pre">f_pos</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.f_pos" title="Permalink to this definition"></a></dt>
-<dd><p>Position of the stage with the maximum entropy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.focus_pos">
-<span class="sig-name descname"><span class="pre">focus_pos</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.focus_pos" title="Permalink to this definition"></a></dt>
-<dd><p>Position of the stage with the maximum entropy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.target_frame_id">
-<span class="sig-name descname"><span class="pre">target_frame_id</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.target_frame_id" title="Permalink to this definition"></a></dt>
-<dd><p>Frame ID of the frame to be processed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.get_frames_num">
-<span class="sig-name descname"><span class="pre">get_frames_num</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.get_frames_num" title="Permalink to this definition"></a></dt>
-<dd><p>Number of frames to be processed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.plot_data">
-<span class="sig-name descname"><span class="pre">plot_data</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.plot_data" title="Permalink to this definition"></a></dt>
-<dd><p>List containing the entropy of the image for each frame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.total_frame_num">
-<span class="sig-name descname"><span class="pre">total_frame_num</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.total_frame_num" title="Permalink to this definition"></a></dt>
-<dd><p>Total number of frames to be processed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.fine_step_size">
-<span class="sig-name descname"><span class="pre">fine_step_size</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.fine_step_size" title="Permalink to this definition"></a></dt>
-<dd><p>Step size of the fine autofocus.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.fine_pos_offset">
-<span class="sig-name descname"><span class="pre">fine_pos_offset</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.fine_pos_offset" title="Permalink to this definition"></a></dt>
-<dd><p>Offset of the fine autofocus.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.coarse_step_size">
-<span class="sig-name descname"><span class="pre">coarse_step_size</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.coarse_step_size" title="Permalink to this definition"></a></dt>
-<dd><p>Step size of the coarse autofocus.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.coarse_steps">
-<span class="sig-name descname"><span class="pre">coarse_steps</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.coarse_steps" title="Permalink to this definition"></a></dt>
-<dd><p>Number of steps of the coarse autofocus.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.signal_id">
-<span class="sig-name descname"><span class="pre">signal_id</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.signal_id" title="Permalink to this definition"></a></dt>
-<dd><p>ID of the frame to be processed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.target_channel">
-<span class="sig-name descname"><span class="pre">target_channel</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.target_channel" title="Permalink to this definition"></a></dt>
-<dd><p>Channel of the image to be processed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.run" title="Permalink to this definition"></a></dt>
-<dd><p>Run the autofocus data process.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'stage'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'f'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the Autofocus class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="aslm.model.model.Model.html#aslm.model.model.Model" title="aslm.model.model.Model"><em>Model</em></a>) – Model object</p></li>
+<li><p><strong>device</strong> (<em>str</em>) – Device name</p></li>
+<li><p><strong>device_ref</strong> (<em>str</em>) – Device reference</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.__init__" title="aslm.model.features.autofocus.Autofocus.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, device, device_ref])</p></td>
-<td><p></p></td>
+<td><p>Initialize the Autofocus class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.end_func_data" title="aslm.model.features.autofocus.Autofocus.end_func_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_func_data</span></code></a>()</p></td>
 <td><p>End the autofocus routine.</p></td>
@@ -370,8 +178,79 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.robust_autofocus" title="aslm.model.features.autofocus.Autofocus.robust_autofocus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">robust_autofocus</span></code></a>()</p></td>
 <td><p>Robust autofocus routine.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="aslm.model.features.autofocus.Autofocus.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.run" title="aslm.model.features.autofocus.Autofocus.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>()</p></td>
 <td><p>Run the Autofocusing Routine</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.model" title="aslm.model.features.autofocus.Autofocus.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>Model object</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.max_entropy" title="aslm.model.features.autofocus.Autofocus.max_entropy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_entropy</span></code></a></p></td>
+<td><p>Maximum entropy</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.f_frame_id" title="aslm.model.features.autofocus.Autofocus.f_frame_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_frame_id</span></code></a></p></td>
+<td><p>Frame id</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.frame_num" title="aslm.model.features.autofocus.Autofocus.frame_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">frame_num</span></code></a></p></td>
+<td><p>Number of frames</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.init_pos" title="aslm.model.features.autofocus.Autofocus.init_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_pos</span></code></a></p></td>
+<td><p>Initial position</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.f_pos" title="aslm.model.features.autofocus.Autofocus.f_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_pos</span></code></a></p></td>
+<td><p>Focus position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.focus_pos" title="aslm.model.features.autofocus.Autofocus.focus_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">focus_pos</span></code></a></p></td>
+<td><p>Focus position</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.target_frame_id" title="aslm.model.features.autofocus.Autofocus.target_frame_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">target_frame_id</span></code></a></p></td>
+<td><p>Target frame id</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.get_frames_num" title="aslm.model.features.autofocus.Autofocus.get_frames_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frames_num</span></code></a></p></td>
+<td><p>Number of frames</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.plot_data" title="aslm.model.features.autofocus.Autofocus.plot_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_data</span></code></a></p></td>
+<td><p>Plot data</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.total_frame_num" title="aslm.model.features.autofocus.Autofocus.total_frame_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_frame_num</span></code></a></p></td>
+<td><p>Total frame number</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.fine_step_size" title="aslm.model.features.autofocus.Autofocus.fine_step_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fine_step_size</span></code></a></p></td>
+<td><p>Fine step size</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.fine_pos_offset" title="aslm.model.features.autofocus.Autofocus.fine_pos_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fine_pos_offset</span></code></a></p></td>
+<td><p>Fine position offset</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.coarse_step_size" title="aslm.model.features.autofocus.Autofocus.coarse_step_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coarse_step_size</span></code></a></p></td>
+<td><p>Coarse step size</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.coarse_steps" title="aslm.model.features.autofocus.Autofocus.coarse_steps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coarse_steps</span></code></a></p></td>
+<td><p>Coarse steps</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.signal_id" title="aslm.model.features.autofocus.Autofocus.signal_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_id</span></code></a></p></td>
+<td><p>Signal id</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.autofocus_frame_queue" title="aslm.model.features.autofocus.Autofocus.autofocus_frame_queue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">autofocus_frame_queue</span></code></a></p></td>
+<td><p>Autofocus frame queue</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.autofocus_pos_queue" title="aslm.model.features.autofocus.Autofocus.autofocus_pos_queue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">autofocus_pos_queue</span></code></a></p></td>
+<td><p>Autofocus position queue</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.target_channel" title="aslm.model.features.autofocus.Autofocus.target_channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">target_channel</span></code></a></p></td>
+<td><p>Target channel</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.config_table" title="aslm.model.features.autofocus.Autofocus.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<td><p>Configuration table</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.device" title="aslm.model.features.autofocus.Autofocus.device"><code class="xref py py-obj docutils literal notranslate"><span class="pre">device</span></code></a></p></td>
+<td><p>Device name</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.autofocus.Autofocus.device_ref" title="aslm.model.features.autofocus.Autofocus.device_ref"><code class="xref py py-obj docutils literal notranslate"><span class="pre">device_ref</span></code></a></p></td>
+<td><p>Device reference</p></td>
 </tr>
 </tbody>
 </table>
@@ -379,6 +258,14 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.end_func_data">
 <span class="sig-name descname"><span class="pre">end_func_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.end_func_data" title="Permalink to this definition"></a></dt>
 <dd><p>End the autofocus routine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the autofocus routine is finished.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -428,7 +315,13 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 <dd><p>Run the autofocus routine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>frame_ids</strong> (<em>list</em>) – List of frame ids to be processed</p>
+<dd class="field-odd"><p><strong>frame_ids</strong> (<em>list</em>) – List of frame ids to be processed.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>frame_ids</strong> – List of frame ids to be processed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -459,17 +352,19 @@ move to. If the autofocus_pos_queue is empty, the autofocus is finished.</p>
 is unfortunately unstable.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>self.focus_pos</strong> – Focus position</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>float</p>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>fit_data</strong> (<em>list</em>) – Autofocus data</p></li>
+<li><p><strong>focus_position</strong> (<em>float</em>) – Focus position</p></li>
+<li><p><strong>r_squared</strong> (<em>float</em>) – R-Squared value</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.run" title="Permalink to this definition"></a></dt>
 <dd><p>Run the Autofocusing Routine</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -477,6 +372,248 @@ is unfortunately unstable.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.autofocus_frame_queue">
+<span class="sig-name descname"><span class="pre">autofocus_frame_queue</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.autofocus_frame_queue" title="Permalink to this definition"></a></dt>
+<dd><p>Autofocus frame queue</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Queue</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.autofocus_pos_queue">
+<span class="sig-name descname"><span class="pre">autofocus_pos_queue</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.autofocus_pos_queue" title="Permalink to this definition"></a></dt>
+<dd><p>Autofocus position queue</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Queue</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.coarse_step_size">
+<span class="sig-name descname"><span class="pre">coarse_step_size</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.coarse_step_size" title="Permalink to this definition"></a></dt>
+<dd><p>Coarse step size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.coarse_steps">
+<span class="sig-name descname"><span class="pre">coarse_steps</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.coarse_steps" title="Permalink to this definition"></a></dt>
+<dd><p>Coarse steps</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.config_table">
+<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.config_table" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.device">
+<span class="sig-name descname"><span class="pre">device</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.device" title="Permalink to this definition"></a></dt>
+<dd><p>Device name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.device_ref">
+<span class="sig-name descname"><span class="pre">device_ref</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.device_ref" title="Permalink to this definition"></a></dt>
+<dd><p>Device reference</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.f_frame_id">
+<span class="sig-name descname"><span class="pre">f_frame_id</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.f_frame_id" title="Permalink to this definition"></a></dt>
+<dd><p>Frame id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.f_pos">
+<span class="sig-name descname"><span class="pre">f_pos</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.f_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Focus position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.fine_pos_offset">
+<span class="sig-name descname"><span class="pre">fine_pos_offset</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.fine_pos_offset" title="Permalink to this definition"></a></dt>
+<dd><p>Fine position offset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.fine_step_size">
+<span class="sig-name descname"><span class="pre">fine_step_size</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.fine_step_size" title="Permalink to this definition"></a></dt>
+<dd><p>Fine step size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.focus_pos">
+<span class="sig-name descname"><span class="pre">focus_pos</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.focus_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Focus position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.frame_num">
+<span class="sig-name descname"><span class="pre">frame_num</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.frame_num" title="Permalink to this definition"></a></dt>
+<dd><p>Number of frames</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.get_frames_num">
+<span class="sig-name descname"><span class="pre">get_frames_num</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.get_frames_num" title="Permalink to this definition"></a></dt>
+<dd><p>Number of frames</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.init_pos">
+<span class="sig-name descname"><span class="pre">init_pos</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.init_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Initial position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.max_entropy">
+<span class="sig-name descname"><span class="pre">max_entropy</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.max_entropy" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum entropy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.model" title="Permalink to this definition"></a></dt>
+<dd><p>Model object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="aslm.model.model.Model.html#aslm.model.model.Model" title="aslm.model.model.Model">Model</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.plot_data">
+<span class="sig-name descname"><span class="pre">plot_data</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.plot_data" title="Permalink to this definition"></a></dt>
+<dd><p>Plot data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.signal_id">
+<span class="sig-name descname"><span class="pre">signal_id</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.signal_id" title="Permalink to this definition"></a></dt>
+<dd><p>Signal id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.target_channel">
+<span class="sig-name descname"><span class="pre">target_channel</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.target_channel" title="Permalink to this definition"></a></dt>
+<dd><p>Target channel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.target_frame_id">
+<span class="sig-name descname"><span class="pre">target_frame_id</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.target_frame_id" title="Permalink to this definition"></a></dt>
+<dd><p>Target frame id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.autofocus.Autofocus.total_frame_num">
+<span class="sig-name descname"><span class="pre">total_frame_num</span></span><a class="headerlink" href="#aslm.model.features.autofocus.Autofocus.total_frame_num" title="Permalink to this definition"></a></dt>
+<dd><p>Total frame number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

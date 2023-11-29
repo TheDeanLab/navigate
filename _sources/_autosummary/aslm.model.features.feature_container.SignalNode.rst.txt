@@ -24,4 +24,15 @@ aslm.model.features.feature\_container.SignalNode
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SignalNode.node_name
+      ~SignalNode.node_funcs
+      ~SignalNode.node_type
+      ~SignalNode.device_related
+      ~SignalNode.need_response
+      ~SignalNode.is_initialized
+   
    

@@ -28,4 +28,13 @@ aslm.model.features.remove\_empty\_tiles.DetectTissueInStackAndRecord
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DetectTissueInStackAndRecord.position_records
+      ~DetectTissueInStackAndRecord.model
+      ~DetectTissueInStackAndRecord.planes
+      ~DetectTissueInStackAndRecord.detect_func
+   
    

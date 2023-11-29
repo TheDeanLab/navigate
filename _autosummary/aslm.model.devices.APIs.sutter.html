@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aslm.model.features.dummy_detective &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>aslm.model.devices.APIs.sutter &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -20,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="aslm.model.features.dummy_detective.Dummy_Detective" href="aslm.model.features.dummy_detective.Dummy_Detective.html" />
-    <link rel="prev" title="aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition" href="aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition.html" /> 
+    <link rel="next" title="aslm.model.devices.APIs.sutter.MP285" href="aslm.model.devices.APIs.sutter.MP285.html" />
+    <link rel="prev" title="aslm.model.devices.APIs.omicron" href="aslm.model.devices.APIs.omicron.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
@@ -60,22 +63,22 @@
 <li class="toctree-l3"><a class="reference internal" href="aslm.model.concurrency.html">aslm.model.concurrency</a></li>
 <li class="toctree-l3"><a class="reference internal" href="aslm.model.data_sources.html">aslm.model.data_sources</a></li>
 <li class="toctree-l3"><a class="reference internal" href="aslm.model.device_startup_functions.html">aslm.model.device_startup_functions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a></li>
-<li class="toctree-l3"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.auto_tile_scan.html">aslm.model.features.auto_tile_scan</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.autofocus.html">aslm.model.features.autofocus</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.common_features.html">aslm.model.features.common_features</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.constant_velocity_acquisition.html">aslm.model.features.constant_velocity_acquisition</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">aslm.model.features.dummy_detective</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.feature_container.html">aslm.model.features.feature_container</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.feature_related_functions.html">aslm.model.features.feature_related_functions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.image_writer.html">aslm.model.features.image_writer</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.remove_empty_tiles.html">aslm.model.features.remove_empty_tiles</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.restful_features.html">aslm.model.features.restful_features</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.volume_search.html">aslm.model.features.volume_search</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="aslm.model.devices.html">aslm.model.devices</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="aslm.model.devices.APIs.html">aslm.model.devices.APIs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.camera.html">aslm.model.devices.camera</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.daq.html">aslm.model.devices.daq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.filter_wheel.html">aslm.model.devices.filter_wheel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.galvo.html">aslm.model.devices.galvo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.lasers.html">aslm.model.devices.lasers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.objectives.html">aslm.model.devices.objectives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.remote_focus.html">aslm.model.devices.remote_focus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.shutter.html">aslm.model.devices.shutter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.stages.html">aslm.model.devices.stages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.devices.zoom.html">aslm.model.devices.zoom</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.dummy.html">aslm.model.dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aslm.model.features.html">aslm.model.features</a></li>
 <li class="toctree-l3"><a class="reference internal" href="aslm.model.metadata_sources.html">aslm.model.metadata_sources</a></li>
 <li class="toctree-l3"><a class="reference internal" href="aslm.model.microscope.html">aslm.model.microscope</a></li>
 <li class="toctree-l3"><a class="reference internal" href="aslm.model.model.html">aslm.model.model</a></li>
@@ -104,10 +107,11 @@
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
           <li class="breadcrumb-item"><a href="aslm.model.html">aslm.model</a></li>
-          <li class="breadcrumb-item"><a href="aslm.model.features.html">aslm.model.features</a></li>
-      <li class="breadcrumb-item active">aslm.model.features.dummy_detective</li>
+          <li class="breadcrumb-item"><a href="aslm.model.devices.html">aslm.model.devices</a></li>
+          <li class="breadcrumb-item"><a href="aslm.model.devices.APIs.html">aslm.model.devices.APIs</a></li>
+      <li class="breadcrumb-item active">aslm.model.devices.APIs.sutter</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/aslm.model.features.dummy_detective.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/aslm.model.devices.APIs.sutter.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -115,12 +119,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-aslm.model.features.dummy_detective">
-<span id="aslm-model-features-dummy-detective"></span><h1>aslm.model.features.dummy_detective<a class="headerlink" href="#module-aslm.model.features.dummy_detective" title="Permalink to this heading"></a></h1>
-<p class="rubric">Classes</p>
+  <section id="module-aslm.model.devices.APIs.sutter">
+<span id="aslm-model-devices-apis-sutter"></span><h1>aslm.model.devices.APIs.sutter<a class="headerlink" href="#module-aslm.model.devices.APIs.sutter" title="Permalink to this heading"></a></h1>
+<p class="rubric">Modules</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="aslm.model.features.dummy_detective.Dummy_Detective.html#aslm.model.features.dummy_detective.Dummy_Detective" title="aslm.model.features.dummy_detective.Dummy_Detective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dummy_Detective</span></code></a>(model)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="aslm.model.devices.APIs.sutter.MP285.html#module-aslm.model.devices.APIs.sutter.MP285" title="aslm.model.devices.APIs.sutter.MP285"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aslm.model.devices.APIs.sutter.MP285</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -131,8 +135,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition.html" class="btn btn-neutral float-left" title="aslm.model.features.constant_velocity_acquisition.ConstantVelocityAcquisition" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="aslm.model.features.dummy_detective.Dummy_Detective.html" class="btn btn-neutral float-right" title="aslm.model.features.dummy_detective.Dummy_Detective" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="aslm.model.devices.APIs.omicron.html" class="btn btn-neutral float-left" title="aslm.model.devices.APIs.omicron" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aslm.model.devices.APIs.sutter.MP285.html" class="btn btn-neutral float-right" title="aslm.model.devices.APIs.sutter.MP285" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

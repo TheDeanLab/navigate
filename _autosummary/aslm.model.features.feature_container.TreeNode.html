@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>aslm.model.features.feature_container.TreeNode &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -51,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="aslm.config.html">aslm.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="aslm.controller.html">aslm.controller</a></li>
@@ -66,8 +69,7 @@
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.auto_tile_scan.html">aslm.model.features.auto_tile_scan</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.autofocus.html">aslm.model.features.autofocus</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.common_features.html">aslm.model.features.common_features</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.constant_velocity_acquisition.html">aslm.model.features.constant_velocity_acquisition</a></li>
-<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.dummy_detective.html">aslm.model.features.dummy_detective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aslm.model.features.cva_conpro.html">aslm.model.features.cva_conpro</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="aslm.model.features.feature_container.html">aslm.model.features.feature_container</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.feature_related_functions.html">aslm.model.features.feature_related_functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="aslm.model.features.image_writer.html">aslm.model.features.image_writer</a></li>
@@ -126,54 +128,6 @@
 <p>This class represents a node in a control sequence tree used for controlling the
 behavior of a microscope or similar device. Each node has a name, associated
 functions, and properties that define its behavior in the control sequence.</p>
-<section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>feature_name<span class="classifier">str</span></dt><dd><p>The name or identifier of the feature associated with this node.</p>
-</dd>
-<dt>func_dict<span class="classifier">dict</span></dt><dd><p>A dictionary containing functions associated with this node. The dictionary
-should include keys for different signals or events and corresponding function
-references to be executed when those signals are received.</p>
-</dd>
-<dt>node_type<span class="classifier">str, optional</span></dt><dd><p>The type of the node, which can be ‘one-step’ or ‘multi-step’. Default is
-‘one-step’.</p>
-</dd>
-<dt>device_related<span class="classifier">bool, optional</span></dt><dd><p>A boolean indicating whether the node is related to device control. Default
-is False.</p>
-</dd>
-<dt>need_response<span class="classifier">bool, optional</span></dt><dd><p>A boolean indicating whether a response is needed from this node. Default is
-False.</p>
-</dd>
-</dl>
-</section>
-<section id="attributes">
-<h2>Attributes:<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>node_name<span class="classifier">str</span></dt><dd><p>The name or identifier of the feature associated with this node.</p>
-</dd>
-<dt>node_funcs<span class="classifier">dict</span></dt><dd><p>A dictionary containing functions associated with this node.</p>
-</dd>
-<dt>node_type<span class="classifier">str</span></dt><dd><p>The type of the node, which can be ‘one-step’ or ‘multi-step’.</p>
-</dd>
-<dt>device_related<span class="classifier">bool</span></dt><dd><p>A boolean indicating whether the node is related to device control.</p>
-</dd>
-<dt>need_response<span class="classifier">bool</span></dt><dd><p>A boolean indicating whether a response is needed from this node.</p>
-</dd>
-<dt>is_initialized<span class="classifier">bool</span></dt><dd><p>A boolean indicating whether the node has been initialized.</p>
-</dd>
-<dt>child<span class="classifier">TreeNode or None</span></dt><dd><p>A reference to the child node if one exists, otherwise None.</p>
-</dd>
-<dt>sibling<span class="classifier">TreeNode or None</span></dt><dd><p>A reference to the sibling node if one exists, otherwise None.</p>
-</dd>
-</dl>
-</section>
-<section id="methods">
-<h2>Methods:<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>set_property(<a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs):</dt><dd><p>Set the properties of the TreeNode object using keyword arguments.</p>
-</dd>
-</dl>
-</section>
 <section id="notes">
 <h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
 <ul class="simple">
@@ -191,16 +145,60 @@ node when it is executed.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="aslm.model.features.feature_container.TreeNode.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'one-step'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_related</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">need_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aslm.model.features.feature_container.TreeNode.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the TreeNode object.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>feature_name<span class="classifier">str</span></dt><dd><p>The name or identifier of the feature associated with this node.</p>
+</dd>
+<dt>func_dict<span class="classifier">dict</span></dt><dd><p>A dictionary containing functions associated with this node. The dictionary
+should include keys for different signals or events and corresponding
+function references to be executed when those signals are received.</p>
+</dd>
+<dt>node_type<span class="classifier">str, optional</span></dt><dd><p>The type of the node, which can be ‘one-step’ or ‘multi-step’. Default is
+‘one-step’.</p>
+</dd>
+<dt>device_related<span class="classifier">bool, optional</span></dt><dd><p>A boolean indicating whether the node is related to device control. Default
+is False.</p>
+</dd>
+<dt>need_response<span class="classifier">bool, optional</span></dt><dd><p>A boolean indicating whether a response is needed from this node. Default is
+False.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.TreeNode.__init__" title="aslm.model.features.feature_container.TreeNode.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(feature_name, func_dict, *[, ...])</p></td>
-<td><p></p></td>
+<td><p>Initialize the TreeNode object.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.TreeNode.set_property" title="aslm.model.features.feature_container.TreeNode.set_property"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_property</span></code></a>(**kwargs)</p></td>
 <td><p>Set the properties of the TreeNode object using keyword arguments.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.TreeNode.node_name" title="aslm.model.features.feature_container.TreeNode.node_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">node_name</span></code></a></p></td>
+<td><p>The name or identifier of the feature associated with this node.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.TreeNode.node_funcs" title="aslm.model.features.feature_container.TreeNode.node_funcs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">node_funcs</span></code></a></p></td>
+<td><p>A dictionary containing functions associated with this node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.TreeNode.node_type" title="aslm.model.features.feature_container.TreeNode.node_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">node_type</span></code></a></p></td>
+<td><p>The type of the node, which can be 'one-step' or 'multi-step'.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.TreeNode.device_related" title="aslm.model.features.feature_container.TreeNode.device_related"><code class="xref py py-obj docutils literal notranslate"><span class="pre">device_related</span></code></a></p></td>
+<td><p>A boolean indicating whether the node is related to device control.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.TreeNode.need_response" title="aslm.model.features.feature_container.TreeNode.need_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_response</span></code></a></p></td>
+<td><p>A boolean indicating whether a response is needed from this node.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aslm.model.features.feature_container.TreeNode.is_initialized" title="aslm.model.features.feature_container.TreeNode.is_initialized"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_initialized</span></code></a></p></td>
+<td><p>A boolean indicating whether the node has been initialized.</p></td>
 </tr>
 </tbody>
 </table>
@@ -212,18 +210,80 @@ node when it is executed.</p></li>
 using keyword arguments. The method iterates through the provided keyword-
 argument pairs and updates the corresponding attributes of the TreeNode
 object.</p>
-<section id="id3">
-<h3>Parameters:<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<section id="id1">
+<h3>Parameters:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <dl class="simple">
-<dt><a href="#id4"><span class="problematic" id="id5">**</span></a>kwargs<span class="classifier">dict</span></dt><dd><p>Keyword arguments with attribute names as keys and values to set as
+<dt><a href="#id2"><span class="problematic" id="id3">**</span></a>kwargs<span class="classifier">dict</span></dt><dd><p>Keyword arguments with attribute names as keys and values to set as
 values.</p>
 </dd>
 </dl>
 </section>
-<section id="returns">
-<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
-<p>None</p>
-</section>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.TreeNode.device_related">
+<span class="sig-name descname"><span class="pre">device_related</span></span><a class="headerlink" href="#aslm.model.features.feature_container.TreeNode.device_related" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean indicating whether the node is related to device control.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.TreeNode.is_initialized">
+<span class="sig-name descname"><span class="pre">is_initialized</span></span><a class="headerlink" href="#aslm.model.features.feature_container.TreeNode.is_initialized" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean indicating whether the node has been initialized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.TreeNode.need_response">
+<span class="sig-name descname"><span class="pre">need_response</span></span><a class="headerlink" href="#aslm.model.features.feature_container.TreeNode.need_response" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean indicating whether a response is needed from this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.TreeNode.node_funcs">
+<span class="sig-name descname"><span class="pre">node_funcs</span></span><a class="headerlink" href="#aslm.model.features.feature_container.TreeNode.node_funcs" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary containing functions associated with this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.TreeNode.node_name">
+<span class="sig-name descname"><span class="pre">node_name</span></span><a class="headerlink" href="#aslm.model.features.feature_container.TreeNode.node_name" title="Permalink to this definition"></a></dt>
+<dd><p>The name or identifier of the feature associated with this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aslm.model.features.feature_container.TreeNode.node_type">
+<span class="sig-name descname"><span class="pre">node_type</span></span><a class="headerlink" href="#aslm.model.features.feature_container.TreeNode.node_type" title="Permalink to this definition"></a></dt>
+<dd><p>The type of the node, which can be ‘one-step’ or ‘multi-step’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

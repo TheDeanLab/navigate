@@ -36,5 +36,20 @@ aslm.model.data\_sources.data\_source.DataSource
       ~DataSource.nbytes
       ~DataSource.shape
       ~DataSource.voxel_size
+      ~DataSource.logger
+      ~DataSource.file_name
+      ~DataSource.metadata
+      ~DataSource.bits
+      ~DataSource.dx
+      ~DataSource.dy
+      ~DataSource.dz
+      ~DataSource.dt
+      ~DataSource.dc
+      ~DataSource.shape_x
+      ~DataSource.shape_y
+      ~DataSource.shape_z
+      ~DataSource.shape_t
+      ~DataSource.shape_c
+      ~DataSource.positions
    
    

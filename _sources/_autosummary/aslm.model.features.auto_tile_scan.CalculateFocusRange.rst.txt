@@ -28,4 +28,11 @@ aslm.model.features.auto\_tile\_scan.CalculateFocusRange
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CalculateFocusRange.model
+      ~CalculateFocusRange.autofocus
+   
    

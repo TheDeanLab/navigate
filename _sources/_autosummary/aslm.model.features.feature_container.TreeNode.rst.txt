@@ -23,4 +23,15 @@ aslm.model.features.feature\_container.TreeNode
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TreeNode.node_name
+      ~TreeNode.node_funcs
+      ~TreeNode.node_type
+      ~TreeNode.device_related
+      ~TreeNode.need_response
+      ~TreeNode.is_initialized
+   
    

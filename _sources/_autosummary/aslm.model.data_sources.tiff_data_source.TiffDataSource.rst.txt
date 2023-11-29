@@ -40,5 +40,22 @@ aslm.model.data\_sources.tiff\_data\_source.TiffDataSource
       ~TiffDataSource.nbytes
       ~TiffDataSource.shape
       ~TiffDataSource.voxel_size
+      ~TiffDataSource.image
+      ~TiffDataSource.save_directory
+      ~TiffDataSource.metadata
+      ~TiffDataSource.logger
+      ~TiffDataSource.file_name
+      ~TiffDataSource.bits
+      ~TiffDataSource.dx
+      ~TiffDataSource.dy
+      ~TiffDataSource.dz
+      ~TiffDataSource.dt
+      ~TiffDataSource.dc
+      ~TiffDataSource.shape_x
+      ~TiffDataSource.shape_y
+      ~TiffDataSource.shape_z
+      ~TiffDataSource.shape_t
+      ~TiffDataSource.shape_c
+      ~TiffDataSource.positions
    
    

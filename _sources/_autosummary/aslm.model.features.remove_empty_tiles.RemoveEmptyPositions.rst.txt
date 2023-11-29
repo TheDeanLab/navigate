@@ -23,4 +23,11 @@ aslm.model.features.remove\_empty\_tiles.RemoveEmptyPositions
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RemoveEmptyPositions.model
+      ~RemoveEmptyPositions.position_records
+   
    

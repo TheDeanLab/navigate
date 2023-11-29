@@ -100,15 +100,13 @@ class SyntheticDAQ(DAQBase):
         """Close the tasks for triggering, analog, and counter outputs."""
         pass
 
-    def prepare_acquisition(self, channel_key, exposure_time):
+    def prepare_acquisition(self, channel_key):
         """Prepare the acquisition.
 
         Parameters
         ----------
-        channel_key : int
-            Index of channel to be imaged.
-        exposure_time : float
-            Camera exposure duration.
+        channel_key : str
+            Channel key for current channel.
         """
         self.current_channel_key = channel_key
         self.is_updating_analog_task = False

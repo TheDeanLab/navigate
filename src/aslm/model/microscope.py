@@ -211,6 +211,10 @@ class Microscope:
         stage_devices = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["stage"]["hardware"]
+        # set the NI Galvo stage flag
+        self.configuration["configuration"]["microscopes"][self.microscope_name][
+            "stage"
+        ]["has_ni_galvo_stage"] = False
         if type(stage_devices) != ListProxy:
             stage_devices = [stage_devices]
 
@@ -244,6 +248,10 @@ class Microscope:
             # SHARED DEVICES
             if device_ref_name.startswith("GalvoNIStage"):
                 devices_dict["stages"][device_ref_name] = self.daq
+                # set the NI Galvo stage flag
+                self.configuration["configuration"]["microscopes"][
+                    self.microscope_name
+                ]["stage"]["has_ni_galvo_stage"] = True
 
             if device_ref_name.startswith("ASI") and self.tiger_controller is not None:
                 # If the self.tiger_controller is already set, then we can pass it to
@@ -406,8 +414,8 @@ class Microscope:
             self.galvo[k].adjust(exposure_times, sweep_times) for k in self.galvo
         ]
 
-        # TODO: calculate waveform for galvo stage
-        for stage, axes in self.stages_list:
+        # calculate waveform for galvo stage
+        for stage, _ in self.stages_list:
             if type(stage) == GalvoNIStage:
                 stage.calculate_waveform(exposure_times, sweep_times)
         waveform_dict = {
@@ -497,7 +505,7 @@ class Microscope:
 
         return exposure_times, sweep_times
 
-    def prepare_next_channel(self):
+    def prepare_next_channel(self, update_daq_task_flag=True):
         """Prepare the next channel.
 
         This function, `prepare_next_channel`, is responsible for configuring various
@@ -508,6 +516,10 @@ class Microscope:
         data acquisition system for the new channel, and adjusts the focus position as
         necessary, ensuring the hardware is ready for imaging the selected channel.
 
+        Parameters
+        ----------
+        update_daq_task_flag : bool
+            whether to override waveforms in the DAQ (create new tasks)
         """
         curr_channel = self.current_channel
         prefix = "channel_"
@@ -559,8 +571,11 @@ class Microscope:
 
         # stop daq before writing new waveform
         # When called the first time, throws an error.
-        self.daq.stop_acquisition()
-        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
+        # choose to not update the waveform is very useful when running ZStack
+        # if there is a NI Galvo stage in the system.
+        if update_daq_task_flag:
+            self.daq.stop_acquisition()
+            self.daq.prepare_acquisition(channel_key)
 
         # Add Defocus term
         # Assume wherever we start is the central focus

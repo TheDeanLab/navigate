@@ -497,7 +497,7 @@ class Microscope:
 
         return exposure_times, sweep_times
 
-    def prepare_next_channel(self):
+    def prepare_next_channel(self, update_daq_task_flag=True):
         """Prepare the next channel.
 
         This function, `prepare_next_channel`, is responsible for configuring various
@@ -508,6 +508,10 @@ class Microscope:
         data acquisition system for the new channel, and adjusts the focus position as
         necessary, ensuring the hardware is ready for imaging the selected channel.
 
+        Parameters
+        ----------
+        update_daq_task_flag : bool
+            whether to override waveforms in the DAQ (create new tasks)
         """
         curr_channel = self.current_channel
         prefix = "channel_"
@@ -559,8 +563,11 @@ class Microscope:
 
         # stop daq before writing new waveform
         # When called the first time, throws an error.
-        self.daq.stop_acquisition()
-        self.daq.prepare_acquisition(channel_key, self.current_exposure_time)
+        # choose to not update the waveform is very useful when running ZStack
+        # if there is a NI Galvo stage in the system.
+        if update_daq_task_flag:
+            self.daq.stop_acquisition()
+            self.daq.prepare_acquisition(channel_key)
 
         # Add Defocus term
         # Assume wherever we start is the central focus

@@ -41,7 +41,7 @@ import nidaqmx
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.waveforms import dc_value, remote_focus_ramp
+from aslm.model.waveforms import remote_focus_ramp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -163,10 +163,11 @@ class GalvoNIStage(StageBase):
         self.waveform_dict = {}
 
         if (
-                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                != "confocal-projection"
+            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            != "confocal-projection"
         ):
-            #: nidaqmx.Task: Analog output task for step-and-settle acquisition routines.
+            #: nidaqmx.Task: Analog output task for step-and-settle
+            # acquisition routines.
             self.ao_task = nidaqmx.Task()
             self.ao_task.ao_channels.add_ao_voltage_chan(self.axes_channels[0])
 
@@ -212,7 +213,6 @@ class GalvoNIStage(StageBase):
 
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
-
                 # Get the Waveform Parameters
                 # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
                 exposure_time = self.exposure_times[channel_key]
@@ -258,10 +258,10 @@ class GalvoNIStage(StageBase):
                         )
                     self.waveform_dict[channel_key][
                         self.waveform_dict[channel_key] > self.galvo_max_voltage
-                        ] = self.galvo_max_voltage
+                    ] = self.galvo_max_voltage
                     self.waveform_dict[channel_key][
                         self.waveform_dict[channel_key] < self.galvo_min_voltage
-                        ] = self.galvo_min_voltage
+                    ] = self.galvo_min_voltage
 
                     self.waveform_dict[channel_key] = np.hstack(waveforms)
                     self.samples = int(self.sample_rate * self.sweep_time * z_planes)
@@ -272,6 +272,10 @@ class GalvoNIStage(StageBase):
                         "waveform": self.waveform_dict,
                     }
                 else:
+                    if volts > self.galvo_max_voltage:
+                        volts = self.galvo_max_voltage
+                    if volts < self.galvo_min_voltage:
+                        volts = self.galvo_min_voltage
                     self.ao_task.write(volts, auto_start=True)
 
         return self.waveform_dict

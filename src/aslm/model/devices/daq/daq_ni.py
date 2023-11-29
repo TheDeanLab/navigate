@@ -67,19 +67,14 @@ class NIDAQ(DAQBase):
         #: obj: NI DAQmx task for master trigger
         self.master_trigger_task = None
 
+        #: obj: NI DAQmx task for laser switching
+        self.laser_switching_task = None
+
         #: str: Trigger mode. Self-trigger or external-trigger.
         self.trigger_mode = "self-trigger"  # self-trigger, external-trigger
 
         #: str: NI DAQmx port for laser switching
         self.external_trigger = None
-        try:
-            # switching_port = self.configuration["configuration"]["microscopes"][
-            #     self.microscope_name
-            # ]["daq"]["laser_port_switcher"]
-            #: obj: NI DAQmx task for laser switching
-            self.laser_switching_task = nidaqmx.Task()
-        except KeyError:
-            self.laser_switching_task = None
 
         # keep track of analog outputs and their waveforms
         #: dict: Analog outputs.
@@ -208,7 +203,7 @@ class NIDAQ(DAQBase):
 
         return callback_func
 
-    def create_camera_task(self, exposure_time):
+    def create_camera_task(self, channel_key):
         """Set up the camera trigger task.
 
         TTL for triggering the camera. TTL is 4 ms in duration.
@@ -217,22 +212,24 @@ class NIDAQ(DAQBase):
 
         Parameters
         ----------
-        exposure_time : float
-            Duration of camera exposure.
+        channel_key : str
+            Channel key for current channel.
         """
         self.camera_trigger_task = nidaqmx.Task()
         camera_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["camera_trigger_out_line"]
-        self.camera_high_time = 0.004
-        self.camera_low_time = self.sweep_time - self.camera_high_time
-        self.camera_delay = (self.camera_delay_percent / 100) * (exposure_time / 1000)
+        camera_high_time = 0.004
+        exposure_time = self.exposure_times[channel_key]
+        sweep_time = self.sweep_times[channel_key]
+        camera_low_time = sweep_time - camera_high_time
+        camera_delay = (self.camera_delay_percent / 100) * (exposure_time / 1000)
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
             camera_trigger_out_line,
-            high_time=self.camera_high_time,
-            low_time=self.camera_low_time,
-            initial_delay=self.camera_delay,
+            high_time=camera_high_time,
+            low_time=camera_low_time,
+            initial_delay=camera_delay,
         )
 
         # apply waveform templates
@@ -335,7 +332,7 @@ class NIDAQ(DAQBase):
             ).squeeze()
             self.analog_output_tasks[board].write(waveforms)
 
-    def prepare_acquisition(self, channel_key, exposure_time):
+    def prepare_acquisition(self, channel_key):
         """Prepare the acquisition.
 
         Creates and configures the DAQ tasks.
@@ -343,10 +340,8 @@ class NIDAQ(DAQBase):
 
         Parameters
         ----------
-        channel_key : int
-            Index of channel to be imaged.
-        exposure_time : float
-            Camera exposure duration.
+        channel_key : str
+            Channel key for current channel.
         """
         waveform_template_name = self.configuration["experiment"]["MicroscopeState"][
             "waveform_template"
@@ -364,7 +359,7 @@ class NIDAQ(DAQBase):
         logger.info(f"Waveform Expand Num = {self.waveform_expand_num}")
         logger.info(f"Waveform Repeat Num = {self.waveform_repeat_num}")
 
-        self.create_camera_task(exposure_time)
+        self.create_camera_task(channel_key)
         self.create_analog_output_tasks(channel_key)
         self.current_channel_key = channel_key
         self.is_updating_analog_task = False
@@ -453,6 +448,13 @@ class NIDAQ(DAQBase):
             self.microscope_name = microscope_name
             self.analog_outputs = {}
             self.analog_output_tasks = {}
+        
+        self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"]["delay_percent"]
+        self.sample_rate = self.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["daq"]["sample_rate"]
 
         try:
             switching_port = self.configuration["configuration"]["microscopes"][
@@ -462,7 +464,8 @@ class NIDAQ(DAQBase):
                 self.microscope_name
             ]["daq"]["laser_switch_state"]
 
-            self.laser_switching_task.close()
+            if self.laser_switching_task:
+                self.laser_switching_task.close()
             self.laser_switching_task = nidaqmx.Task()
             self.laser_switching_task.do_channels.add_do_chan(
                 switching_port,

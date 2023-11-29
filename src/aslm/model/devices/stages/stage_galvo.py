@@ -37,6 +37,7 @@ import time
 
 # Third Party Imports
 import numpy as np
+import nidaqmx
 
 # Local Imports
 from aslm.model.devices.stages.stage_base import StageBase
@@ -161,6 +162,14 @@ class GalvoNIStage(StageBase):
         #: dict: Dictionary of waveforms for each channel.
         self.waveform_dict = {}
 
+        if (
+                self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+                != "confocal-projection"
+        ):
+            #: nidaqmx.Task: Analog output task for step-and-settle acquisition routines.
+            self.ao_task = nidaqmx.Task()
+            self.ao_task.ao_channels.add_ao_voltage_chan(self.axes_channels[0])
+
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self):
         """Reports the position for all axes, and create position dictionary.
@@ -208,9 +217,9 @@ class GalvoNIStage(StageBase):
                 # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
                 exposure_time = self.exposure_times[channel_key]
                 self.sweep_time = self.sweep_times[channel_key]
-
                 self.samples = int(self.sample_rate * self.sweep_time)
 
+                # Confocal Projection Mode
                 if (
                     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                     == "confocal-projection"
@@ -232,7 +241,6 @@ class GalvoNIStage(StageBase):
                         )
                     else:
                         offsets = [z_offset_start]
-                    print(offsets)
                     for z_offset in offsets:
                         amp = eval(self.volts_per_micron, {"x": 0.5 * (z_range)})
                         off = eval(self.volts_per_micron, {"x": 0.5 * (z_offset)})
@@ -248,38 +256,24 @@ class GalvoNIStage(StageBase):
                                 offset=off,
                             )
                         )
-                        print(waveforms[-1].shape)
-                        print(
-                            np.min(waveforms[-1]),
-                            np.mean(waveforms[-1]),
-                            np.max(waveforms[-1]),
-                        )
+                    self.waveform_dict[channel_key][
+                        self.waveform_dict[channel_key] > self.galvo_max_voltage
+                        ] = self.galvo_max_voltage
+                    self.waveform_dict[channel_key][
+                        self.waveform_dict[channel_key] < self.galvo_min_voltage
+                        ] = self.galvo_min_voltage
+
                     self.waveform_dict[channel_key] = np.hstack(waveforms)
                     self.samples = int(self.sample_rate * self.sweep_time * z_planes)
-                    print(
-                        f"Waveform with {z_planes} planes is of length"
-                        f" {self.waveform_dict[channel_key].shape}"
-                    )
+                    self.daq.analog_outputs[self.axes_channels[0]] = {
+                        "sample_rate": self.sample_rate,
+                        "samples": self.samples,
+                        "trigger_source": self.trigger_source,
+                        "waveform": self.waveform_dict,
+                    }
                 else:
-                    self.waveform_dict[channel_key] = dc_value(
-                        sample_rate=self.sample_rate,
-                        sweep_time=self.sweep_time,
-                        amplitude=volts,
-                    )
+                    self.ao_task.write(volts, auto_start=True)
 
-                self.waveform_dict[channel_key][
-                    self.waveform_dict[channel_key] > self.galvo_max_voltage
-                ] = self.galvo_max_voltage
-                self.waveform_dict[channel_key][
-                    self.waveform_dict[channel_key] < self.galvo_min_voltage
-                ] = self.galvo_min_voltage
-
-        self.daq.analog_outputs[self.axes_channels[0]] = {
-            "sample_rate": self.sample_rate,
-            "samples": self.samples,
-            "trigger_source": self.trigger_source,
-            "waveform": self.waveform_dict,
-        }
         return self.waveform_dict
 
     def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
@@ -319,54 +313,11 @@ class GalvoNIStage(StageBase):
 
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
-
-                # Get the Waveform Parameters
-                # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
-                try:
-                    self.sweep_time = self.sweep_times[channel_key]
-                except TypeError:
-                    # In the event we have not called calculate_waveform in advance...
-                    # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
-                    exposure_time = channel["camera_exposure_time"] / 1000
-                    self.sweep_time = exposure_time + exposure_time * (
-                        (self.camera_delay_percent + self.remote_focus_ramp_falling)
-                        / 100
-                    )
-
-                    duty_cycle_wait_duration = (
-                        float(
-                            self.configuration["waveform_constants"]
-                            .get("other_constants", {})
-                            .get("remote_focus_settle_duration", 0)
-                        )
-                        / 1000
-                    )
-
-                    self.sweep_time += duty_cycle_wait_duration
-
-                self.samples = int(self.sample_rate * self.sweep_time)
-
-                # Calculate the Waveforms
-                self.waveform_dict[channel_key] = dc_value(
-                    sample_rate=self.sample_rate,
-                    sweep_time=self.sweep_time,
-                    amplitude=volts,
-                )
-                self.waveform_dict[channel_key][
-                    self.waveform_dict[channel_key] > self.galvo_max_voltage
-                ] = self.galvo_max_voltage
-                self.waveform_dict[channel_key][
-                    self.waveform_dict[channel_key] < self.galvo_min_voltage
-                ] = self.galvo_min_voltage
-
-        self.daq.analog_outputs[self.axes_channels[0]] = {
-            "sample_rate": self.sample_rate,
-            "samples": self.samples,
-            "trigger_source": self.trigger_source,
-            "waveform": self.waveform_dict,
-        }
-        # update analog waveform
-        self.daq.update_analog_task(self.axes_channels[0].split("/")[0])
+                if volts > self.galvo_max_voltage:
+                    volts = self.galvo_max_voltage
+                if volts < self.galvo_min_voltage:
+                    volts = self.galvo_min_voltage
+                self.ao_task.write(volts, auto_start=True)
 
         # Stage Settle Duration in Milliseconds
         if (

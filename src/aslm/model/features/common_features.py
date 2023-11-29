@@ -917,7 +917,9 @@ class ZStackAcquisition:
         # If so, need to update the waveform of the task in DAQ only after
         # the NI Galvo Stage has finished updating the waveform.
         # prepare_next_channel() writes waveform in the DAQ when preparing acquisition.
-        self.has_ni_galvo_stage = any([type(stage) == GalvoNIStage for stage, _ in self.model.active_microscope.stages_list])
+        self.has_ni_galvo_stage = self.model.configuration["configuration"][
+            "microscopes"
+        ][microscope_state["microscope_name"]]["stage"]["has_ni_galvo_stage"]
         self.need_to_update_waveform = self.has_ni_galvo_stage
 
         self.model.logger.debug(
@@ -1053,7 +1055,9 @@ class ZStackAcquisition:
         if self.need_to_update_waveform:
             channel_id = self.model.active_microscope.current_channel
             self.model.active_microscope.daq.stop_acquisition()
-            self.model.active_microscope.daq.prepare_acquisition(f"channel_{channel_id}")
+            self.model.active_microscope.daq.prepare_acquisition(
+                f"channel_{channel_id}"
+            )
             self.need_to_update_waveform = False
         return True
 

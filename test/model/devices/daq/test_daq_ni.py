@@ -68,7 +68,7 @@ def test_daq_ni_functions():
     ]
     args = [
         [microscope_name],
-        [list(daq.waveform_dict.keys())[0], random.random()],
+        [list(daq.waveform_dict.keys())[0]],
         None,
         None,
     ]

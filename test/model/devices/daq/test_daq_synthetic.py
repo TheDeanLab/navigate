@@ -39,7 +39,7 @@ def test_synthetic_daq_functions():
         None,
         None,
         None,
-        [f"channel_{random.randint(1, 5)}", random.random()],
+        [f"channel_{random.randint(1, 5)}"],
         None,
         None,
         None,

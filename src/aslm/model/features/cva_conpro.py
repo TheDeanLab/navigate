@@ -228,7 +228,7 @@ class ConstantVelocityAcquisition:
         )
         print("scan r initalized")
 
-        self.asi_stage.wait_until_complete(self.axis)
+        # self.asi_stage.wait_until_complete(self.axis)
         # print("Stage wait until complete
         #       completed after scanr")
 

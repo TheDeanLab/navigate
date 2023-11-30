@@ -162,14 +162,7 @@ class GalvoNIStage(StageBase):
         #: dict: Dictionary of waveforms for each channel.
         self.waveform_dict = {}
 
-        if (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            != "confocal-projection"
-        ):
-            #: nidaqmx.Task: Analog output task for step-and-settle
-            # acquisition routines.
-            self.ao_task = nidaqmx.Task()
-            self.ao_task.ao_channels.add_ao_voltage_chan(self.axes_channels[0])
+        self.switch_mode("normal")
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
     def report_position(self):
@@ -202,11 +195,6 @@ class GalvoNIStage(StageBase):
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
 
-        volts = eval(
-            self.volts_per_micron,
-            {"x": self.configuration["experiment"]["StageParameters"][self.axes[0]]},
-        )
-
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
             channel = microscope_state["channels"][channel_key]
@@ -219,64 +207,53 @@ class GalvoNIStage(StageBase):
                 self.sweep_time = self.sweep_times[channel_key]
                 self.samples = int(self.sample_rate * self.sweep_time)
 
-                # Confocal Projection Mode
-                if (
-                    self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-                    == "confocal-projection"
-                ):
-                    z_range = microscope_state["scanrange"]
-                    z_planes = microscope_state["n_plane"]
-                    z_offset_start = microscope_state["offset_start"]
-                    z_offset_end = (
-                        microscope_state["offset_end"]
-                        if z_planes > 1
-                        else z_offset_start
+                z_range = microscope_state["scanrange"]
+                z_planes = microscope_state["n_plane"]
+                z_offset_start = microscope_state["offset_start"]
+                z_offset_end = (
+                    microscope_state["offset_end"]
+                    if z_planes > 1
+                    else z_offset_start
+                )
+                waveforms = []
+                if z_planes > 1:
+                    offsets = (
+                        np.arange(int(z_planes))
+                        * (z_offset_end - z_offset_start)
+                        / float(z_planes - 1)
                     )
-                    waveforms = []
-                    if z_planes > 1:
-                        offsets = (
-                            np.arange(int(z_planes))
-                            * (z_offset_end - z_offset_start)
-                            / float(z_planes - 1)
-                        )
-                    else:
-                        offsets = [z_offset_start]
-                    for z_offset in offsets:
-                        amp = eval(self.volts_per_micron, {"x": 0.5 * (z_range)})
-                        off = eval(self.volts_per_micron, {"x": 0.5 * (z_offset)})
-                        waveforms.append(
-                            remote_focus_ramp(
-                                sample_rate=self.sample_rate,
-                                exposure_time=exposure_time,
-                                sweep_time=self.sweep_time,
-                                remote_focus_delay=self.remote_focus_delay,
-                                camera_delay=self.camera_delay_percent,
-                                fall=self.remote_focus_ramp_falling,
-                                amplitude=amp,
-                                offset=off,
-                            )
-                        )
-                    self.waveform_dict[channel_key][
-                        self.waveform_dict[channel_key] > self.galvo_max_voltage
-                    ] = self.galvo_max_voltage
-                    self.waveform_dict[channel_key][
-                        self.waveform_dict[channel_key] < self.galvo_min_voltage
-                    ] = self.galvo_min_voltage
-
-                    self.waveform_dict[channel_key] = np.hstack(waveforms)
-                    self.samples = int(self.sample_rate * self.sweep_time * z_planes)
-                    self.daq.analog_outputs[self.axes_channels[0]] = {
-                        "sample_rate": self.sample_rate,
-                        "samples": self.samples,
-                        "trigger_source": self.trigger_source,
-                        "waveform": self.waveform_dict,
-                    }
                 else:
-                    if volts > self.galvo_max_voltage:
-                        volts = self.galvo_max_voltage
-                    if volts < self.galvo_min_voltage:
-                        volts = self.galvo_min_voltage
-                    self.ao_task.write(volts, auto_start=True)
+                    offsets = [z_offset_start]
+                for z_offset in offsets:
+                    amp = eval(self.volts_per_micron, {"x": 0.5 * (z_range)})
+                    off = eval(self.volts_per_micron, {"x": 0.5 * (z_offset)})
+                    waveforms.append(
+                        remote_focus_ramp(
+                            sample_rate=self.sample_rate,
+                            exposure_time=exposure_time,
+                            sweep_time=self.sweep_time,
+                            remote_focus_delay=self.remote_focus_delay,
+                            camera_delay=self.camera_delay_percent,
+                            fall=self.remote_focus_ramp_falling,
+                            amplitude=amp,
+                            offset=off,
+                        )
+                    )
+                self.waveform_dict[channel_key][
+                    self.waveform_dict[channel_key] > self.galvo_max_voltage
+                ] = self.galvo_max_voltage
+                self.waveform_dict[channel_key][
+                    self.waveform_dict[channel_key] < self.galvo_min_voltage
+                ] = self.galvo_min_voltage
+
+                self.waveform_dict[channel_key] = np.hstack(waveforms)
+                self.samples = int(self.sample_rate * self.sweep_time * z_planes)
+                self.daq.analog_outputs[self.axes_channels[0]] = {
+                    "sample_rate": self.sample_rate,
+                    "samples": self.samples,
+                    "trigger_source": self.trigger_source,
+                    "waveform": self.waveform_dict,
+                }
 
         return self.waveform_dict
 
@@ -309,19 +286,7 @@ class GalvoNIStage(StageBase):
 
         volts = eval(self.volts_per_micron, {"x": axis_abs})
 
-        microscope_state = self.configuration["experiment"]["MicroscopeState"]
-
-        for channel_key in microscope_state["channels"].keys():
-            # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
-            channel = microscope_state["channels"][channel_key]
-
-            # Only proceed if it is enabled in the GUI
-            if channel["is_selected"] is True:
-                if volts > self.galvo_max_voltage:
-                    volts = self.galvo_max_voltage
-                if volts < self.galvo_min_voltage:
-                    volts = self.galvo_min_voltage
-                self.ao_task.write(volts, auto_start=True)
+        self.ao_task.write(volts, auto_start=True)
 
         # Stage Settle Duration in Milliseconds
         if (
@@ -361,3 +326,36 @@ class GalvoNIStage(StageBase):
     def stop(self):
         """Stop all stage movement abruptly."""
         pass
+
+    def switch_mode(self, mode="normal", exposure_times=None, sweep_times=None):
+        """Calculate the waveform for the stage.
+
+        Parameters
+        ----------
+        mode : str
+            Name of the stage working mode
+            Current supported modes are: confocal-projection, normal
+        exposure_times : dict
+            Dictionary of exposure times for each channel
+        sweep_times : dict
+            Dictionary of sweep times for each channel
+        """
+        if mode == "confocal-projection":
+            if self.ao_task:
+                self.ao_task.stop()
+                self.ao_task.close()
+                self.ao_task = None
+            self.calculate_waveform(exposure_times, sweep_times)
+        else:
+            if self.ao_task is None:
+                self.ao_task = nidaqmx.Task()
+                self.ao_task.ao_channels.add_ao_voltage_chan(self.axes_channels[0])
+            volts = eval(
+                self.volts_per_micron,
+                {"x": self.configuration["experiment"]["StageParameters"][self.axes[0]]},
+            )
+            if volts > self.galvo_max_voltage:
+                volts = self.galvo_max_voltage
+            if volts < self.galvo_min_voltage:
+                volts = self.galvo_min_voltage
+            self.ao_task.write(volts, auto_start=True)

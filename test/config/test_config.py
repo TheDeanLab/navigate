@@ -33,12 +33,14 @@
 # Standard Imports
 import pathlib
 import unittest
+from unittest.mock import patch, MagicMock
 from multiprocessing import Manager
 from multiprocessing.managers import ListProxy, DictProxy
 import os
 import time
 import random
-
+import yaml
+import sys
 
 # Third Party Imports
 
@@ -87,6 +89,30 @@ def test_get_aslm_path():
     assert ".ASLM" in path_string
 
 
+def test_get_aslm_path_windows(monkeypatch):
+    """Test that the ASLM path is a string."""
+    monkeypatch.setattr(config.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(config.os, "getenv", lambda x: "LOCALAPPDATA")
+    monkeypatch.setattr(config.os.path, "exists", lambda x: True)
+    assert isinstance(config.get_aslm_path(), str)
+    path_string = config.get_aslm_path()
+    assert path_string.startswith("LOCALAPPDATA")
+    assert path_string.endswith(".ASLM")
+
+    
+
+
+def test_get_aslm_path_mac(monkeypatch):
+    """Test that the ASLM path is a string."""
+    monkeypatch.setattr(config.platform, "system", lambda: "Darwin")
+    monkeypatch.setattr(config.os, "getenv", lambda x: "HOME")
+    monkeypatch.setattr(config.os.path, "exists", lambda x: True)
+    assert isinstance(config.get_aslm_path(), str)
+    path_string = config.get_aslm_path()
+    assert path_string.startswith("HOME")
+    assert path_string.endswith(".ASLM")
+
+
 # Write a test for config.get_configuration_paths()
 def test_get_configuration_paths():
     """Test that the configuration paths are a list."""
@@ -94,6 +120,55 @@ def test_get_configuration_paths():
     for path in paths:
         assert isinstance(path, pathlib.Path)
     assert len(paths) == 5
+
+
+def test_get_configuration_paths_create_dir(monkeypatch):
+    """Test that the configuration path is created,
+    and that they are a list."""
+    monkeypatch.setattr(config, "get_aslm_path", lambda: "TESTPATH")
+    paths = config.get_configuration_paths()
+    for path in paths:
+        assert isinstance(path, pathlib.Path)
+        assert os.path.exists(path), "Each configuration yaml file is copied"
+        assert path.suffix.lower() in [".yml", ".yaml"]
+    # delete generated folder
+    delete_folder("TESTPATH")
+
+# test that the system is exited if no file is provided to load_yaml_config
+def test_load_yaml_config_no_file():
+    """Test that the system exits if no file is provided."""
+    from unittest import mock
+
+    with mock.patch("sys.exit") as mock_sys_exit:
+        config.load_configs(manager=Manager(), **{})
+        mock_sys_exit.assert_called_once()
+
+
+class TestLoadConfigsWithYAMLError(unittest.TestCase):
+    """Test the load_configs function.
+
+    Target is the yaml.YAMLError exception clause.
+    """
+
+    @patch("yaml.load")
+    @patch("builtins.open")
+    @patch("pathlib.Path.exists")
+    def test_yaml_error(self, mock_exists, mock_open, mock_yaml_load):
+        # Set up the mocks
+        mock_exists.return_value = True
+        mock_open.return_value = MagicMock()
+        mock_yaml_load.side_effect = yaml.YAMLError("Test YAMLError")
+
+        # Mocking sys.exit to prevent the test runner from exiting
+        with patch.object(sys, "exit") as mock_exit:
+            manager = MagicMock()
+            config.load_configs(manager, config1="path/to/config1.yaml")
+
+            # Check if sys.exit was called with the expected argument
+            mock_exit.assert_called_with(1)
+
+            # Check if the YAMLError was triggered
+            mock_yaml_load.assert_called_once()
 
 
 class TestBuildNestedDict(unittest.TestCase):

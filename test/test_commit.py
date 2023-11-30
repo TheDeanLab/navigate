@@ -30,46 +30,17 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from pathlib import Path
-import pytest
+# Standard Library Imports
+import unittest
+
+# Third Party Imports
+
+# Local Imports
+from aslm._commit import get_git_revision_hash
 
 
-def test_update_nested_dict():
-    from aslm.log_files.log_functions import update_nested_dict
-
-    test_dict = {"one": 2, "three": {4: {"metastasis": False}}}
-
-    test_dict_updated = update_nested_dict(
-        test_dict, lambda k, v: k == "metastasis", lambda x: True
-    )
-
-    assert test_dict_updated == {"one": 2, "three": {4: {"metastasis": True}}}
-
-
-@pytest.mark.parametrize("logging_configuration", ["logging.yml"])
-@pytest.mark.parametrize("logging_path", [None, Path("./")])
-def test_log_setup(logging_configuration, logging_path):
-    from datetime import datetime
-
-    from aslm.log_files.log_functions import log_setup
-    from aslm.config.config import get_aslm_path
-
-    time = datetime.now()
-    time_stamp = Path(
-        "%s-%s-%s-%s%s"
-        % (
-            f"{time.year:04d}",
-            f"{time.month:02d}",
-            f"{time.day:02d}",
-            f"{time.hour:02d}",
-            f"{time.minute:02d}",
-        )
-    )
-
-    if logging_path is None:
-        logging_path = Path.joinpath(Path(get_aslm_path()), "logs")
-    todays_path = Path.joinpath(logging_path, time_stamp)
-
-    log_setup(logging_configuration, logging_path)
-
-    assert Path.joinpath(todays_path, "performance.log").is_file()
+class TestGetGitRevisionHash(unittest.TestCase):
+    def test_return_type(self):
+        """Test that the function returns a string."""
+        result = get_git_revision_hash()
+        self.assertIsInstance(result, str)

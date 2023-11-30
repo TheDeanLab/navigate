@@ -331,8 +331,10 @@ class BigDataViewerDataSource(DataSource):
         """
         if self._shapes is None:
             self._shapes = np.maximum(
-                np.array([self.shape_z, self.shape_y, self.shape_x])[None, :]
-                // self.resolutions[:, ::-1],
+                np.ceil(
+                    np.array([self.shape_z, self.shape_y, self.shape_x])[None, :]
+                    / self.resolutions[:, ::-1]
+                ).astype(int),
                 1,
             )
         return self._shapes
@@ -534,7 +536,7 @@ class BigDataViewerDataSource(DataSource):
                 timepoint = setup.create_group(time_group_name)
                 for j in range(self.subdivisions.shape[0]):
                     s_group_name = f"s{j}"
-                    shape = self.shapes[j, ...][::-1]
+                    shape = [int(x) for x in self.shapes[j, ...][::-1]]
                     # chunks = self.subdivisions[j, ...]
                     sx = timepoint.zeros(
                         s_group_name, shape=tuple(shape), chunks=(shape[0], shape[1], 1)

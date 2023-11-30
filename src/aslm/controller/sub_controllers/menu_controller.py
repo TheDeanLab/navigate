@@ -477,13 +477,24 @@ class MenuController(GUIController):
             ),
         )
 
-        # add adaptive optics as standalone pop-up for now (if mirror is real, otherwise don't)
-        self.view.menubar.menu_features.add_separator()
-        self.view.menubar.menu_features.add_command(
-            label="Adaptive Optics", command=self.popup_adaptiveoptics
-        )
+        # add adaptive optics as standalone pop-up for now
+        # (if mirror is real, otherwise don't)
+        microscope_name = self.parent_controller.configuration["experiment"][
+            "MicroscopeState"
+        ]["microscope_name"]
+        scope = self.parent_controller.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]
+        if (
+            scope.get("mirror") is not None
+            and "synthetic" not in scope["mirror"]["hardware"]["type"].lower()
+        ):
+            self.view.menubar.menu_features.add_separator()
+            self.view.menubar.menu_features.add_command(
+                label="Adaptive Optics", command=self.popup_adaptiveoptics
+            )
+            self.view.menubar.menu_features.add_separator()
 
-        self.view.menubar.menu_features.add_separator()
         self.view.menubar.menu_features.add_command(
             label="Ilastik Settings", command=self.popup_ilastik_setting
         )
@@ -699,7 +710,7 @@ class MenuController(GUIController):
         )
 
     def popup_adaptiveoptics(self):
-        if hasattr(self.parent_controller, 'adaptiveoptics_popup_controller'):
+        if hasattr(self.parent_controller, "adaptiveoptics_popup_controller"):
             self.parent_controller.ao_popup_controller.showup()
             return
         ao_popup = AdaptiveOpticsPopup(self.view)

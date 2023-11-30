@@ -323,7 +323,7 @@ class ConstantVelocityAcquisition:
 
         posw = self.asi_stage.get_axis_position(self.axis)
         print(f"current position = {posw}, start position = {self.start_position_um}")
-
+        print(f"self.axis = {self.axis}")
         # self.model.resume_data_thread()
         # print("DATA THREAD RESUMED")
 

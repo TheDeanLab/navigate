@@ -53,22 +53,25 @@ class TestAutoRedial(unittest.TestCase):
     def test_successful_connection_after_failures(self):
         """Test successful connection after a few failures."""
         mock_func = MagicMock(
-            side_effect=[Exception("fail"), Exception("fail"), "success"]
+            side_effect=[Exception("fail"), Exception("fail"), "success", Exception("fail"), "success"]
         )
-        result = auto_redial(mock_func, (), n_tries=3)
+        result = auto_redial(mock_func, (), n_tries=5)
         self.assertEqual(result, "success")
+        assert mock_func.call_count == 3
 
     def test_failure_after_all_retries(self):
         """Test failure after all retries."""
         mock_func = MagicMock(side_effect=Exception("fail"))
         with self.assertRaises(Exception):
             auto_redial(mock_func, (), n_tries=3)
+        assert mock_func.call_count == 3
 
     def test_exception_type_handling(self):
         """Test that only the specified exception type is caught."""
         mock_func = MagicMock(side_effect=[ValueError("wrong exception"), "success"])
         with self.assertRaises(ValueError):
             auto_redial(mock_func, (), n_tries=3, exception=TypeError)
+        assert mock_func.call_count == 1
 
     def test_arguments_passing(self):
         """Test that arguments and keyword arguments are correctly passed."""

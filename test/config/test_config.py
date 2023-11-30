@@ -96,7 +96,10 @@ def test_get_aslm_path_windows(monkeypatch):
     monkeypatch.setattr(config.os.path, "exists", lambda x: True)
     assert isinstance(config.get_aslm_path(), str)
     path_string = config.get_aslm_path()
-    assert ".ASLM" in path_string
+    assert path_string.startswith("LOCALAPPDATA")
+    assert path_string.endswith(".ASLM")
+
+    
 
 
 def test_get_aslm_path_mac(monkeypatch):
@@ -106,7 +109,8 @@ def test_get_aslm_path_mac(monkeypatch):
     monkeypatch.setattr(config.os.path, "exists", lambda x: True)
     assert isinstance(config.get_aslm_path(), str)
     path_string = config.get_aslm_path()
-    assert ".ASLM" in path_string
+    assert path_string.startswith("HOME")
+    assert path_string.endswith(".ASLM")
 
 
 # Write a test for config.get_configuration_paths()
@@ -121,11 +125,14 @@ def test_get_configuration_paths():
 def test_get_configuration_paths_create_dir(monkeypatch):
     """Test that the configuration path is created,
     and that they are a list."""
-    monkeypatch.setattr(config.os.path, "isdir", lambda x: False)
+    monkeypatch.setattr(config, "get_aslm_path", lambda: "TESTPATH")
     paths = config.get_configuration_paths()
     for path in paths:
         assert isinstance(path, pathlib.Path)
-
+        assert os.path.exists(path), "Each configuration yaml file is copied"
+        assert path.suffix.lower() in [".yml", ".yaml"]
+    # delete generated folder
+    delete_folder("TESTPATH")
 
 # test that the system is exited if no file is provided to load_yaml_config
 def test_load_yaml_config_no_file():

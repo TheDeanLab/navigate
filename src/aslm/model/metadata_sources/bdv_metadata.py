@@ -81,20 +81,22 @@ class BigDataViewerMetadata(XMLMetadata):
         configuration : dict
             Configuration dictionary.
         """
-        bdv_configuration = configuration["configuration"]["BDVParameters"]
+        bdv_configuration = configuration["configuration"].get("BDVParameters")
 
-        # Shear Parameters
-        self.shear_data = bdv_configuration["shear"].get("shear_data", False)
-        self.shear_dimension = (
-            bdv_configuration["shear"].get("shear_dimension", "YZ").upper()
-        )
-        self.shear_angle = bdv_configuration["shear"].get("shear_angle", 0)
+        if bdv_configuration is not None:
 
-        # Rotate Parameters
-        self.rotate_data = bdv_configuration["rotate"].get("rotate_data", False)
-        self.rotate_angle_x = bdv_configuration["rotate"].get("X", 0)
-        self.rotate_angle_y = bdv_configuration["rotate"].get("Y", 0)
-        self.rotate_angle_z = bdv_configuration["rotate"].get("Z", 0)
+            # Shear Parameters
+            self.shear_data = bdv_configuration["shear"].get("shear_data", False)
+            self.shear_dimension = (
+                bdv_configuration["shear"].get("shear_dimension", "YZ").upper()
+            )
+            self.shear_angle = bdv_configuration["shear"].get("shear_angle", 0)
+
+            # Rotate Parameters
+            self.rotate_data = bdv_configuration["rotate"].get("rotate_data", False)
+            self.rotate_angle_x = bdv_configuration["rotate"].get("X", 0)
+            self.rotate_angle_y = bdv_configuration["rotate"].get("Y", 0)
+            self.rotate_angle_z = bdv_configuration["rotate"].get("Z", 0)
 
     def bdv_xml_dict(
         self, file_name: Union[str, list, None], views: list, **kw

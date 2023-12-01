@@ -493,7 +493,8 @@ class MenuController(GUIController):
             self.view.menubar.menu_features.add_command(
                 label="Adaptive Optics", command=self.popup_adaptiveoptics
             )
-            self.view.menubar.menu_features.add_separator()
+
+        self.view.menubar.menu_features.add_separator()
 
         self.view.menubar.menu_features.add_command(
             label="Ilastik Settings", command=self.popup_ilastik_setting

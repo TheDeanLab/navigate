@@ -620,20 +620,22 @@ class Model:
             print("*** autofocus args:", *args)
             autofocus = Autofocus(self, *args)
             autofocus.run()
-        
-        elif command == 'flatten_mirror':
+
+        elif command == "flatten_mirror":
             self.update_mirror(coef=[], flatten=True)
-        elif command == 'zero_mirror':
+        elif command == "zero_mirror":
             self.active_microscope.mirror.zero_flatness()
-        elif command == 'set_mirror':
-            coef = list(self.configuration['experiment']['MirrorParameters']['modes'].values())
+        elif command == "set_mirror":
+            coef = list(
+                self.configuration["experiment"]["MirrorParameters"]["modes"].values()
+            )
             self.update_mirror(coef=coef)
-        elif command == 'save_wcs_file':
+        elif command == "save_wcs_file":
             self.active_microscope.mirror.save_wcs_file(path=args[0])
-        elif command == 'set_mirror_from_wcs':
+        elif command == "set_mirror_from_wcs":
             coef = self.active_microscope.mirror.set_from_wcs_file(path=args[0])
             self.update_mirror(coef=coef)
-        elif command == 'tony_wilson':
+        elif command == "tony_wilson":
             tony_wilson = TonyWilson(self)
             tony_wilson.run(*args)
 
@@ -706,12 +708,12 @@ class Model:
         elif command == "terminate":
             self.terminate()
 
-        elif command == 'change_camera':
+        elif command == "change_camera":
             new_camera = list(self.active_microscope.cameras.values())[args[0]]
-            print(f'Using new camera >> {new_camera.camera_controller._serial_number}')
+            print(f"Using new camera >> {new_camera.camera_controller._serial_number}")
             self.active_microscope.camera = new_camera
 
-        elif command == 'exit':
+        elif command == "exit":
             for camera in self.active_microscope.cameras.values():
                 camera.camera_controller.dev_close()
 
@@ -724,7 +726,9 @@ class Model:
 
         mirror_img = self.active_microscope.mirror.mirror_controller.get_wavefront_pix()
 
-        self.event_queue.put(('mirror_update', {'mirror_img': mirror_img, 'coefs': coef}))
+        self.event_queue.put(
+            ("mirror_update", {"mirror_img": mirror_img, "coefs": coef})
+        )
 
         # print(self.configuration['experiment']['MirrorParameters']['modes'])
 
@@ -1200,7 +1204,7 @@ class Model:
             SyntheticRemoteFocus,  # noqa: F401
             SyntheticStage,
             SyntheticZoom,  # noqa: F401
-            SyntheticMirror,
+            SyntheticMirror,  # noqa: F401
         )
 
         microscope = Microscope(
@@ -1213,11 +1217,11 @@ class Model:
 
         # TODO: lasers
         temp = {
-            'zoom': 'SyntheticZoom',
-            'filter_wheel': 'SyntheticFilterWheel',
-            'shutter': 'SyntheticShutter',
-            'remote_focus_device': 'SyntheticRemoteFocus',
-            'mirror': 'SyntheticMirror'
+            "zoom": "SyntheticZoom",
+            "filter_wheel": "SyntheticFilterWheel",
+            "shutter": "SyntheticShutter",
+            "remote_focus_device": "SyntheticRemoteFocus",
+            "mirror": "SyntheticMirror",
         }
 
         for k in microscope_config:

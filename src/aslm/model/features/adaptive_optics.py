@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -45,37 +46,42 @@ from aslm.model.features.image_writer import ImageWriter
 
 import time
 
+
 def poly2(x, a, b, c):
-    return a*x**2 + b*x + c
+    return a * x**2 + b * x + c
+
 
 def gauss(x, a, b, c, d):
-    y = (x - b)/c
-    y = np.exp(-y**2)
-    return a*y + d
+    y = (x - b) / c
+    y = np.exp(-(y**2))
+    return a * y + d
+
 
 def r_squared(y, y_fit):
     y_bar = np.mean(y)
-    SS_res = np.sum((y - y_fit)**2)
-    SS_tot = np.sum((y - y_bar)**2)
+    SS_res = np.sum((y - y_fit) ** 2)
+    SS_tot = np.sum((y - y_bar) ** 2)
 
-    return 1 - SS_res/SS_tot
+    return 1 - SS_res / SS_tot
+
 
 def fourier_annulus(im, radius_1=0, radius_2=64):
-    
+
     x_, y_ = np.meshgrid(range(im.shape[1]), range(im.shape[0]))
-    
+
     x_ = x_.astype(float) - x_.mean()
     y_ = y_.astype(float) - y_.mean()
 
     mask = x_**2 + y_**2 > radius_1**2
     mask *= x_**2 + y_**2 <= radius_2**2
-    
+
     IM = np.fft.fftshift(np.fft.fft2(im))
     IM_abs = np.abs(IM)
-    
+
     IM_mask = IM_abs * mask
-    
+
     return np.mean(IM_mask), IM_mask
+
 
 class TonyWilson:
     def __init__(self, model):
@@ -88,28 +94,38 @@ class TonyWilson:
         self.laser = None
         self.laser_power = 0
         self.start_time = 0
-        
+
         self.model = model
         self.mirror_controller = self.model.active_microscope.mirror.mirror_controller
 
         self.n_modes = self.mirror_controller.n_modes
 
         self.change_coef = []
-        modes_armed_dict = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['modes_armed']
+        modes_armed_dict = self.model.configuration["experiment"][
+            "AdaptiveOpticsParameters"
+        ]["TonyWilson"]["modes_armed"]
         self.mode_names = modes_armed_dict.keys()
         for i, k in enumerate(self.mode_names):
             if modes_armed_dict[k]:
                 self.change_coef += [i]
         self.n_coefs = len(self.change_coef)
 
-        start_from = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['from']
-        if start_from == 'flat':
+        start_from = self.model.configuration["experiment"]["AdaptiveOpticsParameters"][
+            "TonyWilson"
+        ]["from"]
+        if start_from == "flat":
             self.best_coefs = np.zeros(self.n_modes, dtype=np.float32)
-        elif start_from == 'current':
-            curr_expt_coefs = list(self.model.configuration['experiment']['MirrorParameters']['modes'].values())
+        elif start_from == "current":
+            curr_expt_coefs = list(
+                self.model.configuration["experiment"]["MirrorParameters"][
+                    "modes"
+                ].values()
+            )
             self.best_coefs = np.asarray(curr_expt_coefs, dtype=np.float32)
 
-        self.metric = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']['metric']
+        self.metric = self.model.configuration["experiment"][
+            "AdaptiveOpticsParameters"
+        ]["TonyWilson"]["metric"]
 
         self.best_coefs_overall = deepcopy(self.best_coefs)
         self.best_metric = 0.0
@@ -119,22 +135,26 @@ class TonyWilson:
         # Queue
         self.tw_frame_queue = Queue()
         self.tw_data_queue = Queue()
-        
+
         # Image Writer
-        self.image_writer = ImageWriter(model, sub_dir='AO_Frames')
+        self.image_writer = ImageWriter(model, sub_dir="AO_Frames")
 
         # target channel
         self.target_channel = 1
 
-        self.config_table = {'signal': {'init': self.pre_func_signal,
-                                        'main': self.in_func_signal,
-                                        'end': self.end_func_signal},
-                             'data': {'init': self.pre_func_data,
-                                      'main': self.in_func_data,
-                                      'end': self.end_func_data},
-                             'node': {'node_type': 'multi-step',
-                                      'device_related': True },
-                            }
+        self.config_table = {
+            "signal": {
+                "init": self.pre_func_signal,
+                "main": self.in_func_signal,
+                "end": self.end_func_signal,
+            },
+            "data": {
+                "init": self.pre_func_data,
+                "main": self.in_func_data,
+                "end": self.end_func_data,
+            },
+            "node": {"node_type": "multi-step", "device_related": True},
+        }
 
     def run(self, *args):
         r"""Run the Tony Wilson iterative AO routine
@@ -150,40 +170,39 @@ class TonyWilson:
         frame_num = self.get_tw_frame_num()
         if frame_num < 1:
             return
-        
+
         # Opens correct shutter and puts all signals to false
-        self.model.prepare_acquisition()  
+        self.model.prepare_acquisition()
         self.model.active_microscope.prepare_next_channel()
 
         # load signal and data containers
         self.model.signal_container, self.model.data_container = load_features(
-            self.model, [[{'name': TonyWilson}]]
+            self.model, [[{"name": TonyWilson}]]
         )
 
         self.model.signal_thread = threading.Thread(
-            target=self.model.run_acquisition,
-            name='TonyWilson Signal'
+            target=self.model.run_acquisition, name="TonyWilson Signal"
         )
 
         self.model.data_thread = threading.Thread(
             target=self.model.run_data_process,
             # args=(frame_num,),
-            kwargs={'data_func': self.image_writer.save_image},
-            name='TonyWilson Data'
+            kwargs={"data_func": self.image_writer.save_image},
+            name="TonyWilson Data",
         )
 
-        print(
-            "\n*************************** STARTING TONY WILSON ***************************\n"
-        )
+        print("\n**** STARTING TONY WILSON ****\n")
 
         # Start Threads
         self.model.signal_thread.start()
         self.model.data_thread.start()
-        
+
     def get_tw_frame_num(self):
         r"""Calculate how many frames are needed: iterations x steps x num_coefs"""
-        settings = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']
-        frames = settings['iterations'] * settings['steps'] * self.n_coefs
+        settings = self.model.configuration["experiment"]["AdaptiveOpticsParameters"][
+            "TonyWilson"
+        ]
+        frames = settings["iterations"] * settings["steps"] * self.n_coefs
         return frames
 
     # don't need this?
@@ -198,15 +217,19 @@ class TonyWilson:
         # Timing
         self.start_time = time.time()
 
-        tw_settings = self.model.configuration['experiment']['AdaptiveOpticsParameters']['TonyWilson']
+        tw_settings = self.model.configuration["experiment"][
+            "AdaptiveOpticsParameters"
+        ]["TonyWilson"]
 
         self.done_all = False
 
-        self.n_iter = tw_settings['iterations']
-        self.n_steps = tw_settings['steps']
-        self.coef_amp = tw_settings['amplitude']
+        self.n_iter = tw_settings["iterations"]
+        self.n_steps = tw_settings["steps"]
+        self.coef_amp = tw_settings["amplitude"]
 
-        self.coef_sweep = np.linspace(-self.coef_amp, self.coef_amp, self.n_steps).astype(np.float32)
+        self.coef_sweep = np.linspace(
+            -self.coef_amp, self.coef_amp, self.n_steps
+        ).astype(np.float32)
 
         self.signal_id = 0
         self.target_signal_id = 0
@@ -215,13 +238,13 @@ class TonyWilson:
         print(f"Total frame num: {self.total_frame_num}")
 
     def in_func_signal(self):
-        out_str = f'in_func_signal\n'
+        out_str = "in_func_signal\n"
 
-        out_str += f'\tSignal:\t{self.signal_id}\n'
+        out_str += f"\tSignal:\t{self.signal_id}\n"
 
         step = self.signal_id % self.n_steps
-        coef = int(self.signal_id/self.n_steps) % self.n_coefs
-        itr = int(self.signal_id/self.n_steps/self.n_coefs) % self.n_iter
+        coef = int(self.signal_id / self.n_steps) % self.n_coefs
+        itr = int(self.signal_id / self.n_steps / self.n_coefs) % self.n_iter
 
         out_str += f"\tStep:\t{step}\n"
         out_str += f"\tC_n:\t{coef}\n"
@@ -236,54 +259,54 @@ class TonyWilson:
         out_str += f"\tApply:\t[{' '.join([f'{c:.2f}' for c in (applied_coefs)])}]\n"
 
         # Update the mirror...
-        self.mirror_controller.flat()   
+        self.mirror_controller.flat()
         try:
             self.mirror_controller.display_modes(applied_coefs)
         except Exception as e:
             print(e)
             return
-        
-        time.sleep(
-            self.model.active_microscope.current_exposure_time/1000
-        )
+
+        time.sleep(self.model.active_microscope.current_exposure_time / 1000)
 
         try:
             curr_mirror_coefs = self.mirror_controller.get_modal_coefs()[0]
-            out_str += f"\tCoefs:\t[{' '.join([f'{c:.2f}' for c in (curr_mirror_coefs)])}]\n"
+            out_str += (
+                f"\tCoefs:\t[{' '.join([f'{c:.2f}' for c in (curr_mirror_coefs)])}]\n"
+            )
         except Exception as e:
             print(e)
             return
 
         self.model.logger.debug(
-            f"*** TonyWilson > in_func_signal :: iter: {itr}\tcoef: {coef}\tstep: {step}"
+            f"*** TonyWilson > in_func_signal :: iter:{itr}\tcoef:{coef}\tstep:{step}"
         )
-        coef_str = ' '.join([f'{c:.2f}' for c in (coef_arr + self.best_coefs)])    
+        coef_str = " ".join([f"{c:.2f}" for c in (coef_arr + self.best_coefs)])
         self.model.logger.debug(
-            f"*** TonyWilson > in_func_signal :: display_modes: [{coef_str}]"
+            f"*** TonyWilson > in_func_signal :: display_modes:[{coef_str}]"
         )
-        
-        if ((applied_coefs == curr_mirror_coefs).all() or (applied_coefs == 0).all()):
+
+        if (applied_coefs == curr_mirror_coefs).all() or (applied_coefs == 0).all():
             self.signal_id += 1
 
-            out_str += '\tSending tw_frame_queue...\n'
+            out_str += "\tSending tw_frame_queue...\n"
             self.tw_frame_queue.put(
                 (
                     self.model.frame_id,
                     self.total_frame_num - self.signal_id,
                     itr,
                     coef,
-                    step
+                    step,
                 )
             )
         else:
-            out_str += '\tMirror update failed...\n'
+            out_str += "\tMirror update failed...\n"
 
         print(out_str)
-        
+
         return self.signal_id >= self.total_frame_num
 
     def end_func_signal(self):
-        print('end_func_signal() called!!!')
+        print("end_func_signal() called!!!")
 
         if self.model.stop_acquisition:
             return True
@@ -291,9 +314,12 @@ class TonyWilson:
         return self.signal_id >= self.total_frame_num
 
     def pre_func_data(self):
-        self.f_frame_id = -1  #  to indicate if there is one frame need to calculate shannon value, but the image frame isn't ready
+        self.f_frame_id = (
+            -1
+        )  # to indicate if there is one frame need to calculate shannon value,
+        # but the image frame isn't ready
         self.frame_num = 10  # any value but not 1
-        self.target_frame_id = 0 # frame id in the buffer with best focus
+        self.target_frame_id = 0  # frame id in the buffer with best focus
         self.get_frames_num = 0
         self.plot_data = []
         self.trace_list = {}
@@ -306,60 +332,76 @@ class TonyWilson:
 
         self.frames_done = 0
 
-    def process_data(self, coef, mode='poly'):
+    def process_data(self, coef, mode="poly"):
         self.y = self.plot_data
-        
-        if mode == 'poly':
-            c = np.min(self.y) # offset guess
-            b = (np.max(self.y) - c) / self.coef_amp # slope guess
-            a = -b/2
-            
-            p, _ = curve_fit(poly2, self.x, self.y, p0=[a,b,c], bounds=([-np.inf, -np.inf, -np.inf], [0., np.inf, np.inf]))
+
+        if mode == "poly":
+            c = np.min(self.y)  # offset guess
+            b = (np.max(self.y) - c) / self.coef_amp  # slope guess
+            a = -b / 2
+
+            p, _ = curve_fit(
+                poly2,
+                self.x,
+                self.y,
+                p0=[a, b, c],
+                bounds=([-np.inf, -np.inf, -np.inf], [0.0, np.inf, np.inf]),
+            )
             self.y_fit = poly2(self.x_fit, p[0], p[1], p[2])
             r_2 = r_squared(self.y, poly2(self.x, p[0], p[1], p[2]))
-        
-        elif mode == 'gauss':
+
+        elif mode == "gauss":
             d = np.min(self.y)
             a = np.max(self.y) - d
             b = self.x[np.argmax(self.y)]
-            c = (self.x[-1] - self.x[0])/2
+            c = (self.x[-1] - self.x[0]) / 2
 
-            p, _ = curve_fit(gauss, self.x, self.y, p0=[a,b,c,d], bounds=([0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf]))
+            p, _ = curve_fit(
+                gauss,
+                self.x,
+                self.y,
+                p0=[a, b, c, d],
+                bounds=([0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf]),
+            )
             self.y_fit = gauss(self.x_fit, p[0], p[1], p[2], p[3])
             r_2 = r_squared(self.y, gauss(self.x, p[0], p[1], p[2], p[3]))
 
-        self.best_coefs[self.change_coef[coef-1]] += self.x_fit[self.y_fit.argmax()] * r_2 # weight by R^2 goodness of fit
+        self.best_coefs[self.change_coef[coef - 1]] += (
+            self.x_fit[self.y_fit.argmax()] * r_2
+        )  # weight by R^2 goodness of fit
         self.mirror_img = self.mirror_controller.get_wavefront_pix()
 
-        new_metric = self.plot_data[int(self.n_steps/2)]        
+        new_metric = self.plot_data[int(self.n_steps / 2)]
         self.best_peaks.append(new_metric)
         if new_metric > self.best_metric:
             self.best_metric = new_metric
             self.best_coefs_overall = deepcopy(self.best_coefs)
-    
+
         self.plot_data = []
 
     def in_func_data(self, frame_ids=[]):
         self.get_frames_num += len(frame_ids)
-        
-        out_str = 'in_func_data\n'
 
-        out_str += f'\tFrames:\t{frame_ids}\n'
+        out_str = "in_func_data\n"
 
-        out_str += f'\tGet Frames Num:\t{self.get_frames_num}\n'
+        out_str += f"\tFrames:\t{frame_ids}\n"
+
+        out_str += f"\tGet Frames Num:\t{self.get_frames_num}\n"
 
         while True:
             try:
                 if self.f_frame_id < 0:
                     (
-                        self.f_frame_id, 
-                        self.frame_num, 
-                        itr, 
-                        coef, 
-                        step
+                        self.f_frame_id,
+                        self.frame_num,
+                        itr,
+                        coef,
+                        step,
                     ) = self.tw_frame_queue.get_nowait()
                 if self.f_frame_id not in frame_ids:
-                    out_str += f"\tFrame ID {self.f_frame_id} was not in the frame queue...\n"
+                    out_str += (
+                        f"\tFrame ID {self.f_frame_id} was not in the frame queue...\n"
+                    )
                     break
             except Exception:
                 out_str += "\tStill waiting tw_frame_queue...\n"
@@ -367,28 +409,30 @@ class TonyWilson:
 
             # get the image metric
             img = self.model.data_buffer[self.f_frame_id]
-            
+
             """ IMAGE METRICS """
-            if self.metric == 'Pixel Max':
+            if self.metric == "Pixel Max":
                 new_data = img.max()
-            elif self.metric == 'Pixel Average':
+            elif self.metric == "Pixel Average":
                 new_data = img.mean()
-            elif self.metric == 'DCT Shannon Entropy':
+            elif self.metric == "DCT Shannon Entropy":
                 new_data = img_contrast.fast_normalized_dct_shannon_entropy(img, 3)[0]
 
             if len(self.plot_data) == self.n_steps:
-                self.process_data(coef, mode='poly')
+                self.process_data(coef, mode="poly")
                 self.trace_list[self.mode_names[self.change_coef[coef]]] = {
-                    'x': self.x, 'y': self.y,
-                    'x_fit': self.x_fit[::32], 'y_fit': self.y_fit[::32]
-                    }
-                out_str += '\tFITTING DATA...\n'
+                    "x": self.x,
+                    "y": self.y,
+                    "x_fit": self.x_fit[::32],
+                    "y_fit": self.y_fit[::32],
+                }
+                out_str += "\tFITTING DATA...\n"
 
             self.plot_data.append(new_data)
-            out_str += f'\tTrace:\t{np.flip(self.plot_data)}\n'
+            out_str += f"\tTrace:\t{np.flip(self.plot_data)}\n"
 
             self.frames_done += 1
-            out_str += f'\tDone:\t{self.frames_done}\n'
+            out_str += f"\tDone:\t{self.frames_done}\n"
 
             self.f_frame_id = -1
 
@@ -396,24 +440,23 @@ class TonyWilson:
                 f"*** TonyWilson > in_func_data :: plot_data: {np.flip(self.plot_data)}"
             )
 
-
-            out_str += f'\tFrame Num:\t{self.frame_num}\n'
+            out_str += f"\tFrame Num:\t{self.frame_num}\n"
             if self.frame_num == 1:
                 self.frame_num = 10  # any value but not 1
                 return [self.target_frame_id]
 
-            if coef == self.n_coefs-1:
-                if step == self.n_steps-1:
-                    
+            if coef == self.n_coefs - 1:
+                if step == self.n_steps - 1:
+
                     self.coef_sweep *= 0.95
                     self.done_itr = True
-                    out_str += f'\tDone iteration {itr}!\n'
+                    out_str += f"\tDone iteration {itr}!\n"
 
-                    if itr == self.n_iter-1:
+                    if itr == self.n_iter - 1:
                         self.done_all = True
-                        out_str += '\tDone all!!!\n'
+                        out_str += "\tDone all!!!\n"
 
-        out_str += '\tSending tw_data_queue...\n'
+        out_str += "\tSending tw_data_queue...\n"
         self.tw_data_queue.put((self.frames_done,))
 
         print(out_str)
@@ -423,37 +466,43 @@ class TonyWilson:
             return frame_ids
 
     def end_func_data(self):
-        print('end_func_data() called!!!')
-        
+        print("end_func_data() called!!!")
+
         if self.done_all:
             self.best_coefs = self.best_coefs_overall
             self.model.stop_acquisition = True
             self.model.end_acquisition()
-            print('Ending acquisition...')
+            print("Ending acquisition...")
             try:
                 stop_time = time.time()
-                print(f'Total runtime:\t{(stop_time - self.start_time):.3f} sec')
+                print(f"Total runtime:\t{(stop_time - self.start_time):.3f} sec")
             except Exception as e:
                 print(e)
 
         try:
             if self.done_itr:
-                self.model.event_queue.put(('mirror_update', {
-                    'mirror_img': self.mirror_img,
-                    'coefs': self.best_coefs
-                    }))
-                self.model.event_queue.put(('tonywilson', {
-                    'peaks': self.best_peaks,
-                    'trace': self.trace_list,
-                    'done': self.done_all,
-                    'metric': self.metric
-                    }))
+                self.model.event_queue.put(
+                    (
+                        "mirror_update",
+                        {"mirror_img": self.mirror_img, "coefs": self.best_coefs},
+                    )
+                )
+                self.model.event_queue.put(
+                    (
+                        "tonywilson",
+                        {
+                            "peaks": self.best_peaks,
+                            "trace": self.trace_list,
+                            "done": self.done_all,
+                            "metric": self.metric,
+                        },
+                    )
+                )
         except Exception as e:
             print(e)
-        
+
         self.done_itr = False
 
         self.mirror_controller.display_modes(self.best_coefs_overall)
-        
-        return self.frames_done >= self.total_frame_num
 
+        return self.frames_done >= self.total_frame_num

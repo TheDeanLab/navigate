@@ -226,22 +226,28 @@ class WaveformTabController(GUIController):
                 np.hstack([remote_focus_waveform] * waveform_repeat_total_num),
                 label=k,
             )
-            ax = self.view.plot_galvo.axis
+            # ax = self.view.plot_galvo.axis
             for i, galvo_waveform in enumerate(galvo_waveform_list):
                 self.view.plot_galvo.plot(
-                    np.arange(len(galvo_waveform) * waveform_repeat_total_num) / self.sample_rate + last_galvo,
+                    np.arange(len(galvo_waveform) * waveform_repeat_total_num)
+                    / self.sample_rate
+                    + last_galvo,
                     np.hstack([galvo_waveform] * waveform_repeat_total_num),
                     label=f"{k}_{i}",
                 )
             self.view.plot_etl.plot(
-                np.arange(len(camera_waveform) * waveform_repeat_total_num) / self.sample_rate + last_camera,
-                np.hstack([camera_waveform] * waveform_repeat_total_num)/5,
+                np.arange(len(camera_waveform) * waveform_repeat_total_num)
+                / self.sample_rate
+                + last_camera,
+                np.hstack([camera_waveform] * waveform_repeat_total_num) / 5,
                 c="k",
                 linestyle="--",
             )
             self.view.plot_galvo.plot(
-                np.arange(len(camera_waveform) * waveform_repeat_total_num) / self.sample_rate + last_camera,
-                np.hstack([camera_waveform] * waveform_repeat_total_num)/5,
+                np.arange(len(camera_waveform) * waveform_repeat_total_num)
+                / self.sample_rate
+                + last_camera,
+                np.hstack([camera_waveform] * waveform_repeat_total_num) / 5,
                 c="k",
                 linestyle="--",
             )

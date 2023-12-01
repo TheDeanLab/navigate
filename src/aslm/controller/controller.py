@@ -657,23 +657,30 @@ class Controller:
             )
 
         # mirror commands:
-        elif command == 'flatten_mirror':
-            self.model.run_command('flatten_mirror', *args)
-        elif command == 'zero_mirror':
-            self.model.run_command('zero_mirror', *args)        
-        elif command == 'set_mirror':
-            self.model.run_command('set_mirror', *args)
-        elif command == 'set_mirror_from_wcs':
-            self.model.run_command('set_mirror_from_wcs', *args)
-        elif command == 'save_wcs_file':
-            self.model.run_command('save_wcs_file', *args)
-        elif command == 'tony_wilson':
-            self.threads_pool.createThread('camera', self.capture_image, args=('tony_wilson', 'live',))
+        elif command == "flatten_mirror":
+            self.model.run_command("flatten_mirror", *args)
+        elif command == "zero_mirror":
+            self.model.run_command("zero_mirror", *args)
+        elif command == "set_mirror":
+            self.model.run_command("set_mirror", *args)
+        elif command == "set_mirror_from_wcs":
+            self.model.run_command("set_mirror_from_wcs", *args)
+        elif command == "save_wcs_file":
+            self.model.run_command("save_wcs_file", *args)
+        elif command == "tony_wilson":
+            self.threads_pool.createThread(
+                "camera",
+                self.capture_image,
+                args=(
+                    "tony_wilson",
+                    "live",
+                ),
+            )
 
-        elif command == 'change_camera':
-            self.model.run_command('change_camera', *args)
+        elif command == "change_camera":
+            self.model.run_command("change_camera", *args)
 
-        elif command == 'autofocus':
+        elif command == "autofocus":
             r"""Execute autofocus routine."""
             self.threads_pool.createThread(
                 "camera",
@@ -1117,17 +1124,17 @@ class Controller:
                         data=value[0], line_plot=value[1], clear_data=value[2]
                     )
 
-            elif event == 'tonywilson':
-                if hasattr(self, 'ao_popup_controller'):
+            elif event == "tonywilson":
+                if hasattr(self, "ao_popup_controller"):
                     # self.ao_popup_controller.set_widgets_from_coef(value['coefs'])
                     self.ao_popup_controller.plot_tonywilson(value)
                     # self.ao_popup_controller.plot_mirror(value)
-                    if value['done']:
-                        print('Tony Wilson done! Updating expt...')
+                    if value["done"]:
+                        print("Tony Wilson done! Updating expt...")
                         self.ao_popup_controller.update_experiment_values()
-            elif event == 'mirror_update':
-                if hasattr(self, 'ao_popup_controller'):
-                    self.ao_popup_controller.set_widgets_from_coef(value['coefs'])
+            elif event == "mirror_update":
+                if hasattr(self, "ao_popup_controller"):
+                    self.ao_popup_controller.set_widgets_from_coef(value["coefs"])
                     self.ao_popup_controller.plot_mirror(value)
             elif event == "stop":
                 # Stop the software

@@ -711,6 +711,7 @@ class MenuController(GUIController):
         )
 
     def popup_adaptiveoptics(self):
+        """Pop up the Adaptive Optics setting window."""
         if hasattr(self.parent_controller, "adaptiveoptics_popup_controller"):
             self.parent_controller.ao_popup_controller.showup()
             return

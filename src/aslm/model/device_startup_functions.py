@@ -249,7 +249,7 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
 
 
 def load_mirror(configuration, is_synthetic=False):
-    r"""Initializes the deformable mirror class on a dedicated thread.
+    """Initializes the deformable mirror class on a dedicated thread.
 
     Parameters
     ----------
@@ -281,7 +281,7 @@ def load_mirror(configuration, is_synthetic=False):
 
 
 def start_mirror(microscope_name, device_connection, configuration, is_synthetic=False):
-    r"""Initializes the mirror class.
+    """Initializes the mirror class.
 
     Parameters
     ----------

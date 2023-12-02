@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -44,42 +45,82 @@ logger = logging.getLogger(p)
 
 
 class ImagineOpticsMirror(MirrorBase):
-    r"""ImageineOpticsMirror mirror class.
+    """ImageineOpticsMirror mirror class."""
 
-    Parameters
-    ----------
-   microscope_name : str
-        Name of microscope in configuration
-    device_connection : object
-        Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
-
-    """
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the ImagineOpticsMirror class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : dict
+            Dictionary containing the device connection information.
+        configuration : dict
+            Dictionary containing the configuration information.
+        """
         super().__init__(microscope_name, device_connection, configuration)
 
-        flat_path = configuration['configuration']['microscopes'][microscope_name]['mirror']['hardware']['flat_path']
+        flat_path = configuration["configuration"]["microscopes"][microscope_name][
+            "mirror"
+        ]["hardware"]["flat_path"]
         self.mirror_controller.set_flat(pos_path=flat_path)
-        
+
         logger.info("ImagineOpticsMirror Initialized")
-    
+
     def flat(self):
+        """Move the mirror to the flat position."""
         self.mirror_controller.flat()
-    
+
     def zero_flatness(self):
+        """Zero the mirror flatness."""
         self.mirror_controller.move_absolute_zero()
 
     def set_positions_flat(self, pos):
+        """Set the mirror to the flat position.
+
+        Parameters
+        ----------
+        pos : list
+            List of positions to set the mirror to.
+        """
         self.mirror_controller.set_flat(pos)
 
     def display_modes(self, coefs):
+        """Display the mirror modes.
+
+        Parameters
+        ----------
+        coefs : list
+            List of coefficients to display the mirror modes.
+        """
         self.mirror_controller.display_modes(coefs)
-        
+
     def get_modal_coefs(self):
+        """Get the modal coefficients.
+
+        Returns
+        -------
+        list
+            List of modal coefficients.
+        """
         return self.mirror_controller.get_modal_coefs()
 
     def set_from_wcs_file(self, path=None, name=None):
+        """Set the mirror from a WCS file.
+
+        Parameters
+        ----------
+        path : str, optional
+            Path to the WCS file, by default None
+        name : str, optional
+            Name of the WCS file, by default None
+
+        Returns
+        -------
+        list
+            List of coefficients.
+        """
         if path:
             coefs = self.mirror_controller.load_wcs(path=path, mode_file=True)
         elif name:
@@ -87,8 +128,17 @@ class ImagineOpticsMirror(MirrorBase):
         return coefs
 
     def save_wcs_file(self, path=None, name=None):
+        """Save the WCS file.
+
+        Parameters
+        ----------
+        path : str, optional
+            Path to save the WCS file, by default None
+        name : str, optional
+            Name of the WCS file, by default None
+        """
+
         if path:
             self.mirror_controller.save_wcs(path=path, mode_file=True)
         elif name:
             self.mirror_controller.save_wcs(name=name, mode_file=True)
-        

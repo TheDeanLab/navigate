@@ -1,7 +1,4 @@
-"""
-ASLM sub-controller ETL popup window.
-
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+""" Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,13 +31,16 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from aslm.controller.sub_controllers.gui_controller import GUIController
+# Standard library imports
 from tkinter import filedialog
+import logging
 
+# Third-party imports
 # from matplotlib.figure import Figure
 # from matplotlib.axes import Axes
 
-import logging
+# Local application imports
+from aslm.controller.sub_controllers.gui_controller import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -48,7 +48,18 @@ logger = logging.getLogger(p)
 
 
 class AdaptiveOpticsPopupController(GUIController):
+    """Controller for the Adaptive Optics popup window"""
+
     def __init__(self, view, parent_controller):
+        """Initialize the Adaptive Optics popup controller
+
+        Parameters
+        ----------
+        view : AdaptiveOpticsPopupView
+            The view for this controller
+        parent_controller : Controller
+            The parent controller for this controller
+        """
         super().__init__(view, parent_controller)
 
         self.view.popup.protocol("WM_DELETE_WINDOW", self.view.popup.dismiss)
@@ -56,25 +67,45 @@ class AdaptiveOpticsPopupController(GUIController):
         self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
             "HighlightedMode"
         ] = None
+
+        #: list of dicts: list of dicts containing trace data
         self.trace_list = []
 
+        #: dict: dictionary of widgets
         self.widgets = self.view.get_widgets()
+
+        #: dict: dictionary of armed modes
         self.modes_armed = self.view.get_modes_armed()
+
+        #: dict: dictionary of mode labels
         self.mode_labels = self.view.get_labels()
 
         # TODO: just for testing, remove later...
+        #: list: list of cameras
         self.camera_list = self.view.camera_list
         self.camera_list.bind(
             "<<ComboboxSelected>>", lambda evt: self.change_camera(evt)
         )
 
+        #: Figure: figure for mirror plot
         self.fig = self.view.fig
+
+        #: Figure: figure for tony wilson plot
         self.fig_tw = self.view.fig_tw
+
+        #: Figure: figure for peaks plot
         self.peaks_plot = self.view.peaks_plot
+
+        #: Figure: figure for trace plot
         self.trace_plot = self.view.trace_plot
+
+        #: Figure: figure for mirror image
         self.mirror_img = self.view.mirror_img
+
+        #: Figure: figure for coefs bar
         self.coefs_bar = self.view.coefs_bar
 
+        # Trace Events
         self.view.set_button.configure(command=self.set_mirror)
         self.view.flat_button.configure(command=self.flatten_mirror)
         self.view.zero_button.configure(command=self.zero_mirror)
@@ -99,10 +130,26 @@ class AdaptiveOpticsPopupController(GUIController):
         self.populate_experiment_values()
 
     def change_camera(self, evt):
+        """Change the camera to the selected camera
+
+        Parameters
+        ----------
+        evt : Event
+            The event that triggered this function
+        """
         cam_id = evt.widget.get().split("_")[-1]
         self.parent_controller.execute("change_camera", int(cam_id))
 
     def set_highlighted_mode(self, evt, mode):
+        """Set the highlighted mode
+
+        Parameters
+        ----------
+        evt : Event
+            The event that triggered this function
+        mode : str
+            The mode to highlight
+        """
         evt.widget.config(background="red")
         self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
             "HighlightedMode"
@@ -110,14 +157,17 @@ class AdaptiveOpticsPopupController(GUIController):
         self.plot_tw_trace()
 
     def select_all_modes(self):
+        """Select all modes"""
         for k in self.modes_armed.keys():
             self.modes_armed[k]["variable"].set(True)
 
     def deselect_all_modes(self):
+        """Deselect all modes"""
         for k in self.modes_armed.keys():
             self.modes_armed[k]["variable"].set(False)
 
     def populate_experiment_values(self):
+        """Populate the experiment values"""
         coefs_dict = self.parent_controller.configuration["experiment"][
             "MirrorParameters"
         ]["modes"]
@@ -140,6 +190,7 @@ class AdaptiveOpticsPopupController(GUIController):
                 self.widgets[k].set(tw_param_dict[k])
 
     def clear_all_coefs(self):
+        """Clear all coefficients"""
         coefs_dict = self.parent_controller.configuration["experiment"][
             "MirrorParameters"
         ]["modes"]
@@ -148,6 +199,7 @@ class AdaptiveOpticsPopupController(GUIController):
         self.update_experiment_values()
 
     def update_experiment_values(self):
+        """Update the experiment values"""
         modes_dict = {}
         coef_list = self.get_coef_from_widgets()
         keys = self.view.mode_names
@@ -181,6 +233,13 @@ class AdaptiveOpticsPopupController(GUIController):
         # print(self.parent_controller.configuration['experiment']['MirrorParameters']['modes'])
 
     def get_coef_from_widgets(self):
+        """Get the coefficients from the widgets
+
+        Returns
+        -------
+        list
+            The coefficients
+        """
         coef = []
         for k in self.widgets.keys():
             if k in self.view.mode_names:
@@ -188,21 +247,32 @@ class AdaptiveOpticsPopupController(GUIController):
         return coef
 
     def set_widgets_from_coef(self, coef):
+        """Set the widgets from the coefficients
+
+        Parameters
+        ----------
+        coef : list
+            The coefficients
+        """
         if list(coef):
             self.view.set_widgets(coef)
             self.update_experiment_values()
 
     def flatten_mirror(self):
+        """Flatten the mirror"""
         self.parent_controller.execute("flatten_mirror")
 
     def zero_mirror(self):
+        """Zero the mirror"""
         self.parent_controller.execute("zero_mirror")
 
     def set_mirror(self):
+        """Set the mirror"""
         self.update_experiment_values()
         self.parent_controller.execute("set_mirror")
 
     def save_wcs_file(self):
+        """Save the wcs file"""
         wcs_path = filedialog.asksaveasfilename(
             defaultextension=".wcs",
             initialdir="E:\\WaveKitX64\\MirrorFiles",
@@ -212,6 +282,7 @@ class AdaptiveOpticsPopupController(GUIController):
         self.parent_controller.execute("save_wcs_file", wcs_path)
 
     def set_from_wcs_file(self):
+        """Set the mirror from the wcs file"""
         wcs_path = filedialog.askopenfilename(
             defaultextension=".wcs",
             initialdir="E:\\WaveKitX64\\MirrorFiles",
@@ -221,20 +292,25 @@ class AdaptiveOpticsPopupController(GUIController):
         self.parent_controller.execute("set_mirror_from_wcs", wcs_path)
 
     def run_tony_wilson(self):
+        """Run the tony wilson routine"""
         self.update_experiment_values()
         self.parent_controller.execute("tony_wilson")
 
     def showup(self, popup_window=None):
-        """show the popup window
-
-        this function will let the popup window show in front
-        """
+        """Show the popup window."""
         # if popup_window is not None:
         #     self.view = popup_window
         self.view.popup.deiconify()
         self.view.popup.attributes("-topmost", 1)
 
     def plot_mirror(self, data):
+        """Plot the mirror data.
+
+        Parameters
+        ----------
+        data : dict
+            The data to plot
+        """
 
         try:
             self.mirror_img.clear()
@@ -260,8 +336,14 @@ class AdaptiveOpticsPopupController(GUIController):
         self.fig.canvas.draw_idle()
 
     def plot_tonywilson(self, data):
-        """
-        ### Displays a plot of [focus, entropy] with data from autofocus routine
+        """Plot the tony wilson data.
+
+        Displays a plot of [focus, entropy] with data from autofocus routine
+
+        Parameters
+        ----------
+        data : dict
+            The data to plot
         """
 
         try:
@@ -282,6 +364,7 @@ class AdaptiveOpticsPopupController(GUIController):
         self.plot_tw_trace()
 
     def plot_tw_trace(self):
+        """Plot the tony wilson trace data."""
         mode = self.parent_controller.configuration["experiment"][
             "AdaptiveOpticsParameters"
         ]["HighlightedMode"]

@@ -1,5 +1,4 @@
-"""
-Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+"""Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,12 +31,17 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
+# Standard library imports
 import tkinter as tk
 from tkinter import ttk
-from aslm.view.custom_widgets.popup import PopUp
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+
+# Third party imports
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+# Local application imports
+from aslm.view.custom_widgets.popup import PopUp
+from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 import logging
 
@@ -47,35 +51,65 @@ logger = logging.getLogger(p)
 
 
 class ScrollFrame(ttk.Frame):
+    """Scrollable Frame"""
+
     def __init__(self, parent):
+        """Initialize ScrollFrame
 
+        Parameters
+        ----------
+        parent : tk.Frame
+            Parent frame
+        """
         tk.Frame.__init__(self, parent)
+        #: tk.Canvas: Canvas
         self.canvas = tk.Canvas(self, borderwidth=1)
-        self.frame = tk.Frame(self.canvas)
-        self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=self.vsb.set, width=200)
 
+        #: tk.Frame: Frame
+        self.frame = tk.Frame(self.canvas)
+
+        #: tk.Scrollbar: Vertical Scrollbar
+        self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+
+        self.canvas.configure(yscrollcommand=self.vsb.set, width=200)
         self.vsb.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="y", expand=False)
         self.canvas.create_window(
             0, 0, window=self.frame, anchor="nw", tags="self.frame"
         )
-
         self.frame.bind("<Configure>", self.onFrameConfigure)
 
     def onFrameConfigure(self, event):
-        """Reset the scroll region to encompass the inner frame"""
+        """Reset the scroll region to encompass the inner frame.
+
+        Parameters
+        ----------
+        event : tk.Event
+            Event
+        """
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
 
 class AdaptiveOpticsPopup:
+    """Adaptive Optics Popup"""
+
     def __init__(self, root, *args, **kwargs):
-        # Creating popup window with this name and size/placement, PopUp is a
-        # Toplevel window
+        """Initialize AdaptiveOpticsPopup
+
+        Creating popup window with this name and size/placement, PopUp is a
+        Toplevel window
+
+        Parameters
+        ----------
+        root : tk.Tk
+            Root window
+        """
+        #: PopUp: Popup
         self.popup = PopUp(
             root, "Adaptive Optics", "1100x550+320+180", top=False, transient=False
         )
 
+        #: list: List of mode names
         self.mode_names = [
             "Vert. Tilt",
             "Horz. Tilt",
@@ -111,27 +145,38 @@ class AdaptiveOpticsPopup:
             "Oblq. 9th Asm.",
         ]
 
+        #: int: Number of modes
         self.n_modes = 32  # TODO: Don't hardcode... Get from exp file!
 
         content_frame = self.popup.get_frame()
 
         """Creating the widgets for the popup"""
-        # Dictionary for all the variables
+        #: dict: Dictionary of all the variables
         self.inputs = {}
+
+        #: dict: Dictionary of all the armed modes
         self.modes_armed = {}
+
+        #: dict: Dictionary of all the mode labels
         self.mode_labels = {}
 
+        #: ttk.Notebook: Notebook
         self.ao_notebook = ttk.Notebook(master=content_frame)
         self.ao_notebook.grid(row=0, column=2, rowspan=2)
 
+        #: ttk.Frame: Tony Wilson Tab
         self.tab_tw = ttk.Frame(master=self.ao_notebook)
         self.ao_notebook.add(self.tab_tw, text="Tony Wilson")
+
+        #: ttk.Frame: CNN-AO Tab
         self.tab_cnn = ttk.Frame(master=self.ao_notebook)
         self.ao_notebook.add(self.tab_cnn, text="CNN-AO")
 
+        #: ttk.Frame: Tony Wilson Widget Frame
         tw_widget_frame = ttk.Frame(master=self.tab_tw)
         tw_widget_frame.grid(row=0, column=1)
 
+        #: ttk.Label: Label Frames
         self.inputs["iterations"] = LabelInput(
             tw_widget_frame,
             label="Iterations:",
@@ -180,6 +225,7 @@ class AdaptiveOpticsPopup:
         tw_metric_combo.current(0)
         self.inputs["metric"] = {"button": tw_metric_combo, "variable": tw_metric_var}
 
+        #: ttk.Button: Tony Wilson Button
         self.tony_wilson_button = ttk.Button(tw_widget_frame, text="RUN", width=15)
         self.tony_wilson_button.grid(row=7, column=1, pady=5)
 
@@ -190,20 +236,35 @@ class AdaptiveOpticsPopup:
         button_frame = ttk.Frame(control_frame)
         button_frame.grid(row=0, column=0)
 
+        #: ttk.Button: Set Button
         self.set_button = ttk.Button(button_frame, text="Set", width=15)
         self.set_button.grid(row=0, column=0, pady=5)
+
+        #: ttk.Button: Flat Button
         self.flat_button = ttk.Button(button_frame, text="Flat", width=15)
         self.flat_button.grid(row=1, column=0, pady=5)
+
+        #: ttk.Button: Zero Button
         self.zero_button = ttk.Button(button_frame, text="Zero", width=15)
         self.zero_button.grid(row=2, column=0, pady=5)
+
+        #: ttk.Button: Clear Button
         self.clear_button = ttk.Button(button_frame, text="Clear All", width=15)
         self.clear_button.grid(row=3, column=0, pady=5)
+
+        #: ttk.Button: Save Button
         self.save_wcs_button = ttk.Button(button_frame, text="Save WCS File", width=15)
         self.save_wcs_button.grid(row=0, column=1, pady=5)
+
+        #: ttk.Button: Load Button
         self.from_wcs_button = ttk.Button(button_frame, text="From WCS File", width=15)
         self.from_wcs_button.grid(row=1, column=1, pady=5)
+
+        #: ttk.Button: Select All Button
         self.select_all_modes = ttk.Button(button_frame, text="Select All", width=15)
         self.select_all_modes.grid(row=2, column=1, pady=5)
+
+        #: ttk.Button: Deselect All Button
         self.deselect_all_modes = ttk.Button(
             button_frame, text="Deselect All", width=15
         )
@@ -234,11 +295,17 @@ class AdaptiveOpticsPopup:
 
         scroll.grid(row=1, column=0)
 
+        #: ttk.Frame: Plot Frame
         self.plot_frame = ttk.Frame(master=content_frame)
         self.plot_frame.grid(row=0, column=1, rowspan=2)
 
+        #: matplotlib.figure.Figure: Figure
         self.fig = Figure(figsize=(3, 5), dpi=100)
+
+        #: matplotlib.axes.Axes: Mirror Image
         self.mirror_img = self.fig.add_subplot(211)
+
+        #: matplotlib.axes.Axes: Coefficients Bar
         self.coefs_bar = self.fig.add_subplot(212)
         self.fig.tight_layout()
 
@@ -248,8 +315,13 @@ class AdaptiveOpticsPopup:
             row=0, column=0, sticky=(tk.NSEW), padx=(5, 5), pady=(5, 5)
         )
 
+        #: matplotlib.figure.Figure: Figure
         self.fig_tw = Figure(figsize=(4, 5), dpi=100)
+
+        #: matplotlib.axes.Axes: Peaks Plot
         self.peaks_plot = self.fig_tw.add_subplot(211)
+
+        #: matplotlib.axes.Axes: Trace Plot
         self.trace_plot = self.fig_tw.add_subplot(212)
         self.fig_tw.tight_layout()
 
@@ -260,23 +332,59 @@ class AdaptiveOpticsPopup:
         )
 
         camera_var = tk.StringVar()
+        #: ttk.Combobox: Camera List
         self.camera_list = ttk.Combobox(master=self.tab_cnn, textvariable=camera_var)
         self.camera_list["values"] = ("cam_0", "cam_1")
         self.camera_list.grid(row=0, column=0, padx=10, pady=10)
         self.camera_list.current(0)
 
     def onFrameConfigure(self, event):
+        """Reset the scroll region to encompass the inner frame.
+
+        Parameters
+        ----------
+        event : tk.Event
+            Event
+        """
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def get_widgets(self):
+        """Get widgets
+
+        Returns
+        -------
+        dict
+            Dictionary of widgets
+        """
         return self.inputs
 
     def get_labels(self):
+        """Get labels
+
+        Returns
+        -------
+        dict
+            Dictionary of labels
+        """
         return self.mode_labels
 
     def get_modes_armed(self):
+        """Get armed modes
+
+        Returns
+        -------
+        dict
+            Dictionary of armed modes
+        """
         return self.modes_armed
 
     def set_widgets(self, coefs):
+        """Set widgets
+
+        Parameters
+        ----------
+        coefs : list
+            List of coefficients
+        """
         for i, c in enumerate(coefs):
             self.inputs[self.mode_names[i]].set(c)

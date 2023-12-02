@@ -44,27 +44,33 @@ logger = logging.getLogger(p)
 
 
 class MirrorBase:
-    r"""MirrorBase Parent camera class.
-
-     Parameters
-     ----------
-    microscope_name : str
-         Name of microscope in configuration
-     device_connection : object
-         Hardware device to connect to
-     configuration : multiprocesing.managers.DictProxy
-         Global configuration of the microscope
-
-    """
+    """MirrorBase Parent camera class."""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the MirrorBase class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocesing.managers.DictProxy
+            Global configuration of the microscope
+        """
         if microscope_name not in configuration["configuration"]["microscopes"].keys():
             raise NameError(f"Microscope {microscope_name} does not exist!")
 
+        #: dict: Configuration of the microscope
         self.configuration = configuration
+
+        #: object: Hardware device to connect to
         self.mirror_controller = device_connection
+
+        #: dict: Configuration of the mirror
         self.mirror_parameters = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["mirror"]
 
+        #: bool: Is the mirror synthetic?
         self.is_synthetic = False

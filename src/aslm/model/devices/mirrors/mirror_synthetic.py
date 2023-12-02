@@ -47,9 +47,22 @@ class SyntheticMirror(MirrorBase):
     """SyntheticMirror Class - literally does nothing"""
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the SyntheticMirror class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : dict
+            Dictionary containing the device connection information.
+        configuration : dict
+            Dictionary containing the configuration information.
+        """
         super().__init__(microscope_name, device_connection, configuration)
 
+        #: bool: Is this a synthetic mirror?
         self.is_synthetic = True
 
     def flat(self):
+        """Flat the mirror."""
         pass

@@ -681,7 +681,7 @@ class Controller:
             self.model.run_command("change_camera", *args)
 
         elif command == "autofocus":
-            r"""Execute autofocus routine."""
+            """Execute autofocus routine."""
             self.threads_pool.createThread(
                 "camera",
                 self.capture_image,

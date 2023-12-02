@@ -719,6 +719,15 @@ class Model:
 
     # main function to update mirror/set experiment mode values
     def update_mirror(self, coef=[], flatten=False):
+        """Update the mirror.
+
+        Parameters
+        ----------
+        coef : list
+            List of coefficients.
+        flatten : bool
+            Flatten the mirror?
+        """
         if coef:
             self.active_microscope.mirror.display_modes(coef)
         elif flatten:

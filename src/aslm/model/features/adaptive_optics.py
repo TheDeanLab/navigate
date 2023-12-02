@@ -34,30 +34,82 @@
 # Standard Library Imports
 from queue import Queue
 import threading
+from copy import deepcopy
+import time
+
+# Third Party Imports
 import numpy as np
 from scipy.optimize import curve_fit
 
 # Local imports
 from aslm.model.features.feature_container import load_features
 import aslm.model.analysis.image_contrast as img_contrast
-from copy import deepcopy
-
 from aslm.model.features.image_writer import ImageWriter
-
-import time
 
 
 def poly2(x, a, b, c):
+    """Second order polynomial function
+
+    Parameters
+    ----------
+    x : float
+        x value
+    a : float
+        a value
+    b : float
+        b value
+    c : float
+        c value
+
+    Returns
+    -------
+    float
+        y value
+    """
     return a * x**2 + b * x + c
 
 
 def gauss(x, a, b, c, d):
+    """Gaussian function
+
+    Parameters
+    ----------
+    x : float
+        x value
+    a : float
+        a value
+    b : float
+        b value
+    c : float
+        c value
+    d : float
+        d value
+
+    Returns
+    -------
+    float
+        y value
+    """
     y = (x - b) / c
     y = np.exp(-(y**2))
     return a * y + d
 
 
 def r_squared(y, y_fit):
+    """Calculate the R^2 value
+
+    Parameters
+    ----------
+    y : list
+        y values
+    y_fit : list
+        y_fit values
+
+    Returns
+    -------
+    float
+        R^2 value
+    """
     y_bar = np.mean(y)
     SS_res = np.sum((y - y_fit) ** 2)
     SS_tot = np.sum((y - y_bar) ** 2)
@@ -66,6 +118,24 @@ def r_squared(y, y_fit):
 
 
 def fourier_annulus(im, radius_1=0, radius_2=64):
+    """Calculate the mean of the fourier transform of an annulus
+
+    Parameters
+    ----------
+    im : array
+        Image array
+    radius_1 : int, optional
+        Inner radius of the annulus, by default 0
+    radius_2 : int, optional
+        Outer radius of the annulus, by default 64
+
+    Returns
+    -------
+    float
+        Mean of the fourier transform of the annulus
+    array
+        Fourier transform of the annulus
+    """
 
     x_, y_ = np.meshgrid(range(im.shape[1]), range(im.shape[0]))
 
@@ -84,26 +154,55 @@ def fourier_annulus(im, radius_1=0, radius_2=64):
 
 
 class TonyWilson:
+    """Tony Wilson iterative AO routine"""
+
     def __init__(self, model):
+        """Initialize the Tony Wilson iterative AO routine
+
+        Parameters
+        ----------
+        model : Model
+            Model object
+        """
+        #: int: Number of modes
         self.n_modes = None
+
+        #: int: Number of iterations
         self.n_iter = None
+
+        #: int: Number of steps
         self.n_steps = None
+
+        #: float: Coefficient amplitude
         self.coef_amp = None
+
+        #: bool: True if all iterations are done, False otherwise
         self.done_all = False
+
+        #: bool: True if the current iteration is done, False otherwise
         self.done_itr = False
+
+        # TODO: I don't think these are used...
         self.laser = None
         self.laser_power = 0
         self.start_time = 0
 
+        #: aslm.model.Model: Model object
         self.model = model
+
+        #: aslm.model.devices.mirrors.mirror_imop.ImagineOpticsMirror: Mirror object
         self.mirror_controller = self.model.active_microscope.mirror.mirror_controller
 
+        #: int: Number of modes
         self.n_modes = self.mirror_controller.n_modes
 
+        #: list: List of coefficients to change
         self.change_coef = []
         modes_armed_dict = self.model.configuration["experiment"][
             "AdaptiveOpticsParameters"
         ]["TonyWilson"]["modes_armed"]
+
+        #: list: List of mode names
         self.mode_names = modes_armed_dict.keys()
         for i, k in enumerate(self.mode_names):
             if modes_armed_dict[k]:
@@ -157,7 +256,7 @@ class TonyWilson:
         }
 
     def run(self, *args):
-        r"""Run the Tony Wilson iterative AO routine
+        """Run the Tony Wilson iterative AO routine
 
         Parameters
         ----------
@@ -198,7 +297,7 @@ class TonyWilson:
         self.model.data_thread.start()
 
     def get_tw_frame_num(self):
-        r"""Calculate how many frames are needed: iterations x steps x num_coefs"""
+        """Calculate how many frames are needed: iterations x steps x num_coefs"""
         settings = self.model.configuration["experiment"]["AdaptiveOpticsParameters"][
             "TonyWilson"
         ]
@@ -207,11 +306,28 @@ class TonyWilson:
 
     # don't need this?
     def get_steps(self, ranges, step_size):
+        """Calculate the number of steps and the position offset
+
+        Parameters
+        ----------
+        ranges : int
+            Range of the scan
+        step_size : int
+            Step size
+
+        Returns
+        -------
+        int
+            Number of steps
+        int
+            Position offset
+        """
         steps = ranges // step_size + 1
         pos_offset = (steps // 2) * step_size + step_size
         return steps, pos_offset
 
     def pre_func_signal(self):
+        """Prepare the signal"""
         # initialize the mirror and coef lists, etc
 
         # Timing
@@ -238,6 +354,13 @@ class TonyWilson:
         print(f"Total frame num: {self.total_frame_num}")
 
     def in_func_signal(self):
+        """Run the signal.
+
+        Returns
+        -------
+        bool
+            True if the signal is done, False otherwise
+        """
         out_str = "in_func_signal\n"
 
         out_str += f"\tSignal:\t{self.signal_id}\n"
@@ -306,6 +429,13 @@ class TonyWilson:
         return self.signal_id >= self.total_frame_num
 
     def end_func_signal(self):
+        """End the signal
+
+        Returns
+        -------
+        bool
+            True if the signal is done, False otherwise
+        """
         print("end_func_signal() called!!!")
 
         if self.model.stop_acquisition:
@@ -314,6 +444,7 @@ class TonyWilson:
         return self.signal_id >= self.total_frame_num
 
     def pre_func_data(self):
+        """Prepare the data"""
         self.f_frame_id = (
             -1
         )  # to indicate if there is one frame need to calculate shannon value,
@@ -333,6 +464,15 @@ class TonyWilson:
         self.frames_done = 0
 
     def process_data(self, coef, mode="poly"):
+        """Process the data
+
+        Parameters
+        ----------
+        coef : int
+            Coefficient index
+        mode : str, optional
+            Fitting mode, by default "poly"
+        """
         self.y = self.plot_data
 
         if mode == "poly":
@@ -380,6 +520,18 @@ class TonyWilson:
         self.plot_data = []
 
     def in_func_data(self, frame_ids=[]):
+        """Run the data
+
+        Parameters
+        ----------
+        frame_ids : list, optional
+            List of frame ids, by default []
+
+        Returns
+        -------
+        list
+            List of frame ids
+        """
         self.get_frames_num += len(frame_ids)
 
         out_str = "in_func_data\n"
@@ -466,6 +618,13 @@ class TonyWilson:
             return frame_ids
 
     def end_func_data(self):
+        """End the data
+
+        Returns
+        -------
+        bool
+            True if the data is done, False otherwise
+        """
         print("end_func_data() called!!!")
 
         if self.done_all:

@@ -273,6 +273,7 @@ class WaveformTabController(GUIController):
         self.view.plot_galvo.set_ylabel("Amplitude")
 
         self.view.plot_etl.legend()
+        self.view.plot_galvo.legend()
 
         self.view.fig.tight_layout()
 

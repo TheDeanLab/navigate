@@ -264,10 +264,6 @@ class Microscope:
 
             self.stages_list.append((stage, list(device_config["axes"])))
 
-        # flatten the mirror
-        if not self.mirror.is_synthetic:
-            self.mirror.flat()
-
         # connect daq and camera in synthetic mode
         if is_synthetic:
             self.daq.add_camera(self.microscope_name, self.camera)
@@ -717,21 +713,8 @@ class Microscope:
                 self.microscope_name
             ][device_name]
         except KeyError:
-            # if no 'mirror' defined in .config:
-            # add a synthetic mirror to self.configuration
-            # and call assemble_device_config_lists again
-            # (in principle could work for any device...)
-            # (just need 'type': 'Synthetic_____' dict)
-            if device_name == "mirror":
-                dummy_mirror = {"type": "SyntheticMirror"}
-                self.configuration["configuration"]["hardware"][
-                    device_name
-                ] = dummy_mirror
-                self.configuration["configuration"]["microscopes"][
-                    self.microscope_name
-                ][device_name] = {"hardware": dummy_mirror}
-
-                return self.assemble_device_config_lists(device_name, device_name_dict)
+            # if no such device
+            return [], [], False
 
         if type(devices) == ListProxy:
             i = 0

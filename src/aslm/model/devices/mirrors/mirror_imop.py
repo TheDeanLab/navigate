@@ -68,6 +68,9 @@ class ImagineOpticsMirror(MirrorBase):
 
         logger.info("ImagineOpticsMirror Initialized")
 
+        # flatten the mirror
+        self.flat()
+
     def flat(self):
         """Move the mirror to the flat position."""
         self.mirror_controller.flat()

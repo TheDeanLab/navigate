@@ -48,13 +48,6 @@ from aslm.view.main_application_window import MainApp as view
 from aslm.view.popups.camera_view_popup_window import CameraViewPopupWindow
 from aslm.view.popups.feature_list_popup import FeatureListPopup
 
-# These may not be needed anymore...
-# from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
-# from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
-# from aslm.view.popups.adaptiveoptics_popup import adaptiveoptics_popup
-# from aslm.view.popups.help_popup import HelpPopup
-# from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
-
 # Local Sub-Controller Imports
 from aslm.controller.configuration_controller import ConfigurationController
 from aslm.controller.sub_controllers import (

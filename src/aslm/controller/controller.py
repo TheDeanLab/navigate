@@ -599,7 +599,8 @@ class Controller:
                 'remote_focus_constants'][self.resolution][self.mag]
                 }
             """
-            microscope_name, zoom = self.menu_controller.resolution_value.get().split()
+            temp = args[0].split()
+            microscope_name, zoom = temp[0], temp[1]
             self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
             if (
                 microscope_name
@@ -670,8 +671,8 @@ class Controller:
                 ),
             )
 
-        elif command == "change_camera":
-            self.model.run_command("change_camera", *args)
+        # elif command == "change_camera":
+        #     self.model.run_command("change_camera", *args)
 
         elif command == "autofocus":
             """Execute autofocus routine."""

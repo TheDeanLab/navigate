@@ -708,10 +708,10 @@ class Model:
         elif command == "terminate":
             self.terminate()
 
-        elif command == "change_camera":
-            new_camera = list(self.active_microscope.cameras.values())[args[0]]
-            print(f"Using new camera >> {new_camera.camera_controller._serial_number}")
-            self.active_microscope.camera = new_camera
+        # elif command == "change_camera":
+        #     new_camera = list(self.active_microscope.cameras.values())[args[0]]
+        #     print(f"Using new camera >> {new_camera.camera_controller._serial_number}")
+        #     self.active_microscope.camera = new_camera
 
         elif command == "exit":
             for camera in self.active_microscope.cameras.values():

@@ -83,11 +83,9 @@ class AdaptiveOpticsPopupController(GUIController):
         # TODO: just for testing, remove later...
         #: list: list of cameras
         self.camera_list = self.view.camera_list
-        self.camera_list["values"] = list(
-            self.parent_controller.configuration["waveform_constants"][
-                "remote_focus_constants"
-            ].keys()
-        )
+        self.camera_list[
+            "values"
+        ] = self.parent_controller.configuration_controller.microscope_list
         self.camera_list.bind(
             "<<ComboboxSelected>>", lambda evt: self.change_camera(evt)
         )
@@ -145,10 +143,7 @@ class AdaptiveOpticsPopupController(GUIController):
         # cam_id = evt.widget.get().split("_")[-1]
         # self.parent_controller.execute("change_camera", int(cam_id))
         cam_name = evt.widget.get()
-        zoom_id = self.parent_controller.configuration["waveform_constants"][
-            "remote_focus_constants"
-        ][cam_name].keys()[0]
-        self.parent_controller.execute("resolution", f"{cam_name} {zoom_id}")
+        self.parent_controller.execute("resolution", cam_name)
 
     def set_highlighted_mode(self, evt, mode):
         """Set the highlighted mode

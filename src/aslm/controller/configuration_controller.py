@@ -374,3 +374,26 @@ class ConfigurationController:
         if self.microscope_config is not None:
             return self.configuration["configuration"]["gui"]["channels"]["count"]
         return 5
+
+    @property
+    def microscope_list(self):
+        """Return a list of microscope names
+
+        Returns
+        -------
+        microscope_list : list
+            List of microscope names.
+        """
+        return list(self.configuration["configuration"]["microscopes"].keys())
+
+    def get_zoom_value_list(self, microscope_name):
+        """Return a list of zoom values
+
+        Returns
+        -------
+        zoom_value_list : list
+            List of zoom values.
+        """
+        return self.configuration["waveform_constants"]["remote_focus_constants"][
+            microscope_name
+        ].keys()

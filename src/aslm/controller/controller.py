@@ -300,29 +300,34 @@ class Controller:
             command=self.stage_controller.stop_button_handler
         )
 
-    def change_microscope(self, microscope_name):
+    def change_microscope(self, microscope_name, zoom=None):
         """Change the microscope configuration.
 
         Parameters
         ----------
         microscope_name : string
             Name of the microscope to change to.
+        zoom : string
+            Name of the zoom value to change to.
         """
         self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ] = microscope_name
+        if zoom:
+            self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
         if self.configuration_controller.change_microscope():
             # update widgets
             self.stage_controller.initialize()
             self.channels_tab_controller.initialize()
             self.camera_setting_controller.update_camera_device_related_setting()
             self.camera_setting_controller.calculate_physical_dimensions()
-            if (
-                hasattr(self, "waveform_popup_controller")
-                and self.waveform_popup_controller
-            ):
-                self.waveform_popup_controller.populate_experiment_values()
             self.camera_view_controller.update_snr()
+
+        if (
+            hasattr(self, "waveform_popup_controller")
+            and self.waveform_popup_controller
+        ):
+            self.waveform_popup_controller.populate_experiment_values()
 
     def initialize_cam_view(self):
         """Populate view tab.
@@ -592,23 +597,28 @@ class Controller:
 
             Parameters
             ----------
-            args : dict
-                dict = {'resolution_mode': self.resolution,
-                'zoom': self.mag,
-                'laser_info': self.resolution_info[
-                'remote_focus_constants'][self.resolution][self.mag]
-                }
+            args : str
+                "microscope_name zoom_value", "microscope_name", or "zoom_value"
             """
+            # get microscope name and zoom value from args[0]
             temp = args[0].split()
-            microscope_name, zoom = temp[0], temp[1]
-            self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
-            if (
-                microscope_name
-                != self.configuration["experiment"]["MicroscopeState"][
-                    "microscope_name"
-                ]
-            ):
-                self.change_microscope(microscope_name)
+            if len(temp) == 1:
+                # microscope name is given
+                if temp[0] in self.configuration_controller.microscope_list:
+                    temp.append(
+                        self.configuration_controller.get_zoom_value_list(temp[0])[0]
+                    )
+                elif temp[0] in self.configuration_controller.get_zoom_value_list(
+                    self.configuration_controller.microscope_name
+                ):
+                    temp = [self.configuration_controller.microscope_name, temp[0]]
+                else:
+                    return
+            resolution_value = " ".join(temp)
+            if resolution_value != self.menu_controller.resolution_value.get():
+                self.menu_controller.resolution_value.set(resolution_value)
+                return
+            self.change_microscope(temp[0], temp[1])
             work_thread = self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("update_setting", "resolution")
             )

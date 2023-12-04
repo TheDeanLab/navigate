@@ -79,7 +79,7 @@ def dummy_view(tk_root, dummy_controller):  # noqa
     yield view
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="session")
 def dummy_controller(dummy_view):
     """Dummy controller for testing.
 

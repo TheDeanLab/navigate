@@ -501,7 +501,7 @@ class TonyWilson:
                 self.x,
                 self.y,
                 p0=[a, b, c, d],
-                bounds=([0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf]),
+                bounds=([0, -np.inf, 0, 0], [np.inf, np.inf, np.inf, np.inf]),
             )
             self.y_fit = gauss(self.x_fit, p[0], p[1], p[2], p[3])
             r_2 = r_squared(self.y, gauss(self.x, p[0], p[1], p[2], p[3]))
@@ -571,7 +571,7 @@ class TonyWilson:
                 new_data = img_contrast.fast_normalized_dct_shannon_entropy(img, 3)[0]
 
             if len(self.plot_data) == self.n_steps:
-                self.process_data(coef, mode="poly")
+                self.process_data(coef, mode="gauss")
                 self.trace_list[self.mode_names[self.change_coef[coef]]] = {
                     "x": self.x,
                     "y": self.y,

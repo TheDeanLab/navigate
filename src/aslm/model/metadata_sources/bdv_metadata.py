@@ -40,6 +40,7 @@ import numpy.typing as npt
 
 # Local imports
 from .metadata import XMLMetadata
+from aslm.tools.linear_algebra import affine_rotation, affine_shear
 
 
 class BigDataViewerMetadata(XMLMetadata):
@@ -54,6 +55,53 @@ class BigDataViewerMetadata(XMLMetadata):
     def __init__(self) -> None:
         """Initialize the BigDataViewer metadata object."""
         super().__init__()
+
+        # Affine Transform Parameters
+        #: bool: Shear the data.
+        self.shear_data = False
+        #: str: Dimension to shear the data.
+        self.shear_dimension = "YZ"
+        #: float: Angle in degrees to shear the data.
+        self.shear_angle = 0
+        #: npt.NDArray: Shear transform matrix.
+        self.shear_transform = np.eye(3, 4)
+
+        # Rotation Transform Parameters
+        #: bool: Rotate the data.
+        self.rotate_data = False
+        #: float: Angle in degrees to rotate the data in X.
+        self.rotate_angle_x = 0
+        #: float: Angle in degrees to rotate the data in Y.
+        self.rotate_angle_y = 0
+        #: float: Angle in degrees to rotate the data in Z.
+        self.rotate_angle_z = 0
+        #: npt.NDArray: Rotation transform matrix.
+        self.rotate_transform = np.eye(3, 4)
+
+    def get_affine_parameters(self, configuration):
+        """Get the affine transform parameters from the configuration file.
+
+        Parameters
+        ----------
+        configuration : dict
+            Configuration dictionary.
+        """
+        bdv_configuration = configuration["configuration"].get("BDVParameters")
+
+        if bdv_configuration is not None:
+
+            # Shear Parameters
+            self.shear_data = bdv_configuration["shear"].get("shear_data", False)
+            self.shear_dimension = (
+                bdv_configuration["shear"].get("shear_dimension", "YZ").upper()
+            )
+            self.shear_angle = bdv_configuration["shear"].get("shear_angle", 0)
+
+            # Rotate Parameters
+            self.rotate_data = bdv_configuration["rotate"].get("rotate_data", False)
+            self.rotate_angle_x = bdv_configuration["rotate"].get("X", 0)
+            self.rotate_angle_y = bdv_configuration["rotate"].get("Y", 0)
+            self.rotate_angle_z = bdv_configuration["rotate"].get("Z", 0)
 
     def bdv_xml_dict(
         self, file_name: Union[str, list, None], views: list, **kw
@@ -124,6 +172,10 @@ class BigDataViewerMetadata(XMLMetadata):
                 "type": "relative",
                 "text": file_name,
             }
+
+        # Calculate shear and rotation transforms
+        self.bdv_shear_transform()
+        self.bdv_rotate_transform()
 
         # Populate ViewSetups
         bdv_dict["SequenceDescription"]["ViewSetups"] = {}
@@ -203,11 +255,51 @@ class BigDataViewerMetadata(XMLMetadata):
                             # We have most likely canceled in the middle of
                             # an acquisition.
                             pass
-                    d = {"timepoint": t, "setup": view_id}
-                    d["ViewTransform"] = {"type": "affine"}
-                    d["ViewTransform"]["affine"] = {
-                        "text": " ".join([f"{x:.6f}" for x in mat.ravel()])
-                    }
+
+                    view_transforms = [
+                        {
+                            "type": "affine",
+                            "Name": "Translation to Regular Grid",
+                            "affine": {
+                                "text": " ".join([f"{x:.6f}" for x in mat.ravel()])
+                            },
+                        }
+                    ]
+
+                    if self.shear_data:
+                        view_transforms.append(
+                            {
+                                "type": "affine",
+                                "Name": "Shearing Transform",
+                                "affine": {
+                                    "text": " ".join(
+                                        [
+                                            f"{x:.6f}"
+                                            for x in self.shear_transform.ravel()
+                                        ]
+                                    )
+                                },
+                            }
+                        )
+
+                    if self.rotate_data:
+                        view_transforms.append(
+                            {
+                                "type": "affine",
+                                "Name": "Rotation Transform",
+                                "affine": {
+                                    "text": " ".join(
+                                        [
+                                            f"{x:.6f}"
+                                            for x in self.rotate_transform.ravel()
+                                        ]
+                                    )
+                                },
+                            }
+                        )
+
+                    d = dict(timepoint=t, setup=view_id, ViewTransform=view_transforms)
+
                     bdv_dict["ViewRegistrations"]["ViewRegistration"].append(d)
 
         return bdv_dict
@@ -287,6 +379,34 @@ class BigDataViewerMetadata(XMLMetadata):
         theta, f = None, None
 
         return x, y, z, theta, f
+
+    def bdv_shear_transform(self):
+        """Calculate the shear transform matrix.
+
+        BDV-specific. Matrix provided is not (4,4), but (3,4).
+        """
+        if self.shear_data:
+            self.shear_transform = affine_shear(
+                dz=self.dz,
+                dx=self.dx,
+                dy=self.dy,
+                dimension=self.shear_dimension,
+                angle=self.shear_angle,
+            )[:3]
+        else:
+            self.shear_transform = np.eye(3, 4)
+
+    def bdv_rotate_transform(self):
+        """Calculate the BDV rotation transform matrix.
+
+        BDV-specific. Matrix provided is not (4,4), but (3,4).
+        """
+        if self.rotate_data:
+            self.rotate_transform = affine_rotation(
+                x=self.rotate_angle_x, y=self.rotate_angle_y, z=self.rotate_angle_z
+            )[:3]
+        else:
+            self.rotate_transform = np.eye(3, 4)
 
     def parse_xml(self, root: Union[str, ET.Element]) -> tuple:
         """Parse a BigDataViewer XML file into our metadata format.

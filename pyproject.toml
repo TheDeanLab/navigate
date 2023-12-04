@@ -53,6 +53,7 @@ dev = [
     "pytest-cov",
     "pre-commit",
     "ipykernel",
+    "jupyterlab",
     "ruff-pre-commit@git+https://github.com/astral-sh/ruff-pre-commit.git",
     "black@git+https://github.com/psf/black"
     ]

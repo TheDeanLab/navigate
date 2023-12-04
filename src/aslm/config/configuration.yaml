@@ -505,3 +505,17 @@ gui:
       min: 0
       max: 1000
       step: 1
+
+BDVParameters:
+# The following parameters are used to configure the BigDataViewer
+  # visualization. See the BigDataViewer documentation for more details.
+  # https://imagej.net/BigDataViewer
+  shear:
+    shear_data: True
+    shear_dimension: YZ # XZ, YZ, or XY
+    shear_angle: 45
+  rotate:
+    rotate_data: False
+    X: 0
+    Y: 0
+    Z: 0

@@ -370,9 +370,11 @@ class BigDataViewerDataSource(DataSource):
         configuration : DictProxy
             The configuration experiment.
         """
-
         self._subdivisions = None
         self._shapes = None
+
+        # Set rotation and affine transform information in metadata.
+        self.metadata.get_affine_parameters(configuration=configuration)
         return super().set_metadata_from_configuration_experiment(configuration)
 
     def write(self, data: npt.ArrayLike, **kw) -> None:

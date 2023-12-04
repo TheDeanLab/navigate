@@ -283,7 +283,7 @@ class XMLMetadata(Metadata):
         """
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n'  # XML file header
         xml += (
-            f"<!-- Created by ASLM, "
+            f"<!-- Created by Navigate, "
             f"v{__version__}, "
             f"Commit {__commit__}, Dean Lab at UTSW -->\n"
         )

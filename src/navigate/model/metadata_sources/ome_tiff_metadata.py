@@ -79,7 +79,7 @@ class OMETIFFMetadata(XMLMetadata):
             OME TIFF metadata dictionary
         """
         ome_dict = {
-            "Creator": f"ASLM,v{__version__}, "
+            "Creator": f"Navigate,v{__version__}, "
             f"Commit {__commit__}, "
             f"Dean Lab at UTSW",
             "xmlns": "http://www.openmicroscopy.org/Schemas/OME/2016-06",

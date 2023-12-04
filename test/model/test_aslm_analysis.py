@@ -110,9 +110,9 @@ try:
     # from navigate.model.navigate_analysis import Analysis as navigate_analysis
     from navigate.model.navigate_debug_model import calculate_entropy
 
-    class TestASLMAnalysis(unittest.TestCase):
+    class TestNavigateAnalysis(unittest.TestCase):
         """
-        Unit Tests for the ASLM Analysis Module
+        Unit Tests for the Navigate Analysis Module
         """
 
         @pytest.mark.skip(reason="file path not found")

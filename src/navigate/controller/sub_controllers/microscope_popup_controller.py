@@ -58,7 +58,7 @@ class MicroscopePopupController(GUIController):
         view : object
             GUI element containing widgets and variables to control.
             Likely tk.Toplevel-derived.
-        parent_controller : ASLM_controller
+        parent_controller : Navigate_controller
             The main controller.
         microscope_info : dict
             A dictionary containing the information of the microscopes.

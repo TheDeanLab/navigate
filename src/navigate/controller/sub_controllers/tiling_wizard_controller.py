@@ -71,7 +71,7 @@ class TilingWizardController(GUIController):
         view : object
             Tiling Wizard View instance
         parent_controller : object
-            ASLM Controller instance
+            Navigate Controller instance
         """
         super().__init__(view, parent_controller)
 

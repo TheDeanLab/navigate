@@ -183,14 +183,14 @@ class CameraBase:
         self, full_chip_exposure_time, shutter_width
     ):
         """Convert normal mode exposure time to light-sheet mode exposure time.
-        Calculate the parameters for an ASLM acquisition
+        Calculate the parameters for an acquisition
 
         Parameters
         ----------
         full_chip_exposure_time : float
             Normal mode exposure time.
         shutter_width : int
-            Width of ASLM rolling shutter.
+            Width of light-sheet rolling shutter.
 
         Returns
         -------

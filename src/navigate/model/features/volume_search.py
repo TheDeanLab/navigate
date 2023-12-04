@@ -97,7 +97,7 @@ class VolumeSearch:
         Parameters
         ----------
         model : navigate.model.model.Model
-            ASLM Model
+            Navigate Model
         target_resolution : str
             Name of microscope to use for tiled imaging of tissue
         target_zoom : str
@@ -113,7 +113,7 @@ class VolumeSearch:
             If True, save debug images to disk.
         """
 
-        #: navigate.model.model.Model: ASLM Model
+        #: navigate.model.model.Model: Navigate Model
         self.model = model
 
         #: str: Name of microscope to use for tiled imaging of tissue

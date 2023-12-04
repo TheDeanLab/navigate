@@ -58,7 +58,7 @@ class TextArrayTestCase(unittest.TestCase):
 
     def test_text_array_output_type(self):
         """Confirm output is np.ndarray object"""
-        text_output = text_array(text="ASLM")
+        text_output = text_array(text="Navigate")
         assert type(text_output) == np.ndarray
 
     def test_text_array_output_height(self):
@@ -67,7 +67,7 @@ class TextArrayTestCase(unittest.TestCase):
         Initially thought that the height should be ~= font_size, but this
         turned out to be much more variable than I anticipated
         """
-        text = "ASLM"
+        text = "Navigate"
         text_output = text_array(text=text)
         font = ImageFont.load_default()  # match font size in text_array()
         height = np.shape(text_output)[0]

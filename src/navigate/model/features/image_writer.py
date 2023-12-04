@@ -57,7 +57,7 @@ class ImageWriter:
         Parameters
         ----------
         model : navigate.model.model.Model
-            ASLM Model class for controlling hardware/acquisition.
+            Navigate Model class for controlling hardware/acquisition.
         data_buffer: [SharedNDArray]
             data_buffer will use model's default data_buffer if it's not specified
         sub_dir : str
@@ -67,7 +67,7 @@ class ImageWriter:
         image_name : str
             Name of the image to be saved. If None, a name will be generated
         """
-        #: navigate.model.model.Model: ASLM Model class for controlling
+        #: navigate.model.model.Model: Navigate Model class for controlling
         # hardware/acquisition.
         self.model = model
 

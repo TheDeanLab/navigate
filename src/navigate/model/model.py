@@ -85,7 +85,7 @@ p = __name__.split(".")[1]
 
 
 class Model:
-    """ASLM Model Class
+    """Navigate Model Class
 
     Model for Model-View-Controller Software Architecture."""
 
@@ -477,9 +477,9 @@ class Model:
         **kwargs : dict
             Dictionary of keyword arguments to pass to the command.
         """
-        logging.info("ASLM Model - Received command from controller:", command, args)
+        logging.info("Navigate Model - Received command from controller:", command, args)
         if not self.data_buffer:
-            logging.debug("ASLM Model - Shared Memory Buffer Not Set Up.")
+            logging.debug("Navigate Model - Shared Memory Buffer Not Set Up.")
             return
 
         if command == "acquire":
@@ -690,7 +690,7 @@ class Model:
             """
             Called when user halts the acquisition
             """
-            self.logger.info("ASLM Model - Stopping with stop command.")
+            self.logger.info("Navigate Model - Stopping with stop command.")
             self.stop_acquisition = True
 
             if hasattr(self, "signal_container"):
@@ -831,11 +831,11 @@ class Model:
                 self.pause_data_event.wait()
             frame_ids = self.active_microscope.camera.get_new_frame()
             self.logger.info(
-                f"ASLM Model - Running data process, get frames {frame_ids}"
+                f"Navigate Model - Running data process, get frames {frame_ids}"
             )
             # if there is at least one frame available
             if not frame_ids:
-                self.logger.info(f"ASLM Model - Waiting {wait_num}")
+                self.logger.info(f"Navigate Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
                     # Camera timeout, abort acquisition.
@@ -856,23 +856,23 @@ class Model:
 
             if hasattr(self, "data_container"):
                 if self.data_container.is_closed:
-                    self.logger.info("ASLM Model - Data container is closed.")
+                    self.logger.info("Navigate Model - Data container is closed.")
                     self.stop_acquisition = True
                     break
 
                 self.data_container.run(frame_ids)
 
             # show image
-            self.logger.info(f"ASLM Model - Sent through pipe{frame_ids[0]}")
+            self.logger.info(f"Navigate Model - Sent through pipe{frame_ids[0]}")
             self.show_img_pipe.send(frame_ids[-1])
 
             if count_frame and acquired_frame_num >= num_of_frames:
-                self.logger.info("ASLM Model - Loop stop condition met.")
+                self.logger.info("Navigate Model - Loop stop condition met.")
                 self.stop_acquisition = True
 
         self.show_img_pipe.send("stop")
-        self.logger.info("ASLM Model - Data thread stopped.")
-        self.logger.info(f"ASLM Model - Received frames in total: {acquired_frame_num}")
+        self.logger.info("Navigate Model - Data thread stopped.")
+        self.logger.info(f"Navigate Model - Received frames in total: {acquired_frame_num}")
 
         # release the lock when data thread ends
         if self.pause_data_ready_lock.locked():
@@ -922,12 +922,12 @@ class Model:
                 microscope.camera.get_new_frame()
             )  # This is the 500 ms wait for Hamamatsu
             self.logger.info(
-                f"ASLM Model - Running data process, get frames {frame_ids} from "
+                f"Navigate Model - Running data process, get frames {frame_ids} from "
                 f"{microscope.microscope_name}"
             )
             # if there is at least one frame available
             if not frame_ids:
-                self.logger.info(f"ASLM Model - Waiting {wait_num}")
+                self.logger.info(f"Navigate Model - Waiting {wait_num}")
                 wait_num -= 1
                 if wait_num <= 0:
                     # Camera timeout, abort acquisition.
@@ -943,15 +943,15 @@ class Model:
 
             # show image
             self.logger.info(
-                f"ASLM Model - Sent through pipe{frame_ids[0]} -- "
+                f"Navigate Model - Sent through pipe{frame_ids[0]} -- "
                 f"{microscope.microscope_name}"
             )
             show_img_pipe.send(frame_ids[-1])
             acquired_frame_num += len(frame_ids)
 
         show_img_pipe.send("stop")
-        self.logger.info("ASLM Model - Data thread stopped.")
-        self.logger.info(f"ASLM Model - Received frames in total: {acquired_frame_num}")
+        self.logger.info("Navigate Model - Data thread stopped.")
+        self.logger.info(f"Navigate Model - Received frames in total: {acquired_frame_num}")
 
     def prepare_acquisition(self, turn_off_flags=True):
         """Prepare the acquisition.
@@ -1053,7 +1053,7 @@ class Model:
             if not hasattr(self, "signal_container"):
                 return
             if self.signal_container.is_closed:
-                self.logger.info("ASLM Model - Signal container is closed.")
+                self.logger.info("Navigate Model - Signal container is closed.")
                 self.stop_acquisition = True
                 return
         if self.imaging_mode != "live":
@@ -1322,7 +1322,7 @@ class Model:
 
         Note
         ----
-            System folcer can be found at '..../.ASLM/feature_lists'
+            System folcer can be found at '..../.navigate/feature_lists'
         """
         feature_lists_path = get_navigate_path() + "/feature_lists"
         if not os.path.exists(feature_lists_path):

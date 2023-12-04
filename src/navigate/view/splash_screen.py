@@ -72,7 +72,7 @@ class SplashScreen(tk.Toplevel):
             loading_label = tk.Label(self, image=img)
         except tk.TclError:
             w, h = 300, 100
-            loading_label = tk.Label(self, text="Loading ASLM Software ...")
+            loading_label = tk.Label(self, text="Loading Navigate Software ...")
         loading_label.pack()
 
         # get screen width and height

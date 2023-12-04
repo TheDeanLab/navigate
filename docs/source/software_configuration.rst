@@ -8,18 +8,18 @@ files. Once you are ready to configure your exact hardware, please see the :doc:
 
 Configuration File
 ------------------
-In order for the ASLM software to function, you will need to configure the
+In order for the Navigate software to function, you will need to configure the
 specifications of the various hardware that you will be using. The first time you
-launch the software, ASLM will evaluate the the hardware settings as provided in the
-``ASLM\config\configuration.yaml`` file. Every subsequent time you launch the
+launch the software, Navigate will evaluate the the hardware settings as provided in the
+``navigate\config\configuration.yaml`` file. Every subsequent time you launch the
 software, a local version of the ``configuration.yaml`` file can be found
-in either ``Users\name\AppData\Local\.ASLM\config`` if on Windows or ``~/.ASLM`` if on
+in either ``Users\name\AppData\Local\.navigate\config`` if on Windows or ``~/.navigate`` if on
 Mac/Linux.
 
 To avoid confusion, we recommend launching the software in the synthetic hardware
-mode initially. Within your Terminal, or Anaconda Prompt, activate your ASLM Python
+mode initially. Within your Terminal, or Anaconda Prompt, activate your Navigate Python
 environment and launch the software by typing: ``navigate -sh``. Thereafter, you should
-only modify the ``configuration.yaml`` file in your local ``/.ASLM`` directory. The
+only modify the ``configuration.yaml`` file in your local ``/.navigate`` directory. The
 local copy avoids conflicts between different microscopes after pulling new
 changes on GitHub.
 
@@ -114,7 +114,7 @@ You would add it to the hardware section:
     The type of the device is needed when deciding which python object to instantiate
 on startup of the software (eg type: ASI). The other fields are specified by the
 manufacturers API software. They help the API software communicate with the computer
-you are using which in turn allows the ASLM software to communicate with the device
+you are using which in turn allows the Navigate software to communicate with the device
 (eg port: COM7).
 
 Running the software with our current microscope setup would fail. It turns out our

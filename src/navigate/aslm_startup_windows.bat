@@ -1,6 +1,6 @@
-TITLE ASLM
+TITLE Navigate
 
-cd "C:\Users\Dax\Documents\GitHub\ASLM\src"
+cd "C:\Users\Dax\Documents\GitHub\navigate\src"
 
 set root=C:\Users\Dax\AppData\Local\Continuum\anaconda3
 

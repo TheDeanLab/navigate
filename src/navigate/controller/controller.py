@@ -92,7 +92,7 @@ logger = logging.getLogger(p)
 
 
 class Controller:
-    """ASLM Controller"""
+    """Navigate Controller"""
 
     def __init__(
         self,
@@ -105,7 +105,7 @@ class Controller:
         waveform_templates_path,
         args,
     ):
-        """Initialize the ASLM Controller.
+        """Initialize the Navigate Controller.
 
         Parameters
         ----------
@@ -804,7 +804,7 @@ class Controller:
 
         elif command == "exit":
             """Exit the program."""
-            # Save current GUI settings to .ASLM/config/experiment.yml file.
+            # Save current GUI settings to .navigate/config/experiment.yml file.
             self.sloppy_stop()
             # self.menu_controller.feature_id_val.set(0)
 
@@ -824,7 +824,7 @@ class Controller:
             self.threads_pool.clear()
             sys.exit()
 
-        logger.info(f"ASLM Controller - command passed from child, {command}, {args}")
+        logger.info(f"Navigate Controller - command passed from child, {command}, {args}")
 
     def sloppy_stop(self):
         """Keep trying to stop the model until successful.
@@ -897,13 +897,13 @@ class Controller:
                 break
             # Receive the Image and log it.
             image_id = self.show_img_pipe.recv()
-            logger.info(f"ASLM Controller - Received Image: {image_id}")
+            logger.info(f"Navigate Controller - Received Image: {image_id}")
 
             if image_id == "stop":
                 break
             if not isinstance(image_id, int):
                 logger.debug(
-                    f"ASLM Controller - Something wrong happened, stop the model!, "
+                    f"Navigate Controller - Something wrong happened, stop the model!, "
                     f"{image_id}"
                 )
                 self.execute("stop_acquire")
@@ -920,7 +920,7 @@ class Controller:
                 stop=False,
             )
 
-        logger.info(f"ASLM Controller - Captured {images_received}, " f"{mode} Images")
+        logger.info(f"Navigate Controller - Captured {images_received}, " f"{mode} Images")
 
         # Stop Progress Bars
         self.acquire_bar_controller.progress_bar(
@@ -959,13 +959,13 @@ class Controller:
                     break
                 # Receive the Image and log it.
                 image_id = show_img_pipe.recv()
-                logger.info(f"ASLM Controller - Received Image: {image_id}")
+                logger.info(f"Navigate Controller - Received Image: {image_id}")
 
                 if image_id == "stop":
                     break
                 if not isinstance(image_id, int):
                     logger.debug(
-                        f"ASLM Controller - Something wrong happened in additional "
+                        f"Navigate Controller - Something wrong happened in additional "
                         f"microscope!, {image_id}"
                     )
                     break
@@ -1096,7 +1096,7 @@ class Controller:
 
             if event == "warning":
                 # Display a warning that arises from the model as a top-level GUI popup
-                messagebox.showwarning(title="ASLM", message=value)
+                messagebox.showwarning(title="Navigate", message=value)
 
             elif event == "waveform":
                 # Update the waveform plot.

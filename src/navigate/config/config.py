@@ -47,24 +47,24 @@ import yaml
 
 
 def get_navigate_path():
-    """Establish a program home directory in AppData/Local/.ASLM for Windows
-    or ~/.ASLM for Mac and Linux.
+    """Establish a program home directory in AppData/Local/.navigate for Windows
+    or ~/.navigate for Mac and Linux.
 
     Returns
     -------
     str
-        Path to ASLM home directory.
+        Path to Navigate home directory.
 
     Examples
     --------
     >>> get_navigate_path()
-    'C:\\Users\\username\\AppData\\Local\\.ASLM'
+    'C:\\Users\\username\\AppData\\Local\\.navigate'
     """
     if platform.system() == "Windows":
         base_directory = os.getenv("LOCALAPPDATA")
     else:
         base_directory = os.getenv("HOME")
-    navigate_path = os.path.join(base_directory, ".ASLM")
+    navigate_path = os.path.join(base_directory, ".navigate")
 
     if not os.path.exists(navigate_path):
         os.mkdir(navigate_path)
@@ -73,7 +73,7 @@ def get_navigate_path():
 
 
 def get_configuration_paths():
-    """Get the paths of the various configuration files used by ASLM.
+    """Get the paths of the various configuration files used by Navigate.
 
     Returns
     --------

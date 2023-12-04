@@ -52,7 +52,7 @@ os.environ["https_proxy"] = ""
 
 
 def main():
-    """Autonomous Software for Light Microscopy (ASLM).
+    """Light-sheet Microscopy (Navigate).
     Microscope control software built in a Model-View-Controller architecture.
     Provides control of cameras, data acquisition cards, filter wheels, lasers
     stages, voice coils, and zoom servos.

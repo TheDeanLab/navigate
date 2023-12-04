@@ -83,34 +83,34 @@ def test_config_methods():
 
 
 def test_get_navigate_path():
-    """Test that the ASLM path is a string."""
+    """Test that the Navigate path is a string."""
     assert isinstance(config.get_navigate_path(), str)
     path_string = config.get_navigate_path()
-    assert ".ASLM" in path_string
+    assert ".navigate" in path_string
 
 
 def test_get_navigate_path_windows(monkeypatch):
-    """Test that the ASLM path is a string."""
+    """Test that the Navigate path is a string."""
     monkeypatch.setattr(config.platform, "system", lambda: "Windows")
     monkeypatch.setattr(config.os, "getenv", lambda x: "LOCALAPPDATA")
     monkeypatch.setattr(config.os.path, "exists", lambda x: True)
     assert isinstance(config.get_navigate_path(), str)
     path_string = config.get_navigate_path()
     assert path_string.startswith("LOCALAPPDATA")
-    assert path_string.endswith(".ASLM")
+    assert path_string.endswith(".navigate")
 
     
 
 
 def test_get_navigate_path_mac(monkeypatch):
-    """Test that the ASLM path is a string."""
+    """Test that the Navigate path is a string."""
     monkeypatch.setattr(config.platform, "system", lambda: "Darwin")
     monkeypatch.setattr(config.os, "getenv", lambda x: "HOME")
     monkeypatch.setattr(config.os.path, "exists", lambda x: True)
     assert isinstance(config.get_navigate_path(), str)
     path_string = config.get_navigate_path()
     assert path_string.startswith("HOME")
-    assert path_string.endswith(".ASLM")
+    assert path_string.endswith(".navigate")
 
 
 # Write a test for config.get_configuration_paths()

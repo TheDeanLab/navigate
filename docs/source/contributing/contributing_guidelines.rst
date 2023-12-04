@@ -28,10 +28,10 @@ live system prior to merging into the ``develop`` branch.
 
 Installation of Developer Dependencies
 --------------------------------------
-To install the developer dependencies, run the following command from within the ASLM
+To install the developer dependencies, run the following command from within the Navigate
 repository folder::
 
-    conda activate ASLM
+    conda activate navigate
     pip install -e '.[dev]'
 
 Coding Style

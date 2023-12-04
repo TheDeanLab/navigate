@@ -242,7 +242,7 @@ class Microscope:
                     "configuration.yaml file. Importantly, name, "
                     "type, and serial numbers must match.\n"
                     "3. You may be using a stage that is not supported by "
-                    "ASLM. Please check the list of supported stages in "
+                    "Navigate. Please check the list of supported stages in "
                     "the documentation.",
                 )
 

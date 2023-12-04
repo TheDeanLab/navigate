@@ -417,7 +417,7 @@ class HamamatsuOrca(CameraBase):
         Note
         ----
             Units of the Hamamatsu API are in seconds.
-            Units for ASLM are in milliseconds. Conversion is done here.
+            Units for the software are in milliseconds. Conversion is done here.
 
         Parameters
         ----------

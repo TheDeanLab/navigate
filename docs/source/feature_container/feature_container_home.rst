@@ -1,12 +1,12 @@
 Feature Container
 ========================
-To make ASLM as powerful as possible, we want to encourage users to contribute code and
+To make Navigate as powerful as possible, we want to encourage users to contribute code and
 engage in the software collaboratively.
 
 Introduction
 -------------------------------------
 
-The ASLM **feature container** allows for reconfigurable acquisition and
+The Navigate **feature container** allows for reconfigurable acquisition and
 analysis. The feature container runs a tree of **features**, where each
 feature may perform a *signal* operation, where it modifies the state of
 microscope hardware, a *data* operation, where it performs an analysis on
@@ -92,10 +92,10 @@ dictionaries are methods of the feature object.
 Creating Custom Features
 ----------------------------
 
-The ASLM Software allows you to build a custom feature that implements new
+The Navigate Software allows you to build a custom feature that implements new
 functionality, or a new feature list that builds an intelligent acquisition workflow
 from existing features. This documentation explains how to create and load
-a customized feature list within the ASLM software. The first step is to create a
+a customized feature list within the Navigate software. The first step is to create a
 Python function, and decorating it as a "FeatureList." .
 
 
@@ -122,10 +122,10 @@ To create a customized feature, follow these steps:
        ]
 
 
-Once you've created a feature, you can load it into the ASLM software using these steps:
+Once you've created a feature, you can load it into the Navigate software using these steps:
 
-2. Open ASLM.
-3. Navigate to the `Features` menu.
+2. Open Navigate.
+3. Go to the `Features` menu.
 
 
 .. image:: images/step_1.png
@@ -139,7 +139,7 @@ containing your customized feature list function.
 .. image:: images/step_2.png
 
 
-5. Choose the Python file containing your customized feature list function. ASLM will
+5. Choose the Python file containing your customized feature list function. Navigate will
 load the specified feature list, making it available for use in your experiments and
 analyses. It will appear at the bottom of the `Features` menu.
 

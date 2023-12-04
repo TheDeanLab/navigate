@@ -54,7 +54,7 @@ class HelpPopupController(GUIController):
         ----------
         view : HelpPopupView
             The view for the help popup window
-        parent_controller : ASLMController
+        parent_controller : Navigate Controller
             The parent controller for the help popup window
 
         """

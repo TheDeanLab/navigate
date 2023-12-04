@@ -40,8 +40,8 @@ import numpy as np
 from tifffile import TiffFile, TiffFileError
 
 # Local Imports
-from aslm.model.analysis import camera
-from aslm.model.devices.camera.camera_base import CameraBase
+from navigate.model.analysis import camera
+from navigate.model.devices.camera.camera_base import CameraBase
 
 # Logger Setup
 p = __name__.split(".")[1]

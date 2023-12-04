@@ -39,7 +39,7 @@ import numpy as np
 import serial
 
 # Local Imports
-from aslm.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
+from navigate.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
 
 # Logger Setup
 p = __name__.split(".")[1]

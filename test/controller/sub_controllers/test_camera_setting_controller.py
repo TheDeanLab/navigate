@@ -38,7 +38,7 @@ import pytest
 import random
 
 # Local Imports
-from aslm.controller.sub_controllers.camera_setting_controller import (
+from navigate.controller.sub_controllers.camera_setting_controller import (
     CameraSettingController,
 )
 

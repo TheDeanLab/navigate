@@ -37,8 +37,8 @@ import time
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
-from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController
+from navigate.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
+from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
 
 # Logger Setup
 p = __name__.split(".")[1]

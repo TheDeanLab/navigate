@@ -40,16 +40,16 @@ import numpy as np
 import random
 
 # Local Imports
-from aslm.config.config import (
+from navigate.config.config import (
     load_configs,
     verify_experiment_config,
     verify_waveform_constants,
 )
-from aslm.model.devices.camera.camera_synthetic import (
+from navigate.model.devices.camera.camera_synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
 )
-from aslm.model.features.feature_container import (
+from navigate.model.features.feature_container import (
     load_features,
 )
 
@@ -69,12 +69,12 @@ class DummyController:
         -------
         >>> controller = DummyController(view)
         """
-        from aslm.controller.configuration_controller import ConfigurationController
-        from aslm.controller.sub_controllers import MenuController
-        from aslm.controller.sub_controllers.multi_position_controller import (
+        from navigate.controller.configuration_controller import ConfigurationController
+        from navigate.controller.sub_controllers import MenuController
+        from navigate.controller.sub_controllers.multi_position_controller import (
             MultiPositionController,
         )
-        from aslm.controller.sub_controllers.channels_tab_controller import (
+        from navigate.controller.sub_controllers.channels_tab_controller import (
             ChannelsTabController,
         )
 

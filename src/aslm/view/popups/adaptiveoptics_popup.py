@@ -40,8 +40,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Local application imports
-from aslm.view.custom_widgets.popup import PopUp
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 import logging
 

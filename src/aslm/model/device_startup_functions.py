@@ -40,7 +40,7 @@ from multiprocessing.managers import ListProxy
 # Third Party Imports
 
 # Local Imports
-from aslm.tools.common_functions import build_ref_name
+from navigate.tools.common_functions import build_ref_name
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -139,12 +139,12 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
     if cam_type == "HamamatsuOrca" or cam_type == "HamamatsuOrcaLightning":
         # Locally Import Hamamatsu API and Initialize Camera Controller
         HamamatsuController = importlib.import_module(
-            "aslm.model.devices.APIs.hamamatsu.HamamatsuAPI"
+            "navigate.model.devices.APIs.hamamatsu.HamamatsuAPI"
         )
         return auto_redial(HamamatsuController.DCAM, (camera_id,), exception=Exception)
 
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
-        from aslm.model.devices.camera.camera_synthetic import SyntheticCameraController
+        from navigate.model.devices.camera.camera_synthetic import SyntheticCameraController
 
         return SyntheticCameraController()
     elif cam_type == "Photometrics":
@@ -225,22 +225,22 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
         ]["hardware"]["type"]
 
     if cam_type == "HamamatsuOrca":
-        from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
+        from navigate.model.devices.camera.camera_hamamatsu import HamamatsuOrca
 
         return HamamatsuOrca(microscope_name, device_connection, configuration)
 
     elif cam_type == "HamamatsuOrcaLightning":
-        from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrcaLightning
+        from navigate.model.devices.camera.camera_hamamatsu import HamamatsuOrcaLightning
 
         return HamamatsuOrcaLightning(microscope_name, device_connection, configuration)
 
     elif cam_type == "Photometrics":
-        from aslm.model.devices.camera.camera_photometrics import PhotometricsKinetix
+        from navigate.model.devices.camera.camera_photometrics import PhotometricsKinetix
 
         return PhotometricsKinetix(microscope_name, device_connection, configuration)
 
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
-        from aslm.model.devices.camera.camera_synthetic import SyntheticCamera
+        from navigate.model.devices.camera.camera_synthetic import SyntheticCamera
 
         return SyntheticCamera(microscope_name, device_connection, configuration)
 
@@ -271,7 +271,7 @@ def load_mirror(configuration, is_synthetic=False):
         ]  # only one mirror for now...
 
     if mirror_type == "ImagineOpticsMirror":
-        from aslm.model.devices.APIs.imagineoptics.imop import IMOP_Mirror
+        from navigate.model.devices.APIs.imagineoptics.imop import IMOP_Mirror
 
         return auto_redial(IMOP_Mirror, (), exception=Exception)
     elif mirror_type == "SyntheticMirror":
@@ -309,11 +309,11 @@ def start_mirror(microscope_name, device_connection, configuration, is_synthetic
         ]["hardware"]["type"]
 
     if mirror_type == "ImagineOpticsMirror":
-        from aslm.model.devices.mirrors.mirror_imop import ImagineOpticsMirror
+        from navigate.model.devices.mirrors.mirror_imop import ImagineOpticsMirror
 
         return ImagineOpticsMirror(microscope_name, device_connection, configuration)
     elif mirror_type == "SyntheticMirror":
-        from aslm.model.devices.mirrors.mirror_synthetic import SyntheticMirror
+        from navigate.model.devices.mirrors.mirror_synthetic import SyntheticMirror
 
         return SyntheticMirror(microscope_name, device_connection, configuration)
     else:
@@ -357,7 +357,7 @@ def load_stages(configuration, is_synthetic=False):
             stage_type = stage_config["type"]
 
         if stage_type == "PI" and platform.system() == "Windows":
-            from aslm.model.devices.stages.stage_pi import build_PIStage_connection
+            from navigate.model.devices.stages.stage_pi import build_PIStage_connection
             from pipython.pidevice.gcserror import GCSError
 
             stage_devices.append(
@@ -374,7 +374,7 @@ def load_stages(configuration, is_synthetic=False):
             )
 
         elif stage_type == "MP285" and platform.system() == "Windows":
-            from aslm.model.devices.stages.stage_sutter import build_MP285_connection
+            from navigate.model.devices.stages.stage_sutter import build_MP285_connection
 
             stage_devices.append(
                 auto_redial(
@@ -389,10 +389,10 @@ def load_stages(configuration, is_synthetic=False):
             )
 
         elif stage_type == "Thorlabs" and platform.system() == "Windows":
-            from aslm.model.devices.stages.stage_tl_kcube_inertial import (
+            from navigate.model.devices.stages.stage_tl_kcube_inertial import (
                 build_TLKIMStage_connection,
             )
-            from aslm.model.devices.APIs.thorlabs.kcube_inertial import (
+            from navigate.model.devices.APIs.thorlabs.kcube_inertial import (
                 TLFTDICommunicationError,
             )
 
@@ -405,8 +405,8 @@ def load_stages(configuration, is_synthetic=False):
             )
 
         elif stage_type == "MCL" and platform.system() == "Windows":
-            from aslm.model.devices.stages.stage_mcl import build_MCLStage_connection
-            from aslm.model.devices.APIs.mcl.madlib import MadlibError
+            from navigate.model.devices.stages.stage_mcl import build_MCLStage_connection
+            from navigate.model.devices.APIs.mcl.madlib import MadlibError
 
             stage_devices.append(
                 auto_redial(
@@ -423,10 +423,10 @@ def load_stages(configuration, is_synthetic=False):
             if filter_wheel == "ASI":
                 stage_devices.append("shared device")
             else:
-                from aslm.model.devices.stages.stage_asi import (
+                from navigate.model.devices.stages.stage_asi import (
                     build_ASI_Stage_connection,
                 )
-                from aslm.model.devices.APIs.asi.asi_tiger_controller import (
+                from navigate.model.devices.APIs.asi.asi_tiger_controller import (
                     TigerException,
                 )
 
@@ -495,37 +495,37 @@ def start_stage(
         device_type = device_config["type"]
 
     if device_type == "PI":
-        from aslm.model.devices.stages.stage_pi import PIStage
+        from navigate.model.devices.stages.stage_pi import PIStage
 
         return PIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "MP285":
-        from aslm.model.devices.stages.stage_sutter import SutterStage
+        from navigate.model.devices.stages.stage_sutter import SutterStage
 
         return SutterStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "Thorlabs":
-        from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
+        from navigate.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
 
         return TLKIMStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "MCL":
-        from aslm.model.devices.stages.stage_mcl import MCLStage
+        from navigate.model.devices.stages.stage_mcl import MCLStage
 
         return MCLStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "ASI":
-        from aslm.model.devices.stages.stage_asi import ASIStage
+        from navigate.model.devices.stages.stage_asi import ASIStage
 
         return ASIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "GalvoNIStage":
-        from aslm.model.devices.stages.stage_galvo import GalvoNIStage
+        from navigate.model.devices.stages.stage_galvo import GalvoNIStage
 
         return GalvoNIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type.lower() == "syntheticstage" or device_type.lower() == "synthetic":
-        from aslm.model.devices.stages.stage_synthetic import SyntheticStage
+        from navigate.model.devices.stages.stage_synthetic import SyntheticStage
 
         return SyntheticStage(microscope_name, device_connection, configuration, id)
 
@@ -563,7 +563,7 @@ def load_zoom_connection(configuration, is_synthetic=False):
         device_type = device_info["type"]
 
     if device_type == "DynamixelZoom":
-        from aslm.model.devices.zoom.zoom_dynamixel import (
+        from navigate.model.devices.zoom.zoom_dynamixel import (
             build_dynamixel_zoom_connection,
         )
 
@@ -615,15 +615,15 @@ def start_zoom(microscope_name, device_connection, configuration, is_synthetic=F
         device_type = "NoDevice"
 
     if device_type == "DynamixelZoom":
-        from aslm.model.devices.zoom.zoom_dynamixel import DynamixelZoom
+        from navigate.model.devices.zoom.zoom_dynamixel import DynamixelZoom
 
         return DynamixelZoom(microscope_name, device_connection, configuration)
     elif device_type.lower() == "syntheticzoom" or device_type.lower() == "synthetic":
-        from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
+        from navigate.model.devices.zoom.zoom_synthetic import SyntheticZoom
 
         return SyntheticZoom(microscope_name, device_connection, configuration)
     elif device_type == "NoDevice" or "None":
-        from aslm.model.devices.zoom.zoom_base import ZoomBase
+        from navigate.model.devices.zoom.zoom_base import ZoomBase
 
         return ZoomBase(microscope_name, device_connection, configuration)
     else:
@@ -656,7 +656,7 @@ def load_filter_wheel_connection(configuration, is_synthetic=False):
         device_type = device_info["type"]
 
     if device_type == "SutterFilterWheel":
-        from aslm.model.devices.filter_wheel.filter_wheel_sutter import (
+        from navigate.model.devices.filter_wheel.filter_wheel_sutter import (
             build_filter_wheel_connection,
         )
 
@@ -667,7 +667,7 @@ def load_filter_wheel_connection(configuration, is_synthetic=False):
         )
 
     elif device_type == "ASI":
-        from aslm.model.devices.filter_wheel.filter_wheel_asi import (
+        from navigate.model.devices.filter_wheel.filter_wheel_asi import (
             build_filter_wheel_connection,
         )
 
@@ -728,14 +728,14 @@ def start_filter_wheel(
         ]["hardware"]["type"]
 
     if device_type == "SutterFilterWheel":
-        from aslm.model.devices.filter_wheel.filter_wheel_sutter import (
+        from navigate.model.devices.filter_wheel.filter_wheel_sutter import (
             SutterFilterWheel,
         )
 
         return SutterFilterWheel(microscope_name, device_connection, configuration)
 
     elif device_type == "ASI":
-        from aslm.model.devices.filter_wheel.filter_wheel_asi import ASIFilterWheel
+        from navigate.model.devices.filter_wheel.filter_wheel_asi import ASIFilterWheel
 
         return ASIFilterWheel(microscope_name, device_connection, configuration)
 
@@ -743,7 +743,7 @@ def start_filter_wheel(
         device_type.lower() == "syntheticfilterwheel"
         or device_type.lower() == "synthetic"
     ):
-        from aslm.model.devices.filter_wheel.filter_wheel_synthetic import (
+        from navigate.model.devices.filter_wheel.filter_wheel_synthetic import (
             SyntheticFilterWheel,
         )
 
@@ -782,12 +782,12 @@ def start_daq(configuration, is_synthetic=False):
         device_type = configuration["configuration"]["hardware"]["daq"]["type"]
 
     if device_type == "NI":
-        from aslm.model.devices.daq.daq_ni import NIDAQ
+        from navigate.model.devices.daq.daq_ni import NIDAQ
 
         return NIDAQ(configuration)
 
     elif device_type.lower() == "syntheticdaq" or device_type.lower() == "synthetic":
-        from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
+        from navigate.model.devices.daq.daq_synthetic import SyntheticDAQ
 
         return SyntheticDAQ(configuration)
 
@@ -836,7 +836,7 @@ def start_shutter(
     if device_type == "NI":
         if device_connection is not None:
             return device_connection
-        from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
+        from navigate.model.devices.shutter.laser_shutter_ttl import ShutterTTL
 
         return ShutterTTL(microscope_name, None, configuration)
     elif (
@@ -844,7 +844,7 @@ def start_shutter(
     ):
         if device_connection is not None:
             return device_connection
-        from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
+        from navigate.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
 
         return SyntheticShutter(microscope_name, None, configuration)
     else:
@@ -893,13 +893,13 @@ def start_lasers(
     if device_type == "NI":
         if device_connection is not None:
             return device_connection
-        from aslm.model.devices.lasers.laser_ni import LaserNI
+        from navigate.model.devices.lasers.laser_ni import LaserNI
 
         return LaserNI(microscope_name, device_connection, configuration, id)
     elif device_type.lower() == "syntheticlaser" or device_type.lower() == "synthetic":
         if device_connection is not None:
             return device_connection
-        from aslm.model.devices.lasers.laser_synthetic import SyntheticLaser
+        from navigate.model.devices.lasers.laser_synthetic import SyntheticLaser
 
         return SyntheticLaser(microscope_name, device_connection, configuration, id)
     else:
@@ -944,12 +944,12 @@ def start_remote_focus_device(
         ]["hardware"]["type"]
 
     if device_type == "NI":
-        from aslm.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
+        from navigate.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
 
         return RemoteFocusNI(microscope_name, device_connection, configuration)
 
     elif device_type == "EquipmentSolutions":
-        from aslm.model.devices.remote_focus.remote_focus_equipment_solutions import (
+        from navigate.model.devices.remote_focus.remote_focus_equipment_solutions import (
             RemoteFocusEquipmentSolutions,
         )
 
@@ -961,7 +961,7 @@ def start_remote_focus_device(
         device_type.lower() == "syntheticremotefocus"
         or device_type.lower() == "synthetic"
     ):
-        from aslm.model.devices.remote_focus.remote_focus_synthetic import (
+        from navigate.model.devices.remote_focus.remote_focus_synthetic import (
             SyntheticRemoteFocus,
         )
 
@@ -1010,11 +1010,11 @@ def start_galvo(
         ][id]["hardware"]["type"]
 
     if device_type == "NI":
-        from aslm.model.devices.galvo.galvo_ni import GalvoNI
+        from navigate.model.devices.galvo.galvo_ni import GalvoNI
 
         return GalvoNI(microscope_name, device_connection, configuration, id)
     elif device_type.lower() == "syntheticgalvo" or device_type.lower() == "synthetic":
-        from aslm.model.devices.galvo.galvo_synthetic import SyntheticGalvo
+        from navigate.model.devices.galvo.galvo_synthetic import SyntheticGalvo
 
         return SyntheticGalvo(microscope_name, device_connection, configuration, id)
     else:

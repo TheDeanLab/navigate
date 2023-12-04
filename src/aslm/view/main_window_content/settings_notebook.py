@@ -37,13 +37,13 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
+from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 
 # Import Sub-Frames
-from aslm.view.main_window_content.camera_tab import CameraSettingsTab
-from aslm.view.main_window_content.channels_tab import ChannelsTab
-from aslm.view.main_window_content.stage_tab import StageControlTab
-from aslm.view.main_window_content.multiposition_tab import MultiPositionTab
+from navigate.view.main_window_content.camera_tab import CameraSettingsTab
+from navigate.view.main_window_content.channels_tab import ChannelsTab
+from navigate.view.main_window_content.stage_tab import StageControlTab
+from navigate.view.main_window_content.multiposition_tab import MultiPositionTab
 
 # Logger Setup
 p = __name__.split(".")[1]

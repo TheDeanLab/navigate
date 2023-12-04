@@ -38,7 +38,7 @@ from threading import Lock
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.daq.daq_base import DAQBase
+from navigate.model.devices.daq.daq_base import DAQBase
 
 # Logger Setup
 p = __name__.split(".")[1]

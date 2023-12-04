@@ -45,7 +45,7 @@ class TestWaveformTemplates(unittest.TestCase):
         current_path = os.path.abspath(os.path.dirname(__file__))
         root_path = os.path.dirname(os.path.dirname(current_path))
         yaml_path = os.path.join(
-            root_path, "src", "aslm", "config", "waveform_templates.yml"
+            root_path, "src", "navigate", "config", "waveform_templates.yml"
         )
 
         with open(yaml_path) as file:

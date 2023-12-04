@@ -36,7 +36,7 @@ import logging
 # Third party imports
 
 # Local application imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui_controller import GUIController
 
 
 # Logger Setup

@@ -40,8 +40,8 @@ from scipy.optimize import curve_fit
 from scipy.stats import linregress
 
 # Local imports
-from aslm.model.features.feature_container import load_features
-from aslm.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
+from navigate.model.features.feature_container import load_features
+from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
 
 
 def power_tent(x, x_offset, y_offset, amplitude, sigma, alpha):

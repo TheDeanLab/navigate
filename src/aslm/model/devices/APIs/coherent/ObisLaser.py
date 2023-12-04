@@ -9,7 +9,7 @@ from pathlib import Path
 import serial
 from time import time, sleep
 
-from aslm.model.devices.lasers.LaserBase import LaserBase
+from navigate.model.devices.lasers.LaserBase import LaserBase
 
 # Logger Setup
 p = __name__.split(".")[1]

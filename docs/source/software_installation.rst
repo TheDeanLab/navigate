@@ -70,13 +70,13 @@ The last step requires you to change into the ASLM directory and the install the
 
 
 **Run the ASLM software**::
-    (ASLM) MyComputer ASLM $ aslm
+    (ASLM) MyComputer ASLM $ navigate
 
 .. note::
 
-    If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after aslm:
+    If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after navigate:
 
-        aslm -sh
+        navigate -sh
 
 
 After completeting these steps you will only need to do the below to start the software upon opening the prompt:
@@ -84,11 +84,11 @@ After completeting these steps you will only need to do the below to start the s
 .. code-block::
 
     (base) MyComputer ~ $ conda activate ASLM
-    (ASLM) MyComputer ~ $ aslm
+    (ASLM) MyComputer ~ $ navigate
 
 .. note::
 
-    If you are running Windows, you can create a desktop shortcut to ASLM by right-clicking the Desktop, navigating to New and then Shortcut and entering ``%windir%\system32\cmd.exe "/c" C:\path\to\miniconda\Scripts\activate.bat aslm && aslm`` into the location text box.
+    If you are running Windows, you can create a desktop shortcut to ASLM by right-clicking the Desktop, navigating to New and then Shortcut and entering ``%windir%\system32\cmd.exe "/c" C:\path\to\miniconda\Scripts\activate.bat navigate && navigate`` into the location text box.
 
 Troubleshooting
 ---------------

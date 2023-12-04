@@ -17,7 +17,7 @@ def get_data_source(file_type):
     Examples
     --------
     >>> get_data_source('tif')
-    <class 'aslm.model.data_sources.tif.TifDataSource'>
+    <class 'navigate.model.data_sources.tif.TifDataSource'>
     """
 
     if (file_type == "TIFF") or (file_type == "OME-TIFF"):

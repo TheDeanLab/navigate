@@ -37,8 +37,8 @@ import numpy as np
 import matplotlib.ticker as tck
 
 # Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.tools.common_functions import combine_funcs
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.tools.common_functions import combine_funcs
 
 
 import logging
@@ -55,9 +55,9 @@ class AutofocusPopupController(GUIController):
         """
         Parameters
         ----------
-        view : aslm.view.popups.autofocus_setting_popup.AutofocusPopup
+        view : navigate.view.popups.autofocus_setting_popup.AutofocusPopup
             The view of the autofocus popup.
-        parent_controller : aslm.controller.main_controller.MainController
+        parent_controller : navigate.controller.main_controller.MainController
             The parent controller of the autofocus popup.
         """
         super().__init__(view, parent_controller)

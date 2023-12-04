@@ -35,8 +35,8 @@ import tkinter as tk
 from tkinter import ttk
 
 # Local Imports
-from aslm.view.custom_widgets.popup import PopUp
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 
 class FeatureIcon(ttk.Button):

@@ -40,8 +40,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 # Local Imports
-from aslm.view.custom_widgets.DockableNotebook import DockableNotebook
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
+from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 
 # Logger Setup

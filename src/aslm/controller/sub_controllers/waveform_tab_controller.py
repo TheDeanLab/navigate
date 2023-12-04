@@ -38,8 +38,8 @@ import numpy as np
 from tkinter import NSEW
 
 # Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.tools.waveform_template_funcs import get_waveform_template_parameters
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -54,9 +54,9 @@ class WaveformTabController(GUIController):
 
         Parameters
         ----------
-        view : aslm.view.waveform_tab.WaveformTab
+        view : navigate.view.waveform_tab.WaveformTab
             View for the waveform tab
-        parent_controller : aslm.controller.main_controller.MainController
+        parent_controller : navigate.controller.main_controller.MainController
             Parent controller for the waveform tab
         """
         super().__init__(view, parent_controller)

@@ -38,9 +38,9 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.view.custom_widgets.hovermixin import HoverButton
-from aslm.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.hovermixin import HoverButton
+from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
+from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 # Logger Setup
 p = __name__.split(".")[1]

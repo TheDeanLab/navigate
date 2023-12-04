@@ -1,8 +1,8 @@
 def test_laser_base_functions():
     import random
 
-    from aslm.model.devices.lasers.laser_base import LaserBase
-    from aslm.model.dummy import DummyModel
+    from navigate.model.devices.lasers.laser_base import LaserBase
+    from navigate.model.dummy import DummyModel
 
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][

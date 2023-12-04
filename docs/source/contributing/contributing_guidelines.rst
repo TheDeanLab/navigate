@@ -54,13 +54,13 @@ We leverage pre-commit workflows to enforce consistent code formatting. In some 
 cases, Ruff may complain about a line of code that is actually fine. For example, in the example code below,
 Ruff complains that the start_stage class is imported but not used. However, it is actually used in as part of an `exec` statement::
 
-        from aslm.model.device_startup_functions import start_stage
+        from navigate.model.device_startup_functions import start_stage
         device_name = stage
         exec(f"self.{device_name} = start_{device_name}(name, device_connection, configuration, i, is_synthetic)")
 
 To avoid this error, you can add a `# noqa` comment to the end of the line to tell Ruff to ignore the error::
 
-        from aslm.model.device_startup_functions import start_stage  # noqa
+        from navigate.model.device_startup_functions import start_stage  # noqa
 
 Dictionary Parsing
 ------------------

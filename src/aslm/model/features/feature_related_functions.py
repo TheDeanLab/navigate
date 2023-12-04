@@ -38,9 +38,9 @@ import importlib
 # Third-party imports
 
 # Local application imports
-from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
-from aslm.model.features.autofocus import Autofocus  # noqa
-from aslm.model.features.common_features import (
+from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
+from navigate.model.features.autofocus import Autofocus  # noqa
+from navigate.model.features.common_features import (
     ChangeResolution,  # noqa
     Snap,  # noqa
     WaitToContinue,  # noqa
@@ -52,16 +52,16 @@ from aslm.model.features.common_features import (
     ConProAcquisition,  # noqa
     FindTissueSimple2D,  # noqa
 )
-from aslm.model.features.image_writer import ImageWriter  # noqa
-from aslm.model.features.restful_features import IlastikSegmentation  # noqa
-from aslm.model.features.volume_search import VolumeSearch  # noqa
-from aslm.model.features.remove_empty_tiles import (
+from navigate.model.features.image_writer import ImageWriter  # noqa
+from navigate.model.features.restful_features import IlastikSegmentation  # noqa
+from navigate.model.features.volume_search import VolumeSearch  # noqa
+from navigate.model.features.remove_empty_tiles import (
     DetectTissueInStack,  # noqa
     DetectTissueInStackAndRecord,  # noqa
     RemoveEmptyPositions,  # noqa
 )
-from aslm.tools.file_functions import load_yaml_file
-from aslm.tools.common_functions import load_module_from_file
+from navigate.tools.file_functions import load_yaml_file
+from navigate.tools.common_functions import load_module_from_file
 
 
 class SharedList(list):

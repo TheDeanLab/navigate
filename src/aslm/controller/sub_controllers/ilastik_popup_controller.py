@@ -38,8 +38,8 @@ import logging
 # Third party imports
 
 # Local application imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.model.features.restful_features import prepare_service
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.model.features.restful_features import prepare_service
 
 
 # Logger Setup
@@ -60,10 +60,10 @@ class IlastikPopupController(GUIController):
         parent_controller : MainController
             main controller
         service_url : str
-            url of the aslm_server for ilastik
+            url of the navigate_server for ilastik
         """
         super().__init__(view, parent_controller)
-        #: str: url of the aslm_server for ilastik
+        #: str: url of the navigate_server for ilastik
         self.service_url = service_url
         #: str: ilastik project file name
         self.project_filename = None
@@ -88,7 +88,7 @@ class IlastikPopupController(GUIController):
             )
         except Exception as e:
             r = None
-            message = "Please make sure the aslm_server for ilastik is running!"
+            message = "Please make sure the navigate_server for ilastik is running!"
             logger.debug(e)
             logger.debug(traceback.format_exc())
 

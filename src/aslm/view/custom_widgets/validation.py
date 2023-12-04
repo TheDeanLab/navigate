@@ -39,7 +39,7 @@ import logging
 # Third party imports
 
 # Local imports
-from aslm.view.custom_widgets.hover import Hover
+from navigate.view.custom_widgets.hover import Hover
 
 # Logger Setup
 p = __name__.split(".")[1]

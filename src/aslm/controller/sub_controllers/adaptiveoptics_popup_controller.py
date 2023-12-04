@@ -40,7 +40,7 @@ import logging
 # from matplotlib.axes import Axes
 
 # Local application imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui_controller import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]

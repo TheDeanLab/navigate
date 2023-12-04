@@ -6,9 +6,9 @@ formatters:
     format: '%(asctime)s - %(name)s - %(levelname)s - %(module)s: %(message)s'
 filters:
   performance_specs:
-    (): ext://aslm.log_files.filters.PerformanceFilter
+    (): ext://navigate.log_files.filters.PerformanceFilter
   not_performance:
-    (): ext://aslm.log_files.filters.NonPerfFilter
+    (): ext://navigate.log_files.filters.NonPerfFilter
 handlers:
   console:
     class: logging.StreamHandler

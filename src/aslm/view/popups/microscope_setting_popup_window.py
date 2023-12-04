@@ -38,9 +38,9 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.view.custom_widgets.popup import PopUp
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from aslm.tools.common_functions import build_ref_name
+from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.tools.common_functions import build_ref_name
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)

@@ -37,14 +37,14 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.tools.multipos_table_tools import (
+from navigate.tools.multipos_table_tools import (
     sign,
     compute_tiles_from_bounding_box,
     calc_num_tiles,
     update_table,
 )
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.tools.common_functions import combine_funcs
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.tools.common_functions import combine_funcs
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -100,7 +100,7 @@ class TilingWizardController(GUIController):
         # (Camera Settings, Stage Control Positions, Stack Acq Settings)
         main_view = (
             self.parent_controller.parent_controller.view
-        )  # channels_tab_controller -> aslm_controller -> view
+        )  # channels_tab_controller -> navigate_controller -> view
         self.cam_settings_widgets = (
             main_view.settings.camera_settings_tab.camera_roi.get_widgets()
         )

@@ -36,9 +36,9 @@ import unittest
 import numpy as np
 
 # Local imports
-from aslm.model.features.autofocus import power_tent
-from aslm.model.features.autofocus import Autofocus
-from aslm.model.dummy import DummyModel
+from navigate.model.features.autofocus import power_tent
+from navigate.model.features.autofocus import Autofocus
+from navigate.model.dummy import DummyModel
 
 
 class TestPowerTentFunction(unittest.TestCase):

@@ -38,7 +38,7 @@ import nidaqmx
 from nidaqmx.constants import LineGrouping
 
 # Local Imports
-from aslm.model.devices.shutter.laser_shutter_base import ShutterBase
+from navigate.model.devices.shutter.laser_shutter_base import ShutterBase
 
 # Logger Setup
 p = __name__.split(".")[1]

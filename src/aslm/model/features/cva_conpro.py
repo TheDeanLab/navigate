@@ -35,11 +35,11 @@ import logging
 
 # Third Party Imports
 import numpy as np
-from aslm.model.features.image_writer import ImageWriter
+from navigate.model.features.image_writer import ImageWriter
 
-# from aslm.model import data_sources
-# from aslm.model.data_sources import data_source
-# # from aslm.model.data_sources import D
+# from navigate.model import data_sources
+# from navigate.model.data_sources import data_source
+# # from navigate.model.data_sources import D
 # import os
 
 

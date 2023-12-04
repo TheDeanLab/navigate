@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.galvo.galvo_base import GalvoBase
+from navigate.model.devices.galvo.galvo_base import GalvoBase
 
 # # Logger Setup
 p = __name__.split(".")[1]

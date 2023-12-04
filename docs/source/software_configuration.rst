@@ -18,7 +18,7 @@ Mac/Linux.
 
 To avoid confusion, we recommend launching the software in the synthetic hardware
 mode initially. Within your Terminal, or Anaconda Prompt, activate your ASLM Python
-environment and launch the software by typing: ``aslm -sh``. Thereafter, you should
+environment and launch the software by typing: ``navigate -sh``. Thereafter, you should
 only modify the ``configuration.yaml`` file in your local ``/.ASLM`` directory. The
 local copy avoids conflicts between different microscopes after pulling new
 changes on GitHub.

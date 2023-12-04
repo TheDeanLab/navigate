@@ -2,11 +2,11 @@ import urllib.request
 import os
 import platform
 
-from aslm.tools.file_functions import delete_folder
+from navigate.tools.file_functions import delete_folder
 
 
 def test_ome_metadata_valid(dummy_model):
-    from aslm.model.metadata_sources.ome_tiff_metadata import OMETIFFMetadata
+    from navigate.model.metadata_sources.ome_tiff_metadata import OMETIFFMetadata
 
     # First, download OME-XML validation tools
     urllib.request.urlretrieve(

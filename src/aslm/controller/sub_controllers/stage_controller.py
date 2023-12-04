@@ -32,7 +32,7 @@
 import tkinter as tk
 
 
-from aslm.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui_controller import GUIController
 import logging
 
 # Logger Setup
@@ -53,13 +53,13 @@ class StageController(GUIController):
 
         Parameters
          ----------
-         view : aslm.view.stage_view.StageView
+         view : navigate.view.stage_view.StageView
              The stage view
          main_view : tkinter.Tk
              The main view of the microscope
          canvas : tkinter.Canvas
              The canvas of the microscope
-         parent_controller : aslm.controller.microscope_controller.MicroscopeController
+         parent_controller : navigate.controller.microscope_controller.MicroscopeController
              The parent controller of the stage controller
         """
         super().__init__(view, parent_controller)

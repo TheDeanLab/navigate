@@ -36,8 +36,8 @@ import time
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.devices.APIs.asi.asi_tiger_controller import (
+from navigate.model.devices.stages.stage_base import StageBase
+from navigate.model.devices.APIs.asi.asi_tiger_controller import (
     TigerController,
     TigerException,
 )

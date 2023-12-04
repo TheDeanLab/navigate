@@ -44,13 +44,13 @@ import time
 # Third Party Imports
 
 # Local View Imports
-from aslm.view.main_application_window import MainApp as view
-from aslm.view.popups.camera_view_popup_window import CameraViewPopupWindow
-from aslm.view.popups.feature_list_popup import FeatureListPopup
+from navigate.view.main_application_window import MainApp as view
+from navigate.view.popups.camera_view_popup_window import CameraViewPopupWindow
+from navigate.view.popups.feature_list_popup import FeatureListPopup
 
 # Local Sub-Controller Imports
-from aslm.controller.configuration_controller import ConfigurationController
-from aslm.controller.sub_controllers import (
+from navigate.controller.configuration_controller import ConfigurationController
+from navigate.controller.sub_controllers import (
     KeystrokeController,
     WaveformTabController,
     StageController,
@@ -65,24 +65,24 @@ from aslm.controller.sub_controllers import (
     # AdaptiveOpticsPopupController,
 )
 
-from aslm.controller.thread_pool import SynchronizedThreadPool
+from navigate.controller.thread_pool import SynchronizedThreadPool
 
 # Local Model Imports
-from aslm.model.model import Model
-from aslm.model.concurrency.concurrency_tools import ObjectInSubprocess
+from navigate.model.model import Model
+from navigate.model.concurrency.concurrency_tools import ObjectInSubprocess
 
 # Misc. Local Imports
-from aslm.config.config import (
+from navigate.config.config import (
     load_configs,
     update_config_dict,
     verify_experiment_config,
     verify_waveform_constants,
-    get_aslm_path,
+    get_navigate_path,
 )
-from aslm.tools.file_functions import create_save_path, save_yaml_file
-from aslm.tools.common_dict_tools import update_stage_dict
-from aslm.tools.multipos_table_tools import update_table
-from aslm.tools.common_functions import combine_funcs
+from navigate.tools.file_functions import create_save_path, save_yaml_file
+from navigate.tools.common_dict_tools import update_stage_dict
+from navigate.tools.multipos_table_tools import update_table
+from navigate.tools.common_functions import combine_funcs
 
 # Logger Setup
 import logging
@@ -809,7 +809,7 @@ class Controller:
             # self.menu_controller.feature_id_val.set(0)
 
             self.update_experiment_setting()
-            file_directory = os.path.join(get_aslm_path(), "config")
+            file_directory = os.path.join(get_navigate_path(), "config")
             save_yaml_file(
                 file_directory=file_directory,
                 content_dict=self.configuration["experiment"],

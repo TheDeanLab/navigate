@@ -46,9 +46,9 @@ def model():
     from types import SimpleNamespace
     from pathlib import Path
 
-    from aslm.model.model import Model
+    from navigate.model.model import Model
     from multiprocessing import Queue
-    from aslm.config.config import (
+    from navigate.config.config import (
         load_configs,
         verify_experiment_config,
         verify_waveform_constants,
@@ -56,7 +56,7 @@ def model():
 
     # Use configuration files that ship with the code base
     configuration_directory = Path.joinpath(
-        Path(__file__).resolve().parent.parent.parent, "src", "aslm", "config"
+        Path(__file__).resolve().parent.parent.parent, "src", "navigate", "config"
     )
     configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
     experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
@@ -127,7 +127,7 @@ def test_multiposition_acquisition(model):
     is a multiprocessing.Queue, which is not thread safe.
     """
     # from time import sleep
-    from aslm.config.config import update_config_dict
+    from navigate.config.config import update_config_dict
 
     # def check_queue(event, event_queue):
     #     """Check if the event queue contains the event. If it does, return True.
@@ -269,7 +269,7 @@ def test_get_feature_list(model):
     assert model.get_feature_list(0) == ""
     assert model.get_feature_list(len(feature_lists) + 1) == ""
 
-    from aslm.model.features.feature_related_functions import (
+    from navigate.model.features.feature_related_functions import (
         convert_str_to_feature_list,
     )
 
@@ -285,7 +285,7 @@ def test_load_feature_list_from_str(model):
     l = len(feature_lists)  # noqa
     model.load_feature_list_from_str('[{"name": PrepareNextChannel}]')
     assert len(feature_lists) == l + 1
-    from aslm.model.features.feature_related_functions import (
+    from navigate.model.features.feature_related_functions import (
         convert_feature_list_to_str,
     )
 
@@ -305,13 +305,13 @@ def test_load_feature_records(model):
     feature_lists = model.feature_list
     l = len(feature_lists)  # noqa
 
-    from aslm.config.config import get_aslm_path
-    from aslm.tools.file_functions import save_yaml_file, load_yaml_file
-    from aslm.model.features.feature_related_functions import (
+    from navigate.config.config import get_navigate_path
+    from navigate.tools.file_functions import save_yaml_file, load_yaml_file
+    from navigate.model.features.feature_related_functions import (
         convert_feature_list_to_str,
     )
 
-    feature_lists_path = get_aslm_path() + "/feature_lists"
+    feature_lists_path = get_navigate_path() + "/feature_lists"
 
     if not os.path.exists(feature_lists_path):
         os.makedirs(feature_lists_path)

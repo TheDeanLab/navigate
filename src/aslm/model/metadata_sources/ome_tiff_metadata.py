@@ -33,7 +33,7 @@ import os
 from typing import Optional, Union
 
 from .metadata import XMLMetadata
-from aslm import __version__, __commit__
+from navigate import __version__, __commit__
 
 
 class OMETIFFMetadata(XMLMetadata):

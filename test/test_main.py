@@ -38,8 +38,8 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
-from aslm.tools.main_functions import create_parser
-from aslm.config.config import get_aslm_path
+from navigate.tools.main_functions import create_parser
+from navigate.config.config import get_navigate_path
 
 
 class TestMain(unittest.TestCase):
@@ -54,7 +54,7 @@ class TestMain(unittest.TestCase):
             parser.parse_args([arg])
 
         # Path Arguments.
-        aslm_path = Path(get_aslm_path())
+        navigate_path = Path(get_navigate_path())
         input_arguments = [
             "--config_file",
             "--experiment_file",
@@ -63,7 +63,7 @@ class TestMain(unittest.TestCase):
             "--logging_config",
         ]
         for arg in input_arguments:
-            parser.parse_args([arg, str(Path.joinpath(aslm_path, "test.yml"))])
+            parser.parse_args([arg, str(Path.joinpath(navigate_path, "test.yml"))])
 
 
 if __name__ == "__main__":

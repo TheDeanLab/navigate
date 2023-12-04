@@ -35,8 +35,8 @@ import time
 from serial import SerialException
 
 # Local Imports
-from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.devices.APIs.sutter.MP285 import MP285
+from navigate.model.devices.stages.stage_base import StageBase
+from navigate.model.devices.APIs.sutter.MP285 import MP285
 
 # Logger Setup
 p = __name__.split(".")[1]

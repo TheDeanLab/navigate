@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.waveforms import camera_exposure
+from navigate.model.waveforms import camera_exposure
 
 # Logger Setup
 p = __name__.split(".")[1]

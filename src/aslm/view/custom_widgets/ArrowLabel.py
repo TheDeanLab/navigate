@@ -37,7 +37,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 # Local Imports
-from aslm.tools.image import create_arrow_image
+from navigate.tools.image import create_arrow_image
 
 
 class ArrowLabel(tk.Label):

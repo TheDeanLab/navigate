@@ -41,7 +41,7 @@ import numpy as np
 from tifffile import imsave
 
 # Local imports
-from aslm.model import data_sources
+from navigate.model import data_sources
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -56,7 +56,7 @@ class ImageWriter:
 
         Parameters
         ----------
-        model : aslm.model.model.Model
+        model : navigate.model.model.Model
             ASLM Model class for controlling hardware/acquisition.
         data_buffer: [SharedNDArray]
             data_buffer will use model's default data_buffer if it's not specified
@@ -67,7 +67,7 @@ class ImageWriter:
         image_name : str
             Name of the image to be saved. If None, a name will be generated
         """
-        #: aslm.model.model.Model: ASLM Model class for controlling
+        #: navigate.model.model.Model: ASLM Model class for controlling
         # hardware/acquisition.
         self.model = model
 
@@ -188,7 +188,7 @@ class ImageWriter:
         file_name = os.path.join(self.save_directory, image_name)
 
         # Initialize data source, pointing to the new file name
-        #: aslm.model.data_sources.DataSource : Data source for saving data to disk.
+        #: navigate.model.data_sources.DataSource : Data source for saving data to disk.
         self.data_source = data_sources.get_data_source(self.file_type)(
             file_name=file_name
         )

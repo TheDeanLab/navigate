@@ -43,7 +43,7 @@ from datetime import datetime
 import yaml
 
 # Local Imports
-from aslm.config.config import get_aslm_path
+from navigate.config.config import get_navigate_path
 
 
 def update_nested_dict(d, find_func, apply_func):
@@ -121,7 +121,7 @@ def log_setup(logging_configuration, logging_path=None):
         Path to file to be loaded.
         Relative to the location of the folder containing this file.
     logging_path : str, optional
-        Path to store logs. Defaults to aslm_path/logs
+        Path to store logs. Defaults to navigate_path/logs
     """
 
     # path to logging_configuration is set relative
@@ -143,7 +143,7 @@ def log_setup(logging_configuration, logging_path=None):
     )
 
     if logging_path is None:
-        logging_path = Path.joinpath(Path(get_aslm_path()), "logs")
+        logging_path = Path.joinpath(Path(get_navigate_path()), "logs")
     todays_path = Path.joinpath(logging_path, time_stamp)
     if not os.path.exists(logging_path):
         os.mkdir(logging_path)

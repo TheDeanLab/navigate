@@ -39,10 +39,10 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
-from aslm.view.custom_widgets.hovermixin import HoverTkButton
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from aslm.view.custom_widgets.validation import ValidatedSpinbox
-from aslm.view.custom_widgets.validation import ValidatedEntry
+from navigate.view.custom_widgets.hovermixin import HoverTkButton
+from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.validation import ValidatedSpinbox
+from navigate.view.custom_widgets.validation import ValidatedEntry
 
 
 # Logger Setup

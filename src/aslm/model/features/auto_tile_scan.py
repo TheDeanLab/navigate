@@ -35,7 +35,7 @@
 # Third party imports
 
 # Local application imports
-from aslm.model.features.autofocus import Autofocus
+from navigate.model.features.autofocus import Autofocus
 
 
 class CalculateFocusRange:

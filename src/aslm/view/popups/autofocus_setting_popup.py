@@ -41,9 +41,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.ticker as tck
 
 # Local Imports
-from aslm.view.custom_widgets.popup import PopUp
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from aslm.view.custom_widgets.validation import ValidatedSpinbox
+from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.validation import ValidatedSpinbox
 
 # Logger Setup
 p = __name__.split(".")[1]

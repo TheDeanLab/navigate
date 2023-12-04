@@ -36,10 +36,10 @@ import logging
 # Third-party imports
 
 # Local application imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.tools.file_functions import save_yaml_file
-from aslm.tools.common_functions import combine_funcs
-from aslm.config.config import update_config_dict
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.tools.file_functions import save_yaml_file
+from navigate.tools.common_functions import combine_funcs
+from navigate.config.config import update_config_dict
 
 # Logger Setup
 p = __name__.split(".")[1]

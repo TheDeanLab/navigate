@@ -37,7 +37,7 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
-from aslm.config import get_configuration_paths
+from navigate.config import get_configuration_paths
 
 
 def evaluate_parser_input_arguments(args):

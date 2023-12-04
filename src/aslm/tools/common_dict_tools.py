@@ -35,7 +35,7 @@ def update_stage_dict(target, pos_dict):
 
     Parameters
     ----------
-    target : aslm.model.Model or aslm.controller.Controller
+    target : navigate.model.Model or navigate.controller.Controller
         The object that is being updated.
     pos_dict : dict
         The dictionary of positions to update.

@@ -37,7 +37,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.zoom.zoom_base import ZoomBase
+from navigate.model.devices.zoom.zoom_base import ZoomBase
 
 # Logger Setup
 p = __name__.split(".")[1]

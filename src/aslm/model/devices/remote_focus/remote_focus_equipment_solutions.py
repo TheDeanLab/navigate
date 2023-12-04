@@ -38,7 +38,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
+from navigate.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
 
 # Logger Setup
 p = __name__.split(".")[1]

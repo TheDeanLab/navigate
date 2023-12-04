@@ -38,7 +38,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.view.custom_widgets.popup import PopUp
+from navigate.view.custom_widgets.popup import PopUp
 
 # Logger Setup
 p = __name__.split(".")[1]

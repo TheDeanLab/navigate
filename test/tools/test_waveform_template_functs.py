@@ -36,7 +36,7 @@ import unittest
 # Third-party imports
 
 # Local application imports
-from aslm.tools.waveform_template_funcs import get_waveform_template_parameters
+from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
 
 
 class TestGetWaveformTemplateParameters(unittest.TestCase):

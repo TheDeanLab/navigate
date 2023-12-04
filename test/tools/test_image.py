@@ -40,7 +40,7 @@ from PIL import Image, ImageFont
 # import pytest
 
 # Local Imports
-from aslm.tools.image import text_array, create_arrow_image
+from navigate.tools.image import text_array, create_arrow_image
 
 
 class TextArrayTestCase(unittest.TestCase):

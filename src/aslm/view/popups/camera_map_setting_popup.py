@@ -39,7 +39,7 @@ from matplotlib.pyplot import subplots
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Local Imports
-from aslm.view.custom_widgets.popup import PopUp
+from navigate.view.custom_widgets.popup import PopUp
 
 
 class CameraMapSettingPopup(PopUp):

@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.mirrors.mirror_base import MirrorBase
+from navigate.model.devices.mirrors.mirror_base import MirrorBase
 
 # # Logger Setup
 p = __name__.split(".")[1]

@@ -39,9 +39,9 @@ from tkinter import filedialog
 import tifffile
 
 # Local application imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.config import get_aslm_path
-from aslm.model.analysis.camera import compute_scmos_offset_and_variance_map
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.config import get_navigate_path
+from navigate.model.analysis.camera import compute_scmos_offset_and_variance_map
 
 
 class CameraMapSettingPopupController(GUIController):
@@ -56,14 +56,14 @@ class CameraMapSettingPopupController(GUIController):
 
         Parameters
         ----------
-        view : aslm.view.sub_views.camera_map_setting_popup.CameraMapSettingPopup
+        view : navigate.view.sub_views.camera_map_setting_popup.CameraMapSettingPopup
             View for the camera map setting popup.
-        parent_controller : aslm.controller.main_controller.MainController
+        parent_controller : navigate.controller.main_controller.MainController
             Parent controller of this controller.
         """
         super().__init__(view, parent_controller)
         #: str: Path to the camera maps directory.
-        self.map_path = os.path.join(get_aslm_path(), "camera_maps")
+        self.map_path = os.path.join(get_navigate_path(), "camera_maps")
         #: np.ndarray: Offset map.
         self.off = None
         #: np.ndarray: Variance map.

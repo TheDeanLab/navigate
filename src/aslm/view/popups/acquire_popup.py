@@ -39,10 +39,10 @@ from tkinter.scrolledtext import ScrolledText
 # Third Party Imports
 
 # Local Imports
-from aslm.view.custom_widgets.popup import PopUp
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedEntry
-from aslm.model.data_sources import FILE_TYPES
+from navigate.view.custom_widgets.popup import PopUp
+from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.validation import ValidatedCombobox, ValidatedEntry
+from navigate.model.data_sources import FILE_TYPES
 
 # Logger Setup
 p = __name__.split(".")[1]

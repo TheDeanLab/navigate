@@ -35,7 +35,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
+from navigate.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
 
 # Logger Setup
 p = __name__.split(".")[1]

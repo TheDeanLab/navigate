@@ -34,11 +34,11 @@ import logging
 import importlib  # noqa: F401
 from multiprocessing.managers import ListProxy
 
-from aslm.model.device_startup_functions import (
+from navigate.model.device_startup_functions import (
     start_stage,
 )
-from aslm.tools.common_functions import build_ref_name
-from aslm.model.devices.stages.stage_galvo import GalvoNIStage
+from navigate.tools.common_functions import build_ref_name
+from navigate.model.devices.stages.stage_galvo import GalvoNIStage
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -784,7 +784,7 @@ class Microscope:
         try:
             exec(
                 f"start_{device_name}=importlib.import_module("
-                f"'aslm.model.device_startup_functions').start_{device_name}"
+                f"'navigate.model.device_startup_functions').start_{device_name}"
             )
         except AttributeError:
             print(f"Could not import start_{device_name}")

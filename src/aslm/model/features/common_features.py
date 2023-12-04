@@ -40,8 +40,8 @@ import copy
 
 # Local application imports
 from .image_writer import ImageWriter
-from aslm.tools.common_functions import VariableWithLock
-from aslm.model.devices.stages.stage_galvo import GalvoNIStage
+from navigate.tools.common_functions import VariableWithLock
+from navigate.model.devices.stages.stage_galvo import GalvoNIStage
 
 
 class ChangeResolution:
@@ -1481,7 +1481,7 @@ class FindTissueSimple2D:
         from skimage import filters
         from skimage.transform import downscale_local_mean
         import numpy as np
-        from aslm.tools.multipos_table_tools import (
+        from navigate.tools.multipos_table_tools import (
             compute_tiles_from_bounding_box,
             calc_num_tiles,
         )

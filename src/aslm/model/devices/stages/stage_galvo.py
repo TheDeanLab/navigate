@@ -39,8 +39,8 @@ import time
 import numpy as np
 
 # Local Imports
-from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.waveforms import dc_value, remote_focus_ramp
+from navigate.model.devices.stages.stage_base import StageBase
+from navigate.model.waveforms import dc_value, remote_focus_ramp
 
 # Logger Setup
 p = __name__.split(".")[1]

@@ -44,7 +44,7 @@ dependencies = [
     ]
 
 [project.scripts]
-aslm = "aslm.main:main"
+navigate = "navigate.main:main"
 
 [project.optional-dependencies]
 dev = [

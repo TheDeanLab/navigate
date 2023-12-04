@@ -3,7 +3,7 @@ import threading
 import numpy as np
 from multiprocessing import shared_memory
 
-from aslm.model.concurrency.concurrency_tools import (
+from navigate.model.concurrency.concurrency_tools import (
     ObjectInSubprocess,
     ResultThread,
     CustodyThread,

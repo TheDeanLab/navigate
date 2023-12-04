@@ -40,7 +40,7 @@ import numpy as np
 import numpy.typing as npt
 
 # Local application imports
-# from aslm.model.analysis.camera import compute_signal_to_noise
+# from navigate.model.analysis.camera import compute_signal_to_noise
 
 
 def has_tissue(

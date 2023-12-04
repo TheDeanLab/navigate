@@ -40,13 +40,13 @@ import os
 # Third Party Imports
 
 # Local Imports
-from aslm.model.concurrency.concurrency_tools import SharedNDArray
-from aslm.model.features.autofocus import Autofocus
-from aslm.model.features.cva_conpro import ConstantVelocityAcquisition
-from aslm.model.features.adaptive_optics import TonyWilson
-from aslm.model.features.image_writer import ImageWriter
-from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
-from aslm.model.features.common_features import (
+from navigate.model.concurrency.concurrency_tools import SharedNDArray
+from navigate.model.features.autofocus import Autofocus
+from navigate.model.features.cva_conpro import ConstantVelocityAcquisition
+from navigate.model.features.adaptive_optics import TonyWilson
+from navigate.model.features.image_writer import ImageWriter
+from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
+from navigate.model.features.common_features import (
     ChangeResolution,
     Snap,
     ZStackAcquisition,
@@ -58,26 +58,26 @@ from aslm.model.features.common_features import (
     MoveToNextPositionInMultiPositionTable,
     WaitToContinue,
 )
-from aslm.model.features.remove_empty_tiles import (
+from navigate.model.features.remove_empty_tiles import (
     DetectTissueInStackAndRecord,
     RemoveEmptyPositions,
 )
-from aslm.model.features.feature_container import load_features
-from aslm.model.features.restful_features import IlastikSegmentation
-from aslm.model.features.volume_search import VolumeSearch
-from aslm.model.features.feature_related_functions import (
+from navigate.model.features.feature_container import load_features
+from navigate.model.features.restful_features import IlastikSegmentation
+from navigate.model.features.volume_search import VolumeSearch
+from navigate.model.features.feature_related_functions import (
     convert_str_to_feature_list,
     convert_feature_list_to_str,
     SharedList,
     load_dynamic_parameter_functions,
 )
-from aslm.log_files.log_functions import log_setup
-from aslm.tools.common_dict_tools import update_stage_dict
-from aslm.tools.common_functions import load_module_from_file
-from aslm.tools.file_functions import load_yaml_file, save_yaml_file
-from aslm.model.device_startup_functions import load_devices
-from aslm.model.microscope import Microscope
-from aslm.config.config import get_aslm_path
+from navigate.log_files.log_functions import log_setup
+from navigate.tools.common_dict_tools import update_stage_dict
+from navigate.tools.common_functions import load_module_from_file
+from navigate.tools.file_functions import load_yaml_file, save_yaml_file
+from navigate.model.device_startup_functions import load_devices
+from navigate.model.microscope import Microscope
+from navigate.config.config import get_navigate_path
 
 
 # Logger Setup
@@ -660,7 +660,7 @@ class Model:
                     self.addon_feature = self.feature_list[args[0] - 1]
                     load_dynamic_parameter_functions(
                         self.addon_feature,
-                        f"{get_aslm_path()}/feature_lists/feature_parameter_setting",
+                        f"{get_navigate_path()}/feature_lists/feature_parameter_setting",
                     )
                     self.signal_container, self.data_container = load_features(
                         self, self.addon_feature
@@ -1203,7 +1203,7 @@ class Model:
         ]
 
         # create virtual microscope
-        from aslm.model.devices import (
+        from navigate.model.devices import (
             SyntheticDAQ,
             SyntheticCamera,  # noqa: F401
             SyntheticGalvo,
@@ -1324,7 +1324,7 @@ class Model:
         ----
             System folcer can be found at '..../.ASLM/feature_lists'
         """
-        feature_lists_path = get_aslm_path() + "/feature_lists"
+        feature_lists_path = get_navigate_path() + "/feature_lists"
         if not os.path.exists(feature_lists_path):
             os.makedirs(feature_lists_path)
             return

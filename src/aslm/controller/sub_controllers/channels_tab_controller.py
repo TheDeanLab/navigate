@@ -40,17 +40,17 @@ import numpy as np
 import tkinter as tk
 
 # Local Imports
-from aslm.controller.sub_controllers.widget_functions import validate_wrapper
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.controller.sub_controllers.channel_setting_controller import (
+from navigate.controller.sub_controllers.widget_functions import validate_wrapper
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.channel_setting_controller import (
     ChannelSettingController,
 )
-from aslm.controller.sub_controllers.tiling_wizard_controller2 import (
+from navigate.controller.sub_controllers.tiling_wizard_controller2 import (
     TilingWizardController,
 )
 
 # View Imports that are not called on startup
-from aslm.view.popups.tiling_wizard_popup2 import TilingWizardPopup
+from navigate.view.popups.tiling_wizard_popup2 import TilingWizardPopup
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -67,7 +67,7 @@ class ChannelsTabController(GUIController):
         ----------
         view : tkinter.Frame
             The view that this controller will control.
-        parent_controller : aslm.controller.main_controller.MainController
+        parent_controller : navigate.controller.main_controller.MainController
             The parent controller of this controller.
         """
         super().__init__(view, parent_controller)

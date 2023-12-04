@@ -40,7 +40,7 @@ import numpy.typing as npt
 
 # Local imports
 from .metadata import XMLMetadata
-from aslm.tools.linear_algebra import affine_rotation, affine_shear
+from navigate.tools.linear_algebra import affine_rotation, affine_shear
 
 
 class BigDataViewerMetadata(XMLMetadata):

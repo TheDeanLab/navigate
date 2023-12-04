@@ -38,8 +38,8 @@ from tkinter import ttk
 # Third Party Imports
 
 # Local Imports
-from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from aslm.view.custom_widgets.validation import ValidatedSpinbox, ValidatedEntry
+from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedEntry
 
 # Logger Setup
 p = __name__.split(".")[1]

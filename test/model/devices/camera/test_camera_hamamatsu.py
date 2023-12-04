@@ -37,8 +37,8 @@ import pytest
 @pytest.mark.hardware
 @pytest.fixture(scope="module")
 def prepare_cameras(dummy_model):
-    from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
-    from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
+    from navigate.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
+    from navigate.model.devices.camera.camera_hamamatsu import HamamatsuOrca
 
     def start_camera(idx=0):
         # open camera
@@ -104,7 +104,7 @@ class TestHamamatsuOrca:
         return value > target_min and value < target_max
 
     def test_hamamatsu_camera_attributes(self):
-        from aslm.model.devices.camera.camera_hamamatsu import HamamatsuOrca
+        from navigate.model.devices.camera.camera_hamamatsu import HamamatsuOrca
 
         attributes = dir(HamamatsuOrca)
         desired_attributes = [
@@ -329,7 +329,7 @@ class TestHamamatsuOrca:
     def test_acquire_image(self):
         import random
         import time
-        from aslm.model.concurrency.concurrency_tools import SharedNDArray
+        from navigate.model.concurrency.concurrency_tools import SharedNDArray
 
         # set software trigger
         self.camera.camera_controller.set_property_value("trigger_source", 3)

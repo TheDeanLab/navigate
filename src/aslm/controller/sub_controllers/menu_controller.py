@@ -41,17 +41,17 @@ import subprocess
 # Third Party Imports
 
 # Local Imports
-from aslm.view.popups.ilastik_setting_popup import ilastik_setting_popup
-from aslm.view.popups.help_popup import HelpPopup
-from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
-from aslm.view.popups.adaptiveoptics_popup import AdaptiveOpticsPopup
-from aslm.view.popups.camera_map_setting_popup import CameraMapSettingPopup
-from aslm.view.popups.waveform_parameter_popup_window import (
+from navigate.view.popups.ilastik_setting_popup import ilastik_setting_popup
+from navigate.view.popups.help_popup import HelpPopup
+from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
+from navigate.view.popups.adaptiveoptics_popup import AdaptiveOpticsPopup
+from navigate.view.popups.camera_map_setting_popup import CameraMapSettingPopup
+from navigate.view.popups.waveform_parameter_popup_window import (
     WaveformParameterPopupWindow,
 )
-from aslm.view.popups.feature_list_popup import FeatureListPopup
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.controller.sub_controllers import (
+from navigate.view.popups.feature_list_popup import FeatureListPopup
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers import (
     AutofocusPopupController,
     IlastikPopupController,
     CameraMapSettingPopupController,
@@ -62,10 +62,10 @@ from aslm.controller.sub_controllers import (
     FeatureAdvancedSettingController,
     AdaptiveOpticsPopupController,
 )
-from aslm.tools.file_functions import save_yaml_file, load_yaml_file
-from aslm.tools.decorators import FeatureList
-from aslm.tools.common_functions import load_module_from_file
-from aslm.config.config import get_aslm_path
+from navigate.tools.file_functions import save_yaml_file, load_yaml_file
+from navigate.tools.decorators import FeatureList
+from navigate.tools.common_functions import load_module_from_file
+from navigate.config.config import get_navigate_path
 
 
 # Logger Setup
@@ -521,7 +521,7 @@ class MenuController(GUIController):
         )
         self.view.menubar.menu_features.add_separator()
         # add feature lists from previous loaded ones
-        feature_lists_path = get_aslm_path() + "/feature_lists"
+        feature_lists_path = get_navigate_path() + "/feature_lists"
         if not os.path.exists(feature_lists_path):
             os.makedirs(feature_lists_path)
             return
@@ -577,12 +577,12 @@ class MenuController(GUIController):
 
     def open_log_files(self):
         """Open log files folder."""
-        path = os.path.join(get_aslm_path(), "logs")
+        path = os.path.join(get_navigate_path(), "logs")
         self.open_folder(path)
 
     def open_configuration_files(self):
         """Open configuration files folder."""
-        path = os.path.join(get_aslm_path(), "config")
+        path = os.path.join(get_navigate_path(), "config")
         self.open_folder(path)
 
     def populate_menu(self, menu_dict):
@@ -845,7 +845,7 @@ class MenuController(GUIController):
         features = [
             f for f in dir(module) if isinstance(getattr(module, f), FeatureList)
         ]
-        feature_lists_path = get_aslm_path() + "/feature_lists"
+        feature_lists_path = get_navigate_path() + "/feature_lists"
         feature_list_files = [
             temp
             for temp in os.listdir(feature_lists_path)
@@ -916,7 +916,7 @@ class MenuController(GUIController):
             True: add feature list successfully
             False: failed
         """
-        feature_lists_path = get_aslm_path() + "/feature_lists"
+        feature_lists_path = get_navigate_path() + "/feature_lists"
         if os.path.exists(f"{feature_lists_path}/{'_'.join(feature_list_name)}.yml"):
             return False
         self.view.menubar.menu_features.add_radiobutton(
@@ -964,7 +964,7 @@ class MenuController(GUIController):
         self.view.menubar.menu_features.delete(feature_list_name)
 
         # remove from yaml file
-        feature_lists_path = get_aslm_path() + "/feature_lists"
+        feature_lists_path = get_navigate_path() + "/feature_lists"
         feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
         temp = feature_records[feature_id - self.system_feature_list_count]
         os.remove(f"{feature_lists_path}/{temp['yaml_file_name']}")

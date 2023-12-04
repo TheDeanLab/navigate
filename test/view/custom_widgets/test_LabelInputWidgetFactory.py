@@ -7,7 +7,7 @@ class NastyVar:
 
 
 def test_label_input_get():
-    from aslm.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+    from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
     root = tk.Tk()
     label_input = LabelInput(root)

@@ -84,7 +84,7 @@ class IlastikSegmentation:
             Model object
         """
 
-        #: aslm.model.Model: Model object
+        #: navigate.model.Model: Model object
         self.model = model
 
         #: str: url of the service

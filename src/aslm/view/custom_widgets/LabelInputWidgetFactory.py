@@ -38,8 +38,8 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
-from aslm.view.custom_widgets.hovermixin import (
+from navigate.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
+from navigate.view.custom_widgets.hovermixin import (
     HoverButton,
     HoverCheckButton,
     HoverRadioButton,

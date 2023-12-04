@@ -40,15 +40,15 @@ from math import ceil
 import numpy as np
 
 # Local application imports
-from aslm.tools.multipos_table_tools import (
+from navigate.tools.multipos_table_tools import (
     update_table,
 )
-from aslm.view.main_window_content.multiposition_tab import MultiPositionTable
+from navigate.view.main_window_content.multiposition_tab import MultiPositionTable
 
 
 @pytest.mark.parametrize("pair", zip([5.6, -3.8, 0], [1, -1, 1]))
 def test_sign(pair):
-    from aslm.tools.multipos_table_tools import sign
+    from navigate.tools.multipos_table_tools import sign
 
     x, cmp_x = pair
 
@@ -106,7 +106,7 @@ def test_compute_tiles_from_bounding_box(
     f_overlap,
     f_track_with_z,
 ):
-    from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box
+    from navigate.tools.multipos_table_tools import compute_tiles_from_bounding_box
 
     tiles = compute_tiles_from_bounding_box(
         x_start,
@@ -185,7 +185,7 @@ def test_compute_tiles_from_bounding_box(
 @pytest.mark.parametrize("overlap", listize(np.random.rand(3)))
 @pytest.mark.parametrize("roi_length", listize(np.random.rand(3) * 1000))
 def test_calc_num_tiles(dist, overlap, roi_length):
-    from aslm.tools.multipos_table_tools import calc_num_tiles
+    from navigate.tools.multipos_table_tools import calc_num_tiles
 
     # dist = 300
     # overlap = .75

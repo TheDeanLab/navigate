@@ -38,10 +38,10 @@ import os
 # Third Party Imports
 
 # Local Imports
-from aslm.controller.controller import Controller
-from aslm.log_files.log_functions import log_setup
-from aslm.view.splash_screen import SplashScreen
-from aslm.tools.main_functions import (
+from navigate.controller.controller import Controller
+from navigate.log_files.log_functions import log_setup
+from navigate.view.splash_screen import SplashScreen
+from navigate.tools.main_functions import (
     evaluate_parser_input_arguments,
     create_parser,
 )

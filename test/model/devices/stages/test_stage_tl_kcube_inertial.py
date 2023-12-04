@@ -37,7 +37,7 @@ import random
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
+from navigate.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
 
 
 class MockKimController:

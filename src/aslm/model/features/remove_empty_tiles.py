@@ -36,7 +36,7 @@ from math import ceil
 # Third Party Imports
 
 # Local Imports
-from aslm.model.analysis.boundary_detect import find_tissue_boundary_2d
+from navigate.model.analysis.boundary_detect import find_tissue_boundary_2d
 
 
 def detect_tissue(image_data, percentage=0.0):
@@ -156,7 +156,7 @@ class DetectTissueInStack:
             `detect_tissue` function will be used.
         """
 
-        #: aslm.model.Model: The model object representing the microscope.
+        #: navigate.model.Model: The model object representing the microscope.
         self.model = model
 
         #: int: The number of Z planes to capture in the stack.
@@ -408,7 +408,7 @@ class RemoveEmptyPositions:
             A list of position flags to remove. Default is an empty list.
         """
 
-        #: aslm.model.Model: The model object representing the microscope.
+        #: navigate.model.Model: The model object representing the microscope.
         self.model = model
 
         #: list: A list of position flags to remove.

@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui_controller import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -53,7 +53,7 @@ class CameraSettingController(GUIController):
         ----------
         view : tkinter.Frame
             The view for the camera settings.
-        parent_controller : aslm.controller.main_controller.MainController
+        parent_controller : navigate.controller.main_controller.MainController
             The parent controller.
         """
         super().__init__(view, parent_controller)

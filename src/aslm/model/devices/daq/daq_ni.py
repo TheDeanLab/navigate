@@ -40,8 +40,8 @@ import nidaqmx
 import numpy as np
 
 # Local Imports
-from aslm.model.devices.daq.daq_base import DAQBase
-from aslm.tools.waveform_template_funcs import get_waveform_template_parameters
+from navigate.model.devices.daq.daq_base import DAQBase
+from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
 
 # Logger Setup
 p = __name__.split(".")[1]

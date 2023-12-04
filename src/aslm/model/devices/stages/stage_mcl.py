@@ -33,7 +33,7 @@ import importlib
 import logging
 import time
 
-from aslm.model.devices.stages.stage_base import StageBase
+from navigate.model.devices.stages.stage_base import StageBase
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -53,7 +53,7 @@ def build_MCLStage_connection(serialnum):
     stage_connection : dict
         Dictionary containing the connection information for the stage.
     """
-    mcl_controller = importlib.import_module("aslm.model.devices.APIs.mcl.madlib")
+    mcl_controller = importlib.import_module("navigate.model.devices.APIs.mcl.madlib")
 
     # Initialize
     mcl_controller.MCL_GrabAllHandles()

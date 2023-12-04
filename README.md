@@ -1,5 +1,5 @@
 <h1 align="center">
-<img src="./src/aslm/view/icon/mic.ico?raw=true" />
+<img src="./src/navigate/view/icon/mic.ico?raw=true" />
 
 ASLM - Autonomous Software for Light Microscopy
 </h1>
@@ -14,11 +14,11 @@ ASLM is an open source Python package for control of light-sheet microscopes. It
 Download and install [Miniconda](https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links).
 
 ```
-conda create -n aslm python=3.9.7
+conda create -n navigate python=3.9.7
 pip install git+https://github.com/TheDeanLab/ASLM.git
 ```
 
-To test, run `conda activate aslm` and launch in synthetic hardware mode with `aslm
+To test, run `conda activate navigate` and launch in synthetic hardware mode with `navigate
 -sh`. Developers will have to install additional dependencies with
 `pip install -e '.[dev]'`.
 ### Documentation

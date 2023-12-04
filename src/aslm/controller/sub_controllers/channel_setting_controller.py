@@ -37,8 +37,8 @@ import tkinter as tk
 # Third party imports
 
 # Local application imports
-from aslm.controller.sub_controllers.widget_functions import validate_wrapper
-from aslm.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.widget_functions import validate_wrapper
+from navigate.controller.sub_controllers.gui_controller import GUIController
 
 
 # Logger Setup
@@ -54,9 +54,9 @@ class ChannelSettingController(GUIController):
 
         Parameters
         ----------
-        view : aslm.view.channel_setting_view.ChannelSettingView
+        view : navigate.view.channel_setting_view.ChannelSettingView
             The view for the channel setting widgets.
-        parent_controller : aslm.controller.main_controller.MainController
+        parent_controller : navigate.controller.main_controller.MainController
             The parent controller.
         configuration_controller : ConfigurationController
             The configuration controller.

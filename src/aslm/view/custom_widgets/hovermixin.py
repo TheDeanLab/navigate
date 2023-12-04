@@ -37,7 +37,7 @@ from tkinter import ttk
 # Third Party Imports
 
 # Local Imports
-from aslm.view.custom_widgets.hover import Hover
+from navigate.view.custom_widgets.hover import Hover
 
 
 class HoverMixin:

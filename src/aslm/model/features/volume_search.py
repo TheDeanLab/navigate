@@ -31,7 +31,7 @@
 #
 
 from queue import Queue
-from aslm.model.analysis.boundary_detect import (
+from navigate.model.analysis.boundary_detect import (
     find_tissue_boundary_2d,
     binary_detect,
     map_boundary,
@@ -96,7 +96,7 @@ class VolumeSearch:
 
         Parameters
         ----------
-        model : aslm.model.model.Model
+        model : navigate.model.model.Model
             ASLM Model
         target_resolution : str
             Name of microscope to use for tiled imaging of tissue
@@ -113,7 +113,7 @@ class VolumeSearch:
             If True, save debug images to disk.
         """
 
-        #: aslm.model.model.Model: ASLM Model
+        #: navigate.model.model.Model: ASLM Model
         self.model = model
 
         #: str: Name of microscope to use for tiled imaging of tissue

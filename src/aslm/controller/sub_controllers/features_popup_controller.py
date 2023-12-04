@@ -40,14 +40,14 @@ import os
 from PIL import Image, ImageTk
 
 # Local application imports
-from aslm.view.popups.feature_list_popup import FeatureIcon, FeatureConfigPopup
-from aslm.view.custom_widgets.ArrowLabel import ArrowLabel
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.tools.image import create_arrow_image
-from aslm.tools.file_functions import load_yaml_file
-from aslm.model.features.feature_related_functions import convert_str_to_feature_list
-from aslm.model.features import feature_related_functions
-from aslm.config.config import get_aslm_path
+from navigate.view.popups.feature_list_popup import FeatureIcon, FeatureConfigPopup
+from navigate.view.custom_widgets.ArrowLabel import ArrowLabel
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.tools.image import create_arrow_image
+from navigate.tools.file_functions import load_yaml_file
+from navigate.model.features.feature_related_functions import convert_str_to_feature_list
+from navigate.model.features import feature_related_functions
+from navigate.config.config import get_navigate_path
 
 
 class FeaturePopupController(GUIController):
@@ -58,9 +58,9 @@ class FeaturePopupController(GUIController):
 
         Parameters
         ----------
-        view : aslm.view.popups.feature_list_popup.FeatureListPopup
+        view : navigate.view.popups.feature_list_popup.FeatureListPopup
             The view of the controller
-        parent_controller : aslm.controller.main_controller.MainController
+        parent_controller : navigate.controller.main_controller.MainController
             The parent controller
         feature_list_id : int, optional
             The id of the feature list, by default 0
@@ -332,7 +332,7 @@ class FeaturePopupController(GUIController):
             """The function to show the feature configuration popup"""
             # load feature parameter setting
             feature_config_path = (
-                f"{get_aslm_path()}/"
+                f"{get_navigate_path()}/"
                 f"feature_lists/feature_parameter_setting"
                 f"/{feature['name'].__name__}.yml"
             )
@@ -369,14 +369,14 @@ class FeaturePopupController(GUIController):
 
             Parameters
             ----------
-            popup : aslm.view.popups.feature_list_popup.FeatureConfigPopup
+            popup : navigate.view.popups.feature_list_popup.FeatureConfigPopup
                 The feature configuration popup
             """
             feature_name = popup.feature_name_widget.get()
             new_feature = getattr(feature_related_functions, feature_name)
             # load feature parameter setting
             feature_config_path = (
-                f"{get_aslm_path()}/"
+                f"{get_navigate_path()}/"
                 f"feature_lists/feature_parameter_setting"
                 f"/{new_feature.__name__}.yml"
             )
@@ -391,7 +391,7 @@ class FeaturePopupController(GUIController):
 
             Parameters
             ----------
-            popup : aslm.view.popups.feature_list_popup.FeatureConfigPopup
+            popup : navigate.view.popups.feature_list_popup.FeatureConfigPopup
                 The feature configuration popup
 
             Returns

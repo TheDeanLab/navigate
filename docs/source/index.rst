@@ -1,5 +1,5 @@
 
-.. _aslm-home:
+.. _navigate-home:
 
 ############################################
 **Autonomous Software for Light Microscopy**

@@ -40,7 +40,7 @@ import pandas as pd
 from pandastable import TableModel
 
 # Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui_controller import GUIController
 
 
 # Logger Setup

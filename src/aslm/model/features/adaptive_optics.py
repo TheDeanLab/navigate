@@ -42,9 +42,9 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 # Local imports
-from aslm.model.features.feature_container import load_features
-import aslm.model.analysis.image_contrast as img_contrast
-from aslm.model.features.image_writer import ImageWriter
+from navigate.model.features.feature_container import load_features
+import navigate.model.analysis.image_contrast as img_contrast
+from navigate.model.features.image_writer import ImageWriter
 
 
 def poly2(x, a, b, c):
@@ -187,10 +187,10 @@ class TonyWilson:
         self.laser_power = 0
         self.start_time = 0
 
-        #: aslm.model.Model: Model object
+        #: navigate.model.Model: Model object
         self.model = model
 
-        #: aslm.model.devices.mirrors.mirror_imop.ImagineOpticsMirror: Mirror object
+        #: navigate.model.devices.mirrors.mirror_imop.ImagineOpticsMirror: Mirror object
         self.mirror_controller = self.model.active_microscope.mirror.mirror_controller
 
         #: int: Number of modes

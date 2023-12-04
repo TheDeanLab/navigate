@@ -46,7 +46,7 @@ import yaml
 # Local Imports
 
 
-def get_aslm_path():
+def get_navigate_path():
     """Establish a program home directory in AppData/Local/.ASLM for Windows
     or ~/.ASLM for Mac and Linux.
 
@@ -57,19 +57,19 @@ def get_aslm_path():
 
     Examples
     --------
-    >>> get_aslm_path()
+    >>> get_navigate_path()
     'C:\\Users\\username\\AppData\\Local\\.ASLM'
     """
     if platform.system() == "Windows":
         base_directory = os.getenv("LOCALAPPDATA")
     else:
         base_directory = os.getenv("HOME")
-    aslm_path = os.path.join(base_directory, ".ASLM")
+    navigate_path = os.path.join(base_directory, ".ASLM")
 
-    if not os.path.exists(aslm_path):
-        os.mkdir(aslm_path)
+    if not os.path.exists(navigate_path):
+        os.mkdir(navigate_path)
 
-    return aslm_path
+    return navigate_path
 
 
 def get_configuration_paths():
@@ -89,10 +89,10 @@ def get_configuration_paths():
     waveform_templates_path : str
         Path to file containing waveform templates
     """
-    aslm_directory = get_aslm_path()
-    if not os.path.exists(aslm_directory):
-        os.mkdir(aslm_directory)
-    configuration_directory = Path(os.path.join(aslm_directory, "config"))
+    navigate_directory = get_navigate_path()
+    if not os.path.exists(navigate_directory):
+        os.mkdir(navigate_directory)
+    configuration_directory = Path(os.path.join(navigate_directory, "config"))
     if not os.path.exists(configuration_directory):
         os.mkdir(configuration_directory)
 
@@ -360,8 +360,8 @@ def verify_experiment_config(manager, configuration):
 
     # saving info
     saving_dict_sample = {
-        "root_directory": get_aslm_path(),
-        "save_directory": get_aslm_path(),
+        "root_directory": get_navigate_path(),
+        "save_directory": get_navigate_path(),
         "user": "Kevin",
         "tissue": "Lung",
         "celltype": "MV3",

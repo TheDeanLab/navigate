@@ -36,8 +36,8 @@ import time
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
-from aslm.model.devices.zoom.zoom_base import ZoomBase
+from navigate.model.devices.APIs.dynamixel import dynamixel_functions as dynamixel
+from navigate.model.devices.zoom.zoom_base import ZoomBase
 
 # Logger Setup
 p = __name__.split(".")[1]

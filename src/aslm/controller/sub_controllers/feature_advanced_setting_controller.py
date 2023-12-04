@@ -39,13 +39,13 @@ from tkinter import filedialog, messagebox
 # Third-party imports
 
 # Local application imports
-from aslm.model.features import feature_related_functions
+from navigate.model.features import feature_related_functions
 
-# from aslm.model.features.feature_related_functions import convert_str_to_feature_list
-from aslm.view.popups.feature_list_popup import FeatureAdvancedSettingPopup
-from aslm.tools.file_functions import load_yaml_file, save_yaml_file
-from aslm.tools.common_functions import load_module_from_file
-from aslm.config.config import get_aslm_path
+# from navigate.model.features.feature_related_functions import convert_str_to_feature_list
+from navigate.view.popups.feature_list_popup import FeatureAdvancedSettingPopup
+from navigate.tools.file_functions import load_yaml_file, save_yaml_file
+from navigate.tools.common_functions import load_module_from_file
+from navigate.config.config import get_navigate_path
 
 
 class FeatureAdvancedSettingController:
@@ -58,7 +58,7 @@ class FeatureAdvancedSettingController:
         ----------
         parent_view : tkinter.Toplevel
             The parent view of the popup window
-        parent_controller : aslm.controller.main_controller.MainController
+        parent_controller : navigate.controller.main_controller.MainController
             The parent controller of the popup window
         """
         self.parent_controller = parent_controller
@@ -85,14 +85,14 @@ class FeatureAdvancedSettingController:
 
         Parameters
         ----------
-        popup : aslm.view.popups.feature_list_popup.FeatureAdvancedSettingPopup
+        popup : navigate.view.popups.feature_list_popup.FeatureAdvancedSettingPopup
             The popup window
         """
         feature_name = popup.feature_name_widget.get()
         new_feature = getattr(feature_related_functions, feature_name)
         # load feature parameter setting
         feature_config_path = (
-            f"{get_aslm_path()}/"
+            f"{get_navigate_path()}/"
             f"feature_lists/feature_parameter_setting"
             f"/{new_feature.__name__}.yml"
         )
@@ -192,7 +192,7 @@ class FeatureAdvancedSettingController:
 
         # save to yaml file
         parameter_config_path = (
-            get_aslm_path() + "/feature_lists/feature_parameter_setting"
+            get_navigate_path() + "/feature_lists/feature_parameter_setting"
         )
         if not os.path.exists(parameter_config_path):
             os.mkdir(parameter_config_path)

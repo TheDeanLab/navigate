@@ -39,7 +39,7 @@ from nidaqmx.errors import DaqError
 from nidaqmx.constants import LineGrouping
 
 # Local Imports
-from aslm.model.devices.lasers.laser_base import LaserBase
+from navigate.model.devices.lasers.laser_base import LaserBase
 
 # Logger Setup
 p = __name__.split(".")[1]

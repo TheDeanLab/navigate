@@ -37,7 +37,7 @@ import time
 # Third Party Imports
 
 # Local Imports
-from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
+from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
 
 
 def test_autofocuspopup():

@@ -38,7 +38,7 @@ import nidaqmx
 from nidaqmx.constants import AcquisitionType
 
 # Local Imports
-from aslm.model.devices.galvo.galvo_base import GalvoBase
+from navigate.model.devices.galvo.galvo_base import GalvoBase
 
 # # Logger Setup
 p = __name__.split(".")[1]

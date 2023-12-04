@@ -38,7 +38,7 @@ import os
 import tifffile
 
 # Local Imports
-from aslm.config import get_aslm_path
+from navigate.config import get_navigate_path
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -131,7 +131,7 @@ class CameraBase:
         """
         serial_number = self.camera_parameters["hardware"]["serial_number"]
         try:
-            map_path = os.path.join(get_aslm_path(), "camera_maps")
+            map_path = os.path.join(get_navigate_path(), "camera_maps")
             self._offset = tifffile.imread(
                 os.path.join(map_path, f"{serial_number}_off.tiff")
             )

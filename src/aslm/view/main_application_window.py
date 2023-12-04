@@ -38,11 +38,11 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
-from aslm.view.main_window_content.settings_notebook import SettingsNotebook
-from aslm.view.main_window_content.display_notebook import CameraNotebook
-from aslm.view.main_window_content.acquire_notebook import AcquireBar
-from aslm.view.main_window_content.menus import Menubar
-from aslm.view.custom_widgets.scrollbars import ScrolledFrame
+from navigate.view.main_window_content.settings_notebook import SettingsNotebook
+from navigate.view.main_window_content.display_notebook import CameraNotebook
+from navigate.view.main_window_content.acquire_notebook import AcquireBar
+from navigate.view.main_window_content.menus import Menubar
+from navigate.view.custom_widgets.scrollbars import ScrolledFrame
 
 # Logger Setup
 p = __name__.split(".")[1]

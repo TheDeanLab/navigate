@@ -37,8 +37,8 @@ from tkinter import messagebox
 # Third Party Imports
 
 # Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.view.popups.acquire_popup import AcquirePopUp
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.view.popups.acquire_popup import AcquirePopUp
 
 # Logger Setup
 p = __name__.split(".")[1]

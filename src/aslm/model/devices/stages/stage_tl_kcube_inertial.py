@@ -36,7 +36,7 @@ import time
 from multiprocessing.managers import ListProxy
 
 # Local Imports
-from aslm.model.devices.stages.stage_base import StageBase
+from navigate.model.devices.stages.stage_base import StageBase
 
 
 # Logger Setup
@@ -58,7 +58,7 @@ def build_TLKIMStage_connection(serialnum):
         Thorlabs KIM Stage controller
     """
     kim_controller = importlib.import_module(
-        "aslm.model.devices.APIs.thorlabs.kcube_inertial"
+        "navigate.model.devices.APIs.thorlabs.kcube_inertial"
     )
 
     # Initialize

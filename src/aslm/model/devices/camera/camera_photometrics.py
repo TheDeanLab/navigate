@@ -40,7 +40,7 @@ from ctypes import *  # noqa
 import numpy as np
 
 # Local Imports
-from aslm.model.devices.camera.camera_base import CameraBase
+from navigate.model.devices.camera.camera_base import CameraBase
 
 # Logger Setup
 p = __name__.split(".")[1]

@@ -17,8 +17,8 @@ will execute (for example, move the stage, then snap a picture). Following
 this, the next set of features in sequence will be executed.
 
 Examples of some existing features include
-``aslm.model.features.common_features.ZStackAcquisition``, which acquires a
-z-stack, and ``aslm.model.features.autofocus.Autofocus``, which finds the
+``navigate.model.features.common_features.ZStackAcquisition``, which acquires a
+z-stack, and ``navigate.model.features.autofocus.Autofocus``, which finds the
 ideal plane of focus of a sample using a Discrete Cosine Transform.
 
 Currently Implemented Features
@@ -45,7 +45,7 @@ Currently Implemented Features
 The Feature Object
 ------------------
 
-Each feature is an object that accepts a pointer to ``aslm.model.model`` in its
+Each feature is an object that accepts a pointer to ``navigate.model.model`` in its
 ``__init__()``  arguments and contains a configuration dictionary that dictates
 feature behavior in its ``__init__()`` function. A complete configuration
 dictionary is shown below. As few or as many of these options can be specified
@@ -106,8 +106,8 @@ To create a customized feature, follow these steps:
 
 .. code-block:: python
 
-   from aslm.tools.decorators import FeatureList
-   from aslm.model.features.feature_related_functions import *
+   from navigate.tools.decorators import FeatureList
+   from navigate.model.features.feature_related_functions import *
 
    @FeatureList
    def feature_example():

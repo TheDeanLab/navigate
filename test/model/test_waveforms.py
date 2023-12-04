@@ -38,7 +38,7 @@ import numpy as np
 import pytest
 
 # Local Imports
-from aslm.model import waveforms
+from navigate.model import waveforms
 
 
 class TestWaveforms(unittest.TestCase):

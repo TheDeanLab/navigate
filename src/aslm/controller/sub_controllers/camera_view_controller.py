@@ -44,9 +44,9 @@ import numpy as np
 import copy
 
 # Local Imports
-from aslm.controller.sub_controllers.gui_controller import GUIController
-from aslm.model.analysis.camera import compute_signal_to_noise
-from aslm.tools.common_functions import VariableWithLock
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.model.analysis.camera import compute_signal_to_noise
+from navigate.tools.common_functions import VariableWithLock
 
 # Logger Setup
 p = __name__.split(".")[1]

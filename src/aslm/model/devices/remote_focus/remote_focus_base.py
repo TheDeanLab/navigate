@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.waveforms import remote_focus_ramp, smooth_waveform
+from navigate.model.waveforms import remote_focus_ramp, smooth_waveform
 
 # # Logger Setup
 p = __name__.split(".")[1]

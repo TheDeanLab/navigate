@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from aslm.model.waveforms import sawtooth, sine_wave
+from navigate.model.waveforms import sawtooth, sine_wave
 
 # # Logger Setup
 p = __name__.split(".")[1]

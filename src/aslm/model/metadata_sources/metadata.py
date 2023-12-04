@@ -35,8 +35,8 @@ import logging
 from typing import Optional
 
 # Local Imports
-from aslm.tools import xml_tools
-from aslm import __version__, __commit__
+from navigate.tools import xml_tools
+from navigate import __version__, __commit__
 
 from multiprocessing.managers import DictProxy
 

@@ -38,7 +38,7 @@ import nidaqmx
 from nidaqmx.constants import AcquisitionType
 
 # Local Imports
-from aslm.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
+from navigate.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
 
 # # Logger Setup
 p = __name__.split(".")[1]

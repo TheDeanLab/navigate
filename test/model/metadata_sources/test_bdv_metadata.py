@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.parametrize("ext", ["h5", "n5", "tiff"])
 def test_bdv_metadata(ext):
-    from aslm.model.metadata_sources.bdv_metadata import BigDataViewerMetadata
+    from navigate.model.metadata_sources.bdv_metadata import BigDataViewerMetadata
 
     md = BigDataViewerMetadata()
 

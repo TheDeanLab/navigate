@@ -234,6 +234,9 @@ class AdaptiveOpticsPopupController(GUIController):
         self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
             "TonyWilson"
         ]["metric"] = self.widgets["metric"]["variable"].get()
+        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
+            "TonyWilson"
+        ]["fitfunc"] = self.widgets["fitfunc"]["variable"].get()
 
         for k in self.modes_armed.keys():
             self.parent_controller.configuration["experiment"][

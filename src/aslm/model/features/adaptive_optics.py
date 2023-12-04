@@ -226,6 +226,10 @@ class TonyWilson:
             "AdaptiveOpticsParameters"
         ]["TonyWilson"]["metric"]
 
+        self.fit_func = self.model.configuration["experiment"][
+            "AdaptiveOpticsParameters"
+        ]["TonyWilson"]["fitfunc"]
+
         self.best_coefs_overall = deepcopy(self.best_coefs)
         self.best_metric = 0.0
         self.coef_sweep = None
@@ -571,7 +575,7 @@ class TonyWilson:
                 new_data = img_contrast.fast_normalized_dct_shannon_entropy(img, 3)[0]
 
             if len(self.plot_data) == self.n_steps:
-                self.process_data(coef, mode="gauss")
+                self.process_data(coef, mode=self.fit_func)
                 self.trace_list[self.mode_names[self.change_coef[coef]]] = {
                     "x": self.x,
                     "y": self.y,

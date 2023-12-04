@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -44,6 +45,21 @@ logger = logging.getLogger(p)
 
 
 def prepare_service(service_url, **kwargs):
+    """Prepare service for Ilastik segmentation
+
+    Parameters
+    ----------
+    service_url : str
+        url of the service
+    kwargs : dict
+        project_file : str
+        project file for Ilastik segmentation
+
+    Returns
+    -------
+    dict
+        response from the server
+    """
     service_url = service_url.rstrip("/")
     if service_url.endswith("ilastik"):
         r = requests.get(f"{service_url}/load?project={kwargs['project_file']}")
@@ -54,20 +70,52 @@ def prepare_service(service_url, **kwargs):
 
 
 class IlastikSegmentation:
+    """Ilastik segmentation class.
+
+    Uses Ilastik REST API to perform segmentation in a separate process.
+    """
+
     def __init__(self, model):
+        """Initialize Ilastik segmentation class.
+
+        Parameters
+        ----------
+        model : Model
+            Model object
+        """
+
+        #: aslm.model.Model: Model object
         self.model = model
 
+        #: str: url of the service
         self.service_url = self.model.configuration["rest_api_config"]["Ilastik"]["url"]
+
+        #: str: project file for Ilastik segmentation
         self.project_file = None
 
+        #: str: resolution of the current microscope
         self.resolution = None
+
+        #: str: zoom of the current microscope
         self.zoom = None
+
+        #: int: number of pieces
         self.pieces_num = 1
+
+        #: int: size of pieces
         self.pieces_size = 1
 
+        #: dict: configuration table
         self.config_table = {"data": {"init": self.init_func, "main": self.data_func}}
 
     def init_func(self, *args):
+        """Initialize Ilastik segmentation.
+
+        Parameters
+        ----------
+        args : list
+            list of arguments
+        """
         if (
             self.resolution
             != self.model.configuration["experiment"]["MicroscopeState"][
@@ -79,6 +127,13 @@ class IlastikSegmentation:
             self.update_setting()
 
     def data_func(self, frame_ids):
+        """Perform Ilastik segmentation.
+
+        Parameters
+        ----------
+        frame_ids : list
+            list of frame ids
+        """
         # Ilastik process multiple images in sequence.
         img_data = [base64.b64encode(self.model.data_buffer[idx]) for idx in frame_ids]
         json_data = {
@@ -91,7 +146,8 @@ class IlastikSegmentation:
             f"{self.service_url}/segmentation", json=json_data, stream=True
         )
         if response.status_code == 200:
-            # segmentation_mask is a dictionary like object with keys 'arr_0', 'arr_1'...
+            # segmentation_mask is a dictionary like object with keys 'arr_0',
+            # 'arr_1'...
             segmentation_mask = numpy.load(BytesIO(response.raw.read()))
             # display segmentation
             for idx in range(len(segmentation_mask)):
@@ -107,6 +163,7 @@ class IlastikSegmentation:
             print("There is something wrong!")
 
     def update_setting(self):
+        """Update Ilastik segmentation settings."""
         self.resolution = self.model.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
@@ -134,6 +191,8 @@ class IlastikSegmentation:
             )
             / self.pieces_num
         )
+
+        #: float: position step size
         self.posistion_step_size = self.pieces_size * pixel_size
         # calculate corner (x,y)
         curr_fov_x = (
@@ -148,16 +207,28 @@ class IlastikSegmentation:
             )
             * curr_pixel_size
         )
+
+        #: float: x start position
         self.x_start = (
             float(self.model.configuration["experiment"]["StageParameters"]["x"])
             - curr_fov_x / 2
         )
+
+        #: float: y start position
         self.y_start = (
             float(self.model.configuration["experiment"]["StageParameters"]["y"])
             - curr_fov_y / 2
         )
 
     def mark_position(self, mask):
+        """Mark position based on the segmentation mask.
+
+        Parameters
+        ----------
+        mask : numpy.ndarray
+            segmentation mask
+        """
+
         # target_label = self.model.ilastik_target
         target_label = self.model.ilastik_target_labels
         lx, rx = 0, self.pieces_size

@@ -40,8 +40,7 @@ from aslm.model.analysis.boundary_detect import find_tissue_boundary_2d
 
 
 def detect_tissue(image_data, percentage=0.0):
-    """
-    Detect tissue in an image and determine if it exceeds a specified percentage.
+    """Detect tissue in an image and determine if it exceeds a specified percentage.
 
     This function takes an image in the form of image data and detects tissue
     within the image. It calculates the percentage of tissue area with respect
@@ -103,8 +102,7 @@ def detect_tissue(image_data, percentage=0.0):
 
 
 def detect_tissue2(image_data, percentage=0.0):
-    """
-    Detect Tissue in an Image (Version 2).
+    """Detect Tissue in an Image (Version 2).
 
     This function analyzes an image to determine if it contains tissue based on
     a specified percentage threshold. Unlike other tissue detection methods,
@@ -134,78 +132,49 @@ def detect_tissue2(image_data, percentage=0.0):
 
 
 class DetectTissueInStack:
-    """
-    Detect Tissue in a Stack of Images.
+    """Detect Tissue in a Stack of Images.
 
     This class is used to detect tissue in a stack of images by moving the microscope
     stage through different Z and F positions and analyzing each frame for tissue
     presence.
-
-    Parameters:
-    -----------
-    model : object
-        The model object representing the microscope.
-
-    planes : int, optional
-        The number of Z planes to capture in the stack. Default is 1.
-
-    percentage : float, optional
-        The minimum percentage of tissue required to consider a frame as having tissue.
-        Default is 0.75 (75%).
-
-    detect_func : function, optional
-        The custom tissue detection function to use. If not specified, the default
-        `detect_tissue` function will be used.
-
-    Attributes:
-    -----------
-    model : object
-        The model object representing the microscope.
-
-    planes : int
-        The number of Z planes to capture in the stack.
-
-    percentage : float
-        The minimum percentage of tissue required to consider a frame as having tissue.
-
-    detect_func : function
-        The tissue detection function used to analyze image frames.
-
-    config_table : dict
-        A dictionary specifying the configuration for signal and data functions.
-
-    Methods:
-    --------
-    pre_func_signal()
-        Initialization function for signal processing.
-
-    in_func_signal()
-        Signal processing function to move the microscope stage.
-
-    end_func_signal()
-        Signal processing function to end the signal phase.
-
-    pre_func_data()
-        Initialization function for data processing.
-
-    in_func_data(frame_ids)
-        Data processing function to analyze image frames for tissue presence.
-
-    end_func_data()
-        Data processing function to end the data phase.
-
     """
 
     def __init__(self, model, planes=1, percentage=0.75, detect_func=None):
+        """Initialize the DetectTissueInStack class.
+
+        Parameters:
+        -----------
+        model : object
+            The model object representing the microscope.
+        planes : int, optional
+            The number of Z planes to capture in the stack. Default is 1.
+        percentage : float, optional
+            The minimum percentage of tissue required to consider a frame as having
+            tissue. Default is 0.75 (75%).
+        detect_func : function, optional
+            The custom tissue detection function to use. If not specified, the default
+            `detect_tissue` function will be used.
+        """
+
+        #: aslm.model.Model: The model object representing the microscope.
         self.model = model
+
+        #: int: The number of Z planes to capture in the stack.
         self.planes = int(planes)
+
+        #: float: The minimum percentage of tissue required to consider a frame as
+        # having tissue.
         self.percentage = float(percentage)
+
         # if not specify a detect function, use the default one
         if detect_func is None:
+            #: function: The tissue detection function used to analyze image frames.
             self.detect_func = detect_tissue
         else:
             self.detect_func = detect_func
 
+        #: dict: A dictionary specifying the configuration for signal and data
+        # functions.
         self.config_table = {
             "signal": {
                 "init": self.pre_func_signal,
@@ -221,49 +190,50 @@ class DetectTissueInStack:
         }
 
     def pre_func_signal(self):
-        """
-        Initialization function for signal processing.
+        """Initialization function for signal processing.
 
         This method is called at the beginning of the signal processing phase
         and initializes the necessary parameters for moving the microscope stage.
-
-        Returns:
-        --------
-        None
         """
 
         microscope_config = self.model.configuration["experiment"]["MicroscopeState"]
         # get current z and f position
         pos = self.model.get_stage_position()
+
+        #: float: The current Z position of the microscope stage.
         self.current_z_pos = pos["z_pos"] + float(microscope_config["start_position"])
+
+        #: float: The current F position of the microscope stage.
         self.current_f_pos = pos["f_pos"] + float(microscope_config["start_focus"])
+
         # calculate Z and F stage step sizes
-        # initialize place count
         z_pos_range = float(microscope_config["end_position"]) - float(
             microscope_config["start_position"]
         )
         f_pos_range = float(microscope_config["end_focus"]) - float(
             microscope_config["start_focus"]
         )
+
+        #: int: The number of Z planes to capture in the stack.
         if self.planes == 1:
             self.current_z_pos = self.current_z_pos + z_pos_range / 2
             self.current_f_pos = self.current_f_pos + f_pos_range / 2
         else:
+            #: float: The Z stage step size.
             self.z_step = (z_pos_range) / (self.planes - 1)
+
+            #: float: The F stage step size.
             self.f_step = (f_pos_range) / (self.planes - 1)
+
+        #: int: The current scan number.
         self.scan_num = 0
 
     def in_func_signal(self):
-        """
-        Signal processing function to move the microscope stage.
+        """Signal processing function to move the microscope stage.
 
         This method is called during the signal processing phase to move the microscope
          stage to the specified Z and F positions. It increments the Z and F
          positions for each scan.
-
-        Returns:
-        --------
-        None
         """
 
         # move to Z anf F position
@@ -278,8 +248,7 @@ class DetectTissueInStack:
         self.scan_num += 1
 
     def end_func_signal(self):
-        """
-        Signal processing function to end the signal phase.
+        """Signal processing function to end the signal phase.
 
         This method is called to determine whether the signal phase should end.
         It checks if the specified number of Z planes have been scanned.
@@ -299,8 +268,7 @@ class DetectTissueInStack:
         return False
 
     def pre_func_data(self):
-        """
-        Initialization function for data processing.
+        """Initialization function for data processing.
 
         This method is called at the beginning of the data processing phase and
         initializes variables for tracking received frames and tissue detection.
@@ -309,13 +277,14 @@ class DetectTissueInStack:
         --------
         None
         """
-
+        #: int: The number of received frames.
         self.received_frames = 0
+
+        #: bool: Flag indicating whether tissue is detected.
         self.has_tissue_flag = False
 
     def in_func_data(self, frame_ids):
-        """
-        Data processing function to analyze image frames for tissue presence.
+        """Data processing function to analyze image frames for tissue presence.
 
         This method is called during the data processing phase to analyze image frames
         for tissue presence. It checks if any of the received frames contain
@@ -346,8 +315,7 @@ class DetectTissueInStack:
         return self.has_tissue_flag
 
     def end_func_data(self):
-        """
-        Data processing function to end the data phase.
+        """Data processing function to end the data phase.
 
         This method is called to determine whether the data phase should end. It checks
          if the specified number of frames have been received.
@@ -357,88 +325,56 @@ class DetectTissueInStack:
         bool
             True if the data phase should end, False otherwise.
         """
-
         return self.received_frames >= self.planes
 
 
 class DetectTissueInStackAndRecord(DetectTissueInStack):
-    """
-    Detect Tissue in a Stack of Images and Record Positions.
+    """Detect Tissue in a Stack of Images and Record Positions.
 
     This class extends the functionality of detecting tissue in a stack of images
     and also records positions where tissue was detected.
-
-    Parameters:
-    -----------
-    model : object
-        The model object representing the microscope.
-
-    planes : int, optional
-        The number of Z planes to capture in the stack. Default is 1.
-
-    percentage : float, optional
-        The minimum percentage of tissue required to consider a frame as having tissue.
-        Default is 0.75 (75%).
-
-    position_records : list, optional
-        A list to record positions where tissue was detected. Default is an empty list.
-
-    detect_func : function, optional
-        The custom tissue detection function to use. If not specified, the default
-        `detect_tissue` function will be used.
-
-    Attributes:
-    -----------
-    model : object
-        The model object representing the microscope.
-
-    planes : int
-        The number of Z planes to capture in the stack.
-
-    percentage : float
-        The minimum percentage of tissue required to consider a frame as having tissue.
-
-    position_records : list
-        A list to record positions where tissue was detected.
-
-    detect_func : function
-        The tissue detection function used to analyze image frames.
-
-    Methods:
-    --------
-    pre_func_data()
-        Initialization function for data processing. Extends the base class method.
-
-    end_func_data()
-        Data processing function to end the data phase. Extends the base class method.
-
     """
 
     def __init__(
         self, model, planes=1, percentage=0.75, position_records=[], detect_func=None
     ):
+        """Initialize the DetectTissueInStackAndRecord class.
+
+        Parameters:
+        -----------
+        model : object
+            The model object representing the microscope.
+        planes : int, optional
+            The number of Z planes to capture in the stack. Default is 1.
+        percentage : float, optional
+            The minimum percentage of tissue required to consider a frame as having
+            tissue. Default is 0.75 (75%).
+        position_records : list, optional
+            A list to record positions where tissue was detected. Default is an empty
+            list.
+        detect_func : function, optional
+            The custom tissue detection function to use. If not specified, the default
+            `detect_tissue` function will be used.
+        """
         super().__init__(model, planes, percentage, detect_func)
+
+        #: list: A list to record positions where tissue was detected.
         self.position_records = position_records
 
     def pre_func_data(self):
-        """
-        Initialization function for data processing. Extends the base class method.
+        """Initialization function for data processing. Extends the base class method.
 
         This method is called at the beginning of the data processing phase and
         initializes variables for tracking received frames, tissue detection,
         and records the position.
-
-        Returns:
-        --------
-        None
         """
 
         super().pre_func_data()
         self.position_records.append(True)
 
     def end_func_data(self):
-        """
-        Data processing function to end the data phase. Extends the base class method.
+        """Data processing function to end the data phase. Extends the base class
+        method.
 
         This method is called to determine whether the data phase should end. It checks
         if the specified number of frames have been received and updates the position
@@ -455,44 +391,35 @@ class DetectTissueInStackAndRecord(DetectTissueInStack):
 
 
 class RemoveEmptyPositions:
-    """
-    Remove Empty Positions from the Model.
+    """Remove Empty Positions from the Model.
 
     This class is used to remove empty positions from the model based on the specified
     position flags.
-
-    Parameters:
-    -----------
-    model : object
-        The model object representing the microscope.
-
-    position_flags : list, optional
-        A list of position flags indicating which positions to remove. Default is an
-        empty list.
-
-    Attributes:
-    -----------
-    model : object
-        The model object representing the microscope.
-
-    position_records : list
-        A list of position flags indicating which positions to remove.
-
-    Methods:
-    --------
-    signal_func()
-        Main signal processing function to remove empty positions.
-
     """
 
     def __init__(self, model, position_flags=[]):
+        """Initialize the RemoveEmptyPositions class.
+
+        Parameters:
+        -----------
+        model : object
+            The model object representing the microscope.
+        position_flags : list, optional
+            A list of position flags to remove. Default is an empty list.
+        """
+
+        #: aslm.model.Model: The model object representing the microscope.
         self.model = model
+
+        #: list: A list of position flags to remove.
         self.position_records = position_flags
+
+        #: dict: A dictionary specifying the configuration for signal and data
+        # functions.
         self.config_table = {"signal": {"main": self.signal_func}}
 
     def signal_func(self):
-        """
-        Main signal processing function to remove empty positions.
+        """Main signal processing function to remove empty positions.
 
         This method processes the signal to remove empty positions from the model based
         on the specified position flags. It puts a "remove_positions" event into the

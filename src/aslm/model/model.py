@@ -958,8 +958,7 @@ class Model:
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()
             self.active_microscope.daq.prepare_acquisition(
-                f"channel_{self.active_microscope.current_channel}",
-                self.active_microscope.current_exposure_time,
+                f"channel_{self.active_microscope.current_channel}"
             )
             self.active_microscope.daq.run_acquisition()
         finally:

@@ -75,8 +75,11 @@ class DAQBase:
         #: float: Sample rate of the DAQ
         self.sample_rate = self.daq_parameters["sample_rate"]
 
-        #: float: Sweep time of the DAQ
-        self.sweep_time = self.daq_parameters["sweep_time"]
+        #: dict: Sweep times for different channels
+        self.sweep_times = None
+        
+        #: dict: exposure times for different channels
+        self.exposure_times = None
 
         # Remote Focus Parameters
         #: dict: Dictionary of remote focus ramp falling percentages
@@ -91,17 +94,6 @@ class DAQBase:
         self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["camera"]["delay_percent"]
-
-        #: float: Camera pulse percentage
-        self.camera_pulse_percent = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["camera"]["pulse_percent"]
-
-        #: float: Camera high time
-        self.camera_high_time = self.camera_pulse_percent * 0.01 * self.sweep_time
-
-        #: float: Camera delay time
-        self.camera_delay = self.camera_delay_percent * 0.01 * self.sweep_time
 
         #: dict: Dictionary of waveforms.
         self.waveform_dict = {}
@@ -131,16 +123,12 @@ class DAQBase:
             Dictionary of waveforms to pass to galvo and ETL, plus a camera waveform for
             display purposes.
         """
+        self.exposure_times = exposure_times
+        self.sweep_times = sweep_times
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         self.enable_microscope(microscope_name)
 
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["camera"]["delay_percent"]
-        self.sample_rate = self.configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["daq"]["sample_rate"]
 
         # Iterate through the dictionary.
         for channel_key in microscope_state["channels"].keys():
@@ -150,11 +138,11 @@ class DAQBase:
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
                 exposure_time = exposure_times[channel_key]
-                self.sweep_time = sweep_times[channel_key]
+                sweep_time = sweep_times[channel_key]
 
                 self.waveform_dict[channel_key] = camera_exposure(
                     sample_rate=self.sample_rate,
-                    sweep_time=self.sweep_time,
+                    sweep_time=sweep_time,
                     exposure=exposure_time,
                     camera_delay=self.camera_delay_percent,
                 )
@@ -171,3 +159,10 @@ class DAQBase:
         """
         if microscope_name != self.microscope_name:
             self.microscope_name = microscope_name
+
+        self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"]["delay_percent"]
+        self.sample_rate = self.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["daq"]["sample_rate"]

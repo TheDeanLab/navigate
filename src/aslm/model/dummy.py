@@ -65,8 +65,6 @@ class DummyController:
         view : DummyView
             The view to be controlled by this controller.
 
-
-
         Example
         -------
         >>> controller = DummyController(view)
@@ -111,7 +109,6 @@ class DummyController:
 
         Appends commands sent via execute,
         first element is oldest command/first to pop off
-
 
         Parameters
         ----------
@@ -261,7 +258,6 @@ class DummyModel:
         ----
         - The function utilizes a signal container and a signal pipe for communication.
         - It terminates when the `end_flag` is set and sends a "shutdown" signal.
-
         """
 
         self.signal_container.reset()
@@ -287,8 +283,6 @@ class DummyModel:
         This method continuously sends data requests using a data pipe and receives
         corresponding frame IDs. It appends the received frame IDs to the data storage
         and runs data processing operations if a data container is available.
-
-
 
         Notes
         -----

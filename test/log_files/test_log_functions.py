@@ -31,7 +31,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from pathlib import Path
-
 import pytest
 
 

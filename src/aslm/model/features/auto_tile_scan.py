@@ -44,49 +44,6 @@ class CalculateFocusRange:
     This class provides functionality to calculate the focus range of a microscope
     using autofocus measurements.
 
-    Parameters:
-    ----------
-    model : MicroscopeModel
-        The microscope model object used for focus range calculation.
-
-    Attributes:
-    ----------
-    model : MicroscopeModel
-        The microscope model associated with the focus range calculation.
-
-    autofocus : Autofocus
-        An Autofocus instance used for autofocus operations.
-
-    config_table : dict
-        A dictionary defining the configuration for various stages of focus range
-        calculation. It contains the following keys:
-        - "signal": Configuration for the signal acquisition stage.
-        - "data": Configuration for the data acquisition stage.
-        - "node": Configuration related to node type and device.
-
-    Methods:
-    --------
-    pre_func_signal():
-        Prepare for the signal acquisition stage, setting up initial values and
-        configurations.
-
-    in_func_signal():
-        Perform actions during the signal acquisition stage, such as autofocus
-        measurements.
-
-    end_func_signal():
-        Finalize the signal acquisition stage and check if additional steps are needed.
-
-    pre_func_data():
-        Prepare for the data acquisition stage, if applicable.
-
-    in_func_data(frame_ids=[]):
-        Perform actions during the data acquisition stage, possibly for specific
-        frame IDs.
-
-    end_func_data():
-        Finalize the data acquisition stage, if applicable.
-
     Notes:
     ------
     - This class is used to calculate the focus range of a microscope by utilizing
@@ -109,8 +66,20 @@ class CalculateFocusRange:
     """
 
     def __init__(self, model):
+        """Initialize the CalculateFocusRange class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for focus range calculation.
+        """
+        #: MicroscopeModel: The microscope model object used for focus range
         self.model = model
+        #: Autofocus: The autofocus object used for focus range calculation.
         self.autofocus = Autofocus(model)
+        #: dict: A dictionary that defines the configuration for each stage of the
+        # calculation process, including initialization, main execution, and
+        # finalization steps.
         self.config_table = {
             "signal": {
                 "init": self.pre_func_signal,
@@ -130,25 +99,22 @@ class CalculateFocusRange:
 
         This method sets up initial values and configurations before the signal
         acquisition stage.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         self.model.active_microscope.current_channel = 0
         self.model.active_microscope.prepare_next_channel()
         self.autofocus.pre_func_signal()
+        #: int: The number of autofocus measurements performed.
         self.autofocus_count = 0
+        #: float: The starting z position of the focus range.
         self.focus_start_pos = None
+        #: float: The ending z position of the focus range.
         self.focus_end_pos = None
 
         # get current z pos, calculate last z pos in a stack
         stage_pos = self.model.get_stage_position()
+        #: float: The current z position of the stage.
         self.current_z_pos = stage_pos["z_pos"]
+        #: float: The last z position of the stage in a stack.
         self.last_z_pos = self.current_z_pos + float(
             self.model.configuration["experiment"]["MicroscopeState"]["end_position"]
         )
@@ -159,14 +125,6 @@ class CalculateFocusRange:
         This method is responsible for carrying out actions during the signal
         acquisition stage, such as performing autofocus measurements and calculating
         focus-related parameters.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         if self.autofocus_count == 0:
             self.focus_start_pos = self.autofocus.in_func_signal()
@@ -185,15 +143,10 @@ class CalculateFocusRange:
                 )
 
     def end_func_signal(self):
-        """
-        Finalize the signal acquisition stage.
+        """Finalize the signal acquisition stage.
 
         This method finalizes the signal acquisition stage and checks if additional
         steps are needed based on the results of autofocus measurements.
-
-        Parameters:
-        ----------
-        None
 
         Returns:
         -------
@@ -211,25 +164,15 @@ class CalculateFocusRange:
         return self.autofocus_count >= 2
 
     def pre_func_data(self):
-        """
-        Prepare for the data acquisition stage, if applicable.
+        """Prepare for the data acquisition stage, if applicable.
 
         This method prepares for the data acquisition stage, which may involve
         setting up configurations or performing actions before data acquisition begins.
-
-        Parameters:
-        ----------
-        None
-
-        Returns:
-        -------
-        None
         """
         self.autofocus.pre_func_data()
 
     def in_func_data(self, frame_ids=[]):
-        """
-        Perform actions during the data acquisition stage, possibly for specific
+        """Perform actions during the data acquisition stage, possibly for specific
         frame IDs.
 
         This method performs actions during the data acquisition stage, which may
@@ -241,24 +184,15 @@ class CalculateFocusRange:
         frame_ids : list, optional
             A list of frame IDs for which data acquisition should be performed.
             Default is an empty list.
-
-        Returns:
-        -------
-        None
         """
         self.autofocus.in_func_data(frame_ids)
 
     def end_func_data(self):
-        """
-        Finalize the data acquisition stage, if applicable.
+        """Finalize the data acquisition stage, if applicable.
 
         This method finalizes the data acquisition stage, and it may involve
         additional actions or
         checks.
-
-        Parameters:
-        ----------
-        None
 
         Returns:
         -------

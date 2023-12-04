@@ -368,13 +368,12 @@ class GalvoNIStage(StageBase):
         # update analog waveform
         self.daq.update_analog_task(self.axes_channels[0].split("/")[0])
 
-        # Stage Settle Duration
+        # Stage Settle Duration in Milliseconds
         if (
             wait_until_done
-            and self.distance_threshold
+            and (self.distance_threshold is not None)
             and (delta_position >= self.distance_threshold)
         ):
-            # Convert from milliseconds to seconds.
             time.sleep(self.stage_settle_duration)
 
         setattr(self, f"{axis}_pos", axis_abs)

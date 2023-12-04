@@ -62,7 +62,6 @@ def main():
     *args : iterable
         --synthetic_hardware
         --sh
-        --debug
         --config_file
         --experiment_file
         --waveform_constants_path

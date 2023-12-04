@@ -75,6 +75,8 @@ class FeatureConfigPopup:
         ----------
         root : tk.Tk
             Root window of the application
+        *args : list
+            List of arguments
         features : list
             List of features
         feature_name : str
@@ -85,11 +87,12 @@ class FeatureConfigPopup:
             List of arguments value
         """
         # Creating popup window with this name and size/placement,
-        # PopUp is a Toplevel window
+
         #: PopUp: Popup window
         self.popup = PopUp(
             root, kwargs["title"], "+320+180", top=False, transient=False
         )
+
         # Change background of popup window to white
         self.popup.configure(bg="white")
 
@@ -98,6 +101,7 @@ class FeatureConfigPopup:
 
         #: list: List of input widgets
         self.inputs = []
+
         #: LabelInput: Feature name widget
         self.feature_name_widget = LabelInput(
             parent=content_frame,

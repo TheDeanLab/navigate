@@ -40,6 +40,28 @@ import numpy as np
 
 
 def draw_box(img, xl, yl, xu, yu, fill=65535):
+    """Draw a box on an image
+
+    Parameters
+    ----------
+    img : np.ndarray
+        Image to draw on
+    xl : int
+        Lower x coordinate
+    yl : int
+        Lower y coordinate
+    xu : int
+        Upper x coordinate
+    yu : int
+        Upper y coordinate
+    fill : int
+        Value to fill box with
+
+    Returns
+    -------
+    np.ndarray
+        Image with box drawn
+    """
     img[xl:xu, yl] = fill
     img[xl:xu, yu] = fill
     img[xl, yl:yu] = fill
@@ -48,6 +70,18 @@ def draw_box(img, xl, yl, xu, yu, fill=65535):
 
 
 class VolumeSearch:
+    """VolumeSearch.
+
+    Find the outer boundary of a tissue, moving the stage through z. Assumes
+    there is no tissue out-of-frame in the x,y-directions.
+
+    Construct a list of stage positions that will tile the entire tissue
+    boundary in x,y,z at target_resolution, target_zoom. Current resolution
+    and zoom is self.model.active_microscope_name and
+    self.model.configuration["experiment"]["MicroscopeState"]["zoom"].
+
+    """
+
     def __init__(
         self,
         model,
@@ -58,14 +92,7 @@ class VolumeSearch:
         overlap=0.1,
         debug=False,
     ):
-        """
-        Find the outer boundary of a tissue, moving the stage through z. Assumes
-        there is no tissue out-of-frame in the x,y-directions.
-
-        Construct a list of stage positions that will tile the entire tissue
-        boundary in x,y,z at target_resolution, target_zoom. Current resolution
-        and zoom is self.model.active_microscope_name and
-        self.model.configuration["experiment"]["MicroscopeState"]["zoom"].
+        """Initialize VolumeSearch
 
         Parameters
         ----------
@@ -82,34 +109,70 @@ class VolumeSearch:
             Flip the direction in which new tiles are added.
         overlap : float
             Value between 0 and 1 indicating percent overlap of tiles.
+        debug : bool
+            If True, save debug images to disk.
         """
+
+        #: aslm.model.model.Model: ASLM Model
         self.model = model
+
+        #: str: Name of microscope to use for tiled imaging of tissue
         self.target_resolution = target_resolution
+
+        #: str: Resolution of microscope (target_resolution) to use for tiled imaging
         self.target_zoom = target_zoom
 
+        #: int: Number of z-steps to take
         self.z_steps = 0
+
+        #: float: Size of z-step
         self.z_step_size = 0
+
+        #: float: Current z-position
         self.z_pos = 0
+
+        #: float: Size of focus step
         self.f_step_size = 0
+
+        #: float: Current focus position
         self.f_pos = 0
+
+        #: int: Current z-index
         self.f_offset = 0
+
+        #: int: Current z-index
         self.curr_z_index = 0
 
         # By default an increase in x/y stage position corresponds
         # to a sample moving down/right into the field of view
+        #: int: 1 if flipx is False, -1 if flipx is True
         self.sinx = 1 if flipx else -1
+
+        #: int: 1 if flipy is False, -1 if flipy is True
         self.siny = 1 if flipy else -1
 
+        #: float: Percent overlap of tiles
         self.overlap = max(0, min(overlap, 0.999))
 
+        #: Queue: Queue for communicating whether tissue was found
         self.has_tissue_queue = Queue()
+
+        #: int: 1 if moving up, -1 if moving down
         self.direction = 1  # up: 1; down: -1
+
+        #: bool: True if tissue was found
         self.has_tissue = False
+
+        #: dict: Boundary of tissue
         self.first_boundary = None
+
+        #: dict: Boundary of tissue
         self.pre_boundary = None
 
+        #: bool: True if the search is complete
         self.end_flag = False
 
+        #: dict: Feature configuration
         self.config_table = {
             "signal": {
                 "init": self.pre_signal_func,
@@ -127,10 +190,14 @@ class VolumeSearch:
             "node": {"node_type": "multi-step", "device_related": True},
         }
 
+        #: bool: True if debug mode is enabled
         self.debug = debug
+
+        #: np.ndarray: Debug image
         self.volumes_selected = None
 
     def pre_signal_func(self):
+        """Initialize signal function"""
         self.model.active_microscope.current_channel = 0
         self.model.active_microscope.prepare_next_channel()
 
@@ -171,6 +238,15 @@ class VolumeSearch:
             )
 
     def signal_func(self):
+        """Signal function.
+
+        Move the stage to the next z-position.
+
+        Returns
+        -------
+        bool
+            True if the signal function should be called again.
+        """
         self.model.logger.debug(f"acquiring at z:{self.curr_z_index}")
         z = self.z_pos + self.curr_z_index * self.z_step_size
         f = self.f_pos + self.curr_z_index * self.f_step_size
@@ -178,6 +254,15 @@ class VolumeSearch:
         return True
 
     def signal_response_func(self, *args):
+        """Signal response function.
+
+        Check if tissue was found. If not, move the stage to the next z-position.
+
+        Returns
+        -------
+        bool
+            True if the signal function should be called again.
+        """
         has_tissue = self.has_tissue_queue.get()
 
         if not has_tissue or self.curr_z_index == self.z_steps - 1:
@@ -188,9 +273,19 @@ class VolumeSearch:
         return True
 
     def signal_end(self):
+        """Signal end function.
+
+        Check if the search is complete.
+
+        Returns
+        -------
+        bool
+            True if the search is complete.
+        """
         return self.end_flag
 
     def init_data_func(self):
+        """Initialize data function"""
         # Establish current and target pixel sizes
         microscope_name = self.model.active_microscope_name
         curr_zoom = self.model.configuration["experiment"]["MicroscopeState"]["zoom"]
@@ -261,6 +356,20 @@ class VolumeSearch:
         self.boundary = {}
 
     def data_func(self, frame_ids):
+        """Data function.
+
+        Find the tissue boundary in the current frame.
+
+        Parameters
+        ----------
+        frame_ids : list
+            List of frame ids to process.
+
+        Returns
+        -------
+        bool
+            True if the data function should be called again.
+        """
         for idx in frame_ids:
             img_data = self.model.data_buffer[idx]
             # TODO: make sure set the right threshold_value in
@@ -298,6 +407,15 @@ class VolumeSearch:
             self.has_tissue_queue.put(self.has_tissue)
 
     def end_data_func(self):
+        """End data function.
+
+        Map the tissue boundary to stage positions.
+
+        Returns
+        -------
+        bool
+            True if the search is complete.
+        """
         if self.end_flag:
             direction = True
             positions = []
@@ -341,4 +459,5 @@ class VolumeSearch:
         return self.end_flag
 
     def cleanup(self):
+        """Cleanup function"""
         self.has_tissue_queue.put(False)

@@ -51,59 +51,6 @@ class TreeNode:
     behavior of a microscope or similar device. Each node has a name, associated
     functions, and properties that define its behavior in the control sequence.
 
-    Parameters:
-    ----------
-    feature_name : str
-        The name or identifier of the feature associated with this node.
-
-    func_dict : dict
-        A dictionary containing functions associated with this node. The dictionary
-        should include keys for different signals or events and corresponding function
-        references to be executed when those signals are received.
-
-    node_type : str, optional
-        The type of the node, which can be 'one-step' or 'multi-step'. Default is
-        'one-step'.
-
-    device_related : bool, optional
-        A boolean indicating whether the node is related to device control. Default
-        is False.
-
-    need_response : bool, optional
-        A boolean indicating whether a response is needed from this node. Default is
-        False.
-
-    Attributes:
-    ----------
-    node_name : str
-        The name or identifier of the feature associated with this node.
-
-    node_funcs : dict
-        A dictionary containing functions associated with this node.
-
-    node_type : str
-        The type of the node, which can be 'one-step' or 'multi-step'.
-
-    device_related : bool
-        A boolean indicating whether the node is related to device control.
-
-    need_response : bool
-        A boolean indicating whether a response is needed from this node.
-
-    is_initialized : bool
-        A boolean indicating whether the node has been initialized.
-
-    child : TreeNode or None
-        A reference to the child node if one exists, otherwise None.
-
-    sibling : TreeNode or None
-        A reference to the sibling node if one exists, otherwise None.
-
-    Methods:
-    --------
-    set_property(**kwargs):
-        Set the properties of the TreeNode object using keyword arguments.
-
     Notes:
     ------
     - This class is used to represent nodes in a control sequence tree where each node
@@ -131,18 +78,47 @@ class TreeNode:
         device_related=False,
         need_response=False,
     ):
+        """Initialize the TreeNode object.
+
+        Parameters:
+        ----------
+        feature_name : str
+            The name or identifier of the feature associated with this node.
+        func_dict : dict
+            A dictionary containing functions associated with this node. The dictionary
+            should include keys for different signals or events and corresponding
+            function references to be executed when those signals are received.
+        node_type : str, optional
+            The type of the node, which can be 'one-step' or 'multi-step'. Default is
+            'one-step'.
+        device_related : bool, optional
+            A boolean indicating whether the node is related to device control. Default
+            is False.
+        need_response : bool, optional
+            A boolean indicating whether a response is needed from this node. Default is
+            False.
+        """
+        #: str: The name or identifier of the feature associated with this node.
         self.node_name = str(feature_name)
+        #: dict: A dictionary containing functions associated with this node.
         self.node_funcs = func_dict
+        #: str: The type of the node, which can be 'one-step' or 'multi-step'.
         self.node_type = node_type  # 'one-step', 'multi-step'
+        #: bool: A boolean indicating whether the node is related to device control.
         self.device_related = device_related
+        #: bool: A boolean indicating whether a response is needed from this node.
         self.need_response = need_response  # True, False
+        #: bool: A boolean indicating whether the node has been initialized.
         self.is_initialized = False
+        #: TreeNode or None: A reference to the child node if one exists, otherwise
+        # None.
         self.child = None
+        #: TreeNode or None: A reference to the sibling node if one exists, otherwise
+        # None.
         self.sibling = None
 
     def set_property(self, **kwargs):
-        """
-        Set the properties of the TreeNode object using keyword arguments.
+        """Set the properties of the TreeNode object using keyword arguments.
 
         This method allows setting or updating the properties of the TreeNode object
         using keyword arguments. The method iterates through the provided keyword-
@@ -154,10 +130,6 @@ class TreeNode:
         **kwargs : dict
             Keyword arguments with attribute names as keys and values to set as
             values.
-
-        Returns:
-        -------
-        None
         """
 
         for key in kwargs:
@@ -166,73 +138,12 @@ class TreeNode:
 
 
 class SignalNode(TreeNode):
-    """
-    SignalNode class for representing a signal-processing node in a control sequence
+    """SignalNode class for representing a signal-processing node in a control sequence
     tree.
 
     This class represents a signal-processing node in a control sequence tree used for
     controlling the behavior of a microscope or similar device. It inherits from the
     TreeNode class and adds signal processing capabilities.
-
-    Parameters:
-    ----------
-    feature_name : str
-        The name or identifier of the feature associated with this node.
-
-    func_dict : dict
-        A dictionary containing functions associated with this node. The dictionary
-        should include keys for different signals or events and corresponding function
-        references to be executed when those signals are received.
-
-    node_type : str, optional
-        The type of the node, which can be 'one-step' or 'multi-step'. Default is
-        'one-step'.
-
-    device_related : bool, optional
-        A boolean indicating whether the node is related to device control. Default
-        is False.
-
-    need_response : bool, optional
-        A boolean indicating whether a response is needed from this node. Default is
-        False.
-
-    wait_response : bool, optional
-        A boolean indicating whether the node is currently waiting for a response.
-        Default is False.
-
-    Attributes:
-    ----------
-    node_name : str
-        The name or identifier of the feature associated with this node.
-
-    node_funcs : dict
-        A dictionary containing functions associated with this node.
-
-    node_type : str
-        The type of the node, which can be 'one-step' or 'multi-step'.
-
-    device_related : bool
-        A boolean indicating whether the node is related to device control.
-
-    need_response : bool
-        A boolean indicating whether a response is needed from this node.
-
-    wait_response : bool
-        A boolean indicating whether the node is currently waiting for a response.
-
-    is_initialized : bool
-        A boolean indicating whether the node has been initialized.
-
-    child : TreeNode or None
-        A reference to the child node if one exists, otherwise None.
-
-    sibling : TreeNode or None
-        A reference to the sibling node if one exists, otherwise None.
-
-    Methods:
-    --------
-    run(*args, wait_response=False):
-        Execute the main function associated with this node and handle response.
 
     Notes:
     ------
@@ -266,6 +177,29 @@ class SignalNode(TreeNode):
         need_response=False,
         **kwargs,
     ):
+        """Initialize the SignalNode object.
+
+        Parameters:
+        ----------
+        feature_name : str
+            The name or identifier of the feature associated with this node.
+        func_dict : dict
+            A dictionary containing functions associated with this node. The dictionary
+            should include keys for different signals or events and corresponding
+            unction references to be executed when those signals are received.
+        node_type : str, optional
+            The type of the node, which can be 'one-step' or 'multi-step'. Default is
+            'one-step'.
+        device_related : bool, optional
+            A boolean indicating whether the node is related to device control. Default
+            is False.
+        need_response : bool, optional
+            A boolean indicating whether a response is needed from this node. Default is
+            False.
+        wait_response : bool, optional
+            A boolean indicating whether the node is currently waiting for a response.
+            Default is False.
+        """
         super().__init__(
             feature_name,
             func_dict,
@@ -273,13 +207,14 @@ class SignalNode(TreeNode):
             device_related=device_related,
             need_response=need_response,
         )
+        #: bool: A boolean indicating whether the node is currently waiting for a
+        # response.
         self.wait_response = False
         if self.device_related and self.node_type == "multi-step":
             self.need_response = True
 
     def run(self, *args, wait_response=False):
-        """
-        Execute the main function associated with this node and handle response.
+        """Execute the main function associated with this node and handle response.
 
         This method is used to execute the main function associated with this node and
         handle response logic based on the node's properties. It can be used with or
@@ -334,71 +269,12 @@ class SignalNode(TreeNode):
 
 
 class DataNode(TreeNode):
-    """
-    DataNode class for representing a data-processing node in a control sequence tree.
+    """DataNode class for representing a data-processing node in a control sequence
+    tree.
 
     This class represents a data-processing node in a control sequence tree used for
     controlling the behavior of a microscope or similar device. It inherits from the
     TreeNode class and adds data processing capabilities.
-
-    Parameters:
-    ----------
-    feature_name : str
-        The name or identifier of the feature associated with this node.
-
-    func_dict : dict
-        A dictionary containing functions associated with this node. The dictionary
-        should include keys for different data processing steps and corresponding
-        function references to be executed during those steps.
-
-    node_type : str, optional
-        The type of the node, which can be 'one-step' or 'multi-step'. Default is
-        'one-step'.
-
-    device_related : bool, optional
-        A boolean indicating whether the node is related to device control. Default
-        is False.
-
-    need_response : bool, optional
-        A boolean indicating whether a response is needed from this node. Default is
-        False.
-
-    is_marked : bool, optional
-        A boolean indicating whether the node is marked. Default is False.
-
-    Attributes:
-    ----------
-    node_name : str
-        The name or identifier of the feature associated with this node.
-
-    node_funcs : dict
-        A dictionary containing functions associated with this node.
-
-    node_type : str
-        The type of the node, which can be 'one-step' or 'multi-step'.
-
-    device_related : bool
-        A boolean indicating whether the node is related to device control.
-
-    need_response : bool
-        A boolean indicating whether a response is needed from this node.
-
-    is_initialized : bool
-        A boolean indicating whether the node has been initialized.
-
-    is_marked : bool
-        A boolean indicating whether the node is marked.
-
-    child : TreeNode or None
-        A reference to the child node if one exists, otherwise None.
-
-    sibling : TreeNode or None
-        A reference to the sibling node if one exists, otherwise None.
-
-    Methods:
-    --------
-    run(*args):
-        Execute the data processing functions associated with this node.
 
     Notes:
     ------
@@ -431,6 +307,28 @@ class DataNode(TreeNode):
         need_response=False,
         **kwargs,
     ):
+        """Initialize the DataNode object.
+
+        Parameters:
+        ----------
+        feature_name : str
+            The name or identifier of the feature associated with this node.
+        func_dict : dict
+            A dictionary containing functions associated with this node. The dictionary
+            should include keys for different data processing steps and corresponding
+            function references to be executed during those steps.
+        node_type : str, optional
+            The type of the node, which can be 'one-step' or 'multi-step'. Default is
+            'one-step'.
+        device_related : bool, optional
+            A boolean indicating whether the node is related to device control. Default
+            is False.
+        need_response : bool, optional
+            A boolean indicating whether a response is needed from this node. Default is
+            False.
+        is_marked : bool, optional
+            A boolean indicating whether the node is marked. Default is False.
+        """
         super().__init__(
             feature_name,
             func_dict,
@@ -438,11 +336,11 @@ class DataNode(TreeNode):
             device_related=device_related,
             need_response=need_response,
         )
+        #: bool: A boolean indicating whether the node is marked.
         self.is_marked = False
 
     def run(self, *args):
-        """
-        Execute the data processing functions associated with this node.
+        """Execute the data processing functions associated with this node.
 
         This method is used to execute the data processing functions associated with
         this node during the control sequence. It initializes the node if not already
@@ -485,47 +383,11 @@ class DataNode(TreeNode):
 
 
 class Container:
-    """
-    Container class for managing a control sequence tree.
+    """Container class for managing a control sequence tree.
 
     This class is responsible for managing a control sequence tree, which consists of
     nodes representing different actions or steps in the control sequence. It provides
     methods for resetting the tree and performing cleanup operations on specified nodes.
-
-    Parameters:
-    ----------
-    root : TreeNode or None, optional
-        The root node of the control sequence tree. Default is None.
-
-    cleanup_list : list of TreeNode, optional
-        A list of nodes containing 'cleanup' functions to be executed when the
-        container is closed. Default is an empty list.
-
-    Attributes:
-    ----------
-    root : TreeNode or None
-        The root node of the control sequence tree.
-
-    curr_node : TreeNode or None
-        The currently running node in the tree.
-
-    end_flag : bool
-        A flag indicating whether the control sequence execution should stop.
-
-    cleanup_list : list of TreeNode
-        A list of nodes containing 'cleanup' functions to be executed when the
-        container is closed.
-
-    is_closed : bool
-        A boolean indicating whether the container is closed.
-
-    Methods:
-    --------
-    reset():
-        Reset the container's state, including the current node and end flag.
-
-    cleanup():
-        Execute 'cleanup' functions for specified nodes in the tree.
 
     Notes:
     ------
@@ -550,17 +412,35 @@ class Container:
     """
 
     def __init__(self, root=None, cleanup_list=[]):
-        self.root = root  # root node of the tree
-        self.curr_node = None  # current running node
-        self.end_flag = False  # stop running flag
-        self.cleanup_list = (
-            cleanup_list  # a list of nodes containing 'cleanup' functions.
-        )
+        """Initialize the Container object.
+
+        Parameters:
+        ----------
+        root : TreeNode or None, optional
+            The root node of the control sequence tree. Default is None.
+
+        cleanup_list : list of TreeNode, optional
+            A list of nodes containing 'cleanup' functions to be executed when the
+            container is closed. Default is an empty list.
+        """
+        #: TreeNode or None: The root node of the control sequence tree.
+        self.root = root
+
+        #: TreeNode or None: The currently running node in the control sequence.
+        self.curr_node = None
+
+        #: bool: A flag indicating whether the control sequence execution should stop.
+        self.end_flag = False
+
+        #: list of TreeNode: A list of nodes containing 'cleanup' functions to be
+        # executed when the container is closed.
+        self.cleanup_list = cleanup_list
+
+        #: bool: A boolean indicating whether the container is closed.
         self.is_closed = False
 
     def reset(self):
-        """
-        Reset the container's state, including the current node and end flag.
+        """Reset the container's state, including the current node and end flag.
 
         This method resets the state of the container, including setting the current
         node to None and clearing the end flag. It prepares the container for running
@@ -571,8 +451,7 @@ class Container:
         self.end_flag = False
 
     def cleanup(self):
-        """
-        Execute 'cleanup' functions for specified nodes in the tree.
+        """Execute 'cleanup' functions for specified nodes in the tree.
 
         This method executes the 'cleanup' functions associated with nodes in the
         `cleanup_list`. These functions are typically used to perform resource
@@ -589,56 +468,11 @@ class Container:
 
 
 class SignalContainer(Container):
-    """
-    SignalContainer class for managing signal-based control sequences.
+    """SignalContainer class for managing signal-based control sequences.
 
     This class is a specialized container for managing control sequences that consist
     of signal-based nodes. It extends the functionality of the base `Container` class
     and provides methods for running signal-based control sequences.
-
-    Parameters:
-    ----------
-    root : TreeNode or None, optional
-        The root node of the control sequence tree. Default is None.
-
-    cleanup_list : list of TreeNode, optional
-        A list of nodes containing 'cleanup' functions to be executed when the
-        container is closed. Default is an empty list.
-
-    number_of_execution : int, optional
-        The number of times the control sequence should be executed. Default is 1.
-
-    Attributes:
-    ----------
-    root : TreeNode or None
-        The root node of the control sequence tree.
-
-    curr_node : TreeNode or None
-        The currently running node in the control sequence.
-
-    end_flag : bool
-        A flag indicating whether the control sequence execution should stop.
-
-    cleanup_list : list of TreeNode
-        A list of nodes containing 'cleanup' functions to be executed when the
-        container is closed.
-
-    is_closed : bool
-        A boolean indicating whether the container is closed.
-
-    number_of_execution : int
-        The total number of times the control sequence should be executed.
-
-    remaining_number_of_execution : int
-        The remaining number of executions of the control sequence.
-
-    Methods:
-    --------
-    reset():
-        Reset the container's state, including the current node and end flag.
-
-    run(*args, wait_response=False):
-        Run the signal-based control sequence.
 
     Notes:
     ------
@@ -654,13 +488,28 @@ class SignalContainer(Container):
     """
 
     def __init__(self, root=None, cleanup_list=[], number_of_execution=1):
+        """Initialize the SignalContainer object.
+
+        Parameters:
+        ----------
+        root : TreeNode or None, optional
+            The root node of the control sequence tree. Default is None.
+        cleanup_list : list of TreeNode, optional
+            A list of nodes containing 'cleanup' functions to be executed when the
+            container is closed. Default is an empty list.
+        number_of_execution : int, optional
+            The number of times the control sequence should be executed. Default is 1.
+        """
         super().__init__(root, cleanup_list)
+
+        #: int: The total number of times the control sequence should be executed.
         self.number_of_execution = number_of_execution
+
+        #: int: The remaining number of executions of the control sequence.
         self.remaining_number_of_execution = number_of_execution
 
     def reset(self):
-        """
-        Reset the container's state, including the current node and end flag.
+        """Reset the container's state, including the current node and end flag.
 
         This method resets the state of the container, including setting the current
         node to None, clearing the end flag, and resetting the remaining number of
@@ -672,8 +521,7 @@ class SignalContainer(Container):
         self.remaining_number_of_execution = self.number_of_execution
 
     def run(self, *args, wait_response=False):
-        """
-        Run the signal-based control sequence.
+        """Run the signal-based control sequence.
 
         This method runs the signal-based control sequence by iterating through its
         nodes and executing them in order. It manages the execution of nodes and
@@ -732,26 +580,11 @@ class SignalContainer(Container):
 
 
 class DataContainer(Container):
-    """
-    DataContainer class for managing data-based control sequences.
+    """DataContainer class for managing data-based control sequences.
 
     This class is a specialized container for managing control sequences that involve
     data-based nodes. It extends the functionality of the base `Container` class and
     provides methods for running data-based control sequences.
-
-    Parameters:
-    ----------
-    root : TreeNode or None, optional
-        The root node of the control sequence tree. Default is None.
-
-    cleanup_list : list of TreeNode, optional
-        A list of nodes containing 'cleanup' functions to be executed when the
-        container is closed. Default is an empty list.
-
-    Methods:
-    --------
-    run(*args):
-        Run the data-based control sequence.
 
     Notes:
     ------
@@ -768,11 +601,20 @@ class DataContainer(Container):
     """
 
     def __init__(self, root=None, cleanup_list=[]):
+        """Initialize the DataContainer object.
+
+        Parameters:
+        ----------
+        root : TreeNode or None, optional
+            The root node of the control sequence tree. Default is None.
+        cleanup_list : list of TreeNode, optional
+            A list of nodes containing 'cleanup' functions to be executed when the
+            container is closed. Default is an empty list.
+        """
         super().__init__(root, cleanup_list)
 
     def run(self, *args):
-        """
-        Run the data-based control sequence.
+        """Run the data-based control sequence.
 
         This method runs the data-based control sequence by iterating through its
         nodes and executing them in order. It manages the execution of nodes, handles
@@ -842,8 +684,7 @@ class DataContainer(Container):
 
 
 def get_registered_funcs(feature_module, func_type="signal"):
-    """
-    Get a dictionary of registered functions for a feature module.
+    """Get a dictionary of registered functions for a feature module.
 
     This function retrieves a dictionary of registered functions for a given feature
     module and function type (signal or data). It ensures that essential functions
@@ -893,8 +734,7 @@ def get_registered_funcs(feature_module, func_type="signal"):
 
 
 def load_features(model, feature_list):
-    """
-    Load and organize a list of feature modules into a child-sibling tree structure.
+    """Load and organize a list of feature modules into a child-sibling tree structure.
 
     This function takes a list of feature modules and organizes them into a
     child-sibling tree structure, creating SignalNodes and DataNodes for each
@@ -945,8 +785,7 @@ def load_features(model, feature_list):
     shared_variables = {}
 
     def create_node(feature_dict):
-        """
-        Create SignalNode and DataNode instances for a feature module.
+        """Create SignalNode and DataNode instances for a feature module.
 
         This function takes a feature dictionary, creates SignalNode and DataNode
         instances, and handles node configurations, including 'need_response' and
@@ -1020,8 +859,7 @@ def load_features(model, feature_list):
         return signal_node, data_node
 
     def build_feature_tree(feature_list):
-        """
-        Build a child-sibling tree structure from a feature list.
+        """Build a child-sibling tree structure from a feature list.
 
         This function recursively builds a child-sibling tree structure from a list
         of feature modules. It creates SignalNode and DataNode instances for each
@@ -1093,8 +931,7 @@ def load_features(model, feature_list):
 
 
 def dummy_True(*args):
-    """
-    Dummy function that always returns True.
+    """Dummy function that always returns True.
 
     This function serves as a placeholder for operations that need to return a
     Boolean value. It is designed to always return True.
@@ -1119,8 +956,7 @@ def dummy_True(*args):
 
 
 def dummy_func(*args):
-    """
-    Dummy function with no operation.
+    """Dummy function with no operation.
 
     This function serves as a placeholder for operations that require a function
     but do not perform any actual computation. It does not have any side effects

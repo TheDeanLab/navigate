@@ -66,6 +66,8 @@ class ChannelsTab(tk.Frame):
         """
         # Init Frame
         tk.Frame.__init__(self, setntbk, *args, **kwargs)
+        #: int: The index of the tab
+        self.index = 0
         self.configuration = configuration
 
         # Formatting
@@ -203,7 +205,17 @@ class ChannelCreator(ttk.Labelframe):
 
         #: list: List of the defocus spinboxes
         self.defocus_spins = []
-        self.label_text.append("Defocus")
+
+        #: list: List of the labels for the columns
+        self.label_text = [
+            "Channel",
+            "Laser",
+            "Power",
+            "Filter",
+            "Exp. Time (ms)",
+            "Interval",
+            "Defocus",
+        ]
 
         #: list: List of the labels for the columns
         self.labels = []
@@ -387,7 +399,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
     """This class is the frame that holds the stack acquisition settings."""
 
     def __init__(self, settings_tab, *args, **kwargs):
-        """Initilization of the Stack Acquisition Frame
+        """Initialization of the Stack Acquisition Frame
 
         Parameters
         ----------
@@ -406,15 +418,15 @@ class StackAcquisitionFrame(ttk.Labelframe):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Dictionary for widgets and buttons
         #: dict: Dictionary of the widgets in the frame
         self.inputs = {}
+
         #: dict: Dictionary of the buttons in the frame
         self.buttons = {}
 
-        # Frames for widgets
         #: tkinter.Frame: The frame that holds the position and slice settings
         self.pos_slice = ttk.Frame(self)
+
         #: tkinter.Frame: The frame that holds the laser cycling settings
         self.cycling = ttk.Frame(self)
 
@@ -425,6 +437,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
         # Start Pos Frame (Vertically oriented)
         start_names = ["start_position", "start_focus"]
         start_labels = ["Pos", "Foc"]
+
         #: tkinter.Label: The label for the start position frame
         self.start_label = ttk.Label(self.pos_slice, text="Start")
         self.start_label.grid(row=0, column=0, sticky="S")
@@ -450,6 +463,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
         # End Pos Frame (Vertically Oriented)
         end_names = ["end_position", "end_focus"]
         end_labels = ["Pos", "Foc"]
+
         #: tkinter.Label: The label for the end position
         self.end_label = ttk.Label(self.pos_slice, text="End")
         self.end_label.grid(row=0, column=1, sticky="S")

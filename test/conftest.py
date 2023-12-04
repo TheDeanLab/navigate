@@ -32,12 +32,15 @@
 
 # Standard Library Imports
 import tkinter as tk
+from pathlib import Path
+from multiprocessing import Manager
 
 # Third Party Imports
 import pytest
 
 # Local Imports
 from test.controller.test_controller import controller  # noqa
+from aslm.config.config import load_configs
 
 
 @pytest.fixture(scope="package")
@@ -63,7 +66,7 @@ def tk_root():
 
 
 @pytest.fixture(scope="session")
-def dummy_view(tk_root, dummy_controller):  # noqa
+def dummy_view(tk_root):  # noqa
     """Dummy view for testing.
 
     Creates a dummy view for the controller tests.
@@ -74,12 +77,32 @@ def dummy_view(tk_root, dummy_controller):  # noqa
     """
     from aslm.view.main_application_window import MainApp
 
-    view = MainApp(root=tk_root, configuration=dummy_controller.configuration)
+    base_directory = Path(__file__).resolve().parent
+    configuration_directory = Path.joinpath(base_directory, "aslm", "src", "config")
+    print(configuration_directory)
+
+    config = Path.joinpath(configuration_directory, "configuration.yaml")
+    experiment = Path.joinpath(configuration_directory, "experiment.yml")
+    waveform_constants = Path.joinpath(
+        configuration_directory, "waveform_constants.yml"
+    )
+
+    #: Manager: The manager.
+    manager = Manager()
+    #: dict: The configuration dictionary.
+    configuration = load_configs(
+        manager,
+        configuration=config,
+        experiment=experiment,
+        waveform_constants=waveform_constants,
+    )
+
+    view = MainApp(root=tk_root, configuration=configuration)
     tk_root.update()
     yield view
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="package")
 def dummy_controller(dummy_view):
     """Dummy controller for testing.
 

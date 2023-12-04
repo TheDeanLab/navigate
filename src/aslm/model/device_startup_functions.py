@@ -248,6 +248,78 @@ def start_camera(microscope_name, device_connection, configuration, is_synthetic
         device_not_found(microscope_name, "camera", cam_type)
 
 
+def load_mirror(configuration, is_synthetic=False):
+    """Initializes the deformable mirror class on a dedicated thread.
+
+    Parameters
+    ----------
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
+
+    Returns
+    -------
+    Mirror : class
+        Mirror class.
+    """
+    if is_synthetic:
+        mirror_type = "SyntheticMirror"
+    else:
+        mirror_type = configuration["configuration"]["hardware"]["mirror"][
+            "type"
+        ]  # only one mirror for now...
+
+    if mirror_type == "ImagineOpticsMirror":
+        from aslm.model.devices.APIs.imagineoptics.imop import IMOP_Mirror
+
+        return auto_redial(IMOP_Mirror, (), exception=Exception)
+    elif mirror_type == "SyntheticMirror":
+        return DummyDeviceConnection()
+    else:
+        device_not_found("mirror", mirror_type)
+
+
+def start_mirror(microscope_name, device_connection, configuration, is_synthetic=False):
+    """Initializes the mirror class.
+
+    Parameters
+    ----------
+    Parameters
+    ----------
+    microscope_name : str
+        Name of microscope in configuration
+    device_connection : object
+        Hardware device to connect to
+    configuration : multiprocesing.managers.DictProxy
+        Global configuration of the microscope
+    is_synthetic : bool
+        Run synthetic version of hardware?
+
+    Returns
+    -------
+    Mirror : class
+        Mirror class.
+    """
+    if device_connection is None or is_synthetic:
+        mirror_type = "SyntheticMirror"
+    else:
+        mirror_type = configuration["configuration"]["microscopes"][microscope_name][
+            "mirror"
+        ]["hardware"]["type"]
+
+    if mirror_type == "ImagineOpticsMirror":
+        from aslm.model.devices.mirrors.mirror_imop import ImagineOpticsMirror
+
+        return ImagineOpticsMirror(microscope_name, device_connection, configuration)
+    elif mirror_type == "SyntheticMirror":
+        from aslm.model.devices.mirrors.mirror_synthetic import SyntheticMirror
+
+        return SyntheticMirror(microscope_name, device_connection, configuration)
+    else:
+        device_not_found(microscope_name, "mirror", mirror_type)
+
+
 def load_stages(configuration, is_synthetic=False):
     """Initializes the stage class on a dedicated thread.
 
@@ -1010,6 +1082,13 @@ def load_devices(configuration, is_synthetic=False) -> dict:
             devices["camera"][device_ref_name] = load_camera_connection(
                 configuration, id, is_synthetic
             )
+
+    # load mirror
+    if "mirror" in configuration["configuration"]["hardware"].keys():
+        devices["mirror"] = {}
+        device = configuration["configuration"]["hardware"]["mirror"]
+        device_ref_name = build_ref_name("_", device["type"])
+        devices["mirror"][device_ref_name] = load_mirror(configuration, is_synthetic)
 
     # load filter wheel
     if "filter_wheel" in configuration["configuration"]["hardware"].keys():

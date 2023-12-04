@@ -295,3 +295,4 @@ src/aslm/log_files/LOGS
 test.n5
 test_dir
 test.xml
+*_log.txt

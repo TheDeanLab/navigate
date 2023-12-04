@@ -61,6 +61,8 @@ from aslm.controller.sub_controllers import (
     AcquireBarController,
     FeaturePopupController,
     MenuController,
+    # MicroscopePopupController,
+    # AdaptiveOpticsPopupController,
 )
 
 from aslm.controller.thread_pool import SynchronizedThreadPool
@@ -298,29 +300,34 @@ class Controller:
             command=self.stage_controller.stop_button_handler
         )
 
-    def change_microscope(self, microscope_name):
+    def change_microscope(self, microscope_name, zoom=None):
         """Change the microscope configuration.
 
         Parameters
         ----------
         microscope_name : string
             Name of the microscope to change to.
+        zoom : string
+            Name of the zoom value to change to.
         """
         self.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ] = microscope_name
+        if zoom:
+            self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
         if self.configuration_controller.change_microscope():
             # update widgets
             self.stage_controller.initialize()
             self.channels_tab_controller.initialize()
             self.camera_setting_controller.update_camera_device_related_setting()
             self.camera_setting_controller.calculate_physical_dimensions()
-            if (
-                hasattr(self, "waveform_popup_controller")
-                and self.waveform_popup_controller
-            ):
-                self.waveform_popup_controller.populate_experiment_values()
             self.camera_view_controller.update_snr()
+
+        if (
+            hasattr(self, "waveform_popup_controller")
+            and self.waveform_popup_controller
+        ):
+            self.waveform_popup_controller.populate_experiment_values()
 
     def initialize_cam_view(self):
         """Populate view tab.
@@ -590,22 +597,28 @@ class Controller:
 
             Parameters
             ----------
-            args : dict
-                dict = {'resolution_mode': self.resolution,
-                'zoom': self.mag,
-                'laser_info': self.resolution_info[
-                'remote_focus_constants'][self.resolution][self.mag]
-                }
+            args : str
+                "microscope_name zoom_value", "microscope_name", or "zoom_value"
             """
-            microscope_name, zoom = self.menu_controller.resolution_value.get().split()
-            self.configuration["experiment"]["MicroscopeState"]["zoom"] = zoom
-            if (
-                microscope_name
-                != self.configuration["experiment"]["MicroscopeState"][
-                    "microscope_name"
-                ]
-            ):
-                self.change_microscope(microscope_name)
+            # get microscope name and zoom value from args[0]
+            temp = args[0].split()
+            if len(temp) == 1:
+                # microscope name is given
+                if temp[0] in self.configuration_controller.microscope_list:
+                    temp.append(
+                        self.configuration_controller.get_zoom_value_list(temp[0])[0]
+                    )
+                elif temp[0] in self.configuration_controller.get_zoom_value_list(
+                    self.configuration_controller.microscope_name
+                ):
+                    temp = [self.configuration_controller.microscope_name, temp[0]]
+                else:
+                    return
+            resolution_value = " ".join(temp)
+            if resolution_value != self.menu_controller.resolution_value.get():
+                self.menu_controller.resolution_value.set(resolution_value)
+                return
+            self.change_microscope(temp[0], temp[1])
             work_thread = self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("update_setting", "resolution")
             )
@@ -646,6 +659,30 @@ class Controller:
             self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("stage_limits", *args)
             )
+
+        # mirror commands:
+        elif command == "flatten_mirror":
+            self.model.run_command("flatten_mirror", *args)
+        elif command == "zero_mirror":
+            self.model.run_command("zero_mirror", *args)
+        elif command == "set_mirror":
+            self.model.run_command("set_mirror", *args)
+        elif command == "set_mirror_from_wcs":
+            self.model.run_command("set_mirror_from_wcs", *args)
+        elif command == "save_wcs_file":
+            self.model.run_command("save_wcs_file", *args)
+        elif command == "tony_wilson":
+            self.threads_pool.createThread(
+                "camera",
+                self.capture_image,
+                args=(
+                    "tony_wilson",
+                    "live",
+                ),
+            )
+
+        # elif command == "change_camera":
+        #     self.model.run_command("change_camera", *args)
 
         elif command == "autofocus":
             """Execute autofocus routine."""
@@ -1091,6 +1128,18 @@ class Controller:
                         data=value[0], line_plot=value[1], clear_data=value[2]
                     )
 
+            elif event == "tonywilson":
+                if hasattr(self, "ao_popup_controller"):
+                    # self.ao_popup_controller.set_widgets_from_coef(value['coefs'])
+                    self.ao_popup_controller.plot_tonywilson(value)
+                    # self.ao_popup_controller.plot_mirror(value)
+                    if value["done"]:
+                        print("Tony Wilson done! Updating expt...")
+                        self.ao_popup_controller.update_experiment_values()
+            elif event == "mirror_update":
+                if hasattr(self, "ao_popup_controller"):
+                    self.ao_popup_controller.set_widgets_from_coef(value["coefs"])
+                    self.ao_popup_controller.plot_mirror(value)
             elif event == "stop":
                 # Stop the software
                 break

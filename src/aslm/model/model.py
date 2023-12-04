@@ -43,6 +43,7 @@ import os
 from aslm.model.concurrency.concurrency_tools import SharedNDArray
 from aslm.model.features.autofocus import Autofocus
 from aslm.model.features.cva_conpro import ConstantVelocityAcquisition
+from aslm.model.features.adaptive_optics import TonyWilson
 from aslm.model.features.image_writer import ImageWriter
 from aslm.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from aslm.model.features.common_features import (
@@ -619,6 +620,25 @@ class Model:
             print("*** autofocus args:", *args)
             autofocus = Autofocus(self, *args)
             autofocus.run()
+
+        elif command == "flatten_mirror":
+            self.update_mirror(coef=[], flatten=True)
+        elif command == "zero_mirror":
+            self.active_microscope.mirror.zero_flatness()
+        elif command == "set_mirror":
+            coef = list(
+                self.configuration["experiment"]["MirrorParameters"]["modes"].values()
+            )
+            self.update_mirror(coef=coef)
+        elif command == "save_wcs_file":
+            self.active_microscope.mirror.save_wcs_file(path=args[0])
+        elif command == "set_mirror_from_wcs":
+            coef = self.active_microscope.mirror.set_from_wcs_file(path=args[0])
+            self.update_mirror(coef=coef)
+        elif command == "tony_wilson":
+            tony_wilson = TonyWilson(self)
+            tony_wilson.run(*args)
+
         elif command == "load_feature":
             """
             args[0]: int, args[0]-1 is the id of features
@@ -687,6 +707,39 @@ class Model:
 
         elif command == "terminate":
             self.terminate()
+
+        # elif command == "change_camera":
+        #     new_camera = list(self.active_microscope.cameras.values())[args[0]]
+        #     print(f"Using new camera >> {new_camera.camera_controller._serial_number}")
+        #     self.active_microscope.camera = new_camera
+
+        elif command == "exit":
+            for camera in self.active_microscope.cameras.values():
+                camera.camera_controller.dev_close()
+
+    # main function to update mirror/set experiment mode values
+    def update_mirror(self, coef=[], flatten=False):
+        """Update the mirror.
+
+        Parameters
+        ----------
+        coef : list
+            List of coefficients.
+        flatten : bool
+            Flatten the mirror?
+        """
+        if coef:
+            self.active_microscope.mirror.display_modes(coef)
+        elif flatten:
+            self.active_microscope.mirror.flat()
+
+        mirror_img = self.active_microscope.mirror.mirror_controller.get_wavefront_pix()
+
+        self.event_queue.put(
+            ("mirror_update", {"mirror_img": mirror_img, "coefs": coef})
+        )
+
+        # print(self.configuration['experiment']['MirrorParameters']['modes'])
 
     def move_stage(self, pos_dict, wait_until_done=False):
         """Moves the stages.
@@ -1159,6 +1212,7 @@ class Model:
             SyntheticRemoteFocus,  # noqa: F401
             SyntheticStage,
             SyntheticZoom,  # noqa: F401
+            SyntheticMirror,  # noqa: F401
         )
 
         microscope = Microscope(
@@ -1175,6 +1229,7 @@ class Model:
             "filter_wheel": "SyntheticFilterWheel",
             "shutter": "SyntheticShutter",
             "remote_focus_device": "SyntheticRemoteFocus",
+            "mirror": "SyntheticMirror",
         }
 
         for k in microscope_config:

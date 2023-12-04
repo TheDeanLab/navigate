@@ -119,6 +119,7 @@ class Microscope:
             "remote_focus_device": ["type", "channel"],
             "galvo": ["type", "channel"],
             "lasers": ["wavelength"],
+            "mirror": ["type"],
         }
 
         # TODO: This cannot be pulled into the repo.
@@ -722,9 +723,13 @@ class Microscope:
         device_config_list = []
         device_name_list = []
 
-        devices = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ][device_name]
+        try:
+            devices = self.configuration["configuration"]["microscopes"][
+                self.microscope_name
+            ][device_name]
+        except KeyError:
+            # if no such device
+            return [], [], False
 
         if type(devices) == ListProxy:
             i = 0

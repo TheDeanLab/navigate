@@ -76,3 +76,6 @@ robot = [
 
 [project.urls]
 Source = "https://github.com/TheDeanLab/navigate"
+
+[tool.setuptools.dynamic]
+version = {attr = "navigate.__version__"}

@@ -1,7 +1,7 @@
 <h1 align="center">
 <img src="./src/navigate/view/icon/mic.ico?raw=true" />
 
-navigate - open-source light sheet microscope control
+navigate - open source light sheet microscope control
 </h1>
 
 [![Tests](https://github.com/TheDeanLab/navigate/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/TheDeanLab/navigate/actions/workflows/push_checks.yaml)

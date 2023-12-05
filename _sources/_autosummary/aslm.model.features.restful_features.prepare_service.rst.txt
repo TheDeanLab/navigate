@@ -1,6 +1,0 @@
-aslm.model.features.restful\_features.prepare\_service
-======================================================
-
-.. currentmodule:: aslm.model.features.restful_features
-
-.. autofunction:: prepare_service

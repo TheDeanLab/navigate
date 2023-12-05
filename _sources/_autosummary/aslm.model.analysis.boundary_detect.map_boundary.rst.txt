@@ -1,6 +1,0 @@
-aslm.model.analysis.boundary\_detect.map\_boundary
-==================================================
-
-.. currentmodule:: aslm.model.analysis.boundary_detect
-
-.. autofunction:: map_boundary

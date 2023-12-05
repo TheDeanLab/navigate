@@ -56,7 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Configuration Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to Navigate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -105,8 +105,8 @@ and install the appropriate version based on your operating system.</p>
 <li><p>Windows: Search your computer for the anaconda prompt window. Given how frequently you will use this, we recommend pinning it to your taskbar.</p></li>
 <li><p>Linux/Mac: Search your computer for Terminal.</p></li>
 </ul>
-<p><strong>Create a python environment called ASLM with Python version 3.9.7</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda create -n ASLM python=3.9.7
+<p><strong>Create a python environment called Navigate with Python version 3.9.7</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda create -n navigate python=3.9.7
 </pre></div>
 </div>
 <div class="admonition note">
@@ -114,14 +114,14 @@ and install the appropriate version based on your operating system.</p>
 <p>If you are inside of a firewall, e.g., on the UTSW campus, you will likely run into a proxy error.
 See the Troubleshooting section below for information on how to add the proxy address to your environment variables to circumvent this problem.</p>
 </div>
-<p><strong>Activate the ASLM environment</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate ASLM
+<p><strong>Activate the Navigate environment</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate navigate
 </pre></div>
 </div>
 <p>The active environment is shown in parentheses on the far-left.  Originally, we were in the miniconda base environment.
-After activatin the ASLM environment, it should now show (ASLM).</p>
+After activatin the Navigate environment, it should now show (NAVIGATE).</p>
 <p><strong>Update the pip python package manager</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ~ $ python -m pip install --upgrade pip
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(Navigate) MyComputer ~ $ python -m pip install --upgrade pip
 </pre></div>
 </div>
 <dl class="simple">
@@ -131,48 +131,48 @@ Once the folder is created, we will want to change that to our working directory
 </dl>
 <ul>
 <li><p>Windows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span> <span class="n">cd</span> <span class="n">Desktop</span>
-<span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">mkdir</span> <span class="n">Code</span>
-<span class="p">(</span><span class="n">ASLM</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">cd</span> <span class="n">Code</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">Navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span> <span class="n">cd</span> <span class="n">Desktop</span>
+<span class="p">(</span><span class="n">Navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">mkdir</span> <span class="n">Code</span>
+<span class="p">(</span><span class="n">Navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">cd</span> <span class="n">Code</span>
 </pre></div>
 </div>
 </li>
 <li><p>Linux/Mac:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer ~ $ mkdir ~/Desktop/Code
-(ASLM) MyComputer ~ $ cd ~/Desktop/Code
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(Navigate) MyComputer ~ $ mkdir ~/Desktop/Code
+(Navigate) MyComputer ~ $ cd ~/Desktop/Code
 </pre></div>
 </div>
 </li>
 </ul>
 <p><strong>Clone the GitHub repository</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/ASLM.git
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(Navigate) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/navigate.git
 </pre></div>
 </div>
-<p><strong>Install the ASLM repository</strong></p>
-<p>The last step requires you to change into the ASLM directory and the install the repo as a package locally on your machine.:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(ASLM) MyComputer MyFolderName $ cd ASLM
-(ASLM) MyComputer ASLM $ pip install -e .
+<p><strong>Install the Navigate repository</strong></p>
+<p>The last step requires you to change into the Navigate directory and the install the repo as a package locally on your machine.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(Navigate) MyComputer MyFolderName $ cd navigate
+(Navigate) MyComputer Navigate $ pip install -e .
 </pre></div>
 </div>
 <dl class="simple">
-<dt><strong>Run the ASLM software</strong>::</dt><dd><p>(ASLM) MyComputer ASLM $ aslm</p>
+<dt><strong>Run the Navigate software</strong>::</dt><dd><p>(Navigate) MyComputer Navigate $ navigate</p>
 </dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after aslm:</p>
+<p>If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after navigate:</p>
 <blockquote>
-<div><p>aslm -sh</p>
+<div><p>navigate -sh</p>
 </div></blockquote>
 </div>
 <p>After completeting these steps you will only need to do the below to start the software upon opening the prompt:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate ASLM
-(ASLM) MyComputer ~ $ aslm
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate navigate
+(Navigate) MyComputer ~ $ navigate
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you are running Windows, you can create a desktop shortcut to ASLM by right-clicking the Desktop, navigating to New and then Shortcut and entering <code class="docutils literal notranslate"><span class="pre">%windir%\system32\cmd.exe</span> <span class="pre">&quot;/c&quot;</span> <span class="pre">C:\path\to\miniconda\Scripts\activate.bat</span> <span class="pre">aslm</span> <span class="pre">&amp;&amp;</span> <span class="pre">aslm</span></code> into the location text box.</p>
+<p>If you are running Windows, you can create a desktop shortcut to Navigate by right-clicking the Desktop, navigating to New and then Shortcut and entering <code class="docutils literal notranslate"><span class="pre">%windir%\system32\cmd.exe</span> <span class="pre">&quot;/c&quot;</span> <span class="pre">C:\path\to\miniconda\Scripts\activate.bat</span> <span class="pre">navigate</span> <span class="pre">&amp;&amp;</span> <span class="pre">navigate</span></code> into the location text box.</p>
 </div>
 </section>
 <section id="troubleshooting">

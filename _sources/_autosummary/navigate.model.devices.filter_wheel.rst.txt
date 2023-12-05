@@ -1,0 +1,35 @@
+navigate.model.devices.filter\_wheel
+====================================
+
+.. automodule:: navigate.model.devices.filter_wheel
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   navigate.model.devices.filter_wheel.filter_wheel_asi
+   navigate.model.devices.filter_wheel.filter_wheel_base
+   navigate.model.devices.filter_wheel.filter_wheel_sutter
+   navigate.model.devices.filter_wheel.filter_wheel_synthetic
+

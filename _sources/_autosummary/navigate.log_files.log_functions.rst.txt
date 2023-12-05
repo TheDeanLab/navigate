@@ -1,0 +1,33 @@
+navigate.log\_files.log\_functions
+==================================
+
+.. automodule:: navigate.log_files.log_functions
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      find_filename
+      log_setup
+      main_process_listener
+      update_nested_dict
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,6 +1,0 @@
-aslm.log\_files.log\_functions.log\_setup
-=========================================
-
-.. currentmodule:: aslm.log_files.log_functions
-
-.. autofunction:: log_setup

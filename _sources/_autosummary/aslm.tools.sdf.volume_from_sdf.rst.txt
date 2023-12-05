@@ -1,6 +1,0 @@
-aslm.tools.sdf.volume\_from\_sdf
-================================
-
-.. currentmodule:: aslm.tools.sdf
-
-.. autofunction:: volume_from_sdf

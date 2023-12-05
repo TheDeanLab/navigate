@@ -1,0 +1,34 @@
+navigate.model.dummy
+====================
+
+.. automodule:: navigate.model.dummy
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      DummyController
+      DummyDevice
+      DummyMicroscope
+      DummyModel
+   
+   
+
+   
+   
+   
+
+
+

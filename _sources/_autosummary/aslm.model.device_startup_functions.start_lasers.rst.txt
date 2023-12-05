@@ -1,6 +1,0 @@
-aslm.model.device\_startup\_functions.start\_lasers
-===================================================
-
-.. currentmodule:: aslm.model.device_startup_functions
-
-.. autofunction:: start_lasers

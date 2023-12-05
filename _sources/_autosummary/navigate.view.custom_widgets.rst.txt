@@ -1,0 +1,40 @@
+navigate.view.custom\_widgets
+=============================
+
+.. automodule:: navigate.view.custom_widgets
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   navigate.view.custom_widgets.ArrowLabel
+   navigate.view.custom_widgets.DockableNotebook
+   navigate.view.custom_widgets.LabelInputWidgetFactory
+   navigate.view.custom_widgets.hover
+   navigate.view.custom_widgets.hoverbar
+   navigate.view.custom_widgets.hovermixin
+   navigate.view.custom_widgets.popup
+   navigate.view.custom_widgets.scrollbars
+   navigate.view.custom_widgets.validation
+

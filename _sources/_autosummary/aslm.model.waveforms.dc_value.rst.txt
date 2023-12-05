@@ -1,6 +1,0 @@
-aslm.model.waveforms.dc\_value
-==============================
-
-.. currentmodule:: aslm.model.waveforms
-
-.. autofunction:: dc_value

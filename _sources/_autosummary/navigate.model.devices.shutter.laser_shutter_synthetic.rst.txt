@@ -1,0 +1,31 @@
+navigate.model.devices.shutter.laser\_shutter\_synthetic
+========================================================
+
+.. automodule:: navigate.model.devices.shutter.laser_shutter_synthetic
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      SyntheticShutter
+   
+   
+
+   
+   
+   
+
+
+

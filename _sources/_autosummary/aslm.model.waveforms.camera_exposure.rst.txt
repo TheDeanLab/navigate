@@ -1,6 +1,0 @@
-aslm.model.waveforms.camera\_exposure
-=====================================
-
-.. currentmodule:: aslm.model.waveforms
-
-.. autofunction:: camera_exposure

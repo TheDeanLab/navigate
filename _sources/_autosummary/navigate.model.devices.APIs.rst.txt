@@ -1,0 +1,35 @@
+navigate.model.devices.APIs
+===========================
+
+.. automodule:: navigate.model.devices.APIs
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   navigate.model.devices.APIs.coherent
+   navigate.model.devices.APIs.dynamixel
+   navigate.model.devices.APIs.omicron
+   navigate.model.devices.APIs.sutter
+

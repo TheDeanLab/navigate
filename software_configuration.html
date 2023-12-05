@@ -80,7 +80,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to Navigate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -116,17 +116,17 @@
 files. Once you are ready to configure your exact hardware, please see the <a class="reference internal" href="supported_hardware.html"><span class="doc">Supported Hardware</span></a> section.</p>
 <section id="configuration-file">
 <h2>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this heading"></a></h2>
-<p>In order for the ASLM software to function, you will need to configure the
+<p>In order for the Navigate software to function, you will need to configure the
 specifications of the various hardware that you will be using. The first time you
-launch the software, ASLM will evaluate the the hardware settings as provided in the
-<code class="docutils literal notranslate"><span class="pre">ASLM\config\configuration.yaml</span></code> file. Every subsequent time you launch the
+launch the software, Navigate will evaluate the the hardware settings as provided in the
+<code class="docutils literal notranslate"><span class="pre">navigate\config\configuration.yaml</span></code> file. Every subsequent time you launch the
 software, a local version of the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file can be found
-in either <code class="docutils literal notranslate"><span class="pre">Users\name\AppData\Local\.ASLM\config</span></code> if on Windows or <code class="docutils literal notranslate"><span class="pre">~/.ASLM</span></code> if on
+in either <code class="docutils literal notranslate"><span class="pre">Users\name\AppData\Local\.navigate\config</span></code> if on Windows or <code class="docutils literal notranslate"><span class="pre">~/.navigate</span></code> if on
 Mac/Linux.</p>
 <p>To avoid confusion, we recommend launching the software in the synthetic hardware
-mode initially. Within your Terminal, or Anaconda Prompt, activate your ASLM Python
-environment and launch the software by typing: <code class="docutils literal notranslate"><span class="pre">aslm</span> <span class="pre">-sh</span></code>. Thereafter, you should
-only modify the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file in your local <code class="docutils literal notranslate"><span class="pre">/.ASLM</span></code> directory. The
+mode initially. Within your Terminal, or Anaconda Prompt, activate your Navigate Python
+environment and launch the software by typing: <code class="docutils literal notranslate"><span class="pre">navigate</span> <span class="pre">-sh</span></code>. Thereafter, you should
+only modify the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file in your local <code class="docutils literal notranslate"><span class="pre">/.navigate</span></code> directory. The
 local copy avoids conflicts between different microscopes after pulling new
 changes on GitHub.</p>
 <section id="hardware-section">
@@ -212,7 +212,7 @@ PI stage with a different manufacturer:</p>
 </div>
 <p>on startup of the software (eg type: ASI). The other fields are specified by the
 manufacturers API software. They help the API software communicate with the computer
-you are using which in turn allows the ASLM software to communicate with the device
+you are using which in turn allows the Navigate software to communicate with the device
 (eg port: COM7).</p>
 <p>Running the software with our current microscope setup would fail. It turns out our
 ASI stage only moves in the x, y, z axes. We need a way to handle theta and f axes.</p>

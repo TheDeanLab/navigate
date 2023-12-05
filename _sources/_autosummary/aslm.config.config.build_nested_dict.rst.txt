@@ -1,6 +1,0 @@
-aslm.config.config.build\_nested\_dict
-======================================
-
-.. currentmodule:: aslm.config.config
-
-.. autofunction:: build_nested_dict

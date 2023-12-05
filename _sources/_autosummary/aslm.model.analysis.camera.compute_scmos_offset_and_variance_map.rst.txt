@@ -1,6 +1,0 @@
-aslm.model.analysis.camera.compute\_scmos\_offset\_and\_variance\_map
-=====================================================================
-
-.. currentmodule:: aslm.model.analysis.camera
-
-.. autofunction:: compute_scmos_offset_and_variance_map

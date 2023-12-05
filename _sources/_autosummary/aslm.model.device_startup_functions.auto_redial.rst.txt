@@ -1,6 +1,0 @@
-aslm.model.device\_startup\_functions.auto\_redial
-==================================================
-
-.. currentmodule:: aslm.model.device_startup_functions
-
-.. autofunction:: auto_redial

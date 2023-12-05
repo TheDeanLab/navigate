@@ -1,0 +1,39 @@
+navigate.model.devices.stages
+=============================
+
+.. automodule:: navigate.model.devices.stages
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   navigate.model.devices.stages.stage_asi
+   navigate.model.devices.stages.stage_base
+   navigate.model.devices.stages.stage_galvo
+   navigate.model.devices.stages.stage_mcl
+   navigate.model.devices.stages.stage_pi
+   navigate.model.devices.stages.stage_sutter
+   navigate.model.devices.stages.stage_synthetic
+   navigate.model.devices.stages.stage_tl_kcube_inertial
+

@@ -1,0 +1,43 @@
+navigate.view.popups
+====================
+
+.. automodule:: navigate.view.popups
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   navigate.view.popups.acquire_popup
+   navigate.view.popups.adaptiveoptics_popup
+   navigate.view.popups.autofocus_setting_popup
+   navigate.view.popups.camera_map_setting_popup
+   navigate.view.popups.camera_view_popup_window
+   navigate.view.popups.feature_list_popup
+   navigate.view.popups.help_popup
+   navigate.view.popups.ilastik_setting_popup
+   navigate.view.popups.microscope_setting_popup_window
+   navigate.view.popups.tiling_wizard_popup
+   navigate.view.popups.tiling_wizard_popup2
+   navigate.view.popups.waveform_parameter_popup_window
+

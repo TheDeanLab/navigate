@@ -1,0 +1,31 @@
+navigate.model.devices.stages.stage\_synthetic
+==============================================
+
+.. automodule:: navigate.model.devices.stages.stage_synthetic
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      SyntheticStage
+   
+   
+
+   
+   
+   
+
+
+

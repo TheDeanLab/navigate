@@ -1,6 +1,0 @@
-aslm.tools.main\_functions.create\_parser
-=========================================
-
-.. currentmodule:: aslm.tools.main_functions
-
-.. autofunction:: create_parser

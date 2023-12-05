@@ -1,0 +1,31 @@
+navigate.model.devices.lasers.laser\_base
+=========================================
+
+.. automodule:: navigate.model.devices.lasers.laser_base
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      LaserBase
+   
+   
+
+   
+   
+   
+
+
+

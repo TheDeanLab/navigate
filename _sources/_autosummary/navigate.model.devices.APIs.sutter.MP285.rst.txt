@@ -1,0 +1,31 @@
+navigate.model.devices.APIs.sutter.MP285
+========================================
+
+.. automodule:: navigate.model.devices.APIs.sutter.MP285
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      MP285
+   
+   
+
+   
+   
+   
+
+
+

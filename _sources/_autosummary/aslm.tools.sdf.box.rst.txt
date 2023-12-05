@@ -1,6 +1,0 @@
-aslm.tools.sdf.box
-==================
-
-.. currentmodule:: aslm.tools.sdf
-
-.. autofunction:: box

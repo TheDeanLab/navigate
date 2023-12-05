@@ -1,0 +1,33 @@
+navigate.model.features.remove\_empty\_tiles.RemoveEmptyPositions
+=================================================================
+
+.. currentmodule:: navigate.model.features.remove_empty_tiles
+
+.. autoclass:: RemoveEmptyPositions
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RemoveEmptyPositions.__init__
+      ~RemoveEmptyPositions.signal_func
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RemoveEmptyPositions.model
+      ~RemoveEmptyPositions.position_records
+   
+   

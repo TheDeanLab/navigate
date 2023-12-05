@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuring ASLM &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+  <title>Configuring Navigate &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Configuration Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to Navigate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -69,7 +69,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Configuring ASLM</li>
+      <li class="breadcrumb-item active">Configuring Navigate</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/config.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -79,10 +79,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="configuring-aslm">
-<h1>Configuring ASLM<a class="headerlink" href="#configuring-aslm" title="Permalink to this heading"></a></h1>
-<p>In order to properly use the ASLM software you will need to configure the specifications of the various hardware that you will be using.
-This is done by updating the configuration.yaml file located in either <code class="docutils literal notranslate"><span class="pre">Users\name\AppData\Local\.ASLM</span></code> if on Windows or <code class="docutils literal notranslate"><span class="pre">~/.ASLM</span></code> if on Mac/Linux.</p>
+  <section id="configuring-navigate">
+<h1>Configuring Navigate<a class="headerlink" href="#configuring-navigate" title="Permalink to this heading"></a></h1>
+<p>In order to properly use the Navigate software you will need to configure the specifications of the various hardware that you will be using.
+This is done by updating the configuration.yaml file located in either <code class="docutils literal notranslate"><span class="pre">Users\name\AppData\Local\.navigate</span></code> if on Windows or <code class="docutils literal notranslate"><span class="pre">~/.navigate</span></code> if on Mac/Linux.</p>
 <section id="configuration-yaml">
 <h2>Configuration.yaml<a class="headerlink" href="#configuration-yaml" title="Permalink to this heading"></a></h2>
 <section id="hardware-section">
@@ -164,7 +164,7 @@ For example, if you wanted to remove the Thorlabs stage and replace the PI stage
 <p class="admonition-title">Note</p>
 <p>The type of the device is needed when deciding which Python object to instantiate on startup of the software. (eg type: ASI)
 The other fields (eg port: COM7) are specified by the manufacturer’s API. They help the API communicate with the computer
-you are using which in turn allows the ASLM software to communicate with the device.</p>
+you are using which in turn allows the Navigate software to communicate with the device.</p>
 </div>
 <p>Running the software with our current microscope setup would fail. It turns out our ASI stage only moves in the x, y, z axes.
 We need a way to handle theta and f axes.</p>
@@ -293,7 +293,7 @@ the synthetic stage.</p>
 <ul class="simple">
 <li><p>We can optionally add <code class="docutils literal notranslate"><span class="pre">axes_mapping</span></code> to the hardware dictionary. <code class="docutils literal notranslate"><span class="pre">axes_mapping</span></code> lists the values</p></li>
 </ul>
-<p>ASLM uses to access stage axes on the stage controller hardware, while <code class="docutils literal notranslate"><span class="pre">axes</span></code> tells ASLM which software axis (X, Y, Z,
+<p>Navigate uses to access stage axes on the stage controller hardware, while <code class="docutils literal notranslate"><span class="pre">axes</span></code> tells Navigate which software axis (X, Y, Z,
 Theta or Focus) is controlled by the hardware stage axis at the corresponding index of <code class="docutils literal notranslate"><span class="pre">axes_mapping</span></code>.</p>
 <ul class="simple">
 <li><p>PI stages will tell you their <code class="docutils literal notranslate"><span class="pre">axes_mapping</span></code> in a consistent fashion if queried from their API, so we do not need to

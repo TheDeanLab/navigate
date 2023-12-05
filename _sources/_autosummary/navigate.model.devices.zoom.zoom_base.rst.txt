@@ -1,0 +1,31 @@
+navigate.model.devices.zoom.zoom\_base
+======================================
+
+.. automodule:: navigate.model.devices.zoom.zoom_base
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      ZoomBase
+   
+   
+
+   
+   
+   
+
+
+

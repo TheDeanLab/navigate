@@ -1,6 +1,0 @@
-aslm.tools.xml\_tools.dict\_to\_xml
-===================================
-
-.. currentmodule:: aslm.tools.xml_tools
-
-.. autofunction:: dict_to_xml

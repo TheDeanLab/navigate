@@ -1,6 +1,0 @@
-aslm.model.waveforms.remote\_focus\_ramp
-========================================
-
-.. currentmodule:: aslm.model.waveforms
-
-.. autofunction:: remote_focus_ramp

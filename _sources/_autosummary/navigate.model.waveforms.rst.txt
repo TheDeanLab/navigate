@@ -1,0 +1,37 @@
+navigate.model.waveforms
+========================
+
+.. automodule:: navigate.model.waveforms
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      camera_exposure
+      dc_value
+      remote_focus_ramp
+      sawtooth
+      sine_wave
+      single_pulse
+      smooth_waveform
+      square
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

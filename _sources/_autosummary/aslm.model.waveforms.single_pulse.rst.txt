@@ -1,6 +1,0 @@
-aslm.model.waveforms.single\_pulse
-==================================
-
-.. currentmodule:: aslm.model.waveforms
-
-.. autofunction:: single_pulse

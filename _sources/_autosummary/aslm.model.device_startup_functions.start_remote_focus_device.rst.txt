@@ -1,6 +1,0 @@
-aslm.model.device\_startup\_functions.start\_remote\_focus\_device
-==================================================================
-
-.. currentmodule:: aslm.model.device_startup_functions
-
-.. autofunction:: start_remote_focus_device

@@ -1,6 +1,0 @@
-aslm.model.devices.stages.stage\_mcl.build\_MCLStage\_connection
-================================================================
-
-.. currentmodule:: aslm.model.devices.stages.stage_mcl
-
-.. autofunction:: build_MCLStage_connection

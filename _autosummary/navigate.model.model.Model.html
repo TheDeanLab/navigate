@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.model.Model &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.waveforms" href="navigate.model.waveforms.html" />
+    <link rel="prev" title="navigate.model.model" href="navigate.model.model.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Autonomous Software for Light Microscopy
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.dummy.html">navigate.model.dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">navigate.model.model.Model</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.model.html">navigate.model.model</a></li>
+      <li class="breadcrumb-item active">navigate.model.model.Model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.model.Model.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-model-model">
+<h1>navigate.model.model.Model<a class="headerlink" href="#navigate-model-model-model" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.model.Model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Navigate Model Class</p>
+<p>Model for Model-View-Controller Software Architecture.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the Model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>argparse.Namespace</em>) – Command line arguments.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – Configuration dictionary.</p></li>
+<li><p><strong>event_queue</strong> (<em>multiprocessing.Queue</em>) – Queue for events.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.__init__" title="navigate.model.model.Model.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(args[, configuration, event_queue])</p></td>
+<td><p>Initialize the Model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.change_resolution" title="navigate.model.model.Model.change_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">change_resolution</span></code></a>(resolution_value)</p></td>
+<td><p>Switch resolution mode of the microscope.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.create_pipe" title="navigate.model.model.Model.create_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_pipe</span></code></a>(pipe_name)</p></td>
+<td><p>Create a data pipe.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.destroy_virtual_microscope" title="navigate.model.model.Model.destroy_virtual_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">destroy_virtual_microscope</span></code></a>(microscope_name)</p></td>
+<td><p>Destroy a virtual microscope.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.end_acquisition" title="navigate.model.model.Model.end_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_acquisition</span></code></a>()</p></td>
+<td><p>End the acquisition.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.get_active_microscope" title="navigate.model.model.Model.get_active_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_active_microscope</span></code></a>()</p></td>
+<td><p>Get the active microscope.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.get_camera_line_interval_and_exposure_time" title="navigate.model.model.Model.get_camera_line_interval_and_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_camera_line_interval_and_exposure_time</span></code></a>(...)</p></td>
+<td><p>Get camera line interval time and light sheet exposure time</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.get_data_buffer" title="navigate.model.model.Model.get_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_data_buffer</span></code></a>([img_width, img_height])</p></td>
+<td><p>Get the data buffer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.get_feature_list" title="navigate.model.model.Model.get_feature_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_feature_list</span></code></a>(idx)</p></td>
+<td><p>Get feature list str by index</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.get_microscope_info" title="navigate.model.model.Model.get_microscope_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_microscope_info</span></code></a>()</p></td>
+<td><p>Return Microscopes device information.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.get_offset_variance_maps" title="navigate.model.model.Model.get_offset_variance_maps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_offset_variance_maps</span></code></a>()</p></td>
+<td><p>Get the offset variance maps.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.get_stage_position" title="navigate.model.model.Model.get_stage_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_stage_position</span></code></a>()</p></td>
+<td><p>Get the position of the stage.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.launch_virtual_microscope" title="navigate.model.model.Model.launch_virtual_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">launch_virtual_microscope</span></code></a>(microscope_name, ...)</p></td>
+<td><p>Launch a virtual microscope.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.load_feature_list_from_file" title="navigate.model.model.Model.load_feature_list_from_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_feature_list_from_file</span></code></a>(filename, features)</p></td>
+<td><p>Append feature list from file</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.load_feature_list_from_str" title="navigate.model.model.Model.load_feature_list_from_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_feature_list_from_str</span></code></a>(feature_list_str)</p></td>
+<td><p>Append feature list from feature_list_str</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.load_feature_records" title="navigate.model.model.Model.load_feature_records"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_feature_records</span></code></a>()</p></td>
+<td><p>Load installed feature lists from system folder</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.load_images" title="navigate.model.model.Model.load_images"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_images</span></code></a>([filenames])</p></td>
+<td><p>Load/Unload images to the Synthetic Camera</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.move_stage" title="navigate.model.model.Model.move_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_stage</span></code></a>(pos_dict[, wait_until_done])</p></td>
+<td><p>Moves the stages.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.pause_data_thread" title="navigate.model.model.Model.pause_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_thread</span></code></a>()</p></td>
+<td><p>Pause the data thread.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.prepare_acquisition" title="navigate.model.model.Model.prepare_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_acquisition</span></code></a>([turn_off_flags])</p></td>
+<td><p>Prepare the acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.release_pipe" title="navigate.model.model.Model.release_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_pipe</span></code></a>(pipe_name)</p></td>
+<td><p>Close a data pipe.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.resume_data_thread" title="navigate.model.model.Model.resume_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resume_data_thread</span></code></a>()</p></td>
+<td><p>Resume the data thread.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_acquisition" title="navigate.model.model.Model.run_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_acquisition</span></code></a>()</p></td>
+<td><p>Run acquisition along with a feature list one time.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_command" title="navigate.model.model.Model.run_command"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_command</span></code></a>(command, *args, **kwargs)</p></td>
+<td><p>Receives commands from the controller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_data_process" title="navigate.model.model.Model.run_data_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_data_process</span></code></a>([num_of_frames, data_func])</p></td>
+<td><p>Run the data process.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_live_acquisition" title="navigate.model.model.Model.run_live_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_live_acquisition</span></code></a>()</p></td>
+<td><p>Stream live image to the GUI.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.simplified_data_process" title="navigate.model.model.Model.simplified_data_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simplified_data_process</span></code></a>(microscope, ...[, ...])</p></td>
+<td><p>Run the data process.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.snap_image" title="navigate.model.model.Model.snap_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snap_image</span></code></a>()</p></td>
+<td><p>Acquire an image after updating the waveforms.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.stop_stage" title="navigate.model.model.Model.stop_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_stage</span></code></a>()</p></td>
+<td><p>Stop the stages.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.terminate" title="navigate.model.model.Model.terminate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">terminate</span></code></a>()</p></td>
+<td><p>Terminate the model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.update_data_buffer" title="navigate.model.model.Model.update_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_data_buffer</span></code></a>([img_width, img_height])</p></td>
+<td><p>Update the Data Buffer</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.update_ilastik_setting" title="navigate.model.model.Model.update_ilastik_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ilastik_setting</span></code></a>([...])</p></td>
+<td><p>Update the ilastik setting.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.update_mirror" title="navigate.model.model.Model.update_mirror"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_mirror</span></code></a>([coef, flatten])</p></td>
+<td><p>Update the mirror.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.logger" title="navigate.model.model.Model.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
+<td><p>Logger object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.configuration" title="navigate.model.model.Model.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Configuration dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.virtual_microscopes" title="navigate.model.model.Model.virtual_microscopes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">virtual_microscopes</span></code></a></p></td>
+<td><p>Dictionary of virtual microscopes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.microscopes" title="navigate.model.model.Model.microscopes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscopes</span></code></a></p></td>
+<td><p>Dictionary of physical microscopes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.active_microscope" title="navigate.model.model.Model.active_microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_microscope</span></code></a></p></td>
+<td><p>Name of the active microscope.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.active_microscope_name" title="navigate.model.model.Model.active_microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">active_microscope_name</span></code></a></p></td>
+<td><p>Name of the active microscope.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.imaging_mode" title="navigate.model.model.Model.imaging_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">imaging_mode</span></code></a></p></td>
+<td><p>Imaging mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.image_count" title="navigate.model.model.Model.image_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_count</span></code></a></p></td>
+<td><p>Number of images acquired.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.acquisition_count" title="navigate.model.model.Model.acquisition_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">acquisition_count</span></code></a></p></td>
+<td><p>Number of acquisitions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.total_acquisition_count" title="navigate.model.model.Model.total_acquisition_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_acquisition_count</span></code></a></p></td>
+<td><p>Total number of acquisitions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.total_image_count" title="navigate.model.model.Model.total_image_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_image_count</span></code></a></p></td>
+<td><p>Total number of images.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.current_exposure_time" title="navigate.model.model.Model.current_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_exposure_time</span></code></a></p></td>
+<td><p>Current exposure time in milliseconds</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.pre_exposure_time" title="navigate.model.model.Model.pre_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_exposure_time</span></code></a></p></td>
+<td><p>Pre-exposure time in milliseconds</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.camera_wait_iterations" title="navigate.model.model.Model.camera_wait_iterations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_wait_iterations</span></code></a></p></td>
+<td><p>Number of timeouts before aborting acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.start_time" title="navigate.model.model.Model.start_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_time</span></code></a></p></td>
+<td><p>Time before acquisition.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.data_buffer" title="navigate.model.model.Model.data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_buffer</span></code></a></p></td>
+<td><p>Data buffer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.img_width" title="navigate.model.model.Model.img_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">img_width</span></code></a></p></td>
+<td><p>Number of active pixels in the x-dimension.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.img_height" title="navigate.model.model.Model.img_height"><code class="xref py py-obj docutils literal notranslate"><span class="pre">img_height</span></code></a></p></td>
+<td><p>Number of active pixels in the y-dimension.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.binning" title="navigate.model.model.Model.binning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">binning</span></code></a></p></td>
+<td><p>Binning mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.data_buffer_positions" title="navigate.model.model.Model.data_buffer_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_buffer_positions</span></code></a></p></td>
+<td><p>Number of frames in the data buffer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.is_acquiring" title="navigate.model.model.Model.is_acquiring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_acquiring</span></code></a></p></td>
+<td><p>Is the model acquiring?</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.f_position" title="navigate.model.model.Model.f_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_position</span></code></a></p></td>
+<td><p>Current focus position.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.max_entropy" title="navigate.model.model.Model.max_entropy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_entropy</span></code></a></p></td>
+<td><p>Autofocus maximum entropy.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.focus_pos" title="navigate.model.model.Model.focus_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">focus_pos</span></code></a></p></td>
+<td><p>Autofocus maximum entropy position.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.signal_thread" title="navigate.model.model.Model.signal_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_thread</span></code></a></p></td>
+<td><p>Signal thread.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.data_thread" title="navigate.model.model.Model.data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_thread</span></code></a></p></td>
+<td><p>Data thread.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.show_img_pipe" title="navigate.model.model.Model.show_img_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_img_pipe</span></code></a></p></td>
+<td><p>Show image pipe.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.plot_pipe" title="navigate.model.model.Model.plot_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pipe</span></code></a></p></td>
+<td><p>Plot pipe.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.event_queue" title="navigate.model.model.Model.event_queue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">event_queue</span></code></a></p></td>
+<td><p>Waveform queue.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.frame_id" title="navigate.model.model.Model.frame_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">frame_id</span></code></a></p></td>
+<td><p>Frame ID.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.autofocus_on" title="navigate.model.model.Model.autofocus_on"><code class="xref py py-obj docutils literal notranslate"><span class="pre">autofocus_on</span></code></a></p></td>
+<td><p>Autofocus on?</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.is_live" title="navigate.model.model.Model.is_live"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_live</span></code></a></p></td>
+<td><p>Is the model live?</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.is_save" title="navigate.model.model.Model.is_save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_save</span></code></a></p></td>
+<td><p>Is the model saving the data?</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.stop_acquisition" title="navigate.model.model.Model.stop_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_acquisition</span></code></a></p></td>
+<td><p>Stop signal and data threads?</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.stop_send_signal" title="navigate.model.model.Model.stop_send_signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_send_signal</span></code></a></p></td>
+<td><p>Stop signal thread?</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.pause_data_event" title="navigate.model.model.Model.pause_data_event"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_event</span></code></a></p></td>
+<td><p>Pause data event.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.pause_data_ready_lock" title="navigate.model.model.Model.pause_data_ready_lock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_ready_lock</span></code></a></p></td>
+<td><p>Pause data ready lock.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.ask_to_pause_data_thread" title="navigate.model.model.Model.ask_to_pause_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ask_to_pause_data_thread</span></code></a></p></td>
+<td><p>Ask to pause data thread?</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.number_of_frames" title="navigate.model.model.Model.number_of_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_frames</span></code></a></p></td>
+<td><p>Number of frames in the data buffer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.image_writer" title="navigate.model.model.Model.image_writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_writer</span></code></a></p></td>
+<td><p>Image writer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.feature_list" title="navigate.model.model.Model.feature_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">feature_list</span></code></a></p></td>
+<td><p>List of features.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.change_resolution">
+<span class="sig-name descname"><span class="pre">change_resolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.change_resolution" title="Permalink to this definition"></a></dt>
+<dd><p>Switch resolution mode of the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>resolution_value</strong> (<em>str</em>) – Resolution mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.create_pipe">
+<span class="sig-name descname"><span class="pre">create_pipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipe_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.create_pipe" title="Permalink to this definition"></a></dt>
+<dd><p>Create a data pipe.</p>
+<p>Creates a pair of connection objects connected by a pipe which by default is
+duplex (two-way)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pipe_name</strong> (<em>str</em>) – Name of pipe to create.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>end1</strong> – Connection object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.destroy_virtual_microscope">
+<span class="sig-name descname"><span class="pre">destroy_virtual_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.destroy_virtual_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>Destroy a virtual microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.end_acquisition">
+<span class="sig-name descname"><span class="pre">end_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.end_acquisition" title="Permalink to this definition"></a></dt>
+<dd><p>End the acquisition.</p>
+<p>Sets the current channel to 0, clears the signal and data containers,
+disconnects buffer in live mode and closes the shutters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.get_active_microscope">
+<span class="sig-name descname"><span class="pre">get_active_microscope</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.get_active_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>Get the active microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>microscope</strong> – Active microscope.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope" title="navigate.model.microscope.Microscope">Microscope</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.get_camera_line_interval_and_exposure_time">
+<span class="sig-name descname"><span class="pre">get_camera_line_interval_and_exposure_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_pixel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.get_camera_line_interval_and_exposure_time" title="Permalink to this definition"></a></dt>
+<dd><p>Get camera line interval time and light sheet exposure time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>exposure_time</strong> (<em>float</em>) – camera global exposure time</p></li>
+<li><p><strong>number_of_pixel</strong> (<em>int</em>) – number of pixel in light sheet mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>exposure_time</strong> (<em>float</em>) – Light-sheet mode exposure time (ms).</p></li>
+<li><p><strong>camera_line_interval</strong> (<em>float</em>) – line interval duration (s).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.get_data_buffer">
+<span class="sig-name descname"><span class="pre">get_data_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.get_data_buffer" title="Permalink to this definition"></a></dt>
+<dd><p>Get the data buffer.</p>
+<p>If the number of active pixels in x and y changes, updates the data buffer and
+returns newly-sized buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_height</strong> (<em>int</em>) – Number of active pixels in the x-dimension.</p></li>
+<li><p><strong>img_width</strong> (<em>int</em>) – Number of active pixels in the y-dimension.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>data_buffer</strong> – Shared memory object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.model.concurrency.concurrency_tools.SharedNDArray.html#navigate.model.concurrency.concurrency_tools.SharedNDArray" title="navigate.model.concurrency.concurrency_tools.SharedNDArray">SharedNDArray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.get_feature_list">
+<span class="sig-name descname"><span class="pre">get_feature_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.get_feature_list" title="Permalink to this definition"></a></dt>
+<dd><p>Get feature list str by index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>idx</strong> (<em>int</em>) – index of feature list</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>feature_list_str</strong> – “” if not exist
+string of the feature list</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.get_microscope_info">
+<span class="sig-name descname"><span class="pre">get_microscope_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.get_microscope_info" title="Permalink to this definition"></a></dt>
+<dd><p>Return Microscopes device information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>microscope_info</strong> – Microscope device information.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.get_offset_variance_maps">
+<span class="sig-name descname"><span class="pre">get_offset_variance_maps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.get_offset_variance_maps" title="Permalink to this definition"></a></dt>
+<dd><p>Get the offset variance maps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>offset_variance_maps</strong> – Offset variance maps.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.get_stage_position">
+<span class="sig-name descname"><span class="pre">get_stage_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.get_stage_position" title="Permalink to this definition"></a></dt>
+<dd><p>Get the position of the stage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ret_pos_dict</strong> – Dictionary of stage positions.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.launch_virtual_microscope">
+<span class="sig-name descname"><span class="pre">launch_virtual_microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microscope_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.launch_virtual_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>Launch a virtual microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope.</p></li>
+<li><p><strong>microscope_config</strong> (<em>dict</em>) – Configuration of microscope.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>data_buffer</strong> – List of data buffer.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.load_feature_list_from_file">
+<span class="sig-name descname"><span class="pre">load_feature_list_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.load_feature_list_from_file" title="Permalink to this definition"></a></dt>
+<dd><p>Append feature list from file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – filename of the feature list</p></li>
+<li><p><strong>features</strong> (<em>list</em>) – list of feature names</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.load_feature_list_from_str">
+<span class="sig-name descname"><span class="pre">load_feature_list_from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_list_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.load_feature_list_from_str" title="Permalink to this definition"></a></dt>
+<dd><p>Append feature list from feature_list_str</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>feature_list_str</strong> (<em>str</em>) – str of a feature list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.load_feature_records">
+<span class="sig-name descname"><span class="pre">load_feature_records</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.load_feature_records" title="Permalink to this definition"></a></dt>
+<dd><p>Load installed feature lists from system folder</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>System folcer can be found at ‘…./.navigate/feature_lists’</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.load_images">
+<span class="sig-name descname"><span class="pre">load_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.load_images" title="Permalink to this definition"></a></dt>
+<dd><p>Load/Unload images to the Synthetic Camera</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filenames</strong> (<em>list</em>) – List of filenames to load.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.move_stage">
+<span class="sig-name descname"><span class="pre">move_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.move_stage" title="Permalink to this definition"></a></dt>
+<dd><p>Moves the stages.</p>
+<p>Updates the stage dictionary, moves to the desired position, and reports
+the position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos_dict</strong> (<em>dict</em>) – Dictionary of stage positions.</p></li>
+<li><p><strong>wait_until_done</strong> (<em>bool</em>) – Checks “on target state” after command and waits until done.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Was the move successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.pause_data_thread">
+<span class="sig-name descname"><span class="pre">pause_data_thread</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.pause_data_thread" title="Permalink to this definition"></a></dt>
+<dd><p>Pause the data thread.</p>
+<p>Function is called when user pauses the acquisition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.prepare_acquisition">
+<span class="sig-name descname"><span class="pre">prepare_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turn_off_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.prepare_acquisition" title="Permalink to this definition"></a></dt>
+<dd><p>Prepare the acquisition.</p>
+<p>This function is called when user starts the acquisition.
+Sets flags. Calculates all of the waveforms. Sets the Camera Sensor Mode
+Initializes the data buffer and starts camera. Opens Shutters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>turn_off_flags</strong> (<em>bool</em>) – Turn off the flags.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.release_pipe">
+<span class="sig-name descname"><span class="pre">release_pipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipe_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.release_pipe" title="Permalink to this definition"></a></dt>
+<dd><p>Close a data pipe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pipe_name</strong> (<em>str</em>) – Name of pipe to close.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.resume_data_thread">
+<span class="sig-name descname"><span class="pre">resume_data_thread</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.resume_data_thread" title="Permalink to this definition"></a></dt>
+<dd><p>Resume the data thread.</p>
+<p>Function is called when user resumes the acquisition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.run_acquisition">
+<span class="sig-name descname"><span class="pre">run_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.run_acquisition" title="Permalink to this definition"></a></dt>
+<dd><p>Run acquisition along with a feature list one time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.run_command">
+<span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.run_command" title="Permalink to this definition"></a></dt>
+<dd><p>Receives commands from the controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – Type of command to run.</p></li>
+<li><p><strong>*args</strong> (<em>list</em>) – List of arguments to pass to the command.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Dictionary of keyword arguments to pass to the command.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.run_data_process">
+<span class="sig-name descname"><span class="pre">run_data_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_of_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.run_data_process" title="Permalink to this definition"></a></dt>
+<dd><p>Run the data process.</p>
+<p>This function is the structure of data thread.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_of_frames</strong> (<em>int</em>) – Number of frames to acquire.</p></li>
+<li><p><strong>data_func</strong> (<em>object</em>) – Function to run on the acquired data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.run_live_acquisition">
+<span class="sig-name descname"><span class="pre">run_live_acquisition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.run_live_acquisition" title="Permalink to this definition"></a></dt>
+<dd><p>Stream live image to the GUI.</p>
+<p>Recalculates the waveforms for each image, thereby allowing people to adjust
+acquisition parameters in real-time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.simplified_data_process">
+<span class="sig-name descname"><span class="pre">simplified_data_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_img_pipe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.simplified_data_process" title="Permalink to this definition"></a></dt>
+<dd><p>Run the data process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope</strong> (<a class="reference internal" href="navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope" title="navigate.model.microscope.Microscope"><em>Microscope</em></a>) – Microscope object.</p></li>
+<li><p><strong>show_img_pipe</strong> (<em>multiprocessing.connection.Connection</em>) – Pipe for showing images.</p></li>
+<li><p><strong>data_func</strong> (<em>object</em>) – Function to run on the acquired data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.snap_image">
+<span class="sig-name descname"><span class="pre">snap_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.snap_image" title="Permalink to this definition"></a></dt>
+<dd><p>Acquire an image after updating the waveforms.</p>
+<p>Can be used in acquisitions where changing waveforms are required,
+but there is additional overhead due to the need to write the
+waveforms into the buffers of the DAQ cards.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.stop_stage">
+<span class="sig-name descname"><span class="pre">stop_stage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.stop_stage" title="Permalink to this definition"></a></dt>
+<dd><p>Stop the stages.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.terminate">
+<span class="sig-name descname"><span class="pre">terminate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.terminate" title="Permalink to this definition"></a></dt>
+<dd><p>Terminate the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.update_data_buffer">
+<span class="sig-name descname"><span class="pre">update_data_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.update_data_buffer" title="Permalink to this definition"></a></dt>
+<dd><p>Update the Data Buffer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_width</strong> (<em>int</em>) – Number of active pixels in the x-dimension.</p></li>
+<li><p><strong>img_height</strong> (<em>int</em>) – Number of active pixels in the y-dimension.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.update_ilastik_setting">
+<span class="sig-name descname"><span class="pre">update_ilastik_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_segmentation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mark_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.update_ilastik_setting" title="Permalink to this definition"></a></dt>
+<dd><p>Update the ilastik setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>display_segmentation</strong> (<em>bool</em>) – Display segmentation.</p></li>
+<li><p><strong>mark_position</strong> (<em>bool</em>) – Mark position.</p></li>
+<li><p><strong>target_labels</strong> (<em>list</em>) – Target labels.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.update_mirror">
+<span class="sig-name descname"><span class="pre">update_mirror</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flatten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.update_mirror" title="Permalink to this definition"></a></dt>
+<dd><p>Update the mirror.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coef</strong> (<em>list</em>) – List of coefficients.</p></li>
+<li><p><strong>flatten</strong> (<em>bool</em>) – Flatten the mirror?</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.acquisition_count">
+<span class="sig-name descname"><span class="pre">acquisition_count</span></span><a class="headerlink" href="#navigate.model.model.Model.acquisition_count" title="Permalink to this definition"></a></dt>
+<dd><p>Number of acquisitions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.active_microscope">
+<span class="sig-name descname"><span class="pre">active_microscope</span></span><a class="headerlink" href="#navigate.model.model.Model.active_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>Name of the active microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.active_microscope_name">
+<span class="sig-name descname"><span class="pre">active_microscope_name</span></span><a class="headerlink" href="#navigate.model.model.Model.active_microscope_name" title="Permalink to this definition"></a></dt>
+<dd><p>Name of the active microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.ask_to_pause_data_thread">
+<span class="sig-name descname"><span class="pre">ask_to_pause_data_thread</span></span><a class="headerlink" href="#navigate.model.model.Model.ask_to_pause_data_thread" title="Permalink to this definition"></a></dt>
+<dd><p>Ask to pause data thread?</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.autofocus_on">
+<span class="sig-name descname"><span class="pre">autofocus_on</span></span><a class="headerlink" href="#navigate.model.model.Model.autofocus_on" title="Permalink to this definition"></a></dt>
+<dd><p>Autofocus on?</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.binning">
+<span class="sig-name descname"><span class="pre">binning</span></span><a class="headerlink" href="#navigate.model.model.Model.binning" title="Permalink to this definition"></a></dt>
+<dd><p>Binning mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.camera_wait_iterations">
+<span class="sig-name descname"><span class="pre">camera_wait_iterations</span></span><a class="headerlink" href="#navigate.model.model.Model.camera_wait_iterations" title="Permalink to this definition"></a></dt>
+<dd><p>Number of timeouts before aborting acquisition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#navigate.model.model.Model.configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.current_exposure_time">
+<span class="sig-name descname"><span class="pre">current_exposure_time</span></span><a class="headerlink" href="#navigate.model.model.Model.current_exposure_time" title="Permalink to this definition"></a></dt>
+<dd><p>Current exposure time in milliseconds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.data_buffer">
+<span class="sig-name descname"><span class="pre">data_buffer</span></span><a class="headerlink" href="#navigate.model.model.Model.data_buffer" title="Permalink to this definition"></a></dt>
+<dd><p>Data buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.data_buffer_positions">
+<span class="sig-name descname"><span class="pre">data_buffer_positions</span></span><a class="headerlink" href="#navigate.model.model.Model.data_buffer_positions" title="Permalink to this definition"></a></dt>
+<dd><p>Number of frames in the data buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.data_thread">
+<span class="sig-name descname"><span class="pre">data_thread</span></span><a class="headerlink" href="#navigate.model.model.Model.data_thread" title="Permalink to this definition"></a></dt>
+<dd><p>Data thread.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>threading.Thread</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.event_queue">
+<span class="sig-name descname"><span class="pre">event_queue</span></span><a class="headerlink" href="#navigate.model.model.Model.event_queue" title="Permalink to this definition"></a></dt>
+<dd><p>Waveform queue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>multiprocessing.Queue</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.f_position">
+<span class="sig-name descname"><span class="pre">f_position</span></span><a class="headerlink" href="#navigate.model.model.Model.f_position" title="Permalink to this definition"></a></dt>
+<dd><p>Current focus position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.feature_list">
+<span class="sig-name descname"><span class="pre">feature_list</span></span><a class="headerlink" href="#navigate.model.model.Model.feature_list" title="Permalink to this definition"></a></dt>
+<dd><p>List of features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.focus_pos">
+<span class="sig-name descname"><span class="pre">focus_pos</span></span><a class="headerlink" href="#navigate.model.model.Model.focus_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Autofocus maximum entropy position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.frame_id">
+<span class="sig-name descname"><span class="pre">frame_id</span></span><a class="headerlink" href="#navigate.model.model.Model.frame_id" title="Permalink to this definition"></a></dt>
+<dd><p>Frame ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.image_count">
+<span class="sig-name descname"><span class="pre">image_count</span></span><a class="headerlink" href="#navigate.model.model.Model.image_count" title="Permalink to this definition"></a></dt>
+<dd><p>Number of images acquired.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.image_writer">
+<span class="sig-name descname"><span class="pre">image_writer</span></span><a class="headerlink" href="#navigate.model.model.Model.image_writer" title="Permalink to this definition"></a></dt>
+<dd><p>Image writer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.model.features.image_writer.ImageWriter.html#navigate.model.features.image_writer.ImageWriter" title="navigate.model.features.image_writer.ImageWriter">ImageWriter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.imaging_mode">
+<span class="sig-name descname"><span class="pre">imaging_mode</span></span><a class="headerlink" href="#navigate.model.model.Model.imaging_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Imaging mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.img_height">
+<span class="sig-name descname"><span class="pre">img_height</span></span><a class="headerlink" href="#navigate.model.model.Model.img_height" title="Permalink to this definition"></a></dt>
+<dd><p>Number of active pixels in the y-dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.img_width">
+<span class="sig-name descname"><span class="pre">img_width</span></span><a class="headerlink" href="#navigate.model.model.Model.img_width" title="Permalink to this definition"></a></dt>
+<dd><p>Number of active pixels in the x-dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.is_acquiring">
+<span class="sig-name descname"><span class="pre">is_acquiring</span></span><a class="headerlink" href="#navigate.model.model.Model.is_acquiring" title="Permalink to this definition"></a></dt>
+<dd><p>Is the model acquiring?</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.is_live">
+<span class="sig-name descname"><span class="pre">is_live</span></span><a class="headerlink" href="#navigate.model.model.Model.is_live" title="Permalink to this definition"></a></dt>
+<dd><p>Is the model live?</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.is_save">
+<span class="sig-name descname"><span class="pre">is_save</span></span><a class="headerlink" href="#navigate.model.model.Model.is_save" title="Permalink to this definition"></a></dt>
+<dd><p>Is the model saving the data?</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#navigate.model.model.Model.logger" title="Permalink to this definition"></a></dt>
+<dd><p>Logger object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.max_entropy">
+<span class="sig-name descname"><span class="pre">max_entropy</span></span><a class="headerlink" href="#navigate.model.model.Model.max_entropy" title="Permalink to this definition"></a></dt>
+<dd><p>Autofocus maximum entropy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.microscopes">
+<span class="sig-name descname"><span class="pre">microscopes</span></span><a class="headerlink" href="#navigate.model.model.Model.microscopes" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of physical microscopes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.number_of_frames">
+<span class="sig-name descname"><span class="pre">number_of_frames</span></span><a class="headerlink" href="#navigate.model.model.Model.number_of_frames" title="Permalink to this definition"></a></dt>
+<dd><p>Number of frames in the data buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.pause_data_event">
+<span class="sig-name descname"><span class="pre">pause_data_event</span></span><a class="headerlink" href="#navigate.model.model.Model.pause_data_event" title="Permalink to this definition"></a></dt>
+<dd><p>Pause data event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.pause_data_ready_lock">
+<span class="sig-name descname"><span class="pre">pause_data_ready_lock</span></span><a class="headerlink" href="#navigate.model.model.Model.pause_data_ready_lock" title="Permalink to this definition"></a></dt>
+<dd><p>Pause data ready lock.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>threading.Lock</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.plot_pipe">
+<span class="sig-name descname"><span class="pre">plot_pipe</span></span><a class="headerlink" href="#navigate.model.model.Model.plot_pipe" title="Permalink to this definition"></a></dt>
+<dd><p>Plot pipe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>multiprocessing.connection.Connection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.pre_exposure_time">
+<span class="sig-name descname"><span class="pre">pre_exposure_time</span></span><a class="headerlink" href="#navigate.model.model.Model.pre_exposure_time" title="Permalink to this definition"></a></dt>
+<dd><p>Pre-exposure time in milliseconds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.show_img_pipe">
+<span class="sig-name descname"><span class="pre">show_img_pipe</span></span><a class="headerlink" href="#navigate.model.model.Model.show_img_pipe" title="Permalink to this definition"></a></dt>
+<dd><p>Show image pipe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>multiprocessing.connection.Connection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.signal_thread">
+<span class="sig-name descname"><span class="pre">signal_thread</span></span><a class="headerlink" href="#navigate.model.model.Model.signal_thread" title="Permalink to this definition"></a></dt>
+<dd><p>Signal thread.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>threading.Thread</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.start_time">
+<span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#navigate.model.model.Model.start_time" title="Permalink to this definition"></a></dt>
+<dd><p>Time before acquisition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.stop_acquisition">
+<span class="sig-name descname"><span class="pre">stop_acquisition</span></span><a class="headerlink" href="#navigate.model.model.Model.stop_acquisition" title="Permalink to this definition"></a></dt>
+<dd><p>Stop signal and data threads?</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.stop_send_signal">
+<span class="sig-name descname"><span class="pre">stop_send_signal</span></span><a class="headerlink" href="#navigate.model.model.Model.stop_send_signal" title="Permalink to this definition"></a></dt>
+<dd><p>Stop signal thread?</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.total_acquisition_count">
+<span class="sig-name descname"><span class="pre">total_acquisition_count</span></span><a class="headerlink" href="#navigate.model.model.Model.total_acquisition_count" title="Permalink to this definition"></a></dt>
+<dd><p>Total number of acquisitions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.total_image_count">
+<span class="sig-name descname"><span class="pre">total_image_count</span></span><a class="headerlink" href="#navigate.model.model.Model.total_image_count" title="Permalink to this definition"></a></dt>
+<dd><p>Total number of images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.virtual_microscopes">
+<span class="sig-name descname"><span class="pre">virtual_microscopes</span></span><a class="headerlink" href="#navigate.model.model.Model.virtual_microscopes" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of virtual microscopes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.model.html" class="btn btn-neutral float-left" title="navigate.model.model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.waveforms.html" class="btn btn-neutral float-right" title="navigate.model.waveforms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

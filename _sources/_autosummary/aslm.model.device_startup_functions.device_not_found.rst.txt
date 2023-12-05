@@ -1,6 +1,0 @@
-aslm.model.device\_startup\_functions.device\_not\_found
-========================================================
-
-.. currentmodule:: aslm.model.device_startup_functions
-
-.. autofunction:: device_not_found

@@ -1,0 +1,42 @@
+﻿navigate.model
+==============
+
+.. automodule:: navigate.model
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   navigate.model.analysis
+   navigate.model.concurrency
+   navigate.model.data_sources
+   navigate.model.device_startup_functions
+   navigate.model.devices
+   navigate.model.dummy
+   navigate.model.features
+   navigate.model.metadata_sources
+   navigate.model.microscope
+   navigate.model.model
+   navigate.model.waveforms
+

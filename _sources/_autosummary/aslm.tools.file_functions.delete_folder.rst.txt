@@ -1,6 +1,0 @@
-aslm.tools.file\_functions.delete\_folder
-=========================================
-
-.. currentmodule:: aslm.tools.file_functions
-
-.. autofunction:: delete_folder

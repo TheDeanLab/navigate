@@ -1,6 +1,0 @@
-aslm.config.config.verify\_waveform\_constants
-==============================================
-
-.. currentmodule:: aslm.config.config
-
-.. autofunction:: verify_waveform_constants

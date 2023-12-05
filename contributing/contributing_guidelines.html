@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Adding New Hardware" href="contributing_hardware.html" />
-    <link rel="prev" title="Contributing to ASLM" href="contributing_home.html" /> 
+    <link rel="prev" title="Contributing to Navigate" href="contributing_home.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,7 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="contributing_home.html">Contributing to ASLM</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="contributing_home.html">Contributing to Navigate</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Contributing Guidelines</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#general-principles">General Principles</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installation-of-developer-dependencies">Installation of Developer Dependencies</a></li>
@@ -86,7 +86,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="contributing_home.html">Contributing to ASLM</a></li>
+          <li class="breadcrumb-item"><a href="contributing_home.html">Contributing to Navigate</a></li>
       <li class="breadcrumb-item active">Contributing Guidelines</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/contributing/contributing_guidelines.rst.txt" rel="nofollow"> View page source</a>
@@ -126,9 +126,9 @@ discussing this with the software team in advance.</p></li>
 </section>
 <section id="installation-of-developer-dependencies">
 <h2>Installation of Developer Dependencies<a class="headerlink" href="#installation-of-developer-dependencies" title="Permalink to this heading"></a></h2>
-<p>To install the developer dependencies, run the following command from within the ASLM
+<p>To install the developer dependencies, run the following command from within the Navigate
 repository folder:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">ASLM</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">navigate</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;.[dev]&#39;</span>
 </pre></div>
 </div>
@@ -150,13 +150,13 @@ documentation for the code base. Example documentation can be found <a class="re
 <p>We leverage pre-commit workflows to enforce consistent code formatting. In some rare
 cases, Ruff may complain about a line of code that is actually fine. For example, in the example code below,
 Ruff complains that the start_stage class is imported but not used. However, it is actually used in as part of an <cite>exec</cite> statement:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aslm.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>
 <span class="n">device_name</span> <span class="o">=</span> <span class="n">stage</span>
 <span class="n">exec</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;self.</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2"> = start_</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">(name, device_connection, configuration, i, is_synthetic)&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To avoid this error, you can add a <cite># noqa</cite> comment to the end of the line to tell Ruff to ignore the error:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aslm.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>  <span class="c1"># noqa</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>  <span class="c1"># noqa</span>
 </pre></div>
 </div>
 </section>
@@ -214,7 +214,7 @@ of ~1000 typically works:</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="contributing_home.html" class="btn btn-neutral float-left" title="Contributing to ASLM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="contributing_home.html" class="btn btn-neutral float-left" title="Contributing to Navigate" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="contributing_hardware.html" class="btn btn-neutral float-right" title="Adding New Hardware" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

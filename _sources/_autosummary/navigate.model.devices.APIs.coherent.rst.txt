@@ -1,0 +1,32 @@
+navigate.model.devices.APIs.coherent
+====================================
+
+.. automodule:: navigate.model.devices.APIs.coherent
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   navigate.model.devices.APIs.coherent.ObisLaser
+

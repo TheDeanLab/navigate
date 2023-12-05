@@ -1,0 +1,34 @@
+navigate.model.devices.daq
+==========================
+
+.. automodule:: navigate.model.devices.daq
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   navigate.model.devices.daq.daq_base
+   navigate.model.devices.daq.daq_ni
+   navigate.model.devices.daq.daq_synthetic
+

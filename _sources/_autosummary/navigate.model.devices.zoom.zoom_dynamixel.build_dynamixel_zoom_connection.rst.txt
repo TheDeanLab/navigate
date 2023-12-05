@@ -1,0 +1,6 @@
+navigate.model.devices.zoom.zoom\_dynamixel.build\_dynamixel\_zoom\_connection
+==============================================================================
+
+.. currentmodule:: navigate.model.devices.zoom.zoom_dynamixel
+
+.. autofunction:: build_dynamixel_zoom_connection

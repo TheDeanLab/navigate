@@ -1,6 +1,0 @@
-aslm.model.waveforms.sawtooth
-=============================
-
-.. currentmodule:: aslm.model.waveforms
-
-.. autofunction:: sawtooth

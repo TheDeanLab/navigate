@@ -1,0 +1,40 @@
+navigate.model.dummy.DummyController
+====================================
+
+.. currentmodule:: navigate.model.dummy
+
+.. autoclass:: DummyController
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DummyController.__init__
+      ~DummyController.clear
+      ~DummyController.execute
+      ~DummyController.pop
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DummyController.configuration
+      ~DummyController.commands
+      ~DummyController.view
+      ~DummyController.configuration_controller
+      ~DummyController.menu_controller
+      ~DummyController.stage_pos
+      ~DummyController.off_stage_pos
+   
+   

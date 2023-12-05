@@ -1,0 +1,39 @@
+navigate.model.features.feature\_container.DataNode
+===================================================
+
+.. currentmodule:: navigate.model.features.feature_container
+
+.. autoclass:: DataNode
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DataNode.__init__
+      ~DataNode.run
+      ~DataNode.set_property
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DataNode.is_marked
+      ~DataNode.node_name
+      ~DataNode.node_funcs
+      ~DataNode.node_type
+      ~DataNode.device_related
+      ~DataNode.need_response
+      ~DataNode.is_initialized
+   
+   

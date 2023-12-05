@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.features.feature_container.Container &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.features.feature_container.DataContainer" href="navigate.model.features.feature_container.DataContainer.html" />
+    <link rel="prev" title="navigate.model.features.feature_container.load_features" href="navigate.model.features.feature_container.load_features.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Autonomous Software for Light Microscopy
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.dummy.html">navigate.model.dummy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.adaptive_optics.html">navigate.model.features.adaptive_optics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.auto_tile_scan.html">navigate.model.features.auto_tile_scan</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.autofocus.html">navigate.model.features.autofocus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.html">navigate.model.features.common_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.cva_conpro.html">navigate.model.features.cva_conpro</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.model.features.feature_container.html">navigate.model.features.feature_container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.feature_related_functions.html">navigate.model.features.feature_related_functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.image_writer.html">navigate.model.features.image_writer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.remove_empty_tiles.html">navigate.model.features.remove_empty_tiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.restful_features.html">navigate.model.features.restful_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.volume_search.html">navigate.model.features.volume_search</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.features.html">navigate.model.features</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.features.feature_container.html">navigate.model.features.feature_container</a></li>
+      <li class="breadcrumb-item active">navigate.model.features.feature_container.Container</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.features.feature_container.Container.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-features-feature-container-container">
+<h1>navigate.model.features.feature_container.Container<a class="headerlink" href="#navigate-model-features-feature-container-container" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.Container">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.features.feature_container.</span></span><span class="sig-name descname"><span class="pre">Container</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.feature_container.Container" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container class for managing a control sequence tree.</p>
+<p>This class is responsible for managing a control sequence tree, which consists of
+nodes representing different actions or steps in the control sequence. It provides
+methods for resetting the tree and performing cleanup operations on specified nodes.</p>
+<section id="notes">
+<h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>The <cite>Container</cite> class is used to manage the execution of a control sequence
+tree. It maintains the state of the control sequence and provides methods
+for resetting the state and performing cleanup operations.</p></li>
+<li><p>The <cite>root</cite> attribute represents the root node of the control sequence tree,
+which serves as the entry point for executing the control sequence.</p></li>
+<li><p>The <cite>curr_node</cite> attribute tracks the currently running node in the control
+sequence.</p></li>
+<li><p>The <cite>end_flag</cite> attribute is used to signal the termination of control sequence
+execution.</p></li>
+<li><p>The <cite>cleanup_list</cite> attribute is a list of nodes that contain ‘cleanup’
+functions. These functions are executed when the container is closed, allowing
+for resource cleanup.</p></li>
+<li><p>The <cite>is_closed</cite> attribute indicates whether the container has been closed or not.</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.Container.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.feature_container.Container.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the Container object.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>root<span class="classifier">TreeNode or None, optional</span></dt><dd><p>The root node of the control sequence tree. Default is None.</p>
+</dd>
+<dt>cleanup_list<span class="classifier">list of TreeNode, optional</span></dt><dd><p>A list of nodes containing ‘cleanup’ functions to be executed when the
+container is closed. Default is an empty list.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.feature_container.Container.__init__" title="navigate.model.features.feature_container.Container.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([root, cleanup_list])</p></td>
+<td><p>Initialize the Container object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.feature_container.Container.cleanup" title="navigate.model.features.feature_container.Container.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a>()</p></td>
+<td><p>Execute 'cleanup' functions for specified nodes in the tree.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.feature_container.Container.reset" title="navigate.model.features.feature_container.Container.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a>()</p></td>
+<td><p>Reset the container's state, including the current node and end flag.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.feature_container.Container.root" title="navigate.model.features.feature_container.Container.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root</span></code></a></p></td>
+<td><p>The root node of the control sequence tree.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.feature_container.Container.curr_node" title="navigate.model.features.feature_container.Container.curr_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curr_node</span></code></a></p></td>
+<td><p>The currently running node in the control sequence.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.feature_container.Container.end_flag" title="navigate.model.features.feature_container.Container.end_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_flag</span></code></a></p></td>
+<td><p>A flag indicating whether the control sequence execution should stop.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.feature_container.Container.is_closed" title="navigate.model.features.feature_container.Container.is_closed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_closed</span></code></a></p></td>
+<td><p>A boolean indicating whether the container is closed.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.Container.cleanup">
+<span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.feature_container.Container.cleanup" title="Permalink to this definition"></a></dt>
+<dd><p>Execute ‘cleanup’ functions for specified nodes in the tree.</p>
+<p>This method executes the ‘cleanup’ functions associated with nodes in the
+<cite>cleanup_list</cite>. These functions are typically used to perform resource
+cleanup or finalization when the container is closed. The ‘cleanup_list’
+specifies which nodes should have their ‘cleanup’ functions executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.Container.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.feature_container.Container.reset" title="Permalink to this definition"></a></dt>
+<dd><p>Reset the container’s state, including the current node and end flag.</p>
+<p>This method resets the state of the container, including setting the current
+node to None and clearing the end flag. It prepares the container for running
+the control sequence from the beginning.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.Container.curr_node">
+<span class="sig-name descname"><span class="pre">curr_node</span></span><a class="headerlink" href="#navigate.model.features.feature_container.Container.curr_node" title="Permalink to this definition"></a></dt>
+<dd><p>The currently running node in the control sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.model.features.feature_container.TreeNode.html#navigate.model.features.feature_container.TreeNode" title="navigate.model.features.feature_container.TreeNode">TreeNode</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.Container.end_flag">
+<span class="sig-name descname"><span class="pre">end_flag</span></span><a class="headerlink" href="#navigate.model.features.feature_container.Container.end_flag" title="Permalink to this definition"></a></dt>
+<dd><p>A flag indicating whether the control sequence execution should stop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.Container.is_closed">
+<span class="sig-name descname"><span class="pre">is_closed</span></span><a class="headerlink" href="#navigate.model.features.feature_container.Container.is_closed" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean indicating whether the container is closed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.Container.root">
+<span class="sig-name descname"><span class="pre">root</span></span><a class="headerlink" href="#navigate.model.features.feature_container.Container.root" title="Permalink to this definition"></a></dt>
+<dd><p>The root node of the control sequence tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.model.features.feature_container.TreeNode.html#navigate.model.features.feature_container.TreeNode" title="navigate.model.features.feature_container.TreeNode">TreeNode</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.features.feature_container.load_features.html" class="btn btn-neutral float-left" title="navigate.model.features.feature_container.load_features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.features.feature_container.DataContainer.html" class="btn btn-neutral float-right" title="navigate.model.features.feature_container.DataContainer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

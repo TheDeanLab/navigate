@@ -1,0 +1,35 @@
+navigate.model.devices.camera
+=============================
+
+.. automodule:: navigate.model.devices.camera
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   navigate.model.devices.camera.camera_base
+   navigate.model.devices.camera.camera_hamamatsu
+   navigate.model.devices.camera.camera_photometrics
+   navigate.model.devices.camera.camera_synthetic
+

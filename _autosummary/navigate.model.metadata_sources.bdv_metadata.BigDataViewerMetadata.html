@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata &mdash; Autonomous Software for Light Microscopy 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.metadata_sources.metadata" href="navigate.model.metadata_sources.metadata.html" />
+    <link rel="prev" title="navigate.model.metadata_sources.bdv_metadata" href="navigate.model.metadata_sources.bdv_metadata.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Autonomous Software for Light Microscopy
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.dummy.html">navigate.model.dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.model.metadata_sources.bdv_metadata.html">navigate.model.metadata_sources.bdv_metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.metadata_sources.metadata.html">navigate.model.metadata_sources.metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.metadata_sources.ome_tiff_metadata.html">navigate.model.metadata_sources.ome_tiff_metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Autonomous Software for Light Microscopy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.metadata_sources.bdv_metadata.html">navigate.model.metadata_sources.bdv_metadata</a></li>
+      <li class="breadcrumb-item active">navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-metadata-sources-bdv-metadata-bigdataviewermetadata">
+<h1>navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata<a class="headerlink" href="#navigate-model-metadata-sources-bdv-metadata-bigdataviewermetadata" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.metadata_sources.bdv_metadata.</span></span><span class="sig-name descname"><span class="pre">BigDataViewerMetadata</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.model.metadata_sources.metadata.XMLMetadata.html#navigate.model.metadata_sources.metadata.XMLMetadata" title="navigate.model.metadata_sources.metadata.XMLMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">XMLMetadata</span></code></a></p>
+<p>Metadata for BigDataViewer files.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>XML spec in section 2.3 of <a class="reference external" href="https://arxiv.org/abs/1412.0488">https://arxiv.org/abs/1412.0488</a>.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the BigDataViewer metadata object.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.__init__" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<td><p>Initialize the BigDataViewer metadata object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.affine_matrix_to_stage_positions" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.affine_matrix_to_stage_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">affine_matrix_to_stage_positions</span></code></a>(mat)</p></td>
+<td><p>Convert affine matrix back into stage positions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_rotate_transform" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_rotate_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bdv_rotate_transform</span></code></a>()</p></td>
+<td><p>Calculate the BDV rotation transform matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_shear_transform" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_shear_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bdv_shear_transform</span></code></a>()</p></td>
+<td><p>Calculate the shear transform matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_xml_dict" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_xml_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bdv_xml_dict</span></code></a>(file_name, views, **kw)</p></td>
+<td><p>Create a BigDataViewer XML dictionary from a list of views.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.get_affine_parameters" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.get_affine_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_affine_parameters</span></code></a>(configuration)</p></td>
+<td><p>Get the affine transform parameters from the configuration file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.parse_xml" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.parse_xml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_xml</span></code></a>(root)</p></td>
+<td><p>Parse a BigDataViewer XML file into our metadata format.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_from_configuration_experiment" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_from_configuration_experiment</span></code></a>()</p></td>
+<td><p>Set from configuration experiment</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_shape_from_configuration_experiment" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_shape_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_shape_from_configuration_experiment</span></code></a>()</p></td>
+<td><p>Set shape from configuration experiment</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_stack_order_from_configuration_experiment" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_stack_order_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_stack_order_from_configuration_experiment</span></code></a>()</p></td>
+<td><p>Set stack order from configuration experiment</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.stage_positions_to_affine_matrix" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.stage_positions_to_affine_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_positions_to_affine_matrix</span></code></a>(x, y, z, theta)</p></td>
+<td><p>Convert stage positions to an affine matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.to_xml" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.to_xml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_xml</span></code></a>(file_type[, root])</p></td>
+<td><p>Convert stored metadata to XML</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.write_xml" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.write_xml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_xml</span></code></a>(file_name, views)</p></td>
+<td><p>Write BigDataViewer XML metadata.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.configuration" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Return configuration dictionary</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.per_stack" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.per_stack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">per_stack</span></code></a></p></td>
+<td><p>Return per stack</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></p></td>
+<td><p>Return shape as XYCZT.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.voxel_size" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.voxel_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">voxel_size</span></code></a></p></td>
+<td><p>Return voxel size</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_data" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shear_data</span></code></a></p></td>
+<td><p>Shear the data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_dimension" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_dimension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shear_dimension</span></code></a></p></td>
+<td><p>Dimension to shear the data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_angle" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shear_angle</span></code></a></p></td>
+<td><p>Angle in degrees to shear the data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_transform" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shear_transform</span></code></a></p></td>
+<td><p>Shear transform matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_data" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_data</span></code></a></p></td>
+<td><p>Rotate the data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_x" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_angle_x</span></code></a></p></td>
+<td><p>Angle in degrees to rotate the data in X.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_y" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_angle_y</span></code></a></p></td>
+<td><p>Angle in degrees to rotate the data in Y.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_z" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_angle_z</span></code></a></p></td>
+<td><p>Angle in degrees to rotate the data in Z.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_transform" title="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_transform</span></code></a></p></td>
+<td><p>Rotation transform matrix.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.affine_matrix_to_stage_positions">
+<span class="sig-name descname"><span class="pre">affine_matrix_to_stage_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.affine_matrix_to_stage_positions" title="Permalink to this definition"></a></dt>
+<dd><p>Convert affine matrix back into stage positions.</p>
+<p>Ignore theta, focus for now.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mat</strong> (<em>npt.ArrayLike</em>) – An affine matrix.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of stage positions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_rotate_transform">
+<span class="sig-name descname"><span class="pre">bdv_rotate_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_rotate_transform" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the BDV rotation transform matrix.</p>
+<p>BDV-specific. Matrix provided is not (4,4), but (3,4).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_shear_transform">
+<span class="sig-name descname"><span class="pre">bdv_shear_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_shear_transform" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the shear transform matrix.</p>
+<p>BDV-specific. Matrix provided is not (4,4), but (3,4).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_xml_dict">
+<span class="sig-name descname"><span class="pre">bdv_xml_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">views</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.bdv_xml_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Create a BigDataViewer XML dictionary from a list of views.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<em>str</em>) – The file name of the file to be written.</p></li>
+<li><p><strong>views</strong> (<em>list</em>) – A list of dictionaries containing metadata for each view.</p></li>
+<li><p><strong>**kw</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the XML metadata.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.get_affine_parameters">
+<span class="sig-name descname"><span class="pre">get_affine_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.get_affine_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>Get the affine transform parameters from the configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>configuration</strong> (<em>dict</em>) – Configuration dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.parse_xml">
+<span class="sig-name descname"><span class="pre">parse_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Element</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.parse_xml" title="Permalink to this definition"></a></dt>
+<dd><p>Parse a BigDataViewer XML file into our metadata format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>root</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>ET.Element</em><em>]</em>) – The root of the XML tree.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the file path, setups, and transforms.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_from_configuration_experiment">
+<span class="sig-name descname"><span class="pre">set_from_configuration_experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_from_configuration_experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Set from configuration experiment</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_shape_from_configuration_experiment">
+<span class="sig-name descname"><span class="pre">set_shape_from_configuration_experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_shape_from_configuration_experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Set shape from configuration experiment</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_stack_order_from_configuration_experiment">
+<span class="sig-name descname"><span class="pre">set_stack_order_from_configuration_experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_stack_order_from_configuration_experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Set stack order from configuration experiment</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.stage_positions_to_affine_matrix">
+<span class="sig-name descname"><span class="pre">stage_positions_to_affine_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.stage_positions_to_affine_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>Convert stage positions to an affine matrix.</p>
+<p>Ignore theta, focus for now.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – The x position of the stage.</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – The y position of the stage.</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – The z position of the stage.</p></li>
+<li><p><strong>theta</strong> (<em>float</em>) – The theta position of the stage.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An affine matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>npt.ArrayLike</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.to_xml">
+<span class="sig-name descname"><span class="pre">to_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.to_xml" title="Permalink to this definition"></a></dt>
+<dd><p>Convert stored metadata to XML</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_type</strong> (<em>str</em>) – File type</p></li>
+<li><p><strong>root</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Root, by default None</p></li>
+<li><p><strong>**kw</strong> – Keyword arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>XML string</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.write_xml">
+<span class="sig-name descname"><span class="pre">write_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">views</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.write_xml" title="Permalink to this definition"></a></dt>
+<dd><p>Write BigDataViewer XML metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<em>str</em>) – The file name of the file to be written.</p></li>
+<li><p><strong>views</strong> (<em>list</em>) – A list of dictionaries containing metadata for each view.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.active_microscope">
+<span class="sig-name descname"><span class="pre">active_microscope</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.active_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>Active microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.configuration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">configuration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">DictProxy</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Return configuration dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Configuration dictionary</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Optional[DictProxy]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dc">
+<span class="sig-name descname"><span class="pre">dc</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dc" title="Permalink to this definition"></a></dt>
+<dd><p>Step size between channels, should always be 1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dt">
+<span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dt" title="Permalink to this definition"></a></dt>
+<dd><p>Time displacement (s)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dx">
+<span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dx" title="Permalink to this definition"></a></dt>
+<dd><p>Pixel size in x (um)
+float: Pixel size in y (um)
+float: Pixel size in z (um)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dy">
+<span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dy" title="Permalink to this definition"></a></dt>
+<dd><p>Pixel size in x (um)
+float: Pixel size in y (um)
+float: Pixel size in z (um)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dz">
+<span class="sig-name descname"><span class="pre">dz</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.dz" title="Permalink to this definition"></a></dt>
+<dd><p>Pixel size in x (um)
+float: Pixel size in y (um)
+float: Pixel size in z (um)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.per_stack">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">per_stack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.per_stack" title="Permalink to this definition"></a></dt>
+<dd><p>Return per stack</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if per stack, False otherwise</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.positions">
+<span class="sig-name descname"><span class="pre">positions</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.positions" title="Permalink to this definition"></a></dt>
+<dd><p>Number of positions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_x">
+<span class="sig-name descname"><span class="pre">rotate_angle_x</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_x" title="Permalink to this definition"></a></dt>
+<dd><p>Angle in degrees to rotate the data in X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_y">
+<span class="sig-name descname"><span class="pre">rotate_angle_y</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_y" title="Permalink to this definition"></a></dt>
+<dd><p>Angle in degrees to rotate the data in Y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_z">
+<span class="sig-name descname"><span class="pre">rotate_angle_z</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_angle_z" title="Permalink to this definition"></a></dt>
+<dd><p>Angle in degrees to rotate the data in Z.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_data">
+<span class="sig-name descname"><span class="pre">rotate_data</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_data" title="Permalink to this definition"></a></dt>
+<dd><p>Rotate the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_transform">
+<span class="sig-name descname"><span class="pre">rotate_transform</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.rotate_transform" title="Permalink to this definition"></a></dt>
+<dd><p>Rotation transform matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>npt.NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></em><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape" title="Permalink to this definition"></a></dt>
+<dd><p>Return shape as XYCZT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Shape as XYCZT</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_c">
+<span class="sig-name descname"><span class="pre">shape_c</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_c" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_t">
+<span class="sig-name descname"><span class="pre">shape_t</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_t" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_x">
+<span class="sig-name descname"><span class="pre">shape_x</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_x" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_y">
+<span class="sig-name descname"><span class="pre">shape_y</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_y" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_z">
+<span class="sig-name descname"><span class="pre">shape_z</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shape_z" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_angle">
+<span class="sig-name descname"><span class="pre">shear_angle</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_angle" title="Permalink to this definition"></a></dt>
+<dd><p>Angle in degrees to shear the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_data">
+<span class="sig-name descname"><span class="pre">shear_data</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_data" title="Permalink to this definition"></a></dt>
+<dd><p>Shear the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_dimension">
+<span class="sig-name descname"><span class="pre">shear_dimension</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_dimension" title="Permalink to this definition"></a></dt>
+<dd><p>Dimension to shear the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_transform">
+<span class="sig-name descname"><span class="pre">shear_transform</span></span><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.shear_transform" title="Permalink to this definition"></a></dt>
+<dd><p>Shear transform matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>npt.NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.voxel_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">voxel_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></em><a class="headerlink" href="#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.voxel_size" title="Permalink to this definition"></a></dt>
+<dd><p>Return voxel size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Voxel size</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.metadata_sources.bdv_metadata.html" class="btn btn-neutral float-left" title="navigate.model.metadata_sources.bdv_metadata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.metadata_sources.metadata.html" class="btn btn-neutral float-right" title="navigate.model.metadata_sources.metadata" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

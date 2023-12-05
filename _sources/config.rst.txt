@@ -1,8 +1,8 @@
-Configuring ASLM
+Configuring Navigate
 ================
 
-In order to properly use the ASLM software you will need to configure the specifications of the various hardware that you will be using.
-This is done by updating the configuration.yaml file located in either ``Users\name\AppData\Local\.ASLM`` if on Windows or ``~/.ASLM`` if on Mac/Linux.
+In order to properly use the Navigate software you will need to configure the specifications of the various hardware that you will be using.
+This is done by updating the configuration.yaml file located in either ``Users\name\AppData\Local\.navigate`` if on Windows or ``~/.navigate`` if on Mac/Linux.
 
 
 Configuration.yaml
@@ -96,7 +96,7 @@ You would add it to the hardware section:
 
     The type of the device is needed when deciding which Python object to instantiate on startup of the software. (eg type: ASI)
     The other fields (eg port: COM7) are specified by the manufacturer's API. They help the API communicate with the computer
-    you are using which in turn allows the ASLM software to communicate with the device.
+    you are using which in turn allows the Navigate software to communicate with the device.
 
 Running the software with our current microscope setup would fail. It turns out our ASI stage only moves in the x, y, z axes.
 We need a way to handle theta and f axes.
@@ -230,7 +230,7 @@ we needed to add the SyntheticStage to control theta and f. In this section, we 
 the synthetic stage.
 
 * We can optionally add ``axes_mapping`` to the hardware dictionary. ``axes_mapping`` lists the values
-ASLM uses to access stage axes on the stage controller hardware, while ``axes`` tells ASLM which software axis (X, Y, Z,
+Navigate uses to access stage axes on the stage controller hardware, while ``axes`` tells Navigate which software axis (X, Y, Z,
 Theta or Focus) is controlled by the hardware stage axis at the corresponding index of ``axes_mapping``.
 
 * PI stages will tell you their ``axes_mapping`` in a consistent fashion if queried from their API, so we do not need to

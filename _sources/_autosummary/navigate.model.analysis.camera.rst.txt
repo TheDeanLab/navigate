@@ -1,0 +1,33 @@
+navigate.model.analysis.camera
+==============================
+
+.. automodule:: navigate.model.analysis.camera
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      compute_flatfield_map
+      compute_noise_sigma
+      compute_scmos_offset_and_variance_map
+      compute_signal_to_noise
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

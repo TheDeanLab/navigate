@@ -1,0 +1,38 @@
+navigate.model.features.feature\_container.SignalNode
+=====================================================
+
+.. currentmodule:: navigate.model.features.feature_container
+
+.. autoclass:: SignalNode
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SignalNode.__init__
+      ~SignalNode.run
+      ~SignalNode.set_property
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SignalNode.node_name
+      ~SignalNode.node_funcs
+      ~SignalNode.node_type
+      ~SignalNode.device_related
+      ~SignalNode.need_response
+      ~SignalNode.is_initialized
+   
+   

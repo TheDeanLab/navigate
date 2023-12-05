@@ -1,0 +1,41 @@
+navigate.model.features.adaptive\_optics
+========================================
+
+.. automodule:: navigate.model.features.adaptive_optics
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      fourier_annulus
+      gauss
+      poly2
+      r_squared
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      TonyWilson
+   
+   
+
+   
+   
+   
+
+
+

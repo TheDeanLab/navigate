@@ -1,6 +1,0 @@
-aslm.model.waveforms.sine\_wave
-===============================
-
-.. currentmodule:: aslm.model.waveforms
-
-.. autofunction:: sine_wave

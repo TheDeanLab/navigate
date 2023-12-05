@@ -1,0 +1,6 @@
+navigate.model.features.feature\_related\_functions.convert\_str\_to\_feature\_list
+===================================================================================
+
+.. currentmodule:: navigate.model.features.feature_related_functions
+
+.. autofunction:: convert_str_to_feature_list

@@ -1,6 +1,0 @@
-aslm.tools.common\_functions.combine\_funcs
-===========================================
-
-.. currentmodule:: aslm.tools.common_functions
-
-.. autofunction:: combine_funcs

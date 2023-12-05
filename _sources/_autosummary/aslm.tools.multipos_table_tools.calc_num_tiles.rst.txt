@@ -1,6 +1,0 @@
-aslm.tools.multipos\_table\_tools.calc\_num\_tiles
-==================================================
-
-.. currentmodule:: aslm.tools.multipos_table_tools
-
-.. autofunction:: calc_num_tiles

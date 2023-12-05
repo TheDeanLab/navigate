@@ -1,6 +1,0 @@
-aslm.model.features.volume\_search.draw\_box
-============================================
-
-.. currentmodule:: aslm.model.features.volume_search
-
-.. autofunction:: draw_box

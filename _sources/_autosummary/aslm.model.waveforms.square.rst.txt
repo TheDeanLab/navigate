@@ -1,6 +1,0 @@
-aslm.model.waveforms.square
-===========================
-
-.. currentmodule:: aslm.model.waveforms
-
-.. autofunction:: square

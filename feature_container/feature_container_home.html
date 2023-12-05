@@ -51,7 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Feature Container</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#currently-implemented-features">Currently Implemented Features</a></li>
@@ -93,11 +93,11 @@
              
   <section id="feature-container">
 <h1>Feature Container<a class="headerlink" href="#feature-container" title="Permalink to this heading"></a></h1>
-<p>To make ASLM as powerful as possible, we want to encourage users to contribute code and
+<p>To make Navigate as powerful as possible, we want to encourage users to contribute code and
 engage in the software collaboratively.</p>
 <section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h2>
-<p>The ASLM <strong>feature container</strong> allows for reconfigurable acquisition and
+<p>The Navigate <strong>feature container</strong> allows for reconfigurable acquisition and
 analysis. The feature container runs a tree of <strong>features</strong>, where each
 feature may perform a <em>signal</em> operation, where it modifies the state of
 microscope hardware, a <em>data</em> operation, where it performs an analysis on
@@ -106,8 +106,8 @@ acquired image data, or both.</p>
 will execute (for example, move the stage, then snap a picture). Following
 this, the next set of features in sequence will be executed.</p>
 <p>Examples of some existing features include
-<code class="docutils literal notranslate"><span class="pre">aslm.model.features.common_features.ZStackAcquisition</span></code>, which acquires a
-z-stack, and <code class="docutils literal notranslate"><span class="pre">aslm.model.features.autofocus.Autofocus</span></code>, which finds the
+<code class="docutils literal notranslate"><span class="pre">navigate.model.features.common_features.ZStackAcquisition</span></code>, which acquires a
+z-stack, and <code class="docutils literal notranslate"><span class="pre">navigate.model.features.autofocus.Autofocus</span></code>, which finds the
 ideal plane of focus of a sample using a Discrete Cosine Transform.</p>
 </section>
 <section id="currently-implemented-features">
@@ -134,7 +134,7 @@ ideal plane of focus of a sample using a Discrete Cosine Transform.</p>
 </section>
 <section id="the-feature-object">
 <h2>The Feature Object<a class="headerlink" href="#the-feature-object" title="Permalink to this heading"></a></h2>
-<p>Each feature is an object that accepts a pointer to <code class="docutils literal notranslate"><span class="pre">aslm.model.model</span></code> in its
+<p>Each feature is an object that accepts a pointer to <code class="docutils literal notranslate"><span class="pre">navigate.model.model</span></code> in its
 <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>  arguments and contains a configuration dictionary that dictates
 feature behavior in its <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function. A complete configuration
 dictionary is shown below. As few or as many of these options can be specified
@@ -177,17 +177,17 @@ dictionaries are methods of the feature object.</p>
 </section>
 <section id="creating-custom-features">
 <h2>Creating Custom Features<a class="headerlink" href="#creating-custom-features" title="Permalink to this heading"></a></h2>
-<p>The ASLM Software allows you to build a custom feature that implements new
+<p>The Navigate Software allows you to build a custom feature that implements new
 functionality, or a new feature list that builds an intelligent acquisition workflow
 from existing features. This documentation explains how to create and load
-a customized feature list within the ASLM software. The first step is to create a
+a customized feature list within the Navigate software. The first step is to create a
 Python function, and decorating it as a “FeatureList.” .</p>
 <p>To create a customized feature, follow these steps:</p>
 <ol class="arabic simple">
 <li><p>Import the necessary modules:</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aslm.tools.decorators</span> <span class="kn">import</span> <span class="n">FeatureList</span>
-<span class="kn">from</span> <span class="nn">aslm.model.features.feature_related_functions</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.tools.decorators</span> <span class="kn">import</span> <span class="n">FeatureList</span>
+<span class="kn">from</span> <span class="nn">navigate.model.features.feature_related_functions</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="nd">@FeatureList</span>
 <span class="k">def</span> <span class="nf">feature_example</span><span class="p">():</span>
@@ -202,17 +202,17 @@ Python function, and decorating it as a “FeatureList.” .</p>
     <span class="p">]</span>
 </pre></div>
 </div>
-<p>Once you’ve created a feature, you can load it into the ASLM software using these steps:</p>
+<p>Once you’ve created a feature, you can load it into the Navigate software using these steps:</p>
 <ol class="arabic simple" start="2">
-<li><p>Open ASLM.</p></li>
-<li><p>Navigate to the <cite>Features</cite> menu.</p></li>
+<li><p>Open Navigate.</p></li>
+<li><p>Go to the <cite>Features</cite> menu.</p></li>
 </ol>
 <img alt="../_images/step_1.png" src="../_images/step_1.png" />
 <p>4a. Import the customized feature. Select <cite>Add Custom Feature List</cite> from the
 <cite>Features</cite> menu. A dialog box will appear, allowing you to select the Python file
 containing your customized feature list function.</p>
 <img alt="../_images/step_2.png" src="../_images/step_2.png" />
-<p>5. Choose the Python file containing your customized feature list function. ASLM will
+<p>5. Choose the Python file containing your customized feature list function. Navigate will
 load the specified feature list, making it available for use in your experiments and
 analyses. It will appear at the bottom of the <cite>Features</cite> menu.</p>
 </section>

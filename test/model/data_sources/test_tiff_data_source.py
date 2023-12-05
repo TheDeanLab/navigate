@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from aslm.tools.file_functions import delete_folder
+from navigate.tools.file_functions import delete_folder
 
 
 @pytest.mark.parametrize("is_ome", [True, False])
@@ -13,8 +13,8 @@ from aslm.tools.file_functions import delete_folder
 def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack, stop_early):
     import numpy as np
 
-    from aslm.model.dummy import DummyModel
-    from aslm.model.data_sources.tiff_data_source import TiffDataSource
+    from navigate.model.dummy import DummyModel
+    from navigate.model.data_sources.tiff_data_source import TiffDataSource
 
     print(
         f"Conditions are is_ome: {is_ome} multiposition: {multiposition} "

@@ -39,7 +39,7 @@ from unittest.mock import patch
 import pytest
 
 # Local Imports
-from aslm.view.main_application_window import MainApp
+from navigate.view.main_application_window import MainApp
 
 
 @pytest.mark.skip('_tkinter.TclError: image "pyimage43" doesn\'t exist')
@@ -83,10 +83,10 @@ class TestMainApplicationWindowWithPatch(unittest.TestCase):
         self.root.destroy()
 
     @patch(
-        target="aslm.view.main_application_window.Path.joinpath",
+        target="navigate.view.main_application_window.Path.joinpath",
         side_effect=tk.TclError,
     )
-    @patch(target="aslm.view.main_application_window.SettingsNotebook", autospec=True)
+    @patch(target="navigate.view.main_application_window.SettingsNotebook", autospec=True)
     def test_main_app_with_patched_joinpath(
         self, mock_settings_notebook, mock_joinpath
     ):

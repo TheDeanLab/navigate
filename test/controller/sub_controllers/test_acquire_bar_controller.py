@@ -37,11 +37,11 @@
 import pytest
 
 # Local imports
-from aslm.controller.sub_controllers import AcquireBarController
-from aslm.view.popups.acquire_popup import (
+from navigate.controller.sub_controllers import AcquireBarController
+from navigate.view.popups.acquire_popup import (
     AcquirePopUp,
 )
-from aslm.model.data_sources import FILE_TYPES
+from navigate.model.data_sources import FILE_TYPES
 
 
 class TestAcquireBarController:

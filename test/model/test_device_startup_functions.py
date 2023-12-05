@@ -36,9 +36,9 @@ from unittest.mock import MagicMock
 # Third party imports
 
 # Local application imports
-from aslm.model.device_startup_functions import auto_redial
-from aslm.model.device_startup_functions import load_camera_connection
-from aslm.model.devices.camera.camera_synthetic import SyntheticCameraController
+from navigate.model.device_startup_functions import auto_redial
+from navigate.model.device_startup_functions import load_camera_connection
+from navigate.model.devices.camera.camera_synthetic import SyntheticCameraController
 
 
 class TestAutoRedial(unittest.TestCase):
@@ -111,7 +111,7 @@ class TestLoadCameraConnection(unittest.TestCase):
         camera = load_camera_connection(configuration=self.configuration, camera_id=4)
         self.assertTrue(isinstance(camera, SyntheticCameraController))
 
-        # @patch('aslm.model.devices.camera.camera_synthetic.SyntheticCameraController')
+        # @patch('navigate.model.devices.camera.camera_synthetic.SyntheticCameraController')
 
     # def test_load_hamamatsu_orca_camera_connection(self):
     #     """Test that the function returns a camera connection."""

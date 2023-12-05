@@ -40,7 +40,7 @@ def im_circ(r=1, N=128):
 
 
 def test_has_tissue():
-    from aslm.model.analysis.boundary_detect import has_tissue
+    from navigate.model.analysis.boundary_detect import has_tissue
 
     for _ in range(100):
         N = 2 ** np.random.randint(5, 9)
@@ -65,7 +65,7 @@ def test_has_tissue():
 def test_find_tissue_boundary_2d():
     from skimage.transform import downscale_local_mean
 
-    from aslm.model.analysis.boundary_detect import find_tissue_boundary_2d
+    from navigate.model.analysis.boundary_detect import find_tissue_boundary_2d
 
     for _ in range(100):
         N = 2 ** np.random.randint(5, 9)
@@ -86,7 +86,7 @@ def test_find_tissue_boundary_2d():
 
 
 def test_binary_detect():
-    from aslm.model.analysis.boundary_detect import (
+    from navigate.model.analysis.boundary_detect import (
         find_tissue_boundary_2d,
         binary_detect,
     )
@@ -105,7 +105,7 @@ def test_binary_detect():
 
 
 def test_map_boundary():
-    from aslm.model.analysis.boundary_detect import map_boundary
+    from navigate.model.analysis.boundary_detect import map_boundary
 
     assert map_boundary([[1, 2]]) == [(0, 1), (0, 2)]
     assert map_boundary([None, [1, 2]]) == [(1, 1), (1, 2)]

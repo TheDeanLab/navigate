@@ -24,4 +24,4 @@ A clear and concise description of what you expected to happen.
 Please copy and paste the traceback provided in your Anaconda Prompt here.
 
 **Logs & Configuration Files**
-Please drag and drop the logs and configuration files here. These are located in your `.ASLM` folder, and can be found easily be opening ASLM, selecting File, then `Open Log Files` and `Open Configuration Files`.
+Please drag and drop the logs and configuration files here. These are located in your `.navigate` folder, and can be found easily be opening Navigate, selecting File, then `Open Log Files` and `Open Configuration Files`.

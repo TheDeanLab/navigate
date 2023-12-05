@@ -1,0 +1,51 @@
+%YAML 1.2
+---
+version: 1
+formatters:
+  base:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(module)s: %(message)s'
+filters:
+  performance_specs:
+    (): ext://navigate.log_files.filters.PerformanceFilter
+  not_performance:
+    (): ext://navigate.log_files.filters.NonPerfFilter
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: WARNING
+    formatter: base
+    stream: ext://sys.stdout
+    filters: [not_performance]
+  model_info:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: base
+    filename: model_info.log
+    filters: [not_performance]
+    mode: a
+  model_debug:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: base
+    filename: model_debug.log
+    filters: [not_performance]
+    mode: a
+  model_error:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: base
+    filename: model_error.log
+    filters: [not_performance]
+    mode: a
+  model_performance:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: base
+    filename: model_performance.log
+    filters: [performance_specs]
+    mode: a
+loggers:
+  model:
+    level: DEBUG
+    handlers: [console, model_info, model_debug, model_performance]
+    propagate: no

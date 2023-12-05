@@ -4,8 +4,8 @@ import random
 import unittest
 from unittest.mock import MagicMock, patch
 
-from aslm.config import load_configs, get_configuration_paths
-from aslm.model.devices.lasers.laser_ni import LaserNI
+from navigate.config import load_configs, get_configuration_paths
+from navigate.model.devices.lasers.laser_ni import LaserNI
 
 
 class TestLaserNI(unittest.TestCase):

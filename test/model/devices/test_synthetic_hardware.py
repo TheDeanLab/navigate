@@ -36,7 +36,7 @@ import unittest
 # Third Party Imports
 
 # Local Imports
-from aslm.model.dummy import DummyModel
+from navigate.model.dummy import DummyModel
 
 
 class TestSyntheticHardware(unittest.TestCase):
@@ -44,12 +44,12 @@ class TestSyntheticHardware(unittest.TestCase):
     microscope_name = "Mesoscale"
 
     def test_synthetic_daq(self):
-        from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
+        from navigate.model.devices.daq.daq_synthetic import SyntheticDAQ
 
         SyntheticDAQ(self.dummy_model.configuration)
 
     def test_synthetic_camera(self):
-        from aslm.model.devices.camera.camera_synthetic import (
+        from navigate.model.devices.camera.camera_synthetic import (
             SyntheticCamera,
             SyntheticCameraController,
         )
@@ -58,21 +58,21 @@ class TestSyntheticHardware(unittest.TestCase):
         SyntheticCamera(self.microscope_name, scc, self.dummy_model.configuration)
 
     def test_synthetic_stage(self):
-        from aslm.model.devices.stages.stage_synthetic import SyntheticStage
+        from navigate.model.devices.stages.stage_synthetic import SyntheticStage
 
         SyntheticStage(self.microscope_name, None, self.dummy_model.configuration)
 
     def test_synthetic_zoom(self):
-        from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
+        from navigate.model.devices.zoom.zoom_synthetic import SyntheticZoom
 
         SyntheticZoom(self.microscope_name, None, self.dummy_model.configuration)
 
     def test_synthetic_shutter(self):
-        from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
+        from navigate.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
 
         SyntheticShutter(self.microscope_name, None, self.dummy_model.configuration)
 
     def test_synthetic_laser(self):
-        from aslm.model.devices.lasers.laser_synthetic import SyntheticLaser
+        from navigate.model.devices.lasers.laser_synthetic import SyntheticLaser
 
         SyntheticLaser(self.microscope_name, None, self.dummy_model.configuration, 0)

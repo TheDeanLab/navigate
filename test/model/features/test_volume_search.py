@@ -33,7 +33,7 @@ import queue
 import pytest
 import numpy as np
 
-from aslm.model.features.volume_search import VolumeSearch
+from navigate.model.features.volume_search import VolumeSearch
 
 
 class TestVolumeSearch:
@@ -195,7 +195,7 @@ class TestVolumeSearch:
         assert np.max(positions[:, 2]) <= max_z
 
     def test_box_volume_search(self):
-        from aslm.tools.sdf import volume_from_sdf, box
+        from navigate.tools.sdf import volume_from_sdf, box
 
         M = int(self.config["number_z_steps"])
         self.model.configuration["experiment"]["CameraParameters"]["x_pixels"] = self.N

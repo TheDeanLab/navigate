@@ -1,8 +1,8 @@
 def test_remote_focus_synthetic_functions():
-    from aslm.model.devices.remote_focus.remote_focus_synthetic import (
+    from navigate.model.devices.remote_focus.remote_focus_synthetic import (
         SyntheticRemoteFocus,
     )
-    from aslm.model.dummy import DummyModel
+    from navigate.model.dummy import DummyModel
 
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][

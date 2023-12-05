@@ -1,19 +1,19 @@
 
-.. _aslm-home:
+.. _navigate-home:
 
 ############################################
 **Autonomous Software for Light Microscopy**
 ############################################
 
 
-**ASLM** is a Python library to control microscopes in the UT Southwestern ecosystem.
+**Navigate** is a Python library to control microscopes in the UT Southwestern ecosystem.
 It aims to abstract hardware and allow for maximum customization. The library
 contains a feature list that acts as a recipe maker for automated microscope routines.
 
 .. note::
 
    This project is under active development. See our `GitHub repository for updates
-   <https://github.com/TheDeanLab/ASLM>`_.
+   <https://github.com/TheDeanLab/navigate>`_.
 
 **Project Philosophy**
 =========================
@@ -46,7 +46,7 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 **Authors**
 ============
 
-**ASLM** includes key contributions from numerous individuals, including Zach Marin,
+**Navigate** includes key contributions from numerous individuals, including Zach Marin,
 Annie Wang, Dax Collison, Kevin Dean, Sampath Rapuri, Renil Gupta, Samir Mamtani,
 Andrew Jamieson, Andrew York, Nathaniel Thayer, and more.
 

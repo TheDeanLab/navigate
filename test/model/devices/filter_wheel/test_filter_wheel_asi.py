@@ -37,7 +37,7 @@ import time
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.filter_wheel.filter_wheel_asi import ASIFilterWheel
+from navigate.model.devices.filter_wheel.filter_wheel_asi import ASIFilterWheel
 
 
 class TestASIFilterWheel(unittest.TestCase):

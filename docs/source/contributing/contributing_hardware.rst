@@ -1,7 +1,7 @@
 Adding New Hardware
 =========================
 
-ASLM is built with an abstraction layer that enables operation with a diverse set of
+Navigate is built with an abstraction layer that enables operation with a diverse set of
 hardware manufacturers and equipment.
 
 

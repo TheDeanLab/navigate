@@ -6,6 +6,9 @@ This is a case study in using the software to image with a `mesoSPIM BT microsco
 Setting the beam parameters
 ---------------------------
 
+Make sure the imaging chamber is empty or, if a sample is mounted, the sample is not in the beam path.
+
+#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Go to the :guilabel:`Channels` tab. Choose the wavelength you want to align. Set the laser's :guilabel:`Power` to `100.0`. Change :guilabel:`Filter` to an "Empty" option.
 #. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup named :guilabel:`Waveform Parameter Settings` will appear. Make sure the :guilabel:`Mode` matches "mesoSPIM BT" and the :guilabel:`Magnification` matches the magnification of the objective you are using.
 #. :guilabel:`Galvo 0` digitally sweeps the beam across the field of view. To align the axially-swept light sheet parameters, set the :guilabel:`Galvo 0` :guilabel:`Amplitude` to `0.0`. Set the :guilabel:`Offset` so that the beam is centered in the field of view. Click the :guilabel:`Camera View` to toggle the crosshairs, which indicate the center of the field of view. Adjust the :guilabel:`F` (focus) value in the :guilabel:`Stage Control` panel until the beam is as thin/focused as possible.
@@ -22,15 +25,16 @@ Loading and finding the sample
 ------------------------------
 
 #. Load the sample on the microscope.
-#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`.
+#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Scroll around with the stage either via joystick or using the controls in the :guilabel:`Stage Control` tab until the sample comes into view.
-#. Focus on the sample using the focus axi. Optionally, use Autofocus by going to :menuselection:`Autofocus --> Autofocus Settings`. Press :guilabel:`Autofocus`. Ensure there is a clear peak in the resulting plot. If there is not, the autofocusing routine did not work. Try increasing the laser power and/or bringing the sample more into focus manually.
+#. Focus on the sample using the focus axis. Optionally, use Autofocus by going to :menuselection:`Autofocus --> Autofocus Settings`. Press :guilabel:`Autofocus`. Ensure there is a clear peak in the resulting plot. If there is not, the autofocusing routine did not work. Try increasing the laser power and/or bringing the sample more into focus manually.
 
 .. z_stack:
 
 Imaging a Z-Stack
 -----------------
-#. Go to a shallow Z-position in the sample. Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)` press :guilabel:`Set Start Pos/Foc`.
+#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`. This will launch a live acquisition mode.
+#. Using the :guilabel:`Stage Control`, go to a shallow Z-position in the sample. Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)` press :guilabel:`Set Start Pos/Foc`.
 #. Go to a deep Z-position in the sample. Press :guilabel:`Set End Pos/Foc`.
 #. Select "Z-Stack" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`.
 #. Enter the sample parameters in the :guilabel:`File Saving Dialog` that pops up. Press :guilabel:`Acquire Data`.

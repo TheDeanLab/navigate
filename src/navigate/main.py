@@ -34,6 +34,8 @@
 import tkinter as tk
 import platform
 import os
+import glob
+import random
 
 # Third Party Imports
 
@@ -80,7 +82,12 @@ def main():
     # Start the GUI, withdraw main screen, and show splash screen.
     root = tk.Tk()
     root.withdraw()
-    splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
+
+    # Splash Screen
+    image_files = glob.glob("src/navigate/view/icon/splash_screen_image_*.png")
+    image = random.choice(image_files) if image_files else None
+    if image:
+        splash_screen = SplashScreen(root, image)
 
     # Parse command line arguments
     parser = create_parser()

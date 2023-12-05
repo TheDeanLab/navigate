@@ -288,7 +288,7 @@ temp-BICF-JG-LE4350.txt
 # Custom Ignore
 *.log
 *.icloud
-src/aslm/log_files/LOGS
+src/navigate/log_files/LOGS
 *.tiff
 *.ipynb
 *.tif

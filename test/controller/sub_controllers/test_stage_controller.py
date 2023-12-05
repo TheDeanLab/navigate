@@ -44,7 +44,7 @@ def pos_dict(v, axes=AXES):
 
 @pytest.fixture
 def stage_controller(dummy_controller):
-    from aslm.controller.sub_controllers.stage_controller import StageController
+    from navigate.controller.sub_controllers.stage_controller import StageController
 
     dummy_controller.camera_view_controller = MagicMock()
 

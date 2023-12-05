@@ -37,8 +37,8 @@
 import pytest
 
 # Local Imports
-from aslm.controller.sub_controllers.help_popup_controller import HelpPopupController
-from aslm.view.popups.help_popup import HelpPopup
+from navigate.controller.sub_controllers.help_popup_controller import HelpPopupController
+from navigate.view.popups.help_popup import HelpPopup
 
 
 class TestHelpPopupController:

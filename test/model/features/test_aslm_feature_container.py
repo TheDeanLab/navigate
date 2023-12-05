@@ -33,15 +33,15 @@ import unittest
 import random
 import threading
 
-from aslm.model.features.feature_container import (
+from navigate.model.features.feature_container import (
     SignalNode,
     DataNode,
     DataContainer,
     load_features,
 )
-from aslm.model.features.common_features import WaitToContinue, LoopByCount
-from aslm.model.features.feature_container import dummy_True
-from aslm.model.dummy import DummyModel
+from navigate.model.features.common_features import WaitToContinue, LoopByCount
+from navigate.model.features.feature_container import dummy_True
+from navigate.model.dummy import DummyModel
 
 
 class DummyFeature:

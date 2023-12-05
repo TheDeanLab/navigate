@@ -4,8 +4,8 @@ import pytest
 
 @pytest.fixture(scope="module")
 def tiling_wizard_controller(dummy_view, dummy_controller):
-    from aslm.view.popups.tiling_wizard_popup2 import TilingWizardPopup
-    from aslm.controller.sub_controllers.tiling_wizard_controller2 import (
+    from navigate.view.popups.tiling_wizard_popup2 import TilingWizardPopup
+    from navigate.controller.sub_controllers.tiling_wizard_controller2 import (
         TilingWizardController,
     )
 
@@ -77,7 +77,7 @@ def test_update_total_tiles(tiling_wizard_controller):
 
 @pytest.mark.parametrize("axis", ["x", "y", "z", "f"])
 def test_calculate_tiles(tiling_wizard_controller, axis):
-    from aslm.tools.multipos_table_tools import calc_num_tiles
+    from navigate.tools.multipos_table_tools import calc_num_tiles
 
     ov, dist, fov = random.random(), random.random() * 100, random.random() * 10
     tiling_wizard_controller._percent_overlap = ov * 100
@@ -116,7 +116,7 @@ def test_update_overlap(tiling_wizard_controller):
 @pytest.mark.parametrize("axis", ["x", "y", "z", "f"])
 def test_update_fov(tiling_wizard_controller, axis):
     import random
-    from aslm.tools.multipos_table_tools import sign
+    from navigate.tools.multipos_table_tools import sign
 
     if axis == "y":
         tiling_wizard_controller.cam_settings_widgets["FOV_X"].set(
@@ -168,7 +168,7 @@ def test_update_fov(tiling_wizard_controller, axis):
 
 
 def test_set_table(tiling_wizard_controller):
-    # from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box
+    # from navigate.tools.multipos_table_tools import compute_tiles_from_bounding_box
     tiling_wizard_controller.set_table()
 
     x_start = float(tiling_wizard_controller.variables["x_start"].get())

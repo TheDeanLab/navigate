@@ -47,7 +47,7 @@ class TextExperimentFile(unittest.TestCase):
     def setUp(self):
         current_path = os.path.abspath(os.path.dirname(__file__))
         root_path = os.path.dirname(os.path.dirname(current_path))
-        yaml_path = os.path.join(root_path, "src", "aslm", "config", "experiment.yml")
+        yaml_path = os.path.join(root_path, "src", "navigate", "config", "experiment.yml")
 
         with open(yaml_path) as file:
             self.data = yaml.safe_load(file)

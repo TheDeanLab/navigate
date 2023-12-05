@@ -39,7 +39,7 @@ from multiprocessing.managers import DictProxy, ListProxy
 # Third party imports
 
 # Local application imports
-import aslm.tools.common_functions as common_functions
+import navigate.tools.common_functions as common_functions
 
 
 def func1():

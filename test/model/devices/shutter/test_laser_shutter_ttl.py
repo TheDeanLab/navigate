@@ -36,7 +36,7 @@ import unittest
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.shutter.laser_shutter_ttl import ShutterTTL
+from navigate.model.devices.shutter.laser_shutter_ttl import ShutterTTL
 
 
 class TestShutterTTL(unittest.TestCase):

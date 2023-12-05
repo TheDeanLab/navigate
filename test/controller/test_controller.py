@@ -20,10 +20,10 @@ class DummySplashScreen:
 
 @pytest.fixture(scope="session")
 def controller(tk_root):
-    from aslm.controller.controller import Controller
+    from navigate.controller.controller import Controller
 
     base_directory = Path.joinpath(
-        Path(__file__).resolve().parent.parent.parent, "src", "aslm"
+        Path(__file__).resolve().parent.parent.parent, "src", "navigate"
     )
     configuration_directory = Path.joinpath(base_directory, "config")
 

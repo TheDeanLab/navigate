@@ -233,7 +233,7 @@ Configuration File
 Remote Focusing Devices
 -------------------------
 Voice coils, also known as linear actuators, play a crucial role in implementing
-aberration-free remote focusing in ASLM. These electromagnetic actuators are used to
+aberration-free remote focusing in Navigate. These electromagnetic actuators are used to
 control the axial position of the light-sheet and the sample relative to the
 microscope objective lens. By precisely adjusting the axial position, the focal plane
 can be shifted without moving the objective lens, thus enabling remote focusing.

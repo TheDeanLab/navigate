@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-from aslm.controller.sub_controllers.camera_view_controller import CameraViewController
+from navigate.controller.sub_controllers.camera_view_controller import CameraViewController
 import pytest
 import random
 from unittest.mock import MagicMock

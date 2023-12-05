@@ -40,7 +40,7 @@ from unittest.mock import patch
 
 @pytest.fixture
 def channels_tab_controller(dummy_controller):
-    from aslm.controller.sub_controllers.channels_tab_controller import (
+    from navigate.controller.sub_controllers.channels_tab_controller import (
         ChannelsTabController,
     )
 

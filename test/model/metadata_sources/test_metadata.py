@@ -2,7 +2,7 @@ import pytest
 
 
 def test_metadata_voxel_size(dummy_model):
-    from aslm.model.metadata_sources.metadata import Metadata
+    from navigate.model.metadata_sources.metadata import Metadata
 
     md = Metadata()
 
@@ -33,7 +33,7 @@ def test_metadata_voxel_size(dummy_model):
 
 
 def test_metadata_shape(dummy_model):
-    from aslm.model.metadata_sources.metadata import Metadata
+    from navigate.model.metadata_sources.metadata import Metadata
 
     dummy_model.configuration["experiment"]["MicroscopeState"]["image_mode"] = "z-stack"
 
@@ -75,7 +75,7 @@ def test_metadata_shape(dummy_model):
 def test_metadata_set_stack_order_from_configuration_experiment(
     dummy_model, image_mode, stack_cycling_mode, conpro_cycling_mode
 ):
-    from aslm.model.metadata_sources.metadata import Metadata
+    from navigate.model.metadata_sources.metadata import Metadata
 
     dummy_model.configuration["experiment"]["MicroscopeState"][
         "image_mode"

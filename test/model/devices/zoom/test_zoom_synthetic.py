@@ -36,8 +36,8 @@ import unittest
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.zoom.zoom_synthetic import SyntheticZoom
-from aslm.model.dummy import DummyModel
+from navigate.model.devices.zoom.zoom_synthetic import SyntheticZoom
+from navigate.model.dummy import DummyModel
 
 
 class TestZoomSynthetic(unittest.TestCase):

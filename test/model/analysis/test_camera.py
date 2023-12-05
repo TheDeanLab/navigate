@@ -4,7 +4,7 @@ import pytest
 
 @pytest.mark.skip("volatile")
 def test_compute_scmos_offset_and_variance_map():
-    from aslm.model.analysis.camera import compute_scmos_offset_and_variance_map
+    from navigate.model.analysis.camera import compute_scmos_offset_and_variance_map
 
     mu, sig = 100 * np.random.rand() + 1, 100 * np.random.rand() + 1
     im = sig * np.random.randn(256, 256, 256) + mu
@@ -19,7 +19,7 @@ def test_compute_scmos_offset_and_variance_map():
 
 @pytest.mark.parametrize("local", [True, False])
 def test_compute_flatfield_map(local):
-    from aslm.model.analysis.camera import compute_flatfield_map
+    from navigate.model.analysis.camera import compute_flatfield_map
 
     image = np.ones((256, 256))
     offset = np.zeros((256, 256))
@@ -29,7 +29,7 @@ def test_compute_flatfield_map(local):
 
 
 def test_compute_noise_sigma():
-    from aslm.model.analysis.camera import compute_noise_sigma
+    from navigate.model.analysis.camera import compute_noise_sigma
 
     Fn = np.random.rand()
     qe = np.random.rand()
@@ -44,7 +44,7 @@ def test_compute_noise_sigma():
 
 
 def test_compute_signal_to_noise():
-    from aslm.model.analysis.camera import compute_signal_to_noise
+    from navigate.model.analysis.camera import compute_signal_to_noise
 
     A = np.random.rand() * 100 + 10
     image = A * np.ones((256, 256))

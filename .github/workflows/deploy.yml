@@ -30,7 +30,6 @@ jobs:
             TWINE_USERNAME: __token__
             TWINE_PASSWORD: ${{ secrets.TWINE_API_KEY }}
           run: |
-            poetry version ${GITHUB_REF##*/}
-            git tag ${GITHUB_REF##*/}
+            git tag
             python -m build
             twine upload dist/*

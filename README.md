@@ -1,10 +1,10 @@
 <h1 align="center">
 <img src="./src/navigate/view/icon/mic.ico?raw=true" />
 
-Navigate - Light Sheet Microscopy
+navigate - open-source light sheet microscope control
 </h1>
 
-[![Tests](https://github.com/AdvancedImagingUTSW/navigate/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/navigate/actions/workflows/push_checks.yaml)
+[![Tests](https://github.com/TheDeanLab/navigate/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/TheDeanLab/navigate/actions/workflows/push_checks.yaml)
 [![codecov](https://codecov.io/gh/TheDeanLab/navigate/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/navigate)
 
 Navigate is an open source Python package for control of light-sheet microscopes. It allows for easily reconfigurable hardware setups and automated acquisition rotuines.

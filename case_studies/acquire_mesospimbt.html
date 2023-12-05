@@ -92,7 +92,9 @@
 <p>This is a case study in using the software to image with a <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2023.06.16.545256v1">mesoSPIM BT microscope</a>.</p>
 <section id="setting-the-beam-parameters">
 <h2>Setting the beam parameters<a class="headerlink" href="#setting-the-beam-parameters" title="Permalink to this heading"></a></h2>
+<p>Make sure the imaging chamber is empty or, if a sample is mounted, the sample is not in the beam path.</p>
 <ol class="arabic simple">
+<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
 <li><p>Go to the <span class="guilabel">Channels</span> tab. Choose the wavelength you want to align. Set the laser’s <span class="guilabel">Power</span> to <cite>100.0</cite>. Change <span class="guilabel">Filter</span> to an “Empty” option.</p></li>
 <li><p>Go to the <span class="menuselection">Microscope Configuration ‣ Waveform Parameters</span>. A popup named <span class="guilabel">Waveform Parameter Settings</span> will appear. Make sure the <span class="guilabel">Mode</span> matches “mesoSPIM BT” and the <span class="guilabel">Magnification</span> matches the magnification of the objective you are using.</p></li>
 <li><p><span class="guilabel">Galvo 0</span> digitally sweeps the beam across the field of view. To align the axially-swept light sheet parameters, set the <span class="guilabel">Galvo 0</span> <span class="guilabel">Amplitude</span> to <cite>0.0</cite>. Set the <span class="guilabel">Offset</span> so that the beam is centered in the field of view. Click the <span class="guilabel">Camera View</span> to toggle the crosshairs, which indicate the center of the field of view. Adjust the <span class="guilabel">F</span> (focus) value in the <span class="guilabel">Stage Control</span> panel until the beam is as thin/focused as possible.</p></li>
@@ -109,15 +111,16 @@
 <h2>Loading and finding the sample<a class="headerlink" href="#loading-and-finding-the-sample" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Load the sample on the microscope.</p></li>
-<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>.</p></li>
+<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
 <li><p>Scroll around with the stage either via joystick or using the controls in the <span class="guilabel">Stage Control</span> tab until the sample comes into view.</p></li>
-<li><p>Focus on the sample using the focus axi. Optionally, use Autofocus by going to <span class="menuselection">Autofocus ‣ Autofocus Settings</span>. Press <span class="guilabel">Autofocus</span>. Ensure there is a clear peak in the resulting plot. If there is not, the autofocusing routine did not work. Try increasing the laser power and/or bringing the sample more into focus manually.</p></li>
+<li><p>Focus on the sample using the focus axis. Optionally, use Autofocus by going to <span class="menuselection">Autofocus ‣ Autofocus Settings</span>. Press <span class="guilabel">Autofocus</span>. Ensure there is a clear peak in the resulting plot. If there is not, the autofocusing routine did not work. Try increasing the laser power and/or bringing the sample more into focus manually.</p></li>
 </ol>
 </section>
 <section id="imaging-a-z-stack">
 <h2>Imaging a Z-Stack<a class="headerlink" href="#imaging-a-z-stack" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
-<li><p>Go to a shallow Z-position in the sample. Under the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquistion Settings (um)</span> press <span class="guilabel">Set Start Pos/Foc</span>.</p></li>
+<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
+<li><p>Using the <span class="guilabel">Stage Control</span>, go to a shallow Z-position in the sample. Under the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquistion Settings (um)</span> press <span class="guilabel">Set Start Pos/Foc</span>.</p></li>
 <li><p>Go to a deep Z-position in the sample. Press <span class="guilabel">Set End Pos/Foc</span>.</p></li>
 <li><p>Select “Z-Stack” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>.</p></li>
 <li><p>Enter the sample parameters in the <span class="guilabel">File Saving Dialog</span> that pops up. Press <span class="guilabel">Acquire Data</span>.</p></li>

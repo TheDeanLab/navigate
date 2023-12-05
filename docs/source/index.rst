@@ -2,7 +2,7 @@
 .. _navigate-home:
 
 ############################################
-**Autonomous Software for Light Microscopy**
+**navigate**
 ############################################
 
 

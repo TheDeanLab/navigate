@@ -12,18 +12,19 @@
 #
 import os
 import sys
+from navigate import __version__
 
 sys.path.insert(0, os.path.abspath("../../src"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = "Autonomous Software for Light Microscopy"
+project = "navigate"
 copyright = "2023, Dean Lab, UT Southwestern Medical Center"
 author = "Dean Lab, UT Southwestern Medical Center"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1"
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 

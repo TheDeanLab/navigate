@@ -142,9 +142,7 @@ def create_parser():
     parser : object
         ArgumentParserObject with Added Input Arguments"""
 
-    parser = argparse.ArgumentParser(
-        description="Autonomous Software for Light Microscopy Command Line Arguments"
-    )
+    parser = argparse.ArgumentParser(description="navigate Command Line Arguments")
 
     input_args = parser.add_argument_group("Input Arguments")
 

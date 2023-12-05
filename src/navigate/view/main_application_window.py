@@ -116,7 +116,7 @@ class MainApp(ttk.Frame):
         # widgets can be resized with the window
         #: tk.Tk: The main window of the application
         self.root = root
-        self.root.title("Autonomous Software for Light Microscopy")
+        self.root.title("navigate")
 
         # keep icons relative to view directory structure
         view_directory = Path(__file__).resolve().parent

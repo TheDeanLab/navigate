@@ -82,7 +82,7 @@ def main():
     root.withdraw()
 
     # Splash Screen
-    splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
+    splash_screen = SplashScreen(root, "src/navigate/view/icon/splash_screen_image.png")
 
     # Parse command line arguments
     parser = create_parser()

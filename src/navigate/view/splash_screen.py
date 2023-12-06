@@ -35,6 +35,7 @@ import tkinter as tk
 from pathlib import Path
 
 # Third Party Imports
+from PIL import Image, ImageTk
 
 # Local Imports
 
@@ -46,14 +47,14 @@ class SplashScreen(tk.Toplevel):
     Centered depending upon the host computer being used.
     """
 
-    def __init__(self, root, imgDir, *args, **kargs):
+    def __init__(self, root, image_path, *args, **kargs):
         """Initialize the SplashScreen.
 
         Parameters
         ----------
         root : Tk top-level widget
             Tkinter GUI instance to which this SplashScreen belongs.
-        imgDir : str
+        image_path : str
             Path to the image to display on the splash screen.
         *args
             Additional arguments to pass to the tk.Toplevel constructor.
@@ -65,9 +66,8 @@ class SplashScreen(tk.Toplevel):
         # without navigation panel
         self.overrideredirect(True)
 
-        img_dir = Path.joinpath(Path(__file__).resolve().parent, imgDir)
         try:
-            img = tk.PhotoImage(file=img_dir)
+            img = tk.PhotoImage(file=image_path)
             w, h = img.width(), img.height()  # width, height of the image
             loading_label = tk.Label(self, image=img)
         except tk.TclError:
@@ -87,3 +87,4 @@ class SplashScreen(tk.Toplevel):
         self.geometry("%dx%d+%d+%d" % (w, h, x, y))
         self.resizable(0, 0)
         self.update()
+

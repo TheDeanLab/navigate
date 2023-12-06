@@ -80,7 +80,15 @@ def main():
     # Start the GUI, withdraw main screen, and show splash screen.
     root = tk.Tk()
     root.withdraw()
-    splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
+
+    # Splash Screen
+    current_directory = os.path.dirname(os.path.realpath(__file__))
+    splash_screen = SplashScreen(root, os.path.join(
+        current_directory,
+        "view",
+        "icon",
+        "splash_screen_image.png"
+    ))
 
     # Parse command line arguments
     parser = create_parser()

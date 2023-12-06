@@ -82,7 +82,13 @@ def main():
     root.withdraw()
 
     # Splash Screen
-    splash_screen = SplashScreen(root, "src/navigate/view/icon/splash_screen_image.png")
+    current_directory = os.path.dirname(os.path.realpath(__file__))
+    splash_screen = SplashScreen(root, os.path.join(
+        current_directory,
+        "view",
+        "icon",
+        "splash_screen_image.png"
+    ))
 
     # Parse command line arguments
     parser = create_parser()

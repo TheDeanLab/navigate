@@ -57,7 +57,7 @@ class TestSplashScreen(unittest.TestCase):
             main_directory, "src", "navigate", "view", "icon", "splash_screen_image.png"
         )
 
-        splash_screen = SplashScreen(self.root, img_path=image_directory)
+        splash_screen = SplashScreen(self.root, image_path=image_directory)
         # Replace 'your_image.png' with a valid image path
 
         # Check if the SplashScreen is an instance of tk.Toplevel

@@ -660,30 +660,6 @@ class Controller:
                 "model", lambda: self.model.run_command("stage_limits", *args)
             )
 
-        # mirror commands:
-        elif command == "flatten_mirror":
-            self.model.run_command("flatten_mirror", *args)
-        elif command == "zero_mirror":
-            self.model.run_command("zero_mirror", *args)
-        elif command == "set_mirror":
-            self.model.run_command("set_mirror", *args)
-        elif command == "set_mirror_from_wcs":
-            self.model.run_command("set_mirror_from_wcs", *args)
-        elif command == "save_wcs_file":
-            self.model.run_command("save_wcs_file", *args)
-        elif command == "tony_wilson":
-            self.threads_pool.createThread(
-                "camera",
-                self.capture_image,
-                args=(
-                    "tony_wilson",
-                    "live",
-                ),
-            )
-
-        # elif command == "change_camera":
-        #     self.model.run_command("change_camera", *args)
-
         elif command == "autofocus":
             """Execute autofocus routine."""
             self.threads_pool.createThread(
@@ -694,9 +670,10 @@ class Controller:
 
         elif command == "load_feature":
             """Tell model to load/unload features."""
-            self.threads_pool.createThread(
+            work_thread = self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("load_feature", *args)
             )
+            work_thread.join()
 
         elif command == "acquire_and_save":
             """Acquire data and save it.
@@ -824,7 +801,32 @@ class Controller:
             self.threads_pool.clear()
             sys.exit()
 
-        logger.info(f"Navigate Controller - command passed from child, {command}, {args}")
+        # mirror commands:
+        elif command in [
+            "flatten_mirror",
+            "zero_mirror",
+            "set_mirror",
+            "set_mirror_from_wcs",
+        ]:
+            self.threads_pool.createThread(
+                "model", lambda: self.model.run_command(command, *args)
+            )
+        elif command == "tony_wilson":
+            self.threads_pool.createThread(
+                "camera",
+                self.capture_image,
+                args=(
+                    "tony_wilson",
+                    "live",
+                ),
+            )
+
+        # elif command == "change_camera":
+        #     self.model.run_command("change_camera", *args)
+
+        logger.info(
+            f"Navigate Controller - command passed from child, {command}, {args}"
+        )
 
     def sloppy_stop(self):
         """Keep trying to stop the model until successful.
@@ -873,7 +875,10 @@ class Controller:
             stop=False,
         )
         try:
-            self.model.run_command(command, *args)
+            work_thread = self.threads_pool.createThread(
+                "model", lambda: self.model.run_command(command, *args)
+            )
+            work_thread.join()
         except Exception as e:
             messagebox.showerror(
                 title="Error:",
@@ -920,7 +925,9 @@ class Controller:
                 stop=False,
             )
 
-        logger.info(f"Navigate Controller - Captured {images_received}, " f"{mode} Images")
+        logger.info(
+            f"Navigate Controller - Captured {images_received}, " f"{mode} Images"
+        )
 
         # Stop Progress Bars
         self.acquire_bar_controller.progress_bar(

@@ -89,7 +89,25 @@ it has indeed moved) before proceeding.
 Each of the functions that are the value entries in ``self.config_table``
 dictionaries are methods of the feature object.
 
-Creating Custom Features
+You have full access to the model and the active microscope when building your own feature. You could call ``self.model.*`` and ``self.model.active_microscope.*`` to call those APIs. 
+
+Frequently used APIs in the model are:
+
+- `configuration["experiment"] <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.configuration>`_ has all the GUI settings
+- `pause_data_thread() <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.pause_data_thread>`_
+- `resume_data_thread() <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.resume_data_thread>`_
+
+Frequently used APIs in the Microscope are:
+
+- `prepare_next_channel() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.prepare_next_channel>`_
+- `move_stage() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_stage>`_
+- `get_stage_position() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.get_stage_position>`_
+- `update_stage_limits() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.update_stage_limits>`_
+- `move_remote_focus() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_remote_focus>`_
+
+Please visit `Model APIs <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.microscope.Microscope.calculate_all_waveform>`_ and `Microscope APIs <../../html/_autosummary/navigate.model.microscope.Microscope.html>`_ for more details.
+
+Creating Custom Feature
 ----------------------------
 
 The Navigate Software allows you to build a custom feature that implements new

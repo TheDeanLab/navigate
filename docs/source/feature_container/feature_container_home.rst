@@ -93,7 +93,7 @@ You have full access to the model and the active microscope when building your o
 
 Frequently used APIs in the model are:
 
-- `configuration["experiment"] <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.configuration>`_ has all the GUI settings
+- `configuration["experiment"] <https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml>`_ has all the GUI settings
 - `pause_data_thread() <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.pause_data_thread>`_
 - `resume_data_thread() <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.resume_data_thread>`_
 

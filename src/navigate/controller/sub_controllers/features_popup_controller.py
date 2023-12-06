@@ -45,7 +45,9 @@ from navigate.view.custom_widgets.ArrowLabel import ArrowLabel
 from navigate.controller.sub_controllers.gui_controller import GUIController
 from navigate.tools.image import create_arrow_image
 from navigate.tools.file_functions import load_yaml_file
-from navigate.model.features.feature_related_functions import convert_str_to_feature_list
+from navigate.model.features.feature_related_functions import (
+    convert_str_to_feature_list,
+)
 from navigate.model.features import feature_related_functions
 from navigate.config.config import get_navigate_path
 
@@ -588,7 +590,7 @@ class FeaturePopupController(GUIController):
             return
         content = self.view.inputs["content"].get("1.0", "end-1c")
         feature_list_content = "".join(content.split("\n"))
-        self.parent_controller.model.run_command(
+        self.parent_controller.execute(
             "load_feature", self.feature_list_id, feature_list_content
         )
         #: bool: Whether the acquisition should start.

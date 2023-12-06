@@ -535,10 +535,10 @@ class CameraSettingController(GUIController):
         if camera_config_dict is None:
             return
 
-        self.step_width = camera_config_dict["x_pixels_step"]
-        self.step_height = camera_config_dict["y_pixels_step"]
-        self.min_width = camera_config_dict["x_pixels_min"]
-        self.min_height = camera_config_dict["y_pixels_min"]
+        self.step_width = camera_config_dict.get("x_pixels_step", 4)
+        self.step_height = camera_config_dict.get("y_pixels_step", 4)
+        self.min_width = camera_config_dict.get("x_pixels_min", 4)
+        self.min_height = camera_config_dict.get("y_pixels_min", 4)
 
         self.default_pixel_size = camera_config_dict["pixel_size_in_microns"]
         (

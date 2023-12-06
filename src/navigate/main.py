@@ -34,8 +34,6 @@
 import tkinter as tk
 import platform
 import os
-import glob
-import random
 
 # Third Party Imports
 
@@ -84,10 +82,7 @@ def main():
     root.withdraw()
 
     # Splash Screen
-    image_files = glob.glob("src/navigate/view/icon/splash_screen_image_*.png")
-    image = random.choice(image_files) if image_files else None
-    if image:
-        splash_screen = SplashScreen(root, image)
+    splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
 
     # Parse command line arguments
     parser = create_parser()

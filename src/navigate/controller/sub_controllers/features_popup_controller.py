@@ -152,12 +152,12 @@ class FeaturePopupController(GUIController):
             if i < l:
                 al = ArrowLabel(
                     feature_list_view,
-                    xys=[(0, 50), (100, 50)],
+                    xys=[(0, 20), (40, 20)],
                     direction="right",
-                    image_width=100,
-                    image_height=100,
+                    image_width=40,
+                    image_height=40,
                 )
-                al.grid(row=0, column=i * 2 + 1, sticky="", pady=(50, 0))
+                al.grid(row=0, column=i * 2 + 1, sticky="", pady=(30, 0))
                 if i == 0:
                     feature_list_view.update()
                     al_width = al.winfo_width()

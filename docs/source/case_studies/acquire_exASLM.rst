@@ -19,6 +19,9 @@ Make sure the imaging chamber is empty or, if a sample is mounted, the sample is
 #. Slowly increase :guilabel:`Galvo 0`'s :guilabel:`Amplitude` until the entire field of view is just covered by the swept beam.
 #. Under :guilabel:`Waveform Parameter Settings`, press :guilabel:`Save Configuration`.
 #. Under the :guilabel:`Channels` tab, restore the filter to its non-empty position.
+#. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
+#. If beam is diverges towards the ends of the camera, reduce the :guilabel:`Height` of camera under :guilabel:`Region of Interest Settings` tab by 10 pixels.
+
 
 
 Loading and finding the sample
@@ -37,9 +40,9 @@ Imaging a Z-Stack using Stop and Settle Mode
 #. Using the :guilabel:`Stage Control`, go to a shallow Z-position in the sample. Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)` press :guilabel:`Set Start Pos`.
 #. Go to a deep Z-position in the sample. Press :guilabel:`Set End Pos`.
 #. Make sure :guilabel:`Set Foc` is 0 for both the :guilabel:`Set Start Pos` and :guilabel:`End Pos`.
-#. Type the desired step size (units um) in the :guilabel:`Step Size` dialog box  :guilabel:`Stack Acquistion Settings (um)`. Step size can only be increments of 0.1 (um) and the minimum is 0.2 (um). 
+#. Type the desired step size (units um) in the :guilabel:`Step Size` dialog box  :guilabel:`Stack Acquistion Settings (um)`. Step size can only be increments of 0.1 (um) and the minimum is 0.2 (um).
 #. Select the number of color channels needed imaging in the :guilabel:`Channel tab` under :guilabel: `Channel Settings`. Select the correct filter for each channel by using the dropdown menu after each channel under the :guilabel:`Filter`.
-#. Change the exposure time by changing number in the :guilabel:`Exp. Time (ms)` for each channels. For the ORCA Lightning camera using ASLM mode, the minimum frame rate is 75 ms and the maximum is 100 ms. 
+#. Change the exposure time by changing number in the :guilabel:`Exp. Time (ms)` for each channels. For the ORCA Lightning camera using ASLM mode, the minimum frame rate is 75 ms and the maximum is 100 ms.
 #. Set :guilabel:`Interval` to be 1.0 for each channel.
 #. Set :guilabel:`Defocus` to be 0 for each channel.
 #. Select "Z-Stack" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`.
@@ -53,11 +56,10 @@ Imaging a Z-Stack using Constant Velocity Acquisition Mode
 #. Using the :guilabel:`Stage Control`, go to a shallow Z-position in the sample. Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)` press :guilabel:`Set Start Pos`.
 #. Go to a deep Z-position in the sample. Press :guilabel:`Set End Pos`.
 #. Make sure :guilabel:`Set Foc` is 0 for both the :guilabel:`Set Start Pos` and :guilabel:`End Pos`.
-#. Type the desired step size (units um) in the :guilabel:`Step Size` dialog box  :guilabel:`Stack Acquistion Settings (um)`. Step size can only be increments of 0.1 (um) and the minimum is 0.2 (um). 
+#. Type the desired step size (units um) in the :guilabel:`Step Size` dialog box  :guilabel:`Stack Acquistion Settings (um)`. Step size can only be increments of 0.1 (um) and the minimum is 0.2 (um).
 #. Select the number of color channels needed imaging in the :guilabel:`Channel tab` under :guilabel: `Channel Settings`. Select the correct filter for each channel by using the dropdown menu after each channel under the :guilabel:`Filter`.
-#. Change the exposure time by changing number in the :guilabel:`Exp. Time (ms)` for each channels. For the ORCA Lightning camera using ASLM mode, the minimum frame rate is 75 ms and the maximum is 100 ms. 
+#. Change the exposure time by changing number in the :guilabel:`Exp. Time (ms)` for each channels. For the ORCA Lightning camera using ASLM mode, the minimum frame rate is 75 ms and the maximum is 100 ms.
 #. Set :guilabel:`Interval` to be 1.0 for each channel.
 #. Set :guilabel:`Defocus` to be 0 for each channel.
 #. Select "Constant Velocity Acquisition" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`.
 #. Enter the sample parameters in the :guilabel:`File Saving Dialog` that pops up. Press :guilabel:`Acquire Data`.
-

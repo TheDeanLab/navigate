@@ -1,8 +1,12 @@
 <h1 align="center">
 <img src="./src/navigate/view/icon/mic.ico?raw=true" />
 
-navigate - open source light sheet microscope control
+navigate
+<h2 align="center">
+	open source light sheet microscope control
+</h2>
 </h1>
+
 
 [![Tests](https://github.com/TheDeanLab/navigate/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/TheDeanLab/navigate/actions/workflows/push_checks.yaml)
 [![codecov](https://codecov.io/gh/TheDeanLab/navigate/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/navigate)
@@ -15,6 +19,7 @@ Download and install [Miniconda](https://docs.conda.io/en/latest/miniconda.html#
 
 ```
 conda create -n navigate python=3.9.7
+conda activate navigate
 pip install git+https://github.com/TheDeanLab/navigate.git
 ```
 

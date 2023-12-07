@@ -53,7 +53,7 @@ class FeatureIcon(ttk.Button):
             Name of the feature
         """
         ttk.Button.__init__(self, parent, text=feature_name)
-        self.configure(padding=(50, 50))
+        self.configure(padding=(10, 20))
 
 
 class FeatureConfigPopup:
@@ -231,7 +231,7 @@ class FeatureListPopup:
 
         scroll_frame = ttk.Frame(content_frame)
         scroll_frame.grid(row=3, column=0, sticky=tk.NSEW)
-        canvas = tk.Canvas(scroll_frame, width=500, height=350)
+        canvas = tk.Canvas(scroll_frame, width=800, height=350)
         scrollbar = ttk.Scrollbar(scroll_frame, orient="horizon", command=canvas.xview)
         self.feature_view_frame = ttk.Frame(canvas)
 

@@ -39,6 +39,7 @@ contains a feature list that acts as a recipe maker for automated microscope rou
    contributing/contributing_home
    feature_container/feature_container_home
    case_studies/acquire_mesospimbt
+   case_studies/acquire_exASLM
    api
 
 

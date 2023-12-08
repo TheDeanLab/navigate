@@ -61,4 +61,5 @@ Imaging a Z-Stack using Constant Velocity Acquisition Mode
 #. Set :guilabel:`Interval` to be 1.0 for each channel.
 #. Set :guilabel:`Defocus` to be 0 for each channel.
 #. Select "Constant Velocity Acquisition" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`.
-#. Enter the sample parameters in the :guilabel:`File Saving Dialog` that pops up. Press :guilabel:`Acquire Data`.
+#. Enter the sample parameters in the :guilabel:`File Saving Dialog` that pops up. Make sure to save to SSD drive or change buffer size in configuration file to prevent any overwriting of images. Then Press :guilabel:`Acquire Data`.
+#. To change frame buffer size, in the :guilabel:`experiment.yaml` file in your local navigate directory in the :guilabel:`config` folder under the :guilabel:`CameraParameters` section, change :guilabel:`databuffer_size` to desired number of frames. Make sure the size of the desired number of frames isn't above the available RAM in the computer.

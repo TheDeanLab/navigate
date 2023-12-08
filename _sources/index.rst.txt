@@ -40,6 +40,7 @@ contains a feature list that acts as a recipe maker for automated microscope rou
    feature_container/feature_container_home
    case_studies/setup_voodoo
    case_studies/acquire_mesospimbt
+   case_studies/acquire_exASLM
    api
 
 

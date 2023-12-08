@@ -10,17 +10,15 @@ Make sure the imaging chamber is empty or, if a sample is mounted, the sample is
 
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Go to the :guilabel:`Channels` tab. Choose the wavelength you want to align. Set the laser's :guilabel:`Power` to `100.0`. Change :guilabel:`Filter` to an "Empty" option.
-#. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup named :guilabel:`Waveform Parameter Settings` will appear. Make sure the :guilabel:`Mode` matches "mesoSPIM BT" and the :guilabel:`Magnification` matches the magnification of the objective you are using.
-#. :guilabel:`Galvo 0` digitally sweeps the beam across the field of view. To align the axially-swept light sheet parameters, set the :guilabel:`Galvo 0` :guilabel:`Amplitude` to `0.0`. Set the :guilabel:`Offset` so that the beam is centered in the field of view. Click the :guilabel:`Camera View` to toggle the crosshairs, which indicate the center of the field of view. Adjust the :guilabel:`F` (focus) value in the :guilabel:`Stage Control` panel until the beam is as thin/focused as possible.
-#. The empty filter makes us susceptible to seeing particles scattering light in the chamber. This can effect the software's autoscaling routine. To ensure we are looking at the beam correctly, uncheck :guilabel:`Autoscale` and set the :guilabel:`Min Counts` and :guilabel:`Max Counts` so the beam is visible, but not saturating the display.
-#. Set the wavelength's :guilabel:`Amplitude` to `0.0`. Set the wavelength's :guilabel:`Offset` so that the beam is focused in the center of the field of view.
+#. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup named :guilabel:`Waveform Parameter Settings` will appear. Make sure the :guilabel:`Mode` matches "Nanoscale" and the :guilabel:`Magnification` says N/A.
+#. Set the desired imaging wavelength's :guilabel:`Amplitude` to `0.0`. Set the wavelength's :guilabel:`Offset` so that the beam is focused in the center of the field of view.
 #. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
 #. Once the beam is straight, slowly change the wavelength's :guilabel:`Offset` until the beam has an even thickness across the field of view.
-#. Slowly increase :guilabel:`Galvo 0`'s :guilabel:`Amplitude` until the entire field of view is just covered by the swept beam.
 #. Under :guilabel:`Waveform Parameter Settings`, press :guilabel:`Save Configuration`.
 #. Under the :guilabel:`Channels` tab, restore the filter to its non-empty position.
 #. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
 #. If beam is diverges towards the ends of the camera, reduce the :guilabel:`Height` of camera under :guilabel:`Region of Interest Settings` tab by 10 pixels.
+#. Before imaging set the resonant galvo :guilabel:`Galvo 0` to 0.3 to mitigate any striping artifacts during imaging.
 
 
 

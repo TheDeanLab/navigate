@@ -7,19 +7,19 @@ Setting the beam parameters
 ---------------------------
 
 Make sure the imaging chamber is empty or, if a sample is mounted, the sample is not in the beam path.
-#. Mount chamber onto microscope stage and add dye solution for desired imaging wavelength into chamber.
-#. Change cylindrical lens to spherical lens in setup.
-#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`. This will launch a live acquisition mode.
-#. Go to the :guilabel:`Channels` tab. Choose the wavelength you want to align. Set the laser's :guilabel:`Power` to `10.0` or lower. Change :guilabel:`Filter` to the appropiate filter for the imaging wavelength.
-#. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup named :guilabel:`Waveform Parameter Settings` will appear. Make sure the :guilabel:`Mode` matches "Nanoscale" and the :guilabel:`Magnification` says N/A.
-#. Set the desired imaging wavelength's :guilabel:`Amplitude` to `0.0`. Set the wavelength's :guilabel:`Offset` so that the beam is focused in the center of the field of view.
-#. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
-#. Once the beam is straight, slowly change the wavelength's :guilabel:`Offset` until the beam has an even thickness across the field of view.
-#. Under :guilabel:`Waveform Parameter Settings`, press :guilabel:`Save Configuration`.
-#. Under the :guilabel:`Channels` tab, restore the filter to its non-empty position.
-#. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
-#. If beam is diverges towards the ends of the camera, reduce the :guilabel:`Height` of camera under :guilabel:`Region of Interest Settings` tab by 10 pixels.
-#. After optimal parameters are found, swap the spherical lens for the cylindrical lens.
+  #. Mount chamber onto microscope stage and add dye solution for desired imaging wavelength into chamber.
+  #. Change cylindrical lens to spherical lens in setup.
+  #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`. This will launch a live acquisition mode.
+  #. Go to the :guilabel:`Channels` tab. Choose the wavelength you want to align. Set the laser's :guilabel:`Power` to `10.0` or lower. Change :guilabel:`Filter` to the appropiate filter for the imaging wavelength.
+  #. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup named :guilabel:`Waveform Parameter Settings` will appear. Make sure the :guilabel:`Mode` matches "Nanoscale" and the :guilabel:`Magnification` says N/A.
+  #. Set the desired imaging wavelength's :guilabel:`Amplitude` to `0.0`. Set the wavelength's :guilabel:`Offset` so that the beam is focused in the center of the field of view.
+  #. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
+  #. Once the beam is straight, slowly change the wavelength's :guilabel:`Offset` until the beam has an even thickness across the field of view.
+  #. Under :guilabel:`Waveform Parameter Settings`, press :guilabel:`Save Configuration`.
+  #. Under the :guilabel:`Channels` tab, restore the filter to its non-empty position.
+  #. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
+  #. If beam is diverges towards the ends of the camera, reduce the :guilabel:`Height` of camera under :guilabel:`Region of Interest Settings` tab by 10 pixels.
+  #. After optimal parameters are found, swap the spherical lens for the cylindrical lens.
 
 
 Loading and finding the sample

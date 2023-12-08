@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Case Study: Setting up the an Axially Swept Light-Sheet Microscope &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/case_studies/setup_voodoo.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="case-study-setting-up-the-an-axially-swept-light-sheet-microscope">
+<h1>Case Study: Setting up the an Axially Swept Light-Sheet Microscope<a class="headerlink" href="#case-study-setting-up-the-an-axially-swept-light-sheet-microscope" title="Permalink to this heading"></a></h1>
+<p>The key to properly setting up the navigate software is to sequentially enable select
+devices, and troubleshoot each one independently. By carefully and methodically
+adding devices, and checking that they are functional, one can be confident that the
+entire system is working as intended. In this example, we will be using a Hamamatsu
+Flash 4.0 camera. However, you may also use another Hamamatsu SCMOS model, or a
+Photometrics camera, as long as the drivers are installed and the camera is
+recognized by the computer. The microscope will operate in a sample scanning format
+for volumetric image acquisition.</p>
+<p>#. Launch the software in synthetic hardware mode. This requires that the conda
+environment has been established, and that the software has been installed. Once the
+conda environment has been activated, the software can be launched by typing
+<cite>navigate -sh</cite> in the terminal.</p>
+<p>#. Once the software has been launched, the GUI will appear. Open the folder
+containing the configuration files by selecting to the menu <span class="menuselection">File ‣
+Open Configuration Files</span>. This will open the <cite>.navigate</cite> folder in the file
+explorer, which is where local configuration files are stored.</p>
+<p>#. Open the <cite>configuration.yaml</cite> file in your preferred integrated development
+environment (e.g., PyCharm, VS Code, etc.).</p>
+<p>#. For every device in the <cite>hardware</cite> and <cite>microscopes</cite> sections of the <cite>configuration
+.yaml</cite> file, you will need to change the type to <cite>synthetic</cite>. For convenience, we
+provide a <cite>synthetic_configuration.yaml</cite> file that can be used to replace the
+<cite>configuration.yaml</cite> file that already has synthetic for each device. You will need
+to replace the <cite>configuration.yaml</cite> file that is located in the <cite>.navigate</cite> folder with
+the <cite>synthetic_configuration.yaml</cite> file.</p>
+<p>#. Restart the software, but this time launch it in a standard operating mode by
+typing <cite>navigate</cite> in the terminal. This confirms that the base configuration file is
+functional. If any problems are encountered, please submit a ticket on GitHub under
+the issues tab.</p>
+<p>#. We will now begin sequentially adding non-synthetic devices to the configuration
+file. The first device to add is the data acquisition card. Of course, the data
+acquisition card’s drivers must be <a class="reference external" href="https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#494676">installed</a> and functioning.
+To confirm that it is functioning, it is best to use the <cite>NI MAX</cite> software and
+evaluate the card’s functionality with an oscilloscope.</p>
+<p>#. In the <cite>hardware</cite> and <cite>microscopes</cite> sections of the <cite>configuration.yaml</cite> file, change
+the <cite>type</cite> to <cite>NI</cite>. You will also need to hard-wire the master_trigger_out_line to the
+trigger_source. The identity of these pins can be found in the NI MAX software by right-
+clicking on the device and selecting <span class="guilabel">Device Pinouts</span>. You will also need to make
+sure that the identity of the pinouts is correct in the <cite>configuration.yaml</cite> file.
+Most commonly, NI cards default to a device name such as “Dev1”. You can change this
+name in NI MAX, or leave it as is, but whatever you do it has to match the name in
+the <cite>configuration.yaml</cite> file (e.g., <cite>PXI6259/port0/line1`</cite> if the name of the device is
+“PXI6259” and the pinout is “port0/line1”).</p>
+<p>#. Open the <cite>navigate</cite> software in the standard operating mode, select the “Continuous Scan”
+mode, and press <span class="guilabel">Acquire</span>. If the software is operating as expected, it should display
+a synthetically generated image of noise. If it does not, double-check the configuration
+file and make sure that the <cite>master_trigger_out_line</cite> is connected to the <cite>trigger_source</cite>.</p>
+<p>#. Next, we will add the camera. The camera must be connected to the computer via a USB
+or the dedicated frame-grabber cable. The camera drivers must also be installed. The
+camera drivers can be found on the <a class="reference external" href="https://dcam-api.com">DCAM-API Website</a>.</p>
+<p>#. Update the camera type to <cite>HamamatsuOrca</cite> and input the correct serial number,
+which can be found on the camera label or through the DCAMConfigurator or HCImage.
+You will also need to connect the <cite>camera_trigger_out_line</cite> on the data acquisition
+card to the BNC port labeled “Ext. Trig.” on the back of the camera</p>
+<p>.</p>
+<p>#. Restart the software and begin an acquisition in the “Continuous Scan” mode. The camera
+should not be delivering frames to the software.</p>
+<p>#. Set up the Filter Wheel. First, identify the comport via the device manager
+on Windows. Change the <cite>filter_wheel</cite> type to <cite>SutterFilterWheel</cite> or equivalent in
+the <cite>hardware</cite> and <cite>microscopes</cite> sections of the configuration file, and
+provide the necessary information for that filter wheel device (e.g., <cite>baudrate`</cite>). At
+this point, you can also name each filter if desired under the <cite>available_filters</cite>
+section.</p>
+<p>#. Restart the software and select multiple channels in the channel settings tab,
+each with different filters. Run the software in “Continuous Scan” mode again and ensure
+that the filter wheel is changing filters between each acquisition.</p>
+<p>#. Set up the lasers. Ideally, the lasers will operate in a mixed modulation mode,
+which requires that the NI card provides both analog and digital signals to each
+laser. This allows blanking of the laser, as well as control of its intensity. Open
+the control software for the lasers, and configure them in a mixed modulation mode.
+Next, connect the analog output of the NI card to the analog input of the laser.
+Finally, connect the digital output of the NI card to the digital input of the laser.
+A common port for the analog and digital outputs are <cite>PXI6733/ao0</cite> and
+<cite>PXI6733/port0/line2</cite>, respectively.</p>
+<p>#. Configure the lasers in the <cite>hardware</cite> and <cite>microscopes</cite> sections of the
+configuration to type <cite>NI</cite>. Here you can specify the wavelength of each laser, as
+well as the minimium and maximum volts to deliver to the laser in both the analog
+(<cite>power</cite>) and digital (<cite>onoff</cite>) sections.</p>
+<p>14. Configure the Voice Coil. Most voice coils only require an analog signal to
+control, which can be delivered via the type <cite>NI</cite> in the <cite>hardware</cite> and <cite>microscopes</cite>.
+However, some voice coils must be configured to accept an analog signal upon each
+power cycle (e.g., <cite>EquipmentSolutions</cite>). In this case, you will also need to specify
+the COM port.</p>
+<p>#. Set up the galvos. Galvos can be used for a wide variety of tasks, including
+shadow reduction, digitally scanned light-sheet formation, and also for stepping the
+beam in z during the acquisition of a z-stack. If the galvo will be used for a
+z-stack, it should be configured in the <cite>stage</cite> section. All other galvos are placed
+in <cite>galvo</cite> section. For a sample-scanning ASLM, we use a resonant galvo to perform
+shadow reduction.</p>
+<p>16. Install and configure the Stages. You will need to specify stages for x, y, z,
+theta, and f. If you do not need one of these stages, it should remain specified as a
+<cite>SyntheticStage</cite>. It is also important to make sure that you map the stage
+coordinates to the software coordinates. For example, with the Sutter MP285, the
+vertical movement of the stage is its z axis. However, for light-sheet microscopes
+that are laid out horizontally, this axis is the x axis. Thus, we must map the
+hardware z-axis to the software x-axis. This is done with the <cite>axes</cite> and
+<cite>axes_mapping</cite> entries, which for the example provided, would be as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># software axes</span>
+<span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">z</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1">#hardware axes</span>
+</pre></div>
+</div>
+<p>Importantly, any stage you designate as z will be used for acquisition of a z-stack.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

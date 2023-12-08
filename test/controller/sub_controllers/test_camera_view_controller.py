@@ -529,6 +529,7 @@ class TestCameraViewController:
         monkeypatch.setattr(ImageTk, "PhotoImage", mocked_PhotoImage)
 
         self.camera_view.canvas.create_image = MagicMock()
+        self.camera_view.image_catche_flag = True
 
         # Call the function
         self.camera_view.populate_image()
@@ -536,6 +537,7 @@ class TestCameraViewController:
         # Assert that the tk_image has been created correctly
         assert self.camera_view.tk_image is not None
         self.camera_view.canvas.create_image.assert_called()
+        assert self.camera_view.image_catche_flag == False
 
         # Set display_mask_flag to True
         self.camera_view.display_mask_flag = False
@@ -544,7 +546,8 @@ class TestCameraViewController:
         self.camera_view.populate_image()
 
         # Assert that the tk_image has been created correctly
-        assert self.camera_view.tk_image is not None
+        assert self.camera_view.tk_image2 is not None
+        assert self.camera_view.image_catche_flag == True
 
     def test_initialize_non_live_display(self):
         # Create test buffer and microscope_state

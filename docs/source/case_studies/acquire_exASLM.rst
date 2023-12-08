@@ -7,9 +7,10 @@ Setting the beam parameters
 ---------------------------
 
 Make sure the imaging chamber is empty or, if a sample is mounted, the sample is not in the beam path.
-
+#. Add dye solution for desired imaging wavelength into chamber.
+#. Change cylindrical lens to spherical lens in setup.
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`. This will launch a live acquisition mode.
-#. Go to the :guilabel:`Channels` tab. Choose the wavelength you want to align. Set the laser's :guilabel:`Power` to `100.0`. Change :guilabel:`Filter` to an "Empty" option.
+#. Go to the :guilabel:`Channels` tab. Choose the wavelength you want to align. Set the laser's :guilabel:`Power` to `10.0` or lower. Change :guilabel:`Filter` to the appropiate filter for the imaging wavelength.
 #. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup named :guilabel:`Waveform Parameter Settings` will appear. Make sure the :guilabel:`Mode` matches "Nanoscale" and the :guilabel:`Magnification` says N/A.
 #. Set the desired imaging wavelength's :guilabel:`Amplitude` to `0.0`. Set the wavelength's :guilabel:`Offset` so that the beam is focused in the center of the field of view.
 #. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
@@ -28,7 +29,7 @@ Loading and finding the sample
 #. Load the sample on the microscope.
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Scroll around with the stage either via joystick or using the controls in the :guilabel:`Stage Control` tab until the sample comes into view.
-#. If using the joystick to move to the stage into the correct position, press the :guilabel:`STOP` button under the :guilabel:`Stage Control` tab to update the stage positions in the software after moving the stage.\
+#. If using the joystick to move to the stage into the correct position, press the :guilabel:`STOP` button under the :guilabel:`Stage Control` tab to update the stage positions in the software after moving the stage.
 
 .. z_stack:
 

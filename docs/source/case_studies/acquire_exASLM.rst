@@ -19,7 +19,7 @@ Make sure the imaging chamber is empty or, if a sample is mounted, the sample is
 #. Under the :guilabel:`Channels` tab, restore the filter to its non-empty position.
 #. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
 #. If beam is diverges towards the ends of the camera, reduce the :guilabel:`Height` of camera under :guilabel:`Region of Interest Settings` tab by 10 pixels.
-#. After optimal parameters are found, swap spherical lens for cylindrical lens
+#. After optimal parameters are found, swap the spherical lens for the cylindrical lens.
 
 
 Loading and finding the sample
@@ -62,4 +62,4 @@ Imaging a Z-Stack using Constant Velocity Acquisition Mode
 #. Set :guilabel:`Defocus` to be 0 for each channel.
 #. Select "Constant Velocity Acquisition" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`.
 #. Enter the sample parameters in the :guilabel:`File Saving Dialog` that pops up. Make sure to save to SSD drive or change buffer size in configuration file to prevent any overwriting of images. Then Press :guilabel:`Acquire Data`.
-#. To change frame buffer size, in the :guilabel:`experiment.yaml` file in your local navigate directory in the :guilabel:`config` folder under the :guilabel:`CameraParameters` section, change :guilabel:`databuffer_size` to desired number of frames. Make sure the size of the desired number of frames isn't above the available RAM in the computer.
+#. To change frame buffer size, in the :guilabel:`CameraParameters` section in the :guilabel:`experiment.yaml` file in your local navigate directory in the :guilabel:`config` folder, change :guilabel:`databuffer_size` to desired number of frames. Make sure the size of the desired number of frames isn't above the available RAM in the computer.

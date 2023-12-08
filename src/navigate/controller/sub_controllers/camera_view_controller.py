@@ -231,6 +231,8 @@ class CameraViewController(GUIController):
         self.mask_color_table = None
         #: bool: Whether or not to flip the image.
         self.flip_flags = None
+        #: bool: Image catche flag
+        self.image_catche_flag = True
 
         # ilastik mask
         #: bool: The display mask flag for ilastik.
@@ -713,13 +715,20 @@ class CameraViewController(GUIController):
             img1 = Image.fromarray(temp_img1)
             temp_img2 = cv2.resize(self.ilastik_seg_mask, temp_img1.shape[:2])
             img2 = Image.fromarray(temp_img2)
-            img3 = Image.blend(img1, img2, 0.2)
-            self.tk_image = ImageTk.PhotoImage(img3)
+            temp_img = Image.blend(img1, img2, 0.2)
         else:
-            self.tk_image = ImageTk.PhotoImage(
-                Image.fromarray(self.cross_hair_image.astype(np.uint8))
-            )
-        self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
+            temp_img = Image.fromarray(self.cross_hair_image.astype(np.uint8))
+        
+        # when calling ImageTk.PhotoImage() to generate a new image, it will destroy
+        # what the canvas is showing and cause a blink.
+        if self.image_catche_flag:
+            self.tk_image2 = ImageTk.PhotoImage(temp_img)
+            self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
+        else:
+            self.tk_image = ImageTk.PhotoImage(temp_img)
+            self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
+
+        self.image_catche_flag = not self.image_catche_flag
 
     def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
         """Initialize the non-live display.

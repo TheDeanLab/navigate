@@ -722,11 +722,11 @@ class CameraViewController(GUIController):
         # when calling ImageTk.PhotoImage() to generate a new image, it will destroy
         # what the canvas is showing and cause a blink.
         if self.image_catche_flag:
-            self.tk_image2 = ImageTk.PhotoImage(temp_img)
-            self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
-        else:
             self.tk_image = ImageTk.PhotoImage(temp_img)
             self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
+        else:
+            self.tk_image2 = ImageTk.PhotoImage(temp_img)
+            self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
 
         self.image_catche_flag = not self.image_catche_flag
 

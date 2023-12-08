@@ -461,10 +461,10 @@ class BigDataViewerMetadata(XMLMetadata):
             )
         )
 
-        # Get number of positions, one per setup
+        # Get number of positions, one per setup/channel
         self.positions = len(
             root.findall("SequenceDescription/ViewSetups/ViewSetup/attributes/tile")
-        )
+        ) // len(channels)
 
         # Get image sizes in (x, y, z), one per setup
         sizes = [

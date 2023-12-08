@@ -7,7 +7,7 @@ Setting the beam parameters
 ---------------------------
 
 Make sure the imaging chamber is empty or, if a sample is mounted, the sample is not in the beam path.
-#. Add dye solution for desired imaging wavelength into chamber.
+#. Mount chamber onto microscope stage and add dye solution for desired imaging wavelength into chamber.
 #. Change cylindrical lens to spherical lens in setup.
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Go to the :guilabel:`Channels` tab. Choose the wavelength you want to align. Set the laser's :guilabel:`Power` to `10.0` or lower. Change :guilabel:`Filter` to the appropiate filter for the imaging wavelength.
@@ -19,8 +19,7 @@ Make sure the imaging chamber is empty or, if a sample is mounted, the sample is
 #. Under the :guilabel:`Channels` tab, restore the filter to its non-empty position.
 #. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude` until the beam becomes a straight line across the screen. If the beam does not become straighter, try changing the camera's :guilabel:`Readout Direction`.
 #. If beam is diverges towards the ends of the camera, reduce the :guilabel:`Height` of camera under :guilabel:`Region of Interest Settings` tab by 10 pixels.
-#. Before imaging set the resonant galvo :guilabel:`Galvo 0` to 0.3 to mitigate any striping artifacts during imaging.
-
+#. After optimal parameters are found, swap spherical lens for cylindrical lens
 
 
 Loading and finding the sample
@@ -30,6 +29,7 @@ Loading and finding the sample
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button. Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Scroll around with the stage either via joystick or using the controls in the :guilabel:`Stage Control` tab until the sample comes into view.
 #. If using the joystick to move to the stage into the correct position, press the :guilabel:`STOP` button under the :guilabel:`Stage Control` tab to update the stage positions in the software after moving the stage.
+#. Set the resonant galvo :guilabel:`Galvo 0` to 0.3 to mitigate any striping artifacts during imaging.
 
 .. z_stack:
 

@@ -38,6 +38,7 @@ contains a feature list that acts as a recipe maker for automated microscope rou
    supported_hardware
    contributing/contributing_home
    feature_container/feature_container_home
+   case_studies/setup_voodoo
    case_studies/acquire_mesospimbt
    api
 

@@ -107,9 +107,19 @@ z-stack, it should be configured in the `stage` section. All other galvos are pl
 in `galvo` section. For a sample-scanning ASLM, we use a resonant galvo to perform
 shadow reduction.
 
-16. Install and configure the Stages.
+16. Install and configure the Stages. You will need to specify stages for x, y, z,
+theta, and f. If you do not need one of these stages, it should remain specified as a
+`SyntheticStage`. It is also important to make sure that you map the stage
+coordinates to the software coordinates. For example, with the Sutter MP285, the
+vertical movement of the stage is its z axis. However, for light-sheet microscopes
+that are laid out horizontally, this axis is the x axis. Thus, we must map the
+hardware z-axis to the software x-axis. This is done with the `axes` and
+`axes_mapping` entries, which for the example provided, would be as follows:
 
-17. Finally, set up the GUI defaults to complete the configuration.
+.. code-block:: yaml
 
-Remember, if you change the name of the microscope in this file, it must be updated in other configuration files as well.
-4. Restart the software after every modification in the `configuration.yaml` file.
+          axes: [x] # software axes
+          axes_mapping: [z] #hardware axes
+
+Importantly, any stage you designate as z will be used for acquisition of a z-stack.
+

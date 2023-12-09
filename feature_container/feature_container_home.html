@@ -56,7 +56,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#currently-implemented-features">Currently Implemented Features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-feature-object">The Feature Object</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#creating-custom-features">Creating Custom Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-custom-feature-object">Creating Custom Feature Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-a-custom-feature-list">Creating A Custom Feature List</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#combining-features">Combining Features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#loading-custom-functions">Loading Custom Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#editing-function-parameters">Editing Function Parameters</a></li>
@@ -177,8 +178,122 @@ it has indeed moved) before proceeding.</p>
 <p>Each of the functions that are the value entries in <code class="docutils literal notranslate"><span class="pre">self.config_table</span></code>
 dictionaries are methods of the feature object.</p>
 </section>
-<section id="creating-custom-features">
-<h2>Creating Custom Features<a class="headerlink" href="#creating-custom-features" title="Permalink to this heading"></a></h2>
+<section id="creating-custom-feature-object">
+<h2>Creating Custom Feature Object<a class="headerlink" href="#creating-custom-feature-object" title="Permalink to this heading"></a></h2>
+<p>Each Feature Object is defined as a class, there is a step-by-step example feature
+that moves the stage to a specific position listed in the multi-position table in the GUI,
+snap an image and calculate its Shannon entropy.</p>
+<ol class="arabic simple">
+<li><p>How to create a custom feature class?</p></li>
+</ol>
+<p>Creating a new feature is the same as a normal new class. However, there is some requires.
+The first parameter of the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function must be <code class="docutils literal notranslate"><span class="pre">model</span></code>, which gives the feature
+object full access to the model. All the other parameters are keyword arguments and must have default values.
+There should always have a config_table attribute (see <a class="reference external" href="../../html/feature_container/feature_container_home.html#the-feature-object">above</a> for a description of the config_table)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.analysis.image_contrast</span> <span class="kn">import</span> <span class="n">fast_normalized_dct_shannon_entropy</span>
+
+<span class="n">Class</span> <span class="n">FeatureExample</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">position_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_id</span> <span class="o">=</span> <span class="n">position_id</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_table</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;signal&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;init&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_func_signal</span><span class="p">,</span>
+                    <span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_func_signal</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_func_data</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;device_related&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>How to get parameters from GUI?</p></li>
+</ol>
+<p>All the GUI parameters are in the <code class="docutils literal notranslate"><span class="pre">model.configuration[&quot;experiment&quot;]</span></code> during
+runtime. Here is an example that get positions from the multi-position table
+in the GUI.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pre_func_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">configuration</span><span class="p">[</span><span class="s2">&quot;experiment&quot;</span><span class="p">][</span><span class="s2">&quot;MultiPositions&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_position</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">position_id</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_stage_position</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_position</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">axis</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">current_position</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+</pre></div>
+</div>
+<p>More GUI parameters can be found in <a class="reference external" href="https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml">experiment.yml</a></p>
+<ol class="arabic simple" start="3">
+<li><p>How to interact with stage?</p></li>
+</ol>
+<p>Now, we move stage to the target_position.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_func_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">_abs&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_position</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">move_stage</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">wait_until_done</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>How to get an image and deal with it?</p></li>
+</ol>
+<p>The image captured by the camara will be stored in the data buffer.
+You should add your code to deal with the image in the main data function.
+Here is an example that calculates the Shannon entropy of the image.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_func_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">):</span>
+    <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">frame_ids</span><span class="p">:</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">data_buffer</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+        <span class="n">entropy</span> <span class="o">=</span> <span class="n">fast_normalized_dct_shannon_entropy</span><span class="p">(</span><span class="n">image</span><span class="p">,</span>
+            <span class="n">psf_support_diameter_xy</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;entropy of image:&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">entropy</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, you’ve create a whole new feature and can use it as you wish.</p>
+<ul class="simple">
+<li><p>How to interact with other devices?</p></li>
+</ul>
+<p>You could interact with all devices through <code class="docutils literal notranslate"><span class="pre">self.model.active_microscope</span></code>.
+Here is an example to open shutter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">active_microscope</span><span class="o">.</span><span class="n">shutter</span><span class="o">.</span><span class="n">open_shutter</span><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>How to pause and resume data threads in the model</p></li>
+</ul>
+<p>The image data acquired from the camara are handled in an indepandant thread.
+Some devices need more time to get ready or move. In this case, you may need to pause
+the data thread until the device is ready.</p>
+<p>Here is an example to pause and resume the data thread:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pause_data_thread</span><span class="p">()</span>
+<span class="c1"># ...</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">resume_data_thread</span><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Frequently used APIs in the model are:</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml">configuration[“experiment”]</a> has all the GUI settings</p></li>
+<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.pause_data_thread">pause_data_thread()</a></p></li>
+<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.resume_data_thread">resume_data_thread()</a></p></li>
+</ul>
+<ul class="simple">
+<li><p>Frequently used APIs in the Microscope are:</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.prepare_next_channel">prepare_next_channel()</a></p></li>
+<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_stage">move_stage()</a></p></li>
+<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.get_stage_position">get_stage_position()</a></p></li>
+<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.update_stage_limits">update_stage_limits()</a></p></li>
+<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_remote_focus">move_remote_focus()</a></p></li>
+</ul>
+<p>Please visit <a class="reference external" href="../../html/_autosummary/navigate.model.model.Model.html#navigate.model.microscope.Microscope.calculate_all_waveform">Model APIs</a> and <a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html">Microscope APIs</a> for more details.</p>
+</section>
+<section id="creating-a-custom-feature-list">
+<h2>Creating A Custom Feature List<a class="headerlink" href="#creating-a-custom-feature-list" title="Permalink to this heading"></a></h2>
 <p>The Navigate Software allows you to build a custom feature that implements new
 functionality, or a new feature list that builds an intelligent acquisition workflow
 from existing features. This documentation explains how to create and load
@@ -220,7 +335,7 @@ analyses. It will appear at the bottom of the <cite>Features</cite> menu.</p>
 </section>
 <section id="combining-features">
 <h2>Combining Features<a class="headerlink" href="#combining-features" title="Permalink to this heading"></a></h2>
-<p>Once you have loaded your feature, the next step is to use it in combination with
+<p>Once you have loaded your feature list, the next step is to use it in combination with
 other features to create an intelligent acquisition workflow. To do this, you will
 need to create a new feature list that combines your custom feature with other
 features:</p>

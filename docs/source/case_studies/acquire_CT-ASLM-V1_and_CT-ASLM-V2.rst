@@ -6,7 +6,7 @@ This is a case study in using the software to image with a `CT-ASLM-V1 and CT-AS
 Setting up the chamber 
 ---------------------------
 
-Make sure the chamber is clean and dry. If in doubt, fill the chamber with diH2O to see if there are any residues. To clean the chamber, rinse it with diH2O and ethanal, then scrape the chamber with Q-tips. Repeat the process a few times and end the process with a rinse of 100% ethanal. Gently clean the objectives with lens paper and 100% ethanal. Finally, let the chamber air dry. To speed up the drying process, one can gently blow some air into the chamber. 
+Make sure the chamber is clean and dry. If in doubt, fill the chamber with diH2O to see if there are any residues. To clean the chamber, rinse it with diH2O and ethanal, then gently clean the chamber with Q-tips. Repeat the process a few times and end the process with a rinse of 100% ethanal. Gently clean the objectives with lens paper and 100% ethanal. Finally, let the chamber air dry. To speed up the drying process, one can gently blow some air into the chamber. 
 
 Once the chamber is completely dry, fill the chamber with imaging media. 
 

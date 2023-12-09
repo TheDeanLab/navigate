@@ -94,14 +94,14 @@ Creating Custom Feature Object
 
 Each Feature Object is defined as a class, there is a step-by-step example feature
 that moves the stage to a specific position listed in the multi-position table in the GUI,
-snap an image and calculate its shannon entropy.
+snap an image and calculate its Shannon entropy.
 
 1. How to create a custom feature class?
 
 Creating a new feature is the same as a normal new class. However, there is some requires. 
-The first parameter of the ``__init__`` function must be ``model``, which gives the feataure 
+The first parameter of the ``__init__`` function must be ``model``, which gives the feature 
 object full access to the model. All the other parameters are keyword arguments and must have default values.
-There should always have a config table.  
+There should always have a config_table attribute (see `above <../../html/feature_container/feature_container_home.html#the-feature-object>`_ for a description of the config_table) 
 
 .. code-block:: python
   
@@ -113,7 +113,7 @@ There should always have a config table.
           self.model = model
           self.position_id = position_id
 
-          self.config_tabel = {
+          self.config_table = {
               "signal": {
                       "init": self.pre_func_signal,
                       "main": self.in_func_signal,
@@ -129,7 +129,7 @@ There should always have a config table.
 2. How to get parameters from GUI?
 
 All the GUI parameters are in the ``model.configuration["experiment"]`` during
-runtime. Here is the example that get positions from the multi-position table
+runtime. Here is an example that get positions from the multi-position table
 in the GUI.
 
 .. code-block:: python
@@ -146,7 +146,7 @@ More GUI parameters can be found in `experiment.yml <https://github.com/TheDeanL
 
 3. How to interact with stage?
 
-Now, we move stage to the target position.
+Now, we move stage to the target_position.
 
 .. code-block:: python
 
@@ -157,9 +157,9 @@ Now, we move stage to the target position.
 
 4. How to get an image and deal with it?
 
-The image capatured by the camara will be stored in the data buffer. 
+The image captured by the camara will be stored in the data buffer. 
 You should add your code to deal with the image in the main data function.
-Here is an example to calculate the shannon entropy of the image.
+Here is an example that calculates the Shannon entropy of the image.
 
 .. code-block:: python
 
@@ -170,7 +170,7 @@ Here is an example to calculate the shannon entropy of the image.
                   psf_support_diameter_xy=3)
               print("entropy of image:", id, entropy)
 
-Now, you've create a whole new feature and can use it as your wish. 
+Now, you've create a whole new feature and can use it as you wish. 
 
 * How to interact with other devices?
 
@@ -184,8 +184,8 @@ Here is an example to open shutter:
 
 * How to pause and resume data threads in the model
 
-The image data acquired from the camara are handle in an indepandant thread.
-Some devices need more time to get ready or move, then you may need to pause
+The image data acquired from the camara are handled in an indepandant thread.
+Some devices need more time to get ready or move. In this case, you may need to pause
 the data thread until the device is ready.
 
 Here is an example to pause and resume the data thread:
@@ -212,7 +212,7 @@ Here is an example to pause and resume the data thread:
 
 Please visit `Model APIs <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.microscope.Microscope.calculate_all_waveform>`_ and `Microscope APIs <../../html/_autosummary/navigate.model.microscope.Microscope.html>`_ for more details.
 
-Creating Custom Feature List
+Creating A Custom Feature List
 --------------------------------
 
 The Navigate Software allows you to build a custom feature that implements new

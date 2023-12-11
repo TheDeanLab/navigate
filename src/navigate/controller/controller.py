@@ -61,6 +61,7 @@ from navigate.controller.sub_controllers import (
     AcquireBarController,
     FeaturePopupController,
     MenuController,
+    PluginsController,
     # MicroscopePopupController,
     # AdaptiveOpticsPopupController,
 )
@@ -239,6 +240,9 @@ class Controller:
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
 
+        self.plugin_controller = PluginsController(view=self.view, parent_controller=self)
+        self.plugin_controller.load_plugins()
+
         # Create default data buffer
         #: int: Number of x_pixels from microscope configuration file.
         self.img_width = 0
@@ -395,6 +399,8 @@ class Controller:
         if hasattr(self, "af_popup_controller"):
             self.af_popup_controller.populate_experiment_values()
 
+        self.plugin_controller.populate_experiment_setting()
+
         # set widget modes
         self.set_mode_of_sub("stop")
         self.stage_controller.initialize()
@@ -480,14 +486,14 @@ class Controller:
             return False
 
         # set waveform template
-        if self.acquire_bar_controller.mode == "confocal-projection":
-            self.configuration["experiment"]["MicroscopeState"][
-                "waveform_template"
-            ] = "Confocal-Projection"
-        else:
-            self.configuration["experiment"]["MicroscopeState"][
-                "waveform_template"
-            ] = "Default"
+        # if self.acquire_bar_controller.mode == "confocal-projection":
+        #     self.configuration["experiment"]["MicroscopeState"][
+        #         "waveform_template"
+        #     ] = "Confocal-Projection"
+        # else:
+        #     self.configuration["experiment"]["MicroscopeState"][
+        #         "waveform_template"
+        #     ] = "Default"
 
         # update real image width and height
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
@@ -819,6 +825,10 @@ class Controller:
                     "tony_wilson",
                     "live",
                 ),
+            )
+        else:
+            self.threads_pool.createThread(
+                "model", lambda: self.model.run_command(command, *args)
             )
 
         # elif command == "change_camera":

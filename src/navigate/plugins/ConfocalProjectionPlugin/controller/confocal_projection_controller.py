@@ -60,7 +60,6 @@ class ConfocalProjectionController(GUIController):
         )
         self.conpro_acq_vals["offset_end"].trace_add("write", self.update_offset_end)
 
-        self.populate_experiment_setting()
 
     def populate_experiment_setting(self):
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][

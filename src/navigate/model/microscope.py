@@ -427,7 +427,7 @@ class Microscope:
         return waveform_dict
 
     def calculate_exposure_sweep_times(self, readout_time):
-        """Get the exposure and sweep times for all channels.
+        """Calculate the exposure and sweep times for all channels.
 
         The `calculate_exposure_sweep_times` function calculates and returns exposure
         times and sweep times for all channels in a microscope configuration. It takes
@@ -504,7 +504,23 @@ class Microscope:
                 exposure_times[channel_key] = exposure_time
                 sweep_times[channel_key] = sweep_time
 
+        self.exposure_times = exposure_times
+        self.sweep_times = sweep_times
+
         return exposure_times, sweep_times
+    
+    def get_exposure_sweep_times(self):
+        """Get the exposure and sweep times for all channels.
+
+        Returns
+        -------
+        exposure_times : dict
+            Dictionary of exposure times.
+        sweep_times : dict
+            Dictionary of sweep times.
+
+        """
+        return self.exposure_times, self.sweep_times
 
     def prepare_next_channel(self, update_daq_task_flag=True):
         """Prepare the next channel.

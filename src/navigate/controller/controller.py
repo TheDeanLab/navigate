@@ -399,7 +399,8 @@ class Controller:
         if hasattr(self, "af_popup_controller"):
             self.af_popup_controller.populate_experiment_values()
 
-        self.plugin_controller.populate_experiment_setting()
+        if file_name:
+            self.plugin_controller.populate_experiment_setting()
 
         # set widget modes
         self.set_mode_of_sub("stop")
@@ -486,14 +487,10 @@ class Controller:
             return False
 
         # set waveform template
-        # if self.acquire_bar_controller.mode == "confocal-projection":
-        #     self.configuration["experiment"]["MicroscopeState"][
-        #         "waveform_template"
-        #     ] = "Confocal-Projection"
-        # else:
-        #     self.configuration["experiment"]["MicroscopeState"][
-        #         "waveform_template"
-        #     ] = "Default"
+        if self.acquire_bar_controller.mode != "customized":
+            self.configuration["experiment"]["MicroscopeState"][
+                "waveform_template"
+            ] = "Default"
 
         # update real image width and height
         self.set_mode_of_sub(self.acquire_bar_controller.mode)

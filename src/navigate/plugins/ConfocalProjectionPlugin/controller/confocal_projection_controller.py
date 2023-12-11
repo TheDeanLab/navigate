@@ -48,6 +48,9 @@ class ConfocalProjectionController(GUIController):
 
         # laser/stack cycling event binds
         self.conpro_acq_widgets["cycling"].widget["values"] = ["Per Plane", "Per Stack"]
+        
+        self.populate_experiment_setting()
+
         self.conpro_acq_vals["cycling"].trace_add("write", self.update_cycling_setting)
 
         # confocal-projection setting variables

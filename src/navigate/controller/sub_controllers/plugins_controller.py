@@ -143,6 +143,7 @@ class PluginsController:
 
         def func(*args, **kwargs):
             if controller_name in self.plugins_dict:
+                self.plugins_dict[controller_name].popup.deiconify()
                 return
             popup = PopUp(self.view, plugin_name, "+320+180", transient=False)
             popup.configure(bg="white")
@@ -159,7 +160,7 @@ class PluginsController:
             popup.protocol(
                 "WM_DELETE_WINDOW",
                 combine_funcs(
-                    popup.dismiss, lambda: self.plugin_controller.pop(controller_name)
+                    popup.dismiss, lambda: self.plugins_dict.pop(controller_name)
                 ),
             )
 

@@ -32,8 +32,10 @@
 
 # Third Party Imports
 import numpy as np
+
 # Local Imports
 from navigate.model.waveforms import remote_focus_ramp
+
 
 class ConProAcquisition:
     """ConProAcquisition class for controlling continuous acquisition.
@@ -110,7 +112,6 @@ class ConProAcquisition:
             "node": {"node_type": "multi-step", "device_related": True},
         }
 
-
     def pre_signal_func(self):
         """Initialize continuous acquisition parameters before the signal stage.
 
@@ -130,7 +131,10 @@ class ConProAcquisition:
         # get exposure times and sweep times
         galvo_stage = self.model.active_microscope.stages[self.axis]
         sample_rate = galvo_stage.sample_rate
-        exposure_times, sweep_times = self.model.active_microscope.get_exposure_sweep_times()
+        (
+            exposure_times,
+            sweep_times,
+        ) = self.model.active_microscope.get_exposure_sweep_times()
 
         # calculate waveforms
         waveform_dict = {}
@@ -152,9 +156,7 @@ class ConProAcquisition:
                 z_planes = microscope_state["n_plane"]
                 z_offset_start = microscope_state["offset_start"]
                 z_offset_end = (
-                    microscope_state["offset_end"]
-                    if z_planes > 1
-                    else z_offset_start
+                    microscope_state["offset_end"] if z_planes > 1 else z_offset_start
                 )
                 waveforms = []
                 if z_planes > 1:

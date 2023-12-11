@@ -37,6 +37,7 @@ from tkinter import ttk
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
+
 class ConfocalProjectionFrame(ttk.Labelframe):
     """Confocal Projection Acquisition Frame
 

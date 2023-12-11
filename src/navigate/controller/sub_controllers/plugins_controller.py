@@ -41,12 +41,14 @@ from navigate.tools.file_functions import load_yaml_file
 from navigate.tools.common_functions import combine_funcs, load_module_from_file
 from navigate.model.features import feature_related_functions
 
-class PluginsController:
 
+class PluginsController:
     def __init__(self, view, parent_controller):
         self.view = view
         self.parent_controller = parent_controller
-        self.plugins_path = os.path.join(Path(__file__).resolve().parent.parent.parent, "plugins")
+        self.plugins_path = os.path.join(
+            Path(__file__).resolve().parent.parent.parent, "plugins"
+        )
         self.plugins_dict = {}
 
     def populate_experiment_setting(self):
@@ -63,7 +65,9 @@ class PluginsController:
                 continue
 
             # read "plugin_config.yml"
-            plugin_config = load_yaml_file(os.path.join(self.plugins_path, f, "plugin_config.yml"))
+            plugin_config = load_yaml_file(
+                os.path.join(self.plugins_path, f, "plugin_config.yml")
+            )
             if plugin_config is None:
                 continue
             plugin_name = plugin_config.get("name", f)
@@ -71,21 +75,46 @@ class PluginsController:
             plugin_class_name = "".join(plugin_name.title().split())
             if "view" in plugin_config:
                 # verify if "frame_name" and "file_name" are given and correct
-                view_file = os.path.join(self.plugins_path, f, "view", f"{plugin_file_name}_frame.py")
-                controller_file = os.path.join(self.plugins_path, f, "controller", f"{plugin_file_name}_controller.py")
-                if os.path.exists(view_file) and os.path.isfile(view_file) and os.path.exists(controller_file) and os.path.isfile(controller_file):
-                    plugin_frame_module = load_module_from_file(f"{plugin_class_name}Frame", view_file)
-                    plugin_frame = getattr(plugin_frame_module, f"{plugin_class_name}Frame")
-                    plugin_controller_module = load_module_from_file(f"{plugin_class_name}Controller", controller_file)
-                    plugin_controller = getattr(plugin_controller_module, f"{plugin_class_name}Controller")
+                view_file = os.path.join(
+                    self.plugins_path, f, "view", f"{plugin_file_name}_frame.py"
+                )
+                controller_file = os.path.join(
+                    self.plugins_path,
+                    f,
+                    "controller",
+                    f"{plugin_file_name}_controller.py",
+                )
+                if (
+                    os.path.exists(view_file)
+                    and os.path.isfile(view_file)
+                    and os.path.exists(controller_file)
+                    and os.path.isfile(controller_file)
+                ):
+                    plugin_frame_module = load_module_from_file(
+                        f"{plugin_class_name}Frame", view_file
+                    )
+                    plugin_frame = getattr(
+                        plugin_frame_module, f"{plugin_class_name}Frame"
+                    )
+                    plugin_controller_module = load_module_from_file(
+                        f"{plugin_class_name}Controller", controller_file
+                    )
+                    plugin_controller = getattr(
+                        plugin_controller_module, f"{plugin_class_name}Controller"
+                    )
 
                     if plugin_config["view"] == "Popup":
                         # menu
                         self.parent_controller.view.menubar.menu_plugins.add_command(
-                            label=plugin_name, command=self.build_popup_window(plugin_name, plugin_frame, plugin_controller)
+                            label=plugin_name,
+                            command=self.build_popup_window(
+                                plugin_name, plugin_frame, plugin_controller
+                            ),
                         )
                     else:
-                        self.build_tab_window(plugin_name, plugin_frame, plugin_controller)
+                        self.build_tab_window(
+                            plugin_name, plugin_frame, plugin_controller
+                        )
             # feature
             features_dir = os.path.join(self.plugins_path, f, "model", "features")
             if os.path.exists(features_dir):
@@ -102,11 +131,15 @@ class PluginsController:
         plugin_frame = frame(self.view.settings)
         self.view.settings.add(plugin_frame, text=plugin_name, sticky=tk.NSEW)
         plugin_controller = controller(plugin_frame, self.parent_controller)
-        controller_name = "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
+        controller_name = (
+            "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
+        )
         self.plugins_dict[controller_name] = plugin_controller
 
     def build_popup_window(self, plugin_name, frame, controller):
-        controller_name = "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
+        controller_name = (
+            "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
+        )
 
         def func(*args, **kwargs):
             if controller_name in self.plugins_dict:
@@ -118,14 +151,16 @@ class PluginsController:
             plugin_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
 
             plugin_controller = controller(plugin_frame, self.parent_controller)
-            
+
             plugin_controller.popup = popup
             popup.deiconify()
             self.plugins_dict[controller_name] = plugin_controller
-            
-            popup.protocol("WM_DELETE_WINDOW", combine_funcs(
-                popup.dismiss,
-                lambda: self.plugin_controller.pop(controller_name)
-            ))
+
+            popup.protocol(
+                "WM_DELETE_WINDOW",
+                combine_funcs(
+                    popup.dismiss, lambda: self.plugin_controller.pop(controller_name)
+                ),
+            )
 
         return func

@@ -31,7 +31,10 @@
 #
 
 from navigate.tools.decorators import FeatureList
-from navigate.plugins.ConfocalProjectionPlugin.model.features.confocal_projection import ConProAcquisition
+from navigate.plugins.ConfocalProjectionPlugin.model.features.confocal_projection import (
+    ConProAcquisition,
+)
+
 
 @FeatureList
 def confocal_projection():

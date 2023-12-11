@@ -38,9 +38,12 @@ from navigate.tools.common_functions import load_module_from_file
 from navigate.tools.file_functions import load_yaml_file
 from navigate.model.features import feature_related_functions
 
+
 class PluginsModel:
     def __init__(self):
-        self.plugins_path = os.path.join(Path(__file__).resolve().parent.parent, "plugins")
+        self.plugins_path = os.path.join(
+            Path(__file__).resolve().parent.parent, "plugins"
+        )
 
     def load_plugins(self):
         plugins = os.listdir(self.plugins_path)
@@ -49,13 +52,15 @@ class PluginsModel:
                 continue
 
             # read "plugin_config.yml"
-            plugin_config = load_yaml_file(os.path.join(self.plugins_path, f, "plugin_config.yml"))
+            plugin_config = load_yaml_file(
+                os.path.join(self.plugins_path, f, "plugin_config.yml")
+            )
             if plugin_config is None:
                 continue
             plugin_name = plugin_config.get("name", f)
             plugin_file_name = "_".join(plugin_name.lower().split())
             plugin_class_name = "".join(plugin_name.title().split())
-            
+
             # feature
             features_dir = os.path.join(self.plugins_path, f, "model", "features")
             if os.path.exists(features_dir):

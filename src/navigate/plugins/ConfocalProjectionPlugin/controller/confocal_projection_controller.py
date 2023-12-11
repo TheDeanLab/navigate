@@ -34,8 +34,8 @@ import tkinter as tk
 
 from navigate.controller.sub_controllers.gui_controller import GUIController
 
-class ConfocalProjectionController(GUIController):
 
+class ConfocalProjectionController(GUIController):
     def __init__(self, view, parent_controller=None):
 
         super().__init__(view, parent_controller)
@@ -60,7 +60,6 @@ class ConfocalProjectionController(GUIController):
         )
         self.conpro_acq_vals["offset_end"].trace_add("write", self.update_offset_end)
 
-
     def populate_experiment_setting(self):
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
@@ -69,10 +68,13 @@ class ConfocalProjectionController(GUIController):
         for _ in ["scanrange", "n_plane", "offset_start", "offset_end"]:
             self.set_widget_value(_)
 
-        cycling = "Per Stack" if self.microscope_state_dict["conpro_cycling_mode"] == "per_stack" else "Per Plane"
+        cycling = (
+            "Per Stack"
+            if self.microscope_state_dict["conpro_cycling_mode"] == "per_stack"
+            else "Per Plane"
+        )
         self.conpro_acq_vals["cycling"].set(cycling)
 
-    
     def update_scanrange(self, *args):
         """Update scan range value in the controller
 

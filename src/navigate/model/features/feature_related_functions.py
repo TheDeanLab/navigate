@@ -49,7 +49,6 @@ from navigate.model.features.common_features import (
     MoveToNextPositionInMultiPositionTable,  # noqa
     StackPause,  # noqa
     ZStackAcquisition,  # noqa
-    ConProAcquisition,  # noqa
     FindTissueSimple2D,  # noqa
 )
 from navigate.model.features.image_writer import ImageWriter  # noqa

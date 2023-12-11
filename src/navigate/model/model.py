@@ -53,7 +53,6 @@ from navigate.model.features.common_features import (
     FindTissueSimple2D,
     PrepareNextChannel,
     LoopByCount,
-    ConProAcquisition,  # noqa
     StackPause,
     MoveToNextPositionInMultiPositionTable,
     WaitToContinue,
@@ -78,6 +77,7 @@ from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.model.device_startup_functions import load_devices
 from navigate.model.microscope import Microscope
 from navigate.config.config import get_navigate_path
+from navigate.model.plugins_model import PluginsModel
 
 
 # Logger Setup
@@ -119,6 +119,9 @@ class Model:
             self.microscopes[microscope_name] = Microscope(
                 microscope_name, configuration, devices_dict, args.synthetic_hardware
             )
+            self.microscopes[microscope_name].output_event_queue = event_queue
+        # register device commands if there is any.
+
         #: str: Name of the active microscope.
         self.active_microscope = None
         #: str: Name of the active microscope.
@@ -342,12 +345,13 @@ class Model:
                 )
             ],
             "projection": [{"name": PrepareNextChannel}],
-            "confocal-projection": [
-                {"name": PrepareNextChannel},
-            ],
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "customized": [],
         }
+
+        plugins = PluginsModel()
+        plugins.load_plugins()
+        
         self.load_feature_records()
 
     def update_data_buffer(self, img_width=512, img_height=512):

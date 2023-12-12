@@ -200,12 +200,29 @@ class AcquireBarController(GUIController):
                     self.view.OvrAcq["value"] = bottom_anticipated_images
 
             elif stop is True:
+                self.update_progress_label(seconds_left=0)
                 self.stop_progress_bar()
 
     def stop_progress_bar(self):
         """Stop moving the continuous progress bar."""
         self.view.CurAcq.stop()
         self.view.OvrAcq.stop()
+
+    def update_progress_label(self, seconds_left):
+        """Update the progress label.
+
+        Parameters
+        ----------
+        seconds_left : int
+            Seconds left in the acquisition.
+        """
+        hours, remainder = divmod(seconds_left, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        self.view.total_acquisition_label.config(
+            text=f"{hours:02}"
+                 f":{minutes:02}"
+                 f":{seconds:02}"
+        )
 
     def set_mode(self, mode):
         """Set imaging mode.

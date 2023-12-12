@@ -358,6 +358,8 @@ class NIDAQ(DAQBase):
 
         logger.info(f"Waveform Expand Num = {self.waveform_expand_num}")
         logger.info(f"Waveform Repeat Num = {self.waveform_repeat_num}")
+        print(f"Waveform Expand Num = {self.waveform_expand_num}")
+        print(f"Waveform Repeat Num = {self.waveform_repeat_num}")
 
         self.create_camera_task(channel_key)
         self.create_analog_output_tasks(channel_key)
@@ -377,6 +379,7 @@ class NIDAQ(DAQBase):
         they are waiting for the trigger signal.
         """
         # wait if writing analog tasks
+        print("run acquisition")
         if self.is_updating_analog_task:
             self.wait_to_run_lock.acquire()
             self.wait_to_run_lock.release()
@@ -448,7 +451,7 @@ class NIDAQ(DAQBase):
             self.microscope_name = microscope_name
             self.analog_outputs = {}
             self.analog_output_tasks = {}
-        
+
         self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["camera"]["delay_percent"]

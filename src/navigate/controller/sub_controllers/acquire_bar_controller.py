@@ -92,6 +92,9 @@ class AcquireBarController(GUIController):
         self.view.pull_down.bind("<<ComboboxSelected>>", self.update_microscope_mode)
         self.view.exit_btn.config(command=self.exit_program)
 
+        # framerate information.
+        self.framerate = 0
+
     def progress_bar(self, images_received, microscope_state, mode, stop=False):
         """Update progress bars.
 
@@ -166,8 +169,17 @@ class AcquireBarController(GUIController):
                 if mode == "live" or mode == "customized":
                     self.view.CurAcq.start()
                     self.view.OvrAcq.start()
+                    self.view.total_acquisition_label.config(text="--:--:--")
 
-                elif (
+                else:
+                    # Calculate the number of images remaining.
+                    # Time is estimated from the framerate, which includes stage
+                    # movement time inherently.
+                    images_remaining = bottom_anticipated_images - images_received
+                    seconds_left = images_remaining / self.framerate
+                    self.update_progress_label(seconds_left)
+
+                if (
                     mode == "z-stack"
                     or mode == "confocal-projection"
                     or mode == "ConstantVelocityAcquisition"
@@ -175,11 +187,13 @@ class AcquireBarController(GUIController):
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )
+
                     self.view.CurAcq["value"] = (
                         top_percent_complete % 100
                         if (top_percent_complete > 100.0)
                         else top_percent_complete
                     )
+
                     bottom_anticipated_images = 100 * (
                         images_received / bottom_anticipated_images
                     )
@@ -209,7 +223,9 @@ class AcquireBarController(GUIController):
         self.view.OvrAcq.stop()
 
     def update_progress_label(self, seconds_left):
-        """Update the progress label.
+        """Update the progress label in the Acquire Bar.
+
+        Formatted time is in HH:MM:SS.
 
         Parameters
         ----------
@@ -219,9 +235,9 @@ class AcquireBarController(GUIController):
         hours, remainder = divmod(seconds_left, 3600)
         minutes, seconds = divmod(remainder, 60)
         self.view.total_acquisition_label.config(
-            text=f"{hours:02}"
-                 f":{minutes:02}"
-                 f":{seconds:02}"
+            text=f"{int(hours):02}"
+                 f":{int(minutes):02}"
+                 f":{int(seconds):02}"
         )
 
     def set_mode(self, mode):

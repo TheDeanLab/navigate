@@ -205,8 +205,6 @@ class GalvoNIStage(StageBase):
             if channel["is_selected"] is True:
 
                 # Get the Waveform Parameters
-                # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
-                exposure_time = self.exposure_times[channel_key]
                 sweep_time = self.sweep_times[channel_key]
 
                 self.samples = int(self.sample_rate * sweep_time)
@@ -231,6 +229,54 @@ class GalvoNIStage(StageBase):
             "waveform": self.waveform_dict,
         }
         return self.waveform_dict
+    
+    def update_waveform(self, waveform_dict):
+        """Update the waveform for the stage.
+
+        Parameters
+        ----------
+        waveform_dict : dict
+            Dictionary of waveforms for each channel
+
+        Returns
+        -------
+        result : bool
+            success or failed
+        """
+        microscope_state = self.configuration["experiment"]["MicroscopeState"]
+        
+        for channel_key in microscope_state["channels"].keys():
+            # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
+            channel = microscope_state["channels"][channel_key]
+
+            # Only proceed if it is enabled in the GUI
+            if channel["is_selected"] is True:
+
+                if channel_key not in waveform_dict:
+                    logger.debug(f"Update waveform in StageGalvo failed! {channel_key}")
+                    print("*** updating waveform in StageGalvo failed!", channel_key)
+                    return False
+
+                # Get the Waveform Parameters
+                sweep_time = self.sweep_times[channel_key]
+
+                self.samples = int(self.sample_rate * sweep_time)
+
+                waveform_dict[channel_key][
+                    waveform_dict[channel_key] > self.galvo_max_voltage
+                ] = self.galvo_max_voltage
+                waveform_dict[channel_key][
+                    waveform_dict[channel_key] < self.galvo_min_voltage
+                ] = self.galvo_min_voltage
+
+        self.waveform_dict = waveform_dict
+        self.daq.analog_outputs[self.axes_channels[0]] = {
+            "sample_rate": self.sample_rate,
+            "samples": self.samples,
+            "trigger_source": self.trigger_source,
+            "waveform": self.waveform_dict,
+        }
+        return True
 
     def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """Implement movement logic along a single axis.
@@ -269,7 +315,31 @@ class GalvoNIStage(StageBase):
 
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
-                sweep_time = self.sweep_times[channel_key]
+                
+                # Get the Waveform Parameters
+                # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
+                try:
+                    sweep_time = self.sweep_times[channel_key]
+                except TypeError:
+                    # In the event we have not called calculate_waveform in advance...
+                    # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
+                    exposure_time = channel["camera_exposure_time"] / 1000
+                    sweep_time = exposure_time + exposure_time * (
+                        (self.camera_delay_percent + self.remote_focus_ramp_falling)
+                        / 100
+                    )
+
+                    duty_cycle_wait_duration = (
+                        float(
+                            self.configuration["waveform_constants"]
+                            .get("other_constants", {})
+                            .get("remote_focus_settle_duration", 0)
+                        )
+                        / 1000
+                    )
+
+                    sweep_time += duty_cycle_wait_duration
+
                 samples = int(self.sample_rate * sweep_time)
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key] = dc_value(

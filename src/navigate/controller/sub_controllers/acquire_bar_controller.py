@@ -79,7 +79,6 @@ class AcquireBarController(GUIController):
             "Single Acquisition": "single",
             "Alignment": "alignment",
             "Projection": "projection",
-            "Confocal-Projection": "confocal-projection",
             "Customized": "customized",
             "Constant Velocity Acquistion": "ConstantVelocityAcquisition",
         }
@@ -147,8 +146,6 @@ class AcquireBarController(GUIController):
             number_of_slices = 1
         elif mode == "projection":
             number_of_slices = 1
-        elif mode == "confocal-projection":
-            number_of_slices = microscope_state["n_plane"]
         elif mode == "z-stack" or "ConstantVelocityAcquisition":
             number_of_slices = microscope_state["number_z_steps"]
 
@@ -169,7 +166,6 @@ class AcquireBarController(GUIController):
 
                 elif (
                     mode == "z-stack"
-                    or mode == "confocal-projection"
                     or mode == "ConstantVelocityAcquisition"
                 ):
                     top_percent_complete = 100 * (
@@ -214,7 +210,6 @@ class AcquireBarController(GUIController):
         ----------
         mode: str
             Mode could be: 'live', 'z-stack', 'single', 'projection',
-            'confocal-projection'
 
         Examples
         --------
@@ -342,7 +337,6 @@ class AcquireBarController(GUIController):
         # Update state status of other widgets in the GUI based on what mode is set
         self.update_stack_acq(self.mode)
         self.update_stack_time(self.mode)
-        self.update_conpro_acq(self.mode)
 
     def update_stack_acq(self, mode):
         """Changes state behavior of widgets in the stack acquisition frame based on
@@ -372,31 +366,6 @@ class AcquireBarController(GUIController):
         else:
             state = "disabled"
         for key, widget in stack_widgets.items():
-            widget.widget["state"] = state
-
-    def update_conpro_acq(self, mode):
-        """Changes state behavior of widgets in the confocal-projection acquisition
-        frame based on mode of microscope
-
-        Parameters
-        ----------
-        mode : str
-            Imaging Mode.
-
-        Examples
-        --------
-        >>> update_conpro_acq('live')
-        """
-
-        # Get ref to widgets
-        conpro_widgets = self.parent_view.conpro_acq_frame.get_widgets()
-
-        # Grey out conpro acq widgets when not confocal-projection
-        if mode == "confocal-projection":
-            state = "normal"
-        else:
-            state = "disabled"
-        for _, widget in conpro_widgets.items():
             widget.widget["state"] = state
 
     def update_stack_time(self, mode):

@@ -175,9 +175,12 @@ class AcquireBarController(GUIController):
                     # Calculate the number of images remaining.
                     # Time is estimated from the framerate, which includes stage
                     # movement time inherently.
-                    images_remaining = bottom_anticipated_images - images_received
-                    seconds_left = images_remaining / self.framerate
-                    self.update_progress_label(seconds_left)
+                    try:
+                        images_remaining = bottom_anticipated_images - images_received
+                        seconds_left = images_remaining / self.framerate
+                        self.update_progress_label(seconds_left)
+                    except ZeroDivisionError:
+                        pass
 
                 if (
                     mode == "z-stack"

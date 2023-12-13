@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Case Study: Imaging on the CT-ASLM-V1 and CT-ASLM-V2 &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acquire_exASLM.html">Case Study: Imaging on the Expansion ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Case Study: Imaging on the CT-ASLM-V1 and CT-ASLM-V2</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/case_studies/acquire_CT-ASLM-V1_and_CT-ASLM-V2.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="case-study-imaging-on-the-ct-aslm-v1-and-ct-aslm-v2">
+<h1>Case Study: Imaging on the CT-ASLM-V1 and CT-ASLM-V2<a class="headerlink" href="#case-study-imaging-on-the-ct-aslm-v1-and-ct-aslm-v2" title="Permalink to this heading"></a></h1>
+<p>This is a case study in using the software to image with a <a class="reference external" href="https://www.nature.com/articles/s41592-019-0615-4">CT-ASLM-V1 and CT-ASLM-V2 microscopes</a>.</p>
+<section id="setting-up-the-chamber">
+<h2>Setting up the chamber<a class="headerlink" href="#setting-up-the-chamber" title="Permalink to this heading"></a></h2>
+<p>Make sure the chamber is clean and dry. If in doubt, fill the chamber with diH2O to see if there are any residues. To clean the chamber, rinse it with diH2O and ethanal, then gently clean the chamber with Q-tips. Repeat the process a few times and end the process with a rinse of 100% ethanal. Gently clean the objectives with lens paper and 100% ethanal. Finally, let the chamber air dry. To speed up the drying process, one can gently blow some air into the chamber.</p>
+<p>Once the chamber is completely dry, fill the chamber with imaging media.</p>
+</section>
+<section id="sample-loading-and-finding-the-samples">
+<h2>Sample loading and finding the samples<a class="headerlink" href="#sample-loading-and-finding-the-samples" title="Permalink to this heading"></a></h2>
+<p>It’s recommended to start the software before loading the sample on the stage.</p>
+<ol class="arabic simple">
+<li><p>Mount the sample on custom cut glass slide with silicon or super glue.</p></li>
+<li><p>Mount the glass slide onto the sample holder.</p></li>
+<li><p>Mount the sample holder onto the stage with the sample facing the illumination and detection objective so the glass slide is 45 degrees with both objectives.</p></li>
+<li><p>Put down the slit out of the setup.</p></li>
+<li><p>Go to <span class="guilabel">Camera Settings</span>. Select “Normal” under <span class="guilabel">Sensor Mode</span>.</p></li>
+<li><p>Go to the <span class="guilabel">Microscope Configuration ‣ Waveform Parameters</span>. A popup named <span class="guilabel">Waveform Parameter Settings</span> will appear.</p></li>
+<li><p>Set the wavelength’s <span class="guilabel">Amplitude</span> and <span class="guilabel">Offset</span> to 0.0.</p></li>
+<li><p>Select the channel with a proper laser under the <span class="guilabel">Channels</span> tab and set the laser power to an appropriate value.</p></li>
+<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
+<li><p>Scroll around with the stage either via joystick or using the controls in the <span class="guilabel">Stage Control</span> tab until the sample comes into view.</p></li>
+<li><p>Focus on the sample in the center of the beam. Zoom in by scrolling the mouse. Slowly adjusting the focus by scrolling the piezo controller to move the detection objective along the z axis. Lower the laser power if the image is saturated.</p></li>
+</ol>
+</section>
+<section id="imaging-a-z-stack-with-stelzer-mode">
+<h2>Imaging a Z-Stack with Stelzer mode<a class="headerlink" href="#imaging-a-z-stack-with-stelzer-mode" title="Permalink to this heading"></a></h2>
+<p>Stelzer mode is the normal non-ASLM light sheet mode, it gives more signal while offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) lateral resolution.</p>
+<ol class="arabic simple">
+<li><p>Go to the <span class="guilabel">Microscope Configuration ‣ Waveform Parameters</span>. A popup named <span class="guilabel">Waveform Parameter Settings will appear</span>.</p></li>
+<li><p>Set the wavelength’s <span class="guilabel">Amplitude</span> and <span class="guilabel">Offset</span> to 0.0.</p></li>
+<li><p>Go to <span class="guilabel">Camera Settings</span>, select “Normal” under <span class="guilabel">Sensor Mode</span>.</p></li>
+<li><p>Switch the slit back into the setup.</p></li>
+<li><p>Select the channel with a proper laser under the <span class="guilabel">Channels</span> tab and set the laser power to an appropriate value.</p></li>
+<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
+<li><p>If needed, slowly adjust the slit opening until the image looks uniformly across the whole field of view. Uncheck <span class="guilabel">Autoscale</span> in <span class="guilabel">Camera View</span> under LUT and adjust the <span class="guilabel">Min Counts</span> and <span class="guilabel">Max Counts</span> if needed.</p></li>
+<li><p>Go to <span class="guilabel">Stage Control</span>, set the Z position in <span class="guilabel">Stage Positions</span> to be 0.</p></li>
+<li><p>Find the region of interest by using the joystick or using the controls in the <span class="guilabel">Stage Control</span> tab. If using the joystick, hit the big red <span class="guilabel">STOP</span> button to update the stage locations to the software.</p></li>
+<li><p>Move along the Z axis with the joystick or the “Focus” in the <span class="guilabel">Stage Control</span> tab to one end of the region of interest. If using the joystick, hit the big red <span class="guilabel">STOP</span> button to update the stage locations to the software. Under the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquistion Settings (um)</span>, press <span class="guilabel">Set Start Pos/Foc</span>.</p></li>
+<li><p>Go to <span class="guilabel">Stage Control</span>, change the Z position in <span class="guilabel">Stage Positions</span> to set the scan range. Be aware the range for Z position is 0 – 200. Going outside of the range will cause the stage to have issues.</p></li>
+<li><p>Go back to <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquistion Settings (um)</span>, press <span class="guilabel">Set End Pos/Foc</span>.</p></li>
+<li><p>Setup <span class="guilabel">Step Size</span> under the <span class="guilabel">Channels</span>, recommend 3.0 (CT-ASLM-V1) and 1.0 (CT-ASLM-V2).</p></li>
+<li><p>Under the <span class="guilabel">Channels</span>, make sure <span class="guilabel">Enable</span> is unchecked under <span class="guilabel">Multi-Position Acquisition</span>.</p></li>
+<li><p>Under the <span class="guilabel">Channels</span>, make sure <span class="guilabel">Save Data</span> is checked under <span class="guilabel">Timepoint Settings</span>.</p></li>
+<li><p>Select “Z-Stack” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>. A popup named <span class="guilabel">File Saving Dialog</span> will appear.</p></li>
+<li><p>Fill out the fields and press <span class="guilabel">Acquire Data</span>.</p></li>
+</ol>
+</section>
+<section id="imaging-a-z-stack-with-aslm-mode">
+<h2>Imaging a Z-Stack with ASLM mode<a class="headerlink" href="#imaging-a-z-stack-with-aslm-mode" title="Permalink to this heading"></a></h2>
+<p>ASLM mode is the high-resolution light sheet mode, it gives leas signal but offering around 950 nm (CT-ASLM-V1) and 480 nm (CT-ASLM-V2) isotropic resolution.</p>
+<ol class="arabic simple">
+<li><p>Switch the slit out of the setup.</p></li>
+<li><p>Go to <span class="guilabel">Camera Settings</span>, select “Light-Sheet” under <span class="guilabel">Sensor Mode</span>.</p></li>
+<li><p>Select the channel with a proper laser under the <span class="guilabel">Channels</span> tab and set the laser power to an appropriate value.</p></li>
+<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
+<li><p>Go to the <span class="guilabel">Microscope Configuration ‣ Waveform Parameters</span>. A popup named <span class="guilabel">Waveform Parameter Settings</span> will appear.</p></li>
+<li><p>Uncheck <span class="guilabel">Autoscale</span> in <span class="guilabel">Camera View</span> under LUT and adjust the <span class="guilabel">Min Counts</span> and <span class="guilabel">Max Counts</span> if needed.</p></li>
+<li><p>Set the wavelength’s <span class="guilabel">Amplitude</span> to 0.0.</p></li>
+<li><p>Adjust the wavelength’s <span class="guilabel">Offset</span> so the focus part of the image can be located perfectly in the center of the field of view.</p></li>
+<li><p>Slowly adjust the wavelength’s <span class="guilabel">Amplitude</span> so it will be uniform across the whole field of view.</p></li>
+<li><p>Adjust the wavelength’s <span class="guilabel">Offset</span> again slightly and make sure it is uniformly in focus across the whole field of view.</p></li>
+<li><p>Go to <span class="guilabel">Stage Control</span>, set the Z position in <span class="guilabel">Stage Positions</span> to be 0.</p></li>
+<li><p>Find the region of interest by using the joystick or using the controls in the <span class="guilabel">Stage Control</span> tab. If using the joystick, hit the big red <span class="guilabel">STOP</span> button to update the stage locations to the software.</p></li>
+<li><p>Move along the Z axis with the joystick or the “Focus” in the <span class="guilabel">Stage Control</span> tab to one end of the region of interest. If using the joystick, hit the big red <span class="guilabel">STOP</span> button to update the stage locations to the software. Under the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquistion Settings (um)</span>, press <span class="guilabel">Set Start Pos/Foc</span>.</p></li>
+<li><p>Go to <span class="guilabel">Stage Control</span>, change the Z position in <span class="guilabel">Stage Positions</span> to set the scan range. Be aware the range for Z position is 0 – 200. Going outside of the range will cause the stage to have issues.</p></li>
+<li><p>Go back to <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquistion Settings (um)</span>, press <span class="guilabel">Set End Pos/Foc</span>.</p></li>
+<li><p>Setup <span class="guilabel">Step Size</span> under the <span class="guilabel">Channels</span>, recommend 0.46 (CT-ASLM-V1) and 0.2 (CT-ASLM-V2) for isotropic imaging.</p></li>
+<li><p>Under the <span class="guilabel">Channels</span>, make sure <span class="guilabel">Enable</span> is unchecked under <span class="guilabel">Multi-Position Acquisition</span>.</p></li>
+<li><p>Under the <span class="guilabel">Channels</span>, make sure <span class="guilabel">Save Data</span> is checked under <span class="guilabel">Timepoint Settings</span>.</p></li>
+<li><p>Select “Z-Stack” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>. A popup named <span class="guilabel">File Saving Dialog</span> will appear.</p></li>
+<li><p>Fill out the fields and press <span class="guilabel">Acquire Data</span>.</p></li>
+</ol>
+</section>
+<section id="tiling-a-sample-larger-than-the-field-of-view">
+<h2>Tiling a sample larger than the field of view<a class="headerlink" href="#tiling-a-sample-larger-than-the-field-of-view" title="Permalink to this heading"></a></h2>
+<p>This assumes you have already found the samples and ready to acquire data in either Stelzer mode or ASLM mode. (see <span class="xref std std-ref">Imaging a Z-Stack with Stelzer mode</span> and <span class="xref std std-ref">Imaging a Z-Stack with ASLM mode</span>).</p>
+<ol class="arabic simple">
+<li><p>Under <span class="guilabel">Channels</span> tab, press <span class="guilabel">Launch Tiling Wizard</span>. A popup named <span class="guilabel">Multi-PositionTiling Wizard</span> will appear.</p></li>
+<li><p>Follow <span class="xref std std-ref">Imaging a Z-Stack with Stelzer mode/ASLM mode</span> to set up the start and end positions in <span class="guilabel">Stack Acquistion Settings (um)</span>. At the same time, when pressing <span class="guilabel">Set Start Pos/Foc</span> to set up the start position, go to <span class="guilabel">Multi-PositionTiling Wizard</span> and press <span class="guilabel">Set Z Start</span>. When pressing <span class="guilabel">Set End Pos/Foc</span> to set up the end position, go to <span class="guilabel">Multi-PositionTiling Wizard</span> and press <span class="guilabel">Set Z End</span>.</p></li>
+<li><p>Move the joystick or the “X Movement” in the <span class="guilabel">Stage Control</span> tab to the lower bound of the x-axis and press <span class="guilabel">Set X Start</span> in the <span class="guilabel">Multi-PositionTiling Wizard</span> popup. Navigate to the upper bound of the x-axis and press <span class="guilabel">Set X End</span> in the <span class="guilabel">Multi-PositionTiling Wizard</span> popup. Repeat for all axes except for Z. If using the joystick, hit the big red <span class="guilabel">STOP</span> button to update the stage locations to the software.</p></li>
+<li><p>Press <span class="guilabel">Populate Multi-Position Table</span>. Navigate to the <span class="guilabel">Multiposition</span> tab and ensure the locations populated.</p></li>
+<li><p>Under the <span class="guilabel">Channels</span>, make sure Enable is checked under <span class="guilabel">Multi-Position Acquisition</span>.</p></li>
+<li><p>Under the <span class="guilabel">Channels</span>, make sure <span class="guilabel">Save Data</span> is checked under <span class="guilabel">Timepoint Settings</span>.</p></li>
+<li><p>Select “Z-Stack” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>.</p></li>
+<li><p>Enter the sample parameters in the <span class="guilabel">File Saving Dialog</span> that pops up. Press <span class="guilabel">Acquire Data</span>.</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

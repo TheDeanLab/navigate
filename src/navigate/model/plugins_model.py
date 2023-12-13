@@ -46,6 +46,7 @@ class PluginsModel:
         )
 
     def load_plugins(self):
+        devices_dict = {}
         plugins = os.listdir(self.plugins_path)
         for f in plugins:
             if not os.path.isdir(os.path.join(self.plugins_path, f)):
@@ -72,3 +73,22 @@ class PluginsModel:
                         for c in dir(temp):
                             if inspect.isclass(getattr(temp, c)):
                                 setattr(feature_related_functions, c, getattr(temp, c))
+
+            # device
+            device_dir = os.path.join(self.plugins_path, f, "model", "devices")
+            if os.path.exists(device_dir):
+                devices = os.listdir(device_dir)
+                for device in devices:
+                    device_path = os.path.join(device_dir, device)
+                    if not os.path.isdir(device_path):
+                        continue
+                    module = load_module_from_file(
+                        "device_module",
+                        os.path.join(device_path, "device_startup_functions.py"),
+                    )
+                    if module:
+                        devices_dict[device] = {}
+                        devices_dict[device]["ref_list"] = module.DEVICE_REF_LIST
+                        devices_dict[device]["load_device"] = module.load_device
+                        devices_dict[device]["start_device"] = module.start_device
+        return devices_dict

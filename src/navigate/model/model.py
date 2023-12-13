@@ -111,6 +111,11 @@ class Model:
         self.configuration = configuration
 
         devices_dict = load_devices(configuration, args.synthetic_hardware)
+
+        plugins = PluginsModel()
+        # load plugin feature and devices
+        devices_dict["__plugins__"] = plugins.load_plugins()
+
         #: dict: Dictionary of virtual microscopes.
         self.virtual_microscopes = {}
         #: dict: Dictionary of physical microscopes.
@@ -348,9 +353,6 @@ class Model:
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "customized": [],
         }
-
-        plugins = PluginsModel()
-        plugins.load_plugins()
         
         self.load_feature_records()
 
@@ -720,6 +722,8 @@ class Model:
         elif command == "exit":
             for camera in self.active_microscope.cameras.values():
                 camera.camera_controller.dev_close()
+        else:
+            self.active_microscope.run_command(command, args)
 
     # main function to update mirror/set experiment mode values
     def update_mirror(self, coef=[], flatten=False):

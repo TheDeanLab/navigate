@@ -107,6 +107,10 @@ class Microscope:
         self.laser_wavelength = []
         #: dict: Dictionary of returned stage positions.
         self.ret_pos_dict = {}
+        #: dict: Dictionary of commands
+        self.commands = {}
+        #: dict: Dictionary of plugin devices
+        self.plugin_devices = {}
 
         if is_virtual:
             return
@@ -136,7 +140,12 @@ class Microscope:
 
         # LOAD/START CAMERAS, FILTER_WHEELS, ZOOM, SHUTTERS, REMOTE_FOCUS_DEVICES,
         # GALVOS, AND LASERS
-        for device_name in device_ref_dict.keys():
+        for device_name in self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ].keys():
+            if device_name in ["daq", "stage"]:
+                continue
+            is_plugin = False
             device_connection = None
             (
                 device_config_list,
@@ -145,7 +154,20 @@ class Microscope:
             ) = self.assemble_device_config_lists(
                 device_name=device_name, device_name_dict=device_name_dict
             )
-
+            if device_name not in device_ref_dict:
+                if device_name in devices_dict["__plugins__"]:
+                    device_ref_dict[device_name] = devices_dict["__plugins__"][
+                        device_name
+                    ]["ref_list"]
+                    is_plugin = True
+                else:
+                    print(
+                        f"Device {device_name} could not be loaded! Please make sure there is no spelling error!"
+                    )
+                    logger.debug(
+                        f"Device {device_name} could not be loaded! Please make sure there is no spelling error!"
+                    )
+                    continue
             for i, device in enumerate(device_config_list):
                 device_ref_name = None
                 if "hardware" in device.keys():
@@ -165,6 +187,22 @@ class Microscope:
                     and device_ref_name in devices_dict[device_name]
                 ):
                     device_connection = devices_dict[device_name][device_ref_name]
+
+                elif is_plugin:
+                    device_plugin_dict = devices_dict.get(device_name, {})
+                    exec(
+                        f"device_plugin_dict['{device_ref_name}'] = devices_dict['__plugins__']['{device_name}']['load_device'](configuration, is_synthetic)"
+                    )
+                    devices_dict[device_name] = device_plugin_dict
+                    device_connection = device_plugin_dict[device_ref_name]
+                    exec(
+                        f"self.plugin_devices['{device_name}'] = devices_dict['__plugins__']['{device_name}']['start_device'](self.microscope_name, device_connection, configuration, is_synthetic)"
+                    )
+                    self.info[device_name] = device_ref_name
+                    commands_dict = self.plugin_devices[device_name].commands
+                    for command in commands_dict:
+                        self.commands[command] = (device_name, commands_dict[command])
+                    continue
 
                 # SHARED DEVICES
                 elif device_ref_name.startswith("NI") and (
@@ -508,7 +546,7 @@ class Microscope:
         self.sweep_times = sweep_times
 
         return exposure_times, sweep_times
-    
+
     def get_exposure_sweep_times(self):
         """Get the exposure and sweep times for all channels.
 
@@ -841,3 +879,12 @@ class Microscope:
         except Exception as e:
             print(f"Stage delete failure: {e}")
         pass
+
+    def run_command(self, command, *args):
+        if command in self.commands:
+            result = self.commands[command][1](*args)
+            if result:
+                device_name = self.commands[command][0]
+                self.output_event_queue.put((device_name, result))
+        else:
+            print("unknown command in the Microscope:", command)

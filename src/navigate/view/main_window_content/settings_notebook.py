@@ -44,6 +44,7 @@ from navigate.view.main_window_content.camera_tab import CameraSettingsTab
 from navigate.view.main_window_content.channels_tab import ChannelsTab
 from navigate.view.main_window_content.stage_tab import StageControlTab
 from navigate.view.main_window_content.multiposition_tab import MultiPositionTab
+from navigate.view.main_window_content.robot_tab import RobotControlTab
 
 # Logger Setup
 p = __name__.split(".")[1]

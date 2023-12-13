@@ -38,49 +38,23 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
-from aslm.tools.main_functions import identify_gpu, create_parser
-from aslm.config.config import get_aslm_path
+from navigate.tools.main_functions import create_parser
+from navigate.config.config import get_navigate_path
 
 
 class TestMain(unittest.TestCase):
     """Unit Test for main.py"""
 
-    def test_identify_gpu(self):
-        import platform
-
-        parser = create_parser()
-        args = parser.parse_args(["--GPU"])
-
-        # we turned GPU on
-        expected_use_gpu = True
-
-        # we don't support macs
-        if platform.system() == "Darwin":
-            expected_use_gpu = False
-
-        # We need tensorflow installed
-        try:
-            import tensorflow as tf
-
-            # we need at least one GPU
-            if len(tf.config.list_physical_devices("GPU")) < 1:
-                expected_use_gpu = False
-        except ModuleNotFoundError:
-            expected_use_gpu = False
-
-        use_gpu = identify_gpu(args)
-        assert use_gpu is expected_use_gpu
-
     def test_argument_parser(self):
         parser = create_parser()
 
         # Boolean arguments
-        input_arguments = ["-sh", "--synthetic_hardware", "-d", "--debug", "--GPU"]
+        input_arguments = ["-sh", "--synthetic_hardware"]
         for arg in input_arguments:
             parser.parse_args([arg])
 
         # Path Arguments.
-        aslm_path = Path(get_aslm_path())
+        navigate_path = Path(get_navigate_path())
         input_arguments = [
             "--config_file",
             "--experiment_file",
@@ -89,7 +63,7 @@ class TestMain(unittest.TestCase):
             "--logging_config",
         ]
         for arg in input_arguments:
-            parser.parse_args([arg, str(Path.joinpath(aslm_path, "test.yml"))])
+            parser.parse_args([arg, str(Path.joinpath(navigate_path, "test.yml"))])
 
 
 if __name__ == "__main__":

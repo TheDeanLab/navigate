@@ -1,6 +1,6 @@
-Contributing to ASLM
-==============
-To make ASLM as powerful as possible, we want to encourage users to contribute code and
+Contributing to Navigate
+=====================
+To make Navigate as powerful as possible, we want to encourage users to contribute code and
 engage in the software collaboratively.
 
 .. toctree::
@@ -9,4 +9,3 @@ engage in the software collaboratively.
     contributing_guidelines
     contributing_hardware
     contributing_model
-    api

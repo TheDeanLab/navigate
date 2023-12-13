@@ -1,6 +1,6 @@
 def test_initialize_daq_synthetic():
-    from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
-    from aslm.model.dummy import DummyModel
+    from navigate.model.devices.daq.daq_synthetic import SyntheticDAQ
+    from navigate.model.dummy import DummyModel
 
     model = DummyModel()
     daq = SyntheticDAQ(model.configuration)
@@ -9,8 +9,8 @@ def test_initialize_daq_synthetic():
 def test_synthetic_daq_functions():
     import random
 
-    from aslm.model.devices.daq.daq_synthetic import SyntheticDAQ
-    from aslm.model.dummy import DummyModel
+    from navigate.model.devices.daq.daq_synthetic import SyntheticDAQ
+    from navigate.model.dummy import DummyModel
 
     model = DummyModel()
     daq = SyntheticDAQ(model.configuration)
@@ -39,7 +39,7 @@ def test_synthetic_daq_functions():
         None,
         None,
         None,
-        [f"channel_{random.randint(1, 5)}", random.random()],
+        [f"channel_{random.randint(1, 5)}"],
         None,
         None,
         None,

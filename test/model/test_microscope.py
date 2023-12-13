@@ -36,8 +36,8 @@ import random
 
 @pytest.fixture(scope="module")
 def dummy_microscope(dummy_model):
-    from aslm.model.microscope import Microscope
-    from aslm.model.device_startup_functions import load_devices
+    from navigate.model.microscope import Microscope
+    from navigate.model.device_startup_functions import load_devices
 
     devices_dict = load_devices(dummy_model.configuration, is_synthetic=True)
 

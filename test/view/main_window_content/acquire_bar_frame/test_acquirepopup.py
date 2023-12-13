@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import tkinter as tk
-from aslm.view.popups.acquire_popup import AcquirePopUp
+from navigate.view.popups.acquire_popup import AcquirePopUp
 import time
 
 

@@ -33,18 +33,20 @@
 # Standard Imports
 import pathlib
 import unittest
+from unittest.mock import patch, MagicMock
 from multiprocessing import Manager
 from multiprocessing.managers import ListProxy, DictProxy
 import os
 import time
 import random
-
+import yaml
+import sys
 
 # Third Party Imports
 
 # Local Imports
-import aslm.config.config as config
-from aslm.tools.file_functions import save_yaml_file, delete_folder, load_yaml_file
+import navigate.config.config as config
+from navigate.tools.file_functions import save_yaml_file, delete_folder, load_yaml_file
 
 
 def test_config_methods():
@@ -62,7 +64,7 @@ def test_config_methods():
         "__package__",
         "__spec__",
         "build_nested_dict",
-        "get_aslm_path",
+        "get_navigate_path",
         "get_configuration_paths",
         "isfile",
         "load_configs",
@@ -80,11 +82,35 @@ def test_config_methods():
         assert method in desired_methods
 
 
-def test_get_aslm_path():
-    """Test that the ASLM path is a string."""
-    assert isinstance(config.get_aslm_path(), str)
-    path_string = config.get_aslm_path()
-    assert ".ASLM" in path_string
+def test_get_navigate_path():
+    """Test that the Navigate path is a string."""
+    assert isinstance(config.get_navigate_path(), str)
+    path_string = config.get_navigate_path()
+    assert ".navigate" in path_string
+
+
+def test_get_navigate_path_windows(monkeypatch):
+    """Test that the Navigate path is a string."""
+    monkeypatch.setattr(config.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(config.os, "getenv", lambda x: "LOCALAPPDATA")
+    monkeypatch.setattr(config.os.path, "exists", lambda x: True)
+    assert isinstance(config.get_navigate_path(), str)
+    path_string = config.get_navigate_path()
+    assert path_string.startswith("LOCALAPPDATA")
+    assert path_string.endswith(".navigate")
+
+    
+
+
+def test_get_navigate_path_mac(monkeypatch):
+    """Test that the Navigate path is a string."""
+    monkeypatch.setattr(config.platform, "system", lambda: "Darwin")
+    monkeypatch.setattr(config.os, "getenv", lambda x: "HOME")
+    monkeypatch.setattr(config.os.path, "exists", lambda x: True)
+    assert isinstance(config.get_navigate_path(), str)
+    path_string = config.get_navigate_path()
+    assert path_string.startswith("HOME")
+    assert path_string.endswith(".navigate")
 
 
 # Write a test for config.get_configuration_paths()
@@ -94,6 +120,55 @@ def test_get_configuration_paths():
     for path in paths:
         assert isinstance(path, pathlib.Path)
     assert len(paths) == 5
+
+
+def test_get_configuration_paths_create_dir(monkeypatch):
+    """Test that the configuration path is created,
+    and that they are a list."""
+    monkeypatch.setattr(config, "get_navigate_path", lambda: "TESTPATH")
+    paths = config.get_configuration_paths()
+    for path in paths:
+        assert isinstance(path, pathlib.Path)
+        assert os.path.exists(path), "Each configuration yaml file is copied"
+        assert path.suffix.lower() in [".yml", ".yaml"]
+    # delete generated folder
+    delete_folder("TESTPATH")
+
+# test that the system is exited if no file is provided to load_yaml_config
+def test_load_yaml_config_no_file():
+    """Test that the system exits if no file is provided."""
+    from unittest import mock
+
+    with mock.patch("sys.exit") as mock_sys_exit:
+        config.load_configs(manager=Manager(), **{})
+        mock_sys_exit.assert_called_once()
+
+
+class TestLoadConfigsWithYAMLError(unittest.TestCase):
+    """Test the load_configs function.
+
+    Target is the yaml.YAMLError exception clause.
+    """
+
+    @patch("yaml.load")
+    @patch("builtins.open")
+    @patch("pathlib.Path.exists")
+    def test_yaml_error(self, mock_exists, mock_open, mock_yaml_load):
+        # Set up the mocks
+        mock_exists.return_value = True
+        mock_open.return_value = MagicMock()
+        mock_yaml_load.side_effect = yaml.YAMLError("Test YAMLError")
+
+        # Mocking sys.exit to prevent the test runner from exiting
+        with patch.object(sys, "exit") as mock_exit:
+            manager = MagicMock()
+            config.load_configs(manager, config1="path/to/config1.yaml")
+
+            # Check if sys.exit was called with the expected argument
+            mock_exit.assert_called_with(1)
+
+            # Check if the YAMLError was triggered
+            mock_yaml_load.assert_called_once()
 
 
 class TestBuildNestedDict(unittest.TestCase):
@@ -186,7 +261,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         self.manager = Manager()
         current_path = os.path.abspath(os.path.dirname(__file__))
         root_path = os.path.dirname(os.path.dirname(current_path))
-        self.config_path = os.path.join(root_path, "src", "aslm", "config")
+        self.config_path = os.path.join(root_path, "src", "navigate", "config")
         self.test_root = "test_dir"
         os.mkdir(self.test_root)
 
@@ -195,8 +270,8 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             configuration=os.path.join(self.config_path, "configuration.yaml"),
         )
         saving_dict_sample = {
-            "root_directory": config.get_aslm_path(),
-            "save_directory": config.get_aslm_path(),
+            "root_directory": config.get_navigate_path(),
+            "save_directory": config.get_navigate_path(),
             "user": "Kevin",
             "tissue": "Lung",
             "celltype": "MV3",

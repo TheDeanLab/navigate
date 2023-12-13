@@ -1,6 +1,6 @@
 def test_filter_wheel_base_functions():
-    from aslm.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
-    from aslm.model.dummy import DummyModel
+    from navigate.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
+    from navigate.model.dummy import DummyModel
 
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][

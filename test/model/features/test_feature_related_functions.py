@@ -33,7 +33,7 @@
 import pytest
 
 #local imports
-from aslm.model.features.feature_related_functions import *
+from navigate.model.features.feature_related_functions import *
 
 @pytest.mark.parametrize(
     "feature_list_str, expected_list",

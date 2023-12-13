@@ -6,9 +6,9 @@ API Reference
    :template: custom_module.rst
    :recursive:
 
-   aslm.config
-   aslm.controller
-   aslm.log_files
-   aslm.model
-   aslm.tools
-   aslm.view
+   navigate.config
+   navigate.controller
+   navigate.log_files
+   navigate.model
+   navigate.tools
+   navigate.view

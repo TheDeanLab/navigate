@@ -31,12 +31,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from pathlib import Path
-
 import pytest
 
 
 def test_update_nested_dict():
-    from aslm.log_files.log_functions import update_nested_dict
+    from navigate.log_files.log_functions import update_nested_dict
 
     test_dict = {"one": 2, "three": {4: {"metastasis": False}}}
 
@@ -52,8 +51,8 @@ def test_update_nested_dict():
 def test_log_setup(logging_configuration, logging_path):
     from datetime import datetime
 
-    from aslm.log_files.log_functions import log_setup
-    from aslm.config.config import get_aslm_path
+    from navigate.log_files.log_functions import log_setup
+    from navigate.config.config import get_navigate_path
 
     time = datetime.now()
     time_stamp = Path(
@@ -68,7 +67,7 @@ def test_log_setup(logging_configuration, logging_path):
     )
 
     if logging_path is None:
-        logging_path = Path.joinpath(Path(get_aslm_path()), "logs")
+        logging_path = Path.joinpath(Path(get_navigate_path()), "logs")
     todays_path = Path.joinpath(logging_path, time_stamp)
 
     log_setup(logging_configuration, logging_path)

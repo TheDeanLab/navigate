@@ -33,7 +33,7 @@
 # Third Party Imports
 import pytest
 
-from aslm.model.devices.camera.camera_base import CameraBase
+from navigate.model.devices.camera.camera_base import CameraBase
 
 
 def test_start_camera(dummy_model):

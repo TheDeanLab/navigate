@@ -37,8 +37,8 @@ import random
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.stages.stage_asi import ASIStage
-from aslm.model.devices.APIs.asi.asi_tiger_controller import TigerController
+from navigate.model.devices.stages.stage_asi import ASIStage
+from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
 
 
 class MockASIStage:

@@ -34,7 +34,7 @@
 import pytest
 import numpy as np
 
-from aslm.model.devices.camera.camera_synthetic import (
+from navigate.model.devices.camera.camera_synthetic import (
     SyntheticCamera,
     SyntheticCameraController,
 )
@@ -156,7 +156,7 @@ class TestSyntheticCamera:
 
     def test_synthetic_camera_acquire_images(self):
         import random
-        from aslm.model.concurrency.concurrency_tools import SharedNDArray
+        from navigate.model.concurrency.concurrency_tools import SharedNDArray
 
         number_of_frames = 100
         data_buffer = [

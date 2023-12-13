@@ -40,15 +40,15 @@ from math import ceil
 import numpy as np
 
 # Local application imports
-from aslm.tools.multipos_table_tools import (
+from navigate.tools.multipos_table_tools import (
     update_table,
 )
-from aslm.view.main_window_content.multiposition_tab import MultiPositionTable
+from navigate.view.main_window_content.multiposition_tab import MultiPositionTable
 
 
 @pytest.mark.parametrize("pair", zip([5.6, -3.8, 0], [1, -1, 1]))
 def test_sign(pair):
-    from aslm.tools.multipos_table_tools import sign
+    from navigate.tools.multipos_table_tools import sign
 
     x, cmp_x = pair
 
@@ -82,6 +82,7 @@ def listize(x):
 @pytest.mark.parametrize("f_tiles", listize(np.random.randint(0, 5)))
 @pytest.mark.parametrize("f_length", listize(np.random.rand() * 1000))
 @pytest.mark.parametrize("f_overlap", listize(np.random.rand()))
+@pytest.mark.parametrize("f_track_with_z", [True, False])
 def test_compute_tiles_from_bounding_box(
     x_start,
     x_tiles,
@@ -103,8 +104,9 @@ def test_compute_tiles_from_bounding_box(
     f_tiles,
     f_length,
     f_overlap,
+    f_track_with_z,
 ):
-    from aslm.tools.multipos_table_tools import compute_tiles_from_bounding_box
+    from navigate.tools.multipos_table_tools import compute_tiles_from_bounding_box
 
     tiles = compute_tiles_from_bounding_box(
         x_start,
@@ -127,6 +129,7 @@ def test_compute_tiles_from_bounding_box(
         f_tiles,
         f_length,
         f_overlap,
+        f_track_with_z,
     )
 
     x_tiles = 1 if x_tiles <= 0 else x_tiles
@@ -151,7 +154,10 @@ def test_compute_tiles_from_bounding_box(
     assert tiles[-1, 1] == y_max
     assert tiles[-1, 2] == z_max
     assert tiles[-1, 3] == theta_max
-    assert tiles[-1, 4] <= f_max  # Due to clipping. TODO: Fix
+    if f_track_with_z:
+        assert tiles[-1, 4] <= f_max  # Due to clipping. TODO: Fix
+    else:
+        assert tiles[-1, 4] == f_max
 
     # check bounding box
     assert np.min(tiles[:, 0]) == x_start
@@ -163,23 +169,31 @@ def test_compute_tiles_from_bounding_box(
     assert np.min(tiles[:, 3]) == theta_start
     assert np.max(tiles[:, 3]) == theta_max
     assert np.min(tiles[:, 4]) == f_start
-    assert np.max(tiles[:, 4]) <= f_max  # Due to clipping. TODO: Fix
+    if f_track_with_z:
+        assert np.max(tiles[:, 4]) <= f_max  # Due to clipping. TODO: Fix
+    else:
+        assert np.max(tiles[:, 4]) == f_max
 
-    # check length
-    assert len(tiles) == x_tiles * y_tiles * z_tiles * theta_tiles
+    if f_track_with_z:
+        # check length
+        assert len(tiles) == x_tiles * y_tiles * z_tiles * theta_tiles
+    else:
+        assert len(tiles) == x_tiles * y_tiles * z_tiles * theta_tiles * f_tiles
 
 
 @pytest.mark.parametrize("dist", listize(np.random.rand(3) * 1000))
 @pytest.mark.parametrize("overlap", listize(np.random.rand(3)))
 @pytest.mark.parametrize("roi_length", listize(np.random.rand(3) * 1000))
 def test_calc_num_tiles(dist, overlap, roi_length):
-    from aslm.tools.multipos_table_tools import calc_num_tiles
+    from navigate.tools.multipos_table_tools import calc_num_tiles
 
     # dist = 300
     # overlap = .75
     # roi_length = 525
     expected_num_tiles = ceil(
-        abs(dist - overlap * roi_length) / abs(roi_length - overlap * roi_length)
+        # abs(dist - overlap * roi_length) / abs(roi_length - overlap * roi_length)
+        (dist - overlap * roi_length)
+        / (roi_length - overlap * roi_length)
     )
 
     result = calc_num_tiles(dist, overlap, roi_length)

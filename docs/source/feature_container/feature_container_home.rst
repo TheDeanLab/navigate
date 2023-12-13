@@ -1,12 +1,12 @@
 Feature Container
 ========================
-To make ASLM as powerful as possible, we want to encourage users to contribute code and
+To make Navigate as powerful as possible, we want to encourage users to contribute code and
 engage in the software collaboratively.
 
 Introduction
 -------------------------------------
 
-The ASLM **feature container** allows for reconfigurable acquisition and
+The Navigate **feature container** allows for reconfigurable acquisition and
 analysis. The feature container runs a tree of **features**, where each
 feature may perform a *signal* operation, where it modifies the state of
 microscope hardware, a *data* operation, where it performs an analysis on
@@ -17,8 +17,8 @@ will execute (for example, move the stage, then snap a picture). Following
 this, the next set of features in sequence will be executed.
 
 Examples of some existing features include
-``aslm.model.features.common_features.ZStackAcquisition``, which acquires a
-z-stack, and ``aslm.model.features.autofocus.Autofocus``, which finds the
+``navigate.model.features.common_features.ZStackAcquisition``, which acquires a
+z-stack, and ``navigate.model.features.autofocus.Autofocus``, which finds the
 ideal plane of focus of a sample using a Discrete Cosine Transform.
 
 Currently Implemented Features
@@ -45,7 +45,7 @@ Currently Implemented Features
 The Feature Object
 ------------------
 
-Each feature is an object that accepts a pointer to ``aslm.model.model`` in its
+Each feature is an object that accepts a pointer to ``navigate.model.model`` in its
 ``__init__()``  arguments and contains a configuration dictionary that dictates
 feature behavior in its ``__init__()`` function. A complete configuration
 dictionary is shown below. As few or as many of these options can be specified
@@ -89,13 +89,136 @@ it has indeed moved) before proceeding.
 Each of the functions that are the value entries in ``self.config_table``
 dictionaries are methods of the feature object.
 
-Creating Custom Features
-----------------------------
+Creating Custom Feature Object
+---------------------------------
 
-The ASLM Software allows you to build a custom feature that implements new
+Each Feature Object is defined as a class, there is a step-by-step example feature
+that moves the stage to a specific position listed in the multi-position table in the GUI,
+snap an image and calculate its Shannon entropy.
+
+1. How to create a custom feature class?
+
+Creating a new feature is the same as a normal new class. However, there is some requires. 
+The first parameter of the ``__init__`` function must be ``model``, which gives the feature 
+object full access to the model. All the other parameters are keyword arguments and must have default values.
+There should always have a config_table attribute (see `above <../../html/feature_container/feature_container_home.html#the-feature-object>`_ for a description of the config_table) 
+
+.. code-block:: python
+  
+  from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
+  
+  Class FeatureExample:
+
+      def __init__(self, model, position_id=0):
+          self.model = model
+          self.position_id = position_id
+
+          self.config_table = {
+              "signal": {
+                      "init": self.pre_func_signal,
+                      "main": self.in_func_signal,
+              },
+              "data": {
+                      "main": self.in_func_data,
+              },
+              "node": {
+                  "device_related": True,
+              }
+          }
+
+2. How to get parameters from GUI?
+
+All the GUI parameters are in the ``model.configuration["experiment"]`` during
+runtime. Here is an example that get positions from the multi-position table
+in the GUI.
+
+.. code-block:: python
+
+    def pre_func_signal(self):
+        positions = self.model.configuration["experiment"]["MultiPositions"]
+        if self.position_id < len(positions):
+            self.target_position = positions[self.position_id]
+        else:
+            current_position = self.model.get_stage_position()
+            self.target_position = dict([(axis[:-4], value) for axis, value in current_position.items()])
+
+More GUI parameters can be found in `experiment.yml <https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml>`_
+
+3. How to interact with stage?
+
+Now, we move stage to the target_position.
+
+.. code-block:: python
+
+    def in_func_signal(self):
+        pos = dict([(f"{axis}_abs", value) for axis, value in self.target_position.items()])
+        self.model.move_stage(pos, wait_until_done=True)
+
+
+4. How to get an image and deal with it?
+
+The image captured by the camara will be stored in the data buffer. 
+You should add your code to deal with the image in the main data function.
+Here is an example that calculates the Shannon entropy of the image.
+
+.. code-block:: python
+
+      def in_func_data(self, frame_ids):
+          for id in frame_ids:
+              image = self.model.data_buffer[id]
+              entropy = fast_normalized_dct_shannon_entropy(image,
+                  psf_support_diameter_xy=3)
+              print("entropy of image:", id, entropy)
+
+Now, you've create a whole new feature and can use it as you wish. 
+
+* How to interact with other devices?
+
+You could interact with all devices through ``self.model.active_microscope``.
+Here is an example to open shutter:
+
+.. code-block:: python
+
+  self.model.active_microscope.shutter.open_shutter()
+
+
+* How to pause and resume data threads in the model
+
+The image data acquired from the camara are handled in an indepandant thread.
+Some devices need more time to get ready or move. In this case, you may need to pause
+the data thread until the device is ready.
+
+Here is an example to pause and resume the data thread:
+
+.. code-block:: python
+
+  self.model.pause_data_thread()
+  # ...
+  self.model.resume_data_thread()
+
+* Frequently used APIs in the model are:
+
+- `configuration["experiment"] <https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml>`_ has all the GUI settings
+- `pause_data_thread() <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.pause_data_thread>`_
+- `resume_data_thread() <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.resume_data_thread>`_
+
+* Frequently used APIs in the Microscope are:
+
+- `prepare_next_channel() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.prepare_next_channel>`_
+- `move_stage() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_stage>`_
+- `get_stage_position() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.get_stage_position>`_
+- `update_stage_limits() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.update_stage_limits>`_
+- `move_remote_focus() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_remote_focus>`_
+
+Please visit `Model APIs <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.microscope.Microscope.calculate_all_waveform>`_ and `Microscope APIs <../../html/_autosummary/navigate.model.microscope.Microscope.html>`_ for more details.
+
+Creating A Custom Feature List
+--------------------------------
+
+The Navigate Software allows you to build a custom feature that implements new
 functionality, or a new feature list that builds an intelligent acquisition workflow
 from existing features. This documentation explains how to create and load
-a customized feature list within the ASLM software. The first step is to create a
+a customized feature list within the Navigate software. The first step is to create a
 Python function, and decorating it as a "FeatureList." .
 
 
@@ -106,8 +229,8 @@ To create a customized feature, follow these steps:
 
 .. code-block:: python
 
-   from aslm.tools.decorators import FeatureList
-   from aslm.model.features.feature_related_functions import *
+   from navigate.tools.decorators import FeatureList
+   from navigate.model.features.feature_related_functions import *
 
    @FeatureList
    def feature_example():
@@ -122,10 +245,10 @@ To create a customized feature, follow these steps:
        ]
 
 
-Once you've created a feature, you can load it into the ASLM software using these steps:
+Once you've created a feature, you can load it into the Navigate software using these steps:
 
-2. Open ASLM.
-3. Navigate to the `Features` menu.
+2. Open Navigate.
+3. Go to the `Features` menu.
 
 
 .. image:: images/step_1.png
@@ -139,14 +262,14 @@ containing your customized feature list function.
 .. image:: images/step_2.png
 
 
-5. Choose the Python file containing your customized feature list function. ASLM will
+5. Choose the Python file containing your customized feature list function. Navigate will
 load the specified feature list, making it available for use in your experiments and
 analyses. It will appear at the bottom of the `Features` menu.
 
 Combining Features
 ---------------------------------------------------
 
-Once you have loaded your feature, the next step is to use it in combination with
+Once you have loaded your feature list, the next step is to use it in combination with
 other features to create an intelligent acquisition workflow. To do this, you will
 need to create a new feature list that combines your custom feature with other
 features:

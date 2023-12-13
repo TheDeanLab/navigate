@@ -21,25 +21,25 @@ and install the appropriate version based on your operating system.
 * Windows: Search your computer for the anaconda prompt window. Given how frequently you will use this, we recommend pinning it to your taskbar.
 * Linux/Mac: Search your computer for Terminal.
 
-**Create a python environment called ASLM with Python version 3.9.7**::
+**Create a python environment called Navigate with Python version 3.9.7**::
 
-    (base) MyComputer ~ $ conda create -n ASLM python=3.9.7
+    (base) MyComputer ~ $ conda create -n navigate python=3.9.7
 
 .. note::
     If you are inside of a firewall, e.g., on the UTSW campus, you will likely run into a proxy error.
     See the Troubleshooting section below for information on how to add the proxy address to your environment variables to circumvent this problem.
 
 
-**Activate the ASLM environment**::
+**Activate the Navigate environment**::
 
-    (base) MyComputer ~ $ conda activate ASLM
+    (base) MyComputer ~ $ conda activate navigate
 
 The active environment is shown in parentheses on the far-left.  Originally, we were in the miniconda base environment.
-After activatin the ASLM environment, it should now show (ASLM).
+After activatin the Navigate environment, it should now show (NAVIGATE).
 
 **Update the pip python package manager**::
 
-    (ASLM) MyComputer ~ $ python -m pip install --upgrade pip
+    (Navigate) MyComputer ~ $ python -m pip install --upgrade pip
 
 
 **Create a directory where the repository will be cloned**
@@ -48,58 +48,47 @@ After activatin the ASLM environment, it should now show (ASLM).
 
 * Windows::
 
-    (ASLM) C:\Users\Dean-Lab cd Desktop
-    (ASLM) C:\Users\Dean-Lab\Desktop mkdir Code
-    (ASLM) C:\users\Dean-Lab\Desktop cd Code
+    (Navigate) C:\Users\Dean-Lab cd Desktop
+    (Navigate) C:\Users\Dean-Lab\Desktop mkdir Code
+    (Navigate) C:\users\Dean-Lab\Desktop cd Code
 
 * Linux/Mac::
 
-    (ASLM) MyComputer ~ $ mkdir ~/Desktop/Code
-    (ASLM) MyComputer ~ $ cd ~/Desktop/Code
+    (Navigate) MyComputer ~ $ mkdir ~/Desktop/Code
+    (Navigate) MyComputer ~ $ cd ~/Desktop/Code
 
 **Clone the GitHub repository**::
 
-    (ASLM) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/ASLM.git
+    (Navigate) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/navigate.git
 
-**Install the ASLM repository**
+**Install the Navigate repository**
 
-The last step requires you to change into the ASLM directory and the install the repo as a package locally on your machine.::
+The last step requires you to change into the Navigate directory and the install the repo as a package locally on your machine.::
 
-    (ASLM) MyComputer MyFolderName $ cd ASLM
-    (ASLM) MyComputer ASLM $ pip install -e .
+    (Navigate) MyComputer MyFolderName $ cd navigate
+    (Navigate) MyComputer Navigate $ pip install -e .
 
 
-**Run the ASLM software**::
-    (ASLM) MyComputer ASLM $ aslm
+**Run the Navigate software**::
+    (Navigate) MyComputer Navigate $ navigate
 
 .. note::
 
-    If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after aslm:
+    If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after navigate:
 
-        aslm -sh
+        navigate -sh
 
 
 After completeting these steps you will only need to do the below to start the software upon opening the prompt:
 
 .. code-block::
 
-    (base) MyComputer ~ $ conda activate ASLM
-    (ASLM) MyComputer ~ $ aslm
+    (base) MyComputer ~ $ conda activate navigate
+    (Navigate) MyComputer ~ $ navigate
 
 .. note::
 
-    If you are running Windows, you can create a desktop shortcut to ASLM by right-clicking the Desktop, navigating to New and then Shortcut and entering ``%windir%\system32\cmd.exe "/c" C:\path\to\miniconda\Scripts\activate.bat aslm && aslm`` into the location text box.
-
-GPU Dependencies
-----------------
-Some of the software routines for microscope feedback are accelerated using GPU computing.
-These require a CUDA GPU device that is compatible with TensorFlow (1.15), PyTorch (1.10.2), CuPy, ...
-`Excellent directions can be found for CuPy <https://docs.cupy.dev/en/stable/install.html>`_.
-    * `NVIDIA CUDA Version 11.2 <https://developer.nvidia.com/cuda-11.2.0-download-archive?target_os=Windows&target_arch=x86_64&target_version=10&target_type=exelocal>`_
-    * `cuDNN SDK 8.4.1 <https://developer.nvidia.com/rdp/cudnn-download>`_
-    * NVIDIA Graphics Driver >450.80.02
-    * TensorRT 7
-    * Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019
+    If you are running Windows, you can create a desktop shortcut to Navigate by right-clicking the Desktop, navigating to New and then Shortcut and entering ``%windir%\system32\cmd.exe "/c" C:\path\to\miniconda\Scripts\activate.bat navigate && navigate`` into the location text box.
 
 Troubleshooting
 ---------------

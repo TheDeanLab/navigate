@@ -1,27 +1,33 @@
 <h1 align="center">
-<img src="./src/aslm/view/icon/mic.ico?raw=true" />
+<img src="./src/navigate/view/icon/mic.ico?raw=true" />
 
-ASLM - Autonomous Software for Light Microscopy
+navigate
+<h2 align="center">
+	open source light sheet microscope control
+</h2>
 </h1>
 
-[![Tests](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/AdvancedImagingUTSW/ASLM/actions/workflows/push_checks.yaml)
-[![codecov](https://codecov.io/gh/TheDeanLab/ASLM/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/ASLM)
 
-ASLM is an open source Python package for control of light-sheet microscopes. It allows for easily reconfigurable hardware setups and automated acquisition rotuines.
+[![Tests](https://github.com/TheDeanLab/navigate/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/TheDeanLab/navigate/actions/workflows/push_checks.yaml)
+[![codecov](https://codecov.io/gh/TheDeanLab/navigate/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/navigate)
+
+Navigate is an open source Python package for control of light-sheet microscopes. It allows for easily reconfigurable hardware setups and automated acquisition rotuines.
 
 ### Quick install
 
 Download and install [Miniconda](https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links).
 
 ```
-conda create -n aslm python=3.9.7
-pip install git+https://github.com/TheDeanLab/ASLM.git
+conda create -n navigate python=3.9.7
+conda activate navigate
+pip install git+https://github.com/TheDeanLab/navigate.git
 ```
 
-To test, run `conda activate aslm` and launch in synthetic hardware mode with `aslm -sh`.
-
+To test, run `conda activate navigate` and launch in synthetic hardware mode with `navigate
+-sh`. Developers will have to install additional dependencies with
+`pip install -e '.[dev]'`.
 ### Documentation
-Please refer to and contribute to the documentation, which can be found on GitHub Pages: [https://thedeanlab.github.io/ASLM/](https://thedeanlab.github.io/ASLM/).
+Please refer to and contribute to the documentation, which can be found on GitHub Pages: [https://thedeanlab.github.io/navigate/](https://thedeanlab.github.io/navigate/).
 
 ### Command Line Arguments
 
@@ -30,8 +36,6 @@ Please refer to and contribute to the documentation, which can be found on GitHu
 
 * Input Arguments:
   	* -sh, --synthetic_hardware
- 	* -d, --debug
-	* --GPU
   	* --config_file CONFIG_FILE
   	* --experiment_file EXPERIMENT_FILE
   	* --etl_const_file ETL_CONST_FILE

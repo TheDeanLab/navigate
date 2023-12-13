@@ -162,6 +162,9 @@ class GalvoNIStage(StageBase):
         #: dict: Dictionary of waveforms for each channel.
         self.waveform_dict = {}
 
+        #: object: DAQ ao task
+        self.ao_task = None
+
         self.switch_mode("normal")
 
     # for stacking, we could have 2 axis here or not, y is for tiling, not necessary
@@ -328,7 +331,7 @@ class GalvoNIStage(StageBase):
         pass
 
     def switch_mode(self, mode="normal", exposure_times=None, sweep_times=None):
-        """Calculate the waveform for the stage.
+        """Switch Galvo stage working mode.
 
         Parameters
         ----------

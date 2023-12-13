@@ -3,10 +3,10 @@ import pytest
 
 @pytest.fixture(scope="module")
 def waveform_popup_controller(dummy_view, dummy_controller):
-    from aslm.controller.sub_controllers.waveform_popup_controller import (
+    from navigate.controller.sub_controllers.waveform_popup_controller import (
         WaveformPopupController,
     )
-    from aslm.view.popups.waveform_parameter_popup_window import (
+    from navigate.view.popups.waveform_parameter_popup_window import (
         WaveformParameterPopupWindow,
     )
 

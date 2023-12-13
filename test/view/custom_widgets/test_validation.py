@@ -4,7 +4,7 @@ import tkinter as tk
 
 import pytest
 
-from aslm.view.custom_widgets.validation import ValidatedEntry
+from navigate.view.custom_widgets.validation import ValidatedEntry
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 

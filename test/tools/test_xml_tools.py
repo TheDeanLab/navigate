@@ -38,7 +38,7 @@ import unittest
 # Third party imports
 
 # Local application imports
-from aslm.tools import xml_tools
+from navigate.tools import xml_tools
 
 
 def test_xml_parse_write():

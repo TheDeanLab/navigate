@@ -35,7 +35,7 @@
 # Third Party Imports
 
 # Local Imports
-from aslm.tools.common_dict_tools import update_stage_dict
+from navigate.tools.common_dict_tools import update_stage_dict
 
 import unittest
 from unittest.mock import MagicMock

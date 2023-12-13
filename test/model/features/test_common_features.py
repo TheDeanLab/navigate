@@ -33,7 +33,7 @@
 
 import random
 import pytest
-from aslm.model.features.common_features import ZStackAcquisition
+from navigate.model.features.common_features import ZStackAcquisition
 
 
 class TestZStack:

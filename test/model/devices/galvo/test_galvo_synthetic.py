@@ -31,8 +31,8 @@
 
 import unittest
 from unittest.mock import MagicMock
-from aslm.model.devices.galvo.galvo_synthetic import SyntheticGalvo
-from aslm.config import load_configs, get_configuration_paths
+from navigate.model.devices.galvo.galvo_synthetic import SyntheticGalvo
+from navigate.config import load_configs, get_configuration_paths
 from multiprocessing import Manager
 
 

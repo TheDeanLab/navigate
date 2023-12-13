@@ -3,15 +3,14 @@ requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ASLM"
-description = "Autonomous Softtware for Light Microscopy."
+name = "navigate"
+description = "Open source light-sheet microscope controls."
 authors = [{name = "The Dean Lab, UT Southwestern Medical Center"}]
 readme = "README.md"
 license = {file = "LICENSE.md"}
 dynamic = ["version"]
 classifiers = [
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: TBD",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: Microsoft :: Windows",
@@ -44,7 +43,7 @@ dependencies = [
     ]
 
 [project.scripts]
-aslm = "aslm.main:main"
+navigate = "navigate.main:main"
 
 [project.optional-dependencies]
 dev = [
@@ -53,8 +52,7 @@ dev = [
     "pytest-cov",
     "pre-commit",
     "ipykernel",
-    "ruff-pre-commit@git+https://github.com/astral-sh/ruff-pre-commit.git",
-    "black@git+https://github.com/psf/black"
+    "jupyterlab",
     ]
 
 docs = [
@@ -74,4 +72,7 @@ robot = [
 ]
 
 [project.urls]
-Source = "https://github.com/TheDeanLab/ASLM"
+Source = "https://github.com/TheDeanLab/navigate"
+
+[tool.setuptools.dynamic]
+version = {attr = "navigate.__version__"}

@@ -46,7 +46,7 @@ class TestWaveformConstants(unittest.TestCase):
         current_path = os.path.abspath(os.path.dirname(__file__))
         root_path = os.path.dirname(os.path.dirname(current_path))
         yaml_path = os.path.join(
-            root_path, "src", "aslm", "config", "waveform_constants.yml"
+            root_path, "src", "navigate", "config", "waveform_constants.yml"
         )
 
         # Load the YAML file

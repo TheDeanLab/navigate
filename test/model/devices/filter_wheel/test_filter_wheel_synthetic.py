@@ -34,10 +34,10 @@
 def test_synthetic_filter_wheel_functions():
     import random
 
-    from aslm.model.devices.filter_wheel.filter_wheel_synthetic import (
+    from navigate.model.devices.filter_wheel.filter_wheel_synthetic import (
         SyntheticFilterWheel,
     )
-    from aslm.model.dummy import DummyModel
+    from navigate.model.dummy import DummyModel
 
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][

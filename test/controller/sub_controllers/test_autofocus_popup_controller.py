@@ -38,8 +38,8 @@ import pytest
 import numpy as np
 
 # Local application imports
-from aslm.controller.sub_controllers import AutofocusPopupController
-from aslm.view.popups.autofocus_setting_popup import AutofocusPopup
+from navigate.controller.sub_controllers import AutofocusPopupController
+from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
 
 
 class TestAutofocusPopupController:

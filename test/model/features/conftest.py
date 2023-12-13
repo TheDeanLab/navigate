@@ -2,7 +2,7 @@ import pytest
 import time
 import threading
 import multiprocessing as mp
-from aslm.model.features.feature_container import load_features
+from navigate.model.features.feature_container import load_features
 
 
 class DummyDevice:

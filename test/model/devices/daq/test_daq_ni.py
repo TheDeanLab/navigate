@@ -39,8 +39,8 @@ import pytest
 
 @pytest.mark.hardware
 def test_initialize_daq_ni():
-    from aslm.model.devices.daq.daq_ni import NIDAQ
-    from aslm.model.dummy import DummyModel
+    from navigate.model.devices.daq.daq_ni import NIDAQ
+    from navigate.model.dummy import DummyModel
 
     model = DummyModel()
     daq = NIDAQ(model.configuration)
@@ -51,8 +51,8 @@ def test_initialize_daq_ni():
 def test_daq_ni_functions():
     import random
 
-    from aslm.model.devices.daq.daq_ni import NIDAQ
-    from aslm.model.dummy import DummyModel
+    from navigate.model.devices.daq.daq_ni import NIDAQ
+    from navigate.model.dummy import DummyModel
 
     model = DummyModel()
     daq = NIDAQ(model.configuration)

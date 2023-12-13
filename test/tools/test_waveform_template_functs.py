@@ -36,7 +36,7 @@ import unittest
 # Third-party imports
 
 # Local application imports
-from aslm.tools.waveform_template_funcs import get_waveform_template_parameters
+from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
 
 
 class TestGetWaveformTemplateParameters(unittest.TestCase):
@@ -79,6 +79,47 @@ class TestGetWaveformTemplateParameters(unittest.TestCase):
 
         self.assertEqual(repeat_num, 1)
         self.assertEqual(expand_num, 1)
+
+
+class TestGetWaveformTemplateParametersExceptions(unittest.TestCase):
+    def test_key_error_waveform_template_name(self):
+        waveform_template_dict = {"template1": {"repeat": 2, "expand": 3}}
+        microscope_state_dict = {}
+        result = get_waveform_template_parameters(
+            "nonexistent_template", waveform_template_dict, microscope_state_dict
+        )
+        self.assertEqual(
+            result,
+            (1, 1),
+            "Default values should be returned when waveform template "
+            "name is not found",
+        )
+
+    def test_key_error_repeat_key(self):
+        waveform_template_dict = {"template1": {"expand": 3}}
+        microscope_state_dict = {}
+        result = get_waveform_template_parameters(
+            "template1", waveform_template_dict, microscope_state_dict
+        )
+        self.assertEqual(
+            result,
+            (1, 3),
+            "Default value for repeat_num should be returned "
+            "when repeat key is not found",
+        )
+
+    def test_key_error_expand_key(self):
+        waveform_template_dict = {"template1": {"repeat": 2}}
+        microscope_state_dict = {}
+        result = get_waveform_template_parameters(
+            "template1", waveform_template_dict, microscope_state_dict
+        )
+        self.assertEqual(
+            result,
+            (2, 1),
+            "Default value for expand_num should be returned"
+            " when expand key is not found",
+        )
 
 
 if __name__ == "__main__":

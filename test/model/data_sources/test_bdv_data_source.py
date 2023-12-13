@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 import h5py
 
-from aslm.tools.file_functions import delete_folder
+from navigate.tools.file_functions import delete_folder
 
 
 def recurse_dtype(group):
@@ -30,8 +30,8 @@ def recurse_dtype(group):
 @pytest.mark.parametrize("size", [(1024, 2048), (2048, 1024), (2048, 2048)])
 @pytest.mark.parametrize("ext", ["h5", "n5"])
 def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
-    from aslm.model.dummy import DummyModel
-    from aslm.model.data_sources.bdv_data_source import BigDataViewerDataSource
+    from navigate.model.dummy import DummyModel
+    from navigate.model.data_sources.bdv_data_source import BigDataViewerDataSource
 
     print(
         f"Conditions are multiposition: {multiposition} per_stack: {per_stack} "

@@ -37,9 +37,9 @@ import random
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.stages.stage_galvo import GalvoNIStage
-from aslm.model.dummy import DummyModel
-from aslm.tools.common_functions import copy_proxy_object
+from navigate.model.devices.stages.stage_galvo import GalvoNIStage
+from navigate.model.dummy import DummyModel
+from navigate.tools.common_functions import copy_proxy_object
 
 
 class TestStageGalvo:

@@ -5,9 +5,9 @@ import pytest
 def test_remote_focus_ni_functions():
     import random
 
-    from aslm.model.devices.daq.daq_ni import NIDAQ
-    from aslm.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
-    from aslm.model.dummy import DummyModel
+    from navigate.model.devices.daq.daq_ni import NIDAQ
+    from navigate.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
+    from navigate.model.dummy import DummyModel
 
     model = DummyModel()
     daq = NIDAQ(model.configuration)

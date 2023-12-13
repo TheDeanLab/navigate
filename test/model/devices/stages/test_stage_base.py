@@ -37,8 +37,8 @@ import random
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.stages.stage_base import StageBase
-from aslm.model.dummy import DummyModel
+from navigate.model.devices.stages.stage_base import StageBase
+from navigate.model.dummy import DummyModel
 
 
 class TestStageBase:

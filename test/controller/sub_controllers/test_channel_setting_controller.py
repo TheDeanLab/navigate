@@ -35,10 +35,10 @@ import pytest
 class TestChannelSettingController:
     @pytest.fixture(autouse=True)
     def setup_class(self, dummy_controller):
-        from aslm.controller.sub_controllers.channels_tab_controller import (
+        from navigate.controller.sub_controllers.channels_tab_controller import (
             ChannelsTabController,
         )
-        from aslm.controller.sub_controllers.channel_setting_controller import (
+        from navigate.controller.sub_controllers.channel_setting_controller import (
             ChannelSettingController,
         )
 

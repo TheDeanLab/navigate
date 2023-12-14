@@ -225,7 +225,11 @@ class WaveformTabController(GUIController):
 
         true_max = np.maximum(max_remote_focus_waveform, max_galvo_waveform)
         true_min = np.minimum(min_remote_focus_waveform, min_galvo_waveform)
-        scale = (true_max - true_min)/(max_camera_waveform - min_camera_waveform)
+        if true_max == true_min:
+            scale = 1
+            true_min = 0
+        else:
+            scale = (true_max - true_min)/(max_camera_waveform - min_camera_waveform)
 
         for k in sorted(self.waveform_dict["camera_waveform"].keys()):
             if self.waveform_dict["remote_focus_waveform"][k] is None:

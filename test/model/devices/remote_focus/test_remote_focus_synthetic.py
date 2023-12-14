@@ -10,8 +10,8 @@ def test_remote_focus_synthetic_functions():
     ]
     rf = SyntheticRemoteFocus(microscope_name, None, model.configuration)
 
-    funcs = ["prepare_task", "start_task", "stop_task", "close_task"]
-    args = [["channel_dummy"], None, None, None]
+    funcs = ["move"]
+    args = [[0.1, None]]
 
     for f, a in zip(funcs, args):
         if a is not None:

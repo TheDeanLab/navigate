@@ -106,23 +106,3 @@ def test_remote_focus_base_adjust(smoothing):
             # The channel doesn't exist. Points to an issue in how waveform dict
             # is created.
             continue
-
-
-def test_remote_focus_base_functions():
-    from navigate.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
-    from navigate.model.dummy import DummyModel
-
-    model = DummyModel()
-    microscope_name = model.configuration["experiment"]["MicroscopeState"][
-        "microscope_name"
-    ]
-    rf = RemoteFocusBase(microscope_name, None, model.configuration)
-
-    funcs = ["prepare_task", "start_task", "stop_task", "close_task"]
-    args = [["channel_dummy"], None, None, None]
-
-    for f, a in zip(funcs, args):
-        if a is not None:
-            getattr(rf, f)(*a)
-        else:
-            getattr(rf, f)()

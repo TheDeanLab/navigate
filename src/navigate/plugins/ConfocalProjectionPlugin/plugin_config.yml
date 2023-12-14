@@ -1,3 +1,6 @@
 name: Confocal Projection
-view: Popup # Tab or Popup
+view: Tab # Tab or Popup
 
+acquisition_modes: 
+  - name: Confocal Projection
+    file_name: confocal_projection_acquisition.py

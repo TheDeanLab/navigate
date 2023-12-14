@@ -212,28 +212,3 @@ class GalvoBase:
 
         return self.waveform_dict
 
-    def prepare_task(self, channel_key):
-        """Prepare the task for the given channel.
-
-        Parameters
-        ----------
-        channel_key : str
-            Channel key.
-        """
-        pass
-
-    def start_task(self):
-        """Start the task."""
-        pass
-
-    def stop_task(self):
-        """Stop the task."""
-        pass
-
-    def close_task(self):
-        """Close the task."""
-        pass
-
-    def turn_off(self):
-        """Turn off the galvo."""
-        pass

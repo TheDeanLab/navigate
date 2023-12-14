@@ -240,33 +240,3 @@ class RemoteFocusBase:
 
         return self.waveform_dict
 
-    def prepare_task(self, channel_key):
-        """Prepares the task for the remote focus device.
-
-        Parameters
-        ----------
-        channel_key : str
-            Channel key.
-
-        Returns
-        -------
-        task : nidaqmx.Task
-            Task for the remote focus device.
-
-        """
-
-        pass
-
-    def start_task(self):
-        """Starts the task for the remote focus device."""
-
-        pass
-
-    def stop_task(self):
-        """Stops the task for the remote focus device."""
-
-        pass
-
-    def close_task(self):
-        """Closes the task for the remote focus device."""
-        pass

@@ -94,3 +94,19 @@ class GalvoNI(GalvoBase):
             "waveform": waveform_dict,
         }
         return waveform_dict
+
+    def turn_off(self):
+        """Turn off the galvo.
+        Turns off the galvo. NOTE: This will only work if there isn't another task
+        bound to this channel. This should only be called in microscope.terminate().
+        """
+        try:
+            task = nidaqmx.Task()
+            task.ao_channels.add_ao_voltage_chan(
+                self.device_config["hardware"]["channel"]
+            )
+            task.write([0], auto_start=True)
+            task.stop()
+            task.close()
+        except Exception as e:
+            print(f"Galvo turn_off error: {e}")

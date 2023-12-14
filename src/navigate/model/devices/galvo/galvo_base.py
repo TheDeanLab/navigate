@@ -212,3 +212,6 @@ class GalvoBase:
 
         return self.waveform_dict
 
+    def turn_off(self):
+        """Turn off the galvo."""
+        pass

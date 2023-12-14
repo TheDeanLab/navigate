@@ -205,7 +205,7 @@ class WaveformTabController(GUIController):
         last_etl = 0
         last_galvo = 0
         last_camera = 0
-        for k in self.waveform_dict["camera_waveform"].keys():
+        for k in sorted(self.waveform_dict["camera_waveform"].keys()):
             if self.waveform_dict["remote_focus_waveform"][k] is None:
                 continue
             remote_focus_waveform = self.waveform_dict["remote_focus_waveform"][k]

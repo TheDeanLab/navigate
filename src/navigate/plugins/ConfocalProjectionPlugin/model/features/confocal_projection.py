@@ -121,6 +121,9 @@ class ConProAcquisition:
 
         microscope_state = self.model.configuration["experiment"]["MicroscopeState"]
 
+        # set waveform to "confocal_projection"
+        microscope_state["waveform_template"] = "Confocal-Projection"
+
         # microscope_state["conpro_cycling_mode"]
         self.conpro_cycling_mode = "per_stack"
         # get available channel count
@@ -235,6 +238,7 @@ class ConProAcquisition:
         """
         # end this node
         if self.model.stop_acquisition:
+            self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Default"
             return True
 
         # decide whether to update offset

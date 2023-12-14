@@ -91,59 +91,8 @@ class TestGalvoNI(unittest.TestCase):
         assert self.galvo.waveform_dict == {}
 
         # GalvoNI Init
-        assert self.galvo.task is None
         assert self.galvo.trigger_source == "/PXI6259/PFI0"
         assert hasattr(self.galvo, "daq")
-
-    def test_initialize_nidaqmx_task(self):
-        # Mock the nidaqmx module and its required classes and methods
-        self.galvo.device_config["hardware"]["channel"] = "PXI6259/ao0"
-
-        with patch("nidaqmx.Task") as mock_task:
-            mock_task_instance = MagicMock()
-            mock_task.return_value = mock_task_instance
-
-            mock_ao_channels = MagicMock()
-            mock_task_instance.ao_channels = mock_ao_channels
-
-            # Call the initialize_task method
-            self.galvo.initialize_task()
-
-            # Assertions to check if the correct methods were called with the
-            # expected arguments
-            self.assertTrue(mock_task.called)
-            mock_ao_channels.add_ao_voltage_chan.assert_called_once_with(
-                self.galvo.device_config["hardware"]["channel"]
-            )
-            mock_task_instance.timing.cfg_samp_clk_timing.assert_called_once_with(
-                rate=self.galvo.sample_rate,
-                sample_mode=AcquisitionType.FINITE,
-                samps_per_chan=self.galvo.samples,
-            )
-            mock_task_instance.triggers.start_trigger.cfg_dig_edge_start_trig.assert_called_once_with(
-                self.galvo.trigger_source
-            )
-
-    def test_stop_task(self):
-        # This function does nothing.
-        self.galvo.stop_task(force=True)
-        self.device_connection.assert_not_called()
-
-        self.galvo.stop_task(force=False)
-        self.device_connection.assert_not_called()
-
-    def test_close_task(self):
-        # More nothingness.
-        self.galvo.close_task()
-        self.device_connection.assert_not_called()
-
-    def test_start_task(self):
-        self.galvo.start_task()
-        self.device_connection.assert_not_called()
-
-    def test_prepare_task(self):
-        self.galvo.prepare_task(channel_key="infinity")
-        self.device_connection.assert_not_called()
 
     def test_adjust(self):
         sweep_times = {"channel_1": 0.3, "channel_2": 0.4, "channel_3": 0.5}
@@ -166,8 +115,6 @@ class TestGalvoNI(unittest.TestCase):
         self.device_connection.analog_outputs.__setitem__.assert_called_with(
             self.galvo.device_config["hardware"]["channel"],
             {
-                "sample_rate": self.galvo.sample_rate,
-                "samples": self.galvo.samples,
                 "trigger_source": self.galvo.trigger_source,
                 "waveform": waveforms,
             },

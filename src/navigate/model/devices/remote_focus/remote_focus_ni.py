@@ -63,9 +63,6 @@ class RemoteFocusNI(RemoteFocusBase):
         """
         super().__init__(microscope_name, device_connection, configuration)
 
-        #: object: National Instruments Analog Task
-        self.task = None
-
         #: str: The trigger source (e.g., physical channel).
         self.trigger_source = configuration["configuration"]["microscopes"][
             microscope_name
@@ -76,34 +73,6 @@ class RemoteFocusNI(RemoteFocusBase):
 
         #: str: The board name.
         self.board_name = self.device_config["hardware"]["channel"].split("/")[0]
-
-    def initialize_task(self):
-        """Initialize the task.
-
-        This method initializes the task.
-
-        """
-        # TODO: make sure the task is reusable, Or need to create and close each time.
-        self.task = nidaqmx.Task()
-        channel = self.device_config["hardware"]["channel"]
-        self.task.ao_channels.add_ao_voltage_chan(channel)
-        print(
-            f"Initializing remote focus with sample rate {self.sample_rate} and"
-            f"{self.samples} samples"
-        )
-
-        # TODO: does it work with confocal-projection?
-        self.task.timing.cfg_samp_clk_timing(
-            rate=self.sample_rate,
-            sample_mode=AcquisitionType.FINITE,
-            samps_per_chan=self.samples,
-        )
-        self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
-
-    def __del__(self):
-        """Delete the task."""
-        self.stop_task()
-        self.close_task()
 
     def adjust(self, exposure_times, sweep_times, offset=None):
         """Adjust the waveform.
@@ -127,8 +96,6 @@ class RemoteFocusNI(RemoteFocusBase):
         waveform_dict = super().adjust(exposure_times, sweep_times, offset)
 
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
-            "sample_rate": self.sample_rate,
-            "samples": self.samples,
             "trigger_source": self.trigger_source,
             "waveform": waveform_dict,
         }
@@ -151,52 +118,3 @@ class RemoteFocusNI(RemoteFocusBase):
         """
         self.adjust(exposure_times, sweep_times, offset)
         self.daq.update_analog_task(self.board_name)
-
-    def prepare_task(self, channel_key):
-        """Prepare the task.
-
-        This method prepares the task.
-
-        Parameters
-        ----------
-        channel_key : str
-            The channel key.
-
-        """
-
-        # write waveform
-        # self.task.write(self.waveform_dict[channel_key])
-        pass
-
-    def start_task(self):
-        """Start the task.
-
-        This method starts the task.
-
-        """
-        # self.task.start()
-        pass
-
-    def stop_task(self, force=False):
-        """Stop the task.
-
-        This method stops the task.
-
-        Parameters
-        ----------
-        force : bool
-            Force the task to stop.
-        """
-
-        # if not force:
-        #     self.task.wait_until_done()
-        # self.task.stop()
-        pass
-
-    def close_task(self):
-        """Close the task.
-
-        This method closes the task.
-        """
-        # self.task.close()
-        pass

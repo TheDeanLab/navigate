@@ -219,21 +219,25 @@ class WaveformTabController(GUIController):
             camera_waveform = self.waveform_dict["camera_waveform"][k]
             waveform_repeat_total_num = repeat_num * expand_num
 
+            channel_index = k[-1]
+            label = "CH" + channel_index
+
             self.view.plot_etl.plot(
                 np.arange(len(remote_focus_waveform) * waveform_repeat_total_num)
                 / self.sample_rate
                 + last_etl,
                 np.hstack([remote_focus_waveform] * waveform_repeat_total_num),
-                label=k,
+                label=label,
             )
             # ax = self.view.plot_galvo.axis
             for i, galvo_waveform in enumerate(galvo_waveform_list):
+                label = label + " G" + str(i)
                 self.view.plot_galvo.plot(
                     np.arange(len(galvo_waveform) * waveform_repeat_total_num)
                     / self.sample_rate
                     + last_galvo,
                     np.hstack([galvo_waveform] * waveform_repeat_total_num),
-                    label=f"{k}_{i}",
+                    label=label,
                 )
             self.view.plot_etl.plot(
                 np.arange(len(camera_waveform) * waveform_repeat_total_num)

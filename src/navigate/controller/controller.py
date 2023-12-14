@@ -239,7 +239,8 @@ class Controller:
         #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
-
+        # add plugin menus
+        #: PluginsController: Plugin Sub-Controller
         self.plugin_controller = PluginsController(view=self.view, parent_controller=self)
         self.plugin_controller.load_plugins()
 

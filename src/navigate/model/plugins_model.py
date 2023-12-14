@@ -35,8 +35,10 @@ from pathlib import Path
 import inspect
 
 from navigate.tools.common_functions import load_module_from_file
-from navigate.tools.file_functions import load_yaml_file
+from navigate.tools.file_functions import load_yaml_file, save_yaml_file
+from navigate.tools.decorators import FeatureList
 from navigate.model.features import feature_related_functions
+from navigate.config.config import get_navigate_path
 
 
 class PluginsModel:
@@ -48,6 +50,13 @@ class PluginsModel:
     def load_plugins(self):
         devices_dict = {}
         plugins = os.listdir(self.plugins_path)
+        feature_lists_path = get_navigate_path() + "/feature_lists"
+        feature_list_files = [
+            temp
+            for temp in os.listdir(feature_lists_path)
+            if (temp.endswith(".yml") or temp.endswith(".yaml"))
+            and os.path.isfile(os.path.join(feature_lists_path, temp))
+        ]
         for f in plugins:
             if not os.path.isdir(os.path.join(self.plugins_path, f)):
                 continue
@@ -59,8 +68,6 @@ class PluginsModel:
             if plugin_config is None:
                 continue
             plugin_name = plugin_config.get("name", f)
-            plugin_file_name = "_".join(plugin_name.lower().split())
-            plugin_class_name = "".join(plugin_name.title().split())
 
             # feature
             features_dir = os.path.join(self.plugins_path, f, "model", "features")
@@ -72,7 +79,26 @@ class PluginsModel:
                         temp = load_module_from_file(feature, feature_file)
                         for c in dir(temp):
                             if inspect.isclass(getattr(temp, c)):
-                                setattr(feature_related_functions, c, getattr(temp, c))
+                                setattr(feature_related_functions, c, getattr(temp, c))          
+            # feature list
+            plugin_feature_list = os.path.join(self.plugins_path, f, "feature_list.py")
+            if os.path.exists(plugin_feature_list):
+                module = load_module_from_file("feature_list_temp", plugin_feature_list)
+                features = [
+                    f for f in dir(module) if isinstance(getattr(module, f), FeatureList)
+                ]
+                for feature_name in features:
+                    feature = getattr(module, feature_name)
+                    feature_list_name = feature.feature_list_name
+                    feature_list_file_name = '_'.join(feature_list_name.split())
+                    if f"{feature_list_file_name}.yml" in feature_list_files or f"{feature_list_file_name}.yaml" in feature_list_files:
+                        continue
+                    feature_list_content = {
+                        "module_name": feature_name,
+                        "feature_list_name": feature_list_name,
+                        "filename": plugin_feature_list
+                    }
+                    save_yaml_file(feature_lists_path, feature_list_content, f"{feature_list_file_name}.yml")
 
             # device
             device_dir = os.path.join(self.plugins_path, f, "model", "devices")

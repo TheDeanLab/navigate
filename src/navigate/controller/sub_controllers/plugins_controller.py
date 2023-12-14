@@ -35,12 +35,10 @@ import os
 import inspect
 import tkinter as tk
 
-from navigate.config.config import get_navigate_path
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.tools.file_functions import load_yaml_file
 from navigate.tools.common_functions import combine_funcs, load_module_from_file
 from navigate.model.features import feature_related_functions
-
 
 class PluginsController:
     def __init__(self, view, parent_controller):

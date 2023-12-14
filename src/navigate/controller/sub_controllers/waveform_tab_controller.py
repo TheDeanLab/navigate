@@ -205,6 +205,28 @@ class WaveformTabController(GUIController):
         last_etl = 0
         last_galvo = 0
         last_camera = 0
+        max_galvo_waveform = 0
+        min_galvo_waveform = 1000000
+        max_camera_waveform = 0
+        min_camera_waveform = 1000000
+        max_remote_focus_waveform = 0
+        min_remote_focus_waveform = 1000000
+        # two pass
+        for k in self.waveform_dict["camera_waveform"].keys():
+            remote_focus_waveform = self.waveform_dict["remote_focus_waveform"][k]
+            max_remote_focus_waveform = np.maximum(max_remote_focus_waveform, np.max(remote_focus_waveform))
+            min_remote_focus_waveform = np.minimum(min_remote_focus_waveform, np.min(remote_focus_waveform))
+            camera_waveform = self.waveform_dict["camera_waveform"][k]
+            max_camera_waveform = np.maximum(max_camera_waveform, np.max(camera_waveform))
+            min_camera_waveform = np.minimum(min_camera_waveform, np.min(camera_waveform))
+            for galvo_waveform in self.waveform_dict["galvo_waveform"]:
+                max_galvo_waveform = np.maximum(max_galvo_waveform, np.max(galvo_waveform[k]))
+                min_galvo_waveform = np.minimum(min_galvo_waveform, np.min(galvo_waveform[k]))
+
+        true_max = np.maximum(max_remote_focus_waveform, max_galvo_waveform)
+        true_min = np.minimum(min_remote_focus_waveform, min_galvo_waveform)
+        scale = (true_max - true_min)/(max_camera_waveform - min_camera_waveform)
+
         for k in sorted(self.waveform_dict["camera_waveform"].keys()):
             if self.waveform_dict["remote_focus_waveform"][k] is None:
                 continue
@@ -214,9 +236,12 @@ class WaveformTabController(GUIController):
             for galvo_waveform in self.waveform_dict["galvo_waveform"]:
                 if galvo_waveform[k] is None:
                     continue
+                max_galvo_waveform = np.maximum(max_galvo_waveform, np.max(galvo_waveform[k]))
+                min_galvo_waveform = np.minimum(min_galvo_waveform, np.min(galvo_waveform[k]))
                 galvo_waveform_list += [galvo_waveform[k]]
 
-            camera_waveform = self.waveform_dict["camera_waveform"][k]
+            camera_waveform = scale*self.waveform_dict["camera_waveform"][k] + true_min
+
             waveform_repeat_total_num = repeat_num * expand_num
 
             channel_index = k[-1]
@@ -243,7 +268,7 @@ class WaveformTabController(GUIController):
                 np.arange(len(camera_waveform) * waveform_repeat_total_num)
                 / self.sample_rate
                 + last_camera,
-                np.hstack([camera_waveform] * waveform_repeat_total_num) / 5,
+                np.hstack([camera_waveform] * waveform_repeat_total_num),
                 c="k",
                 linestyle="--",
             )
@@ -251,7 +276,7 @@ class WaveformTabController(GUIController):
                 np.arange(len(camera_waveform) * waveform_repeat_total_num)
                 / self.sample_rate
                 + last_camera,
-                np.hstack([camera_waveform] * waveform_repeat_total_num) / 5,
+                np.hstack([camera_waveform] * waveform_repeat_total_num),
                 c="k",
                 linestyle="--",
             )

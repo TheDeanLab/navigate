@@ -101,9 +101,6 @@ class RemoteFocusBase:
         #: float: Remote focus min voltage.
         self.remote_focus_min_voltage = self.device_config["hardware"]["min"]
 
-        #: int: Number of samples.
-        self.samples = int(self.sample_rate * self.sweep_time)
-
         #: dict: Waveform dictionary.
         self.waveform_dict = {}
 
@@ -158,7 +155,7 @@ class RemoteFocusBase:
                 exposure_time = exposure_times[channel_key]
                 self.sweep_time = sweep_times[channel_key]
 
-                self.samples = int(self.sample_rate * self.sweep_time)
+                samples = int(self.sample_rate * self.sweep_time)
 
                 # Make sure the smoothing results in a waveform of length sweep time
                 ps = float(
@@ -231,7 +228,7 @@ class RemoteFocusBase:
                     self.waveform_dict[channel_key] = smooth_waveform(
                         waveform=self.waveform_dict[channel_key],
                         percent_smoothing=self.percent_smoothing,
-                    )[: self.samples]
+                    )[: samples]
 
                 # Clip any values outside of the hardware limits
                 self.waveform_dict[channel_key][

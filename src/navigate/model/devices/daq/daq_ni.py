@@ -262,16 +262,7 @@ class NIDAQ(DAQBase):
         channel_key : str
             Channel key for analog output.
         """
-        n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
-        if len(n_samples) == 0:
-            return
-        elif len(n_samples) > 1:
-            logger.debug(
-                "NI DAQ - Different number of samples provided for each analog"
-                "channel. Defaulting to the minimum number of samples provided."
-                "Waveforms will be clipped to this length."
-            )
-        self.n_sample = min(n_samples)
+        self.n_sample = int(self.sample_rate * self.sweep_times[channel_key])
         max_sample = self.n_sample * self.waveform_expand_num
         # TODO: GalvoStage and remote_focus waveform are not calculated based on a
         #  same sweep time. There needs some fix.
@@ -318,7 +309,7 @@ class NIDAQ(DAQBase):
             # TODO: may change this later to automatically expand the waveform to the
             #  longest
             for k, v in self.analog_outputs.items():
-                if k.split("/")[0] == board and v["samples"] < max_sample:
+                if k.split("/")[0] == board and len(v["waveform"][channel_key]) < max_sample:
                     v["waveform"][channel_key] = np.hstack(
                         [v["waveform"][channel_key]] * self.waveform_expand_num
                     )

@@ -105,9 +105,6 @@ class GalvoBase:
         #: str: Galvo waveform. Waveform or Sawtooth.
         self.galvo_waveform = self.device_config.get("waveform", "sawtooth")
 
-        #: int: Number of samples.
-        self.samples = int(self.sample_rate * self.sweep_time)
-
         #: dict: Dictionary of galvo waveforms.
         self.waveform_dict = {}
 
@@ -154,7 +151,6 @@ class GalvoBase:
                 # Should Assert.
                 exposure_time = exposure_times[channel_key]
                 self.sweep_time = sweep_times[channel_key]
-                self.samples = int(self.sample_rate * self.sweep_time)
 
                 # galvo Parameters
                 try:

@@ -117,8 +117,6 @@ class GalvoNI(GalvoBase):
         waveform_dict = super().adjust(exposure_times, sweep_times)
 
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
-            "sample_rate": self.sample_rate,
-            "samples": self.samples,
             "trigger_source": self.trigger_source,
             "waveform": waveform_dict,
         }

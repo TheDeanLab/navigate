@@ -149,9 +149,6 @@ class GalvoNIStage(StageBase):
         #: float: Total duration of the waveform output by the DAQ.
         self.sweep_time = None
 
-        #: int: Number of samples in the waveform output by the DAQ.
-        self.samples = None
-
         #: dict: Dictionary of exposure times for each channel.
         self.exposure_times = None
 
@@ -209,8 +206,6 @@ class GalvoNIStage(StageBase):
                 exposure_time = self.exposure_times[channel_key]
                 self.sweep_time = self.sweep_times[channel_key]
 
-                self.samples = int(self.sample_rate * self.sweep_time)
-
                 if (
                     self.configuration["experiment"]["MicroscopeState"]["image_mode"]
                     == "confocal-projection"
@@ -255,7 +250,6 @@ class GalvoNIStage(StageBase):
                             np.max(waveforms[-1]),
                         )
                     self.waveform_dict[channel_key] = np.hstack(waveforms)
-                    self.samples = int(self.sample_rate * self.sweep_time * z_planes)
                     print(
                         f"Waveform with {z_planes} planes is of length"
                         f" {self.waveform_dict[channel_key].shape}"
@@ -275,8 +269,6 @@ class GalvoNIStage(StageBase):
                 ] = self.galvo_min_voltage
 
         self.daq.analog_outputs[self.axes_channels[0]] = {
-            "sample_rate": self.sample_rate,
-            "samples": self.samples,
             "trigger_source": self.trigger_source,
             "waveform": self.waveform_dict,
         }
@@ -344,8 +336,6 @@ class GalvoNIStage(StageBase):
 
                     self.sweep_time += duty_cycle_wait_duration
 
-                self.samples = int(self.sample_rate * self.sweep_time)
-
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key] = dc_value(
                     sample_rate=self.sample_rate,
@@ -360,8 +350,6 @@ class GalvoNIStage(StageBase):
                 ] = self.galvo_min_voltage
 
         self.daq.analog_outputs[self.axes_channels[0]] = {
-            "sample_rate": self.sample_rate,
-            "samples": self.samples,
             "trigger_source": self.trigger_source,
             "waveform": self.waveform_dict,
         }

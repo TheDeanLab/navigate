@@ -1,1 +1,20 @@
 name: Custom Stage
+
+# If you want to use/test this plugin device, you should add following lines 
+# in the .navigate/config/configuration.yaml file.
+
+# hardware section:
+# stage:
+#     -
+#       type: CustomStage
+#       serial_number: 12345678
+
+# microscopes section:
+    # stage:
+    #   hardware:
+    #     -
+    #       name: stage3
+    #       type: CustomStage
+    #       serial_number: 12345678
+    #       axes: [x]
+    #       axes_mapping: [1]

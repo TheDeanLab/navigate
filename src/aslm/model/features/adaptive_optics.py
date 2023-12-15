@@ -182,6 +182,9 @@ class TonyWilson:
         #: bool: True if the current iteration is done, False otherwise
         self.done_itr = False
 
+        #: list: detailed report to save as JSON after
+        self.report = []
+
         # TODO: I don't think these are used...
         self.laser = None
         self.laser_power = 0
@@ -195,6 +198,11 @@ class TonyWilson:
 
         #: int: Number of modes
         self.n_modes = self.mirror_controller.n_modes
+
+        #: bool: whether to save report at the end of run
+        self.save_report = self.model.configuration["experiment"][
+            "AdaptiveOpticsParameters"
+        ].get("save_report", False)
 
         #: list: List of coefficients to change
         self.change_coef = []
@@ -621,6 +629,27 @@ class TonyWilson:
             print(">>> in_func_data ended!!!")
             return frame_ids
 
+    def build_report(self):
+
+        return deepcopy(
+            {
+                "mirror_update": {
+                    "mirror_img": self.mirror_img,
+                    "coefs": self.best_coefs,
+                },
+                "tonywilson": {
+                    "peaks": self.best_peaks,
+                    "trace": self.trace_list,
+                    "done": self.done_all,
+                    "metric": self.metric,
+                    "iter": self.n_iter,
+                    "steps": self.n_steps,
+                    "amp": self.coef_amp,
+                    "modes": self.change_coef,
+                },
+            }
+        )
+
     def end_func_data(self):
         """End the data
 
@@ -642,25 +671,18 @@ class TonyWilson:
             except Exception as e:
                 print(e)
 
+            if self.save_report:
+                self.model.event_queue.put(("ao_save_report", self.report))
+
         try:
             if self.done_itr:
+                current_report = self.build_report()
+                self.report.append(current_report)
+
                 self.model.event_queue.put(
-                    (
-                        "mirror_update",
-                        {"mirror_img": self.mirror_img, "coefs": self.best_coefs},
-                    )
+                    ("mirror_update", current_report["mirror_update"])
                 )
-                self.model.event_queue.put(
-                    (
-                        "tonywilson",
-                        {
-                            "peaks": self.best_peaks,
-                            "trace": self.trace_list,
-                            "done": self.done_all,
-                            "metric": self.metric,
-                        },
-                    )
-                )
+                self.model.event_queue.put(("tonywilson", current_report["tonywilson"]))
         except Exception as e:
             print(e)
 

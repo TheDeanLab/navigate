@@ -178,6 +178,11 @@ class AdaptiveOpticsPopupController(GUIController):
                 "microscope_name"
             ]
         )
+        self.widgets["save_report"]["variable"].set(
+            self.parent_controller.configuration["experiment"][
+                "AdaptiveOpticsParameters"
+            ].get("save_report", False)
+        )
         coefs_dict = self.parent_controller.configuration["experiment"][
             "MirrorParameters"
         ]["modes"]
@@ -237,6 +242,10 @@ class AdaptiveOpticsPopupController(GUIController):
         self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
             "TonyWilson"
         ]["fitfunc"] = self.widgets["fitfunc"]["variable"].get()
+
+        self.parent_controller.configuration["experiment"]["AdaptiveOpticsParameters"][
+            "save_report"
+        ] = self.widgets["save_report"]["variable"].get()
 
         for k in self.modes_armed.keys():
             self.parent_controller.configuration["experiment"][
@@ -308,6 +317,31 @@ class AdaptiveOpticsPopupController(GUIController):
         """Run the tony wilson routine"""
         self.update_experiment_values()
         self.parent_controller.execute("tony_wilson")
+
+    def save_report_to_file(self, report):
+        print("Saving report!")
+
+        full_report = {}
+
+        for i, page in enumerate(report):
+            full_report[f"iter_{i}"] = page
+
+        save_dir = self.parent_controller.configuration["experiment"]["Saving"][
+            "save_directory"
+        ]
+
+        report_path = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            initialdir=save_dir,
+            filetypes=[("JSON", "*.json")],
+        )
+
+        import pandas as pd
+
+        try:
+            pd.DataFrame(full_report).to_json(report_path)
+        except Exception:
+            pass
 
     def showup(self, popup_window=None):
         """Show the popup window."""

@@ -1140,6 +1140,10 @@ class Controller:
                 if hasattr(self, "ao_popup_controller"):
                     self.ao_popup_controller.set_widgets_from_coef(value["coefs"])
                     self.ao_popup_controller.plot_mirror(value)
+            elif event == "ao_save_report":
+                if hasattr(self, "ao_popup_controller"):
+                    self.ao_popup_controller.save_report_to_file(value)
+
             elif event == "stop":
                 # Stop the software
                 break

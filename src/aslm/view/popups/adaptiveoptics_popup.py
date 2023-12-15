@@ -312,6 +312,19 @@ class AdaptiveOpticsPopup:
 
         scroll.grid(row=1, column=0)
 
+        save_frame = ttk.Frame(control_frame)
+        save_frame.grid(row=2, column=0)
+
+        # ttk.Checkbutton: save detailed report at the end
+        save_report_var = tk.BooleanVar()
+        save_report_check = ttk.Checkbutton(save_frame, variable=save_report_var)
+        save_report_check.grid(row=0, column=0)
+        self.inputs["save_report"] = {
+            "button": save_report_check,
+            "variable": save_report_var,
+        }
+        ttk.Label(save_frame, text="Save detailed report?").grid(row=0, column=1)
+
         #: ttk.Frame: Plot Frame
         self.plot_frame = ttk.Frame(master=content_frame)
         self.plot_frame.grid(row=0, column=1, rowspan=2)

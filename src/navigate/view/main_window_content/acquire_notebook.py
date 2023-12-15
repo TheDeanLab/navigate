@@ -102,25 +102,26 @@ class AcquireBar(ttk.Frame):
         self.OvrAcq = ttk.Progressbar(
             self.progBar_frame, orient=tk.HORIZONTAL, length=200, mode="determinate"
         )
+
+        #: tk.Label: Label to display the current acquisition progress
+        self.total_acquisition_label = tk.Label(self, text=f"{0:02}"
+                                                           f":{0:02}"
+                                                           f":{0:02}")
+
         self.CurAcq.grid(row=0, column=0)
         self.OvrAcq.grid(row=1, column=0)
+        self.total_acquisition_label.grid(row=0, column=3, sticky=tk.NSEW)
 
-        #  Exit Button
         #: ttk.Button: Button to exit the application
         self.exit_btn = ttk.Button(self, text="Exit")
 
-        # Stop Stage Button
         #: ttk.Button: Button to stop the stage
         self.stop_stage = ttk.Button(self, text="Stop Stage")
 
-        #  grid out Bar
-        """
-            0   1   2   3
-        """
         self.acquire_btn.grid(row=0, column=0, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2))
         self.pull_down.grid(row=0, column=1, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2))
         self.progBar_frame.grid(
             row=0, column=2, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2)
         )
-        self.stop_stage.grid(row=0, column=3, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2))
-        self.exit_btn.grid(row=0, column=4, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2))
+        self.stop_stage.grid(row=0, column=4, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2))
+        self.exit_btn.grid(row=0, column=5, sticky=tk.NSEW, pady=(2, 2), padx=(2, 2))

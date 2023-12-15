@@ -1176,9 +1176,14 @@ class Controller:
                         pass
 
             elif event == "framerate":
+                # Update the Framerate in the Camera Settings Tab
                 self.camera_setting_controller.framerate_widgets["max_framerate"].set(
                     value
                 )
+
+                # Update the Framerate in the Acquire Bar to provide an estimate of
+                # the duration of time remaining.
+                self.acquire_bar_controller.framerate = value
             elif event == "remove_positions":
                 self.multiposition_tab_controller.remove_positions(value)
 

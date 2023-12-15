@@ -42,33 +42,22 @@ from tkinter import ttk
 class NavigateStyle:
     """ Style for check buttons in the navigation panel """
     def __init__(self):
-        """ Initialize the check button style """
-
-        # Default Style
         s = ttk.Style()
+
+        # Default font.
         s.configure('.', font=('Helvetica', 10))
 
-        # Check Buttons
-        self.style = ttk.Style()
-        custom_font = tk.font.Font(size=3)
-        self.style.configure(style="CustomCheckbutton.TCheckbutton",
-                             font=custom_font)
+        # Label frame labels.
+        s.configure('TLabelframe.Label', font=('Helvetica', 16, 'bold'))
 
-        # Headers
-        font = tk.font.Font(family="Helvetica",
-                                 size=14,
-                                 weight="bold")
+        # Labels
+        s.configure(style='TLabel', font=('Helvetica', 12, 'bold', 'italic'))
 
-        # Configure a custom style for the LabelFrame
-        style = ttk.Style()
-        style.configure("Custom.TLabelFrame.Label", font=font)
-        style.configure("Custom.TLabelFrame", labelmargins=[20, 10, 10, 10])
+        # Check buttons.
+        s.configure('TCheckbutton', font=('Helvetica', 10))
 
-
-
-    def get_style(self):
-        """ Return the style """
-        return self.style
+        # Comboboxes.
+        s.configure('TCombobox', font=('Helvetica', 10))
 
 
 class SpinboxStyle:
@@ -77,19 +66,3 @@ class SpinboxStyle:
         """ Initialize the spinbox style """
         self.font = tk.font.Font(family="Helvetica",
                                  size=10)
-
-
-class LabelStyle:
-    """ Style for labels in the navigation panel """
-    def __init__(self):
-        """ Initialize the label style """
-        self.font = tk.font.Font(family="Helvetica",
-                                 size=12,
-                                 weight="bold",
-                                 slant="italic")
-
-
-class HeaderStyle:
-    """ Style for the header in the navigation panel """
-    def __init__(self):
-        """ Initialize the header style """

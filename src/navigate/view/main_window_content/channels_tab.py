@@ -41,7 +41,7 @@ import logging
 from navigate.view.custom_widgets.hovermixin import HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-from navigate.view.style import LabelStyle, SpinboxStyle
+from navigate.view.style import SpinboxStyle
 from navigate.view.style import NavigateStyle
 
 # Logger Setup
@@ -136,7 +136,8 @@ class ChannelCreator(ttk.Labelframe):
         """
         #: str: The title of the frame
         self.title = "Channel Settings"
-        NavigateStyle().get_style()
+        NavigateStyle()
+
         ttk.Labelframe.__init__(self,
                                 channels_tab,
                                 text=self.title,
@@ -223,7 +224,6 @@ class ChannelCreator(ttk.Labelframe):
             self.labels.append(
                 ttk.Label(self.frame_columns[idx],
                           text=self.label_text[idx],
-                          font=LabelStyle().font
                           )
             )
             self.labels[idx].grid(row=0, column=0, sticky=tk.N, pady=1, padx=1)
@@ -244,7 +244,6 @@ class ChannelCreator(ttk.Labelframe):
                     self.frame_columns[0],
                     text="CH" + str(num + 1),
                     variable=self.channel_variables[num],
-                    style="CustomCheckbutton.TCheckbutton",
                 )
             )
             self.channel_checks[num].grid(

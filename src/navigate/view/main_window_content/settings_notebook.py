@@ -104,6 +104,6 @@ class SettingsNotebook(DockableNotebook):
 
         # Adding tabs to settings notebook
         self.add(self.channels_tab, text="Channels", sticky=tk.NSEW)
-        self.add(self.camera_settings_tab, text="Camera Settings", sticky=tk.NSEW)
-        self.add(self.stage_control_tab, text="Stage Control", sticky=tk.NSEW)
-        self.add(self.multiposition_tab, text="Multiposition", sticky=tk.NSEW)
+        self.add(self.camera_settings_tab, text="Cameras", sticky=tk.NSEW)
+        self.add(self.stage_control_tab, text="Stages", sticky=tk.NSEW)
+        self.add(self.multiposition_tab, text="Multi-Position", sticky=tk.NSEW)

@@ -47,7 +47,7 @@ logger = logging.getLogger(p)
 
 class DockableNotebook(ttk.Notebook):
     """Dockable Notebook that allows for tabs to be popped out into a separate
-    windows by right clicking on the tab. The tab must be selected before
+    windows by right-clicking on the tab. The tab must be selected before
     right-clicking.
     """
 
@@ -67,8 +67,10 @@ class DockableNotebook(ttk.Notebook):
             Keyword options for the ttk.Notebook class
         """
         ttk.Notebook.__init__(self, parent, *args, **kwargs)
+
         #: tk.Tk: Tkinter root
         self.root = root
+
         #: list: List of tab variables
         self.tab_list = []
 

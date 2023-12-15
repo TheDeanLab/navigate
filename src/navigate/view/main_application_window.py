@@ -76,11 +76,12 @@ class MainApp(ttk.Frame):
         #: logging.Logger: The logger for this class
         self.logger = logging.getLogger(p)
 
-        # This starts the main window config, and makes sure that any child
-        # widgets can be resized with the window
         #: tk.Tk: The main window of the application
         self.root = root
         self.root.title("navigate")
+
+        # Custom style for the application
+        NavigateStyle()
 
         # keep icons relative to view directory structure
         view_directory = Path(__file__).resolve().parent

@@ -42,6 +42,13 @@ from tkinter import ttk
 class NavigateStyle:
     """ Style for check buttons in the navigation panel """
     def __init__(self):
+        """ Initialize the navigation style
+
+        Note
+        ----
+        The style is based on the ttk style. More information found here:
+        anzeljg.github.io/rin2/book2/2405/docs/tkinter/ttk-style-layer.html
+        """
         s = ttk.Style()
 
         # Default font.
@@ -49,6 +56,9 @@ class NavigateStyle:
 
         # Label frame labels.
         s.configure('TLabelframe.Label', font=('Helvetica', 16, 'bold'))
+
+        # Tabs/Notebooks
+        s.configure('TNotebook.Tab', font=('Helvetica', 12, 'bold'))
 
         # Labels
         s.configure(style='TLabel', font=('Helvetica', 12, 'bold', 'italic'))

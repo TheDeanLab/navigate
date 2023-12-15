@@ -42,7 +42,6 @@ from navigate.view.custom_widgets.hovermixin import HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.style import SpinboxStyle
-from navigate.view.style import NavigateStyle
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -136,7 +135,6 @@ class ChannelCreator(ttk.Labelframe):
         """
         #: str: The title of the frame
         self.title = "Channel Settings"
-        NavigateStyle()
 
         ttk.Labelframe.__init__(self,
                                 channels_tab,
@@ -372,7 +370,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
             Arbitrary keyword arguments.
         """
         # Init Frame
-        text_label = "Stack Acquisition Settings (" + "\N{GREEK SMALL LETTER MU}" + "m)"
+        text_label = "Stack Acquisition Settings"
         ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
 
         # Formatting
@@ -400,7 +398,10 @@ class StackAcquisitionFrame(ttk.Labelframe):
         start_labels = ["Pos", "Foc"]
 
         #: tkinter.Label: The label for the start position frame
-        self.start_label = ttk.Label(self.pos_slice, text="Start")
+        self.start_label = ttk.Label(self.pos_slice, text="Start (" +
+                                                          "\N{GREEK SMALL LETTER MU}" +
+                                                          "m)")
+        # (" + "\N{GREEK SMALL LETTER MU}" + "m)
         self.start_label.grid(row=0, column=0, sticky="S")
         for i in range(len(start_names)):
             self.inputs[start_names[i]] = LabelInput(
@@ -426,7 +427,10 @@ class StackAcquisitionFrame(ttk.Labelframe):
         end_labels = ["Pos", "Foc"]
 
         #: tkinter.Label: The label for the end position
-        self.end_label = ttk.Label(self.pos_slice, text="End")
+        self.end_label = ttk.Label(self.pos_slice, text="End (" +
+                                                          "\N{GREEK SMALL LETTER MU}" +
+                                                          "m)")
+
         self.end_label.grid(row=0, column=1, sticky="S")
         for i in range(len(end_names)):
             self.inputs[end_names[i]] = LabelInput(

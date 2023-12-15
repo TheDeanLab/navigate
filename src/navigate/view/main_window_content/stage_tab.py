@@ -67,12 +67,8 @@ class StageControlNotebook(ttk.Notebook):
         """
         # Init notebook
         ttk.Notebook.__init__(self, frame_bot_right, *args, **kwargs)
-
-        # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
-
-        # Putting notebook 3 into bottom right frame
         self.grid(row=0, column=0)
 
         #: StageControlTab: Stage control tab.
@@ -97,10 +93,7 @@ class GoToFrame(ttk.Frame):
         **kwargs
             Keyword arguments for ttk.Frame
         """
-        # Init Frame
         ttk.Frame.__init__(self, stage_control_tab, *args, **kwargs)
-
-        # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
@@ -120,15 +113,12 @@ class StageControlTab(tk.Frame):
         **kwargs
             Keyword arguments for tk.Frame
         """
-        # Init Frame
         tk.Frame.__init__(self, note3, *args, **kwargs)
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         #: int: Index of the stage control tab.
         self.index = 2
-
-        # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
 
         #: PositionFrame: Position frame.
         self.position_frame = PositionFrame(self)
@@ -264,8 +254,6 @@ class StageControlTab(tk.Frame):
 
         joystick_axes : ListProxy
             A ListProxy containing the axes controlled by the joystick, if any
-
-
         """
         self.xy_frame.toggle_button_states(joystick_is_on, joystick_axes)
         self.z_frame.toggle_button_states(joystick_is_on, joystick_axes)
@@ -304,7 +292,6 @@ class OtherAxisFrame(ttk.Labelframe):
         **kwargs : dict
             Keyword arguments for the ttk.Labelframe
         """
-        # Init Frame
         label = name
         ttk.Labelframe.__init__(
             self,
@@ -495,13 +482,9 @@ class PositionFrame(ttk.Labelframe):
         **kwargs : dict
             Keyword arguments for the ttk.Labelframe
         """
-
-        # Init Frame
         ttk.Labelframe.__init__(
             self, stage_control_tab, text="Stage Positions", *args, **kwargs
         )
-
-        # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
@@ -617,10 +600,6 @@ class XYFrame(ttk.Labelframe):
         Grid.columnconfigure(self, "all", weight=1)
         Grid.rowconfigure(self, "all", weight=1)
 
-        # Setting up buttons for up, down, left, right, zero and increment spinbox
-        s = ttk.Style()
-        s.configure("arrow.TButton", font=(None, 20))
-
         # Path to arrows
         image_directory = Path(__file__).resolve().parent
 
@@ -708,9 +687,6 @@ class XYFrame(ttk.Labelframe):
             self,
             image=self.up_image,
             borderwidth=0
-            # style='arrow.TButton',
-            # width=5
-            # text="\N{UPWARDS BLACK ARROW}"
         )
 
         #: HoverTkButton: Down button.
@@ -718,9 +694,6 @@ class XYFrame(ttk.Labelframe):
             self,
             image=self.down_image,
             borderwidth=0
-            # style='arrow.TButton',
-            # width=10,
-            # text="\N{DOWNWARDS BLACK ARROW}"
         )
 
         #: HoverTkButton: Right button.
@@ -728,9 +701,6 @@ class XYFrame(ttk.Labelframe):
             self,
             image=self.right_image,
             borderwidth=0
-            # style='arrow.TButton',
-            # width=10,
-            # text="\N{RIGHTWARDS BLACK ARROW}"
         )
 
         #: HoverTkButton: Left button.
@@ -738,9 +708,6 @@ class XYFrame(ttk.Labelframe):
             self,
             image=self.left_image,
             borderwidth=0
-            # style='arrow.TButton',
-            # width=10,
-            # text="\N{LEFTWARDS BLACK ARROW}"
         )
 
         #: HoverTkButton: Zero button.
@@ -849,16 +816,12 @@ class StopFrame(ttk.Frame):
         **kwargs
             Keyword arguments for ttk.Frame
         """
-
-        # Init Frame
         ttk.Frame.__init__(self, stage_control_tab, *args, **kwargs)
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         #: str: Name of the frame.
         self.name = name
-
-        # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
 
         #: tk.Button: Stop button.
         self.stop_btn = tk.Button(

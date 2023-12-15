@@ -41,6 +41,8 @@ import logging
 from navigate.view.custom_widgets.hovermixin import HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
+from navigate.view.style import LabelStyle, SpinboxStyle
+from navigate.view.style import NavigateStyle
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -121,8 +123,7 @@ class ChannelCreator(ttk.Labelframe):
     """
 
     def __init__(self, channels_tab, *args, **kwargs):
-        """Initilization of the Channel Creator
-
+        """ Initialization of the Channel Creator
 
         Parameters
         ----------
@@ -135,7 +136,12 @@ class ChannelCreator(ttk.Labelframe):
         """
         #: str: The title of the frame
         self.title = "Channel Settings"
-        ttk.Labelframe.__init__(self, channels_tab, text=self.title, *args, **kwargs)
+        NavigateStyle().get_style()
+        ttk.Labelframe.__init__(self,
+                                channels_tab,
+                                text=self.title,
+                                # style="Custom.TLabelFrame",
+                                *args, **kwargs)
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
@@ -194,7 +200,7 @@ class ChannelCreator(ttk.Labelframe):
             "Laser",
             "Power",
             "Filter",
-            "Exp. Time (ms)",
+            "Exposure",
             "Interval",
             "Defocus",
         ]
@@ -206,7 +212,7 @@ class ChannelCreator(ttk.Labelframe):
         self.frame_columns = []
 
         #  Creates a column frame for each widget,
-        # this is to help with the lables lining up
+        # this is to help with the labels lining up
         for idx in range(len(self.label_text)):
             self.frame_columns.append(ttk.Frame(self))
             self.frame_columns[idx].columnconfigure(0, weight=1, uniform=1)
@@ -215,7 +221,10 @@ class ChannelCreator(ttk.Labelframe):
                 row=0, column=idx, sticky=tk.NSEW, padx=1, pady=(4, 6)
             )
             self.labels.append(
-                ttk.Label(self.frame_columns[idx], text=self.label_text[idx])
+                ttk.Label(self.frame_columns[idx],
+                          text=self.label_text[idx],
+                          font=LabelStyle().font
+                          )
             )
             self.labels[idx].grid(row=0, column=0, sticky=tk.N, pady=1, padx=1)
         self.frame_columns[5].grid(padx=(1, 4))
@@ -225,6 +234,7 @@ class ChannelCreator(ttk.Labelframe):
         #  TODO add connection to config file to specify the range.
         #   This will allow custom selection of amount of channels.
         #   Also may need further refactoring
+
         for num in range(0, 5):
             #  This will add a widget to each column frame for the respective types
             #  Channel Checkboxes
@@ -234,6 +244,7 @@ class ChannelCreator(ttk.Labelframe):
                     self.frame_columns[0],
                     text="CH" + str(num + 1),
                     variable=self.channel_variables[num],
+                    style="CustomCheckbutton.TCheckbutton",
                 )
             )
             self.channel_checks[num].grid(
@@ -247,6 +258,7 @@ class ChannelCreator(ttk.Labelframe):
                     self.frame_columns[1],
                     textvariable=self.laser_variables[num],
                     width=6,
+                    font=SpinboxStyle().font,
                 )
             )
             self.laser_pulldowns[num].state(["readonly"])
@@ -263,8 +275,8 @@ class ChannelCreator(ttk.Labelframe):
                     to=100.0,
                     textvariable=self.laserpower_variables[num],
                     increment=5,
-                    width=3,
-                    font=tk.font.Font(size=11),
+                    width=4,
+                    font=SpinboxStyle().font,
                 )
             )
             self.laserpower_pulldowns[num].grid(
@@ -278,6 +290,7 @@ class ChannelCreator(ttk.Labelframe):
                     self.frame_columns[3],
                     textvariable=self.filterwheel_variables[num],
                     width=10,
+                    font=SpinboxStyle().font,
                 )
             )
             self.filterwheel_pulldowns[num].state(["readonly"])
@@ -295,7 +308,7 @@ class ChannelCreator(ttk.Labelframe):
                     textvariable=self.exptime_variables[num],
                     increment=25,
                     width=5,
-                    font=tk.font.Font(size=11),
+                    font=SpinboxStyle().font,
                 )
             )
             self.exptime_pulldowns[num].grid(
@@ -312,7 +325,7 @@ class ChannelCreator(ttk.Labelframe):
                     textvariable=self.interval_variables[num],
                     increment=1,
                     width=3,
-                    font=tk.font.Font(size=11),
+                    font=SpinboxStyle().font,
                 )
             )
             self.interval_spins[num].grid(
@@ -328,8 +341,8 @@ class ChannelCreator(ttk.Labelframe):
                     to=500.0,
                     textvariable=self.defocus_variables[num],
                     increment=0.1,
-                    width=4,
-                    font=tk.font.Font(size=11),
+                    width=5,
+                    font=SpinboxStyle().font,
                 )
             )
             self.defocus_spins[num].grid(

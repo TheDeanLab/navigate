@@ -147,8 +147,22 @@ class PluginsModel:
                         os.path.join(device_path, "device_startup_functions.py"),
                     )
                     if module:
-                        devices_dict[device] = {}
-                        devices_dict[device]["ref_list"] = module.DEVICE_REF_LIST
-                        devices_dict[device]["load_device"] = module.load_device
-                        devices_dict[device]["start_device"] = module.start_device
+                        try:
+                            device_type_name = module.DEVICE_TYPE_NAME
+                        except AttributeError:
+                            print(
+                                f"Plugin device: {device} is not set correctly!"
+                                "Please make sure the DEVICE_TYPE_NAME is given right!"
+                            )
+                            continue
+                        devices_dict[device_type_name] = {}
+                        devices_dict[device_type_name][
+                            "ref_list"
+                        ] = module.DEVICE_REF_LIST
+                        devices_dict[device_type_name][
+                            "load_device"
+                        ] = module.load_device
+                        devices_dict[device_type_name][
+                            "start_device"
+                        ] = module.start_device
         return devices_dict, plugin_acquisition_modes

@@ -110,11 +110,12 @@ class Model:
         #: dict: Configuration dictionary.
         self.configuration = configuration
 
-        devices_dict = load_devices(configuration, args.synthetic_hardware)
-
         plugins = PluginsModel()
         # load plugin feature and devices
         plugin_devices, plugin_acquisition_modes = plugins.load_plugins()
+        devices_dict = load_devices(
+            configuration, args.synthetic_hardware, plugin_devices
+        )
         devices_dict["__plugins__"] = plugin_devices
 
         #: dict: Dictionary of plugin acquisition modes

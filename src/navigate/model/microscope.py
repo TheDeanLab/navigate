@@ -190,14 +190,21 @@ class Microscope:
 
                 elif is_plugin:
                     device_plugin_dict = devices_dict.get(device_name, {})
-                    exec(
-                        f"device_plugin_dict['{device_ref_name}'] = devices_dict['__plugins__']['{device_name}']['load_device'](configuration, is_synthetic)"
-                    )
-                    devices_dict[device_name] = device_plugin_dict
-                    device_connection = device_plugin_dict[device_ref_name]
-                    exec(
-                        f"self.plugin_devices['{device_name}'] = devices_dict['__plugins__']['{device_name}']['start_device'](self.microscope_name, device_connection, configuration, is_synthetic)"
-                    )
+                    try:
+                        exec(
+                            f"device_plugin_dict['{device_ref_name}'] = devices_dict['__plugins__']['{device_name}']['load_device'](configuration, is_synthetic)"
+                        )
+                        devices_dict[device_name] = device_plugin_dict
+                        device_connection = device_plugin_dict[device_ref_name]
+                        exec(
+                            f"self.plugin_devices['{device_name}'] = devices_dict['__plugins__']['{device_name}']['start_device'](self.microscope_name, device_connection, configuration, is_synthetic)"
+                        )
+                    except RuntimeError:
+                        print(
+                            f"Device {device_name} isn't loaded correctly! Please check the spelling and the plugin!"
+                        )
+                        continue
+
                     self.info[device_name] = device_ref_name
                     commands_dict = self.plugin_devices[device_name].commands
                     for command in commands_dict:
@@ -234,6 +241,7 @@ class Microscope:
                     device_connection=device_connection,
                     name=name,
                     i=i,
+                    plugin_devices=devices_dict["__plugins__"],
                 )
 
                 if device_connection is None and device_ref_name is not None:
@@ -303,6 +311,7 @@ class Microscope:
                 configuration=self.configuration,
                 id=i,
                 is_synthetic=is_synthetic,
+                plugin_devices=devices_dict["__plugins__"],
             )
             for axis in device_config["axes"]:
                 self.stages[axis] = stage
@@ -814,6 +823,7 @@ class Microscope:
         device_connection,
         name,
         i,
+        plugin_devices,
     ):
         """Load and start devices.
 
@@ -833,6 +843,8 @@ class Microscope:
             Name.
         i : int
             Index.
+        plugin_devices : dict
+            Plugin Devices
         """
         # Import start_device classes
         try:
@@ -849,14 +861,14 @@ class Microscope:
             exec(
                 f"self.{device_name}['{device_name_list[i]}'] = "
                 f"start_{device_name}(name, device_connection, self.configuration, "
-                f"i, self.is_synthetic)"
+                f"i, self.is_synthetic, plugin_devices)"
             )
             if device_name in device_name_list[i]:
                 self.info[device_name_list[i]] = device_ref_name
         else:
             exec(
                 f"self.{device_name} = start_{device_name}(name, "
-                f"device_connection, self.configuration, self.is_synthetic)"
+                f"device_connection, self.configuration, self.is_synthetic, plugin_devices)"
             )
             self.info[device_name] = device_ref_name
 

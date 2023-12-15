@@ -314,6 +314,8 @@ class ASIStage(StageBase):
         if not abs_pos_dict:
             return False
         abs_pos_dict = self.verify_move(abs_pos_dict)
+        if len(abs_pos_dict) == 0:
+            return
 
         # This is to account for the asi 1/10 of a micron units
         pos_dict = {

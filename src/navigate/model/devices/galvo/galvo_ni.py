@@ -64,9 +64,6 @@ class GalvoNI(GalvoBase):
         """
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
 
-        #: obj: NI DAQ task for the galvo.
-        self.task = None
-
         #: str: Name of the NI port for galvo control.
         self.trigger_source = configuration["configuration"]["microscopes"][
             microscope_name
@@ -74,30 +71,6 @@ class GalvoNI(GalvoBase):
 
         #: obj: NI DAQ device connection.
         self.daq = device_connection
-
-    def initialize_task(self):
-        """Initialize the NI DAQ task for the galvo"""
-
-        # TODO: make sure the task is reusable, Or need to create and close each time.
-        self.task = nidaqmx.Task()
-        channel = self.device_config["hardware"]["channel"]
-        self.task.ao_channels.add_ao_voltage_chan(channel)
-        print(
-            f"Initializing galvo with sample rate {self.sample_rate} and"
-            f"{self.samples} samples"
-        )
-        # TODO: does it work with confo-projection?
-        self.task.timing.cfg_samp_clk_timing(
-            rate=self.sample_rate,
-            sample_mode=AcquisitionType.FINITE,
-            samps_per_chan=self.samples,
-        )
-        self.task.triggers.start_trigger.cfg_dig_edge_start_trig(self.trigger_source)
-
-    def __del__(self):
-        """Delete the task."""
-        self.stop_task()
-        self.close_task()
 
     def adjust(self, exposure_times, sweep_times):
         """Adjust the galvo to the readout time
@@ -117,8 +90,6 @@ class GalvoNI(GalvoBase):
         waveform_dict = super().adjust(exposure_times, sweep_times)
 
         self.daq.analog_outputs[self.device_config["hardware"]["channel"]] = {
-            "sample_rate": self.sample_rate,
-            "samples": self.samples,
             "trigger_source": self.trigger_source,
             "waveform": waveform_dict,
         }
@@ -126,7 +97,6 @@ class GalvoNI(GalvoBase):
 
     def turn_off(self):
         """Turn off the galvo.
-
         Turns off the galvo. NOTE: This will only work if there isn't another task
         bound to this channel. This should only be called in microscope.terminate().
         """
@@ -140,31 +110,3 @@ class GalvoNI(GalvoBase):
             task.close()
         except Exception as e:
             print(f"Galvo turn_off error: {e}")
-
-    def prepare_task(self, channel_key):
-        """Prepare the task for the given channel
-
-        Parameters
-        ----------
-        channel_key : str
-            The channel key for the task
-        """
-        pass
-
-    def start_task(self):
-        """Start the NI DAQ task for the galvo."""
-        pass
-
-    def stop_task(self, force=False):
-        """Stop the NI DAQ task for the galvo
-
-        Parameters
-        ----------
-        force : bool
-            Force stop the task
-        """
-        pass
-
-    def close_task(self):
-        """Close the NI DAQ task for the galvo"""
-        pass

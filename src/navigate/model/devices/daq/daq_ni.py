@@ -262,16 +262,7 @@ class NIDAQ(DAQBase):
         channel_key : str
             Channel key for analog output.
         """
-        n_samples = list(set([v["samples"] for v in self.analog_outputs.values()]))
-        if len(n_samples) == 0:
-            return
-        elif len(n_samples) > 1:
-            logger.debug(
-                "NI DAQ - Different number of samples provided for each analog"
-                "channel. Defaulting to the minimum number of samples provided."
-                "Waveforms will be clipped to this length."
-            )
-        self.n_sample = min(n_samples)
+        self.n_sample = int(self.sample_rate * self.sweep_times[channel_key])
         max_sample = self.n_sample * self.waveform_expand_num
         # TODO: GalvoStage and remote_focus waveform are not calculated based on a
         #  same sweep time. There needs some fix.
@@ -287,19 +278,9 @@ class NIDAQ(DAQBase):
             self.analog_output_tasks[board] = nidaqmx.Task()
             self.analog_output_tasks[board].ao_channels.add_ao_voltage_chan(channel)
 
-            sample_rates = list(
-                set([v["sample_rate"] for v in self.analog_outputs.values()])
-            )
-
-            if len(sample_rates) > 1:
-                logger.debug(
-                    "NI DAQ - Different sample rates provided for each analog channel."
-                    "Defaulting to the first sample rate provided."
-                )
-
             # apply templates to analog tasks
             self.analog_output_tasks[board].timing.cfg_samp_clk_timing(
-                rate=sample_rates[0],
+                rate=self.sample_rate,
                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                 samps_per_chan=max_sample * self.waveform_repeat_num,
             )
@@ -318,7 +299,7 @@ class NIDAQ(DAQBase):
             # TODO: may change this later to automatically expand the waveform to the
             #  longest
             for k, v in self.analog_outputs.items():
-                if k.split("/")[0] == board and v["samples"] < max_sample:
+                if k.split("/")[0] == board and len(v["waveform"][channel_key]) < max_sample:
                     v["waveform"][channel_key] = np.hstack(
                         [v["waveform"][channel_key]] * self.waveform_expand_num
                     )

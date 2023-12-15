@@ -16,15 +16,13 @@ def test_remote_focus_ni_functions():
     ]
     rf = RemoteFocusNI(microscope_name, daq, model.configuration)
 
-    funcs = [
-        "initialize_task",
-        "adjust",
-        "prepare_task",
-        "start_task",
-        "stop_task",
-        "close_task",
+    funcs = ["adjust"]
+    args = [
+        [
+            {"channel_1": 0.2, "channel_2": 0.1, "channel_3": 0.15},
+            {"channel_1": 0.3, "channel_2": 0.2, "channel_3": 0.25},
+        ]
     ]
-    args = [None, [random.random()], ["channel_dummy"], None, None, None]
 
     for f, a in zip(funcs, args):
         if a is not None:

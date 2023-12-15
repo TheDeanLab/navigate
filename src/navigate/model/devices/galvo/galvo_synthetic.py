@@ -63,30 +63,3 @@ class SyntheticGalvo(GalvoBase):
         super().__init__(microscope_name, device_connection, configuration, galvo_id)
         pass
 
-    def __del__(self):
-        """Destructor for the GalvoNI class"""
-
-        self.stop_task()
-        self.close_task()
-
-    def prepare_task(self, channel_key):
-        """Prepare the task for the given channel
-
-        Parameters
-        ----------
-        channel_key : str
-            The channel key to prepare the task for
-        """
-        logger.debug(f"galvo writes the waveform for {channel_key}")
-
-    def start_task(self):
-        """Start the task."""
-        logger.debug("galvo started task!")
-
-    def stop_task(self):
-        """Stop the task."""
-        logger.debug("galvo stopped task!")
-
-    def close_task(self):
-        """Close the task."""
-        logger.debug("galvo closed task!")

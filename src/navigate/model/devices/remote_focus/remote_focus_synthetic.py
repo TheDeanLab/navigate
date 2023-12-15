@@ -61,36 +61,6 @@ class SyntheticRemoteFocus(RemoteFocusBase):
         super().__init__(microscope_name, device_connection, configuration)
         pass
 
-    def __del__(self):
-        """Destructor"""
-        self.stop_task()
-        self.close_task()
-
-    def prepare_task(self, channel_key):
-        """Prepares the task for the given channel.
-
-        Parameters
-        ----------
-        channel_key : str
-            The channel key.
-
-        """
-        # write waveform
-        logger.debug(f"remote focus writes the waveform for {channel_key}")
-
-    def start_task(self):
-        """Starts the task."""
-
-        logger.debug("remote focus started task!")
-
-    def stop_task(self):
-        """Stops the task."""
-        logger.debug("remote focus stopped task!")
-
-    def close_task(self):
-        """Closes the task."""
-        logger.debug("remote focus closed task!")
-
     def move(self, readout_time, offset=None):
         """Moves the remote focus.
 

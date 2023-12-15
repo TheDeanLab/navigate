@@ -149,9 +149,6 @@ class GalvoNIStage(StageBase):
         #: float: Total duration of the waveform output by the DAQ.
         self.sweep_time = None
 
-        #: int: Number of samples in the waveform output by the DAQ.
-        self.samples = None
-
         #: dict: Dictionary of exposure times for each channel.
         self.exposure_times = None
 
@@ -207,8 +204,6 @@ class GalvoNIStage(StageBase):
                 # Get the Waveform Parameters
                 sweep_time = self.sweep_times[channel_key]
 
-                self.samples = int(self.sample_rate * sweep_time)
-
                 self.waveform_dict[channel_key] = dc_value(
                     sample_rate=self.sample_rate,
                     sweep_time=sweep_time,
@@ -223,8 +218,6 @@ class GalvoNIStage(StageBase):
                 ] = self.galvo_min_voltage
 
         self.daq.analog_outputs[self.axes_channels[0]] = {
-            "sample_rate": self.sample_rate,
-            "samples": self.samples,
             "trigger_source": self.trigger_source,
             "waveform": self.waveform_dict,
         }
@@ -257,11 +250,6 @@ class GalvoNIStage(StageBase):
                     print("*** updating waveform in StageGalvo failed!", channel_key)
                     return False
 
-                # Get the Waveform Parameters
-                sweep_time = self.sweep_times[channel_key]
-
-                self.samples = int(self.sample_rate * sweep_time)
-
                 waveform_dict[channel_key][
                     waveform_dict[channel_key] > self.galvo_max_voltage
                 ] = self.galvo_max_voltage
@@ -271,8 +259,6 @@ class GalvoNIStage(StageBase):
 
         self.waveform_dict = waveform_dict
         self.daq.analog_outputs[self.axes_channels[0]] = {
-            "sample_rate": self.sample_rate,
-            "samples": self.samples,
             "trigger_source": self.trigger_source,
             "waveform": self.waveform_dict,
         }
@@ -340,7 +326,6 @@ class GalvoNIStage(StageBase):
 
                     sweep_time += duty_cycle_wait_duration
 
-                samples = int(self.sample_rate * sweep_time)
                 # Calculate the Waveforms
                 self.waveform_dict[channel_key] = dc_value(
                     sample_rate=self.sample_rate,
@@ -355,8 +340,6 @@ class GalvoNIStage(StageBase):
                 ] = self.galvo_min_voltage
 
         self.daq.analog_outputs[self.axes_channels[0]] = {
-            "sample_rate": self.sample_rate,
-            "samples": samples,
             "trigger_source": self.trigger_source,
             "waveform": self.waveform_dict,
         }

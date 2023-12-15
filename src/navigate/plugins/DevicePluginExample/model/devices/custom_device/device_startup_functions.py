@@ -37,6 +37,7 @@ from navigate.model.device_startup_functions import (
     DummyDeviceConnection,
 )
 
+DEVICE_TYPE_NAME = "custom_device"  # Same as in configuraion.yaml, for example "stage", "filter_wheel", "remote_focus_device"...
 DEVICE_REF_LIST = ["type"]  # the reference value from configuration.yaml
 
 
@@ -67,4 +68,4 @@ def start_device(microscope_name, device_connection, configuration, is_synthetic
             microscope_name, device_connection, configuration
         )
     else:
-        return device_not_found(microscope_name, device_type)
+        device_not_found(microscope_name, device_type)

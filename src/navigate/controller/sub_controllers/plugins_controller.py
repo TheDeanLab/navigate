@@ -38,7 +38,9 @@ import tkinter as tk
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.tools.file_functions import load_yaml_file
 from navigate.tools.common_functions import combine_funcs, load_module_from_file
+from navigate.tools.decorators import AcquisitionMode
 from navigate.model.features import feature_related_functions
+
 
 class PluginsController:
     def __init__(self, view, parent_controller):
@@ -120,10 +122,33 @@ class PluginsController:
                 for feature in features:
                     feature_file = os.path.join(features_dir, feature)
                     if os.path.isfile(feature_file):
-                        temp = load_module_from_file(feature, feature_file)
-                        for c in dir(temp):
-                            if inspect.isclass(getattr(temp, c)):
-                                setattr(feature_related_functions, c, getattr(temp, c))
+                        module = load_module_from_file(feature, feature_file)
+                        for c in dir(module):
+                            if inspect.isclass(getattr(module, c)):
+                                setattr(
+                                    feature_related_functions, c, getattr(module, c)
+                                )
+
+            # acquisition mode
+            acquisition_modes = plugin_config.get("acquisition_modes", [])
+            for acquisition_mode_config in acquisition_modes:
+                acquisition_file = os.path.join(
+                    self.plugins_path, f, acquisition_mode_config["file_name"]
+                )
+                if os.path.exists(acquisition_file):
+                    module = load_module_from_file(
+                        acquisition_mode_config["file_name"][:-3], acquisition_file
+                    )
+                    acquisition_mode = [
+                        m
+                        for m in dir(module)
+                        if isinstance(getattr(module, m), AcquisitionMode)
+                    ]
+                    if acquisition_mode:
+                        self.parent_controller.add_acquisition_mode(
+                            acquisition_mode_config["name"],
+                            getattr(module, acquisition_mode[0]),
+                        )
 
     def build_tab_window(self, plugin_name, frame, controller):
         plugin_frame = frame(self.view.settings)

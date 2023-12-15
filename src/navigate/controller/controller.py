@@ -239,6 +239,8 @@ class Controller:
         #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
+        #: dict: acquisition modes from plugins
+        self.plugin_acquisition_modes = {}
         # add plugin menus
         #: PluginsController: Plugin Sub-Controller
         self.plugin_controller = PluginsController(view=self.view, parent_controller=self)
@@ -487,12 +489,6 @@ class Controller:
             )
             return False
 
-        # set waveform template
-        if self.acquire_bar_controller.mode != "customized":
-            self.configuration["experiment"]["MicroscopeState"][
-                "waveform_template"
-            ] = "Default"
-
         # update real image width and height
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
         self.update_buffer()
@@ -721,6 +717,11 @@ class Controller:
             args[0] : string
                 string = 'continuous', 'z-stack', 'single', or 'projection'
             """
+            # acquisition mode from plugin
+            plugin_obj = self.plugin_acquisition_modes.get(self.acquire_bar_controller.mode, None)
+            if plugin_obj and hasattr(plugin_obj, "prepare_acquisition_controller"):
+                getattr(plugin_obj, "prepare_acquisition_controller")(self)
+
             # Prepare data
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
@@ -936,6 +937,11 @@ class Controller:
         logger.info(
             f"Navigate Controller - Captured {images_received}, " f"{mode} Images"
         )
+
+        # acquisition mode from plugin
+        plugin_obj = self.plugin_acquisition_modes.get(mode, None)
+        if plugin_obj and hasattr(plugin_obj, "end_acquisition_controller"):
+            getattr(plugin_obj, "end_acquisition_controller")(self)
 
         # Stop Progress Bars
         self.acquire_bar_controller.progress_bar(
@@ -1185,3 +1191,10 @@ class Controller:
     #         logger.info("Exiting Program")
     #         self.execute("exit")
     #         sys.exit()
+
+    def add_acquisition_mode(self, name, acquisition_obj):
+        if name in self.plugin_acquisition_modes:
+            print(f"*** plugin acquisition mode {name} exists, can't add another one!")
+            return
+        self.plugin_acquisition_modes[name] = acquisition_obj(name)
+        self.acquire_bar_controller.add_mode(name)

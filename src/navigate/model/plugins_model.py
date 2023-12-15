@@ -36,7 +36,7 @@ import inspect
 
 from navigate.tools.common_functions import load_module_from_file
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
-from navigate.tools.decorators import FeatureList
+from navigate.tools.decorators import FeatureList, AcquisitionMode
 from navigate.model.features import feature_related_functions
 from navigate.config.config import get_navigate_path
 
@@ -49,6 +49,7 @@ class PluginsModel:
 
     def load_plugins(self):
         devices_dict = {}
+        plugin_acquisition_modes = {}
         plugins = os.listdir(self.plugins_path)
         feature_lists_path = get_navigate_path() + "/feature_lists"
         feature_list_files = [
@@ -79,26 +80,57 @@ class PluginsModel:
                         temp = load_module_from_file(feature, feature_file)
                         for c in dir(temp):
                             if inspect.isclass(getattr(temp, c)):
-                                setattr(feature_related_functions, c, getattr(temp, c))          
+                                setattr(feature_related_functions, c, getattr(temp, c))
             # feature list
             plugin_feature_list = os.path.join(self.plugins_path, f, "feature_list.py")
             if os.path.exists(plugin_feature_list):
                 module = load_module_from_file("feature_list_temp", plugin_feature_list)
                 features = [
-                    f for f in dir(module) if isinstance(getattr(module, f), FeatureList)
+                    f
+                    for f in dir(module)
+                    if isinstance(getattr(module, f), FeatureList)
                 ]
                 for feature_name in features:
                     feature = getattr(module, feature_name)
                     feature_list_name = feature.feature_list_name
-                    feature_list_file_name = '_'.join(feature_list_name.split())
-                    if f"{feature_list_file_name}.yml" in feature_list_files or f"{feature_list_file_name}.yaml" in feature_list_files:
+                    feature_list_file_name = "_".join(feature_list_name.split())
+                    if (
+                        f"{feature_list_file_name}.yml" in feature_list_files
+                        or f"{feature_list_file_name}.yaml" in feature_list_files
+                    ):
                         continue
                     feature_list_content = {
                         "module_name": feature_name,
                         "feature_list_name": feature_list_name,
-                        "filename": plugin_feature_list
+                        "filename": plugin_feature_list,
                     }
-                    save_yaml_file(feature_lists_path, feature_list_content, f"{feature_list_file_name}.yml")
+                    save_yaml_file(
+                        feature_lists_path,
+                        feature_list_content,
+                        f"{feature_list_file_name}.yml",
+                    )
+
+            # acquisition mode
+            acquisition_modes = plugin_config.get("acquisition_modes", [])
+            for acquisition_mode_config in acquisition_modes:
+                acquisition_file = os.path.join(
+                    self.plugins_path, f, acquisition_mode_config["file_name"]
+                )
+                if os.path.exists(acquisition_file):
+                    module = load_module_from_file(
+                        acquisition_mode_config["file_name"][:-3], acquisition_file
+                    )
+                    acquisition_mode = [
+                        m
+                        for m in dir(module)
+                        if isinstance(getattr(module, m), AcquisitionMode)
+                    ]
+                    if acquisition_mode:
+                        plugin_acquisition_modes[
+                            acquisition_mode_config["name"]
+                        ] = getattr(module, acquisition_mode[0])(
+                            acquisition_mode_config["name"]
+                        )
 
             # device
             device_dir = os.path.join(self.plugins_path, f, "model", "devices")
@@ -117,4 +149,4 @@ class PluginsModel:
                         devices_dict[device]["ref_list"] = module.DEVICE_REF_LIST
                         devices_dict[device]["load_device"] = module.load_device
                         devices_dict[device]["start_device"] = module.start_device
-        return devices_dict
+        return devices_dict, plugin_acquisition_modes

@@ -114,7 +114,11 @@ class Model:
 
         plugins = PluginsModel()
         # load plugin feature and devices
-        devices_dict["__plugins__"] = plugins.load_plugins()
+        plugin_devices, plugin_acquisition_modes = plugins.load_plugins()
+        devices_dict["__plugins__"] = plugin_devices
+
+        #: dict: Dictionary of plugin acquisition modes
+        self.plugin_acquisition_modes = plugin_acquisition_modes
 
         #: dict: Dictionary of virtual microscopes.
         self.virtual_microscopes = {}
@@ -353,7 +357,12 @@ class Model:
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "customized": [],
         }
-        
+        # append plugin acquisition mode
+        for mode in self.plugin_acquisition_modes:
+            self.acquisition_modes_feature_setting[
+                mode
+            ] = self.plugin_acquisition_modes[mode].feature_list
+
         self.load_feature_records()
 
     def update_data_buffer(self, img_width=512, img_height=512):
@@ -483,7 +492,9 @@ class Model:
         **kwargs : dict
             Dictionary of keyword arguments to pass to the command.
         """
-        logging.info("Navigate Model - Received command from controller:", command, args)
+        logging.info(
+            "Navigate Model - Received command from controller:", command, args
+        )
         if not self.data_buffer:
             logging.debug("Navigate Model - Shared Memory Buffer Not Set Up.")
             return
@@ -802,6 +813,10 @@ class Model:
         for microscope_name in self.virtual_microscopes:
             self.virtual_microscopes[microscope_name].end_acquisition()
 
+        plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
+        if plugin_obj and hasattr(plugin_obj, "end_acquisition_model"):
+            getattr(plugin_obj, "end_acquisition_model")(self)
+
         if hasattr(self, "signal_container"):
             self.signal_container.cleanup()
             delattr(self, "signal_container")
@@ -880,7 +895,9 @@ class Model:
 
         self.show_img_pipe.send("stop")
         self.logger.info("Navigate Model - Data thread stopped.")
-        self.logger.info(f"Navigate Model - Received frames in total: {acquired_frame_num}")
+        self.logger.info(
+            f"Navigate Model - Received frames in total: {acquired_frame_num}"
+        )
 
         # release the lock when data thread ends
         if self.pause_data_ready_lock.locked():
@@ -959,7 +976,9 @@ class Model:
 
         show_img_pipe.send("stop")
         self.logger.info("Navigate Model - Data thread stopped.")
-        self.logger.info(f"Navigate Model - Received frames in total: {acquired_frame_num}")
+        self.logger.info(
+            f"Navigate Model - Received frames in total: {acquired_frame_num}"
+        )
 
     def prepare_acquisition(self, turn_off_flags=True):
         """Prepare the acquisition.
@@ -979,6 +998,10 @@ class Model:
             self.stop_send_signal = False
             self.autofocus_on = False
             self.is_live = False
+
+        plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
+        if plugin_obj and hasattr(plugin_obj, "prepare_acquisition_model"):
+            getattr(plugin_obj, "prepare_acquisition_model")(self)
 
         for m in self.virtual_microscopes:
             self.virtual_microscopes[m].prepare_acquisition()

@@ -170,7 +170,6 @@ class ConProAcquisition:
                     )
                 else:
                     offsets = [z_offset_start]
-                print(offsets)
                 for z_offset in offsets:
                     amp = eval(galvo_stage.volts_per_micron, {"x": 0.5 * (z_range)})
                     off = eval(galvo_stage.volts_per_micron, {"x": 0.5 * (z_offset)})
@@ -185,12 +184,6 @@ class ConProAcquisition:
                             amplitude=amp,
                             offset=off,
                         )
-                    )
-                    print(waveforms[-1].shape)
-                    print(
-                        np.min(waveforms[-1]),
-                        np.mean(waveforms[-1]),
-                        np.max(waveforms[-1]),
                     )
                 waveform_dict[channel_key] = np.hstack(waveforms)
                 samples = int(sample_rate * sweep_time * z_planes)
@@ -238,9 +231,16 @@ class ConProAcquisition:
         """
         # end this node
         if self.model.stop_acquisition:
-            self.model.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+            self.model.configuration["experiment"]["MicroscopeState"][
+                "waveform_template"
+            ] = "Default"
             return True
 
         # decide whether to update offset
         self.current_channel_in_list += 1
         return self.current_channel_in_list >= self.channels
+
+    def cleanup(self):
+        self.model.configuration["experiment"]["MicroscopeState"][
+            "waveform_template"
+        ] = "Default"

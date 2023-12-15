@@ -1,7 +1,7 @@
-Case Study: Imaging on the Expansion ASLM
-======================================
+Imaging on an Upright ASLM
+==========================
 
-This is a case study in using the software to image with a `Expansion ASLM Microscope`.
+This is a case study in using the software to image with an upright ASLM microscope.
 
 Setting the beam parameters
 ---------------------------

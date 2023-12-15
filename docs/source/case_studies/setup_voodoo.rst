@@ -1,5 +1,5 @@
-Case Study: Setting up the an Axially Swept Light-Sheet Microscope
-==================================================================
+Setting up the an Axially Swept Light-Sheet Microscope
+======================================================
 
 The key to properly setting up the navigate software is to sequentially enable select
 devices, and troubleshoot each one independently. By carefully and methodically

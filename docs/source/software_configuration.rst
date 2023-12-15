@@ -3,7 +3,7 @@ Configuration Overview
 
 This section outlines the ``configuration.yaml``, ``experiment.yaml``,``rest_api_config.yaml``,  ``waveform_templates.yaml``, and ``waveform_constants.yaml``
 files. Once you are ready to configure your exact hardware, please see the :doc:`Supported Hardware
-<supported_hardware>` section.
+<hardware/supported_hardware>` section.
 
 
 Configuration File
@@ -363,7 +363,7 @@ definition of each axes identity. For example, many stages define their vertical
 dimension as `z`, whereas optically, we often define this axis as `x`. Thus, there is
 often a need to map the mechanical axes to the optical axes, and this is done with
 the axes mapping dictionary entry in the stage hardware section. By default, stage axes are
-read in as `x`, `y`, `z`, `theta`, `f`, where theta is rotation and f is focus, but this 
+read in as `x`, `y`, `z`, `theta`, `f`, where theta is rotation and f is focus, but this
 can be changed by changing axes mapping.
 
 .. code-block:: yaml
@@ -371,7 +371,7 @@ can be changed by changing axes mapping.
     axes: [x, y, z, theta, f]
     axes_mapping: [x, y, z, theta, f]
 
-If, on a certain microscope, the z stage axis corresponds to the optical y axis, 
+If, on a certain microscope, the z stage axis corresponds to the optical y axis,
 and vice versa, you would then have to import the stages as following:
 
 .. code-block:: yaml
@@ -381,17 +381,17 @@ and vice versa, you would then have to import the stages as following:
 
 Joystick Axes Definition
 """"""""""""""""""""""""
-If you are using a joystick, it is possible to disable GUI control of the stage axes 
-that the joystick can interact with. The axes that the joystick can interact with 
+If you are using a joystick, it is possible to disable GUI control of the stage axes
+that the joystick can interact with. The axes that the joystick can interact with
 appear in the stage field as following:
 
 .. code-block:: yaml
 
     joystick_axes: [x, y, z]
 
-Note that these axes should agree with the optical axes. If, on the same microscope 
-as mentioned in the Stage Axes Definition section, the joystick were to control 
-the optical y axis corresponding to the stage z axis, you would have to put `y` in 
+Note that these axes should agree with the optical axes. If, on the same microscope
+as mentioned in the Stage Axes Definition section, the joystick were to control
+the optical y axis corresponding to the stage z axis, you would have to put `y` in
 the joystick axes brackets as following:
 
 .. code-block:: yaml

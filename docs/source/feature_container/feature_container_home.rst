@@ -1,3 +1,5 @@
+.. _features:
+
 Feature Container
 ========================
 To make Navigate as powerful as possible, we want to encourage users to contribute code and
@@ -98,15 +100,15 @@ snap an image and calculate its Shannon entropy.
 
 1. How to create a custom feature class?
 
-Creating a new feature is the same as a normal new class. However, there is some requires. 
-The first parameter of the ``__init__`` function must be ``model``, which gives the feature 
+Creating a new feature is the same as a normal new class. However, there is some requires.
+The first parameter of the ``__init__`` function must be ``model``, which gives the feature
 object full access to the model. All the other parameters are keyword arguments and must have default values.
-There should always have a config_table attribute (see `above <../../html/feature_container/feature_container_home.html#the-feature-object>`_ for a description of the config_table) 
+There should always have a config_table attribute (see `above <../../html/feature_container/feature_container_home.html#the-feature-object>`_ for a description of the config_table)
 
 .. code-block:: python
-  
+
   from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
-  
+
   Class FeatureExample:
 
       def __init__(self, model, position_id=0):
@@ -157,7 +159,7 @@ Now, we move stage to the target_position.
 
 4. How to get an image and deal with it?
 
-The image captured by the camara will be stored in the data buffer. 
+The image captured by the camara will be stored in the data buffer.
 You should add your code to deal with the image in the main data function.
 Here is an example that calculates the Shannon entropy of the image.
 
@@ -170,7 +172,7 @@ Here is an example that calculates the Shannon entropy of the image.
                   psf_support_diameter_xy=3)
               print("entropy of image:", id, entropy)
 
-Now, you've create a whole new feature and can use it as you wish. 
+Now, you've create a whole new feature and can use it as you wish.
 
 * How to interact with other devices?
 
@@ -224,28 +226,27 @@ Python function, and decorating it as a "FeatureList." .
 
 To create a customized feature, follow these steps:
 
-1. Import the necessary modules::
+1. Import the necessary modules:
+
+  .. code-block:: python
+
+    from navigate.tools.decorators import FeatureList
+    from navigate.model.features.feature_related_functions import *
+
+    @FeatureList
+    def feature_example():
+        return [
+            (
+                {"name": PrepareNextChannel},
+                {
+                    "name": LoopByCount,
+                    "args": ("experiment.MicroscopeState.selected_channels",),
+                },
+            )
+        ]
 
 
-.. code-block:: python
-
-   from navigate.tools.decorators import FeatureList
-   from navigate.model.features.feature_related_functions import *
-
-   @FeatureList
-   def feature_example():
-       return [
-           (
-               {"name": PrepareNextChannel},
-               {
-                   "name": LoopByCount,
-                   "args": ("experiment.MicroscopeState.selected_channels",),
-               },
-           )
-       ]
-
-
-Once you've created a feature, you can load it into the Navigate software using these steps:
+  Once you've created a feature, you can load it into the Navigate software using these steps:
 
 2. Open Navigate.
 3. Go to the `Features` menu.

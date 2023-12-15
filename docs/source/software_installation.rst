@@ -35,11 +35,11 @@ and install the appropriate version based on your operating system.
     (base) MyComputer ~ $ conda activate navigate
 
 The active environment is shown in parentheses on the far-left.  Originally, we were in the miniconda base environment.
-After activatin the Navigate environment, it should now show (NAVIGATE).
+After activating the Navigate environment, it should now show ``(navigate)``.
 
 **Update the pip python package manager**::
 
-    (Navigate) MyComputer ~ $ python -m pip install --upgrade pip
+    (navigate) MyComputer ~ $ python -m pip install --upgrade pip
 
 
 **Create a directory where the repository will be cloned**
@@ -48,29 +48,30 @@ After activatin the Navigate environment, it should now show (NAVIGATE).
 
 * Windows::
 
-    (Navigate) C:\Users\Dean-Lab cd Desktop
-    (Navigate) C:\Users\Dean-Lab\Desktop mkdir Code
-    (Navigate) C:\users\Dean-Lab\Desktop cd Code
+    (navigate) C:\Users\Dean-Lab cd Desktop
+    (navigate) C:\Users\Dean-Lab\Desktop mkdir Code
+    (navigate) C:\users\Dean-Lab\Desktop cd Code
 
 * Linux/Mac::
 
-    (Navigate) MyComputer ~ $ mkdir ~/Desktop/Code
-    (Navigate) MyComputer ~ $ cd ~/Desktop/Code
+    (navigate) MyComputer ~ $ mkdir ~/Desktop/Code
+    (navigate) MyComputer ~ $ cd ~/Desktop/Code
 
 **Clone the GitHub repository**::
 
-    (Navigate) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/navigate.git
+    (navigate) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/navigate.git
 
 **Install the Navigate repository**
 
 The last step requires you to change into the Navigate directory and the install the repo as a package locally on your machine.::
 
-    (Navigate) MyComputer MyFolderName $ cd navigate
-    (Navigate) MyComputer Navigate $ pip install -e .
+    (navigate) MyComputer MyFolderName $ cd navigate
+    (navigate) MyComputer Navigate $ pip install -e .
 
 
 **Run the Navigate software**::
-    (Navigate) MyComputer Navigate $ navigate
+
+    (navigate) MyComputer Navigate $ navigate
 
 .. note::
 
@@ -84,7 +85,7 @@ After completeting these steps you will only need to do the below to start the s
 .. code-block::
 
     (base) MyComputer ~ $ conda activate navigate
-    (Navigate) MyComputer ~ $ navigate
+    (navigate) MyComputer ~ $ navigate
 
 .. note::
 
@@ -100,8 +101,8 @@ If running the software on campus at UTSW you may need to update some of your pr
         *  Variable = HTTPS_PROXY; Value = http://proxy.swmed.edu:3128 (please see that they are both http, this is purposeful and not a typo)
     * If you continue to have issues then change the value of Variable HTTPS_PROXY to https://proxy.swmed.edu:3128
     * If you still have issues then you will need to create/update both configuration files for conda and pip to include proxy settings, if they are not in the paths below you will need to create them. This assumes a Windows perspective. Mac/Linux users will have different paths, they can be found online.
-        *  Conda's Config file = C:\Users\UserProfile\.condarc
-        *  Pip's Config file = C:\Users\UserProfile\pip\pip.ini
+        *  Conda's Config file = C:\\Users\\UserProfile\\.condarc
+        *  Pip's Config file = C:\\Users\\UserProfile\\pip\\pip.ini
     * You can also try to set the proxy from within the Anaconda Prompt:
 	  *  set https_proxy=http://username:password@proxy.example.com:8080
 	  *  set http_proxy=http://username:password@proxy.example.com:8080

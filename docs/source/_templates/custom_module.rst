@@ -4,7 +4,7 @@
 
    {% block attributes %}
    {% if attributes %}
-   .. rubric:: Module Attributes
+   .. rubric:: {{ _('Module Attributes') }}
 
    .. autosummary::
       :toctree:
@@ -57,7 +57,6 @@
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 {% for item in modules %}
    {{ item }}

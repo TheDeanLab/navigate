@@ -1,5 +1,5 @@
 Adding New Hardware
-=========================
+===================
 
 Navigate is built with an abstraction layer that enables operation with a diverse set of
 hardware manufacturers and equipment.

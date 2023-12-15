@@ -69,6 +69,12 @@ class NavigateStyle:
         # Comboboxes.
         s.configure('TCombobox', font=('Helvetica', 10))
 
+        # Acquire Bar
+        s.configure("Custom.TButton",
+                        font=('Helvetica', 16))
+
+
+
 
 class SpinboxStyle:
     """ Style for spinbox in the navigation panel """

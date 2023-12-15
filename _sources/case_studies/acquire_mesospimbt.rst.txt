@@ -1,5 +1,5 @@
-Case Study: Imaging on the mesoSPIM BT
-======================================
+Imaging on a mesoSPIM BT
+========================
 
 This is a case study in using the software to image with a `mesoSPIM BT microscope <https://www.biorxiv.org/content/10.1101/2023.06.16.545256v1>`_.
 
@@ -29,7 +29,7 @@ Loading and finding the sample
 #. Scroll around with the stage either via joystick or using the controls in the :guilabel:`Stage Control` tab until the sample comes into view.
 #. Focus on the sample using the focus axis. Optionally, use Autofocus by going to :menuselection:`Autofocus --> Autofocus Settings`. Press :guilabel:`Autofocus`. Ensure there is a clear peak in the resulting plot. If there is not, the autofocusing routine did not work. Try increasing the laser power and/or bringing the sample more into focus manually.
 
-.. z_stack:
+.. _z_stack:
 
 Imaging a Z-Stack
 -----------------

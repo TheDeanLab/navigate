@@ -25,7 +25,6 @@ navigate.model.devices.filter\_wheel
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.filter_wheel.filter_wheel_asi

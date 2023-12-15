@@ -12,7 +12,6 @@ navigate.model.features.autofocus
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       power_tent
    
@@ -23,8 +22,6 @@ navigate.model.features.autofocus
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       Autofocus
    

@@ -25,7 +25,6 @@
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.tools.common_dict_tools

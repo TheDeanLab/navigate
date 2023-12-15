@@ -16,8 +16,6 @@ navigate.model.devices.remote\_focus.remote\_focus\_synthetic
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       SyntheticRemoteFocus
    

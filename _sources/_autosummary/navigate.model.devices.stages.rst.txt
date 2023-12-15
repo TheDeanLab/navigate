@@ -25,7 +25,6 @@ navigate.model.devices.stages
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.stages.stage_asi

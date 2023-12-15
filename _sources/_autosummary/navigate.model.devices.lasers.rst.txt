@@ -25,7 +25,6 @@ navigate.model.devices.lasers
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.lasers.laser_base

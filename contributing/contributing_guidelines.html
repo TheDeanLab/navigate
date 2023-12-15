@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Adding New Hardware" href="contributing_hardware.html" />
-    <link rel="prev" title="Contributing to Navigate" href="contributing_home.html" /> 
+    <link rel="next" title="API Reference" href="../api.html" />
+    <link rel="prev" title="Feature Container" href="../feature_container/feature_container_home.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,29 +48,21 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="contributing_home.html">Contributing to Navigate</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Contributing Guidelines</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#general-principles">General Principles</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#installation-of-developer-dependencies">Installation of Developer Dependencies</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#coding-style">Coding Style</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#documentation">Documentation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pre-commit-hooks">Pre-Commit Hooks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dictionary-parsing">Dictionary Parsing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#unit-tests">Unit Tests</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#developing-with-a-mac">Developing with a Mac</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="contributing_hardware.html">Adding New Hardware</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing_model.html">Adding New Model Features</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_exASLM.html">Case Study: Imaging on the Expansion ASLM</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing Guidelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general-principles">General Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-of-developer-dependencies">Installation of Developer Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pre-commit-hooks">Pre-Commit Hooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dictionary-parsing">Dictionary Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unit-tests">Unit Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developing-with-a-mac">Developing with a Mac</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
 </ul>
 
@@ -88,7 +80,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="contributing_home.html">Contributing to Navigate</a></li>
       <li class="breadcrumb-item active">Contributing Guidelines</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/contributing/contributing_guidelines.rst.txt" rel="nofollow"> View page source</a>
@@ -122,9 +113,9 @@ disrupting another part of the code base.</p></li>
 <li><p>We are happy to discuss code refactors for improved clarity and speed.
 However, please do not modify something that is already working without
 discussing this with the software team in advance.</p></li>
-<li><p>All code that modifies microscope control behavior must be reviewed and tested on a</p></li>
+<li><p>All code that modifies microscope control behavior must be reviewed and tested on a
+live system prior to merging into the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch.</p></li>
 </ul>
-<p>live system prior to merging into the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch.</p>
 </section>
 <section id="installation-of-developer-dependencies">
 <h2>Installation of Developer Dependencies<a class="headerlink" href="#installation-of-developer-dependencies" title="Permalink to this heading"></a></h2>
@@ -145,7 +136,7 @@ variable names are <code class="docutils literal notranslate"><span class="pre">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h2>
 <p>All classes and functions should have docstrings written in
 <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html">Numpydoc style</a> in a sphinx-compatible format. This allows us to automatically generate
-documentation for the code base. Example documentation can be found <a class="reference internal" href="sphinx_numpydoc.html"><span class="doc">here</span></a></p>
+documentation for the code base.</p>
 </section>
 <section id="pre-commit-hooks">
 <h2>Pre-Commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="Permalink to this heading"></a></h2>
@@ -183,7 +174,7 @@ associated with it.</p>
 <p>Each line of code is unit tested to ensure it behaves appropriately
 and alert future coders to modifications that break expected functionality.
 Guidelines for writing good unit tests can be found <a class="reference external" href="https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test">here</a>
-and <a class="reference external" href="https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0">here</a>,
+and <a class="reference external" href="https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0">over here</a>,
 or see examples of other unit tests in this application’s <code class="docutils literal notranslate"><span class="pre">test</span></code> folder. We
 use the <a class="reference external" href="https://docs.pytest.org/en/7.2.x/">pytest library</a> to evaluate unit
 tests.</p>
@@ -216,8 +207,8 @@ of ~1000 typically works:</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="contributing_home.html" class="btn btn-neutral float-left" title="Contributing to Navigate" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="contributing_hardware.html" class="btn btn-neutral float-right" title="Adding New Hardware" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../feature_container/feature_container_home.html" class="btn btn-neutral float-left" title="Feature Container" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

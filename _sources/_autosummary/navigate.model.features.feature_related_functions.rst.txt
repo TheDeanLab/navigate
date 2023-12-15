@@ -12,7 +12,6 @@ navigate.model.features.feature\_related\_functions
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       convert_feature_list_to_str
       convert_str_to_feature_list
@@ -25,8 +24,6 @@ navigate.model.features.feature\_related\_functions
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       SharedList
    

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Case Study: Imaging on the Expansion ASLM &mdash; navigate 0.0.1 documentation</title>
+  <title>Imaging on an Upright ASLM &mdash; navigate 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="API Reference" href="../api.html" />
-    <link rel="prev" title="Case Study: Imaging on the mesoSPIM BT" href="acquire_mesospimbt.html" /> 
+    <link rel="next" title="Hardware" href="../hardware/hardware_home.html" />
+    <link rel="prev" title="Case Study: Imaging on the CT-ASLM-V1 and CT-ASLM-V2" href="acquire_CT-ASLM-V1_and_CT-ASLM-V2.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,20 +48,23 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
-<li class="toctree-l1"><a class="reference internal" href="setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Case Study: Imaging on the Expansion ASLM</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#setting-the-beam-parameters">Setting the beam parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#loading-and-finding-the-sample">Loading and finding the sample</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#imaging-a-z-stack-using-stop-and-settle-mode">Imaging a Z-Stack using Stop and Settle Mode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#imaging-a-z-stack-using-constant-velocity-acquisition-mode">Imaging a Z-Stack using Constant Velocity Acquisition Mode</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="case_studies_home.html">Case Studies</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="setup_voodoo.html">Setting up the an Axially Swept Light-Sheet Microscope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acquire_mesospimbt.html">Imaging on a mesoSPIM BT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acquire_CT-ASLM-V1_and_CT-ASLM-V2.html">Case Study: Imaging on the CT-ASLM-V1 and CT-ASLM-V2</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Imaging on an Upright ASLM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setting-the-beam-parameters">Setting the beam parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#loading-and-finding-the-sample">Loading and finding the sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imaging-a-z-stack-using-stop-and-settle-mode">Imaging a Z-Stack using Stop and Settle Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imaging-a-z-stack-using-constant-velocity-acquisition-mode">Imaging a Z-Stack using Constant Velocity Acquisition Mode</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
 </ul>
 
@@ -79,7 +82,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Case Study: Imaging on the Expansion ASLM</li>
+          <li class="breadcrumb-item"><a href="case_studies_home.html">Case Studies</a></li>
+      <li class="breadcrumb-item active">Imaging on an Upright ASLM</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/case_studies/acquire_exASLM.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -89,9 +93,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="case-study-imaging-on-the-expansion-aslm">
-<h1>Case Study: Imaging on the Expansion ASLM<a class="headerlink" href="#case-study-imaging-on-the-expansion-aslm" title="Permalink to this heading"></a></h1>
-<p>This is a case study in using the software to image with a <cite>Expansion ASLM Microscope</cite>.</p>
+  <section id="imaging-on-an-upright-aslm">
+<h1>Imaging on an Upright ASLM<a class="headerlink" href="#imaging-on-an-upright-aslm" title="Permalink to this heading"></a></h1>
+<p>This is a case study in using the software to image with an upright ASLM microscope.</p>
 <section id="setting-the-beam-parameters">
 <h2>Setting the beam parameters<a class="headerlink" href="#setting-the-beam-parameters" title="Permalink to this heading"></a></h2>
 <dl class="simple">
@@ -162,8 +166,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="acquire_mesospimbt.html" class="btn btn-neutral float-left" title="Case Study: Imaging on the mesoSPIM BT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="acquire_CT-ASLM-V1_and_CT-ASLM-V2.html" class="btn btn-neutral float-left" title="Case Study: Imaging on the CT-ASLM-V1 and CT-ASLM-V2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../hardware/hardware_home.html" class="btn btn-neutral float-right" title="Hardware" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

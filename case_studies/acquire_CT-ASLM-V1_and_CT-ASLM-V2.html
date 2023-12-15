@@ -21,7 +21,9 @@
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Imaging on an Upright ASLM" href="acquire_exASLM.html" />
+    <link rel="prev" title="Imaging on a mesoSPIM BT" href="acquire_mesospimbt.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,16 +46,26 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="case_studies_home.html">Case Studies</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="setup_voodoo.html">Setting up the an Axially Swept Light-Sheet Microscope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acquire_mesospimbt.html">Imaging on a mesoSPIM BT</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Case Study: Imaging on the CT-ASLM-V1 and CT-ASLM-V2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-the-chamber">Setting up the chamber</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sample-loading-and-finding-the-samples">Sample loading and finding the samples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imaging-a-z-stack-with-stelzer-mode">Imaging a Z-Stack with Stelzer mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imaging-a-z-stack-with-aslm-mode">Imaging a Z-Stack with ASLM mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tiling-a-sample-larger-than-the-field-of-view">Tiling a sample larger than the field of view</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="acquire_exASLM.html">Imaging on an Upright ASLM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
-<li class="toctree-l1"><a class="reference internal" href="setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acquire_exASLM.html">Case Study: Imaging on the Expansion ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
 </ul>
 
@@ -71,6 +83,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="case_studies_home.html">Case Studies</a></li>
       <li class="breadcrumb-item active">Case Study: Imaging on the CT-ASLM-V1 and CT-ASLM-V2</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/case_studies/acquire_CT-ASLM-V1_and_CT-ASLM-V2.rst.txt" rel="nofollow"> View page source</a>
@@ -107,7 +120,7 @@
 </ol>
 </section>
 <section id="imaging-a-z-stack-with-stelzer-mode">
-<h2>Imaging a Z-Stack with Stelzer mode<a class="headerlink" href="#imaging-a-z-stack-with-stelzer-mode" title="Permalink to this heading"></a></h2>
+<span id="z-stack-stelzer"></span><h2>Imaging a Z-Stack with Stelzer mode<a class="headerlink" href="#imaging-a-z-stack-with-stelzer-mode" title="Permalink to this heading"></a></h2>
 <p>Stelzer mode is the normal non-ASLM light sheet mode, it gives more signal while offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) lateral resolution.</p>
 <ol class="arabic simple">
 <li><p>Go to the <span class="guilabel">Microscope Configuration ‣ Waveform Parameters</span>. A popup named <span class="guilabel">Waveform Parameter Settings will appear</span>.</p></li>
@@ -120,7 +133,7 @@
 <li><p>Go to <span class="guilabel">Stage Control</span>, set the Z position in <span class="guilabel">Stage Positions</span> to be 0.</p></li>
 <li><p>Find the region of interest by using the joystick or using the controls in the <span class="guilabel">Stage Control</span> tab. If using the joystick, hit the big red <span class="guilabel">STOP</span> button to update the stage locations to the software.</p></li>
 <li><p>Move along the Z axis with the joystick or the “Focus” in the <span class="guilabel">Stage Control</span> tab to one end of the region of interest. If using the joystick, hit the big red <span class="guilabel">STOP</span> button to update the stage locations to the software. Under the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquistion Settings (um)</span>, press <span class="guilabel">Set Start Pos/Foc</span>.</p></li>
-<li><p>Go to <span class="guilabel">Stage Control</span>, change the Z position in <span class="guilabel">Stage Positions</span> to set the scan range. Be aware the range for Z position is 0 – 200. Going outside of the range will cause the stage to have issues.</p></li>
+<li><p>Go to <span class="guilabel">Stage Control</span>, change the Z position in <span class="guilabel">Stage Positions</span> to set the scan range. Be aware the range for Z position is 0 - 200. Going outside of the range will cause the stage to have issues.</p></li>
 <li><p>Go back to <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquistion Settings (um)</span>, press <span class="guilabel">Set End Pos/Foc</span>.</p></li>
 <li><p>Setup <span class="guilabel">Step Size</span> under the <span class="guilabel">Channels</span>, recommend 3.0 (CT-ASLM-V1) and 1.0 (CT-ASLM-V2).</p></li>
 <li><p>Under the <span class="guilabel">Channels</span>, make sure <span class="guilabel">Enable</span> is unchecked under <span class="guilabel">Multi-Position Acquisition</span>.</p></li>
@@ -130,7 +143,7 @@
 </ol>
 </section>
 <section id="imaging-a-z-stack-with-aslm-mode">
-<h2>Imaging a Z-Stack with ASLM mode<a class="headerlink" href="#imaging-a-z-stack-with-aslm-mode" title="Permalink to this heading"></a></h2>
+<span id="z-stack-aslm"></span><h2>Imaging a Z-Stack with ASLM mode<a class="headerlink" href="#imaging-a-z-stack-with-aslm-mode" title="Permalink to this heading"></a></h2>
 <p>ASLM mode is the high-resolution light sheet mode, it gives leas signal but offering around 950 nm (CT-ASLM-V1) and 480 nm (CT-ASLM-V2) isotropic resolution.</p>
 <ol class="arabic simple">
 <li><p>Switch the slit out of the setup.</p></li>
@@ -157,10 +170,10 @@
 </section>
 <section id="tiling-a-sample-larger-than-the-field-of-view">
 <h2>Tiling a sample larger than the field of view<a class="headerlink" href="#tiling-a-sample-larger-than-the-field-of-view" title="Permalink to this heading"></a></h2>
-<p>This assumes you have already found the samples and ready to acquire data in either Stelzer mode or ASLM mode. (see <span class="xref std std-ref">Imaging a Z-Stack with Stelzer mode</span> and <span class="xref std std-ref">Imaging a Z-Stack with ASLM mode</span>).</p>
+<p>This assumes you have already found the samples and ready to acquire data in either Stelzer mode or ASLM mode. (see <a class="reference internal" href="#z-stack-stelzer"><span class="std std-ref">Imaging a Z-Stack with Stelzer mode</span></a> and <a class="reference internal" href="#z-stack-aslm"><span class="std std-ref">Imaging a Z-Stack with ASLM mode</span></a>).</p>
 <ol class="arabic simple">
 <li><p>Under <span class="guilabel">Channels</span> tab, press <span class="guilabel">Launch Tiling Wizard</span>. A popup named <span class="guilabel">Multi-PositionTiling Wizard</span> will appear.</p></li>
-<li><p>Follow <span class="xref std std-ref">Imaging a Z-Stack with Stelzer mode/ASLM mode</span> to set up the start and end positions in <span class="guilabel">Stack Acquistion Settings (um)</span>. At the same time, when pressing <span class="guilabel">Set Start Pos/Foc</span> to set up the start position, go to <span class="guilabel">Multi-PositionTiling Wizard</span> and press <span class="guilabel">Set Z Start</span>. When pressing <span class="guilabel">Set End Pos/Foc</span> to set up the end position, go to <span class="guilabel">Multi-PositionTiling Wizard</span> and press <span class="guilabel">Set Z End</span>.</p></li>
+<li><p>Follow <a class="reference internal" href="#z-stack-stelzer"><span class="std std-ref">Imaging a Z-Stack with Stelzer mode</span></a> to set up the start and end positions in <span class="guilabel">Stack Acquistion Settings (um)</span>. At the same time, when pressing <span class="guilabel">Set Start Pos/Foc</span> to set up the start position, go to <span class="guilabel">Multi-PositionTiling Wizard</span> and press <span class="guilabel">Set Z Start</span>. When pressing <span class="guilabel">Set End Pos/Foc</span> to set up the end position, go to <span class="guilabel">Multi-PositionTiling Wizard</span> and press <span class="guilabel">Set Z End</span>.</p></li>
 <li><p>Move the joystick or the “X Movement” in the <span class="guilabel">Stage Control</span> tab to the lower bound of the x-axis and press <span class="guilabel">Set X Start</span> in the <span class="guilabel">Multi-PositionTiling Wizard</span> popup. Navigate to the upper bound of the x-axis and press <span class="guilabel">Set X End</span> in the <span class="guilabel">Multi-PositionTiling Wizard</span> popup. Repeat for all axes except for Z. If using the joystick, hit the big red <span class="guilabel">STOP</span> button to update the stage locations to the software.</p></li>
 <li><p>Press <span class="guilabel">Populate Multi-Position Table</span>. Navigate to the <span class="guilabel">Multiposition</span> tab and ensure the locations populated.</p></li>
 <li><p>Under the <span class="guilabel">Channels</span>, make sure Enable is checked under <span class="guilabel">Multi-Position Acquisition</span>.</p></li>
@@ -174,7 +187,10 @@
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="acquire_mesospimbt.html" class="btn btn-neutral float-left" title="Imaging on a mesoSPIM BT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="acquire_exASLM.html" class="btn btn-neutral float-right" title="Imaging on an Upright ASLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

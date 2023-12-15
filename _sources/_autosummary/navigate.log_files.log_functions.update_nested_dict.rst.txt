@@ -1,6 +1,0 @@
-navigate.log\_files.log\_functions.update\_nested\_dict
-=======================================================
-
-.. currentmodule:: navigate.log_files.log_functions
-
-.. autofunction:: update_nested_dict

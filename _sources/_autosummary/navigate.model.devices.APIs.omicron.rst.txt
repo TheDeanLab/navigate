@@ -25,7 +25,6 @@ navigate.model.devices.APIs.omicron
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.APIs.omicron.LuxxLaser

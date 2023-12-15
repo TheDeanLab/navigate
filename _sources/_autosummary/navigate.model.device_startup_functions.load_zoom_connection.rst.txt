@@ -1,6 +1,0 @@
-navigate.model.device\_startup\_functions.load\_zoom\_connection
-================================================================
-
-.. currentmodule:: navigate.model.device_startup_functions
-
-.. autofunction:: load_zoom_connection

@@ -1,0 +1,29 @@
+navigate.model.devices.APIs.coherent.ObisLaser
+==============================================
+
+.. automodule:: navigate.model.devices.APIs.coherent.ObisLaser
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ObisLaser
+   
+   
+
+   
+   
+   
+
+
+

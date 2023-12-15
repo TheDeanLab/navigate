@@ -1,6 +1,0 @@
-navigate.model.features.remove\_empty\_tiles.detect\_tissue
-===========================================================
-
-.. currentmodule:: navigate.model.features.remove_empty_tiles
-
-.. autofunction:: detect_tissue

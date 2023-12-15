@@ -1,6 +1,0 @@
-navigate.model.device\_startup\_functions.start\_remote\_focus\_device
-======================================================================
-
-.. currentmodule:: navigate.model.device_startup_functions
-
-.. autofunction:: start_remote_focus_device

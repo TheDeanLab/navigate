@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.model.features.remove_empty_tiles.detect_tissue" href="navigate.model.features.remove_empty_tiles.detect_tissue.html" />
-    <link rel="prev" title="navigate.model.features.image_writer.ImageWriter" href="navigate.model.features.image_writer.ImageWriter.html" /> 
+    <link rel="next" title="navigate.model.features.restful_features" href="navigate.model.features.restful_features.html" />
+    <link rel="prev" title="navigate.model.features.image_writer" href="navigate.model.features.image_writer.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,14 +48,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_exASLM.html">Case Study: Imaging on the Expansion ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
@@ -125,10 +122,10 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.remove_empty_tiles.detect_tissue.html#navigate.model.features.remove_empty_tiles.detect_tissue" title="navigate.model.features.remove_empty_tiles.detect_tissue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">detect_tissue</span></code></a>(image_data[, percentage])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">detect_tissue</span></code>(image_data[, percentage])</p></td>
 <td><p>Detect tissue in an image and determine if it exceeds a specified percentage.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.remove_empty_tiles.detect_tissue2.html#navigate.model.features.remove_empty_tiles.detect_tissue2" title="navigate.model.features.remove_empty_tiles.detect_tissue2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">detect_tissue2</span></code></a>(image_data[, percentage])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">detect_tissue2</span></code>(image_data[, percentage])</p></td>
 <td><p>Detect Tissue in an Image (Version 2).</p></td>
 </tr>
 </tbody>
@@ -136,13 +133,13 @@
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.remove_empty_tiles.DetectTissueInStack.html#navigate.model.features.remove_empty_tiles.DetectTissueInStack" title="navigate.model.features.remove_empty_tiles.DetectTissueInStack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DetectTissueInStack</span></code></a>(model[, planes, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DetectTissueInStack</span></code>(model[, planes, ...])</p></td>
 <td><p>Detect Tissue in a Stack of Images.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.html#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord" title="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DetectTissueInStackAndRecord</span></code></a>(model[, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DetectTissueInStackAndRecord</span></code>(model[, ...])</p></td>
 <td><p>Detect Tissue in a Stack of Images and Record Positions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.remove_empty_tiles.RemoveEmptyPositions.html#navigate.model.features.remove_empty_tiles.RemoveEmptyPositions" title="navigate.model.features.remove_empty_tiles.RemoveEmptyPositions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RemoveEmptyPositions</span></code></a>(model[, position_flags])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">RemoveEmptyPositions</span></code>(model[, position_flags])</p></td>
 <td><p>Remove Empty Positions from the Model.</p></td>
 </tr>
 </tbody>
@@ -153,8 +150,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="navigate.model.features.image_writer.ImageWriter.html" class="btn btn-neutral float-left" title="navigate.model.features.image_writer.ImageWriter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.model.features.remove_empty_tiles.detect_tissue.html" class="btn btn-neutral float-right" title="navigate.model.features.remove_empty_tiles.detect_tissue" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.model.features.image_writer.html" class="btn btn-neutral float-left" title="navigate.model.features.image_writer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.features.restful_features.html" class="btn btn-neutral float-right" title="navigate.model.features.restful_features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

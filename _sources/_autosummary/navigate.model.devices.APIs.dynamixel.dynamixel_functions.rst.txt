@@ -12,7 +12,6 @@ navigate.model.devices.APIs.dynamixel.dynamixel\_functions
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       create_mock_dxl_device
    

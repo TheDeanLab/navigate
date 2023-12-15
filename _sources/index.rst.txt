@@ -1,14 +1,15 @@
 
 .. _navigate-home:
 
-############################################
+############
 **navigate**
-############################################
+############
 
 
-**Navigate** is a Python library to control microscopes in the UT Southwestern ecosystem.
-It aims to abstract hardware and allow for maximum customization. The library
-contains a feature list that acts as a recipe maker for automated microscope routines.
+**navigate** is an open-source Python software for general microcsope control. It focuses
+on smart microscopy applications by providing reusable acquisition and analysis routines,
+termed :ref:`features <features>`, that can be chained
+in arbitrary orders to create custom acquistion protocols.
 
 .. note::
 
@@ -28,22 +29,16 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 **Contents**
 ============
 
-
 .. toctree::
    :maxdepth: 2
 
    software_installation
-   implementations
    software_configuration
-   supported_hardware
-   contributing/contributing_home
+   case_studies/case_studies_home
+   hardware/hardware_home
    feature_container/feature_container_home
-   case_studies/setup_voodoo
-   case_studies/acquire_mesospimbt
-   case_studies/acquire_exASLM
+   contributing/contributing_guidelines
    api
-
-
 
 **Authors**
 ============
@@ -54,7 +49,6 @@ Andrew Jamieson, Andrew York, Nathaniel Thayer, and more.
 
 **Index and search**
 ====================
-
 
 * :ref:`genindex`
 * :ref:`Search <search>`

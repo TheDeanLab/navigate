@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.tools.common_functions.build_ref_name" href="navigate.tools.common_functions.build_ref_name.html" />
-    <link rel="prev" title="navigate.tools.common_dict_tools.update_stage_dict" href="navigate.tools.common_dict_tools.update_stage_dict.html" /> 
+    <link rel="next" title="navigate.tools.decorators" href="navigate.tools.decorators.html" />
+    <link rel="prev" title="navigate.tools.common_dict_tools" href="navigate.tools.common_dict_tools.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,14 +48,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_exASLM.html">Case Study: Imaging on the Expansion ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
@@ -63,14 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="navigate.model.html">navigate.model</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="navigate.tools.html">navigate.tools</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="navigate.tools.common_dict_tools.html">navigate.tools.common_dict_tools</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">navigate.tools.common_functions</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="navigate.tools.common_functions.build_ref_name.html">navigate.tools.common_functions.build_ref_name</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.tools.common_functions.combine_funcs.html">navigate.tools.common_functions.combine_funcs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.tools.common_functions.copy_proxy_object.html">navigate.tools.common_functions.copy_proxy_object</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.tools.common_functions.load_module_from_file.html">navigate.tools.common_functions.load_module_from_file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.tools.common_functions.VariableWithLock.html">navigate.tools.common_functions.VariableWithLock</a></li>
-</ul>
-</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">navigate.tools.common_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.tools.decorators.html">navigate.tools.decorators</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.tools.file_functions.html">navigate.tools.file_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.tools.image.html">navigate.tools.image</a></li>
@@ -119,16 +109,16 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.tools.common_functions.build_ref_name.html#navigate.tools.common_functions.build_ref_name" title="navigate.tools.common_functions.build_ref_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_ref_name</span></code></a>(separator, *args)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_ref_name</span></code>(separator, *args)</p></td>
 <td><p>this function will build a reference name</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.tools.common_functions.combine_funcs.html#navigate.tools.common_functions.combine_funcs" title="navigate.tools.common_functions.combine_funcs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">combine_funcs</span></code></a>(*funclist)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">combine_funcs</span></code>(*funclist)</p></td>
 <td><p>this function will combine a list of functions to a new function</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.tools.common_functions.copy_proxy_object.html#navigate.tools.common_functions.copy_proxy_object" title="navigate.tools.common_functions.copy_proxy_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_proxy_object</span></code></a>(content)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_proxy_object</span></code>(content)</p></td>
 <td><p>This function will serialize proxy dict and list</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.tools.common_functions.load_module_from_file.html#navigate.tools.common_functions.load_module_from_file" title="navigate.tools.common_functions.load_module_from_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_module_from_file</span></code></a>(module_name, file_path)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_module_from_file</span></code>(module_name, file_path)</p></td>
 <td><p>This function will load python file from file path as a module</p></td>
 </tr>
 </tbody>
@@ -136,7 +126,7 @@
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.tools.common_functions.VariableWithLock.html#navigate.tools.common_functions.VariableWithLock" title="navigate.tools.common_functions.VariableWithLock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariableWithLock</span></code></a>(VariableType)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariableWithLock</span></code>(VariableType)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -147,8 +137,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="navigate.tools.common_dict_tools.update_stage_dict.html" class="btn btn-neutral float-left" title="navigate.tools.common_dict_tools.update_stage_dict" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.tools.common_functions.build_ref_name.html" class="btn btn-neutral float-right" title="navigate.tools.common_functions.build_ref_name" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.tools.common_dict_tools.html" class="btn btn-neutral float-left" title="navigate.tools.common_dict_tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.tools.decorators.html" class="btn btn-neutral float-right" title="navigate.tools.decorators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

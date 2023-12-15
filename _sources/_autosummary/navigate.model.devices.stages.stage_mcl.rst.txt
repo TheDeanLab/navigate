@@ -12,7 +12,6 @@ navigate.model.devices.stages.stage\_mcl
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       build_MCLStage_connection
    
@@ -23,8 +22,6 @@ navigate.model.devices.stages.stage\_mcl
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       MCLStage
    

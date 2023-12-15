@@ -12,7 +12,6 @@ navigate.tools.xml\_tools
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       dict_to_xml
       parse_xml

@@ -12,7 +12,6 @@ navigate.tools.decorators
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       function_timer
    
@@ -23,8 +22,6 @@ navigate.tools.decorators
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       FeatureList
    

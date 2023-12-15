@@ -25,7 +25,6 @@ navigate.model.devices.galvo
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.galvo.galvo_base

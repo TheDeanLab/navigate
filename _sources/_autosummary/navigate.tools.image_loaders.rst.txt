@@ -16,8 +16,6 @@ navigate.tools.image\_loaders
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       LazyTiff
    

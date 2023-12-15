@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.config.config.build_nested_dict" href="navigate.config.config.build_nested_dict.html" />
+    <link rel="next" title="navigate.controller" href="navigate.controller.html" />
     <link rel="prev" title="navigate.config" href="navigate.config.html" /> 
 </head>
 
@@ -48,26 +48,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_exASLM.html">Case Study: Imaging on the Expansion ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="navigate.config.html">navigate.config</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">navigate.config.config</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.build_nested_dict.html">navigate.config.config.build_nested_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.get_configuration_paths.html">navigate.config.config.get_configuration_paths</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.get_navigate_path.html">navigate.config.config.get_navigate_path</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.load_configs.html">navigate.config.config.load_configs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.update_config_dict.html">navigate.config.config.update_config_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.verify_experiment_config.html">navigate.config.config.verify_experiment_config</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.verify_waveform_constants.html">navigate.config.config.verify_waveform_constants</a></li>
-</ul>
-</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">navigate.config.config</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
@@ -110,25 +98,25 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.config.config.build_nested_dict.html#navigate.config.config.build_nested_dict" title="navigate.config.config.build_nested_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_nested_dict</span></code></a>(manager, parent_dict, ...)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_nested_dict</span></code>(manager, parent_dict, ...)</p></td>
 <td><p>Nest dictionaries recursively.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.config.config.get_configuration_paths.html#navigate.config.config.get_configuration_paths" title="navigate.config.config.get_configuration_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_configuration_paths</span></code></a>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_configuration_paths</span></code>()</p></td>
 <td><p>Get the paths of the various configuration files used by Navigate.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.config.config.get_navigate_path.html#navigate.config.config.get_navigate_path" title="navigate.config.config.get_navigate_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_navigate_path</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_navigate_path</span></code>()</p></td>
 <td><p>Establish a program home directory in AppData/Local/.navigate for Windows or ~/.navigate for Mac and Linux.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.config.config.load_configs.html#navigate.config.config.load_configs" title="navigate.config.config.load_configs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_configs</span></code></a>(manager, **kwargs)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_configs</span></code>(manager, **kwargs)</p></td>
 <td><p>Load configuration files.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.config.config.update_config_dict.html#navigate.config.config.update_config_dict" title="navigate.config.config.update_config_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_config_dict</span></code></a>(manager, parent_dict, ...)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_config_dict</span></code>(manager, parent_dict, ...)</p></td>
 <td><p>Read a new file and update info of the configuration dict.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.config.config.verify_experiment_config.html#navigate.config.config.verify_experiment_config" title="navigate.config.config.verify_experiment_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_experiment_config</span></code></a>(manager, configuration)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_experiment_config</span></code>(manager, configuration)</p></td>
 <td><p>Verify configuration (configuration, experiment, waveform_constants) yaml files</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.config.config.verify_waveform_constants.html#navigate.config.config.verify_waveform_constants" title="navigate.config.config.verify_waveform_constants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_waveform_constants</span></code></a>(manager, configuration)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_waveform_constants</span></code>(manager, configuration)</p></td>
 <td><p>Verifies and updates the waveform constants in the configuration dictionary.</p></td>
 </tr>
 </tbody>
@@ -140,7 +128,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="navigate.config.html" class="btn btn-neutral float-left" title="navigate.config" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.config.config.build_nested_dict.html" class="btn btn-neutral float-right" title="navigate.config.config.build_nested_dict" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.controller.html" class="btn btn-neutral float-right" title="navigate.controller" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

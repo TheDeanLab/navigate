@@ -16,8 +16,6 @@ navigate.model.devices.stages.stage\_galvo
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       GalvoNIStage
    

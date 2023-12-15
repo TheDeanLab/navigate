@@ -16,8 +16,6 @@ navigate.model.devices.camera.camera\_hamamatsu
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       HamamatsuOrca
       HamamatsuOrcaLightning

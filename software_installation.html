@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Microscope Implementations" href="implementations.html" />
+    <link rel="next" title="Configuration Overview" href="software_configuration.html" />
     <link rel="prev" title="navigate" href="index.html" /> 
 </head>
 
@@ -53,14 +53,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware/hardware_home.html">Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_studies/setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_studies/acquire_exASLM.html">Case Study: Imaging on the Expansion ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
@@ -121,9 +118,9 @@ See the Troubleshooting section below for information on how to add the proxy ad
 </pre></div>
 </div>
 <p>The active environment is shown in parentheses on the far-left.  Originally, we were in the miniconda base environment.
-After activatin the Navigate environment, it should now show (NAVIGATE).</p>
+After activating the Navigate environment, it should now show <code class="docutils literal notranslate"><span class="pre">(navigate)</span></code>.</p>
 <p><strong>Update the pip python package manager</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(Navigate) MyComputer ~ $ python -m pip install --upgrade pip
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(navigate) MyComputer ~ $ python -m pip install --upgrade pip
 </pre></div>
 </div>
 <dl class="simple">
@@ -133,33 +130,33 @@ Once the folder is created, we will want to change that to our working directory
 </dl>
 <ul>
 <li><p>Windows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">Navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span> <span class="n">cd</span> <span class="n">Desktop</span>
-<span class="p">(</span><span class="n">Navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">mkdir</span> <span class="n">Code</span>
-<span class="p">(</span><span class="n">Navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">cd</span> <span class="n">Code</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span> <span class="n">cd</span> <span class="n">Desktop</span>
+<span class="p">(</span><span class="n">navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">mkdir</span> <span class="n">Code</span>
+<span class="p">(</span><span class="n">navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">cd</span> <span class="n">Code</span>
 </pre></div>
 </div>
 </li>
 <li><p>Linux/Mac:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(Navigate) MyComputer ~ $ mkdir ~/Desktop/Code
-(Navigate) MyComputer ~ $ cd ~/Desktop/Code
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(navigate) MyComputer ~ $ mkdir ~/Desktop/Code
+(navigate) MyComputer ~ $ cd ~/Desktop/Code
 </pre></div>
 </div>
 </li>
 </ul>
 <p><strong>Clone the GitHub repository</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(Navigate) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/navigate.git
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(navigate) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/navigate.git
 </pre></div>
 </div>
 <p><strong>Install the Navigate repository</strong></p>
 <p>The last step requires you to change into the Navigate directory and the install the repo as a package locally on your machine.:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(Navigate) MyComputer MyFolderName $ cd navigate
-(Navigate) MyComputer Navigate $ pip install -e .
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(navigate) MyComputer MyFolderName $ cd navigate
+(navigate) MyComputer Navigate $ pip install -e .
 </pre></div>
 </div>
-<dl class="simple">
-<dt><strong>Run the Navigate software</strong>::</dt><dd><p>(Navigate) MyComputer Navigate $ navigate</p>
-</dd>
-</dl>
+<p><strong>Run the Navigate software</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(navigate) MyComputer Navigate $ navigate
+</pre></div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after navigate:</p>
@@ -169,7 +166,7 @@ Once the folder is created, we will want to change that to our working directory
 </div>
 <p>After completeting these steps you will only need to do the below to start the software upon opening the prompt:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate navigate
-(Navigate) MyComputer ~ $ navigate
+(navigate) MyComputer ~ $ navigate
 </pre></div>
 </div>
 <div class="admonition note">
@@ -193,8 +190,8 @@ Once the folder is created, we will want to change that to our working directory
 <li><p>If you continue to have issues then change the value of Variable HTTPS_PROXY to <a class="reference external" href="https://proxy.swmed.edu:3128">https://proxy.swmed.edu:3128</a></p></li>
 <li><dl class="simple">
 <dt>If you still have issues then you will need to create/update both configuration files for conda and pip to include proxy settings, if they are not in the paths below you will need to create them. This assumes a Windows perspective. Mac/Linux users will have different paths, they can be found online.</dt><dd><ul>
-<li><p>Conda’s Config file = C:UsersUserProfile.condarc</p></li>
-<li><p>Pip’s Config file = C:UsersUserProfilepippip.ini</p></li>
+<li><p>Conda’s Config file = C:\Users\UserProfile\.condarc</p></li>
+<li><p>Pip’s Config file = C:\Users\UserProfile\pip\pip.ini</p></li>
 </ul>
 </dd>
 </dl>
@@ -218,7 +215,7 @@ Once the folder is created, we will want to change that to our working directory
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="navigate" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="implementations.html" class="btn btn-neutral float-right" title="Microscope Implementations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="software_configuration.html" class="btn btn-neutral float-right" title="Configuration Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

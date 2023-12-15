@@ -16,8 +16,6 @@ navigate.model.features.common\_features
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       ChangeResolution
       ConProAcquisition

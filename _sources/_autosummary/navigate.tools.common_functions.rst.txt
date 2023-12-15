@@ -12,7 +12,6 @@ navigate.tools.common\_functions
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       build_ref_name
       combine_funcs
@@ -26,8 +25,6 @@ navigate.tools.common\_functions
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       VariableWithLock
    

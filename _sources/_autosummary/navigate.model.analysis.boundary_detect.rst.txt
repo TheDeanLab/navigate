@@ -12,7 +12,6 @@ navigate.model.analysis.boundary\_detect
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       binary_detect
       find_tissue_boundary_2d

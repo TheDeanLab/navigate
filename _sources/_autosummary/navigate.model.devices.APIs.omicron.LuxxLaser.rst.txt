@@ -1,0 +1,36 @@
+navigate.model.devices.APIs.omicron.LuxxLaser
+=============================================
+
+.. automodule:: navigate.model.devices.APIs.omicron.LuxxLaser
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      print_hex
+      stopwatch
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      LuxxLaser
+   
+   
+
+   
+   
+   
+
+
+

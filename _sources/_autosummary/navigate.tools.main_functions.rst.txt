@@ -12,7 +12,6 @@ navigate.tools.main\_functions
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       create_parser
       evaluate_parser_input_arguments

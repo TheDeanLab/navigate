@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.model.features.feature_container.dummy_True" href="navigate.model.features.feature_container.dummy_True.html" />
-    <link rel="prev" title="navigate.model.features.cva_conpro.ConstantVelocityAcquisition" href="navigate.model.features.cva_conpro.ConstantVelocityAcquisition.html" /> 
+    <link rel="next" title="navigate.model.features.feature_related_functions" href="navigate.model.features.feature_related_functions.html" />
+    <link rel="prev" title="navigate.model.features.cva_conpro" href="navigate.model.features.cva_conpro.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,14 +48,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../case_studies/acquire_exASLM.html">Case Study: Imaging on the Expansion ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
@@ -125,16 +122,16 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.feature_container.dummy_True.html#navigate.model.features.feature_container.dummy_True" title="navigate.model.features.feature_container.dummy_True"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dummy_True</span></code></a>(*args)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dummy_True</span></code>(*args)</p></td>
 <td><p>Dummy function that always returns True.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.feature_container.dummy_func.html#navigate.model.features.feature_container.dummy_func" title="navigate.model.features.feature_container.dummy_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dummy_func</span></code></a>(*args)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dummy_func</span></code>(*args)</p></td>
 <td><p>Dummy function with no operation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.feature_container.get_registered_funcs.html#navigate.model.features.feature_container.get_registered_funcs" title="navigate.model.features.feature_container.get_registered_funcs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_registered_funcs</span></code></a>(feature_module[, func_type])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_registered_funcs</span></code>(feature_module[, func_type])</p></td>
 <td><p>Get a dictionary of registered functions for a feature module.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.feature_container.load_features.html#navigate.model.features.feature_container.load_features" title="navigate.model.features.feature_container.load_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_features</span></code></a>(model, feature_list)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_features</span></code>(model, feature_list)</p></td>
 <td><p>Load and organize a list of feature modules into a child-sibling tree structure.</p></td>
 </tr>
 </tbody>
@@ -142,22 +139,22 @@
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.feature_container.Container.html#navigate.model.features.feature_container.Container" title="navigate.model.features.feature_container.Container"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Container</span></code></a>([root, cleanup_list])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Container</span></code>([root, cleanup_list])</p></td>
 <td><p>Container class for managing a control sequence tree.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.feature_container.DataContainer.html#navigate.model.features.feature_container.DataContainer" title="navigate.model.features.feature_container.DataContainer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataContainer</span></code></a>([root, cleanup_list])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataContainer</span></code>([root, cleanup_list])</p></td>
 <td><p>DataContainer class for managing data-based control sequences.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.feature_container.DataNode.html#navigate.model.features.feature_container.DataNode" title="navigate.model.features.feature_container.DataNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataNode</span></code></a>(feature_name, func_dict, *[, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataNode</span></code>(feature_name, func_dict, *[, ...])</p></td>
 <td><p>DataNode class for representing a data-processing node in a control sequence tree.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.feature_container.SignalContainer.html#navigate.model.features.feature_container.SignalContainer" title="navigate.model.features.feature_container.SignalContainer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SignalContainer</span></code></a>([root, cleanup_list, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SignalContainer</span></code>([root, cleanup_list, ...])</p></td>
 <td><p>SignalContainer class for managing signal-based control sequences.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.feature_container.SignalNode.html#navigate.model.features.feature_container.SignalNode" title="navigate.model.features.feature_container.SignalNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SignalNode</span></code></a>(feature_name, func_dict, *[, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SignalNode</span></code>(feature_name, func_dict, *[, ...])</p></td>
 <td><p>SignalNode class for representing a signal-processing node in a control sequence tree.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.feature_container.TreeNode.html#navigate.model.features.feature_container.TreeNode" title="navigate.model.features.feature_container.TreeNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeNode</span></code></a>(feature_name, func_dict, *[, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeNode</span></code>(feature_name, func_dict, *[, ...])</p></td>
 <td><p>TreeNode class for representing a node in a control sequence tree.</p></td>
 </tr>
 </tbody>
@@ -168,8 +165,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="navigate.model.features.cva_conpro.ConstantVelocityAcquisition.html" class="btn btn-neutral float-left" title="navigate.model.features.cva_conpro.ConstantVelocityAcquisition" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.model.features.feature_container.dummy_True.html" class="btn btn-neutral float-right" title="navigate.model.features.feature_container.dummy_True" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.model.features.cva_conpro.html" class="btn btn-neutral float-left" title="navigate.model.features.cva_conpro" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.features.feature_related_functions.html" class="btn btn-neutral float-right" title="navigate.model.features.feature_related_functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

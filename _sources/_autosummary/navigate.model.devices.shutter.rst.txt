@@ -25,7 +25,6 @@ navigate.model.devices.shutter
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.shutter.laser_shutter_base

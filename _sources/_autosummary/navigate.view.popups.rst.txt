@@ -25,7 +25,6 @@ navigate.view.popups
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.view.popups.acquire_popup

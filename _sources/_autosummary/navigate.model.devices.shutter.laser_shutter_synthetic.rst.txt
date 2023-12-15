@@ -16,8 +16,6 @@ navigate.model.devices.shutter.laser\_shutter\_synthetic
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       SyntheticShutter
    

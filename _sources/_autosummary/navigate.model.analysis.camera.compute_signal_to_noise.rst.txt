@@ -1,6 +1,0 @@
-navigate.model.analysis.camera.compute\_signal\_to\_noise
-=========================================================
-
-.. currentmodule:: navigate.model.analysis.camera
-
-.. autofunction:: compute_signal_to_noise

@@ -25,7 +25,6 @@ navigate.model.features
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.model.features.adaptive_optics

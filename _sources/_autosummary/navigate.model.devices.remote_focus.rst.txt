@@ -25,7 +25,6 @@ navigate.model.devices.remote\_focus
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.remote_focus.remote_focus_base

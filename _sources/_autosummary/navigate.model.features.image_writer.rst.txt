@@ -16,8 +16,6 @@ navigate.model.features.image\_writer
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       ImageWriter
    

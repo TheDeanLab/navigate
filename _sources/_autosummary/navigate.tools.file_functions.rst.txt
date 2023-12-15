@@ -12,7 +12,6 @@ navigate.tools.file\_functions
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       create_save_path
       delete_folder

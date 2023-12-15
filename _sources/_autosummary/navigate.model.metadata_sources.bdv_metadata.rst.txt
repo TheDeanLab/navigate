@@ -16,8 +16,6 @@ navigate.model.metadata\_sources.bdv\_metadata
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       BigDataViewerMetadata
    

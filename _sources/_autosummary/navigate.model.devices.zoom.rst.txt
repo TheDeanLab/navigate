@@ -25,7 +25,6 @@ navigate.model.devices.zoom
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.zoom.zoom_base

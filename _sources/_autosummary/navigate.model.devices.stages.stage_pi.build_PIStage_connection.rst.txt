@@ -1,6 +1,0 @@
-navigate.model.devices.stages.stage\_pi.build\_PIStage\_connection
-==================================================================
-
-.. currentmodule:: navigate.model.devices.stages.stage_pi
-
-.. autofunction:: build_PIStage_connection

@@ -12,7 +12,6 @@ navigate.model.devices.filter\_wheel.filter\_wheel\_asi
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       build_filter_wheel_connection
    
@@ -23,8 +22,6 @@ navigate.model.devices.filter\_wheel.filter\_wheel\_asi
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       ASIFilterWheel
    

@@ -25,7 +25,6 @@ navigate.model.devices.camera
 
 .. autosummary::
    :toctree:
-   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.camera.camera_base

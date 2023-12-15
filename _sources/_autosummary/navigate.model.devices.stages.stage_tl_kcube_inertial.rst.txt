@@ -12,7 +12,6 @@ navigate.model.devices.stages.stage\_tl\_kcube\_inertial
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       build_TLKIMStage_connection
    
@@ -23,8 +22,6 @@ navigate.model.devices.stages.stage\_tl\_kcube\_inertial
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       TLKIMStage
    

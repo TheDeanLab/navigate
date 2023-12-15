@@ -12,7 +12,6 @@ navigate.model.devices.stages.stage\_pi
    .. rubric:: Functions
 
    .. autosummary::
-      :toctree:
    
       build_PIStage_connection
    
@@ -23,8 +22,6 @@ navigate.model.devices.stages.stage\_pi
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       PIStage
    

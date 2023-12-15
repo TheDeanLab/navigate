@@ -1,6 +1,0 @@
-navigate.model.devices.stages.stage\_mcl.build\_MCLStage\_connection
-====================================================================
-
-.. currentmodule:: navigate.model.devices.stages.stage_mcl
-
-.. autofunction:: build_MCLStage_connection

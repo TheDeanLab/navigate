@@ -16,8 +16,6 @@ navigate.model.model
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       Model
    

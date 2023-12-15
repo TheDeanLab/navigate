@@ -47,14 +47,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to Navigate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware/hardware_home.html">Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_studies/setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_studies/acquire_exASLM.html">Case Study: Imaging on the Expansion ASLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
@@ -84,9 +81,10 @@
              
   <section id="navigate">
 <span id="navigate-home"></span><h1><strong>navigate</strong><a class="headerlink" href="#navigate" title="Permalink to this heading"></a></h1>
-<p><strong>Navigate</strong> is a Python library to control microscopes in the UT Southwestern ecosystem.
-It aims to abstract hardware and allow for maximum customization. The library
-contains a feature list that acts as a recipe maker for automated microscope routines.</p>
+<p><strong>navigate</strong> is an open-source Python software for general microcsope control. It focuses
+on smart microscopy applications by providing reusable acquisition and analysis routines,
+termed <a class="reference internal" href="feature_container/feature_container_home.html#features"><span class="std std-ref">features</span></a>, that can be chained
+in arbitrary orders to create custom acquistion protocols.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This project is under active development. See our <a class="reference external" href="https://github.com/TheDeanLab/navigate">GitHub repository for updates</a>.</p>
@@ -112,15 +110,6 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 <li class="toctree-l2"><a class="reference internal" href="software_installation.html#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="implementations.html">Microscope Implementations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="implementations.html#multiscale-microscope">Multiscale Microscope</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations.html#expansion-aslm">Expansion ASLM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations.html#opm-v2">OPM-V2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations.html#ct-aslm-v1">CT-ASLM-V1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations.html#ct-aslm-v2">CT-ASLM-V2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations.html#spectral-tirf">Spectral TIRF</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="software_configuration.html">Configuration Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="software_configuration.html#configuration-file">Configuration File</a></li>
 <li class="toctree-l2"><a class="reference internal" href="software_configuration.html#gui-section">GUI Section</a></li>
@@ -129,24 +118,17 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 <li class="toctree-l2"><a class="reference internal" href="software_configuration.html#rest-api-configuration-file">Rest API Configuration File</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Supported Hardware</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#data-acquisition-card">Data Acquisition Card</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#cameras">Cameras</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#remote-focusing-devices">Remote Focusing Devices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#stages">Stages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#dichroic-turret">Dichroic Turret</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#filter-wheels">Filter Wheels</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#galvanometers">Galvanometers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#lasers">Lasers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#shutters">Shutters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#mechanical-zoom">Mechanical Zoom</a></li>
-<li class="toctree-l2"><a class="reference internal" href="supported_hardware.html#deformable-mirrors">Deformable Mirrors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_studies/case_studies_home.html">Case Studies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="case_studies/setup_voodoo.html">Setting up the an Axially Swept Light-Sheet Microscope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_mesospimbt.html">Imaging on a mesoSPIM BT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_CT-ASLM-V1_and_CT-ASLM-V2.html">Case Study: Imaging on the CT-ASLM-V1 and CT-ASLM-V2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_exASLM.html">Imaging on an Upright ASLM</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_home.html">Contributing to Navigate</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_hardware.html">Adding New Hardware</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_model.html">Adding New Model Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware/hardware_home.html">Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hardware/supported_hardware.html">Supported Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware/implementations.html">Microscope Implementations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware/contributing_hardware.html">Adding New Hardware</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="feature_container/feature_container_home.html">Feature Container</a><ul>
@@ -161,19 +143,15 @@ contains a feature list that acts as a recipe maker for automated microscope rou
 <li class="toctree-l2"><a class="reference internal" href="feature_container/feature_container_home.html#deleting-features">Deleting Features</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="case_studies/setup_voodoo.html">Case Study: Setting up the an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="case_studies/acquire_mesospimbt.html">Case Study: Imaging on the mesoSPIM BT</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_mesospimbt.html#setting-the-beam-parameters">Setting the beam parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_mesospimbt.html#loading-and-finding-the-sample">Loading and finding the sample</a></li>
-<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_mesospimbt.html#imaging-a-z-stack">Imaging a Z-Stack</a></li>
-<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_mesospimbt.html#tiling-a-sample-larger-than-the-field-of-view">Tiling a sample larger than the field of view</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="case_studies/acquire_exASLM.html">Case Study: Imaging on the Expansion ASLM</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_exASLM.html#setting-the-beam-parameters">Setting the beam parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_exASLM.html#loading-and-finding-the-sample">Loading and finding the sample</a></li>
-<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_exASLM.html#imaging-a-z-stack-using-stop-and-settle-mode">Imaging a Z-Stack using Stop and Settle Mode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="case_studies/acquire_exASLM.html#imaging-a-z-stack-using-constant-velocity-acquisition-mode">Imaging a Z-Stack using Constant Velocity Acquisition Mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_guidelines.html">Contributing Guidelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#general-principles">General Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#installation-of-developer-dependencies">Installation of Developer Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#coding-style">Coding Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#pre-commit-hooks">Pre-Commit Hooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#dictionary-parsing">Dictionary Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#unit-tests">Unit Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#developing-with-a-mac">Developing with a Mac</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>

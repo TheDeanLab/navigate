@@ -16,8 +16,6 @@ navigate.model.devices.camera.camera\_photometrics
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
-      :template: custom_class.rst
    
       PhotometricsKinetix
    

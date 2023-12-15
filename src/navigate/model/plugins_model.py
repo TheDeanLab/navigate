@@ -52,6 +52,8 @@ class PluginsModel:
         plugin_acquisition_modes = {}
         plugins = os.listdir(self.plugins_path)
         feature_lists_path = get_navigate_path() + "/feature_lists"
+        if not os.path.exists(feature_lists_path):
+            os.makedirs(feature_lists_path)
         feature_list_files = [
             temp
             for temp in os.listdir(feature_lists_path)

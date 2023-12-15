@@ -24,7 +24,7 @@ General Principles
   However, please do not modify something that is already working without
   discussing this with the software team in advance.
 - All code that modifies microscope control behavior must be reviewed and tested on a
-live system prior to merging into the ``develop`` branch.
+  live system prior to merging into the ``develop`` branch.
 
 Installation of Developer Dependencies
 --------------------------------------
@@ -45,11 +45,10 @@ Documentation
 All classes and functions should have docstrings written in
 `Numpydoc style <https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy
 .html>`_ in a sphinx-compatible format. This allows us to automatically generate
-documentation for the code base. Example documentation can be found :doc:`here
-<sphinx_numpydoc>`
+documentation for the code base.
 
 Pre-Commit Hooks
----------------
+----------------
 We leverage pre-commit workflows to enforce consistent code formatting. In some rare
 cases, Ruff may complain about a line of code that is actually fine. For example, in the example code below,
 Ruff complains that the start_stage class is imported but not used. However, it is actually used in as part of an `exec` statement::
@@ -83,7 +82,7 @@ Unit Tests
 Each line of code is unit tested to ensure it behaves appropriately
 and alert future coders to modifications that break expected functionality.
 Guidelines for writing good unit tests can be found `here <https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test>`_
-and `here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0>`_,
+and `over here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0>`_,
 or see examples of other unit tests in this application's ``test`` folder. We
 use the `pytest library <https://docs.pytest.org/en/7.2.x/>`_ to evaluate unit
 tests.

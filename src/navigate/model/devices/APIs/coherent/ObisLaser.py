@@ -4,12 +4,11 @@ OBIS561, 150 mW, is COM4
 Useful information can be found on Page C-22 of the OBIS_LX_LS Operators Manual
 """
 import logging
-from pathlib import Path
 
 import serial
-from time import time, sleep
+from time import sleep
 
-from navigate.model.devices.lasers.LaserBase import LaserBase
+from navigate.model.devices.lasers.laser_base import LaserBase
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -125,7 +124,8 @@ class ObisLaser(LaserBase):
 
     def set_laser_operating_mode(self, mode):
         """
-        # Set the laser operating mode. Seven mutually exclusive operating modes are available
+        # Set the laser operating mode.
+        # Seven mutually exclusive operating modes are available
         # CWP (continuous wave, constant power)
         # CWC (continuous wave, constant current)
         # DIGITAL (CW with external digital modulation)

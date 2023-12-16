@@ -138,6 +138,9 @@ class Microscope:
         ]["lasers"]
         self.laser_wavelength = [laser["wavelength"] for laser in laser_list]
 
+        if "__plugins__" not in devices_dict:
+            devices_dict["__plugins__"] = {}
+
         # LOAD/START CAMERAS, FILTER_WHEELS, ZOOM, SHUTTERS, REMOTE_FOCUS_DEVICES,
         # GALVOS, AND LASERS
         for device_name in self.configuration["configuration"]["microscopes"][

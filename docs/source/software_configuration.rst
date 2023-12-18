@@ -1,33 +1,39 @@
+======================
 Configuration Overview
-=========================
+======================
 
-This section outlines the ``configuration.yaml``, ``experiment.yaml``,``rest_api_config.yaml``,  ``waveform_templates.yaml``, and ``waveform_constants.yaml``
-files. Once you are ready to configure your exact hardware, please see the :doc:`Supported Hardware
-<hardware/supported_hardware>` section.
+This section outlines the ``configuration.yaml``, ``experiment.yml``,
+``rest_api_config.yml``, ``waveform_templates.yml``, and
+``waveform_constants.yml`` files.
 
 
 Configuration File
-------------------
-In order for the Navigate software to function, you will need to configure the
+==================
+In order for the navigate software to function, you will need to configure the
 specifications of the various hardware that you will be using. The first time you
-launch the software, Navigate will evaluate the the hardware settings as provided in the
-``navigate\config\configuration.yaml`` file. Every subsequent time you launch the
-software, a local version of the ``configuration.yaml`` file can be found
-in either ``Users\name\AppData\Local\.navigate\config`` if on Windows or ``~/.navigate`` if on
-Mac/Linux.
+launch the software, navigate will create a copy of the
+``navigate\config\configuration.yaml`` and the rest of the configuration files in
+``C:\Users\Username\AppData\Local\.navigate\config`` on  Windows or ``~/.navigate`` on
+Mac/Linux. navigate uses these local copies of the configuration files to store
+information specific to the setup attached to the computer it is installed on.
 
 To avoid confusion, we recommend launching the software in the synthetic hardware
 mode initially. Within your Terminal, or Anaconda Prompt, activate your Navigate Python
 environment and launch the software by typing: ``navigate -sh``. Thereafter, you should
-only modify the ``configuration.yaml`` file in your local ``/.navigate`` directory. The
+only modify the ``configuration.yaml`` file in your local ``.navigate`` directory. The
 local copy avoids conflicts between different microscopes after pulling new
 changes on GitHub.
 
+It may help to open ``C:\Users\Username\AppData\Local\.navigate\config\configuration.yaml``
+and follow along in this file when reading the next sections.
+
+.. _hardware_section:
 
 Hardware Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The first section of the file is called hardware. It contains all the necessary
-information to find and connect each hardware device to the computer/software.
+----------------
+The first section of the ``configuration.yaml`` file is called ``hardware``. It contains
+all the necessary information to find and connect each hardware device to the
+computer/software.
 
 Here is an example of what the section will look like:
 
@@ -65,9 +71,21 @@ Here is an example of what the section will look like:
             port: COM18
             baudrate: 1000000
 
-Make sure that all the hardware that will be used is included as a dictionary item in
-yaml format. For example, if you wanted to remove the Thorlabs stage and replace the
-PI stage with a different manufacturer:
+This example specifies that we are connected to
+
+* A National Instruments DAQ (possibly multiple).
+* Two Hamamatsu Orca (Flash or Fusion) cameras with different serial numbers for
+  identification.
+* A Sutter filter wheel controller connected via USB on port 19. This control two
+  filter wheels.
+* A Physik Instrumente controller with access to 5 stages in ``FRF`` refrence mode
+  (see PI's documentation). This is identified by serial number.
+* A Thorlabs stage (with a single axis). This is identified by a serial number.
+* A Dynamixel zoom device connected via USB on port 18.
+
+Make sure that the ``configuration.yaml`` specifies the hardware on your microscope.
+For example, if you wanted to remove the Thorlabs stage and replace the PI stage with
+an ASI stage, the ``stage`` section would instead read:
 
 .. code-block:: yaml
 
@@ -77,310 +95,166 @@ PI stage with a different manufacturer:
         port: COM7
         baudrate: 115200
 
-You would add it to the hardware section:
+Notice that since we are now using a single stage, we no longer have a ``-`` above the
+stage entry. The ``-`` indicates a list, and is only needed if we want to load multiple
+types of a single hardware.
 
+.. note::
+
+    The type of the device is needed when deciding which Python object to instantiate
+    on startup of the software (eg ``type: ASI``). The other fields (eg ``port: COM7``)
+    change depending on the manufacturer's API. They help the API communicate with the
+    computer you are using, which in turn allows the navigate software to communicate
+    with the device.
+
+Running the software with our current microscope setup would fail. It turns out our
+ASI stage only moves in the x, y, z and f axes. Later, you will see we need a way to
+handle theta axis. To address this, we will change our ``stage`` block of the YAML to
+also load a ``SyntheticStage``:
 
 .. code-block:: yaml
 
-    # Configuration in YAML
-    hardware:
-        daq:
-            type: NI
-        camera:
-            -
-              type: HamamatsuOrca
-              serial_number: 302158
-            -
-              type: HamamatsuOrca
-              serial_number: 302352
-        filter_wheel:
-            type: SutterFilterWheel
-            port: COM19
-            baudrate: 9600
-            number_of_wheels: 2
-        stage:
+    stage:
+        -
             type: ASI
             serial_number: 123456789
             port: COM7
             baudrate: 115200
-        zoom:
-            type: DynamixelZoom
-            servo_id: 1
-            port: COM18
-            baudrate: 1000000
+        -
+            type: SyntheticStage
+            serial_number: 987654321
 
-.. note::
-
-    The type of the device is needed when deciding which python object to instantiate
-on startup of the software (eg type: ASI). The other fields are specified by the
-manufacturers API software. They help the API software communicate with the computer
-you are using which in turn allows the Navigate software to communicate with the device
-(eg port: COM7).
-
-Running the software with our current microscope setup would fail. It turns out our
-ASI stage only moves in the x, y, z axes. We need a way to handle theta and f axes.
-
-To do this we will employ the SyntheticStage:
-
-.. code-block:: yaml
-
-    # Configuration in YAML
-    hardware:
-        daq:
-            type: NI
-        camera:
-            -
-              type: HamamatsuOrca
-              serial_number: 302158
-            -
-              type: HamamatsuOrca
-              serial_number: 302352
-        filter_wheel:
-            type: SutterFilterWheel
-            port: COM19
-            baudrate: 9600
-            number_of_wheels: 2
-        stage:
-            -
-              type: ASI
-              serial_number: 123456789
-              port: COM7
-              baudrate: 115200
-            -
-              type: SyntheticStage
-              serial_number: 987654321
-        zoom:
-            type: DynamixelZoom
-            servo_id: 1
-            port: COM18
-            baudrate: 1000000
-
-.. note::
-
-    Notice how there are two entries in the stage field. Each field that you need to add to a section is done by placing a '-'
-    and then the information below that. This formats the stage field to behave like a python list in the code.
-
-If your microscope system does not have a device listed in the hardware section using the Synthetic typing will allow the software to run without it.
-Another example would be replacing the zoom type with SyntheticZoom in the instance your microscope does not use that hardware. Your system will still run as you expect.
+If your microscope system does not have a device listed in the hardware section using
+the Synthetic typing will allow the software to run without it. Another example would
+be replacing the zoom type with ``SyntheticZoom`` in the instance your microscope does
+not use that hardware. Your system will still run as you expect.
 
 Microscope Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------
 
-The second section contains the microscopes that you will be using with the software.
-Each is represented as a yaml dictionary similar to the hardware section. The GUI
-uses this dictionary to switch between the microscopes, each with their own hardware
-and operating modes:
+The second section of ``configuration.yaml`` contains the microscope configurations
+that you will be using with the software. Each microscope is represented as a YAML
+dictionary, as in the hardware section. This section enables us to load one or more
+microscopes using the same hardware with varying combinations:
 
 .. code-block:: yaml
 
     microscopes:
-        name of microscope 1:
+        microscope1:
             ...
             ...
-        name of microscope 2:
+        microscope2:
             ...
             ...
 
-DAQ Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Where ``microscope1`` and ``microscope2`` are names of two different microscopes using
+different combinations of the hardware listed in the ``hardware`` section. The names of
+the microscopes must not include spaces or special characters such as ``<``, ``\``,
+``#``, ``%``, or ``?``.
+
+Each microscope is expected to have a ``daq``, ``camera``, ``remote_focus_device``,
+``galvo``, ``filter_wheel``, ``stage``, ``zoom``, ``shutter`` and ``lasers`` section of
+the YAML dictionary. As in the hardware section, unused devices can be specified as
+synthetic.
+
+Most of the information to set up these devices can be found in the
+:doc:`Supported Hardware <hardware/supported_hardware>` section of the documentation.
+Additional explanations of a few specific sections of the microscope configuration are
+below. Notably, the ``zoom`` section of the ``configuration.yaml`` specifies effective
+pixel size.
+
+
+Stage Subsection
+^^^^^^^^^^^^^^^^
+
+The stage section of the microscope 1) puts the stage control from the ``hardware``
+section into the microscope 2) sets boundaries for stage movement and 3) optionally
+specifies joystick-controlled axes.
 
 .. code-block:: yaml
 
     microscopes:
-        name of microscope 1:
-            daq
-                hardware
-                    name
-                    type
-            sample_rate
-            sweep_time
-            master_trigger_out_line
-            camera_trigger_out_line
-            trigger_source
-            laser_port_switcher
-            laser_switch_state
-
-Camera Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: yaml
-
-    microscopes:
-        name of microscope 1:
-            camera:
-                hardware
-                    name
-                    type
-                    serial_number
-                x_pixels: 2048.0
-                y_pixels: 2048.0
-                pixel_size_in_microns: 6.5
-                subsampling: [1, 2, 4]
-                sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
-                readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
-                lightsheet_rolling_shutter_width: 608
-                defect_correct_mode: 2.0
-                binning: 1x1
-                readout_speed: 1.0
-                trigger_active: 1.0
-                trigger_mode: 1.0 # external light-sheet mode
-                trigger_polarity: 2.0  # positive pulse
-                trigger_source: 2.0  # 2 = external, 3 = software.
-                exposure_time: 20 # Use milliseconds throughout.
-                delay_percent: 10
-                pulse_percent: 1
-                line_interval: 0.000075
-                display_acquisition_subsampling: 4
-                average_frame_rate: 4.969
-                frames_to_average: 1
-                exposure_time_range:
-                    min: 1
-                    max: 1000
-                    step: 1
-
-
-Remote Focus Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: yaml
-
-    microscopes:
-        name of microscope 1:
-            remote_focus_device:
-                hardware:
-                    name: daq
-                    type: NI
-                    channel: PXI6259/ao2
-                    min: 0
-                    max: 5
-                delay_percent: 7.5
-                ramp_rising_percent: 85
-                ramp_falling_percent: 2.5
-                amplitude: 0.7
-                offset: 2.3
-                smoothing: 0.0
-
-
-Galvo Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: yaml
-
-    microscopes:
-        name of microscope 1:
-            galvo:
-                -
-                    hardware:
-                        name: daq
-                        type: NI
-                        channel: PXI6259/ao0
-                        min: -5
-                        max: 5
-                    waveform: sine
-                    frequency: 99.9
-                    amplitude: 2.5
-                    offset: 0.5
-                    duty_cycle: 50
-                    phase: 1.57079 # pi/2
-
-
-Filter Wheel Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: yaml
-
-    microscopes:
-        name of microscope 1:
-            filter_wheel:
-                hardware:
-                    name: filter_wheel
-                    type: SutterFilterWheel
-                    wheel_number: 1
-                filter_wheel_delay: .030 # in seconds
-                available_filters:
-                    Empty-Alignment: 0
-                    GFP - FF01-515/30-32: 1
-                    RFP - FF01-595/31-32: 2
-                    Far-Red - BLP01-647R/31-32: 3
-                    Blocked1: 4
-                    Blocked2: 5
-                    Blocked3: 6
-                    Blocked4: 7
-                    Blocked5: 8
-                    Blocked6: 9
-
-
-Stage Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The stage field has a hardware section that should reflect similar values to the hardware section at the top of the
-configuration file. The only difference is the axes entry that explicility states the axes that the stage will control.
-This lines up with earlier, we needed to add the SyntheticStage to control theta and f. The rest of the values in the
-stage field relate to the bounds of the physical stage. This is what the software uses to set the minimum and maximum values
-for stage movement. Most stages will have different values respectively.
-
-
-.. code-block:: yaml
-
-    microscopes:
-        name of microscope 1:
+        microscope1:
             stage:
-                hardware:
-                    -
-                        name: stage
-                        type: PI
-                        serial_number: 119060508
-                        axes: [x, y, z, theta, f]
-                        volts_per_micron: None
-                        axes_channels: None
-                        max: None
-                        min: None
+            hardware:
+                -
+                    name: stage
+                    type: ASI
+                    serial_number: 123456789
+                    axes: [x, y, z, f] # Software
+                    axes_mapping: [M, Y, X, Z] # M Shear axis mapping
 
-                joystick_axes: [x, y, z]
-                x_max: 100000
-                x_min: -100000
-                y_max: 100000
-                y_min: -100000
-                z_max: 100000
-                z_min: -100000
-                f_max: 100000
-                f_min: -100000
-                theta_max: 360
-                theta_min: 0
 
-                x_step: 500
-                y_step: 500
-                z_step: 500
-                theta_step: 30
-                f_step: 500
-                velocity: 1000
+                -
+                    name: stage
+                    type: SyntheticStage
+                    serial_number: 987654321
+                    axes: [theta]
 
-                x_offset: 0
-                y_offset: 0
-                z_offset: 0
-                theta_offset: 0
-                f_offset: 0
+            joystick_axes: [x, y, z]
+            x_max: 100000
+            x_min: -100000
+            y_max: 100000
+            y_min: -100000
+            z_max: 100000
+            z_min: -100000
+            f_max: 100000
+            f_min: -100000
+            theta_max: 360
+            theta_min: 0
+
+            x_offset: 0
+            y_offset: 0
+            z_offset: 0
+            theta_offset: 0
+            f_offset: 0
+
+First we set the axes controlled by each piece of hardware and a mapping from the
+hardware's API axes to our software's axes. For example, the ASI ``M`` axis is mapped
+onto our software's ``x`` axis below.
+
+As you may recall from the :ref:`Hardware Section <hardware_section>`, we needed to
+add the ``SyntheticStage`` to control ``theta``. We now specify in the microscope that
+``theta`` is controlled by the synthetic stage in the ``hardware`` section of
+``microscope1``.
+
+Below this, we specify that only x, y and z axes may be controlled by a joystick and
+we set the stage bounds for each of the axes.
+
+Finally, we set the offset for each stage axis. This is an offset relative to other
+microscopes (e.g. ``microscope2``) specified in ``configuration.yaml``. In this case,
+``microscope1`` is the reference microscope. Additional microscopes may ask the stage
+to move to a different offset in order to observe the sample at the same position as
+``microscope1``.
+
 
 Stage Axes Definition
-"""""""""""""""""""""""
+"""""""""""""""""""""
+
 Many times, the coordinate system of the stage hardware do not agree with the optical
 definition of each axes identity. For example, many stages define their vertical
-dimension as `z`, whereas optically, we often define this axis as `x`. Thus, there is
+dimension as ``z``, whereas optically, we often define this axis as ``x``. Thus, there is
 often a need to map the mechanical axes to the optical axes, and this is done with
-the axes mapping dictionary entry in the stage hardware section. By default, stage axes are
-read in as `x`, `y`, `z`, `theta`, `f`, where theta is rotation and f is focus, but this
-can be changed by changing axes mapping.
+the axes mapping dictionary entry in the stage hardware section. By default, stage axes
+are read in as ``x``, ``y``, ``z``, ``theta``, ``f``, where ``theta`` is rotation and f
+is focus, but this can be changed by changing axes mapping.
 
 .. code-block:: yaml
 
     axes: [x, y, z, theta, f]
-    axes_mapping: [x, y, z, theta, f]
+    axes_mapping: [x, y, z, r, f]
 
-If, on a certain microscope, the z stage axis corresponds to the optical y axis,
+If, on a certain microscope, the ``z`` stage axis corresponds to the optical y-axis,
 and vice versa, you would then have to import the stages as following:
 
 .. code-block:: yaml
 
     axes: [x, y, z, theta, f]
-    axes_mapping: [x, z, y, theta, f]
+    axes_mapping: [x, z, y, r, f]
 
 Joystick Axes Definition
 """"""""""""""""""""""""
+
 If you are using a joystick, it is possible to disable GUI control of the stage axes
 that the joystick can interact with. The axes that the joystick can interact with
 appear in the stage field as following:
@@ -391,7 +265,7 @@ appear in the stage field as following:
 
 Note that these axes should agree with the optical axes. If, on the same microscope
 as mentioned in the Stage Axes Definition section, the joystick were to control
-the optical y axis corresponding to the stage z axis, you would have to put `y` in
+the optical y-axis corresponding to the stage z axis, you would have to put ``y`` in
 the joystick axes brackets as following:
 
 .. code-block:: yaml
@@ -399,13 +273,18 @@ the joystick axes brackets as following:
     joystick_axes: [y]
 
 
+Zoom Subsection
+^^^^^^^^^^^^^^^
 
-Zoom Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The ``zoom`` section of ``configuration.yaml`` specifies control over microscope
+zoom lenses. For example, we use the
+`Dynamixel Smart Actuator <https://www.dynamixel.com/>`_ to control the rotating
+zoom wheel on an Olympus MVXPLAPO 1x/0.25.
+
 .. code-block:: yaml
 
     microscopes:
-        name of microscope 1:
+        microscope1:
             zoom:
                 hardware:
                     name: zoom
@@ -438,55 +317,34 @@ Zoom Section
                             5x: 5
                             6x: 6
 
-Shutter Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``hardware`` section connects to the zoom hardware. The ``positions`` specify the
+voltage of the actuator at different zoom positions. The ``pixel_size`` specifies the
+effective pixel size of the system at each zoom. The ``stage_positions`` account for
+focal shifts in between the different zoom values (the MVXPLAPO does not have a
+consistent focal plane). These may change depending on the immersion media. Here it is
+specified for a ``BABB`` (Benzyl Alcohol Benzyl Benzoate) immersion media.
+
+Regardless of whether or not your microscope uses a zoom device, you must have a
+``zoom`` entry, indicating the effective pixel size of your system in micrometers.
+For example,
+
 .. code-block:: yaml
 
-    microscopes:
-        name of microscope 1:
-            shutter:
-                hardware:
-                name: daq
-                type: NI
-                channel: PXI6259/port0/line0
-                min: 0
-                max: 5
-
-Laser Section
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: yaml
-
-    microscopes:
-        name of microscope 1:
-            lasers:
-                - wavelength: 488
-                    onoff:
-                        hardware:
-                            name: daq
-                            type: NI
-                            channel: PXI6733/port0/line2
-                            min: 0
-                            max: 5
-                    power:
-                        hardware:
-                            name: daq
-                            type: NI
-                            channel: PXI6733/ao0
-                            min: 0
-                            max: 5
-                    type: LuxX
-                    index: 0
-                    delay_percent: 10
-                    pulse_percent: 87
-                - wavelength: ...
-
-
-
+    zoom:
+      hardware:
+        name: zoom
+        type: SyntheticZoom
+        servo_id: 1
+      position:
+        N/A: 0
+      pixel_size:
+        N/A: 0.168
 
 GUI Section
-------------------
+-----------
 
-The third and final section of the configuration file is the GUI parameters.
+The third and final section of the ``configuration.yaml`` file is the GUI parameters.
 
 It will look something like the below:
 
@@ -496,175 +354,91 @@ It will look something like the below:
         channels:
             count: 5
             laser_power:
-            min: 0
-            max: 100
-            step: 10
+                min: 0
+                max: 100
+                step: 10
             exposure_time:
-            min: 1
-            max: 1000
-            step: 5
+                min: 1
+                max: 1000
+                step: 5
             interval_time:
-            min: 0
-            max: 1000
-            step: 5
+                min: 0
+                max: 1000
+                step: 5
         stack_acquisition:
             step_size:
-            min: 0.200
-            max: 1000
-            step: 0.1
+                min: 0.200
+                max: 1000
+                step: 0.1
             start_pos:
-            min: -5000
-            max: 5000
-            step: 1
+                min: -5000
+                max: 5000
+                step: 1
             end_pos:
-            min: -5000
-            max: 10000
-            step: 1
+                min: -5000
+                max: 10000
+                step: 1
         timepoint:
             timepoints:
-            min: 1
-            max: 1000
-            step: 1
+                min: 1
+                max: 1000
+                step: 1
             stack_pause:
-            min: 0
-            max: 1000
-            step: 1
+                min: 0
+                max: 1000
+                step: 1
 
-The values in each field relate to GUI widgets. They will set the min, max and step size for each of the
-respective spinboxes in the example above.
+The values in each field relate to GUI widgets.
+
+The ``channels`` section indicates GUI settings for the channel settings under
+:guilabel:`Channels`, :guilabel:`Channel Settings`. `count` specifies how many channels
+should be displayed. `laser_power`, `exposure_time` and `interval_time` are used to set
+the minimum, maximum and step size values for :guilabel:`Power`,
+:guilabel:`Exp. Time (ms)` and :guilabel:`Interval`, respectively.
+
+The ``stack_acquisition`` section indicates GUI settings for the stack acquisition
+settings under :guilabel:`Channels`, :guilabel:`Stack Acquisition Settings (um)`.
+`step_size`, `start_pos` and `end_pos` are used to set the minimum, maximum and step
+size values for :guilabel:`Step Size`, :guilabel:`Start` and :guilabel:`End`,
+respectively.
+
+The ``timepoint`` section indicates GUI settings for the timepoint
+settings under :guilabel:`Channels`, :guilabel:`Timepoint Settings`.
+`timepoints` and `stack_pause` are used to set the minimum, maximum and step
+size values for :guilabel:`Timepoints` and :guilabel:`Stack Pause (s)`,
+respectively.
 
 .. note::
 
-    This section is still under development. The plan going forward is to have all widgets be controlled in this
-    manner.
+    This section is still under development. The plan going forward is to have all
+    widgets be controlled in this manner.
+
+Experiment File
+===============
+
+The ``experiment.yml`` file stores information about the current state of the program.
+This includes laser and camera parameters, saving options, z-stack settings and much
+more. This file does not need to be edited by the user. The program will update it
+automatically and save changes automatically on exit.
 
 Waveform Constants File
-------------------------
-In progress...
+=======================
 
-Remote Constants Section
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: yaml
-
-    "remote_focus_constants": {
-        "microscope name 1": {
-            "0.63x": {
-                "488nm": {
-                    "amplitude": "2.5",
-                    "offset": "2.336",
-                    "percent_smoothing": "0",
-                    "percent_delay": "0"
-                },
-                "562nm": {
-                    "amplitude": "2.5",
-                    "offset": "2.336",
-                    "percent_smoothing": "0",
-                    "percent_delay": "0"
-                },
-                "642nm": {
-                    "amplitude": "2.5",
-                    "offset": "2.336",
-                    "percent_smoothing": "0",
-                    "percent_delay": "0"
-                }
-            },
-            ...
-        }
-    },
-
-
-Galvo Constants Section
-^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: yaml
-
-    ...
-    "galvo_constants": {
-        "Galvo 0": {
-            "Nanoscale": {
-                "N/A": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                }
-            },
-            "Mesoscale": {
-                "0.63x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "1x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "2x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "3x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "4x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "5x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                },
-                "6x": {
-                    "amplitude": "0.11",
-                    "offset": "0.10",
-                    "frequency": "99"
-                }
-            }
-        }
-    },
-    ...
-
-Other Constants Section
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: yaml
-
-    "other_constants": {
-        "duty_wait_duration": "10"
-    }
-
-
+The ``waveform_constants.yml`` file stores the waveform parameters that can be edited
+by going to :menuselection:`Microscope Configuration --> Waveform Parameters`. This
+file does not need to be edited by the user. The program will update it automatically
+and save changes automatically on exit.
 
 Waveform Templates File
-----------------------------
-In progress...
+=======================
 
-
-.. code-block::
-
-    {
-      "Default": {
-        "repeat": 1,
-        "expand": 1,
-      },
-      "Confocal-Projection": {
-        "repeat": timepoints,
-        "expand": n_plane,
-      }
-    }
+The waveform templates file stores default behavior for the number of repeats for
+specific waveforms. This file only needs to be edited if the user wishes to introduce
+a new waveform behavior to the application.
 
 Rest API Configuration File
---------------------------------------------------------
-In progress...
+===========================
 
-.. code-block::
-
-    %YAML 1.2
-    ---
-    Ilastik:
-      url: 'http://127.0.0.1:5000/ilastik'
+The REST API configuration file specifies where the REST API should look to get
+and post data. This is only needed if you are using a plugin that requires the
+REST API, such as our communication with Ilastik.

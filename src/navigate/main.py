@@ -60,14 +60,14 @@ def main():
     Parameters
     ----------
     *args : iterable
-        --synthetic_hardware
+        --synthetic-hardware
         --sh
-        --config_file
-        --experiment_file
-        --waveform_constants_path
-        --rest_api_file
-        --waveform_templates_file
-        --logging_config
+        --config-file
+        --experiment-file
+        --waveform_constants-path
+        --rest-api-file
+        --waveform-templates-file
+        --logging-config
 
     Returns
     -------
@@ -75,7 +75,7 @@ def main():
 
     Examples
     --------
-    >>> python main.py --synthetic_hardware
+    >>> python main.py --synthetic-hardware
     """
     # Start the GUI, withdraw main screen, and show splash screen.
     root = tk.Tk()
@@ -83,12 +83,9 @@ def main():
 
     # Splash Screen
     current_directory = os.path.dirname(os.path.realpath(__file__))
-    splash_screen = SplashScreen(root, os.path.join(
-        current_directory,
-        "view",
-        "icon",
-        "splash_screen_image.png"
-    ))
+    splash_screen = SplashScreen(
+        root, os.path.join(current_directory, "view", "icon", "splash_screen_image.png")
+    )
 
     # Parse command line arguments
     parser = create_parser()

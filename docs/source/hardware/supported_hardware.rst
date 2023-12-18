@@ -1,40 +1,57 @@
+==================
 Supported Hardware
-====================
+==================
 
 Data Acquisition Card
-----------------------------
+=====================
+
+.. _hardware_ni:
+
 NI
-^^
+--
+
 We have used several different NI-based data acquisition cards to run the software.
-These include PCIe-6738, PXIe-6259, and PXIe-6733. Prior to installing the card within the computer, first install
-the `NI-DAQmx drivers <https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560>`_. Once installed,
-connect the PCIe or PXIe-based device to the computer. A functioning system should be recognized by the operating system,
-and visible in the Windows Device Manager as a **NI Data Acquisition Device**.
+These include PCIe-6738, PXIe-6259, and PXIe-6733. Prior to installing the card within
+the computer, first install the `NI-DAQmx drivers <https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560>`_.
+Once installed, connect the PCIe or PXIe-based device to the computer. A functioning
+system should be recognized by the operating system, and visible in the Windows Device
+Manager as a **NI Data Acquisition Device**.
 
 .. tip::
 
-    To find the device pin outs for your NI-based data acquisition card, open up NI MAX, find the card under devices,
-    right-click and select 'device pin outs'.
+    To find the device pin outs for your NI-based data acquisition card, open up NI
+    MAX, find the card under devices, right-click and select "device pin outs".
 
-    Important: Should you use the SCB-68A breakout box, do not look at the pinout on the back of the cover.
-    This is misleading. You must look at the device pinouts in NI MAX.
+    Important: Should you use the SCB-68A breakout box, do not look at the pinout on
+    the back of the cover. This is misleading. You must look at the device pinouts in
+    NI MAX.
 
-The most important aspect is to wire up the triggering properly. The software first calculates all of the analog and digital waveforms, creates the NI tasks, and then queues these waveforms on the data acquisition board.
-Upon receipt of a trigger, all of the analog an digital tasks are delivered in parallel. This provides us with deterministic behavior on a per-frame basis, which is necessary for proper ASLM-style acquisitions. It does not
-however provide us with deterministic behavior between image frames, and some jitter in timing is anticipated.
+The most important aspect is to wire up the triggering properly. The software first
+calculates all of the analog and digital waveforms, creates the NI tasks, and then
+queues these waveforms on the data acquisition board. Upon receipt of a trigger, all
+of the analog an digital tasks are delivered in parallel. This provides us with
+deterministic behavior on a per-frame basis, which is necessary for proper ASLM-style
+acquisitions. It does not however provide us with deterministic behavior between image
+frames, and some jitter in timing is anticipated.
 
 Wiring
-- Identify the device name in NI MAX, and change it if you would like. Common names are ``Dev1``, ``Dev2``, etc. This name must correspond with the pinouts provided in the configuration file.
 
-- Connect the ``master_trigger_out_line`` to the ``trigger_source`` with a direct wire, commonly ``PXI6259/port0/line1`` and ``/PXI6259/PFI0``
+- Identify the device name in NI MAX, and change it if you would like. Common names are
+  ``Dev1``, ``Dev2``, etc. This name must correspond with the pinouts provided in the
+  configuration file.
+
+- Connect the ``master_trigger_out_line`` to the ``trigger_source`` with a direct wire,
+  commonly ``PXI6259/port0/line1`` and ``/PXI6259/PFI0``
 
 .. note::
 
     For NI-based cards, port0/line1 is the equivalent of ``P0.1``.
-    There are multiple pins for each PFIO, including source, out, gate, etc. You must use the out terminal.
+    There are multiple pins for each PFIO, including source, out, gate, etc. You must
+    use the out terminal.
 
 PCIe-6738
-"""""""""
+^^^^^^^^^
+
 The PCIe-6738 can only create one software-timed analog task for every four channels.
 As such, the lasers much be attached to analog output ports outside of the banks used by
 the galvo/remote focus units. For example, if you use AO0, AO2, and AO6 for the
@@ -47,17 +64,23 @@ lasers on simultaneously, we could distribute the lasers across independent bank
 
 
 PXI-6259
-""""""""
+^^^^^^^^
+
 The PXI-6259 can create one software-timed analog task per channel. As such, the
 galvo/remote focus/lasers can be attached to any of the analog output ports.
 
 PXI-6723
-""""""""
-- Connect the ``master_trigger_out_line`` to the ``trigger_source`` with a direct wire, commonly ``PXI6723/port0/line1`` and ``/PXI6723/PFI0``. With an SCB-68A breakout box, connect pin 17 directly to pin 11.
-- Connect the ``camera_trigger_out_line`` to the ``Ext. Trigger`` on the camera using the ``CTR0Out`` pin. With an SCB-68A breakout box, the positive lead is pin 2, the ground is pin 36.
+^^^^^^^^
+
+- Connect the ``master_trigger_out_line`` to the ``trigger_source`` with a direct wire,
+  commonly ``PXI6723/port0/line1`` and ``/PXI6723/PFI0``. With an SCB-68A breakout box,
+  connect pin 17 directly to pin 11.
+- Connect the ``camera_trigger_out_line`` to the ``Ext. Trigger`` on the camera using
+  the ``CTR0Out`` pin. With an SCB-68A breakout box, the positive lead is pin 2, the
+  ground is pin 36.
 
 Configuration File
-""""""""""""""""""
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -85,21 +108,26 @@ Configuration File
 
 
 Cameras
--------
-Hamamatsu Flash 4.0
-^^^^^^^^^^^^^^^^^^^
+=======
+
+Hamamatsu Flash 4.0 v3/Fusion
+-----------------------------
+
 * Insert the USB that came with the camera into the computer and install HCImageLive.
 * When prompted with the DCAM-API Setup
 
     * Install the Active Silicon Firebird drivers for the FrameGrabber
     * Select ... next to the tools button, and install DCAM tools onto the computer.
 
-* Shutdown the computer and install the Hamamatsu frame grabber into an appropriate PCIe-x16 slot on the motherboard.
-* Turn on the computer and the camera, and confirm that it is functioning properly in HCImageLive or Excap (one of the DCAM tools installed)
-* Connect the `camera_trigger_out_line` to the External Trigger of the Hamamatsu Camera. Commonly, this is done with a counter port, e.g., ``/PXI6259/ctr0``
+* Shutdown the computer and install the Hamamatsu frame grabber into an appropriate
+  PCIe-x16 slot on the motherboard.
+* Turn on the computer and the camera, and confirm that it is functioning properly in
+  HCImageLive or Excap (one of the DCAM tools installed)
+* Connect the `camera_trigger_out_line` to the External Trigger of the Hamamatsu
+  Camera. Commonly, this is done with a counter port, e.g., ``/PXI6259/ctr0``
 
 Configuration File
-""""""""""""""""""
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -151,12 +179,8 @@ Configuration File
         x_pixels_min: 4
         y_pixels_min: 4
 
-Hamamatsu Fusion
-^^^^^^^^^^^^^^^^
-TBD...
-
 Hamamatsu Lightning
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 .. code-block:: yaml
 
@@ -200,48 +224,75 @@ Hamamatsu Lightning
           step: 1
 
 Photometrics Iris 15
-^^^^^^^^^^^^^^^^^^^^
-* Download the `PVCAM software <https://www.photometrics.com/support/software-and-drivers>`_ from Photometrics.
-  The PVCAM SDK is also available form this location.
-  You will likely have to register and agree to Photometrics terms.
+--------------------
+* Download the `PVCAM software <https://www.photometrics.com/support/software-and-drivers>`_
+  from Photometrics. The PVCAM SDK is also available form this location. You will
+  likely have to register and agree to Photometrics terms.
 * Perform the Full Installation of the PVCAM software.
-* Should a 'Base Device' still show up as unknown in the device manager, you may need to install the `Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits>`_
-* Upon successfully installation, one should be able to acquire images with the manufacturer provided PVCamTest software.
+* Should a 'Base Device' still show up as unknown in the device manager, you may need
+  to install the `Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits>`_
+* Upon successfully installation, one should be able to acquire images with the
+  manufacturer provided PVCamTest software.
 
 
 Configuration File
-""""""""""""""""""
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
-  hardware:
-    camera:
-      -
-        type: Photometrics
-        TBD...
+  camera:
+    type: Photometrics
+    camera_connection: PMPCIECam00
+    serial_number: 1
 
-  microscopes:
-    microscope_name:
-      camera:
-        hardware:
-          name: camera
-          type: Photometrics
-          TBD...
+  camera:
+      hardware:
+        name: camera
+        type: Photometrics
+        serial_number: 1
+      x_pixels: 5056.0
+      y_pixels: 2960.0
+      pixel_size_in_microns: 4.25
+      subsampling: [1, 2, 4]
+      sensor_mode: Normal
+      readout_direction: Bottom-to-Top
+      lightsheet_rolling_shutter_width: 608
+      defect_correct_mode: 2.0
+      binning: 1x1
+      readout_speed: 0x7FFFFFFF
+      trigger_active: 1.0
+      trigger_mode: 1.0
+      trigger_polarity: 2.0
+      trigger_source: 2.0
+      exposure_time: 20
+      delay_percent: 25
+      pulse_percent: 1
+      line_interval: 0.000075
+      display_acquisition_subsampling: 4
+      average_frame_rate: 4.969
+      frames_to_average: 1
+      exposure_time_range:
+        min: 1
+        max: 1000
+        step: 1
 
 Remote Focusing Devices
------------------------
+=======================
+
 Voice coils, also known as linear actuators, play a crucial role in implementing
-aberration-free remote focusing in Navigate. These electromagnetic actuators are used to
-control the axial position of the light-sheet and the sample relative to the
+aberration-free remote focusing in Navigate. These electromagnetic actuators are used
+to control the axial position of the light-sheet and the sample relative to the
 microscope objective lens. By precisely adjusting the axial position, the focal plane
 can be shifted without moving the objective lens, thus enabling remote focusing.
 
 Equipment Solutions
-^^^^^^^^^^^^^^^^^^^
-Configuration can be variable. Many of the voice coils we have received require establishing serial
-communication with the device to explicitly place it in an analog control mode. More recently, Equipment
-Solutions has begun delivering devices that automatically initialize into an analog control mode, and thus
-no longer need the serial communication to be established.
+-------------------
+
+Configuration can be variable. Many of the voice coils we have received require
+establishing serial communication with the device to explicitly place it in an analog
+control mode. More recently, Equipment Solutions has begun delivering devices that
+automatically initialize into an analog control mode, and thus no longer need the
+serial communication to be established.
 
 * `SCA814 Linear Servo Controller <https://www.equipsolutions.com/products/linear-servo-controllers/sca814-linear-servo-controller/>`_
 
@@ -250,7 +301,7 @@ no longer need the serial communication to be established.
 * `LFA-2010 Linear Focus Actuator <https://www.equipsolutions.com/products/linear-focus-actuators/lfa-2010-linear-focus-actuator/>`_
 
 Configuration File
-"""""""""""""""""""
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -273,18 +324,22 @@ Configuration File
 
 
 Thorlabs BLINK
-^^^^^^^^^^^^^^
-The BLINK is a pneumatically actuated voice coil that is controlled with analog control signals.
+--------------
+
+The BLINK is a pneumatically actuated voice coil that is controlled with analog control
+signals.
 
 Optotune Focus Tunable Lens
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------
+
 Device is controlled with an analog signal.
 
 Synthetic Remote Focus Device
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------
 
 Stages
-------
+======
+
 Our software empowers users with a flexible solution for configuring
 multiple stages, catering to diverse microscope modalities. Each stage can be
 customized to suit the specific requirements of a particular modality or shared
@@ -293,7 +348,8 @@ from different manufacturers, enabling users to mix and match components for a t
 versatile and optimized setup tailored to their research needs.
 
 ASI Tiger Controller
-^^^^^^^^^^^^^^^^^^^^
+--------------------
+
 Constant Velocity Acquisition - Software is designed to acquire data in a continuous
 stage scanning mode. Rather than using the default SYNC signal from the ASI stage to
 synchronize the start of imaging, we use the encoder output pulsing mode of the ASI
@@ -302,9 +358,9 @@ multi-channel imaging that is acquired in the per-stack mode, but less so for
 perZ-based acquisitions.
 
 .. tip::
-    If you are using the FTP-2000 stage, you should not change the F stage axis. This will
-    differentially drive the two vertical posts, causing them to torque and potentially damage
-    one another.
+    If you are using the FTP-2000 stage, you should not change the F stage axis. This
+    will differentially drive the two vertical posts, causing them to torque and
+    potentially damage one another.
 
 .. code-block:: yaml
 
@@ -337,7 +393,8 @@ perZ-based acquisitions.
           -
 
 Sutter MP-285
-^^^^^^^^^^^^^
+-------------
+
 .. code-block:: yaml
 
   hardware:
@@ -368,7 +425,7 @@ Sutter MP-285
             name: ...
 
 Physik Instrumente
-^^^^^^^^^^^^^^^^^^
+------------------
 
 .. code-block:: yaml
 
@@ -429,7 +486,7 @@ Physik Instrumente
         theta_offset: 0
 
 Thorlabs
-^^^^^^^^
+--------
 
 .. code-block:: yaml
 
@@ -455,7 +512,7 @@ Thorlabs
               min: None
 
 Analog Controlled (Galvo/Piezo/etc.)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------
 
 .. code-block:: yaml
 
@@ -488,7 +545,7 @@ Analog Controlled (Galvo/Piezo/etc.)
               settle_duration_ms: 5
 
 Synthetic Stage
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------
 
 .. code-block:: yaml
 
@@ -516,9 +573,11 @@ Synthetic Stage
               min: 0
 
 Dichroic Turret
-----------------------------
+===============
+
 ASI
-^^^^^^^^^^^^^^^^^^^^^^
+---
+
 .. code-block:: yaml
 
   hardware:
@@ -542,13 +601,16 @@ ASI
           640LP: 2
 
 Synthetic Dichroic Turret
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------
+
 TBD.
 
 Filter Wheels
-----------------------------
+=============
+
 Sutter
-^^^^^^^^^^^^^^^^^^^^^^
+------
+
 .. code-block:: yaml
 
   hardware:
@@ -577,7 +639,8 @@ Sutter
           Empty-4: 7
 
 ASI
-^^^^^^^^^^^^^^^^^^^^^^
+---
+
 .. code-block:: yaml
 
   hardware:
@@ -606,16 +669,18 @@ ASI
           Empty-4: 7
 
 Synthetic Filter Wheel
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 TBD...
 
 Galvanometers
-----------------------------
+=============
 
 DAQ Control
-^^^^^^^^^^^^^^^^^^^^^
-Multiple types of galvanometers have been used, including Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX
-Each of these devices are externally controlled via analog signals delivered from a data acquisition card.
+-----------
+Multiple types of galvanometers have been used, including Cambridge
+Technologies/Novanta, Thorlabs, and ScannerMAX Each of these devices
+are externally controlled via analog signals delivered from a data
+acquisition card.
 
 .. code-block:: yaml
 
@@ -637,13 +702,16 @@ Each of these devices are externally controlled via analog signals delivered fro
             phase: 1.57079 # pi/2
 
 Synthetic Galvanometer
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------
+
 TBD...
 
 Lasers
-----------
+======
+
 DAQ Control
-^^^^^^^^^^^^^^^^^^^^^
+-----------
+
 Most lasers are controlled externally via mixed analog and digital modulation.
 The ``onoff`` entry is for digital modulation.
 The ``power`` entry is for analog modulation.
@@ -675,21 +743,25 @@ The ``power`` entry is for analog modulation.
         - wavelength: 561...
 
 Coherent
-^^^^^^^^^^^^^^^^^^^^^
-Future implementations of the software will enable a mixture of software and hardware control.
+--------
+Future implementations of the software will enable a mixture of software and hardware
+control.
 
 Omicron
-^^^^^^^^^^^^^^^^^^^^^
-Future implementations of the software will enable a mixture of software and hardware control.
+-------
+
+Future implementations of the software will enable a mixture of software and hardware
+control.
 
 Synthetic Laser
-^^^^^^^^^^^^^^^^^^^^^
+---------------
 
 Shutters
------------------------------
+========
 
 Thorlabs
-^^^^^^^^^^^^
+--------
+
 .. code-block:: yaml
 
   microscopes:
@@ -703,7 +775,8 @@ Thorlabs
           max: 5
 
 Synthetic Shutter
-^^^^^^^^^^^^^^^^^
+-----------------
+
 .. code-block:: yaml
 
   hardware:
@@ -716,9 +789,11 @@ Synthetic Shutter
         max: 5
 
 Mechanical Zoom
----------------------------------
+===============
+
 Dynamixel Zoom
-^^^^^^^^^^^^^^^^
+--------------
+
 .. code-block:: yaml
 
   hardware:
@@ -745,7 +820,8 @@ Dynamixel Zoom
               36X: 0
 
 Synethetic Zoom
-^^^^^^^^^^^^^^^^
+---------------
+
 .. code-block:: yaml
 
   hardware:
@@ -772,7 +848,9 @@ Synethetic Zoom
               36X: 0
 
 Deformable Mirrors
-------------------------
+==================
+
 Imagine Optics
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------
+
 In progress...

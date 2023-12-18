@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>navigate.model.device_startup_functions &mdash; navigate 0.0.1 documentation</title>
@@ -68,6 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
 </ul>
 </li>
@@ -117,7 +118,7 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_camera_connection</span></code>(configuration[, ...])</p></td>
 <td><p>Initializes the camera api class.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_devices</span></code>(configuration[, is_synthetic])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_devices</span></code>(configuration[, is_synthetic, ...])</p></td>
 <td><p>Load devices from configuration.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_filter_wheel_connection</span></code>(configuration)</p></td>
@@ -126,7 +127,7 @@
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_mirror</span></code>(configuration[, is_synthetic])</p></td>
 <td><p>Initializes the deformable mirror class on a dedicated thread.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_stages</span></code>(configuration[, is_synthetic])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_stages</span></code>(configuration[, is_synthetic, ...])</p></td>
 <td><p>Initializes the stage class on a dedicated thread.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_zoom_connection</span></code>(configuration[, ...])</p></td>
@@ -159,7 +160,7 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_stage</span></code>(microscope_name, ...[, id, ...])</p></td>
 <td><p>Initializes the Stage class.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_zoom</span></code>(microscope_name, ...[, is_synthetic])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_zoom</span></code>(microscope_name, ...[, ...])</p></td>
 <td><p>Initializes the zoom class on a dedicated thread.</p></td>
 </tr>
 </tbody>

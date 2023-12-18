@@ -1,0 +1,29 @@
+navigate.model.plugins\_model
+=============================
+
+.. automodule:: navigate.model.plugins_model
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      PluginsModel
+   
+   
+
+   
+   
+   
+
+
+

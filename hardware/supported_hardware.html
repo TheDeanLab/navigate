@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Supported Hardware &mdash; navigate 0.0.1 documentation</title>
@@ -57,8 +57,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#cameras">Cameras</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#hamamatsu-flash-4-0">Hamamatsu Flash 4.0</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#hamamatsu-fusion">Hamamatsu Fusion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hamamatsu-flash-4-0-v3-fusion">Hamamatsu Flash 4.0 v3/Fusion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hamamatsu-lightning">Hamamatsu Lightning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#photometrics-iris-15">Photometrics Iris 15</a></li>
 </ul>
@@ -157,31 +156,41 @@
 <section id="data-acquisition-card">
 <h2>Data Acquisition Card<a class="headerlink" href="#data-acquisition-card" title="Permalink to this heading"></a></h2>
 <section id="ni">
-<h3>NI<a class="headerlink" href="#ni" title="Permalink to this heading"></a></h3>
+<span id="hardware-ni"></span><h3>NI<a class="headerlink" href="#ni" title="Permalink to this heading"></a></h3>
 <p>We have used several different NI-based data acquisition cards to run the software.
-These include PCIe-6738, PXIe-6259, and PXIe-6733. Prior to installing the card within the computer, first install
-the <a class="reference external" href="https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560">NI-DAQmx drivers</a>. Once installed,
-connect the PCIe or PXIe-based device to the computer. A functioning system should be recognized by the operating system,
-and visible in the Windows Device Manager as a <strong>NI Data Acquisition Device</strong>.</p>
+These include PCIe-6738, PXIe-6259, and PXIe-6733. Prior to installing the card within
+the computer, first install the <a class="reference external" href="https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560">NI-DAQmx drivers</a>.
+Once installed, connect the PCIe or PXIe-based device to the computer. A functioning
+system should be recognized by the operating system, and visible in the Windows Device
+Manager as a <strong>NI Data Acquisition Device</strong>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>To find the device pin outs for your NI-based data acquisition card, open up NI MAX, find the card under devices,
-right-click and select ‘device pin outs’.</p>
-<p>Important: Should you use the SCB-68A breakout box, do not look at the pinout on the back of the cover.
-This is misleading. You must look at the device pinouts in NI MAX.</p>
+<p>To find the device pin outs for your NI-based data acquisition card, open up NI
+MAX, find the card under devices, right-click and select “device pin outs”.</p>
+<p>Important: Should you use the SCB-68A breakout box, do not look at the pinout on
+the back of the cover. This is misleading. You must look at the device pinouts in
+NI MAX.</p>
 </div>
-<p>The most important aspect is to wire up the triggering properly. The software first calculates all of the analog and digital waveforms, creates the NI tasks, and then queues these waveforms on the data acquisition board.
-Upon receipt of a trigger, all of the analog an digital tasks are delivered in parallel. This provides us with deterministic behavior on a per-frame basis, which is necessary for proper ASLM-style acquisitions. It does not
-however provide us with deterministic behavior between image frames, and some jitter in timing is anticipated.</p>
-<p>Wiring
-- Identify the device name in NI MAX, and change it if you would like. Common names are <code class="docutils literal notranslate"><span class="pre">Dev1</span></code>, <code class="docutils literal notranslate"><span class="pre">Dev2</span></code>, etc. This name must correspond with the pinouts provided in the configuration file.</p>
+<p>The most important aspect is to wire up the triggering properly. The software first
+calculates all of the analog and digital waveforms, creates the NI tasks, and then
+queues these waveforms on the data acquisition board. Upon receipt of a trigger, all
+of the analog an digital tasks are delivered in parallel. This provides us with
+deterministic behavior on a per-frame basis, which is necessary for proper ASLM-style
+acquisitions. It does not however provide us with deterministic behavior between image
+frames, and some jitter in timing is anticipated.</p>
+<p>Wiring</p>
 <ul class="simple">
-<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">master_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">trigger_source</span></code> with a direct wire, commonly <code class="docutils literal notranslate"><span class="pre">PXI6259/port0/line1</span></code> and <code class="docutils literal notranslate"><span class="pre">/PXI6259/PFI0</span></code></p></li>
+<li><p>Identify the device name in NI MAX, and change it if you would like. Common names are
+<code class="docutils literal notranslate"><span class="pre">Dev1</span></code>, <code class="docutils literal notranslate"><span class="pre">Dev2</span></code>, etc. This name must correspond with the pinouts provided in the
+configuration file.</p></li>
+<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">master_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">trigger_source</span></code> with a direct wire,
+commonly <code class="docutils literal notranslate"><span class="pre">PXI6259/port0/line1</span></code> and <code class="docutils literal notranslate"><span class="pre">/PXI6259/PFI0</span></code></p></li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For NI-based cards, port0/line1 is the equivalent of <code class="docutils literal notranslate"><span class="pre">P0.1</span></code>.
-There are multiple pins for each PFIO, including source, out, gate, etc. You must use the out terminal.</p>
+There are multiple pins for each PFIO, including source, out, gate, etc. You must
+use the out terminal.</p>
 </div>
 <section id="pcie-6738">
 <h4>PCIe-6738<a class="headerlink" href="#pcie-6738" title="Permalink to this heading"></a></h4>
@@ -203,8 +212,12 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 <section id="pxi-6723">
 <h4>PXI-6723<a class="headerlink" href="#pxi-6723" title="Permalink to this heading"></a></h4>
 <ul class="simple">
-<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">master_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">trigger_source</span></code> with a direct wire, commonly <code class="docutils literal notranslate"><span class="pre">PXI6723/port0/line1</span></code> and <code class="docutils literal notranslate"><span class="pre">/PXI6723/PFI0</span></code>. With an SCB-68A breakout box, connect pin 17 directly to pin 11.</p></li>
-<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">camera_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">Ext.</span> <span class="pre">Trigger</span></code> on the camera using the <code class="docutils literal notranslate"><span class="pre">CTR0Out</span></code> pin. With an SCB-68A breakout box, the positive lead is pin 2, the ground is pin 36.</p></li>
+<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">master_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">trigger_source</span></code> with a direct wire,
+commonly <code class="docutils literal notranslate"><span class="pre">PXI6723/port0/line1</span></code> and <code class="docutils literal notranslate"><span class="pre">/PXI6723/PFI0</span></code>. With an SCB-68A breakout box,
+connect pin 17 directly to pin 11.</p></li>
+<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">camera_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">Ext.</span> <span class="pre">Trigger</span></code> on the camera using
+the <code class="docutils literal notranslate"><span class="pre">CTR0Out</span></code> pin. With an SCB-68A breakout box, the positive lead is pin 2, the
+ground is pin 36.</p></li>
 </ul>
 </section>
 <section id="configuration-file">
@@ -237,8 +250,8 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 </section>
 <section id="cameras">
 <h2>Cameras<a class="headerlink" href="#cameras" title="Permalink to this heading"></a></h2>
-<section id="hamamatsu-flash-4-0">
-<h3>Hamamatsu Flash 4.0<a class="headerlink" href="#hamamatsu-flash-4-0" title="Permalink to this heading"></a></h3>
+<section id="hamamatsu-flash-4-0-v3-fusion">
+<h3>Hamamatsu Flash 4.0 v3/Fusion<a class="headerlink" href="#hamamatsu-flash-4-0-v3-fusion" title="Permalink to this heading"></a></h3>
 <ul>
 <li><p>Insert the USB that came with the camera into the computer and install HCImageLive.</p></li>
 <li><p>When prompted with the DCAM-API Setup</p>
@@ -249,9 +262,12 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 </ul>
 </div></blockquote>
 </li>
-<li><p>Shutdown the computer and install the Hamamatsu frame grabber into an appropriate PCIe-x16 slot on the motherboard.</p></li>
-<li><p>Turn on the computer and the camera, and confirm that it is functioning properly in HCImageLive or Excap (one of the DCAM tools installed)</p></li>
-<li><p>Connect the <cite>camera_trigger_out_line</cite> to the External Trigger of the Hamamatsu Camera. Commonly, this is done with a counter port, e.g., <code class="docutils literal notranslate"><span class="pre">/PXI6259/ctr0</span></code></p></li>
+<li><p>Shutdown the computer and install the Hamamatsu frame grabber into an appropriate
+PCIe-x16 slot on the motherboard.</p></li>
+<li><p>Turn on the computer and the camera, and confirm that it is functioning properly in
+HCImageLive or Excap (one of the DCAM tools installed)</p></li>
+<li><p>Connect the <cite>camera_trigger_out_line</cite> to the External Trigger of the Hamamatsu
+Camera. Commonly, this is done with a counter port, e.g., <code class="docutils literal notranslate"><span class="pre">/PXI6259/ctr0</span></code></p></li>
 </ul>
 <section id="id1">
 <h4>Configuration File<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
@@ -306,10 +322,6 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 </div>
 </section>
 </section>
-<section id="hamamatsu-fusion">
-<h3>Hamamatsu Fusion<a class="headerlink" href="#hamamatsu-fusion" title="Permalink to this heading"></a></h3>
-<p>TBD…</p>
-</section>
 <section id="hamamatsu-lightning">
 <h3>Hamamatsu Lightning<a class="headerlink" href="#hamamatsu-lightning" title="Permalink to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
@@ -356,28 +368,52 @@ galvo/remote focus/lasers can be attached to any of the analog output ports.</p>
 <section id="photometrics-iris-15">
 <h3>Photometrics Iris 15<a class="headerlink" href="#photometrics-iris-15" title="Permalink to this heading"></a></h3>
 <ul class="simple">
-<li><p>Download the <a class="reference external" href="https://www.photometrics.com/support/software-and-drivers">PVCAM software</a> from Photometrics.
-The PVCAM SDK is also available form this location.
-You will likely have to register and agree to Photometrics terms.</p></li>
+<li><p>Download the <a class="reference external" href="https://www.photometrics.com/support/software-and-drivers">PVCAM software</a>
+from Photometrics. The PVCAM SDK is also available form this location. You will
+likely have to register and agree to Photometrics terms.</p></li>
 <li><p>Perform the Full Installation of the PVCAM software.</p></li>
-<li><p>Should a ‘Base Device’ still show up as unknown in the device manager, you may need to install the <a class="reference external" href="https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits">Broadcom PCI/PCIe Software Development Kit</a></p></li>
-<li><p>Upon successfully installation, one should be able to acquire images with the manufacturer provided PVCamTest software.</p></li>
+<li><p>Should a ‘Base Device’ still show up as unknown in the device manager, you may need
+to install the <a class="reference external" href="https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits">Broadcom PCI/PCIe Software Development Kit</a></p></li>
+<li><p>Upon successfully installation, one should be able to acquire images with the
+manufacturer provided PVCamTest software.</p></li>
 </ul>
 <section id="id2">
 <h4>Configuration File<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">camera</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Photometrics</span>
-<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">TBD...</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Photometrics</span>
+<span class="w">  </span><span class="nt">camera_connection</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PMPCIECam00</span>
+<span class="w">  </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 
-<span class="nt">microscopes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">camera</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">camera</span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Photometrics</span>
-<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">TBD...</span>
+<span class="nt">camera</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">camera</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Photometrics</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">x_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5056.0</span>
+<span class="w">    </span><span class="nt">y_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2960.0</span>
+<span class="w">    </span><span class="nt">pixel_size_in_microns</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.25</span>
+<span class="w">    </span><span class="nt">subsampling</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">sensor_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Normal</span>
+<span class="w">    </span><span class="nt">readout_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bottom-to-Top</span>
+<span class="w">    </span><span class="nt">lightsheet_rolling_shutter_width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">608</span>
+<span class="w">    </span><span class="nt">defect_correct_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">    </span><span class="nt">binning</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1x1</span>
+<span class="w">    </span><span class="nt">readout_speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0x7FFFFFFF</span>
+<span class="w">    </span><span class="nt">trigger_active</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">trigger_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">trigger_polarity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">    </span><span class="nt">trigger_source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">    </span><span class="nt">exposure_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">delay_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">    </span><span class="nt">pulse_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">line_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.000075</span>
+<span class="w">    </span><span class="nt">display_acquisition_subsampling</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">    </span><span class="nt">average_frame_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.969</span>
+<span class="w">    </span><span class="nt">frames_to_average</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">exposure_time_range</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">      </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </pre></div>
 </div>
 </section>
@@ -386,16 +422,17 @@ You will likely have to register and agree to Photometrics terms.</p></li>
 <section id="remote-focusing-devices">
 <h2>Remote Focusing Devices<a class="headerlink" href="#remote-focusing-devices" title="Permalink to this heading"></a></h2>
 <p>Voice coils, also known as linear actuators, play a crucial role in implementing
-aberration-free remote focusing in Navigate. These electromagnetic actuators are used to
-control the axial position of the light-sheet and the sample relative to the
+aberration-free remote focusing in Navigate. These electromagnetic actuators are used
+to control the axial position of the light-sheet and the sample relative to the
 microscope objective lens. By precisely adjusting the axial position, the focal plane
 can be shifted without moving the objective lens, thus enabling remote focusing.</p>
 <section id="equipment-solutions">
 <h3>Equipment Solutions<a class="headerlink" href="#equipment-solutions" title="Permalink to this heading"></a></h3>
-<p>Configuration can be variable. Many of the voice coils we have received require establishing serial
-communication with the device to explicitly place it in an analog control mode. More recently, Equipment
-Solutions has begun delivering devices that automatically initialize into an analog control mode, and thus
-no longer need the serial communication to be established.</p>
+<p>Configuration can be variable. Many of the voice coils we have received require
+establishing serial communication with the device to explicitly place it in an analog
+control mode. More recently, Equipment Solutions has begun delivering devices that
+automatically initialize into an analog control mode, and thus no longer need the
+serial communication to be established.</p>
 <ul>
 <li><p><a class="reference external" href="https://www.equipsolutions.com/products/linear-servo-controllers/sca814-linear-servo-controller/">SCA814 Linear Servo Controller</a></p>
 <blockquote>
@@ -430,7 +467,8 @@ no longer need the serial communication to be established.</p>
 </section>
 <section id="thorlabs-blink">
 <h3>Thorlabs BLINK<a class="headerlink" href="#thorlabs-blink" title="Permalink to this heading"></a></h3>
-<p>The BLINK is a pneumatically actuated voice coil that is controlled with analog control signals.</p>
+<p>The BLINK is a pneumatically actuated voice coil that is controlled with analog control
+signals.</p>
 </section>
 <section id="optotune-focus-tunable-lens">
 <h3>Optotune Focus Tunable Lens<a class="headerlink" href="#optotune-focus-tunable-lens" title="Permalink to this heading"></a></h3>
@@ -458,9 +496,9 @@ multi-channel imaging that is acquired in the per-stack mode, but less so for
 perZ-based acquisitions.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>If you are using the FTP-2000 stage, you should not change the F stage axis. This will
-differentially drive the two vertical posts, causing them to torque and potentially damage
-one another.</p>
+<p>If you are using the FTP-2000 stage, you should not change the F stage axis. This
+will differentially drive the two vertical posts, causing them to torque and
+potentially damage one another.</p>
 </div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
@@ -768,8 +806,10 @@ one another.</p>
 <h2>Galvanometers<a class="headerlink" href="#galvanometers" title="Permalink to this heading"></a></h2>
 <section id="daq-control">
 <h3>DAQ Control<a class="headerlink" href="#daq-control" title="Permalink to this heading"></a></h3>
-<p>Multiple types of galvanometers have been used, including Cambridge Technologies/Novanta, Thorlabs, and ScannerMAX
-Each of these devices are externally controlled via analog signals delivered from a data acquisition card.</p>
+<p>Multiple types of galvanometers have been used, including Cambridge
+Technologies/Novanta, Thorlabs, and ScannerMAX Each of these devices
+are externally controlled via analog signals delivered from a data
+acquisition card.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">galvo</span><span class="p">:</span>
@@ -829,11 +869,13 @@ The <code class="docutils literal notranslate"><span class="pre">power</span></c
 </section>
 <section id="coherent">
 <h3>Coherent<a class="headerlink" href="#coherent" title="Permalink to this heading"></a></h3>
-<p>Future implementations of the software will enable a mixture of software and hardware control.</p>
+<p>Future implementations of the software will enable a mixture of software and hardware
+control.</p>
 </section>
 <section id="omicron">
 <h3>Omicron<a class="headerlink" href="#omicron" title="Permalink to this heading"></a></h3>
-<p>Future implementations of the software will enable a mixture of software and hardware control.</p>
+<p>Future implementations of the software will enable a mixture of software and hardware
+control.</p>
 </section>
 <section id="synthetic-laser">
 <h3>Synthetic Laser<a class="headerlink" href="#synthetic-laser" title="Permalink to this heading"></a></h3>

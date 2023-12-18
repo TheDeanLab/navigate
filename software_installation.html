@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Software Installation &mdash; navigate 0.0.1 documentation</title>
@@ -48,8 +48,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Software Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#download-git">Download Git</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#setup-your-python-environment">Setup your Python Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-install">Quick install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developer-install">Developer install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
@@ -87,13 +87,9 @@
              
   <section id="software-installation">
 <h1>Software Installation<a class="headerlink" href="#software-installation" title="Permalink to this heading"></a></h1>
-<section id="download-git">
-<h2>Download Git<a class="headerlink" href="#download-git" title="Permalink to this heading"></a></h2>
-<p>If you do not have <a class="reference external" href="https://git-scm.com/downloads">Git already installed</a>, you will need to do so before downloading the repo.
-We also recommend installing <a class="reference external" href="https://desktop.github.com/">GitHub Desktop</a> for a more user-friendly experience.</p>
-</section>
-<section id="setup-your-python-environment">
-<h2>Setup your Python Environment<a class="headerlink" href="#setup-your-python-environment" title="Permalink to this heading"></a></h2>
+<section id="quick-install">
+<h2>Quick install<a class="headerlink" href="#quick-install" title="Permalink to this heading"></a></h2>
+<p><strong>Setup your Python Environment</strong></p>
 <p>Head over to the <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links">miniconda website</a>
 and install the appropriate version based on your operating system.</p>
 <div class="admonition tip">
@@ -101,83 +97,96 @@ and install the appropriate version based on your operating system.</p>
 <p>It is also handy to have the <a class="reference external" href="https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf">conda cheatsheet</a> open when first using miniconda to get accustomed to the commands available.</p>
 </div>
 <ul class="simple">
-<li><p>Windows: Search your computer for the anaconda prompt window. Given how frequently you will use this, we recommend pinning it to your taskbar.</p></li>
-<li><p>Linux/Mac: Search your computer for Terminal.</p></li>
+<li><p>Windows: Use the Windows taskbar search to find “Anaconda Prompt (Miniconda3)”.
+Given how frequently you will use this, we recommend pinning it to your taskbar.</p></li>
+<li><p>Linux/Mac: Open a Terminal.</p></li>
 </ul>
-<p><strong>Create a python environment called Navigate with Python version 3.9.7</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda create -n navigate python=3.9.7
+<p><strong>Create a Python environment called navigate that uses Python version 3.9.7</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(base)</span> <span class="go">MyComputer ~ $ conda create -n navigate python=3.9.7</span>
+</pre></div>
+</div>
+<p><strong>Activate the navigate environment</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(base)</span> <span class="go">MyComputer ~ $ conda activate navigate</span>
+</pre></div>
+</div>
+<p>The active environment is shown in parentheses on the far-left.  Originally, we were in
+the miniconda <code class="docutils literal notranslate"><span class="pre">(base)</span></code> environment. After activating the navigate environment, it
+should now show <code class="docutils literal notranslate"><span class="pre">(navigate)</span></code>.</p>
+<p><strong>Intall navigate via pip</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">MyComputer ~ $ pip install git+https://github.com/TheDeanLab/navigate.git</span>
+</pre></div>
+</div>
+<p><strong>Run the Navigate software</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">MyComputer Navigate $ navigate</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you are inside of a firewall, e.g., on the UTSW campus, you will likely run into a proxy error.
-See the Troubleshooting section below for information on how to add the proxy address to your environment variables to circumvent this problem.</p>
-</div>
-<p><strong>Activate the Navigate environment</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate navigate
+<p>If you are running the software on a computer that does not have the appropriate
+hardware you will need to add  the flag <code class="docutils literal notranslate"><span class="pre">-sh</span></code> (<code class="docutils literal notranslate"><span class="pre">--synthetic-hardware</span></code>) after
+navigate.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">navigate -sh</span>
 </pre></div>
 </div>
-<p>The active environment is shown in parentheses on the far-left.  Originally, we were in the miniconda base environment.
-After activating the Navigate environment, it should now show <code class="docutils literal notranslate"><span class="pre">(navigate)</span></code>.</p>
-<p><strong>Update the pip python package manager</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(navigate) MyComputer ~ $ python -m pip install --upgrade pip
+</div>
+<p>After completing these steps you will only need to do the below to start the software
+upon opening a new Anaconda prompt:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(base)</span> <span class="go">MyComputer ~ $ conda activate navigate</span>
+<span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">MyComputer ~ $ navigate</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are running Windows, you can create a desktop shortcut to navigate by
+right-clicking the Desktop, navigating to New and then Shortcut and entering
+<code class="docutils literal notranslate"><span class="pre">%windir%\system32\cmd.exe</span> <span class="pre">&quot;/c&quot;</span> <span class="pre">C:\path\to\miniconda\Scripts\activate.bat</span> <span class="pre">navigate</span> <span class="pre">&amp;&amp;</span> <span class="pre">navigate</span></code>
+into the location text box.</p>
+</div>
+</section>
+<section id="developer-install">
+<h2>Developer install<a class="headerlink" href="#developer-install" title="Permalink to this heading"></a></h2>
+<p><strong>Download Git</strong></p>
+<p>If you do not have <a class="reference external" href="https://git-scm.com/downloads">Git already installed</a>, you will
+need to do so before downloading the repo. We also recommend installing
+<a class="reference external" href="https://desktop.github.com/">GitHub Desktop</a> for a more user-friendly experience.</p>
 <dl class="simple">
-<dt><strong>Create a directory where the repository will be cloned</strong></dt><dd><p>We recommend a path/location that is easy to find and access such as the your Desktop or Documents.
-Once the folder is created, we will want to change that to our working directory (e.g., cd)</p>
+<dt><strong>Create a directory where the repository will be cloned</strong></dt><dd><p>We recommend a path/location that is easy to find and access such as the your
+Desktop or Documents. Once the folder is created, we will want to change that
+to our working directory (e.g., <code class="docutils literal notranslate"><span class="pre">cd</span></code>)</p>
 </dd>
 </dl>
 <ul>
-<li><p>Windows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span> <span class="n">cd</span> <span class="n">Desktop</span>
-<span class="p">(</span><span class="n">navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">mkdir</span> <span class="n">Code</span>
-<span class="p">(</span><span class="n">navigate</span><span class="p">)</span> <span class="n">C</span><span class="p">:</span>\<span class="n">users</span>\<span class="n">Dean</span><span class="o">-</span><span class="n">Lab</span>\<span class="n">Desktop</span> <span class="n">cd</span> <span class="n">Code</span>
+<li><p>Windows</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">C:\Users\Username&gt; cd Desktop</span>
+<span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">C:\Users\Username\Desktop&gt; mkdir Code</span>
+<span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">C:\users\Username\Desktop&gt; cd Code</span>
 </pre></div>
 </div>
 </li>
-<li><p>Linux/Mac:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(navigate) MyComputer ~ $ mkdir ~/Desktop/Code
-(navigate) MyComputer ~ $ cd ~/Desktop/Code
+<li><p>Linux/Mac</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">MyComputer ~ $ mkdir ~/Desktop/Code</span>
+<span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">MyComputer ~ $ cd ~/Desktop/Code</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<p><strong>Clone the GitHub repository</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(navigate) MyComputer MyFolderName $ git clone https://github.com/TheDeanLab/navigate.git
+<p><strong>Clone the GitHub repository</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">C:\Users\Username\Code&gt; $ git clone https://github.com/TheDeanLab/navigate.git</span>
 </pre></div>
 </div>
 <p><strong>Install the Navigate repository</strong></p>
-<p>The last step requires you to change into the Navigate directory and the install the repo as a package locally on your machine.:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(navigate) MyComputer MyFolderName $ cd navigate
-(navigate) MyComputer Navigate $ pip install -e .
+<p>The last step requires you to change into the navigate directory and the install the repo as
+an editable package locally on your machine.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">C:\Users\Username\Code&gt; cd navigate</span>
+<span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">C:\Users\Username\Code\navigate&gt; pip install -e .[dev]</span>
 </pre></div>
-</div>
-<p><strong>Run the Navigate software</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(navigate) MyComputer Navigate $ navigate
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you are running the software on a computer that does not have the appropriate hardware you will need to add the flag -sh after navigate:</p>
-<blockquote>
-<div><p>navigate -sh</p>
-</div></blockquote>
-</div>
-<p>After completeting these steps you will only need to do the below to start the software upon opening the prompt:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(base) MyComputer ~ $ conda activate navigate
-(navigate) MyComputer ~ $ navigate
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you are running Windows, you can create a desktop shortcut to Navigate by right-clicking the Desktop, navigating to New and then Shortcut and entering <code class="docutils literal notranslate"><span class="pre">%windir%\system32\cmd.exe</span> <span class="pre">&quot;/c&quot;</span> <span class="pre">C:\path\to\miniconda\Scripts\activate.bat</span> <span class="pre">navigate</span> <span class="pre">&amp;&amp;</span> <span class="pre">navigate</span></code> into the location text box.</p>
 </div>
 </section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>If running the software on campus at UTSW you may need to update some of your proxy settings to allow pip/conda to install the proper packages.</dt><dd><ul class="simple">
+<p>If running the software on campus at UTSW you may need to update some of your proxy settings to allow
+<cite>pip</cite>/<cite>conda</cite> to install the proper packages.</p>
+<ul class="simple">
 <li><p>This can be done by going to Environment Variables for Windows, or another OS equivalent.</p></li>
 <li><dl class="simple">
 <dt>Create the following new System Variables:</dt><dd><ul>
@@ -190,23 +199,16 @@ Once the folder is created, we will want to change that to our working directory
 <li><p>If you continue to have issues then change the value of Variable HTTPS_PROXY to <a class="reference external" href="https://proxy.swmed.edu:3128">https://proxy.swmed.edu:3128</a></p></li>
 <li><dl class="simple">
 <dt>If you still have issues then you will need to create/update both configuration files for conda and pip to include proxy settings, if they are not in the paths below you will need to create them. This assumes a Windows perspective. Mac/Linux users will have different paths, they can be found online.</dt><dd><ul>
-<li><p>Conda’s Config file = C:\Users\UserProfile\.condarc</p></li>
-<li><p>Pip’s Config file = C:\Users\UserProfile\pip\pip.ini</p></li>
+<li><p><cite>conda</cite>’s Config file = C:\Users\UserProfile\.condarc</p></li>
+<li><p><cite>pip</cite>’s Config file = C:\Users\UserProfile\pip\pip.ini</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl class="simple">
-<dt>You can also try to set the proxy from within the Anaconda Prompt:</dt><dd><ul>
-<li><p>set https_proxy=http://username:password&#64;proxy.example.com:8080</p></li>
-<li><p>set http_proxy=http://username:password&#64;proxy.example.com:8080</p></li>
+<li><p>You can also try to set the proxy from within the Anaconda Prompt:</p></li>
+<li><p><cite>set https_proxy=http://username:password&#64;proxy.example.com:8080</cite></p></li>
+<li><p><cite>set http_proxy=http://username:password&#64;proxy.example.com:8080</cite></p></li>
 </ul>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
 </section>
 </section>
 

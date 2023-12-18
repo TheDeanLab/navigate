@@ -18,7 +18,6 @@ navigate.model.features.common\_features
    .. autosummary::
    
       ChangeResolution
-      ConProAcquisition
       FindTissueSimple2D
       LoopByCount
       MoveToNextPositionInMultiPositionTable

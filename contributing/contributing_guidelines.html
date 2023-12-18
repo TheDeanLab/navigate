@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contributing Guidelines &mdash; navigate 0.0.1 documentation</title>
@@ -57,6 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#installation-of-developer-dependencies">Installation of Developer Dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding Style</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scientific-units">Scientific Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pre-commit-hooks">Pre-Commit Hooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dictionary-parsing">Dictionary Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#unit-tests">Unit Tests</a></li>
@@ -138,11 +139,21 @@ variable names are <code class="docutils literal notranslate"><span class="pre">
 <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html">Numpydoc style</a> in a sphinx-compatible format. This allows us to automatically generate
 documentation for the code base.</p>
 </section>
+<section id="scientific-units">
+<h2>Scientific Units<a class="headerlink" href="#scientific-units" title="Permalink to this heading"></a></h2>
+<p>Deviations from this can occur where it is necessary to pass a different unit to a
+piece of hardware.</p>
+<ul class="simple">
+<li><p>Time - Milliseconds</p></li>
+<li><p>Distance - Micrometers</p></li>
+</ul>
+</section>
 <section id="pre-commit-hooks">
 <h2>Pre-Commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="Permalink to this heading"></a></h2>
 <p>We leverage pre-commit workflows to enforce consistent code formatting. In some rare
-cases, Ruff may complain about a line of code that is actually fine. For example, in the example code below,
-Ruff complains that the start_stage class is imported but not used. However, it is actually used in as part of an <cite>exec</cite> statement:</p>
+cases, Ruff may complain about a line of code that is actually fine. For example, in
+the example code below, Ruff complains that the start_stage class is imported but not
+used. However, it is actually used in as part of an <cite>exec</cite> statement:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>
 <span class="n">device_name</span> <span class="o">=</span> <span class="n">stage</span>
 <span class="n">exec</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;self.</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2"> = start_</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">(name, device_connection, configuration, i, is_synthetic)&quot;</span><span class="p">)</span>
@@ -184,20 +195,20 @@ tests.</p>
 <p>Many of us in the lab have Apple products and use them for development.
 However, there are some issues that you may encounter when developing on a Mac.
 Below are some of the issues we have encountered and how to resolve them.</p>
-<p>OSError:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>OSError: You tried to simultaneously open more SharedNDArrays than are
-allowed by your system!
+<p>OSError</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">OSError: You tried to simultaneously open more SharedNDArrays than are</span>
+<span class="go">allowed by your system!</span>
 </pre></div>
 </div>
 <p>This results from a limitation in the number of shared memory objects that can
 be created on a Mac. To figure out how many objects can open, open a terminal and
-run the following command:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ulimit</span> <span class="o">-</span><span class="n">n</span>
+run the following command</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ulimit -n</span>
 </pre></div>
 </div>
 <p>To increase this number, simply add an integer value after it. In our hands, a factor
-of ~1000 typically works:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ulimit</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1000</span>
+of ~1000 typically works</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ulimit -n 1000</span>
 </pre></div>
 </div>
 </section>

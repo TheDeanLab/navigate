@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>navigate.model.features.common_features &mdash; navigate 0.0.1 documentation</title>
@@ -81,6 +81,7 @@
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
 </ul>
 </li>
@@ -125,31 +126,28 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ChangeResolution</span></code>(model[, resolution_mode, ...])</p></td>
 <td><p>ChangeResolution class for modifying the resolution mode of a microscope.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConProAcquisition</span></code>(model)</p></td>
-<td><p>ConProAcquisition class for controlling continuous acquisition.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FindTissueSimple2D</span></code>(model[, overlap, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FindTissueSimple2D</span></code>(model[, overlap, ...])</p></td>
 <td><p>FindTissueSimple2D class for detecting tissue and gridding out the imaging space in  2D.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoopByCount</span></code>(model[, steps])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoopByCount</span></code>(model[, steps])</p></td>
 <td><p>LoopByCount class for controlling signal and data acquisition loops.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">MoveToNextPositionInMultiPositionTable</span></code>(model)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">MoveToNextPositionInMultiPositionTable</span></code>(model)</p></td>
 <td><p>MoveToNextPositionInMultiPositionTable class for advancing in a multi-position table.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code>(model)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code>(model)</p></td>
 <td><p>PrepareNextChannel class for preparing microscopes for the next imaging channel.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Snap</span></code>(model)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Snap</span></code>(model)</p></td>
 <td><p>Snap class for capturing data frames using a microscope.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">StackPause</span></code>(model[, pause_num])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">StackPause</span></code>(model[, pause_num])</p></td>
 <td><p>StackPause class for pausing stack acquisition.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaitToContinue</span></code>(model)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaitToContinue</span></code>(model)</p></td>
 <td><p>WaitToContinue class for synchronizing signal and data acquisition.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ZStackAcquisition</span></code>(model[, get_origin, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ZStackAcquisition</span></code>(model[, get_origin, ...])</p></td>
 <td><p>ZStackAcquisition class for controlling z-stack acquisition in microscopy.</p></td>
 </tr>
 </tbody>

@@ -37,5 +37,6 @@
    navigate.model.metadata_sources
    navigate.model.microscope
    navigate.model.model
+   navigate.model.plugins_model
    navigate.model.waveforms
 

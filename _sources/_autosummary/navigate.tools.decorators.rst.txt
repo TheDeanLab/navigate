@@ -23,6 +23,7 @@ navigate.tools.decorators
 
    .. autosummary::
    
+      AcquisitionMode
       FeatureList
    
    

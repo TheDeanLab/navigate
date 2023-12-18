@@ -47,11 +47,20 @@ All classes and functions should have docstrings written in
 .html>`_ in a sphinx-compatible format. This allows us to automatically generate
 documentation for the code base.
 
+Scientific Units
+----------------
+Deviations from this can occur where it is necessary to pass a different unit to a
+piece of hardware.
+
+* Time - Milliseconds
+* Distance - Micrometers
+
 Pre-Commit Hooks
 ----------------
 We leverage pre-commit workflows to enforce consistent code formatting. In some rare
-cases, Ruff may complain about a line of code that is actually fine. For example, in the example code below,
-Ruff complains that the start_stage class is imported but not used. However, it is actually used in as part of an `exec` statement::
+cases, Ruff may complain about a line of code that is actually fine. For example, in
+the example code below, Ruff complains that the start_stage class is imported but not
+used. However, it is actually used in as part of an `exec` statement::
 
         from navigate.model.device_startup_functions import start_stage
         device_name = stage
@@ -93,18 +102,24 @@ Many of us in the lab have Apple products and use them for development.
 However, there are some issues that you may encounter when developing on a Mac.
 Below are some of the issues we have encountered and how to resolve them.
 
-OSError::
+OSError
+
+.. code-block:: console
 
     OSError: You tried to simultaneously open more SharedNDArrays than are
     allowed by your system!
 
 This results from a limitation in the number of shared memory objects that can
 be created on a Mac. To figure out how many objects can open, open a terminal and
-run the following command::
+run the following command
+
+.. code-block:: console
 
     ulimit -n
 
 To increase this number, simply add an integer value after it. In our hands, a factor
-of ~1000 typically works::
+of ~1000 typically works
+
+.. code-block:: console
 
     ulimit -n 1000

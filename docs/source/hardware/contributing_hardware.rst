@@ -5,15 +5,6 @@ Navigate is built with an abstraction layer that enables operation with a divers
 hardware manufacturers and equipment.
 
 
-Scientific Units
-----------------
-Deviations from this can occur where it is necessary to pass a different unit to a
-piece of hardware.
-
-* Time - Milliseconds
-* Distance - Micrometers
-
-
 How to Add New Hardware
 -----------------------
 Each hardware class is accompanied by a base class, and a synthetic class.

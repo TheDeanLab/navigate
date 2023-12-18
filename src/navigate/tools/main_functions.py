@@ -148,7 +148,7 @@ def create_parser():
 
     input_args.add_argument(
         "-sh",
-        "--synthetic_hardware",
+        "--synthetic-hardware",
         required=False,
         default=False,
         action="store_true",
@@ -166,7 +166,7 @@ def create_parser():
 
     # Non-Default Configuration and Experiment Input Arguments
     input_args.add_argument(
-        "--config_file",
+        "--config-file",
         type=Path,
         required=False,
         default=None,
@@ -177,7 +177,7 @@ def create_parser():
     )
 
     input_args.add_argument(
-        "--experiment_file",
+        "--experiment-file",
         type=Path,
         required=False,
         default=None,
@@ -188,7 +188,7 @@ def create_parser():
     )
 
     input_args.add_argument(
-        "--waveform_constants_path",
+        "--waveform-constants-path",
         type=Path,
         required=False,
         default=None,
@@ -198,7 +198,7 @@ def create_parser():
     )
 
     input_args.add_argument(
-        "--rest_api_file",
+        "--rest-api-file",
         type=Path,
         required=False,
         default=None,
@@ -207,7 +207,7 @@ def create_parser():
     )
 
     input_args.add_argument(
-        "--waveform_templates_file",
+        "--waveform-templates-file",
         type=Path,
         required=False,
         default=None,
@@ -216,7 +216,7 @@ def create_parser():
     )
 
     input_args.add_argument(
-        "--logging_config",
+        "--logging-config",
         type=Path,
         required=False,
         default=None,

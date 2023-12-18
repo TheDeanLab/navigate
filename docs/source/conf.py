@@ -39,6 +39,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx.ext.coverage",
+    "sphinx_toolbox.collapse",
 ]
 
 # Boolean indicating whether to scan all found documents for

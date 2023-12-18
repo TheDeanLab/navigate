@@ -61,6 +61,7 @@ from navigate.controller.sub_controllers import (
     AcquireBarController,
     FeaturePopupController,
     MenuController,
+    PluginsController,
     # MicroscopePopupController,
     # AdaptiveOpticsPopupController,
 )
@@ -238,6 +239,12 @@ class Controller:
         #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
+        #: dict: acquisition modes from plugins
+        self.plugin_acquisition_modes = {}
+        # add plugin menus
+        #: PluginsController: Plugin Sub-Controller
+        self.plugin_controller = PluginsController(view=self.view, parent_controller=self)
+        self.plugin_controller.load_plugins()
 
         # Create default data buffer
         #: int: Number of x_pixels from microscope configuration file.
@@ -395,6 +402,9 @@ class Controller:
         if hasattr(self, "af_popup_controller"):
             self.af_popup_controller.populate_experiment_values()
 
+        if file_name:
+            self.plugin_controller.populate_experiment_setting()
+
         # set widget modes
         self.set_mode_of_sub("stop")
         self.stage_controller.initialize()
@@ -478,16 +488,6 @@ class Controller:
                 "Cannot start acquisition!",
             )
             return False
-
-        # set waveform template
-        if self.acquire_bar_controller.mode == "confocal-projection":
-            self.configuration["experiment"]["MicroscopeState"][
-                "waveform_template"
-            ] = "Confocal-Projection"
-        else:
-            self.configuration["experiment"]["MicroscopeState"][
-                "waveform_template"
-            ] = "Default"
 
         # update real image width and height
         self.set_mode_of_sub(self.acquire_bar_controller.mode)
@@ -717,6 +717,11 @@ class Controller:
             args[0] : string
                 string = 'continuous', 'z-stack', 'single', or 'projection'
             """
+            # acquisition mode from plugin
+            plugin_obj = self.plugin_acquisition_modes.get(self.acquire_bar_controller.mode, None)
+            if plugin_obj and hasattr(plugin_obj, "prepare_acquisition_controller"):
+                getattr(plugin_obj, "prepare_acquisition_controller")(self)
+
             # Prepare data
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
@@ -819,6 +824,10 @@ class Controller:
                     "tony_wilson",
                     "live",
                 ),
+            )
+        else:
+            self.threads_pool.createThread(
+                "model", lambda: self.model.run_command(command, *args)
             )
 
         # elif command == "change_camera":
@@ -928,6 +937,11 @@ class Controller:
         logger.info(
             f"Navigate Controller - Captured {images_received}, " f"{mode} Images"
         )
+
+        # acquisition mode from plugin
+        plugin_obj = self.plugin_acquisition_modes.get(mode, None)
+        if plugin_obj and hasattr(plugin_obj, "end_acquisition_controller"):
+            getattr(plugin_obj, "end_acquisition_controller")(self)
 
         # Stop Progress Bars
         self.acquire_bar_controller.progress_bar(
@@ -1182,3 +1196,10 @@ class Controller:
     #         logger.info("Exiting Program")
     #         self.execute("exit")
     #         sys.exit()
+
+    def add_acquisition_mode(self, name, acquisition_obj):
+        if name in self.plugin_acquisition_modes:
+            print(f"*** plugin acquisition mode {name} exists, can't add another one!")
+            return
+        self.plugin_acquisition_modes[name] = acquisition_obj(name)
+        self.acquire_bar_controller.add_mode(name)

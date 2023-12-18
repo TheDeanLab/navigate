@@ -1,0 +1,8 @@
+name: Custom Device
+view: Popup
+
+# If you want to use/test this plugin device, you should add following lines to
+# the .navigate/config/configuration.yaml file.
+#    custom_device:
+#      hardware:
+#        type: CustomDevice

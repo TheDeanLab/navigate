@@ -94,6 +94,10 @@ class Menubar(Menu):
         self.menu_features = Menu(self)
         self.add_cascade(menu=self.menu_features, label="Features")
 
+        #: Menu: Plugins Menu
+        self.menu_plugins = Menu(self)
+        self.add_cascade(menu=self.menu_plugins, label="Plugins")
+
         #: Menu: Window Menu
         self.menu_window = Menu(self)
         self.add_cascade(menu=self.menu_window, label="Window")

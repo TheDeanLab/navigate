@@ -18,3 +18,4 @@ from .microscope_popup_controller import MicroscopePopupController  # noqa
 from .help_popup_controller import HelpPopupController  # noqa
 from .adaptiveoptics_popup_controller import AdaptiveOpticsPopupController  # noqa
 from .menu_controller import MenuController  # noqa
+from .plugins_controller import PluginsController  # noqa

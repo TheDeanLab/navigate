@@ -2,9 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only
-# (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -29,48 +28,44 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+#
+import importlib
 
-from time import time
+from navigate.model.device_startup_functions import (
+    auto_redial,
+    device_not_found,
+    DummyDeviceConnection,
+)
 
-
-def function_timer(func):
-    """Decorator for evaluating the duration of time necessary to execute a statement.
-
-    Parameters
-    ----------
-    func : function
-        The function to be timed.
-
-    Returns
-    -------
-    wrap_func : function
-        The wrapped function.
-    """
-
-    def wrap_func(*args, **kwargs):
-        t1 = time()
-        result = func(*args, **kwargs)
-        t2 = time()
-        print(f"Function {func.__name__!r} executed in {(t2 - t1):.4f}s")
-        return result
-
-    return wrap_func
+DEVICE_TYPE_NAME = "custom_device"  # Same as in configuraion.yaml, for example "stage", "filter_wheel", "remote_focus_device"...
+DEVICE_REF_LIST = ["type"]  # the reference value from configuration.yaml
 
 
-class FeatureList(object):
-    def __init__(self, func):
-        self._feature_list = func
-        temp = func.__name__
-        self.feature_list_name = str.title(temp.replace("_", " "))
-
-    def __call__(self, *args, **kwargs):
-        return self._feature_list()
+def load_device(configuration, is_synthetic=False):
+    return DummyDeviceConnection()
 
 
-class AcquisitionMode(object):
-    def __init__(self, obj):
-        self.__obj_class = obj
-        self.__is_acquisition_mode = True
+def start_device(microscope_name, device_connection, configuration, is_synthetic=False):
+    if is_synthetic:
+        device_type = "synthetic"
+    else:
+        device_type = configuration["configuration"]["microscopes"][microscope_name][
+            "CustomDevice"
+        ]["hardware"]["type"]
 
-    def __call__(self, *args):
-        return self.__obj_class(*args)
+    if device_type == "CustomDevice":
+        custom_device = importlib.import_module(
+            "navigate.plugins.DevicePluginExample.model.devices.custom_device.custom_device"
+        )
+        return custom_device.CustomDevice(
+            microscope_name, device_connection, configuration
+        )
+    elif device_type == "synthetic":
+        synthetic_device = importlib.import_module(
+            "navigate.plugins.DevicePluginExample.model.devices.custom_device.custom_synthetic"
+        )
+        return synthetic_device.CustomSyntheticDevice(
+            microscope_name, device_connection, configuration
+        )
+    else:
+        device_not_found(microscope_name, device_type)

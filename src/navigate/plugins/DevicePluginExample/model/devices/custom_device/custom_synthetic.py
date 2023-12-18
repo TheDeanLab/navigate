@@ -2,9 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only
-# (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -29,48 +28,25 @@
 # IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+#
+class CustomSyntheticDevice:
+    def __init__(self, microscope_name, device_connection, configuration):
+        self.microscope_name = microscope_name
+        self.configuration = configuration
 
-from time import time
+    def move(self, step_size=1.0):
+        print("*** Systhetic Device receive command: move", step_size)
 
+    def stop(self):
+        print("*** Systhetic Device receive command: stop")
 
-def function_timer(func):
-    """Decorator for evaluating the duration of time necessary to execute a statement.
+    def rotate(self, angle=0.1):
+        print("*** Systhetic Device receive command: turn", angle)
 
-    Parameters
-    ----------
-    func : function
-        The function to be timed.
-
-    Returns
-    -------
-    wrap_func : function
-        The wrapped function.
-    """
-
-    def wrap_func(*args, **kwargs):
-        t1 = time()
-        result = func(*args, **kwargs)
-        t2 = time()
-        print(f"Function {func.__name__!r} executed in {(t2 - t1):.4f}s")
-        return result
-
-    return wrap_func
-
-
-class FeatureList(object):
-    def __init__(self, func):
-        self._feature_list = func
-        temp = func.__name__
-        self.feature_list_name = str.title(temp.replace("_", " "))
-
-    def __call__(self, *args, **kwargs):
-        return self._feature_list()
-
-
-class AcquisitionMode(object):
-    def __init__(self, obj):
-        self.__obj_class = obj
-        self.__is_acquisition_mode = True
-
-    def __call__(self, *args):
-        return self.__obj_class(*args)
+    @property
+    def commands(self):
+        return {
+            "move_custom_device": lambda *args: self.move(args[0]),
+            "stop_custom_device": lambda *args: self.stop(),
+            "rotate_custom_device": lambda *args: self.rotate(args[0]),
+        }

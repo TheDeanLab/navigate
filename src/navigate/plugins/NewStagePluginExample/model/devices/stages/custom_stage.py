@@ -43,7 +43,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class SyntheticStage(StageBase):
+class CustomStage(StageBase):
     """Synthetically generated stage for testing purposes."""
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
@@ -62,9 +62,6 @@ class SyntheticStage(StageBase):
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
-        #: float: The default speed of the stage in mm/s.
-        self.default_speed = 7.68 * 0.67
-
         # Default axes mapping
         axes_mapping = {"x": "X", "y": "Y", "z": "Z", "theta": "Theta", "f": "F"}
         if not self.axes_mapping:
@@ -72,12 +69,6 @@ class SyntheticStage(StageBase):
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
-
-        self.sample_rate = 10000
-        self.volts_per_micron = "0.1 * x"
-        self.remote_focus_delay = 0.05
-        self.camera_delay_percent = 0.01
-        self.remote_focus_ramp_falling = 0.1
 
     def report_position(self):
         """Report the current position of the stage.
@@ -106,6 +97,7 @@ class SyntheticStage(StageBase):
         bool
             Was the move successful?
         """
+        print("*** moving custom stage!")
         axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
             return False
@@ -134,6 +126,7 @@ class SyntheticStage(StageBase):
         success : bool
             Was the move successful?
         """
+        print("*** moving custom stage!")
         abs_pos_dict = self.verify_abs_position(move_dictionary)
         if not abs_pos_dict:
             return False
@@ -144,99 +137,3 @@ class SyntheticStage(StageBase):
             time.sleep(0.025)
 
         return True
-
-    def load_sample(self):
-        """Load a sample.
-
-        Warning
-        -------
-            Not implemented.
-        """
-        self.y_pos = self.y_load_position
-
-    def unload_sample(self):
-        """Unload a sample.
-
-        Warning
-        -------
-            Not implemented.
-        """
-        self.y_pos = self.y_unload_position
-
-    def get_axis_position(self, axis):
-        """Get the current position of the stage along a single axis.
-
-        Parameters
-        ----------
-        axis : str
-            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
-
-        Returns
-        -------
-        float
-            The current position of the stage along the specified axis.
-        """
-        return getattr(self, f"{axis}_pos")
-
-    def set_speed(self, velocity_dict):
-        """Set the speed of the stage.
-
-        Parameters
-        ----------
-        velocity_dict : dict
-            Dictionary containing the speed of the stage along each axis.
-        """
-        pass
-
-    def get_speed(self, axis):
-        """Get the speed of the stage.
-
-        Parameters
-        ----------
-        axis : str
-            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
-
-        Returns
-        -------
-        float
-            The speed of the stage along the specified axis.
-        """
-
-        return 1
-
-    def scanr(self, start_position_mm, end_position_mm, enc_divide, axis="z"):
-        """Scan the stage using the constant velocity mode along a single axis.
-
-        Parameters
-        ----------
-        start_position_mm : float
-            Starting position of the scan in mm.
-        end_position_mm : float
-            Ending position of the scan in mm.
-        enc_divide : int
-            Encoder divide value.
-        axis : str
-            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
-
-        """
-
-        pass
-
-    def start_scan(self, axis):
-        """Start a scan along a single axis.
-
-        Parameters
-        ----------
-        axis : str
-            An axis. For example, 'x', 'y', 'z', 'f', 'theta'.
-
-        """
-        pass
-
-    def stop_scan(self):
-        """Stop a scan."""
-        pass
-
-    def update_waveform(self, waveform_dict):
-        print("*** update waveform:", waveform_dict.keys())
-        pass

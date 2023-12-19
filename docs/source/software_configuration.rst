@@ -24,8 +24,12 @@ only modify the ``configuration.yaml`` file in your local ``.navigate`` director
 local copy avoids conflicts between different microscopes after pulling new
 changes on GitHub.
 
-It may help to open ``C:\Users\Username\AppData\Local\.navigate\config\configuration.yaml``
-and follow along in this file when reading the next sections.
+It may help to open
+``C:\Users\Username\AppData\Local\.navigate\config\configuration.yaml`` and follow
+along in this file when reading the next sections.
+
+See the :ref:`Setting up an Axially Swept Light-Sheet Microscope <setup_aslm>` case
+study for a general walkthrough of how to build your own configuration file.
 
 .. _hardware_section:
 

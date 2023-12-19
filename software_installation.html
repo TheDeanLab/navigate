@@ -94,7 +94,8 @@
 and install the appropriate version based on your operating system.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>It is also handy to have the <a class="reference external" href="https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf">conda cheatsheet</a> open when first using miniconda to get accustomed to the commands available.</p>
+<p>It is also handy to have the <a class="reference external" href="https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf">conda cheatsheet</a>
+open when first using miniconda to get accustomed to the commands available.</p>
 </div>
 <ul class="simple">
 <li><p>Windows: Use the Windows taskbar search to find “Anaconda Prompt (Miniconda3)”.
@@ -184,30 +185,36 @@ an editable package locally on your machine.</p>
 </section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading"></a></h2>
-<p>If running the software on campus at UTSW you may need to update some of your proxy settings to allow
-<cite>pip</cite>/<cite>conda</cite> to install the proper packages.</p>
-<ul class="simple">
-<li><p>This can be done by going to Environment Variables for Windows, or another OS equivalent.</p></li>
+<p>If running the software on campus at UTSW you may need to update some of your proxy
+settings to allow <code class="docutils literal notranslate"><span class="pre">pip</span></code>/ <code class="docutils literal notranslate"><span class="pre">conda</span></code> to install the proper packages.</p>
+<ul>
+<li><p>This can be done by going to Environment Variables for Windows, or another OS
+equivalent.</p></li>
 <li><dl class="simple">
-<dt>Create the following new System Variables:</dt><dd><ul>
+<dt>Create the following new System Variables:</dt><dd><ul class="simple">
 <li><p>Variable = HTTP_PROXY; Value = <a class="reference external" href="http://proxy.swmed.edu:3128">http://proxy.swmed.edu:3128</a></p></li>
-<li><p>Variable = HTTPS_PROXY; Value = <a class="reference external" href="http://proxy.swmed.edu:3128">http://proxy.swmed.edu:3128</a> (please see that they are both http, this is purposeful and not a typo)</p></li>
+<li><p>Variable = HTTPS_PROXY; Value = <a class="reference external" href="http://proxy.swmed.edu:3128">http://proxy.swmed.edu:3128</a> (please see that
+they are both http, this is purposeful and not a typo)</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><p>If you continue to have issues then change the value of Variable HTTPS_PROXY to <a class="reference external" href="https://proxy.swmed.edu:3128">https://proxy.swmed.edu:3128</a></p></li>
-<li><dl class="simple">
-<dt>If you still have issues then you will need to create/update both configuration files for conda and pip to include proxy settings, if they are not in the paths below you will need to create them. This assumes a Windows perspective. Mac/Linux users will have different paths, they can be found online.</dt><dd><ul>
-<li><p><cite>conda</cite>’s Config file = C:\Users\UserProfile\.condarc</p></li>
-<li><p><cite>pip</cite>’s Config file = C:\Users\UserProfile\pip\pip.ini</p></li>
+<li><p>If you continue to have issues then change the value of Variable HTTPS_PROXY to
+<a class="reference external" href="https://proxy.swmed.edu:3128">https://proxy.swmed.edu:3128</a></p></li>
+<li><p>If you still have issues then you will need to create/update both configuration
+files for conda and pip to include proxy settings, if they are not in the paths
+below you will need to create them. This assumes a Windows perspective. Mac/Linux
+users will have different paths, they can be found online.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code>’s configuration file can be found at C:\Users\UserProfile\.condarc</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span></code>’s configiguration file can be found at C:\Users\UserProfile\pip\pip.ini</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </li>
 <li><p>You can also try to set the proxy from within the Anaconda Prompt:</p></li>
-<li><p><cite>set https_proxy=http://username:password&#64;proxy.example.com:8080</cite></p></li>
-<li><p><cite>set http_proxy=http://username:password&#64;proxy.example.com:8080</cite></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set</span> <span class="pre">https_proxy=http://username:password&#64;proxy.example.com:8080</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set</span> <span class="pre">http_proxy=http://username:password&#64;proxy.example.com:8080</span></code></p></li>
 </ul>
 </section>
 </section>

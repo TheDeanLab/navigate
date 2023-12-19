@@ -74,7 +74,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#sutter-mp-285">Sutter MP-285</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#physik-instrumente">Physik Instrumente</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#thorlabs">Thorlabs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#analog-controlled-galvo-piezo-etc">Analog Controlled (Galvo/Piezo/etc.)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#analog-controlled-galvo">Analog Controlled Galvo</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#synthetic-stage">Synthetic Stage</a></li>
 </ul>
 </li>
@@ -85,7 +85,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#filter-wheels">Filter Wheels</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#sutter">Sutter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">ASI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15">ASI</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#synthetic-filter-wheel">Synthetic Filter Wheel</a></li>
 </ul>
 </li>
@@ -95,14 +95,14 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lasers">Lasers</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id5">DAQ Control</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id16">DAQ Control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#coherent">Coherent</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#omicron">Omicron</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#synthetic-laser">Synthetic Laser</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#shutters">Shutters</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id6">Thorlabs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id17">Thorlabs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#synthetic-shutter">Synthetic Shutter</a></li>
 </ul>
 </li>
@@ -188,21 +188,21 @@ commonly <code class="docutils literal notranslate"><span class="pre">PXI6259/po
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>For NI-based cards, port0/line1 is the equivalent of <code class="docutils literal notranslate"><span class="pre">P0.1</span></code>.
+<p>For NI-based cards, <code class="docutils literal notranslate"><span class="pre">port0/line1</span></code> is the equivalent of <code class="docutils literal notranslate"><span class="pre">P0.1</span></code>.
 There are multiple pins for each PFIO, including source, out, gate, etc. You must
 use the out terminal.</p>
 </div>
 <section id="pcie-6738">
 <h4>PCIe-6738<a class="headerlink" href="#pcie-6738" title="Permalink to this heading"></a></h4>
 <p>The PCIe-6738 can only create one software-timed analog task for every four channels.
-As such, the lasers much be attached to analog output ports outside of the banks used by
-the galvo/remote focus units. For example, if you use AO0, AO2, and AO6 for the
-remote focus, galvo, and galvo stage, the lasers should be connected to AO8, AO9, and
-AO10. In such a configuration, they will not compete with the other AO ports. Since
-only one task will be created created on the AO8, AO9, AO10 bank at a time (only
-one laser is on at a time), only one laser can be on at a time. If we wanted to turn
-lasers on simultaneously, we could distribute the lasers across independent banks (e
-.g. AO8, AO14, AO19).</p>
+As such, the lasers much be attached to analog output ports outside of the banks used
+by the galvo/remote focus units. For example, if you use ao0, ao2, and ao6 for the
+remote focus, galvo, and galvo stage, the lasers should be connected to ao8, ao9, and
+ao10. In such a configuration, they will not compete with the other analog output
+ports. Since only one task will be created created on the ao8, ao9, ao10 bank at a time
+(only one laser is on at a time), only one laser can be on at a time. If we wanted to
+turn lasers on simultaneously, we could distribute the lasers across independent banks
+(e.g. ao8, ao14, ao19).</p>
 </section>
 <section id="pxi-6259">
 <h4>PXI-6259<a class="headerlink" href="#pxi-6259" title="Permalink to this heading"></a></h4>
@@ -275,9 +275,6 @@ Camera. Commonly, this is done with a counter port, e.g., <code class="docutils 
 <span class="w">  </span><span class="nt">camera</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span>
 <span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span><span class="w"> </span><span class="c1"># First Camera</span>
-<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302153</span>
-<span class="w">    </span><span class="p p-Indicator">-</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span><span class="w"> </span><span class="c1"># Second Camera</span>
 <span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302153</span>
 
 <span class="nt">microscopes</span><span class="p">:</span>
@@ -372,10 +369,10 @@ Camera. Commonly, this is done with a counter port, e.g., <code class="docutils 
 from Photometrics. The PVCAM SDK is also available form this location. You will
 likely have to register and agree to Photometrics terms.</p></li>
 <li><p>Perform the Full Installation of the PVCAM software.</p></li>
-<li><p>Should a ‘Base Device’ still show up as unknown in the device manager, you may need
-to install the <a class="reference external" href="https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits">Broadcom PCI/PCIe Software Development Kit</a></p></li>
-<li><p>Upon successfully installation, one should be able to acquire images with the
-manufacturer provided PVCamTest software.</p></li>
+<li><p>Should a “Base Device” still show up as unknown in the Windows Device Manager, you
+may need to install the <a class="reference external" href="https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits">Broadcom PCI/PCIe Software Development Kit</a></p></li>
+<li><p>Upon successful installation, one should be able to acquire images with the
+manufacturer-provided PVCamTest software.</p></li>
 </ul>
 <section id="id2">
 <h4>Configuration File<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
@@ -422,7 +419,7 @@ manufacturer provided PVCamTest software.</p></li>
 <section id="remote-focusing-devices">
 <h2>Remote Focusing Devices<a class="headerlink" href="#remote-focusing-devices" title="Permalink to this heading"></a></h2>
 <p>Voice coils, also known as linear actuators, play a crucial role in implementing
-aberration-free remote focusing in Navigate. These electromagnetic actuators are used
+aberration-free remote focusing in navigate. These electromagnetic actuators are used
 to control the axial position of the light-sheet and the sample relative to the
 microscope objective lens. By precisely adjusting the axial position, the focal plane
 can be shifted without moving the objective lens, thus enabling remote focusing.</p>
@@ -432,7 +429,8 @@ can be shifted without moving the objective lens, thus enabling remote focusing.
 establishing serial communication with the device to explicitly place it in an analog
 control mode. More recently, Equipment Solutions has begun delivering devices that
 automatically initialize into an analog control mode, and thus no longer need the
-serial communication to be established.</p>
+serial communication to be established. However, we often communicate via both
+serial and a DAQ port to get this device to run.</p>
 <ul>
 <li><p><a class="reference external" href="https://www.equipsolutions.com/products/linear-servo-controllers/sca814-linear-servo-controller/">SCA814 Linear Servo Controller</a></p>
 <blockquote>
@@ -472,7 +470,30 @@ signals.</p>
 </section>
 <section id="optotune-focus-tunable-lens">
 <h3>Optotune Focus Tunable Lens<a class="headerlink" href="#optotune-focus-tunable-lens" title="Permalink to this heading"></a></h3>
-<p>Device is controlled with an analog signal.</p>
+<p>This device is controlled with an analog signal from the DAQ.</p>
+<section id="id4">
+<h4>Configuration File<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h4>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="nt">daq</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+
+<span class="nt">remote_focus_device</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daq</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+<span class="w">      </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PXI6259/ao2</span>
+<span class="w">      </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5</span>
+<span class="w">      </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">    </span><span class="c1"># Optotune EL-16-40-TC-VIS-5D-1-C</span>
+<span class="w">    </span><span class="nt">delay_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7.5</span>
+<span class="w">    </span><span class="nt">ramp_rising_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">85</span>
+<span class="w">    </span><span class="nt">ramp_falling_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.5</span>
+<span class="w">    </span><span class="nt">amplitude</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">    </span><span class="nt">offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.3</span>
+<span class="w">    </span><span class="nt">smoothing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="synthetic-remote-focus-device">
 <h3>Synthetic Remote Focus Device<a class="headerlink" href="#synthetic-remote-focus-device" title="Permalink to this heading"></a></h3>
@@ -488,57 +509,60 @@ from different manufacturers, enabling users to mix and match components for a t
 versatile and optimized setup tailored to their research needs.</p>
 <section id="asi-tiger-controller">
 <h3>ASI Tiger Controller<a class="headerlink" href="#asi-tiger-controller" title="Permalink to this heading"></a></h3>
-<p>Constant Velocity Acquisition - Software is designed to acquire data in a continuous
-stage scanning mode. Rather than using the default SYNC signal from the ASI stage to
-synchronize the start of imaging, we use the encoder output pulsing mode of the ASI
-stage to trigger the acquisition of every frame at precise intervals.  Important for
-multi-channel imaging that is acquired in the per-stack mode, but less so for
-perZ-based acquisitions.</p>
+<p>We are set up to communicate with ASI stages via their Tiger Controller.</p>
+<p>There is a <cite>feedback_alignment</cite> configuration option specific to these stages,
+which corresponds to the <a class="reference external" href="https://asiimaging.com/docs/commands/aalign">Tiger Controller AA Command</a>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>If you are using the FTP-2000 stage, you should not change the F stage axis. This
 will differentially drive the two vertical posts, causing them to torque and
 potentially damage one another.</p>
 </div>
+<section id="id5">
+<h4>Configuration File<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM17</span>
-<span class="w">      </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
-<span class="w">      </span><span class="nt">controllername</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;C-884&#39;</span>
-<span class="w">      </span><span class="nt">stages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE</span>
-<span class="w">      </span><span class="nt">refmode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FRF FRF FRF FRF FRF FRF</span>
-<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">119060508</span>
-<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">    </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123456789</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM8</span>
+<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
 
 <span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span>
-<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
-<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
-<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">119060508</span>
-<span class="w">          </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">]</span>
-<span class="w">          </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">X</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">Y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">Z</span><span class="p p-Indicator">]</span>
-<span class="w">          </span><span class="nt">volts_per_micron</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="w">          </span><span class="nt">axes_channels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="w">          </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="w">          </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="w">        </span><span class="p p-Indicator">-</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">        </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123456789</span>
+<span class="w">        </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># Software</span>
+<span class="w">        </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">M</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">Y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">X</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">Z</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">feedback_alignment</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">90</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">90</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">90</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">90</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
 </section>
+</section>
 <section id="sutter-mp-285">
 <h3>Sutter MP-285<a class="headerlink" href="#sutter-mp-285" title="Permalink to this heading"></a></h3>
+<p>The Sutter MP-285 communicates via serial port and is quite particular. We have done
+our best to ensure the communication is stable, but occasionally the stage will send or
+receive an extra character, throwing off communication. In this case, the MP-285’s
+screen will be covered in <a href="#id6"><span class="problematic" id="id7">`</span></a>0`s, <a href="#id8"><span class="problematic" id="id9">`</span></a>1`s or look garbled. If this happens, simply turn off
+the software, power cycle the stage, and press the “MOVE” button once. When the
+software is restarted, it should work.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Sometimes the Coherent Connection software messes with the MP-285 serial
+communication if it is connected to the lasers.</p>
+</div>
+<section id="id10">
+<h4>Configuration File<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MP285</span>
 <span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM2</span>
 <span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span>
-<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
+<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
 <span class="w">    </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
 <span class="w">    </span><span class="nt">stages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
 
@@ -546,23 +570,30 @@ potentially damage one another.</p>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span>
-<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage1</span>
-<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MP285</span>
-<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
-<span class="w">          </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
-<span class="w">          </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">x</span><span class="p p-Indicator">]</span>
-<span class="w">          </span><span class="nt">volts_per_micron</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="w">          </span><span class="nt">axes_channels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="w">          </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25000</span>
-<span class="w">          </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">        </span><span class="p p-Indicator">-</span>
-<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage1</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MP285</span>
+<span class="w">        </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
+<span class="w">        </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">x</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">volts_per_micron</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">        </span><span class="nt">axes_channels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25000</span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 </pre></div>
 </div>
 </section>
+</section>
 <section id="physik-instrumente">
 <h3>Physik Instrumente<a class="headerlink" href="#physik-instrumente" title="Permalink to this heading"></a></h3>
+<p>These stages are controlled by PI’s own Python code and are quite stable. They
+include a special <code class="docutils literal notranslate"><span class="pre">hardware</span></code> option, <code class="docutils literal notranslate"><span class="pre">refmode</span></code>, which corresponds to how the
+PI stage chooses to self-reference. Options are <code class="docutils literal notranslate"><span class="pre">REF</span></code>, <code class="docutils literal notranslate"><span class="pre">FRF</span></code>, <code class="docutils literal notranslate"><span class="pre">MNL</span></code>, <code class="docutils literal notranslate"><span class="pre">FNL</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MPL</span></code> or <code class="docutils literal notranslate"><span class="pre">FPL</span></code>. These are PI’s GCS commands, and the correct reference mode
+for your stage should be found by launching PIMikroMove, which should come with
+your stage. Stage names (e.g. <code class="docutils literal notranslate"><span class="pre">L-509.20DG10</span></code>) can also be found in PIMikroMove
+or on a label on the side of your stage.</p>
+<section id="id11">
+<h4>Configuration File<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span>
@@ -621,8 +652,12 @@ potentially damage one another.</p>
 </pre></div>
 </div>
 </section>
+</section>
 <section id="thorlabs">
 <h3>Thorlabs<a class="headerlink" href="#thorlabs" title="Permalink to this heading"></a></h3>
+<p>We currently support the KIM001 single-axis, open-loop slip stick controller.</p>
+<section id="id12">
+<h4>Configuration File<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span>
@@ -646,8 +681,16 @@ potentially damage one another.</p>
 </pre></div>
 </div>
 </section>
-<section id="analog-controlled-galvo-piezo-etc">
-<h3>Analog Controlled (Galvo/Piezo/etc.)<a class="headerlink" href="#analog-controlled-galvo-piezo-etc" title="Permalink to this heading"></a></h3>
+</section>
+<section id="analog-controlled-galvo">
+<h3>Analog Controlled Galvo<a class="headerlink" href="#analog-controlled-galvo" title="Permalink to this heading"></a></h3>
+<p>We sometimes control position via a galvo with no software-based feedback. In this
+case, we treat a standard galvo mirror as a stage axis. We control the “stage” via
+voltages sent to the galvo. The <code class="docutils literal notranslate"><span class="pre">volts_per_micron</span></code> setting allows the user to
+pass an equation that converts position in microns <code class="docutils literal notranslate"><span class="pre">x</span></code>, which is passed from the
+software stage controls, to a voltage.</p>
+<section id="id13">
+<h4>Configuration File<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span>
@@ -664,22 +707,25 @@ potentially damage one another.</p>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span>
-<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage3</span>
-<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GalvoNIStage</span>
-<span class="w">            </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
-<span class="w">            </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">z</span><span class="p p-Indicator">]</span>
-<span class="w">            </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">PCI6738/ao6</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1">#48/49</span>
-<span class="w">            </span><span class="nt">volts_per_micron</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05*x</span>
-<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
-<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">            </span><span class="nt">distance_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">            </span><span class="nt">settle_duration_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage3</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GalvoNIStage</span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
+<span class="w">          </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">z</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">PCI6738/ao6</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1">#48/49</span>
+<span class="w">          </span><span class="nt">volts_per_micron</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05*x</span>
+<span class="w">          </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">          </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">distance_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">          </span><span class="nt">settle_duration_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 </pre></div>
 </div>
 </section>
+</section>
 <section id="synthetic-stage">
 <h3>Synthetic Stage<a class="headerlink" href="#synthetic-stage" title="Permalink to this heading"></a></h3>
+<p>We use this to fake a stage.</p>
+<section id="id14">
+<h4>Configuration File<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span>
@@ -694,16 +740,16 @@ potentially damage one another.</p>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span>
-<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage2</span>
-<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syntheticstage</span>
-<span class="w">            </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
-<span class="w">            </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">theta</span><span class="p p-Indicator">]</span>
-<span class="w">            </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">theta</span><span class="p p-Indicator">]</span>
-<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">360</span>
-<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stage2</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syntheticstage</span>
+<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0000</span>
+<span class="w">          </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">theta</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">theta</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">360</span>
+<span class="w">          </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 </pre></div>
 </div>
+</section>
 </section>
 </section>
 <section id="dichroic-turret">
@@ -768,8 +814,8 @@ potentially damage one another.</p>
 </pre></div>
 </div>
 </section>
-<section id="id4">
-<h3>ASI<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<section id="id15">
+<h3>ASI<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">filter_wheel</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
@@ -836,8 +882,8 @@ acquisition card.</p>
 </section>
 <section id="lasers">
 <h2>Lasers<a class="headerlink" href="#lasers" title="Permalink to this heading"></a></h2>
-<section id="id5">
-<h3>DAQ Control<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<section id="id16">
+<h3>DAQ Control<a class="headerlink" href="#id16" title="Permalink to this heading"></a></h3>
 <p>Most lasers are controlled externally via mixed analog and digital modulation.
 The <code class="docutils literal notranslate"><span class="pre">onoff</span></code> entry is for digital modulation.
 The <code class="docutils literal notranslate"><span class="pre">power</span></code> entry is for analog modulation.</p>
@@ -883,8 +929,8 @@ control.</p>
 </section>
 <section id="shutters">
 <h2>Shutters<a class="headerlink" href="#shutters" title="Permalink to this heading"></a></h2>
-<section id="id6">
-<h3>Thorlabs<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<section id="id17">
+<h3>Thorlabs<a class="headerlink" href="#id17" title="Permalink to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">shutter</span><span class="p">:</span>

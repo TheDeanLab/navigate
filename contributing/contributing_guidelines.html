@@ -61,7 +61,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#pre-commit-hooks">Pre-Commit Hooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dictionary-parsing">Dictionary Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#unit-tests">Unit Tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#developing-with-a-mac">Developing with a Mac</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developing-with-a-mac">Developing with a Mac</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#shared-memory-limits">Shared memory limits</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
@@ -195,7 +198,8 @@ tests.</p>
 <p>Many of us in the lab have Apple products and use them for development.
 However, there are some issues that you may encounter when developing on a Mac.
 Below are some of the issues we have encountered and how to resolve them.</p>
-<p>OSError</p>
+<section id="shared-memory-limits">
+<h3>Shared memory limits<a class="headerlink" href="#shared-memory-limits" title="Permalink to this heading"></a></h3>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">OSError: You tried to simultaneously open more SharedNDArrays than are</span>
 <span class="go">allowed by your system!</span>
 </pre></div>
@@ -211,6 +215,7 @@ of ~1000 typically works</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ulimit -n 1000</span>
 </pre></div>
 </div>
+</section>
 </section>
 </section>
 

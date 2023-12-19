@@ -5,6 +5,10 @@ Supported Hardware
 Data Acquisition Card
 =====================
 
+Data acquisition cards control analog and digital inputs and outputs. The software
+uses them for hardware-timed control of voice coil and galvo mirror sweeping synced
+with camera acquisition and, optionally, stage movements.
+
 .. _hardware_ni:
 
 NI
@@ -110,6 +114,9 @@ Configuration File
 Cameras
 =======
 
+The software supports camera-based acquisition. It can run both normal and rolling
+shutter modes of contemporary scientific CMOS cameras.
+
 Hamamatsu Flash 4.0 v3/Fusion
 -----------------------------
 
@@ -178,6 +185,12 @@ Configuration File
 
 Hamamatsu Lightning
 -------------------
+
+The Hamamatsu Lightning has a slightly different class than the Flash/Fusion as it
+reads out 4 rows at a time rather than 1 in rolling shutter mode.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -325,13 +338,14 @@ Configuration File
 Thorlabs BLINK
 --------------
 
-The BLINK is a pneumatically actuated voice coil that is controlled with analog control
-signals.
+The `BLINK <https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK>`_ is a
+pneumatically actuated voice coil that is controlled with analog control signals.
 
 Optotune Focus Tunable Lens
 ---------------------------
 
-This device is controlled with an analog signal from the DAQ.
+`These devices <https://www.optotune.com/tunable-lenses>`_ are controlled with an
+analog signal from the DAQ.
 
 Configuration File
 ^^^^^^^^^^^^^^^^^^
@@ -373,9 +387,10 @@ versatile and optimized setup tailored to their research needs.
 ASI Tiger Controller
 --------------------
 
-We are set up to communicate with ASI stages via their Tiger Controller.
+We are set up to communicate with ASI stages via their
+`Tiger Controller <https://www.asiimaging.com/controllers/tiger-controller/>`_.
 
-There is a `feedback_alignment` configuration option specific to these stages,
+There is a ``feedback_alignment`` configuration option specific to these stages,
 which corresponds to the `Tiger Controller AA Command <https://asiimaging.com/docs/commands/aalign>`_.
 
 .. tip::
@@ -409,12 +424,13 @@ Configuration File
 Sutter MP-285
 -------------
 
-The Sutter MP-285 communicates via serial port and is quite particular. We have done
-our best to ensure the communication is stable, but occasionally the stage will send or
-receive an extra character, throwing off communication. In this case, the MP-285's
-screen will be covered in `0`s, `1`s or look garbled. If this happens, simply turn off
-the software, power cycle the stage, and press the "MOVE" button once. When the
-software is restarted, it should work.
+The `Sutter MP-285 <https://www.sutter.com/MICROMANIPULATION/mp285.html>`_ communicates
+via serial port and is quite particular. We have done our best to ensure the
+communication is stable, but occasionally the stage will send or receive an extra
+character, throwing off communication. In this case, the MP-285's screen will be
+covered in `0`s, `1`s or look garbled. If this happens, simply turn off the software,
+power cycle the stage, and press the "MOVE" button once. When the software is
+restarted, it should work.
 
 .. tip::
 
@@ -453,7 +469,8 @@ Configuration File
 Physik Instrumente
 ------------------
 
-These stages are controlled by PI's own Python code and are quite stable. They
+These stages are controlled by `PI <https://www.pi-usa.us/en/>`_'s own
+`Python code <https://pypi.org/project/PIPython/>`_ and are quite stable. They
 include a special ``hardware`` option, ``refmode``, which corresponds to how the
 PI stage chooses to self-reference. Options are ``REF``, ``FRF``, ``MNL``, ``FNL``,
 ``MPL`` or ``FPL``. These are PI's GCS commands, and the correct reference mode
@@ -525,7 +542,8 @@ Configuration File
 Thorlabs
 --------
 
-We currently support the KIM001 single-axis, open-loop slip stick controller.
+We currently support the `KIM001 <https://www.thorlabs.com/thorproduct.cfm?partnumber=KIM001>`_
+controller.
 
 Configuration File
 ^^^^^^^^^^^^^^^^^^
@@ -553,8 +571,10 @@ Configuration File
               max: None
               min: None
 
-Analog Controlled Galvo
-------------------------
+.. _galvo_stage:
+
+Analog-Controlled Galvo
+-----------------------
 
 We sometimes control position via a galvo with no software-based feedback. In this
 case, we treat a standard galvo mirror as a stage axis. We control the "stage" via
@@ -629,6 +649,10 @@ Configuration File
 Filter Wheels
 =============
 
+Filter wheels can be used in both illumination and detection paths. Dichroic
+turrets are controlled via the same code as filter wheels. The user is expected to
+change the names of available filters to match what is in the filter wheel or turret.
+
 Sutter
 ------
 
@@ -700,6 +724,9 @@ Configuration File
 Galvanometers
 =============
 
+Galvo mirrors are used for fast scanning and destriping and occasionally as stages
+(see :ref:`Analog-Controlled Galvo <galvo_stage>`).
+
 DAQ Control
 -----------
 
@@ -732,6 +759,8 @@ Configuration File
 
 Lasers
 ======
+
+We currently support laser control via voltage signals.
 
 DAQ Control
 -----------
@@ -772,8 +801,12 @@ Configuration File
 Shutters
 ========
 
+Shutters automatically open at the start of acquisition and close upon finish.
+
 Thorlabs
 --------
+
+Thorlabs shutters are controlled via a digital on off voltage.
 
 Configuration File
 ^^^^^^^^^^^^^^^^^^
@@ -785,8 +818,8 @@ Configuration File
       shutter:
         hardware:
           name: daq
-          type: SyntheticShutter
-          channel: PCI6738/port0/line10
+          type: NI
+          channel: PXI6259/port0/line0
           min: 0
           max: 5
 
@@ -810,6 +843,9 @@ Configuration File
 Mechanical Zoom
 ===============
 
+Zoom devices control the magnification of the microscope. If such control is not
+needed, the software expects a :ref:`Synthetic Zoom <synthetic_zoom>` to provide
+the fixed magnification and the effective pixel size of the microscope.
 
 Dynamixel Zoom
 --------------
@@ -866,6 +902,8 @@ the system at each zoom.
                     4x: 4
                     5x: 5
                     6x: 6
+
+.. _synthetic_zoom:
 
 Synthetic Zoom
 --------------

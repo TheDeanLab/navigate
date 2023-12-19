@@ -1,3 +1,5 @@
+.. _setup_aslm:
+
 ==================================================
 Setting up an Axially Swept Light-Sheet Microscope
 ==================================================

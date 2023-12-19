@@ -118,6 +118,11 @@ an editable package locally on your machine.
     (navigate) C:\Users\Username\Code> cd navigate
     (navigate) C:\Users\Username\Code\navigate> pip install -e .[dev]
 
+.. note::
+
+  If working in a ``zsh`` shell, e.g. on a modern macOS, add single quotes around the
+  call: ``pip install -e '.[dev]'``.
+
 Troubleshooting
 ===============
 

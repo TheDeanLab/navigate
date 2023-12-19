@@ -626,50 +626,20 @@ Configuration File
             max: 360
             min: 0
 
-Dichroic Turret
-===============
-
-ASI
----
-
-.. code-block:: yaml
-
-  hardware:
-    dichroic:
-      type: ASI #synthetic #ASI
-      port: COM17
-      baudrate: 115200
-
-  microscopes:
-    microscope:
-      dichroic:
-        hardware:
-          name: ASI
-          type: ASI #synthetic #ASI
-          port: COM17
-          axes: [S]
-          baudrate: 115200
-        available_dichroics:
-          510LP: 0
-          570LP: 1
-          640LP: 2
-
-Synthetic Dichroic Turret
--------------------------
-
-TBD.
-
 Filter Wheels
 =============
 
 Sutter
 ------
 
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
 .. code-block:: yaml
 
   hardware:
     filter_wheel:
-      type: ASI
+      type: SutterFilterWheel
       port: COM10
       baudrate: 9600
       number_of_wheels: 1
@@ -677,23 +647,26 @@ Sutter
   microscopes:
     microscope_name:
       filter_wheel:
-        hardware:
-          name: filter_wheel
-          type: SutterFilterWheel
-          wheel_number: 1
-        filter_wheel_delay: .030 # in seconds
-        available_filters:
-          Empty-1: 0
-          525-30: 1
-          600-52: 2
-          670-30: 3
-          647-LP: 4
-          Empty-2: 5
-          Empty-3: 6
-          Empty-4: 7
+      hardware:
+        name: filter_wheel
+        type: SutterFilterWheel
+        wheel_number: 1
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        Empty-1: 0
+        525-30: 1
+        600-52: 2
+        670-30: 3
+        647-LP: 4
+        Empty-2: 5
+        Empty-3: 6
+        Empty-4: 7
 
 ASI
 ---
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -713,18 +686,16 @@ ASI
           wheel_number: 1
         filter_wheel_delay: .030 # in seconds
         available_filters:
-          Empty-1: 0
-          525-30: 1
-          600-52: 2
-          670-30: 3
-          647-LP: 4
-          Empty-2: 5
-          Empty-3: 6
-          Empty-4: 7
-
-Synthetic Filter Wheel
-----------------------
-TBD...
+          BLU - FF01-442/42-32: 0
+          GFP - FF01-515/30-32: 1
+          RFP - FF01-595/31-32: 2
+          Far-Red - FF01-670/30-32: 3
+          Blocked1: 4
+          Empty: 5
+          Blocked3: 6
+          Blocked4: 7
+          Blocked5: 8
+          Blocked6: 9
 
 Galvanometers
 =============
@@ -736,6 +707,9 @@ Multiple types of galvanometers have been used, including Cambridge
 Technologies/Novanta, Thorlabs, and ScannerMAX Each of these devices
 are externally controlled via analog signals delivered from a data
 acquisition card.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -756,11 +730,6 @@ acquisition card.
             duty_cycle: 50
             phase: 1.57079 # pi/2
 
-Synthetic Galvanometer
-----------------------
-
-TBD...
-
 Lasers
 ======
 
@@ -768,8 +737,11 @@ DAQ Control
 -----------
 
 Most lasers are controlled externally via mixed analog and digital modulation.
-The ``onoff`` entry is for digital modulation.
-The ``power`` entry is for analog modulation.
+The ``onoff`` entry is for digital modulation. The ``power`` entry is for analog
+modulation.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -797,25 +769,14 @@ The ``power`` entry is for analog modulation.
           pulse_percent: 87
         - wavelength: 561...
 
-Coherent
---------
-Future implementations of the software will enable a mixture of software and hardware
-control.
-
-Omicron
--------
-
-Future implementations of the software will enable a mixture of software and hardware
-control.
-
-Synthetic Laser
----------------
-
 Shutters
 ========
 
 Thorlabs
 --------
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -832,6 +793,9 @@ Thorlabs
 Synthetic Shutter
 -----------------
 
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
 .. code-block:: yaml
 
   hardware:
@@ -846,14 +810,25 @@ Synthetic Shutter
 Mechanical Zoom
 ===============
 
+
 Dynamixel Zoom
 --------------
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
+The ``positions`` specify the voltage of the actuator at different zoom positions.
+The ``stage_positions`` account for focal shifts in between the different zoom values
+(the MVXPLAPO does not have a consistent focal plane). These may change depending on
+the immersion media. Here it is specified for a ``BABB`` (Benzyl Alcohol Benzyl
+Benzoate) immersion media.  The ``pixel_size`` specifies the effective pixel size of
+the system at each zoom.
 
 .. code-block:: yaml
 
   hardware:
     zoom:
-      type: synthetic
+      type: DynamixelZoom
       servo_id: 1
       port: COM18
       baudrate: 1000000
@@ -862,20 +837,41 @@ Dynamixel Zoom
     microscope_name:
       zoom:
         hardware:
-          name: zoom
-          type: synthetic
-          servo_id: 1
+            name: zoom
+            type: DynamixelZoom
+            servo_id: 1
         position:
-          36X: 0
+            0.63x: 0
+            1x: 627
+            2x: 1711
+            3x: 2301
+            4x: 2710
+            5x: 3079
+            6x: 3383
         pixel_size:
-          36X: 0.180
+            0.63x: 9.7
+            1x: 6.38
+            2x: 3.14
+            3x: 2.12
+            4x: 1.609
+            5x: 1.255
+            6x: 1.044
         stage_positions:
-          BABB:
-            f:
-              36X: 0
+            BABB:
+                f:
+                    0.63x: 0
+                    1x: 1
+                    2x: 2
+                    3x: 3
+                    4x: 4
+                    5x: 5
+                    6x: 6
 
-Synethetic Zoom
----------------
+Synthetic Zoom
+--------------
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 

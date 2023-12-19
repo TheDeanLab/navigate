@@ -74,41 +74,31 @@
 <li class="toctree-l4"><a class="reference internal" href="#sutter-mp-285">Sutter MP-285</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#physik-instrumente">Physik Instrumente</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#thorlabs">Thorlabs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#analog-controlled-galvo">Analog Controlled Galvo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#analog-controlled-galvo">Analog-Controlled Galvo</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#synthetic-stage">Synthetic Stage</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#dichroic-turret">Dichroic Turret</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#asi">ASI</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#synthetic-dichroic-turret">Synthetic Dichroic Turret</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#filter-wheels">Filter Wheels</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#sutter">Sutter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id15">ASI</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#synthetic-filter-wheel">Synthetic Filter Wheel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#asi">ASI</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#galvanometers">Galvanometers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#daq-control">DAQ Control</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#synthetic-galvanometer">Synthetic Galvanometer</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lasers">Lasers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id16">DAQ Control</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#coherent">Coherent</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#omicron">Omicron</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#synthetic-laser">Synthetic Laser</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#shutters">Shutters</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id17">Thorlabs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id18">Thorlabs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#synthetic-shutter">Synthetic Shutter</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#mechanical-zoom">Mechanical Zoom</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#dynamixel-zoom">Dynamixel Zoom</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#synethetic-zoom">Synethetic Zoom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#synthetic-zoom">Synthetic Zoom</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#deformable-mirrors">Deformable Mirrors</a><ul>
@@ -155,6 +145,9 @@
 <h1>Supported Hardware<a class="headerlink" href="#supported-hardware" title="Permalink to this heading"></a></h1>
 <section id="data-acquisition-card">
 <h2>Data Acquisition Card<a class="headerlink" href="#data-acquisition-card" title="Permalink to this heading"></a></h2>
+<p>Data acquisition cards control analog and digital inputs and outputs. The software
+uses them for hardware-timed control of voice coil and galvo mirror sweeping synced
+with camera acquisition and, optionally, stage movements.</p>
 <section id="ni">
 <span id="hardware-ni"></span><h3>NI<a class="headerlink" href="#ni" title="Permalink to this heading"></a></h3>
 <p>We have used several different NI-based data acquisition cards to run the software.
@@ -250,6 +243,8 @@ ground is pin 36.</p></li>
 </section>
 <section id="cameras">
 <h2>Cameras<a class="headerlink" href="#cameras" title="Permalink to this heading"></a></h2>
+<p>The software supports camera-based acquisition. It can run both normal and rolling
+shutter modes of contemporary scientific CMOS cameras.</p>
 <section id="hamamatsu-flash-4-0-v3-fusion">
 <h3>Hamamatsu Flash 4.0 v3/Fusion<a class="headerlink" href="#hamamatsu-flash-4-0-v3-fusion" title="Permalink to this heading"></a></h3>
 <ul>
@@ -321,6 +316,10 @@ Camera. Commonly, this is done with a counter port, e.g., <code class="docutils 
 </section>
 <section id="hamamatsu-lightning">
 <h3>Hamamatsu Lightning<a class="headerlink" href="#hamamatsu-lightning" title="Permalink to this heading"></a></h3>
+<p>The Hamamatsu Lightning has a slightly different class than the Flash/Fusion as it
+reads out 4 rows at a time rather than 1 in rolling shutter mode.</p>
+<section id="id2">
+<h4>Configuration File<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">camera</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span>
@@ -362,6 +361,7 @@ Camera. Commonly, this is done with a counter port, e.g., <code class="docutils 
 </pre></div>
 </div>
 </section>
+</section>
 <section id="photometrics-iris-15">
 <h3>Photometrics Iris 15<a class="headerlink" href="#photometrics-iris-15" title="Permalink to this heading"></a></h3>
 <ul class="simple">
@@ -374,8 +374,8 @@ may need to install the <a class="reference external" href="https://www.broadcom
 <li><p>Upon successful installation, one should be able to acquire images with the
 manufacturer-provided PVCamTest software.</p></li>
 </ul>
-<section id="id2">
-<h4>Configuration File<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
+<section id="id3">
+<h4>Configuration File<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">camera</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Photometrics</span>
 <span class="w">  </span><span class="nt">camera_connection</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PMPCIECam00</span>
@@ -441,8 +441,8 @@ serial and a DAQ port to get this device to run.</p>
 </li>
 <li><p><a class="reference external" href="https://www.equipsolutions.com/products/linear-focus-actuators/lfa-2010-linear-focus-actuator/">LFA-2010 Linear Focus Actuator</a></p></li>
 </ul>
-<section id="id3">
-<h4>Configuration File<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
+<section id="id4">
+<h4>Configuration File<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">remote_focus_device</span><span class="p">:</span>
@@ -465,14 +465,15 @@ serial and a DAQ port to get this device to run.</p>
 </section>
 <section id="thorlabs-blink">
 <h3>Thorlabs BLINK<a class="headerlink" href="#thorlabs-blink" title="Permalink to this heading"></a></h3>
-<p>The BLINK is a pneumatically actuated voice coil that is controlled with analog control
-signals.</p>
+<p>The <a class="reference external" href="https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK">BLINK</a> is a
+pneumatically actuated voice coil that is controlled with analog control signals.</p>
 </section>
 <section id="optotune-focus-tunable-lens">
 <h3>Optotune Focus Tunable Lens<a class="headerlink" href="#optotune-focus-tunable-lens" title="Permalink to this heading"></a></h3>
-<p>This device is controlled with an analog signal from the DAQ.</p>
-<section id="id4">
-<h4>Configuration File<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h4>
+<p><a class="reference external" href="https://www.optotune.com/tunable-lenses">These devices</a> are controlled with an
+analog signal from the DAQ.</p>
+<section id="id5">
+<h4>Configuration File<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="nt">daq</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
@@ -509,8 +510,9 @@ from different manufacturers, enabling users to mix and match components for a t
 versatile and optimized setup tailored to their research needs.</p>
 <section id="asi-tiger-controller">
 <h3>ASI Tiger Controller<a class="headerlink" href="#asi-tiger-controller" title="Permalink to this heading"></a></h3>
-<p>We are set up to communicate with ASI stages via their Tiger Controller.</p>
-<p>There is a <cite>feedback_alignment</cite> configuration option specific to these stages,
+<p>We are set up to communicate with ASI stages via their
+<a class="reference external" href="https://www.asiimaging.com/controllers/tiger-controller/">Tiger Controller</a>.</p>
+<p>There is a <code class="docutils literal notranslate"><span class="pre">feedback_alignment</span></code> configuration option specific to these stages,
 which corresponds to the <a class="reference external" href="https://asiimaging.com/docs/commands/aalign">Tiger Controller AA Command</a>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -518,8 +520,8 @@ which corresponds to the <a class="reference external" href="https://asiimaging.
 will differentially drive the two vertical posts, causing them to torque and
 potentially damage one another.</p>
 </div>
-<section id="id5">
-<h4>Configuration File<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h4>
+<section id="id6">
+<h4>Configuration File<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
@@ -543,19 +545,20 @@ potentially damage one another.</p>
 </section>
 <section id="sutter-mp-285">
 <h3>Sutter MP-285<a class="headerlink" href="#sutter-mp-285" title="Permalink to this heading"></a></h3>
-<p>The Sutter MP-285 communicates via serial port and is quite particular. We have done
-our best to ensure the communication is stable, but occasionally the stage will send or
-receive an extra character, throwing off communication. In this case, the MP-285’s
-screen will be covered in <a href="#id6"><span class="problematic" id="id7">`</span></a>0`s, <a href="#id8"><span class="problematic" id="id9">`</span></a>1`s or look garbled. If this happens, simply turn off
-the software, power cycle the stage, and press the “MOVE” button once. When the
-software is restarted, it should work.</p>
+<p>The <a class="reference external" href="https://www.sutter.com/MICROMANIPULATION/mp285.html">Sutter MP-285</a> communicates
+via serial port and is quite particular. We have done our best to ensure the
+communication is stable, but occasionally the stage will send or receive an extra
+character, throwing off communication. In this case, the MP-285’s screen will be
+covered in 0s, 1s or look garbled. If this happens, simply turn off the software,
+power cycle the stage, and press the “MOVE” button on the MP-285 controller once. When
+the software is restarted, it should work.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Sometimes the Coherent Connection software messes with the MP-285 serial
 communication if it is connected to the lasers.</p>
 </div>
-<section id="id10">
-<h4>Configuration File<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h4>
+<section id="id8">
+<h4>Configuration File<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span>
@@ -585,15 +588,16 @@ communication if it is connected to the lasers.</p>
 </section>
 <section id="physik-instrumente">
 <h3>Physik Instrumente<a class="headerlink" href="#physik-instrumente" title="Permalink to this heading"></a></h3>
-<p>These stages are controlled by PI’s own Python code and are quite stable. They
+<p>These stages are controlled by <a class="reference external" href="https://www.pi-usa.us/en/">PI</a>’s own
+<a class="reference external" href="https://pypi.org/project/PIPython/">Python code</a> and are quite stable. They
 include a special <code class="docutils literal notranslate"><span class="pre">hardware</span></code> option, <code class="docutils literal notranslate"><span class="pre">refmode</span></code>, which corresponds to how the
 PI stage chooses to self-reference. Options are <code class="docutils literal notranslate"><span class="pre">REF</span></code>, <code class="docutils literal notranslate"><span class="pre">FRF</span></code>, <code class="docutils literal notranslate"><span class="pre">MNL</span></code>, <code class="docutils literal notranslate"><span class="pre">FNL</span></code>,
 <code class="docutils literal notranslate"><span class="pre">MPL</span></code> or <code class="docutils literal notranslate"><span class="pre">FPL</span></code>. These are PI’s GCS commands, and the correct reference mode
 for your stage should be found by launching PIMikroMove, which should come with
 your stage. Stage names (e.g. <code class="docutils literal notranslate"><span class="pre">L-509.20DG10</span></code>) can also be found in PIMikroMove
 or on a label on the side of your stage.</p>
-<section id="id11">
-<h4>Configuration File<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h4>
+<section id="id9">
+<h4>Configuration File<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span>
@@ -655,9 +659,10 @@ or on a label on the side of your stage.</p>
 </section>
 <section id="thorlabs">
 <h3>Thorlabs<a class="headerlink" href="#thorlabs" title="Permalink to this heading"></a></h3>
-<p>We currently support the KIM001 single-axis, open-loop slip stick controller.</p>
-<section id="id12">
-<h4>Configuration File<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h4>
+<p>We currently support the <a class="reference external" href="https://www.thorlabs.com/thorproduct.cfm?partnumber=KIM001">KIM001</a>
+controller.</p>
+<section id="id10">
+<h4>Configuration File<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span>
@@ -683,14 +688,14 @@ or on a label on the side of your stage.</p>
 </section>
 </section>
 <section id="analog-controlled-galvo">
-<h3>Analog Controlled Galvo<a class="headerlink" href="#analog-controlled-galvo" title="Permalink to this heading"></a></h3>
+<span id="galvo-stage"></span><h3>Analog-Controlled Galvo<a class="headerlink" href="#analog-controlled-galvo" title="Permalink to this heading"></a></h3>
 <p>We sometimes control position via a galvo with no software-based feedback. In this
 case, we treat a standard galvo mirror as a stage axis. We control the “stage” via
 voltages sent to the galvo. The <code class="docutils literal notranslate"><span class="pre">volts_per_micron</span></code> setting allows the user to
 pass an equation that converts position in microns <code class="docutils literal notranslate"><span class="pre">x</span></code>, which is passed from the
 software stage controls, to a voltage.</p>
-<section id="id13">
-<h4>Configuration File<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h4>
+<section id="id11">
+<h4>Configuration File<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span>
@@ -724,8 +729,8 @@ software stage controls, to a voltage.</p>
 <section id="synthetic-stage">
 <h3>Synthetic Stage<a class="headerlink" href="#synthetic-stage" title="Permalink to this heading"></a></h3>
 <p>We use this to fake a stage.</p>
-<section id="id14">
-<h4>Configuration File<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h4>
+<section id="id12">
+<h4>Configuration File<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span>
@@ -752,44 +757,18 @@ software stage controls, to a voltage.</p>
 </section>
 </section>
 </section>
-<section id="dichroic-turret">
-<h2>Dichroic Turret<a class="headerlink" href="#dichroic-turret" title="Permalink to this heading"></a></h2>
-<section id="asi">
-<h3>ASI<a class="headerlink" href="#asi" title="Permalink to this heading"></a></h3>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">dichroic</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span><span class="w"> </span><span class="c1">#synthetic #ASI</span>
-<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM17</span>
-<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
-
-<span class="nt">microscopes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">microscope</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">dichroic</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span><span class="w"> </span><span class="c1">#synthetic #ASI</span>
-<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM17</span>
-<span class="w">        </span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">S</span><span class="p p-Indicator">]</span>
-<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
-<span class="w">      </span><span class="nt">available_dichroics</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">510LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">        </span><span class="nt">570LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">640LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-</pre></div>
-</div>
-</section>
-<section id="synthetic-dichroic-turret">
-<h3>Synthetic Dichroic Turret<a class="headerlink" href="#synthetic-dichroic-turret" title="Permalink to this heading"></a></h3>
-<p>TBD.</p>
-</section>
-</section>
 <section id="filter-wheels">
 <h2>Filter Wheels<a class="headerlink" href="#filter-wheels" title="Permalink to this heading"></a></h2>
+<p>Filter wheels can be used in both illumination and detection paths. Dichroic
+turrets are controlled via the same code as filter wheels. The user is expected to
+change the names of available filters to match what is in the filter wheel or turret.</p>
 <section id="sutter">
 <h3>Sutter<a class="headerlink" href="#sutter" title="Permalink to this heading"></a></h3>
+<section id="id13">
+<h4>Configuration File<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">filter_wheel</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span>
 <span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM10</span>
 <span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
 <span class="w">    </span><span class="nt">number_of_wheels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -797,25 +776,28 @@ software stage controls, to a voltage.</p>
 <span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">filter_wheel</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filter_wheel</span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span>
-<span class="w">        </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">      </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.030</span><span class="w"> </span><span class="c1"># in seconds</span>
-<span class="w">      </span><span class="nt">available_filters</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">Empty-1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">        </span><span class="nt">525-30</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">600-52</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="w">        </span><span class="nt">670-30</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="w">        </span><span class="nt">647-LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
-<span class="w">        </span><span class="nt">Empty-2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">        </span><span class="nt">Empty-3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
-<span class="w">        </span><span class="nt">Empty-4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
+<span class="w">    </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filter_wheel</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span>
+<span class="w">      </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.030</span><span class="w"> </span><span class="c1"># in seconds</span>
+<span class="w">    </span><span class="nt">available_filters</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">Empty-1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">      </span><span class="nt">525-30</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">600-52</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">      </span><span class="nt">670-30</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">      </span><span class="nt">647-LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">      </span><span class="nt">Empty-2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">Empty-3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
+<span class="w">      </span><span class="nt">Empty-4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
 </pre></div>
 </div>
 </section>
-<section id="id15">
-<h3>ASI<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h3>
+</section>
+<section id="asi">
+<h3>ASI<a class="headerlink" href="#asi" title="Permalink to this heading"></a></h3>
+<section id="id14">
+<h4>Configuration File<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">filter_wheel</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
@@ -832,30 +814,33 @@ software stage controls, to a voltage.</p>
 <span class="w">        </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">      </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.030</span><span class="w"> </span><span class="c1"># in seconds</span>
 <span class="w">      </span><span class="nt">available_filters</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">Empty-1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">        </span><span class="nt">525-30</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">600-52</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="w">        </span><span class="nt">670-30</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="w">        </span><span class="nt">647-LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
-<span class="w">        </span><span class="nt">Empty-2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">        </span><span class="nt">Empty-3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
-<span class="w">        </span><span class="nt">Empty-4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
+<span class="w">        </span><span class="nt">BLU - FF01-442/42-32</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">GFP - FF01-515/30-32</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">RFP - FF01-595/31-32</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">        </span><span class="nt">Far-Red - FF01-670/30-32</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">        </span><span class="nt">Blocked1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">        </span><span class="nt">Empty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="nt">Blocked3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
+<span class="w">        </span><span class="nt">Blocked4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
+<span class="w">        </span><span class="nt">Blocked5</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="w">        </span><span class="nt">Blocked6</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9</span>
 </pre></div>
 </div>
 </section>
-<section id="synthetic-filter-wheel">
-<h3>Synthetic Filter Wheel<a class="headerlink" href="#synthetic-filter-wheel" title="Permalink to this heading"></a></h3>
-<p>TBD…</p>
 </section>
 </section>
 <section id="galvanometers">
 <h2>Galvanometers<a class="headerlink" href="#galvanometers" title="Permalink to this heading"></a></h2>
+<p>Galvo mirrors are used for fast scanning and destriping and occasionally as stages
+(see <a class="reference internal" href="#galvo-stage"><span class="std std-ref">Analog-Controlled Galvo</span></a>).</p>
 <section id="daq-control">
 <h3>DAQ Control<a class="headerlink" href="#daq-control" title="Permalink to this heading"></a></h3>
 <p>Multiple types of galvanometers have been used, including Cambridge
 Technologies/Novanta, Thorlabs, and ScannerMAX Each of these devices
 are externally controlled via analog signals delivered from a data
 acquisition card.</p>
+<section id="id15">
+<h4>Configuration File<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">galvo</span><span class="p">:</span>
@@ -875,18 +860,18 @@ acquisition card.</p>
 </pre></div>
 </div>
 </section>
-<section id="synthetic-galvanometer">
-<h3>Synthetic Galvanometer<a class="headerlink" href="#synthetic-galvanometer" title="Permalink to this heading"></a></h3>
-<p>TBD…</p>
 </section>
 </section>
 <section id="lasers">
 <h2>Lasers<a class="headerlink" href="#lasers" title="Permalink to this heading"></a></h2>
+<p>We currently support laser control via voltage signals.</p>
 <section id="id16">
 <h3>DAQ Control<a class="headerlink" href="#id16" title="Permalink to this heading"></a></h3>
 <p>Most lasers are controlled externally via mixed analog and digital modulation.
-The <code class="docutils literal notranslate"><span class="pre">onoff</span></code> entry is for digital modulation.
-The <code class="docutils literal notranslate"><span class="pre">power</span></code> entry is for analog modulation.</p>
+The <code class="docutils literal notranslate"><span class="pre">onoff</span></code> entry is for digital modulation. The <code class="docutils literal notranslate"><span class="pre">power</span></code> entry is for analog
+modulation.</p>
+<section id="id17">
+<h4>Configuration File<a class="headerlink" href="#id17" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">lasers</span><span class="p">:</span>
@@ -913,38 +898,33 @@ The <code class="docutils literal notranslate"><span class="pre">power</span></c
 </pre></div>
 </div>
 </section>
-<section id="coherent">
-<h3>Coherent<a class="headerlink" href="#coherent" title="Permalink to this heading"></a></h3>
-<p>Future implementations of the software will enable a mixture of software and hardware
-control.</p>
-</section>
-<section id="omicron">
-<h3>Omicron<a class="headerlink" href="#omicron" title="Permalink to this heading"></a></h3>
-<p>Future implementations of the software will enable a mixture of software and hardware
-control.</p>
-</section>
-<section id="synthetic-laser">
-<h3>Synthetic Laser<a class="headerlink" href="#synthetic-laser" title="Permalink to this heading"></a></h3>
 </section>
 </section>
 <section id="shutters">
 <h2>Shutters<a class="headerlink" href="#shutters" title="Permalink to this heading"></a></h2>
-<section id="id17">
-<h3>Thorlabs<a class="headerlink" href="#id17" title="Permalink to this heading"></a></h3>
+<p>Shutters automatically open at the start of acquisition and close upon finish.</p>
+<section id="id18">
+<h3>Thorlabs<a class="headerlink" href="#id18" title="Permalink to this heading"></a></h3>
+<p>Thorlabs shutters are controlled via a digital on off voltage.</p>
+<section id="id19">
+<h4>Configuration File<a class="headerlink" href="#id19" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">shutter</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daq</span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SyntheticShutter</span>
-<span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PCI6738/port0/line10</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+<span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PXI6259/port0/line0</span>
 <span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 </pre></div>
 </div>
 </section>
+</section>
 <section id="synthetic-shutter">
 <h3>Synthetic Shutter<a class="headerlink" href="#synthetic-shutter" title="Permalink to this heading"></a></h3>
+<section id="id20">
+<h4>Configuration File<a class="headerlink" href="#id20" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">shutter</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">hardware</span><span class="p">:</span>
@@ -957,10 +937,72 @@ control.</p>
 </div>
 </section>
 </section>
+</section>
 <section id="mechanical-zoom">
 <h2>Mechanical Zoom<a class="headerlink" href="#mechanical-zoom" title="Permalink to this heading"></a></h2>
+<p>Zoom devices control the magnification of the microscope. If such control is not
+needed, the software expects a <a class="reference internal" href="#synthetic-zoom"><span class="std std-ref">Synthetic Zoom</span></a> to provide
+the fixed magnification and the effective pixel size of the microscope.</p>
 <section id="dynamixel-zoom">
 <h3>Dynamixel Zoom<a class="headerlink" href="#dynamixel-zoom" title="Permalink to this heading"></a></h3>
+<p>This software supports the
+<a class="reference external" href="https://www.dynamixel.com/">Dynamixel Smart Actuator</a>.</p>
+<section id="id21">
+<h4>Configuration File<a class="headerlink" href="#id21" title="Permalink to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">positions</span></code> specify the voltage of the actuator at different zoom positions.
+The <code class="docutils literal notranslate"><span class="pre">stage_positions</span></code> account for focal shifts in between the different zoom values
+(the MVXPLAPO does not have a consistent focal plane). These may change depending on
+the immersion media. Here it is specified for a <code class="docutils literal notranslate"><span class="pre">BABB</span></code> (Benzyl Alcohol Benzyl
+Benzoate) immersion media.  The <code class="docutils literal notranslate"><span class="pre">pixel_size</span></code> specifies the effective pixel size of
+the system at each zoom.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">zoom</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DynamixelZoom</span>
+<span class="w">    </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM18</span>
+<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">zoom</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">zoom</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DynamixelZoom</span>
+<span class="w">          </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">position</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">0.63x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">1x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">627</span>
+<span class="w">          </span><span class="nt">2x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1711</span>
+<span class="w">          </span><span class="nt">3x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2301</span>
+<span class="w">          </span><span class="nt">4x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2710</span>
+<span class="w">          </span><span class="nt">5x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3079</span>
+<span class="w">          </span><span class="nt">6x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3383</span>
+<span class="w">      </span><span class="nt">pixel_size</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">0.63x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9.7</span>
+<span class="w">          </span><span class="nt">1x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6.38</span>
+<span class="w">          </span><span class="nt">2x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.14</span>
+<span class="w">          </span><span class="nt">3x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.12</span>
+<span class="w">          </span><span class="nt">4x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.609</span>
+<span class="w">          </span><span class="nt">5x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.255</span>
+<span class="w">          </span><span class="nt">6x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.044</span>
+<span class="w">      </span><span class="nt">stage_positions</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">BABB</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">f</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">0.63x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                  </span><span class="nt">1x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">                  </span><span class="nt">2x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">                  </span><span class="nt">3x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                  </span><span class="nt">4x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                  </span><span class="nt">5x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                  </span><span class="nt">6x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="synthetic-zoom">
+<span id="id22"></span><h3>Synthetic Zoom<a class="headerlink" href="#synthetic-zoom" title="Permalink to this heading"></a></h3>
+<section id="id23">
+<h4>Configuration File<a class="headerlink" href="#id23" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">zoom</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synthetic</span>
@@ -986,32 +1028,6 @@ control.</p>
 </pre></div>
 </div>
 </section>
-<section id="synethetic-zoom">
-<h3>Synethetic Zoom<a class="headerlink" href="#synethetic-zoom" title="Permalink to this heading"></a></h3>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">zoom</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synthetic</span>
-<span class="w">    </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM18</span>
-<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
-
-<span class="nt">microscopes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">zoom</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">zoom</span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synthetic</span>
-<span class="w">        </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">      </span><span class="nt">position</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">36X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">      </span><span class="nt">pixel_size</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">36X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.180</span>
-<span class="w">      </span><span class="nt">stage_positions</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">BABB</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">f</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">36X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-</pre></div>
-</div>
 </section>
 </section>
 <section id="deformable-mirrors">

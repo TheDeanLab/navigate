@@ -27,6 +27,7 @@
    :toctree:
    :recursive:
 
+
    navigate.model.analysis
    navigate.model.concurrency
    navigate.model.data_sources
@@ -39,4 +40,5 @@
    navigate.model.model
    navigate.model.plugins_model
    navigate.model.waveforms
+
 

@@ -5,6 +5,10 @@ Supported Hardware
 Data Acquisition Card
 =====================
 
+Data acquisition cards control analog and digital inputs and outputs. The software
+uses them for hardware-timed control of voice coil and galvo mirror sweeping synced
+with camera acquisition and, optionally, stage movements.
+
 .. _hardware_ni:
 
 NI
@@ -110,6 +114,9 @@ Configuration File
 Cameras
 =======
 
+The software supports camera-based acquisition. It can run both normal and rolling
+shutter modes of contemporary scientific CMOS cameras.
+
 Hamamatsu Flash 4.0 v3/Fusion
 -----------------------------
 
@@ -178,6 +185,12 @@ Configuration File
 
 Hamamatsu Lightning
 -------------------
+
+The Hamamatsu Lightning has a slightly different class than the Flash/Fusion as it
+reads out 4 rows at a time rather than 1 in rolling shutter mode.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -325,13 +338,14 @@ Configuration File
 Thorlabs BLINK
 --------------
 
-The BLINK is a pneumatically actuated voice coil that is controlled with analog control
-signals.
+The `BLINK <https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK>`_ is a
+pneumatically actuated voice coil that is controlled with analog control signals.
 
 Optotune Focus Tunable Lens
 ---------------------------
 
-This device is controlled with an analog signal from the DAQ.
+`These devices <https://www.optotune.com/tunable-lenses>`_ are controlled with an
+analog signal from the DAQ.
 
 Configuration File
 ^^^^^^^^^^^^^^^^^^
@@ -373,9 +387,10 @@ versatile and optimized setup tailored to their research needs.
 ASI Tiger Controller
 --------------------
 
-We are set up to communicate with ASI stages via their Tiger Controller.
+We are set up to communicate with ASI stages via their
+`Tiger Controller <https://www.asiimaging.com/controllers/tiger-controller/>`_.
 
-There is a `feedback_alignment` configuration option specific to these stages,
+There is a ``feedback_alignment`` configuration option specific to these stages,
 which corresponds to the `Tiger Controller AA Command <https://asiimaging.com/docs/commands/aalign>`_.
 
 .. tip::
@@ -409,12 +424,13 @@ Configuration File
 Sutter MP-285
 -------------
 
-The Sutter MP-285 communicates via serial port and is quite particular. We have done
-our best to ensure the communication is stable, but occasionally the stage will send or
-receive an extra character, throwing off communication. In this case, the MP-285's
-screen will be covered in `0`s, `1`s or look garbled. If this happens, simply turn off
-the software, power cycle the stage, and press the "MOVE" button once. When the
-software is restarted, it should work.
+The `Sutter MP-285 <https://www.sutter.com/MICROMANIPULATION/mp285.html>`_ communicates
+via serial port and is quite particular. We have done our best to ensure the
+communication is stable, but occasionally the stage will send or receive an extra
+character, throwing off communication. In this case, the MP-285's screen will be
+covered in 0s, 1s or look garbled. If this happens, simply turn off the software,
+power cycle the stage, and press the "MOVE" button on the MP-285 controller once. When
+the software is restarted, it should work.
 
 .. tip::
 
@@ -453,7 +469,8 @@ Configuration File
 Physik Instrumente
 ------------------
 
-These stages are controlled by PI's own Python code and are quite stable. They
+These stages are controlled by `PI <https://www.pi-usa.us/en/>`_'s own
+`Python code <https://pypi.org/project/PIPython/>`_ and are quite stable. They
 include a special ``hardware`` option, ``refmode``, which corresponds to how the
 PI stage chooses to self-reference. Options are ``REF``, ``FRF``, ``MNL``, ``FNL``,
 ``MPL`` or ``FPL``. These are PI's GCS commands, and the correct reference mode
@@ -525,7 +542,8 @@ Configuration File
 Thorlabs
 --------
 
-We currently support the KIM001 single-axis, open-loop slip stick controller.
+We currently support the `KIM001 <https://www.thorlabs.com/thorproduct.cfm?partnumber=KIM001>`_
+controller.
 
 Configuration File
 ^^^^^^^^^^^^^^^^^^
@@ -553,8 +571,10 @@ Configuration File
               max: None
               min: None
 
-Analog Controlled Galvo
-------------------------
+.. _galvo_stage:
+
+Analog-Controlled Galvo
+-----------------------
 
 We sometimes control position via a galvo with no software-based feedback. In this
 case, we treat a standard galvo mirror as a stage axis. We control the "stage" via
@@ -626,50 +646,24 @@ Configuration File
             max: 360
             min: 0
 
-Dichroic Turret
-===============
-
-ASI
----
-
-.. code-block:: yaml
-
-  hardware:
-    dichroic:
-      type: ASI #synthetic #ASI
-      port: COM17
-      baudrate: 115200
-
-  microscopes:
-    microscope:
-      dichroic:
-        hardware:
-          name: ASI
-          type: ASI #synthetic #ASI
-          port: COM17
-          axes: [S]
-          baudrate: 115200
-        available_dichroics:
-          510LP: 0
-          570LP: 1
-          640LP: 2
-
-Synthetic Dichroic Turret
--------------------------
-
-TBD.
-
 Filter Wheels
 =============
 
+Filter wheels can be used in both illumination and detection paths. Dichroic
+turrets are controlled via the same code as filter wheels. The user is expected to
+change the names of available filters to match what is in the filter wheel or turret.
+
 Sutter
 ------
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
   hardware:
     filter_wheel:
-      type: ASI
+      type: SutterFilterWheel
       port: COM10
       baudrate: 9600
       number_of_wheels: 1
@@ -677,23 +671,26 @@ Sutter
   microscopes:
     microscope_name:
       filter_wheel:
-        hardware:
-          name: filter_wheel
-          type: SutterFilterWheel
-          wheel_number: 1
-        filter_wheel_delay: .030 # in seconds
-        available_filters:
-          Empty-1: 0
-          525-30: 1
-          600-52: 2
-          670-30: 3
-          647-LP: 4
-          Empty-2: 5
-          Empty-3: 6
-          Empty-4: 7
+      hardware:
+        name: filter_wheel
+        type: SutterFilterWheel
+        wheel_number: 1
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        Empty-1: 0
+        525-30: 1
+        600-52: 2
+        670-30: 3
+        647-LP: 4
+        Empty-2: 5
+        Empty-3: 6
+        Empty-4: 7
 
 ASI
 ---
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -713,21 +710,22 @@ ASI
           wheel_number: 1
         filter_wheel_delay: .030 # in seconds
         available_filters:
-          Empty-1: 0
-          525-30: 1
-          600-52: 2
-          670-30: 3
-          647-LP: 4
-          Empty-2: 5
-          Empty-3: 6
-          Empty-4: 7
-
-Synthetic Filter Wheel
-----------------------
-TBD...
+          BLU - FF01-442/42-32: 0
+          GFP - FF01-515/30-32: 1
+          RFP - FF01-595/31-32: 2
+          Far-Red - FF01-670/30-32: 3
+          Blocked1: 4
+          Empty: 5
+          Blocked3: 6
+          Blocked4: 7
+          Blocked5: 8
+          Blocked6: 9
 
 Galvanometers
 =============
+
+Galvo mirrors are used for fast scanning and destriping and occasionally as stages
+(see :ref:`Analog-Controlled Galvo <galvo_stage>`).
 
 DAQ Control
 -----------
@@ -736,6 +734,9 @@ Multiple types of galvanometers have been used, including Cambridge
 Technologies/Novanta, Thorlabs, and ScannerMAX Each of these devices
 are externally controlled via analog signals delivered from a data
 acquisition card.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -756,20 +757,20 @@ acquisition card.
             duty_cycle: 50
             phase: 1.57079 # pi/2
 
-Synthetic Galvanometer
-----------------------
-
-TBD...
-
 Lasers
 ======
+
+We currently support laser control via voltage signals.
 
 DAQ Control
 -----------
 
 Most lasers are controlled externally via mixed analog and digital modulation.
-The ``onoff`` entry is for digital modulation.
-The ``power`` entry is for analog modulation.
+The ``onoff`` entry is for digital modulation. The ``power`` entry is for analog
+modulation.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -797,25 +798,18 @@ The ``power`` entry is for analog modulation.
           pulse_percent: 87
         - wavelength: 561...
 
-Coherent
---------
-Future implementations of the software will enable a mixture of software and hardware
-control.
-
-Omicron
--------
-
-Future implementations of the software will enable a mixture of software and hardware
-control.
-
-Synthetic Laser
----------------
-
 Shutters
 ========
 
+Shutters automatically open at the start of acquisition and close upon finish.
+
 Thorlabs
 --------
+
+Thorlabs shutters are controlled via a digital on off voltage.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -824,13 +818,16 @@ Thorlabs
       shutter:
         hardware:
           name: daq
-          type: SyntheticShutter
-          channel: PCI6738/port0/line10
+          type: NI
+          channel: PXI6259/port0/line0
           min: 0
           max: 5
 
 Synthetic Shutter
 -----------------
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -846,14 +843,31 @@ Synthetic Shutter
 Mechanical Zoom
 ===============
 
+Zoom devices control the magnification of the microscope. If such control is not
+needed, the software expects a :ref:`Synthetic Zoom <synthetic_zoom>` to provide
+the fixed magnification and the effective pixel size of the microscope.
+
 Dynamixel Zoom
 --------------
+
+This software supports the
+`Dynamixel Smart Actuator <https://www.dynamixel.com/>`_.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
+The ``positions`` specify the voltage of the actuator at different zoom positions.
+The ``stage_positions`` account for focal shifts in between the different zoom values
+(the MVXPLAPO does not have a consistent focal plane). These may change depending on
+the immersion media. Here it is specified for a ``BABB`` (Benzyl Alcohol Benzyl
+Benzoate) immersion media.  The ``pixel_size`` specifies the effective pixel size of
+the system at each zoom.
 
 .. code-block:: yaml
 
   hardware:
     zoom:
-      type: synthetic
+      type: DynamixelZoom
       servo_id: 1
       port: COM18
       baudrate: 1000000
@@ -862,20 +876,43 @@ Dynamixel Zoom
     microscope_name:
       zoom:
         hardware:
-          name: zoom
-          type: synthetic
-          servo_id: 1
+            name: zoom
+            type: DynamixelZoom
+            servo_id: 1
         position:
-          36X: 0
+            0.63x: 0
+            1x: 627
+            2x: 1711
+            3x: 2301
+            4x: 2710
+            5x: 3079
+            6x: 3383
         pixel_size:
-          36X: 0.180
+            0.63x: 9.7
+            1x: 6.38
+            2x: 3.14
+            3x: 2.12
+            4x: 1.609
+            5x: 1.255
+            6x: 1.044
         stage_positions:
-          BABB:
-            f:
-              36X: 0
+            BABB:
+                f:
+                    0.63x: 0
+                    1x: 1
+                    2x: 2
+                    3x: 3
+                    4x: 4
+                    5x: 5
+                    6x: 6
 
-Synethetic Zoom
----------------
+.. _synthetic_zoom:
+
+Synthetic Zoom
+--------------
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 

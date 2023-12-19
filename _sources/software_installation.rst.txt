@@ -118,6 +118,11 @@ an editable package locally on your machine.
     (navigate) C:\Users\Username\Code> cd navigate
     (navigate) C:\Users\Username\Code\navigate> pip install -e .[dev]
 
+.. note::
+
+  If working in a ``zsh`` shell, e.g. on a modern macOS, add single quotes around the
+  call: ``pip install -e '.[dev]'``.
+
 Troubleshooting
 ===============
 
@@ -136,8 +141,8 @@ settings to allow ``pip``/ ``conda`` to install the proper packages.
   files for conda and pip to include proxy settings, if they are not in the paths
   below you will need to create them. This assumes a Windows perspective. Mac/Linux
   users will have different paths, they can be found online.
-    *  ``conda``'s configuration file can be found at C:\\Users\\UserProfile\\.condarc
-    *  ``pip``'s configiguration file can be found at C:\\Users\\UserProfile\\pip\\pip.ini
+    * ``conda``'s configuration file can be found at C:\\Users\\UserProfile\\.condarc
+    * ``pip``'s configiguration file can be found at C:\\Users\\UserProfile\\pip\\pip.ini
 * You can also try to set the proxy from within the Anaconda Prompt:
 *  ``set https_proxy=http://username:password@proxy.example.com:8080``
 *  ``set http_proxy=http://username:password@proxy.example.com:8080``

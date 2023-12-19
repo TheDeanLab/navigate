@@ -54,7 +54,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing Guidelines</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#general-principles">General Principles</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installation-of-developer-dependencies">Installation of Developer Dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding Style</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scientific-units">Scientific Units</a></li>
@@ -97,7 +96,7 @@
   <section id="contributing-guidelines">
 <h1>Contributing Guidelines<a class="headerlink" href="#contributing-guidelines" title="Permalink to this heading"></a></h1>
 <p>We welcome contributions in the form of bug reports, bug fixes, new features
-and documentation. If you are contributing code, please create it in a fork or
+and documentation. If you are contributing code, please create it in a fork and
 branch separate from the main <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch and then make a pull request
 to the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch for code review. Some best practices for new code are
 outlined below.</p>
@@ -109,7 +108,7 @@ regular software development meeting.</p>
 <ul class="simple">
 <li><p>We use a <a class="reference external" href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">model-view-controller architecture</a>.
 New functionality should keep this strong separation.</p></li>
-<li><p>Please do not create new variables in existing code unless absolutely
+<li><p>Please do not create new configuration variables unless absolutely
 necessary, especially in the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">experiment.yaml</span></code>
 files. A new variable is necessary only if no variable stores similar
 information or there is no way to use the most similar variable without
@@ -121,15 +120,6 @@ discussing this with the software team in advance.</p></li>
 live system prior to merging into the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch.</p></li>
 </ul>
 </section>
-<section id="installation-of-developer-dependencies">
-<h2>Installation of Developer Dependencies<a class="headerlink" href="#installation-of-developer-dependencies" title="Permalink to this heading"></a></h2>
-<p>To install the developer dependencies, run the following command from within the Navigate
-repository folder:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">navigate</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;.[dev]&#39;</span>
-</pre></div>
-</div>
-</section>
 <section id="coding-style">
 <h2>Coding Style<a class="headerlink" href="#coding-style" title="Permalink to this heading"></a></h2>
 <p>We follow the <a class="reference external" href="https://peps.python.org/pep-0008/">PEP8 code style guide</a>.
@@ -139,13 +129,13 @@ variable names are <code class="docutils literal notranslate"><span class="pre">
 <section id="documentation">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h2>
 <p>All classes and functions should have docstrings written in
-<a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html">Numpydoc style</a> in a sphinx-compatible format. This allows us to automatically generate
-documentation for the code base.</p>
+<a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html">Numpydoc style</a>.</p>
 </section>
 <section id="scientific-units">
 <h2>Scientific Units<a class="headerlink" href="#scientific-units" title="Permalink to this heading"></a></h2>
-<p>Deviations from this can occur where it is necessary to pass a different unit to a
-piece of hardware.</p>
+<p>Please express quantities in the following units when they are in the standard model/
+view/controller code. Deviations from this can occur where it is necessary to pass a
+different unit to a piece of hardware.</p>
 <ul class="simple">
 <li><p>Time - Milliseconds</p></li>
 <li><p>Distance - Micrometers</p></li>
@@ -153,16 +143,17 @@ piece of hardware.</p>
 </section>
 <section id="pre-commit-hooks">
 <h2>Pre-Commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="Permalink to this heading"></a></h2>
-<p>We leverage pre-commit workflows to enforce consistent code formatting. In some rare
-cases, Ruff may complain about a line of code that is actually fine. For example, in
-the example code below, Ruff complains that the start_stage class is imported but not
-used. However, it is actually used in as part of an <cite>exec</cite> statement:</p>
+<p>We leverage pre-commit workflows to enforce consistent code formatting and automate
+some of the code review process. In some rare cases, the linter may complain about a
+line of code that is actually fine. For example, in the example code below, Ruff
+linter complains that the start_stage class is imported but not used. However, it is
+actually used in as part of an <code class="docutils literal notranslate"><span class="pre">exec</span></code> statement:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>
 <span class="n">device_name</span> <span class="o">=</span> <span class="n">stage</span>
 <span class="n">exec</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;self.</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2"> = start_</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">(name, device_connection, configuration, i, is_synthetic)&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To avoid this error, you can add a <cite># noqa</cite> comment to the end of the line to tell Ruff to ignore the error:</p>
+<p>To avoid this error, you can add a <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">noqa</span></code> comment to the end of the line to tell Ruff to ignore the error:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>  <span class="c1"># noqa</span>
 </pre></div>
 </div>
@@ -171,16 +162,16 @@ used. However, it is actually used in as part of an <cite>exec</cite> statement:
 <h2>Dictionary Parsing<a class="headerlink" href="#dictionary-parsing" title="Permalink to this heading"></a></h2>
 <p>The configuration file is loaded a large dictionary object, and it is easy to have
 small errors in it that can crash the program. To avoid this, when getting
-properties from the configuration dictionary, it is best to use the <cite>.get()</cite> command,
+properties from the configuration dictionary, it is best to use the <code class="docutils literal notranslate"><span class="pre">.get()</span></code> command,
 which provides you with the opportunity to also have a default value should the key
 provided not be found.  For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Galvo Waveform Information</span>
- <span class="bp">self</span><span class="o">.</span><span class="n">galvo_waveform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span> <span class="s2">&quot;sawtooth&quot;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">galvo_waveform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span> <span class="s2">&quot;sawtooth&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Here, we try to retrieve the <cite>waveform</cite> key from a the <cite>self.device_config</cite>
+<p>Here, we try to retrieve the <code class="docutils literal notranslate"><span class="pre">waveform</span></code> key from a the <code class="docutils literal notranslate"><span class="pre">self.device_config</span></code>
 dictionary.  In the case that this key is not available, it then by default returns
-<cite>sawtooth</cite>. If however the <cite>waveform</cite> key is found, it will provide the value
+<code class="docutils literal notranslate"><span class="pre">sawtooth</span></code>. If however the <code class="docutils literal notranslate"><span class="pre">waveform</span></code> key is found, it will provide the value
 associated with it.</p>
 </section>
 <section id="unit-tests">
@@ -191,7 +182,7 @@ Guidelines for writing good unit tests can be found <a class="reference external
 and <a class="reference external" href="https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0">over here</a>,
 or see examples of other unit tests in this application’s <code class="docutils literal notranslate"><span class="pre">test</span></code> folder. We
 use the <a class="reference external" href="https://docs.pytest.org/en/7.2.x/">pytest library</a> to evaluate unit
-tests.</p>
+tests. Please check that unit tests pass on your machine before making a pull request.</p>
 </section>
 <section id="developing-with-a-mac">
 <h2>Developing with a Mac<a class="headerlink" href="#developing-with-a-mac" title="Permalink to this heading"></a></h2>
@@ -210,8 +201,8 @@ run the following command</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ulimit -n</span>
 </pre></div>
 </div>
-<p>To increase this number, simply add an integer value after it. In our hands, a factor
-of ~1000 typically works</p>
+<p>To increase this number, simply add an integer value after it. In our hands, 1000
+typically works:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ulimit -n 1000</span>
 </pre></div>
 </div>

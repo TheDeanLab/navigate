@@ -27,6 +27,7 @@
    :toctree:
    :recursive:
 
+
    navigate.tools.common_dict_tools
    navigate.tools.common_functions
    navigate.tools.decorators
@@ -39,4 +40,5 @@
    navigate.tools.sdf
    navigate.tools.waveform_template_funcs
    navigate.tools.xml_tools
+
 

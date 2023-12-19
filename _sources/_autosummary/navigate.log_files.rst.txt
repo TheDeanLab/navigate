@@ -27,6 +27,8 @@
    :toctree:
    :recursive:
 
+
    navigate.log_files.filters
    navigate.log_files.log_functions
+
 

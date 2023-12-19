@@ -45,7 +45,7 @@ Wiring
 
 .. note::
 
-    For NI-based cards, port0/line1 is the equivalent of ``P0.1``.
+    For NI-based cards, ``port0/line1`` is the equivalent of ``P0.1``.
     There are multiple pins for each PFIO, including source, out, gate, etc. You must
     use the out terminal.
 
@@ -53,14 +53,14 @@ PCIe-6738
 ^^^^^^^^^
 
 The PCIe-6738 can only create one software-timed analog task for every four channels.
-As such, the lasers much be attached to analog output ports outside of the banks used by
-the galvo/remote focus units. For example, if you use AO0, AO2, and AO6 for the
-remote focus, galvo, and galvo stage, the lasers should be connected to AO8, AO9, and
-AO10. In such a configuration, they will not compete with the other AO ports. Since
-only one task will be created created on the AO8, AO9, AO10 bank at a time (only
-one laser is on at a time), only one laser can be on at a time. If we wanted to turn
-lasers on simultaneously, we could distribute the lasers across independent banks (e
-.g. AO8, AO14, AO19).
+As such, the lasers much be attached to analog output ports outside of the banks used
+by the galvo/remote focus units. For example, if you use ao0, ao2, and ao6 for the
+remote focus, galvo, and galvo stage, the lasers should be connected to ao8, ao9, and
+ao10. In such a configuration, they will not compete with the other analog output
+ports. Since only one task will be created created on the ao8, ao9, ao10 bank at a time
+(only one laser is on at a time), only one laser can be on at a time. If we wanted to
+turn lasers on simultaneously, we could distribute the lasers across independent banks
+(e.g. ao8, ao14, ao19).
 
 
 PXI-6259
@@ -135,9 +135,6 @@ Configuration File
     camera:
       -
         type: HamamatsuOrca # First Camera
-        serial_number: 302153
-      -
-        type: HamamatsuOrca # Second Camera
         serial_number: 302153
 
   microscopes:
@@ -225,14 +222,15 @@ Hamamatsu Lightning
 
 Photometrics Iris 15
 --------------------
+
 * Download the `PVCAM software <https://www.photometrics.com/support/software-and-drivers>`_
   from Photometrics. The PVCAM SDK is also available form this location. You will
   likely have to register and agree to Photometrics terms.
 * Perform the Full Installation of the PVCAM software.
-* Should a 'Base Device' still show up as unknown in the device manager, you may need
-  to install the `Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits>`_
-* Upon successfully installation, one should be able to acquire images with the
-  manufacturer provided PVCamTest software.
+* Should a "Base Device" still show up as unknown in the Windows Device Manager, you
+  may need to install the `Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits>`_
+* Upon successful installation, one should be able to acquire images with the
+  manufacturer-provided PVCamTest software.
 
 
 Configuration File
@@ -280,7 +278,7 @@ Remote Focusing Devices
 =======================
 
 Voice coils, also known as linear actuators, play a crucial role in implementing
-aberration-free remote focusing in Navigate. These electromagnetic actuators are used
+aberration-free remote focusing in navigate. These electromagnetic actuators are used
 to control the axial position of the light-sheet and the sample relative to the
 microscope objective lens. By precisely adjusting the axial position, the focal plane
 can be shifted without moving the objective lens, thus enabling remote focusing.
@@ -292,7 +290,8 @@ Configuration can be variable. Many of the voice coils we have received require
 establishing serial communication with the device to explicitly place it in an analog
 control mode. More recently, Equipment Solutions has begun delivering devices that
 automatically initialize into an analog control mode, and thus no longer need the
-serial communication to be established.
+serial communication to be established. However, we often communicate via both
+serial and a DAQ port to get this device to run.
 
 * `SCA814 Linear Servo Controller <https://www.equipsolutions.com/products/linear-servo-controllers/sca814-linear-servo-controller/>`_
 
@@ -332,7 +331,31 @@ signals.
 Optotune Focus Tunable Lens
 ---------------------------
 
-Device is controlled with an analog signal.
+This device is controlled with an analog signal from the DAQ.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
+.. code-block:: yaml
+
+  hardware:
+  daq:
+    type: NI
+
+  remote_focus_device:
+      hardware:
+        name: daq
+        type: NI
+        channel: PXI6259/ao2
+        min: -5
+        max: 5
+      # Optotune EL-16-40-TC-VIS-5D-1-C
+      delay_percent: 7.5
+      ramp_rising_percent: 85
+      ramp_falling_percent: 2.5
+      amplitude: 0.7
+      offset: 2.3
+      smoothing: 0.0
 
 Synthetic Remote Focus Device
 -----------------------------
@@ -350,50 +373,56 @@ versatile and optimized setup tailored to their research needs.
 ASI Tiger Controller
 --------------------
 
-Constant Velocity Acquisition - Software is designed to acquire data in a continuous
-stage scanning mode. Rather than using the default SYNC signal from the ASI stage to
-synchronize the start of imaging, we use the encoder output pulsing mode of the ASI
-stage to trigger the acquisition of every frame at precise intervals.  Important for
-multi-channel imaging that is acquired in the per-stack mode, but less so for
-perZ-based acquisitions.
+We are set up to communicate with ASI stages via their Tiger Controller.
+
+There is a `feedback_alignment` configuration option specific to these stages,
+which corresponds to the `Tiger Controller AA Command <https://asiimaging.com/docs/commands/aalign>`_.
 
 .. tip::
     If you are using the FTP-2000 stage, you should not change the F stage axis. This
     will differentially drive the two vertical posts, causing them to torque and
     potentially damage one another.
 
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
 .. code-block:: yaml
 
   hardware:
     stage:
-      -
-        type: ASI
-        port: COM17
-        baudrate: 115200
-        controllername: 'C-884'
-        stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
-        refmode: FRF FRF FRF FRF FRF FRF
-        serial_number: 119060508
-      -
+      type: ASI
+      serial_number: 123456789
+      port: COM8
+      baudrate: 115200
 
   microscopes:
     microscope:
       stage:
         hardware:
-          -
-            name: ASI
-            type: ASI
-            serial_number: 119060508
-            axes: [x, y, z]
-            axes_mapping: [X, Y, Z]
-            volts_per_micron: None
-            axes_channels: None
-            max: None
-            min: None
-          -
+          name: stage
+          type: ASI
+          serial_number: 123456789
+          axes: [x, y, z, f] # Software
+          axes_mapping: [M, Y, X, Z]
+          feedback_alignment: [90, 90, 90, 90]
 
 Sutter MP-285
 -------------
+
+The Sutter MP-285 communicates via serial port and is quite particular. We have done
+our best to ensure the communication is stable, but occasionally the stage will send or
+receive an extra character, throwing off communication. In this case, the MP-285's
+screen will be covered in `0`s, `1`s or look garbled. If this happens, simply turn off
+the software, power cycle the stage, and press the "MOVE" button once. When the
+software is restarted, it should work.
+
+.. tip::
+
+  Sometimes the Coherent Connection software messes with the MP-285 serial
+  communication if it is connected to the lasers.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -403,7 +432,7 @@ Sutter MP-285
       type: MP285
       port: COM2
       timeout: 0.25
-      baudrate: 115200
+      baudrate: 9600
       serial_number: 0000
       stages: None
 
@@ -411,21 +440,29 @@ Sutter MP-285
     microscope_name:
       stage:
         hardware:
-          -
-            name: stage1
-            type: MP285
-            serial_number: 0000
-            axes: [y, x, f]
-            axes_mapping: [z, y, x]
-            volts_per_micron: None
-            axes_channels: None
-            max: 25000
-            min: 0
-          -
-            name: ...
+          name: stage1
+          type: MP285
+          serial_number: 0000
+          axes: [y, x, f]
+          axes_mapping: [z, y, x]
+          volts_per_micron: None
+          axes_channels: None
+          max: 25000
+          min: 0
 
 Physik Instrumente
 ------------------
+
+These stages are controlled by PI's own Python code and are quite stable. They
+include a special ``hardware`` option, ``refmode``, which corresponds to how the
+PI stage chooses to self-reference. Options are ``REF``, ``FRF``, ``MNL``, ``FNL``,
+``MPL`` or ``FPL``. These are PI's GCS commands, and the correct reference mode
+for your stage should be found by launching PIMikroMove, which should come with
+your stage. Stage names (e.g. ``L-509.20DG10``) can also be found in PIMikroMove
+or on a label on the side of your stage.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -488,6 +525,11 @@ Physik Instrumente
 Thorlabs
 --------
 
+We currently support the KIM001 single-axis, open-loop slip stick controller.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
 .. code-block:: yaml
 
   hardware:
@@ -511,8 +553,17 @@ Thorlabs
               max: None
               min: None
 
-Analog Controlled (Galvo/Piezo/etc.)
-------------------------------------
+Analog Controlled Galvo
+------------------------
+
+We sometimes control position via a galvo with no software-based feedback. In this
+case, we treat a standard galvo mirror as a stage axis. We control the "stage" via
+voltages sent to the galvo. The ``volts_per_micron`` setting allows the user to
+pass an equation that converts position in microns ``x``, which is passed from the
+software stage controls, to a voltage.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -532,20 +583,24 @@ Analog Controlled (Galvo/Piezo/etc.)
     microscope_name:
       stage:
         hardware:
-            -
-              name: stage3
-              type: GalvoNIStage
-              serial_number: 0000
-              axes: [z]
-              axes_mapping: [PCI6738/ao6] #48/49
-              volts_per_micron: 0.05*x
-              max: 10
-              min: 0
-              distance_threshold: 5
-              settle_duration_ms: 5
+            name: stage3
+            type: GalvoNIStage
+            serial_number: 0000
+            axes: [z]
+            axes_mapping: [PCI6738/ao6] #48/49
+            volts_per_micron: 0.05*x
+            max: 10
+            min: 0
+            distance_threshold: 5
+            settle_duration_ms: 5
 
 Synthetic Stage
 ---------------
+
+We use this to fake a stage.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -563,14 +618,13 @@ Synthetic Stage
     microscope_name:
       stage:
         hardware:
-            -
-              name: stage2
-              type: syntheticstage
-              serial_number: 0000
-              axes: [theta]
-              axes_mapping: [theta]
-              max: 360
-              min: 0
+            name: stage2
+            type: syntheticstage
+            serial_number: 0000
+            axes: [theta]
+            axes_mapping: [theta]
+            max: 360
+            min: 0
 
 Dichroic Turret
 ===============
@@ -677,6 +731,7 @@ Galvanometers
 
 DAQ Control
 -----------
+
 Multiple types of galvanometers have been used, including Cambridge
 Technologies/Novanta, Thorlabs, and ScannerMAX Each of these devices
 are externally controlled via analog signals delivered from a data

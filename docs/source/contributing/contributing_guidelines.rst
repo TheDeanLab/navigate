@@ -102,7 +102,8 @@ Many of us in the lab have Apple products and use them for development.
 However, there are some issues that you may encounter when developing on a Mac.
 Below are some of the issues we have encountered and how to resolve them.
 
-OSError
+Shared memory limits
+^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: console
 

@@ -428,9 +428,9 @@ The `Sutter MP-285 <https://www.sutter.com/MICROMANIPULATION/mp285.html>`_ commu
 via serial port and is quite particular. We have done our best to ensure the
 communication is stable, but occasionally the stage will send or receive an extra
 character, throwing off communication. In this case, the MP-285's screen will be
-covered in `0`s, `1`s or look garbled. If this happens, simply turn off the software,
-power cycle the stage, and press the "MOVE" button once. When the software is
-restarted, it should work.
+covered in 0s, 1s or look garbled. If this happens, simply turn off the software,
+power cycle the stage, and press the "MOVE" button on the MP-285 controller once. When
+the software is restarted, it should work.
 
 .. tip::
 
@@ -849,6 +849,9 @@ the fixed magnification and the effective pixel size of the microscope.
 
 Dynamixel Zoom
 --------------
+
+This software supports the
+`Dynamixel Smart Actuator <https://www.dynamixel.com/>`_.
 
 Configuration File
 ^^^^^^^^^^^^^^^^^^

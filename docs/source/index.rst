@@ -37,6 +37,7 @@ in arbitrary orders to create custom acquistion protocols.
    case_studies/case_studies_home
    hardware/hardware_home
    feature_container/feature_container_home
+   plugin/plugin_home
    contributing/contributing_guidelines
    api
 

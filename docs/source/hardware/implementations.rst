@@ -52,6 +52,19 @@ OPM-V2
 
 |
 
+OPM-V3
+======
+
+- Laser source
+- VAST
+
+.. collapse:: Configuration File
+
+    .. literalinclude:: configurations/configuration_OPMv3.yaml
+       :language: yaml
+
+|
+
 CT-ASLM-V1
 ==========
 

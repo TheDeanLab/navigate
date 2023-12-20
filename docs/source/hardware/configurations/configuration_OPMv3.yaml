@@ -1,0 +1,535 @@
+# Specify all necessary information to find and connect to each hardware
+# device that will be used on any of the scopes.
+hardware:
+  daq:
+    type: NI
+  camera:
+    -
+      type: HamamatsuOrca
+      serial_number: 001301
+  filter_wheel:
+    type: SyntheticFilterWheel
+    port: COM6
+    baudrate: 9600
+    number_of_wheels: 1
+  stage:
+    -
+      type: SyntheticStage
+      serial_number: 123
+    -
+      type: GalvoNIStage
+      serial_number: 124
+    -
+      type: GalvoNIStage
+      serial_number: 125
+  zoom:
+    type: SyntheticZoom
+    servo_id: 1
+  mirror:
+    type: ImagineOpticsMirror
+
+# Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
+microscopes:
+  ProjectionScope:
+    daq:
+      hardware:
+        name: daq
+        type: NI
+
+      # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
+      # Sampling rate in Hz
+      sample_rate: 100000
+      sweep_time: 0.2
+
+      # triggers
+      master_trigger_out_line: /PCIe-6738/port0/line1
+      camera_trigger_out_line: /PCIe-6738/ctr0 #PFI7 Camera trigger
+      trigger_source: /PCIe-6738/PFI0
+
+    mirror:
+      hardware:
+        name: mirror
+        type: ImagineOpticsMirror
+        flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+      n_modes: 32
+
+    zoom:
+      hardware:
+        name: zoom
+        type: SyntheticZoom
+        servo_id: 1
+      position:
+        1x: 0
+      pixel_size:
+        1x: 0.15
+    shutter:
+      hardware:
+        name: shutter
+        type: SyntheticShutter
+        channel: none/line0
+      shutter_min_do: 0
+      shutter_max_do: 5
+    camera:
+      hardware:
+        name: camera
+        type: HamamatsuOrca
+        serial_number: 001301
+      x_pixels: 2048.0
+      y_pixels: 2048.0
+      pixel_size_in_microns: 6.5
+      subsampling: [1, 2, 4]
+      sensor_mode: Normal  # 12 for progressive, 1 for normal.
+      readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
+      lightsheet_rolling_shutter_width: 608
+      defect_correct_mode: 2.0
+      binning: 1x1
+      readout_speed: 1.0
+      trigger_active: 1.0
+      trigger_mode: 1.0 # external light-sheet mode
+      trigger_polarity: 2.0  # positive pulse
+      trigger_source: 2.0  # 2 = external, 3 = software.
+      exposure_time: 20 # Use milliseconds throughout.
+      delay_percent: 10
+      pulse_percent: 1
+      line_interval: 0.000075
+      display_acquisition_subsampling: 4
+      average_frame_rate: 4.969
+      frames_to_average: 1
+      exposure_time_range:
+        min: 1
+        max: 1000
+        step: 1
+    remote_focus_device:
+      hardware:
+        name: daq
+        type: SyntheticRemoteFocus
+        channel: none
+        min: 0
+        max: 5
+      # Optotune EL-16-40-TC-VIS-5D-1-C
+      delay_percent: 0
+      ramp_rising_percent: 50
+      ramp_falling_percent: 2.5
+      amplitude: -0.5
+      offset: 0
+    galvo:
+      -
+        # shear galvo measured: 351.04 um/V
+        name: sheargalvo
+        hardware:
+          name: daq
+          type: NI # SyntheticGalvo
+          channel: PCIe-6738/ao12
+          min: -5
+          max: 5
+        # waveform: halfsaw
+        waveform: sawtooth
+        frequency: 0.5
+        amplitude: -1
+        offset: 0
+        duty_cycle: 50
+        phase: 1.57079
+      -
+        name: xgalvo
+        hardware:
+          name: daq
+          type: NI # SyntheticGalvo
+          channel: PCIe-6738/ao0
+          min: -5
+          max: 5
+        waveform: sawtooth
+        frequency: 0.5
+        amplitude: 0.931
+        offset: 0
+        duty_cycle: 50
+        phase: 1.57079
+    stage:
+      hardware:
+        -
+          name: fake_stage
+          type: SyntheticStage
+          serial_number: 123
+          axes: [x,y,theta,z]
+        -
+          name: snouty_piezo
+          type: GalvoNIStage
+          serial_number: 124
+          axes: [f]
+          axes_mapping: [PCIe-6738/ao14]
+          min: 0
+          max: 10
+          volts_per_micron: (10/15.4)*x + 5.0
+      y_unload_position: 10000
+      y_load_position: 90000
+
+      startfocus: 0
+      x_max: 50
+      x_min: -50
+      y_max: 50
+      y_min: -50
+      z_max: 500
+      z_min: -500
+      f_max: 100000
+      f_min: -100000
+      theta_max: 360
+      theta_min: 0
+
+      x_rot_position: 2000
+      y_rot_position: 2000
+      z_rot_position: 2000
+
+      x_step: 500
+      y_step: 500
+      z_step: 500
+      theta_step: 30
+      f_step: 500
+
+      position:
+        x_pos: 25250
+        y_pos: 40000
+        z_pos: 0
+        f_pos: 70000
+        theta_pos: 0
+      velocity: 1000
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      f_offset: 0
+      theta_offset: 0
+    filter_wheel:
+      hardware:
+        name: filter_wheel
+        type: SyntheticFilterWheel
+        wheel_number: 1
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        FRFP - BLP01-664R-25: 0
+        RFP - FF01-598/25-25: 1
+        GFP - 527/20: 2
+        GFPRFP - ZET488/561m: 3
+        Empty-Alignment: 4
+        Blocked2: 5
+        Blocked3: 6
+        Blocked4: 7
+        Blocked5: 8
+        Blocked6: 9
+    lasers:
+      # Omicron LightHub Ultra
+      # 488 and 640 are LuxX+ Lasers
+      # 561 is a Coherent OBIS Laser
+      # Digital Laser Outputs
+      - wavelength: 488
+        onoff:
+          hardware:
+            name: daq
+            type: NI
+            channel: PCIe-6738/port1/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            name: daq
+            type: NI
+            channel: PCIe-6738/ao5
+            min: 0
+            max: 5
+        type: Obis
+        index: 0
+        delay_percent: 10
+        pulse_percent: 100
+      - wavelength: 561
+        onoff:
+          hardware:
+            name: daq
+            type: NI
+            channel: PCIe-6738/port1/line3
+            min: 0
+            max: 5
+        power:
+          hardware:
+            name: daq
+            type: NI
+            channel: PCIe-6738/ao11
+            min: 0
+            max: 5
+        type: Obis
+        index: 1
+        delay_percent: 10
+        pulse_percent: 100
+
+  StackingScope:
+    daq:
+      hardware:
+        name: daq
+        type: NI
+
+      # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
+      # Sampling rate in Hz
+      sample_rate: 100000
+      sweep_time: 0.2
+
+      # triggers
+      master_trigger_out_line: /PCIe-6738/port0/line1
+      camera_trigger_out_line: /PCIe-6738/ctr0 #PFI7 Camera trigger
+      trigger_source: /PCIe-6738/PFI0
+
+    mirror:
+      hardware:
+        name: mirror
+        type: ImagineOpticsMirror
+        flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+      n_modes: 32
+
+    zoom:
+      hardware:
+        name: zoom
+        type: SyntheticZoom
+        servo_id: 1
+      position:
+        1x: 0
+      pixel_size:
+        1x: 0.15
+    shutter:
+      hardware:
+        name: shutter
+        type: SyntheticShutter
+        channel: none/line0
+      shutter_min_do: 0
+      shutter_max_do: 5
+    camera:
+      hardware:
+        name: camera
+        type: HamamatsuOrca
+        serial_number: 001301
+      x_pixels: 2048.0
+      y_pixels: 2048.0
+      pixel_size_in_microns: 6.5
+      subsampling: [1, 2, 4]
+      sensor_mode: Normal  # 12 for progressive, 1 for normal.
+      readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
+      lightsheet_rolling_shutter_width: 608
+      defect_correct_mode: 2.0
+      binning: 1x1
+      readout_speed: 1.0
+      trigger_active: 1.0
+      trigger_mode: 1.0 # external light-sheet mode
+      trigger_polarity: 2.0  # positive pulse
+      trigger_source: 2.0  # 2 = external, 3 = software.
+      exposure_time: 20 # Use milliseconds throughout.
+      delay_percent: 10
+      pulse_percent: 1
+      line_interval: 0.000075
+      display_acquisition_subsampling: 4
+      average_frame_rate: 4.969
+      frames_to_average: 1
+      exposure_time_range:
+        min: 1
+        max: 1000
+        step: 1
+    remote_focus_device:
+      hardware:
+        name: daq
+        type: SyntheticRemoteFocus
+        channel: none
+        min: 0
+        max: 10
+      # Optotune EL-16-40-TC-VIS-5D-1-C
+      delay_percent: 7.5
+      ramp_rising_percent: 85
+      ramp_falling_percent: 2.5
+      amplitude: 0.7
+      offset: 2.3
+    galvo:
+      -
+        name: sheargalvo
+        hardware:
+          name: daq
+          type: NI # SyntheticGalvo
+          channel: PCIe-6738/ao12
+          min: -5
+          max: 5
+        frequency: 0.5
+        amplitude: 0
+        offset: 0
+        duty_cycle: 50
+        phase: 1.57079
+    stage:
+      hardware:
+        -
+          name: fake_stage
+          type: SyntheticStage
+          serial_number: 123
+          axes: [x,y,theta]
+        -
+          name: snouty_piezo
+          type: GalvoNIStage
+          serial_number: 124
+          axes: [f]
+          axes_mapping: [PCIe-6738/ao14]
+          min: 0
+          max: 10
+          volts_per_micron: (10/15.4)*x + 5.0
+        -
+          name: z_galvo
+          type: GalvoNIStage
+          serial_number: 125
+          axes: [z]
+          # axes_channels: [PCIe-6738/ao0]
+          axes_mapping: [PCIe-6738/ao0]
+          min: -3.5
+          max: 3.5
+          volts_per_micron: 0.007*x
+      y_unload_position: 10000
+      y_load_position: 90000
+
+      startfocus: 0
+      x_max: 50
+      x_min: -50
+      y_max: 50
+      y_min: -50
+      z_max: 500
+      z_min: -500
+      f_max: 100000
+      f_min: -100000
+      theta_max: 360
+      theta_min: 0
+
+      x_rot_position: 2000
+      y_rot_position: 2000
+      z_rot_position: 2000
+
+      x_step: 500
+      y_step: 500
+      z_step: 500
+      theta_step: 30
+      f_step: 500
+
+      position:
+        x_pos: 25250
+        y_pos: 40000
+        z_pos: 0
+        f_pos: 70000
+        theta_pos: 0
+      velocity: 1000
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      f_offset: 0
+      theta_offset: 0
+    filter_wheel:
+      hardware:
+        name: filter_wheel
+        type: SyntheticFilterWheel
+        wheel_number: 1
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        FRFP - BLP01-664R-25: 0
+        RFP - FF01-598/25-25: 1
+        GFP - 527/20: 2
+        GFPRFP - ZET488/561m: 3
+        Empty-Alignment: 4
+        Blocked2: 5
+        Blocked3: 6
+        Blocked4: 7
+        Blocked5: 8
+        Blocked6: 9
+    lasers:
+      # Omicron LightHub Ultra
+      # 488 and 640 are LuxX+ Lasers
+      # 561 is a Coherent OBIS Laser
+      # Digital Laser Outputs
+      - wavelength: 488
+        onoff:
+          hardware:
+            name: daq
+            type: NI
+            channel: PCIe-6738/port1/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            name: daq
+            type: NI
+            channel: PCIe-6738/ao5
+            min: 0
+            max: 5
+        type: Obis
+        index: 0
+        delay_percent: 10
+        pulse_percent: 100
+      - wavelength: 561
+        onoff:
+          hardware:
+            name: daq
+            type: NI
+            channel: PCIe-6738/port1/line3
+            min: 0
+            max: 5
+        power:
+          hardware:
+            name: daq
+            type: NI
+            channel: PCIe-6738/ao11
+            min: 0
+            max: 5
+        type: Obis
+        index: 1
+        delay_percent: 10
+        pulse_percent: 100
+
+gui:
+  channels:
+    count: 5
+    laser_power:
+      min: 0
+      max: 100
+      step: 10
+    exposure_time:
+      min: 1
+      max: 1000
+      step: 5
+    interval_time:
+      min: 0
+      max: 1000
+      step: 5
+  stack_acquisition:
+    step_size:
+      min: 0.200
+      max: 1000
+      step: 0.1
+    start_pos:
+      min: -5000
+      max: 5000
+      step: 1
+    end_pos:
+      min: -5000
+      max: 10000
+      step: 1
+  timepoint:
+    timepoints:
+      min: 1
+      max: 1000
+      step: 1
+    stack_pause:
+      min: 0
+      max: 1000
+      step: 1
+  confocal_projection:
+    scanrange:
+      min: 0
+      max: 600
+      step: 1
+    offset_start:
+      min: -300
+      max: 300
+      step: 0.1
+    offset_end:
+      min: -300
+      max: 300
+      step: 0.1
+    n_plane:
+      min: 1
+      max: 200
+      step: 1

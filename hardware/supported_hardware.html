@@ -88,6 +88,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lasers">Lasers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#omicron-lighthub-ultra">Omicron LightHUB Ultra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coherent-obis">Coherent Obis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id16">DAQ Control</a></li>
 </ul>
 </li>
@@ -596,6 +598,12 @@ PI stage chooses to self-reference. Options are <code class="docutils literal no
 for your stage should be found by launching PIMikroMove, which should come with
 your stage. Stage names (e.g. <code class="docutils literal notranslate"><span class="pre">L-509.20DG10</span></code>) can also be found in PIMikroMove
 or on a label on the side of your stage.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PI L-509.20DG10 has a unidirectional repeatability of 100 nm, bidirectional
+repeatability of 2 microns, and a minimum incremental motion of 100 nm.
+This is potentially too coarse.</p>
+</div>
 <section id="id9">
 <h4>Configuration File<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
@@ -866,7 +874,28 @@ acquisition card.</p>
 </section>
 <section id="lasers">
 <h2>Lasers<a class="headerlink" href="#lasers" title="Permalink to this heading"></a></h2>
-<p>We currently support laser control via voltage signals.</p>
+<p>We currently support laser control via voltage signals. In the near-future, we will consider implementing
+laser control via serial communication for power control, but digital modulation will still be controlled via
+voltage signals.</p>
+<section id="omicron-lighthub-ultra">
+<h3>Omicron LightHUB Ultra<a class="headerlink" href="#omicron-lighthub-ultra" title="Permalink to this heading"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Omicron laser source includes both Coherent- and LuxX lasers, which vary
+according to wavelength. LuxX lasers should be operated in an ACC operating
+mode with the analog modulation option enabled. The Coherent Obis lasers should be
+set in the mixed modulation mode.</p>
+</div>
+</section>
+<section id="coherent-obis">
+<h3>Coherent Obis<a class="headerlink" href="#coherent-obis" title="Permalink to this heading"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Coherent Obis lasers should be set in the mixed modulation mode. It is not uncommon
+for the slew rate from the data acquisition card to be insufficient to drive the modulation
+of the laser if the laser is set to an analog modulation mode.</p>
+</div>
+</section>
 <section id="id16">
 <h3>DAQ Control<a class="headerlink" href="#id16" title="Permalink to this heading"></a></h3>
 <p>Most lasers are controlled externally via mixed analog and digital modulation.

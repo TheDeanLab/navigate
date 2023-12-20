@@ -346,7 +346,7 @@ features:
 
    .. code-block::
 
-       [{""name": PrepareNextChannel}]
+       [{"name": PrepareNextChannel}]
 
    Once you select `Preview`, the feature list will be displayed in the
    :guilabel:`Preview` window. If you are satisfied with the feature list, select

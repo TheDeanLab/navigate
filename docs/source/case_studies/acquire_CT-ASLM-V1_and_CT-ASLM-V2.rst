@@ -29,7 +29,7 @@ It's recommended to start the software before loading the sample on the stage.
    detection objective so the glass slide is 45 degrees with both objectives.
 #. Put down the slit out of the setup.
 #. Go to :guilabel:`Camera Settings`. Select "Normal" under :guilabel:`Sensor Mode`.
-#. Go to the :guilabel:`Microscope Configuration --> Waveform Parameters`. A popup
+#. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup
    named :guilabel:`Waveform Parameter Settings` will appear.
 #. Set the wavelength's :guilabel:`Amplitude` and :guilabel:`Offset` to ``0.0``.
 #. Select the channel with a proper laser under the :guilabel:`Channels` tab and set
@@ -52,7 +52,7 @@ Imaging a Z-Stack with Stelzer mode
 Stelzer mode is the normal non-ASLM light sheet mode, it gives more signal while
 offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) lateral resolution.
 
-#. Go to the :guilabel:`Microscope Configuration --> Waveform Parameters`. A popup
+#. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup
    named :guilabel:`Waveform Parameter Settings` will appear.
 #. Set the wavelength's :guilabel:`Amplitude` and :guilabel:`Offset` to ``0.0``.
 #. Go to :guilabel:`Camera Settings`, select "Normal" under :guilabel:`Sensor Mode`.
@@ -103,7 +103,7 @@ around 950 nm (CT-ASLM-V1) and 480 nm (CT-ASLM-V2) isotropic resolution.
    the laser power to an appropriate value.
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
-#. Go to the :guilabel:`Microscope Configuration --> Waveform Parameters`. A popup
+#. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup
    named :guilabel:`Waveform Parameter Settings` will appear.
 #. Uncheck :guilabel:`Autoscale` in :guilabel:`Camera View` under LUT and adjust the
    :guilabel:`Min Counts` and :guilabel:`Max Counts` if needed.

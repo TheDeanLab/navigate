@@ -215,6 +215,54 @@ whatever task we want to wait for before resuming image acqusition.
 
 Model functions can be found :doc:`in the API </_autosummary/navigate.model.model.Model>`.
 
+Customizing Feature Functionality in the GUI
+--------------------------------------------
+
+Features can be optionally customized within the GUI. For example instead of
+re-programming a feature and loading it again, we can swap Python functions in
+and out of features. This can be helpful, e.g., when you are prototyping a function
+to automatically detect an object within an image and want to try a few different
+options.
+
+Loading Custom Functions
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+#. You can load customized functions in the software by selecting the menu
+   :menuselection:`Features --> Advanced Setting`.
+
+
+   .. image:: images/step_10.png
+
+
+#. In the popup window, choose the feature name with which you want to use the
+   dynamic customized functions as feature parameters.
+
+
+   .. image:: images/step_11.png
+
+
+   .. image:: images/step_12.png
+
+
+#. Click :guilabel:`Add`, A new line will appear and allow you to edit the parameter
+   options. Type the function name which is defined in your python file.
+
+
+   .. image:: images/step_13.png
+
+
+#. Then click :guilabel:`Load` to choose your Oython file.
+
+
+   .. image:: images/step_14.png
+
+#. When you run a feature list containing the feature you just set, the new function
+   name will appear and you can choose the one you just added.
+
+
+   .. image:: images/step_15.png
+
+
 Custom Feature Lists
 ====================
 
@@ -387,50 +435,3 @@ Deleting Feature Lists
 
 
    .. image:: images/step_9.png
-
-Customizing Feature Functionality in the GUI
-============================================
-
-Features can be optionally customized within the GUI. For example instead of
-re-programming a feature and loading it again, we can swap Python functions in
-and out of features. This can be helpful, e.g., when you are prototyping a function
-to automatically detect an object within an image and want to try a few different
-options.
-
-Loading Custom Functions
-------------------------
-
-#. You can load customized functions in the software by selecting the menu
-   :menuselection:`Features --> Advanced Setting`.
-
-
-   .. image:: images/step_10.png
-
-
-#. In the popup window, choose the feature name with which you want to use the
-   dynamic customized functions as feature parameters.
-
-
-   .. image:: images/step_11.png
-
-
-   .. image:: images/step_12.png
-
-
-#. Click :guilabel:`Add`, A new line will appear and allow you to edit the parameter
-   options. Type the function name which is defined in your python file.
-
-
-   .. image:: images/step_13.png
-
-
-#. Then click :guilabel:`Load` to choose your Oython file.
-
-
-   .. image:: images/step_14.png
-
-#. When you run a feature list containing the feature you just set, the new function
-   name will appear and you can choose the one you just added.
-
-
-   .. image:: images/step_15.png

@@ -40,7 +40,10 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.coverage",
     "sphinx_toolbox.collapse",
+    "sphinx.ext.autosectionlabel",
 ]
+
+autosectionlabel_prefix_document = True
 
 # Boolean indicating whether to scan all found documents for
 # autosummary directives, and to generate stub pages for each

@@ -213,24 +213,7 @@ Here is an example of how we can pause and resume the data thread:
 We can of course replace ``self.model.move_stage(pos, wait_until_done=True)`` with
 whatever task we want to wait for before resuming image acqusition.
 
-Frequently used functions
--------------------------
-
-**From the model:**
-
-- `configuration["experiment"] <https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml>`_ has all the GUI settings
-- `pause_data_thread() <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.pause_data_thread>`_
-- `resume_data_thread() <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.resume_data_thread>`_
-
-**From the microscope:**
-
-- `prepare_next_channel() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.prepare_next_channel>`_
-- `move_stage() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_stage>`_
-- `get_stage_position() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.get_stage_position>`_
-- `update_stage_limits() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.update_stage_limits>`_
-- `move_remote_focus() <../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_remote_focus>`_
-
-Please visit `Model APIs <../../html/_autosummary/navigate.model.model.Model.html#navigate.model.microscope.Microscope.calculate_all_waveform>`_ and `Microscope APIs <../../html/_autosummary/navigate.model.microscope.Microscope.html>`_ for more details.
+Model functions can be found :doc:`in the API </_autosummary/navigate.model.model.Model>`.
 
 Custom Feature Lists
 ====================

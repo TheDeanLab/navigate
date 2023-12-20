@@ -287,6 +287,59 @@ Configuration File
         max: 1000
         step: 1
 
+Synthetic Camera
+----------------
+
+The synthetic camera simulates noise images from an sCMOS camera.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
+.. code-block:: yaml
+
+  camera:
+    type: SyntheticCamera
+    serial_number: 12345
+
+   microscopes:
+    microscope_name:
+      camera:
+        hardware:
+          name: camera
+          type: SyntheticCamera
+          serial_number: 12345
+        x_pixels: 2048.0
+        y_pixels: 2048.0
+        flip_x: True
+        flip_y: False
+        pixel_size_in_microns: 6.5
+        subsampling: [1, 2, 4]
+        sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
+        readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
+        lightsheet_rolling_shutter_width: 608
+        defect_correct_mode: 1.0
+        binning: 1x1
+        readout_speed: 2.0
+        trigger_active: 1.0
+        trigger_mode: 1.0 # external light-sheet mode
+        trigger_polarity: 2.0  # positive pulse
+        trigger_source: 2.0  # 2 = external, 3 = software.
+        exposure_time: 20 # Use milliseconds throughout.
+        delay_percent: 20
+        pulse_percent: 1
+        line_interval: 0.000075
+        display_acquisition_subsampling: 4
+        average_frame_rate: 4.969
+        frames_to_average: 1
+        exposure_time_range:
+          min: 1
+          max: 1000
+          step: 1
+        x_pixels_step: 4
+        y_pixels_step: 4
+        x_pixels_min: 4
+        y_pixels_min: 4
+
 Remote Focusing Devices
 =======================
 

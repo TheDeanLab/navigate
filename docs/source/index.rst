@@ -30,15 +30,28 @@ in arbitrary orders to create custom acquistion protocols.
 ============
 
 .. toctree::
+   :caption: Getting Started
+   :maxdepth: 1
+
+   quick_start
+   software_installation
+
+.. toctree::
+   :caption: User Guide
    :maxdepth: 2
 
-   software_installation
-   software_configuration
-   case_studies/case_studies_home
-   hardware/hardware_home
-   feature_container/feature_container_home
-   plugin/plugin_home
+   user_guide/gui_walkthrough
+   user_guide/setup_microscope
+   user_guide/acquiring_home
+   user_guide/case_studies/case_studies_home
+
+.. toctree::
+   :caption: Development
+   :maxdepth: 2
+
    contributing/contributing_guidelines
+   contributing/feature_container
+   plugin/plugin_home
    api
 
 **Authors**

@@ -6,4 +6,3 @@ Hardware
 
     supported_hardware
     implementations
-    contributing_hardware

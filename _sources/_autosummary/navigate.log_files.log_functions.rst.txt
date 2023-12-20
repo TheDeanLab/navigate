@@ -12,6 +12,7 @@ navigate.log\_files.log\_functions
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       find_filename
       log_setup

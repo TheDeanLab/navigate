@@ -1,0 +1,25 @@
+navigate.model.concurrency.concurrency\_tools.ObjectInSubprocess
+================================================================
+
+.. currentmodule:: navigate.model.concurrency.concurrency_tools
+
+.. autoclass:: ObjectInSubprocess
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ObjectInSubprocess.__init__
+   
+   
+
+   
+   
+   

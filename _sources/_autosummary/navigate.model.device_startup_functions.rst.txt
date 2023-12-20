@@ -12,6 +12,7 @@ navigate.model.device\_startup\_functions
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       auto_redial
       device_not_found
@@ -39,6 +40,8 @@ navigate.model.device\_startup\_functions
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       DummyDeviceConnection
    

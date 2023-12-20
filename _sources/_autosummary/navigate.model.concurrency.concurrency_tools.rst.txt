@@ -16,6 +16,8 @@ navigate.model.concurrency.concurrency\_tools
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       CustodyThread
       FancyThread

@@ -12,6 +12,7 @@ navigate.tools.linear\_algebra
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       affine_rotation
       affine_shear

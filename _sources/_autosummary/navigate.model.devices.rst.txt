@@ -25,6 +25,7 @@ navigate.model.devices
 
 .. autosummary::
    :toctree:
+   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.APIs

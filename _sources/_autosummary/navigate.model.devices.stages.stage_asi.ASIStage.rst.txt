@@ -1,0 +1,51 @@
+navigate.model.devices.stages.stage\_asi.ASIStage
+=================================================
+
+.. currentmodule:: navigate.model.devices.stages.stage_asi
+
+.. autoclass:: ASIStage
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ASIStage.__init__
+      ~ASIStage.close
+      ~ASIStage.get_abs_position
+      ~ASIStage.get_axis_position
+      ~ASIStage.get_position_dict
+      ~ASIStage.get_speed
+      ~ASIStage.move_absolute
+      ~ASIStage.move_axis_absolute
+      ~ASIStage.report_position
+      ~ASIStage.scanr
+      ~ASIStage.scanv
+      ~ASIStage.set_speed
+      ~ASIStage.start_scan
+      ~ASIStage.stop
+      ~ASIStage.stop_scan
+      ~ASIStage.verify_abs_position
+      ~ASIStage.verify_move
+      ~ASIStage.wait_until_complete
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ASIStage.axes
+      ~ASIStage.stage_feedback
+      ~ASIStage.axes_mapping
+      ~ASIStage.stage_limits
+   
+   

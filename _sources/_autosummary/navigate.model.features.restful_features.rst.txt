@@ -12,6 +12,7 @@ navigate.model.features.restful\_features
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       prepare_service
    
@@ -22,6 +23,8 @@ navigate.model.features.restful\_features
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       IlastikSegmentation
    

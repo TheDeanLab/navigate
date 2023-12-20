@@ -573,14 +573,16 @@ Configuration File
 
 .. _galvo_stage:
 
-Analog-Controlled Galvo
------------------------
+Analog-Controlled Galvo/Piezo
+-----------------------------
 
-We sometimes control position via a galvo with no software-based feedback. In this
-case, we treat a standard galvo mirror as a stage axis. We control the "stage" via
-voltages sent to the galvo. The ``volts_per_micron`` setting allows the user to
-pass an equation that converts position in microns ``x``, which is passed from the
-software stage controls, to a voltage.
+We sometimes control position via a galvo or piezo with no software API.
+In this case, we treat a standard galvo mirror or piezo as a stage axis. We control the
+"stage" via voltages sent to the galvo or piezo. The ``volts_per_micron`` setting
+allows the user to pass an equation that converts position in microns ``x``, which is
+passed from the software stage controls, to a voltage. Note that we use
+``GalvoNIStage`` whether or not the device is a galvo or a piezo since the logic is
+identical.
 
 Configuration File
 ^^^^^^^^^^^^^^^^^^
@@ -725,7 +727,7 @@ Galvanometers
 =============
 
 Galvo mirrors are used for fast scanning and destriping and occasionally as stages
-(see :ref:`Analog-Controlled Galvo <galvo_stage>`).
+(see :ref:`Analog-Controlled Galvo/Piezo <galvo_stage>`).
 
 DAQ Control
 -----------
@@ -942,7 +944,26 @@ Configuration File
 Deformable Mirrors
 ==================
 
-Imagine Optics
---------------
+Imagine Optic
+-------------
 
-In progress...
+We currently have support for a
+`Mirao 52E <https://www.imagine-optic.com/products/deformable-mirror-mirao-52e/>`_.
+The ``flat_path`` provides a path to a system correction ``.wcs`` file, an Imagine
+Optic proprietary file that stores actuator voltages and corresponding Zernike
+coefficients.
+
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
+.. code-block:: yaml
+
+  mirror:
+    type: ImagineOpticsMirror
+
+  mirror:
+      hardware:
+        name: mirror
+        type: ImagineOpticsMirror
+        flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+      n_modes: 32

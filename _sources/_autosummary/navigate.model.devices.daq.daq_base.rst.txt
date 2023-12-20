@@ -16,6 +16,8 @@ navigate.model.devices.daq.daq\_base
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       DAQBase
    

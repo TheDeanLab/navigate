@@ -1,0 +1,48 @@
+navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser
+========================================================
+
+.. currentmodule:: navigate.model.devices.APIs.coherent.ObisLaser
+
+.. autoclass:: ObisLaser
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ObisLaser.__init__
+      ~ObisLaser.ask
+      ~ObisLaser.close
+      ~ObisLaser.get_ext_control
+      ~ObisLaser.get_laser_model
+      ~ObisLaser.get_laser_operating_mode
+      ~ObisLaser.get_laser_power
+      ~ObisLaser.get_laser_status
+      ~ObisLaser.get_laser_wavelength
+      ~ObisLaser.get_maximum_laser_power
+      ~ObisLaser.get_minimum_laser_power
+      ~ObisLaser.initialize_laser
+      ~ObisLaser.set_laser_operating_mode
+      ~ObisLaser.set_power
+      ~ObisLaser.turn_off
+      ~ObisLaser.turn_on
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ObisLaser.configuration
+      ~ObisLaser.microscope_name
+      ~ObisLaser.device_config
+   
+   

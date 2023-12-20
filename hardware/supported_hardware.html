@@ -74,7 +74,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#sutter-mp-285">Sutter MP-285</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#physik-instrumente">Physik Instrumente</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#thorlabs">Thorlabs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#analog-controlled-galvo">Analog-Controlled Galvo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#analog-controlled-galvo-piezo">Analog-Controlled Galvo/Piezo</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#synthetic-stage">Synthetic Stage</a></li>
 </ul>
 </li>
@@ -102,7 +102,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#deformable-mirrors">Deformable Mirrors</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#imagine-optics">Imagine Optics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#imagine-optic">Imagine Optic</a></li>
 </ul>
 </li>
 </ul>
@@ -687,13 +687,15 @@ controller.</p>
 </div>
 </section>
 </section>
-<section id="analog-controlled-galvo">
-<span id="galvo-stage"></span><h3>Analog-Controlled Galvo<a class="headerlink" href="#analog-controlled-galvo" title="Permalink to this heading"></a></h3>
-<p>We sometimes control position via a galvo with no software-based feedback. In this
-case, we treat a standard galvo mirror as a stage axis. We control the “stage” via
-voltages sent to the galvo. The <code class="docutils literal notranslate"><span class="pre">volts_per_micron</span></code> setting allows the user to
-pass an equation that converts position in microns <code class="docutils literal notranslate"><span class="pre">x</span></code>, which is passed from the
-software stage controls, to a voltage.</p>
+<section id="analog-controlled-galvo-piezo">
+<span id="galvo-stage"></span><h3>Analog-Controlled Galvo/Piezo<a class="headerlink" href="#analog-controlled-galvo-piezo" title="Permalink to this heading"></a></h3>
+<p>We sometimes control position via a galvo or piezo with no software API.
+In this case, we treat a standard galvo mirror or piezo as a stage axis. We control the
+“stage” via voltages sent to the galvo or piezo. The <code class="docutils literal notranslate"><span class="pre">volts_per_micron</span></code> setting
+allows the user to pass an equation that converts position in microns <code class="docutils literal notranslate"><span class="pre">x</span></code>, which is
+passed from the software stage controls, to a voltage. Note that we use
+<code class="docutils literal notranslate"><span class="pre">GalvoNIStage</span></code> whether or not the device is a galvo or a piezo since the logic is
+identical.</p>
 <section id="id11">
 <h4>Configuration File<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h4>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
@@ -832,7 +834,7 @@ change the names of available filters to match what is in the filter wheel or tu
 <section id="galvanometers">
 <h2>Galvanometers<a class="headerlink" href="#galvanometers" title="Permalink to this heading"></a></h2>
 <p>Galvo mirrors are used for fast scanning and destriping and occasionally as stages
-(see <a class="reference internal" href="#galvo-stage"><span class="std std-ref">Analog-Controlled Galvo</span></a>).</p>
+(see <a class="reference internal" href="#galvo-stage"><span class="std std-ref">Analog-Controlled Galvo/Piezo</span></a>).</p>
 <section id="daq-control">
 <h3>DAQ Control<a class="headerlink" href="#daq-control" title="Permalink to this heading"></a></h3>
 <p>Multiple types of galvanometers have been used, including Cambridge
@@ -1032,9 +1034,27 @@ the system at each zoom.</p>
 </section>
 <section id="deformable-mirrors">
 <h2>Deformable Mirrors<a class="headerlink" href="#deformable-mirrors" title="Permalink to this heading"></a></h2>
-<section id="imagine-optics">
-<h3>Imagine Optics<a class="headerlink" href="#imagine-optics" title="Permalink to this heading"></a></h3>
-<p>In progress…</p>
+<section id="imagine-optic">
+<h3>Imagine Optic<a class="headerlink" href="#imagine-optic" title="Permalink to this heading"></a></h3>
+<p>We currently have support for a
+<a class="reference external" href="https://www.imagine-optic.com/products/deformable-mirror-mirao-52e/">Mirao 52E</a>.
+The <code class="docutils literal notranslate"><span class="pre">flat_path</span></code> provides a path to a system correction <code class="docutils literal notranslate"><span class="pre">.wcs</span></code> file, an Imagine
+Optic proprietary file that stores actuator voltages and corresponding Zernike
+coefficients.</p>
+<section id="id24">
+<h4>Configuration File<a class="headerlink" href="#id24" title="Permalink to this heading"></a></h4>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">mirror</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImagineOpticsMirror</span>
+
+<span class="nt">mirror</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mirror</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImagineOpticsMirror</span>
+<span class="w">      </span><span class="nt">flat_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs</span>
+<span class="w">    </span><span class="nt">n_modes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 </section>

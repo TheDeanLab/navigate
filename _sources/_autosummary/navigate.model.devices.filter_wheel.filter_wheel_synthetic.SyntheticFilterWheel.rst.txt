@@ -1,0 +1,37 @@
+navigate.model.devices.filter\_wheel.filter\_wheel\_synthetic.SyntheticFilterWheel
+==================================================================================
+
+.. currentmodule:: navigate.model.devices.filter_wheel.filter_wheel_synthetic
+
+.. autoclass:: SyntheticFilterWheel
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SyntheticFilterWheel.__init__
+      ~SyntheticFilterWheel.check_if_filter_in_filter_dictionary
+      ~SyntheticFilterWheel.close
+      ~SyntheticFilterWheel.filter_change_delay
+      ~SyntheticFilterWheel.read
+      ~SyntheticFilterWheel.set_filter
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticFilterWheel.filter_dictionary
+      ~SyntheticFilterWheel.wheel_position
+   
+   

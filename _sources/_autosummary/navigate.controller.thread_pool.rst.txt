@@ -16,6 +16,8 @@ navigate.controller.thread\_pool
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       SelfLockThread
       SynchronizedThreadPool

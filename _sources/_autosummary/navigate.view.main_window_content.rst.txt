@@ -25,6 +25,7 @@ navigate.view.main\_window\_content
 
 .. autosummary::
    :toctree:
+   :template: custom_module.rst
    :recursive:
 
    navigate.view.main_window_content.acquire_notebook

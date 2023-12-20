@@ -1,0 +1,6 @@
+navigate.model.devices.APIs.omicron.LuxxLaser.print\_hex
+========================================================
+
+.. currentmodule:: navigate.model.devices.APIs.omicron.LuxxLaser
+
+.. autofunction:: print_hex

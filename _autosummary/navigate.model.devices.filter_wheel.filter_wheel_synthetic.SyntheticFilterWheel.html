@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.devices.galvo" href="navigate.model.devices.galvo.html" />
+    <link rel="prev" title="navigate.model.devices.filter_wheel.filter_wheel_synthetic" href="navigate.model.devices.filter_wheel.filter_wheel_synthetic.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.APIs.html">navigate.model.devices.APIs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.camera.html">navigate.model.devices.camera</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.daq.html">navigate.model.devices.daq</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.model.devices.filter_wheel.html">navigate.model.devices.filter_wheel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.galvo.html">navigate.model.devices.galvo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.lasers.html">navigate.model.devices.lasers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.objectives.html">navigate.model.devices.objectives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.remote_focus.html">navigate.model.devices.remote_focus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.shutter.html">navigate.model.devices.shutter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.stages.html">navigate.model.devices.stages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.zoom.html">navigate.model.devices.zoom</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.dummy.html">navigate.model.dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.html">navigate.model.devices</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.filter_wheel.html">navigate.model.devices.filter_wheel</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.filter_wheel.filter_wheel_synthetic.html">navigate.model.devices.filter_wheel.filter_wheel_synthetic</a></li>
+      <li class="breadcrumb-item active">navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-devices-filter-wheel-filter-wheel-synthetic-syntheticfilterwheel">
+<h1>navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel<a class="headerlink" href="#navigate-model-devices-filter-wheel-filter-wheel-synthetic-syntheticfilterwheel" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.devices.filter_wheel.filter_wheel_synthetic.</span></span><span class="sig-name descname"><span class="pre">SyntheticFilterWheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.model.devices.filter_wheel.filter_wheel_base.FilterWheelBase.html#navigate.model.devices.filter_wheel.filter_wheel_base.FilterWheelBase" title="navigate.model.devices.filter_wheel.filter_wheel_base.FilterWheelBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterWheelBase</span></code></a></p>
+<p>SyntheticFilterWheel Class</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.comport">
+<span class="sig-name descname"><span class="pre">comport</span></span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.comport" title="Permalink to this definition"></a></dt>
+<dd><p>Comport for communicating with the filter wheel, e.g., COM1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.baudrate">
+<span class="sig-name descname"><span class="pre">baudrate</span></span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.baudrate" title="Permalink to this definition"></a></dt>
+<dd><p>Baud rate for communicating with the filter wheel, e.g., 9600.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.filter_dictionary">
+<span class="sig-name descname"><span class="pre">filter_dictionary</span></span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.filter_dictionary" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary with installed filter names, e.g., filter_dictionary = {‘GFP’, 0}.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.number_of_filter_wheels">
+<span class="sig-name descname"><span class="pre">number_of_filter_wheels</span></span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.number_of_filter_wheels" title="Permalink to this definition"></a></dt>
+<dd><p>Number of installed filter wheels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.wheel_position">
+<span class="sig-name descname"><span class="pre">wheel_position</span></span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.wheel_position" title="Permalink to this definition"></a></dt>
+<dd><p>Default filter wheel position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">wait_until_done_delay</span> <span class="pre">=</span> <span class="pre">float</span></span></dt>
+<dd><p>Duration of time to wait for a filter wheel change.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">wait_until_done</span> <span class="pre">=</span> <span class="pre">bool</span></span></dt>
+<dd><p>Flag for enabling the wait period for a filter wheel change.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the FilterWheelBase class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of the microscope.</p></li>
+<li><p><strong>device_connection</strong> (<em>dict</em>) – Dictionary of device connections.</p></li>
+<li><p><strong>configuration</strong> (<em>dict</em>) – Dictionary of configuration parameters.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.__init__" title="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
+<td><p>Initialize the FilterWheelBase class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.check_if_filter_in_filter_dictionary" title="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.check_if_filter_in_filter_dictionary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_if_filter_in_filter_dictionary</span></code></a>(filter_name)</p></td>
+<td><p>Checks if the filter designation (string) given exists in the filter dictionary</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.close" title="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
+<td><p>Close the SyntheticFilterWheel.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.filter_change_delay" title="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.filter_change_delay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_change_delay</span></code></a>(filter_name)</p></td>
+<td><p>Calculate duration of time necessary to change filter wheel positions</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.read" title="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>(num_bytes)</p></td>
+<td><p>Reads the specified number of bytes from the serial port.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.set_filter" title="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.set_filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_filter</span></code></a>(filter_name[, wait_until_done])</p></td>
+<td><p>Change the filter wheel to the filter designated by the filter position argument.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.check_if_filter_in_filter_dictionary">
+<span class="sig-name descname"><span class="pre">check_if_filter_in_filter_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.check_if_filter_in_filter_dictionary" title="Permalink to this definition"></a></dt>
+<dd><p>Checks if the filter designation (string) given exists in the
+filter dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filter_name</strong> (<em>str</em>) – Name of filter.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>filter_exists</strong> – Flag if filter exists in the filter dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If filter name is not in the filter dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.close" title="Permalink to this definition"></a></dt>
+<dd><p>Close the SyntheticFilterWheel.</p>
+<p>Sets the filter wheel to the Empty-Alignment position and then closes the port.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.filter_change_delay">
+<span class="sig-name descname"><span class="pre">filter_change_delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.filter_change_delay" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate duration of time necessary to change filter wheel positions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filter_name</strong> (<em>str</em>) – Name of the filter that we want to move to</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_bytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.read" title="Permalink to this definition"></a></dt>
+<dd><p>Reads the specified number of bytes from the serial port.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>num_bytes</strong> (<em>int</em>) – Number of bytes to read from the serial port.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.set_filter">
+<span class="sig-name descname"><span class="pre">set_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.set_filter" title="Permalink to this definition"></a></dt>
+<dd><p>Change the filter wheel to the filter designated by the filter
+position argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter_name</strong> (<em>str</em>) – Name of filter to move to.</p></li>
+<li><p><strong>wait_until_done</strong> (<em>bool</em>) – Waits duration of time necessary for filter wheel to change positions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">filter_dictionary</span></span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of filters available on the filter wheel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">wheel_position</span></span><a class="headerlink" href="#id1" title="Permalink to this definition"></a></dt>
+<dd><p>Filter wheel position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.devices.filter_wheel.filter_wheel_synthetic.html" class="btn btn-neutral float-left" title="navigate.model.devices.filter_wheel.filter_wheel_synthetic" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.devices.galvo.html" class="btn btn-neutral float-right" title="navigate.model.devices.galvo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

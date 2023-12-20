@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.features.remove_empty_tiles.RemoveEmptyPositions" href="navigate.model.features.remove_empty_tiles.RemoveEmptyPositions.html" />
+    <link rel="prev" title="navigate.model.features.remove_empty_tiles.DetectTissueInStack" href="navigate.model.features.remove_empty_tiles.DetectTissueInStack.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../feature_container/feature_container_home.html#currently-implemented-features">Currently Implemented Features</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.adaptive_optics.html">navigate.model.features.adaptive_optics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.auto_tile_scan.html">navigate.model.features.auto_tile_scan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.autofocus.html">navigate.model.features.autofocus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.common_features.html">navigate.model.features.common_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.cva_conpro.html">navigate.model.features.cva_conpro</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.image_writer.html">navigate.model.features.image_writer</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.features.remove_empty_tiles.html">navigate.model.features.remove_empty_tiles</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.remove_empty_tiles.detect_tissue.html">navigate.model.features.remove_empty_tiles.detect_tissue</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.remove_empty_tiles.detect_tissue2.html">navigate.model.features.remove_empty_tiles.detect_tissue2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.remove_empty_tiles.DetectTissueInStack.html">navigate.model.features.remove_empty_tiles.DetectTissueInStack</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.remove_empty_tiles.RemoveEmptyPositions.html">navigate.model.features.remove_empty_tiles.RemoveEmptyPositions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.restful_features.html">navigate.model.features.restful_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.volume_search.html">navigate.model.features.volume_search</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../feature_container/feature_container_home.html#feature-objects">Feature Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../feature_container/feature_container_home.html#custom-feature-lists">Custom Feature Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../feature_container/feature_container_home.html#customizing-feature-functionality-in-the-gui">Customizing Feature Functionality in the GUI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../feature_container/feature_container_home.html">Feature Container</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.features.remove_empty_tiles.html">navigate.model.features.remove_empty_tiles</a></li>
+      <li class="breadcrumb-item active">navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-features-remove-empty-tiles-detecttissueinstackandrecord">
+<h1>navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord<a class="headerlink" href="#navigate-model-features-remove-empty-tiles-detecttissueinstackandrecord" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.features.remove_empty_tiles.</span></span><span class="sig-name descname"><span class="pre">DetectTissueInStackAndRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">planes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_records</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detect_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.model.features.remove_empty_tiles.DetectTissueInStack.html#navigate.model.features.remove_empty_tiles.DetectTissueInStack" title="navigate.model.features.remove_empty_tiles.DetectTissueInStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">DetectTissueInStack</span></code></a></p>
+<p>Detect Tissue in a Stack of Images and Record Positions.</p>
+<p>This class extends the functionality of detecting tissue in a stack of images
+and also records positions where tissue was detected.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">planes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_records</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detect_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the DetectTissueInStackAndRecord class.</p>
+<section id="parameters">
+<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>model<span class="classifier">object</span></dt><dd><p>The model object representing the microscope.</p>
+</dd>
+<dt>planes<span class="classifier">int, optional</span></dt><dd><p>The number of Z planes to capture in the stack. Default is 1.</p>
+</dd>
+<dt>percentage<span class="classifier">float, optional</span></dt><dd><p>The minimum percentage of tissue required to consider a frame as having
+tissue. Default is 0.75 (75%).</p>
+</dd>
+<dt>position_records<span class="classifier">list, optional</span></dt><dd><p>A list to record positions where tissue was detected. Default is an empty
+list.</p>
+</dd>
+<dt>detect_func<span class="classifier">function, optional</span></dt><dd><p>The custom tissue detection function to use. If not specified, the default
+<cite>detect_tissue</cite> function will be used.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.__init__" title="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, planes, percentage, ...])</p></td>
+<td><p>Initialize the DetectTissueInStackAndRecord class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.end_func_data" title="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.end_func_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_func_data</span></code></a>()</p></td>
+<td><p>Data processing function to end the data phase.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.end_func_signal" title="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.end_func_signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_func_signal</span></code></a>()</p></td>
+<td><p>Signal processing function to end the signal phase.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.in_func_data" title="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.in_func_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_func_data</span></code></a>(frame_ids)</p></td>
+<td><p>Data processing function to analyze image frames for tissue presence.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.in_func_signal" title="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.in_func_signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_func_signal</span></code></a>()</p></td>
+<td><p>Signal processing function to move the microscope stage.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.pre_func_data" title="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.pre_func_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_func_data</span></code></a>()</p></td>
+<td><p>Initialization function for data processing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.pre_func_signal" title="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.pre_func_signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_func_signal</span></code></a>()</p></td>
+<td><p>Initialization function for signal processing.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.position_records" title="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.position_records"><code class="xref py py-obj docutils literal notranslate"><span class="pre">position_records</span></code></a></p></td>
+<td><p>A list to record positions where tissue was detected.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.end_func_data">
+<span class="sig-name descname"><span class="pre">end_func_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.end_func_data" title="Permalink to this definition"></a></dt>
+<dd><p>Data processing function to end the data phase. Extends the base class
+method.</p>
+<p>This method is called to determine whether the data phase should end. It checks
+if the specified number of frames have been received and updates the position
+record.</p>
+<section id="returns">
+<h2>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>bool</dt><dd><p>True if the data phase should end, False otherwise.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.end_func_signal">
+<span class="sig-name descname"><span class="pre">end_func_signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.end_func_signal" title="Permalink to this definition"></a></dt>
+<dd><p>Signal processing function to end the signal phase.</p>
+<p>This method is called to determine whether the signal phase should end.
+It checks if the specified number of Z planes have been scanned.</p>
+<section id="id1">
+<h2>Returns:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>bool</dt><dd><p>True if the signal phase should end, False otherwise.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.in_func_data">
+<span class="sig-name descname"><span class="pre">in_func_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.in_func_data" title="Permalink to this definition"></a></dt>
+<dd><p>Data processing function to analyze image frames for tissue presence.</p>
+<p>This method is called during the data processing phase to analyze image frames
+for tissue presence. It checks if any of the received frames contain
+sufficient tissue.</p>
+<section id="id2">
+<h2>Parameters:<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>frame_ids<span class="classifier">list</span></dt><dd><p>A list of frame IDs to analyze.</p>
+</dd>
+</dl>
+</section>
+<section id="id3">
+<h2>Returns:<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>bool</dt><dd><p>True if tissue is detected, False otherwise.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.in_func_signal">
+<span class="sig-name descname"><span class="pre">in_func_signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.in_func_signal" title="Permalink to this definition"></a></dt>
+<dd><p>Signal processing function to move the microscope stage.</p>
+<dl class="simple">
+<dt>This method is called during the signal processing phase to move the microscope</dt><dd><p>stage to the specified Z and F positions. It increments the Z and F
+positions for each scan.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.pre_func_data">
+<span class="sig-name descname"><span class="pre">pre_func_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.pre_func_data" title="Permalink to this definition"></a></dt>
+<dd><p>Initialization function for data processing. Extends the base class method.</p>
+<p>This method is called at the beginning of the data processing phase and
+initializes variables for tracking received frames, tissue detection,
+and records the position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.pre_func_signal">
+<span class="sig-name descname"><span class="pre">pre_func_signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.pre_func_signal" title="Permalink to this definition"></a></dt>
+<dd><p>Initialization function for signal processing.</p>
+<p>This method is called at the beginning of the signal processing phase
+and initializes the necessary parameters for moving the microscope stage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.detect_func">
+<span class="sig-name descname"><span class="pre">detect_func</span></span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.detect_func" title="Permalink to this definition"></a></dt>
+<dd><p>The tissue detection function used to analyze image frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.model" title="Permalink to this definition"></a></dt>
+<dd><p>The model object representing the microscope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>navigate.model.Model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.planes">
+<span class="sig-name descname"><span class="pre">planes</span></span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.planes" title="Permalink to this definition"></a></dt>
+<dd><p>The number of Z planes to capture in the stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.position_records">
+<span class="sig-name descname"><span class="pre">position_records</span></span><a class="headerlink" href="#navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.position_records" title="Permalink to this definition"></a></dt>
+<dd><p>A list to record positions where tissue was detected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.features.remove_empty_tiles.DetectTissueInStack.html" class="btn btn-neutral float-left" title="navigate.model.features.remove_empty_tiles.DetectTissueInStack" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.features.remove_empty_tiles.RemoveEmptyPositions.html" class="btn btn-neutral float-right" title="navigate.model.features.remove_empty_tiles.RemoveEmptyPositions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

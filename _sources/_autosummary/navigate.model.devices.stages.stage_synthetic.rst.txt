@@ -16,6 +16,8 @@ navigate.model.devices.stages.stage\_synthetic
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       SyntheticStage
    

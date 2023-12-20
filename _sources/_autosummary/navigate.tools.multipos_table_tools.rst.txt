@@ -12,6 +12,7 @@ navigate.tools.multipos\_table\_tools
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       calc_num_tiles
       compute_tiles_from_bounding_box

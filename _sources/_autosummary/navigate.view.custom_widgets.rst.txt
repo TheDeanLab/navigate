@@ -25,6 +25,7 @@ navigate.view.custom\_widgets
 
 .. autosummary::
    :toctree:
+   :template: custom_module.rst
    :recursive:
 
    navigate.view.custom_widgets.ArrowLabel

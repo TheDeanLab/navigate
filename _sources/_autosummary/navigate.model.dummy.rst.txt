@@ -16,6 +16,8 @@ navigate.model.dummy
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       DummyController
       DummyDevice

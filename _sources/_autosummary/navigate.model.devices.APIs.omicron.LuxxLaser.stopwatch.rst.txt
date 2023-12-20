@@ -1,0 +1,6 @@
+navigate.model.devices.APIs.omicron.LuxxLaser.stopwatch
+=======================================================
+
+.. currentmodule:: navigate.model.devices.APIs.omicron.LuxxLaser
+
+.. autofunction:: stopwatch

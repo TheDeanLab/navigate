@@ -16,6 +16,8 @@ navigate.model.features.auto\_tile\_scan
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       CalculateFocusRange
    

@@ -16,6 +16,8 @@ navigate.model.devices.lasers.laser\_base
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       LaserBase
    

@@ -12,6 +12,7 @@ navigate.tools.common\_dict\_tools
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       update_stage_dict
    

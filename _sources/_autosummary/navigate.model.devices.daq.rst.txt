@@ -25,6 +25,7 @@ navigate.model.devices.daq
 
 .. autosummary::
    :toctree:
+   :template: custom_module.rst
    :recursive:
 
    navigate.model.devices.daq.daq_base

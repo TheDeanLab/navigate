@@ -1,0 +1,60 @@
+navigate.model.data\_sources.bdv\_data\_source.BigDataViewerDataSource
+======================================================================
+
+.. currentmodule:: navigate.model.data_sources.bdv_data_source
+
+.. autoclass:: BigDataViewerDataSource
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BigDataViewerDataSource.__init__
+      ~BigDataViewerDataSource.close
+      ~BigDataViewerDataSource.get_shape_from_metadata
+      ~BigDataViewerDataSource.get_slice
+      ~BigDataViewerDataSource.read
+      ~BigDataViewerDataSource.set_metadata_from_configuration_experiment
+      ~BigDataViewerDataSource.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BigDataViewerDataSource.data
+      ~BigDataViewerDataSource.mode
+      ~BigDataViewerDataSource.nbytes
+      ~BigDataViewerDataSource.resolutions
+      ~BigDataViewerDataSource.shape
+      ~BigDataViewerDataSource.shapes
+      ~BigDataViewerDataSource.subdivisions
+      ~BigDataViewerDataSource.voxel_size
+      ~BigDataViewerDataSource.image
+      ~BigDataViewerDataSource.metadata
+      ~BigDataViewerDataSource.logger
+      ~BigDataViewerDataSource.file_name
+      ~BigDataViewerDataSource.bits
+      ~BigDataViewerDataSource.dx
+      ~BigDataViewerDataSource.dy
+      ~BigDataViewerDataSource.dz
+      ~BigDataViewerDataSource.dt
+      ~BigDataViewerDataSource.dc
+      ~BigDataViewerDataSource.shape_x
+      ~BigDataViewerDataSource.shape_y
+      ~BigDataViewerDataSource.shape_z
+      ~BigDataViewerDataSource.shape_t
+      ~BigDataViewerDataSource.shape_c
+      ~BigDataViewerDataSource.positions
+   
+   

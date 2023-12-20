@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.features.common_features.ZStackAcquisition &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.features.cva_conpro" href="navigate.model.features.cva_conpro.html" />
+    <link rel="prev" title="navigate.model.features.common_features.WaitToContinue" href="navigate.model.features.common_features.WaitToContinue.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../feature_container/feature_container_home.html#currently-implemented-features">Currently Implemented Features</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.adaptive_optics.html">navigate.model.features.adaptive_optics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.auto_tile_scan.html">navigate.model.features.auto_tile_scan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.autofocus.html">navigate.model.features.autofocus</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.features.common_features.html">navigate.model.features.common_features</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.ChangeResolution.html">navigate.model.features.common_features.ChangeResolution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.FindTissueSimple2D.html">navigate.model.features.common_features.FindTissueSimple2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.LoopByCount.html">navigate.model.features.common_features.LoopByCount</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.html">navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.PrepareNextChannel.html">navigate.model.features.common_features.PrepareNextChannel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.Snap.html">navigate.model.features.common_features.Snap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.StackPause.html">navigate.model.features.common_features.StackPause</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.WaitToContinue.html">navigate.model.features.common_features.WaitToContinue</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">navigate.model.features.common_features.ZStackAcquisition</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.cva_conpro.html">navigate.model.features.cva_conpro</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.image_writer.html">navigate.model.features.image_writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.remove_empty_tiles.html">navigate.model.features.remove_empty_tiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.restful_features.html">navigate.model.features.restful_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.volume_search.html">navigate.model.features.volume_search</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../feature_container/feature_container_home.html#feature-objects">Feature Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../feature_container/feature_container_home.html#custom-feature-lists">Custom Feature Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../feature_container/feature_container_home.html#customizing-feature-functionality-in-the-gui">Customizing Feature Functionality in the GUI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../feature_container/feature_container_home.html">Feature Container</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.features.common_features.html">navigate.model.features.common_features</a></li>
+      <li class="breadcrumb-item active">navigate.model.features.common_features.ZStackAcquisition</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.features.common_features.ZStackAcquisition.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-features-common-features-zstackacquisition">
+<h1>navigate.model.features.common_features.ZStackAcquisition<a class="headerlink" href="#navigate-model-features-common-features-zstackacquisition" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.features.common_features.</span></span><span class="sig-name descname"><span class="pre">ZStackAcquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'z-stack'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>ZStackAcquisition class for controlling z-stack acquisition in microscopy.</p>
+<p>This class provides functionality to control z-stack acquisition, including managing
+z and focus positions, acquiring image data, and handling multi-channel
+acquisitions.</p>
+<section id="notes">
+<h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>This class is used to control z-stack acquisition during microscopy experiments,</p></li>
+</ul>
+<p>allowing for position cycling, multi-channel acquisitions, and image saving.</p>
+<ul class="simple">
+<li><p>The z-stack acquisition process involves initializing parameters, controlling</p></li>
+</ul>
+<p>position and focus movements, handling data acquisition, and managing data threads.</p>
+<ul class="simple">
+<li><p>The <cite>config_table</cite> attribute defines the configuration for the z-stack acquisition</p></li>
+</ul>
+<p>process, including signal acquisition, data handling, and node type.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'z-stack'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the ZStackAcquisition class.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for z-stack acquisition control.</p>
+</dd>
+<dt>get_origin<span class="classifier">bool, optional</span></dt><dd><p>Flag to determine whether to get the z and focus origin positions.
+Default is False.</p>
+</dd>
+<dt>saving_flag<span class="classifier">bool, optional</span></dt><dd><p>Flag to enable image saving during z-stack acquisition. Default is False.</p>
+</dd>
+<dt>saving_dir<span class="classifier">str, optional</span></dt><dd><p>The sub-directory for saving z-stack images. Default is “z-stack”.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.__init__" title="navigate.model.features.common_features.ZStackAcquisition.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, get_origin, saving_flag, ...])</p></td>
+<td><p>Initialize the ZStackAcquisition class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.cleanup_data_func" title="navigate.model.features.common_features.ZStackAcquisition.cleanup_data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup_data_func</span></code></a>()</p></td>
+<td><p>Perform cleanup actions after data acquisition, if image saving is enabled.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.end_data_func" title="navigate.model.features.common_features.ZStackAcquisition.end_data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_data_func</span></code></a>()</p></td>
+<td><p>Check if all expected data frames have been received.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.in_data_func" title="navigate.model.features.common_features.ZStackAcquisition.in_data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_data_func</span></code></a>(frame_ids)</p></td>
+<td><p>Handle incoming data frames during data acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.pre_data_func" title="navigate.model.features.common_features.ZStackAcquisition.pre_data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_data_func</span></code></a>()</p></td>
+<td><p>Initialize data-related parameters before data acquisition.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.pre_signal_func" title="navigate.model.features.common_features.ZStackAcquisition.pre_signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_signal_func</span></code></a>()</p></td>
+<td><p>Initialize z-stack acquisition parameters before the signal stage.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.signal_end" title="navigate.model.features.common_features.ZStackAcquisition.signal_end"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_end</span></code></a>()</p></td>
+<td><p>Handle the end of the signal stage and position cycling.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.signal_func" title="navigate.model.features.common_features.ZStackAcquisition.signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_func</span></code></a>()</p></td>
+<td><p>Control z-stack acquisition, move positions, and manage data threads.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.update_channel" title="navigate.model.features.common_features.ZStackAcquisition.update_channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_channel</span></code></a>()</p></td>
+<td><p>Update the active channel during multi-channel acquisition.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.model" title="navigate.model.features.common_features.ZStackAcquisition.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>The microscope model associated with z-stack acquisition.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.get_origin" title="navigate.model.features.common_features.ZStackAcquisition.get_origin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_origin</span></code></a></p></td>
+<td><p>Flag to determine whether to get the z and focus origin positions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.number_z_steps" title="navigate.model.features.common_features.ZStackAcquisition.number_z_steps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_z_steps</span></code></a></p></td>
+<td><p>The number of z steps in the z-stack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.start_z_position" title="navigate.model.features.common_features.ZStackAcquisition.start_z_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_z_position</span></code></a></p></td>
+<td><p>The start z position for the z-stack.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.start_focus" title="navigate.model.features.common_features.ZStackAcquisition.start_focus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_focus</span></code></a></p></td>
+<td><p>The start focus position for the z-stack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.z_step_size" title="navigate.model.features.common_features.ZStackAcquisition.z_step_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_step_size</span></code></a></p></td>
+<td><p>The z step size for the z-stack.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.focus_step_size" title="navigate.model.features.common_features.ZStackAcquisition.focus_step_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">focus_step_size</span></code></a></p></td>
+<td><p>The z stack distance for the z-stack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.positions" title="navigate.model.features.common_features.ZStackAcquisition.positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">positions</span></code></a></p></td>
+<td><p>A dictionary defining the multi-position table for z-stack acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.current_position_idx" title="navigate.model.features.common_features.ZStackAcquisition.current_position_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_position_idx</span></code></a></p></td>
+<td><p>The current index of the position being acquired in the multi-position</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.current_z_position" title="navigate.model.features.common_features.ZStackAcquisition.current_z_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_z_position</span></code></a></p></td>
+<td><p>The z position of the channel being acquired in the z-stack</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.current_focus_position" title="navigate.model.features.common_features.ZStackAcquisition.current_focus_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_focus_position</span></code></a></p></td>
+<td><p>The f position of the channel being acquired in the z-stack</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.need_to_move_new_position" title="navigate.model.features.common_features.ZStackAcquisition.need_to_move_new_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_to_move_new_position</span></code></a></p></td>
+<td><p>Flag to determine whether to move to a new position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.need_to_move_z_position" title="navigate.model.features.common_features.ZStackAcquisition.need_to_move_z_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_to_move_z_position</span></code></a></p></td>
+<td><p>Flag to determine whether to move the z position</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.z_position_moved_time" title="navigate.model.features.common_features.ZStackAcquisition.z_position_moved_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_position_moved_time</span></code></a></p></td>
+<td><p>The number of times the z position has been moved</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.defocus" title="navigate.model.features.common_features.ZStackAcquisition.defocus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">defocus</span></code></a></p></td>
+<td><p>A dictionary defining the defocus values between channels</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.stack_cycling_mode" title="navigate.model.features.common_features.ZStackAcquisition.stack_cycling_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack_cycling_mode</span></code></a></p></td>
+<td><p>The stack cycling mode for z-stack acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.channels" title="navigate.model.features.common_features.ZStackAcquisition.channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">channels</span></code></a></p></td>
+<td><p>The number of channels in the z-stack.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.has_ni_galvo_stage" title="navigate.model.features.common_features.ZStackAcquisition.has_ni_galvo_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_ni_galvo_stage</span></code></a></p></td>
+<td><p>Flag to determine whether there is a NIGalvo Stage</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.need_to_update_waveform" title="navigate.model.features.common_features.ZStackAcquisition.need_to_update_waveform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_to_update_waveform</span></code></a></p></td>
+<td><p>Flag to determine whether to override waveforms in the DAQ</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.image_writer" title="navigate.model.features.common_features.ZStackAcquisition.image_writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_writer</span></code></a></p></td>
+<td><p>An image writer object for saving z-stack images.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.ZStackAcquisition.config_table" title="navigate.model.features.common_features.ZStackAcquisition.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<td><p>A dictionary defining the configuration for the z-stack acquisition</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.cleanup_data_func">
+<span class="sig-name descname"><span class="pre">cleanup_data_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.cleanup_data_func" title="Permalink to this definition"></a></dt>
+<dd><p>Perform cleanup actions after data acquisition, if image saving is enabled.</p>
+<dl class="simple">
+<dt>This method performs cleanup actions after data acquisition, such as cleaning up</dt><dd><p>image writing, if image saving is enabled.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.end_data_func">
+<span class="sig-name descname"><span class="pre">end_data_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.end_data_func" title="Permalink to this definition"></a></dt>
+<dd><p>Check if all expected data frames have been received.</p>
+<p>This method checks whether all expected data frames have been received during
+data acquisition.</p>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>bool</dt><dd><p>A boolean value indicating whether all expected data frames have been
+received.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.in_data_func">
+<span class="sig-name descname"><span class="pre">in_data_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.in_data_func" title="Permalink to this definition"></a></dt>
+<dd><p>Handle incoming data frames during data acquisition.</p>
+<p>This method handles incoming data frames during data acquisition, updating the
+count of received frames and saving images if enabled.</p>
+<section id="id1">
+<h3>Parameters:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>frame_ids<span class="classifier">list</span></dt><dd><p>A list of frame IDs received during data acquisition.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.pre_data_func">
+<span class="sig-name descname"><span class="pre">pre_data_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.pre_data_func" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize data-related parameters before data acquisition.</p>
+<p>This method initializes data-related parameters before data acquisition,
+including the count of received and expected frames.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.pre_signal_func">
+<span class="sig-name descname"><span class="pre">pre_signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.pre_signal_func" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize z-stack acquisition parameters before the signal stage.</p>
+<p>This method initializes z-stack acquisition parameters, including position,
+focus, and data thread management, before the signal stage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.signal_end">
+<span class="sig-name descname"><span class="pre">signal_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.signal_end" title="Permalink to this definition"></a></dt>
+<dd><p>Handle the end of the signal stage and position cycling.</p>
+<p>This method handles the end of the signal stage, including position cycling and
+channel updates for multi-channel acquisitions.</p>
+<section id="id2">
+<h3>Returns:<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>bool</dt><dd><p>A boolean value indicating whether to end the current node.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.signal_func">
+<span class="sig-name descname"><span class="pre">signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.signal_func" title="Permalink to this definition"></a></dt>
+<dd><p>Control z-stack acquisition, move positions, and manage data threads.</p>
+<p>This method controls the z-stack acquisition process, including moving positions
+and focus, managing data threads, and handling data acquisition during the
+signal stage.</p>
+<section id="id3">
+<h3>Returns:<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>bool</dt><dd><p>A boolean value indicating whether to continue the z-stack acquisition
+process.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.update_channel">
+<span class="sig-name descname"><span class="pre">update_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.update_channel" title="Permalink to this definition"></a></dt>
+<dd><p>Update the active channel during multi-channel acquisition.</p>
+<p>This method updates the active channel for multi-channel acquisitions, allowing
+cycling through channels.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.channels">
+<span class="sig-name descname"><span class="pre">channels</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.channels" title="Permalink to this definition"></a></dt>
+<dd><p>The number of channels in the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.config_table">
+<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.config_table" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the configuration for the z-stack acquisition</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.current_focus_position">
+<span class="sig-name descname"><span class="pre">current_focus_position</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.current_focus_position" title="Permalink to this definition"></a></dt>
+<dd><p>The f position of the channel being acquired in the z-stack</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.current_position_idx">
+<span class="sig-name descname"><span class="pre">current_position_idx</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.current_position_idx" title="Permalink to this definition"></a></dt>
+<dd><p>The current index of the position being acquired in the multi-position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.current_z_position">
+<span class="sig-name descname"><span class="pre">current_z_position</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.current_z_position" title="Permalink to this definition"></a></dt>
+<dd><p>The z position of the channel being acquired in the z-stack</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.defocus">
+<span class="sig-name descname"><span class="pre">defocus</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.defocus" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the defocus values between channels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.focus_step_size">
+<span class="sig-name descname"><span class="pre">focus_step_size</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.focus_step_size" title="Permalink to this definition"></a></dt>
+<dd><p>The z stack distance for the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.get_origin">
+<span class="sig-name descname"><span class="pre">get_origin</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.get_origin" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to determine whether to get the z and focus origin positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.has_ni_galvo_stage">
+<span class="sig-name descname"><span class="pre">has_ni_galvo_stage</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.has_ni_galvo_stage" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to determine whether there is a NIGalvo Stage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.image_writer">
+<span class="sig-name descname"><span class="pre">image_writer</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.image_writer" title="Permalink to this definition"></a></dt>
+<dd><p>An image writer object for saving z-stack images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.model.features.image_writer.ImageWriter.html#navigate.model.features.image_writer.ImageWriter" title="navigate.model.features.image_writer.ImageWriter">ImageWriter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.model" title="Permalink to this definition"></a></dt>
+<dd><p>The microscope model associated with z-stack acquisition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MicroscopeModel</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.need_to_move_new_position">
+<span class="sig-name descname"><span class="pre">need_to_move_new_position</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.need_to_move_new_position" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to determine whether to move to a new position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.need_to_move_z_position">
+<span class="sig-name descname"><span class="pre">need_to_move_z_position</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.need_to_move_z_position" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to determine whether to move the z position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.need_to_update_waveform">
+<span class="sig-name descname"><span class="pre">need_to_update_waveform</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.need_to_update_waveform" title="Permalink to this definition"></a></dt>
+<dd><p>Flag to determine whether to override waveforms in the DAQ</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.number_z_steps">
+<span class="sig-name descname"><span class="pre">number_z_steps</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.number_z_steps" title="Permalink to this definition"></a></dt>
+<dd><p>The number of z steps in the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.positions">
+<span class="sig-name descname"><span class="pre">positions</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.positions" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary defining the multi-position table for z-stack acquisition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.stack_cycling_mode">
+<span class="sig-name descname"><span class="pre">stack_cycling_mode</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.stack_cycling_mode" title="Permalink to this definition"></a></dt>
+<dd><p>The stack cycling mode for z-stack acquisition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.start_focus">
+<span class="sig-name descname"><span class="pre">start_focus</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.start_focus" title="Permalink to this definition"></a></dt>
+<dd><p>The start focus position for the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.start_z_position">
+<span class="sig-name descname"><span class="pre">start_z_position</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.start_z_position" title="Permalink to this definition"></a></dt>
+<dd><p>The start z position for the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.z_position_moved_time">
+<span class="sig-name descname"><span class="pre">z_position_moved_time</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.z_position_moved_time" title="Permalink to this definition"></a></dt>
+<dd><p>The number of times the z position has been moved</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.ZStackAcquisition.z_step_size">
+<span class="sig-name descname"><span class="pre">z_step_size</span></span><a class="headerlink" href="#navigate.model.features.common_features.ZStackAcquisition.z_step_size" title="Permalink to this definition"></a></dt>
+<dd><p>The z step size for the z-stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.features.common_features.WaitToContinue.html" class="btn btn-neutral float-left" title="navigate.model.features.common_features.WaitToContinue" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.features.cva_conpro.html" class="btn btn-neutral float-right" title="navigate.model.features.cva_conpro" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

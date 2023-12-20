@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Contributing Guidelines" href="../contributing/contributing_guidelines.html" />
+    <link rel="next" title="navigate.model.features.adaptive_optics" href="../_autosummary/navigate.model.features.adaptive_optics.html" />
     <link rel="prev" title="Adding New Hardware" href="../hardware/contributing_hardware.html" /> 
 </head>
 
@@ -52,15 +52,35 @@
 <li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Feature Container</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#currently-implemented-features">Currently Implemented Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#the-feature-object">The Feature Object</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#creating-custom-feature-object">Creating Custom Feature Object</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#creating-a-custom-feature-list">Creating A Custom Feature List</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#combining-features">Combining Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#loading-custom-functions">Loading Custom Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#editing-function-parameters">Editing Function Parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#deleting-features">Deleting Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#currently-implemented-features">Currently Implemented Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.html">navigate.model.features.adaptive_optics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.auto_tile_scan.html">navigate.model.features.auto_tile_scan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.autofocus.html">navigate.model.features.autofocus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.html">navigate.model.features.common_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.cva_conpro.html">navigate.model.features.cva_conpro</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.image_writer.html">navigate.model.features.image_writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.html">navigate.model.features.remove_empty_tiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.restful_features.html">navigate.model.features.restful_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.volume_search.html">navigate.model.features.volume_search</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-objects">Feature Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-custom-feature-object">Creating A Custom Feature Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-interact-with-other-devices">How to interact with other devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-pause-and-resume-data-threads-in-the-model">How to pause and resume data threads in the model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-feature-lists">Custom Feature Lists</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-custom-feature-list-in-python">Creating a Custom Feature List in Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-custom-feature-list-in-the-gui">Creating a Custom Feature List in the GUI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#editing-feature-lists-on-the-fly">Editing Feature Lists on the Fly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deleting-feature-lists">Deleting Feature Lists</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#customizing-feature-functionality-in-the-gui">Customizing Feature Functionality in the GUI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#loading-custom-functions">Loading Custom Functions</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
@@ -93,10 +113,6 @@
              
   <section id="feature-container">
 <span id="features"></span><h1>Feature Container<a class="headerlink" href="#feature-container" title="Permalink to this heading"></a></h1>
-<p>To make Navigate as powerful as possible, we want to encourage users to contribute code and
-engage in the software collaboratively.</p>
-<section id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h2>
 <p>The Navigate <strong>feature container</strong> allows for reconfigurable acquisition and
 analysis. The feature container runs a tree of <strong>features</strong>, where each
 feature may perform a <em>signal</em> operation, where it modifies the state of
@@ -109,36 +125,75 @@ this, the next set of features in sequence will be executed.</p>
 <code class="docutils literal notranslate"><span class="pre">navigate.model.features.common_features.ZStackAcquisition</span></code>, which acquires a
 z-stack, and <code class="docutils literal notranslate"><span class="pre">navigate.model.features.autofocus.Autofocus</span></code>, which finds the
 ideal plane of focus of a sample using a Discrete Cosine Transform.</p>
-</section>
 <section id="currently-implemented-features">
 <h2>Currently Implemented Features<a class="headerlink" href="#currently-implemented-features" title="Permalink to this heading"></a></h2>
-<ul class="simple">
-<li><p>VolumeSearch</p></li>
-<li><p>IlastikSegmentation</p></li>
-<li><p>DetectTissueInStack</p></li>
-<li><p>DetectTissueInStackAndRecord</p></li>
-<li><p>RemoveEmptyPositions</p></li>
-<li><p>ImageWriter</p></li>
-<li><p>ConstantVelocityAcquisition</p></li>
-<li><p>ChangeResolution</p></li>
-<li><p>ConProAcquisition</p></li>
-<li><p>FindTissueSimple2D</p></li>
-<li><p>LoopByCount</p></li>
-<li><p>MoveToNextPositionInMultipositionTable</p></li>
-<li><p>PrepareNextChannel</p></li>
-<li><p>Snap</p></li>
-<li><p>StackPause</p></li>
-<li><p>WaitToContinue</p></li>
-<li><p>ZStackAcquisition</p></li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.html">navigate.model.features.adaptive_optics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.fourier_annulus.html">navigate.model.features.adaptive_optics.fourier_annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.gauss.html">navigate.model.features.adaptive_optics.gauss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.poly2.html">navigate.model.features.adaptive_optics.poly2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.r_squared.html">navigate.model.features.adaptive_optics.r_squared</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.TonyWilson.html">navigate.model.features.adaptive_optics.TonyWilson</a></li>
 </ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.auto_tile_scan.html">navigate.model.features.auto_tile_scan</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.auto_tile_scan.CalculateFocusRange.html">navigate.model.features.auto_tile_scan.CalculateFocusRange</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.autofocus.html">navigate.model.features.autofocus</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.autofocus.power_tent.html">navigate.model.features.autofocus.power_tent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.autofocus.Autofocus.html">navigate.model.features.autofocus.Autofocus</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.html">navigate.model.features.common_features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.ChangeResolution.html">navigate.model.features.common_features.ChangeResolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.FindTissueSimple2D.html">navigate.model.features.common_features.FindTissueSimple2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.LoopByCount.html">navigate.model.features.common_features.LoopByCount</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.html">navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.PrepareNextChannel.html">navigate.model.features.common_features.PrepareNextChannel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.Snap.html">navigate.model.features.common_features.Snap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.StackPause.html">navigate.model.features.common_features.StackPause</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.WaitToContinue.html">navigate.model.features.common_features.WaitToContinue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.ZStackAcquisition.html">navigate.model.features.common_features.ZStackAcquisition</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.cva_conpro.html">navigate.model.features.cva_conpro</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.cva_conpro.ConstantVelocityAcquisition.html">navigate.model.features.cva_conpro.ConstantVelocityAcquisition</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.image_writer.html">navigate.model.features.image_writer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.image_writer.ImageWriter.html">navigate.model.features.image_writer.ImageWriter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.html">navigate.model.features.remove_empty_tiles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.detect_tissue.html">navigate.model.features.remove_empty_tiles.detect_tissue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.detect_tissue2.html">navigate.model.features.remove_empty_tiles.detect_tissue2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.DetectTissueInStack.html">navigate.model.features.remove_empty_tiles.DetectTissueInStack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.html">navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.RemoveEmptyPositions.html">navigate.model.features.remove_empty_tiles.RemoveEmptyPositions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.restful_features.html">navigate.model.features.restful_features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.restful_features.prepare_service.html">navigate.model.features.restful_features.prepare_service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.restful_features.IlastikSegmentation.html">navigate.model.features.restful_features.IlastikSegmentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.volume_search.html">navigate.model.features.volume_search</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.volume_search.draw_box.html">navigate.model.features.volume_search.draw_box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.volume_search.VolumeSearch.html">navigate.model.features.volume_search.VolumeSearch</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </section>
-<section id="the-feature-object">
-<h2>The Feature Object<a class="headerlink" href="#the-feature-object" title="Permalink to this heading"></a></h2>
+<section id="feature-objects">
+<span id="id1"></span><h2>Feature Objects<a class="headerlink" href="#feature-objects" title="Permalink to this heading"></a></h2>
 <p>Each feature is an object that accepts a pointer to <code class="docutils literal notranslate"><span class="pre">navigate.model.model</span></code> in its
 <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>  arguments and contains a configuration dictionary that dictates
 feature behavior in its <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function. A complete configuration
 dictionary is shown below. As few or as many of these options can be specified
-as needed.</p>
+as needed. Each function is considered a leaf or node of the feature tree.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">config_table</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;signal&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;init&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_func_signal</span><span class="p">,</span>
                                 <span class="s1">&#39;main&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_func_signal</span><span class="p">,</span>
                                 <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_func_signal</span><span class="p">,</span>
@@ -159,12 +214,15 @@ dictionaries that can contain <code class="docutils literal notranslate"><span c
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">init</span></code> entries dictate pre-processing steps that must be run before the
 main function of the feature starts.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">main</span></code> entries dictate the primary operation of the feature, to be once per
-acqusition step</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">end</span></code> entries describe any closing operations that must be performed when
-exiting the node</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">main</span></code> entries dictate the primary operation of the feature, and are run once per
+acqusition step. They return <code class="docutils literal notranslate"><span class="pre">True</span></code> if the acquistion should proceed and <code class="docutils literal notranslate"><span class="pre">False</span></code>
+if the acquistion should be ended.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">end</span></code> entries are run once per main function returning <code class="docutils literal notranslate"><span class="pre">True</span></code>. They check if the
+acquisition should end, if we are at any boundary points of the <code class="docutils literal notranslate"><span class="pre">main</span></code> function
+(e.g. if we need to change positions in a multi-position z-stack acquistion),
+and describe any closing operations that must be performed when exiting the feature</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cleanup</span></code> entries dictate what happens if the node fails. This is for
-failsafe controls such as “turn off all lasers”</p></li>
+failsafe controls such as “turn off all lasers”.</p></li>
 </ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">node</span></code> configuration dictionary contains general properties of feature
 nodes. <code class="docutils literal notranslate"><span class="pre">node_type</span></code> can be <code class="docutils literal notranslate"><span class="pre">one-step</span></code> or <code class="docutils literal notranslate"><span class="pre">multi-step</span></code>, the latter indicating
@@ -174,22 +232,22 @@ to true if the signal node waits on hardware (e.g. waits for a stage to confirm
 it has indeed moved) before proceeding.</p>
 <p>Each of the functions that are the value entries in <code class="docutils literal notranslate"><span class="pre">self.config_table</span></code>
 dictionaries are methods of the feature object.</p>
-</section>
-<section id="creating-custom-feature-object">
-<h2>Creating Custom Feature Object<a class="headerlink" href="#creating-custom-feature-object" title="Permalink to this heading"></a></h2>
-<p>Each Feature Object is defined as a class, there is a step-by-step example feature
-that moves the stage to a specific position listed in the multi-position table in the GUI,
-snap an image and calculate its Shannon entropy.</p>
-<ol class="arabic simple">
-<li><p>How to create a custom feature class?</p></li>
-</ol>
-<p>Creating a new feature is the same as a normal new class. However, there is some requires.
-The first parameter of the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function must be <code class="docutils literal notranslate"><span class="pre">model</span></code>, which gives the feature
-object full access to the model. All the other parameters are keyword arguments and must have default values.
-There should always have a config_table attribute (see <a class="reference external" href="../../html/feature_container/feature_container_home.html#the-feature-object">above</a> for a description of the config_table)</p>
+<section id="creating-a-custom-feature-object">
+<h3>Creating A Custom Feature Object<a class="headerlink" href="#creating-a-custom-feature-object" title="Permalink to this heading"></a></h3>
+<p>Each feature object is defined as a class. Creating a new feature is the same as
+creating any Python class, but with a few requirements. The first parameter of the
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code> function (after <code class="docutils literal notranslate"><span class="pre">self</span></code>) must be <code class="docutils literal notranslate"><span class="pre">model</span></code>, which gives the feature
+object full access to the navigate model. All the other parameters are keyword
+arguments and must have default values. The init function should always have a
+<code class="docutils literal notranslate"><span class="pre">config_table</span></code> attribute (see <a class="reference internal" href="#feature-objects"><span class="std std-ref">above</span></a> for a description of
+the <code class="docutils literal notranslate"><span class="pre">config_table</span></code>).</p>
+<p>In the example below, we will create a custom feature that moves to a specified
+position in navigate’s multi-position table and calculates the sharpness of the image
+at this position using the Normalized DCT Shannon Entropy metric. An example
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function for our <code class="docutils literal notranslate"><span class="pre">FeatureExample</span></code> class is below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.analysis.image_contrast</span> <span class="kn">import</span> <span class="n">fast_normalized_dct_shannon_entropy</span>
 
-<span class="n">Class</span> <span class="n">FeatureExample</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">FeatureExample</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">position_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
@@ -209,12 +267,12 @@ There should always have a config_table attribute (see <a class="reference exter
         <span class="p">}</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="2">
-<li><p>How to get parameters from GUI?</p></li>
-</ol>
-<p>All the GUI parameters are in the <code class="docutils literal notranslate"><span class="pre">model.configuration[&quot;experiment&quot;]</span></code> during
-runtime. Here is an example that get positions from the multi-position table
-in the GUI.</p>
+<ol class="arabic">
+<li><p>Get multi-position table position from the GUI.</p>
+<p>All the GUI parameters are stored in <code class="docutils literal notranslate"><span class="pre">model.configuration[&quot;experiment&quot;]</span></code> during
+runtime. Below, we create a function to get all the position stored at
+<code class="docutils literal notranslate"><span class="pre">position_id</span></code> from the multi-position table in the GUI when we launch our
+feature.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pre_func_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">configuration</span><span class="p">[</span><span class="s2">&quot;experiment&quot;</span><span class="p">][</span><span class="s2">&quot;MultiPositions&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">):</span>
@@ -225,21 +283,24 @@ in the GUI.</p>
 </pre></div>
 </div>
 <p>More GUI parameters can be found in <a class="reference external" href="https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml">experiment.yml</a></p>
-<ol class="arabic simple" start="3">
-<li><p>How to interact with stage?</p></li>
-</ol>
-<p>Now, we move stage to the target_position.</p>
+</li>
+<li><p>Use the stage to move to this position.</p>
+<p>Now, we move stage to the <code class="docutils literal notranslate"><span class="pre">target_position</span></code> we grabbed from the multi-position
+table.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_func_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">pos</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">_abs&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_position</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">move_stage</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">wait_until_done</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="4">
-<li><p>How to get an image and deal with it?</p></li>
+</li>
+<li><p>Take a picture and process the resulting image.</p></li>
 </ol>
-<p>The image captured by the camara will be stored in the data buffer.
-You should add your code to deal with the image in the main data function.
-Here is an example that calculates the Shannon entropy of the image.</p>
+<blockquote>
+<div><p>In parallel with our signal function call, the camera will acquire an image.
+The image captured by the camera will be stored in the <code class="docutils literal notranslate"><span class="pre">model</span></code> <code class="docutils literal notranslate"><span class="pre">data_buffer</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">data</span></code> functions run after an image is  acquired. We add code to deal with
+this image in the <code class="docutils literal notranslate"><span class="pre">&quot;main&quot;</span></code> data function. Here, we calculate the Shannon entropy
+of the image.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_func_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">):</span>
     <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">frame_ids</span><span class="p">:</span>
         <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">data_buffer</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
@@ -248,63 +309,66 @@ Here is an example that calculates the Shannon entropy of the image.</p>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;entropy of image:&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">entropy</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Now, you’ve create a whole new feature and can use it as you wish.</p>
-<ul class="simple">
-<li><p>How to interact with other devices?</p></li>
-</ul>
-<p>You could interact with all devices through <code class="docutils literal notranslate"><span class="pre">self.model.active_microscope</span></code>.
+</div></blockquote>
+<p>Now, we’ve create a whole new feature and can use it as we wish.</p>
+</section>
+<section id="how-to-interact-with-other-devices">
+<h3>How to interact with other devices<a class="headerlink" href="#how-to-interact-with-other-devices" title="Permalink to this heading"></a></h3>
+<p>We interact with all devices through <code class="docutils literal notranslate"><span class="pre">self.model.active_microscope</span></code>.
 Here is an example to open shutter:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">active_microscope</span><span class="o">.</span><span class="n">shutter</span><span class="o">.</span><span class="n">open_shutter</span><span class="p">()</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p>How to pause and resume data threads in the model</p></li>
-</ul>
-<p>The image data acquired from the camara are handled in an indepandant thread.
-Some devices need more time to get ready or move. In this case, you may need to pause
-the data thread until the device is ready.</p>
-<p>Here is an example to pause and resume the data thread:</p>
+</section>
+<section id="how-to-pause-and-resume-data-threads-in-the-model">
+<h3>How to pause and resume data threads in the model<a class="headerlink" href="#how-to-pause-and-resume-data-threads-in-the-model" title="Permalink to this heading"></a></h3>
+<p>The image data acquired from the camera are handled in an independent thread. As such,
+the <em>signal</em> and <em>data</em> operations by default run in parallel and do not block each
+other. Sometimes, we want to be sure a device is ready or has moved. For example, in
+<code class="docutils literal notranslate"><span class="pre">FeatureExample</span></code>, we have no guarantee that the stage finished moving before the
+image was taken. The <code class="docutils literal notranslate"><span class="pre">wait_until_done</span></code> call only blocks the signal thread from
+progressing before the stage finishs its move. To ensure the data thread also waits,
+we need to pause the data thread until the stage is ready.</p>
+<p>Here is an example of how we can pause and resume the data thread:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pause_data_thread</span><span class="p">()</span>
+
+<span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">move_stage</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">wait_until_done</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="c1"># ...</span>
+
 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">resume_data_thread</span><span class="p">()</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p>Frequently used APIs in the model are:</p></li>
-</ul>
-<ul class="simple">
-<li><p><a class="reference external" href="https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml">configuration[“experiment”]</a> has all the GUI settings</p></li>
-<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.pause_data_thread">pause_data_thread()</a></p></li>
-<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.resume_data_thread">resume_data_thread()</a></p></li>
-</ul>
-<ul class="simple">
-<li><p>Frequently used APIs in the Microscope are:</p></li>
-</ul>
-<ul class="simple">
-<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.prepare_next_channel">prepare_next_channel()</a></p></li>
-<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_stage">move_stage()</a></p></li>
-<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.get_stage_position">get_stage_position()</a></p></li>
-<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.update_stage_limits">update_stage_limits()</a></p></li>
-<li><p><a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_remote_focus">move_remote_focus()</a></p></li>
-</ul>
-<p>Please visit <a class="reference external" href="../../html/_autosummary/navigate.model.model.Model.html#navigate.model.microscope.Microscope.calculate_all_waveform">Model APIs</a> and <a class="reference external" href="../../html/_autosummary/navigate.model.microscope.Microscope.html">Microscope APIs</a> for more details.</p>
+<p>We can of course replace <code class="docutils literal notranslate"><span class="pre">self.model.move_stage(pos,</span> <span class="pre">wait_until_done=True)</span></code> with
+whatever task we want to wait for before resuming image acqusition.</p>
+<p>Model functions can be found <a class="reference internal" href="../_autosummary/navigate.model.model.Model.html"><span class="doc">in the API</span></a>.</p>
 </section>
-<section id="creating-a-custom-feature-list">
-<h2>Creating A Custom Feature List<a class="headerlink" href="#creating-a-custom-feature-list" title="Permalink to this heading"></a></h2>
-<p>The Navigate Software allows you to build a custom feature that implements new
-functionality, or a new feature list that builds an intelligent acquisition workflow
-from existing features. This documentation explains how to create and load
-a customized feature list within the Navigate software. The first step is to create a
-Python function, and decorating it as a “FeatureList.” .</p>
-<p>To create a customized feature, follow these steps:</p>
+</section>
+<section id="custom-feature-lists">
+<h2>Custom Feature Lists<a class="headerlink" href="#custom-feature-lists" title="Permalink to this heading"></a></h2>
+<p>The navigate software allows you to chain feature objects into lists to build
+acquisition workflows.</p>
+<section id="creating-a-custom-feature-list-in-python">
+<h3>Creating a Custom Feature List in Python<a class="headerlink" href="#creating-a-custom-feature-list-in-python" title="Permalink to this heading"></a></h3>
+<p>To create a customized feature list, follow these steps:</p>
 <ol class="arabic simple">
 <li><p>Import the necessary modules:</p></li>
 </ol>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.tools.decorators</span> <span class="kn">import</span> <span class="n">FeatureList</span>
 <span class="kn">from</span> <span class="nn">navigate.model.features.feature_related_functions</span> <span class="kn">import</span> <span class="o">*</span>
-
-<span class="nd">@FeatureList</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">FeatureList</span></code> is a decorator that registers the list of features.
+<code class="docutils literal notranslate"><span class="pre">feature_related_functions</span></code> contains convienience imports that allow us to call
+<code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code> instead of
+<code class="docutils literal notranslate"><span class="pre">navigate.model.features.common_features.PrepareNextChannel</span></code>.
+This makes for more readable code.</p>
+</div></blockquote>
+<ol class="arabic simple">
+<li><p>Create the feature list.</p></li>
+</ol>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@FeatureList</span>
 <span class="k">def</span> <span class="nf">feature_example</span><span class="p">():</span>
     <span class="k">return</span> <span class="p">[</span>
         <span class="p">(</span>
@@ -317,105 +381,140 @@ Python function, and decorating it as a “FeatureList.” .</p>
     <span class="p">]</span>
 </pre></div>
 </div>
-<p>Once you’ve created a feature, you can load it into the Navigate software using these steps:</p>
+<p>In this example, the feature list takes one image per selected channel in the GUI.
+<code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code> sets up the channel and <code class="docutils literal notranslate"><span class="pre">LoopByCount</span></code> call this setup once
+per selected channel.</p>
 </div></blockquote>
-<ol class="arabic simple" start="2">
-<li><p>Open Navigate.</p></li>
-<li><p>Go to the <cite>Features</cite> menu.</p></li>
-</ol>
+<ol class="arabic">
+<li><p>Now, open navigate.</p></li>
+<li><p>Go to the <span class="guilabel">Features</span> menu.</p>
 <img alt="../_images/step_1.png" src="../_images/step_1.png" />
-<p>4a. Import the customized feature. Select <cite>Add Custom Feature List</cite> from the
-<cite>Features</cite> menu. A dialog box will appear, allowing you to select the Python file
-containing your customized feature list function.</p>
+</li>
+<li><p>Import the customized feature. Select <span class="guilabel">Add Custom Feature List</span> from the
+<span class="guilabel">Features</span> menu. A dialog box will appear, allowing you to select the
+Python file containing your customized feature list function.</p>
 <img alt="../_images/step_2.png" src="../_images/step_2.png" />
-<p>5. Choose the Python file containing your customized feature list function. Navigate will
-load the specified feature list, making it available for use in your experiments and
-analyses. It will appear at the bottom of the <cite>Features</cite> menu.</p>
+</li>
+<li><p>Choose the Python file containing your customized feature list function. navigate
+will load the specified feature list, making it available for use in your
+experiments and analyses. It will appear at the bottom of the <span class="guilabel">Features</span>
+menu.</p></li>
+</ol>
 </section>
-<section id="combining-features">
-<h2>Combining Features<a class="headerlink" href="#combining-features" title="Permalink to this heading"></a></h2>
+<section id="creating-a-custom-feature-list-in-the-gui">
+<h3>Creating a Custom Feature List in the GUI<a class="headerlink" href="#creating-a-custom-feature-list-in-the-gui" title="Permalink to this heading"></a></h3>
 <p>Once you have loaded your feature list, the next step is to use it in combination with
 other features to create an intelligent acquisition workflow. To do this, you will
 need to create a new feature list that combines your custom feature with other
 features:</p>
-<p>1. Navigate back to the <cite>Features</cite> menu, and select <cite>Add Customized Feature List</cite>.
-You could add a new feature list directly in the software, by selecting the menu
-“Features-&gt;Add Customized Feature List”. This will open a new dialog box that allows
-you to create a new feature list.</p>
-<p>2. Provide the feature list with a <cite>Feature List Name</cite> of your choice, and type the
-feature list content (which must be a list object). The feature list content could be
-the whole feature list or just a simple feature name. In this example, the feature
-list name is <cite>Feature Example 2</cite>, and the content is a simple feature name: [{“name”:
-PrepareNextChannel}]. Once you select <cite>Preview</cite>, the feature list will be displayed
-in the <cite>Preview</cite> window. If you are satisfied with the feature list, select <cite>OK</cite> to
-save it.</p>
+<ol class="arabic">
+<li><p>Select <span class="menuselection">Features ‣ Add Customized Feature List</span>. This will open a
+new dialog box that allows you to create a new feature list.</p></li>
+<li><p>Provide the feature list with a <span class="guilabel">Feature List Name</span> of your choice, and
+type the feature list content (which must be a list object). The feature list
+content could be the whole feature list or just a simple feature name. In this
+example, the feature list name is <code class="docutils literal notranslate"><span class="pre">Feature</span> <span class="pre">Example</span> <span class="pre">2</span></code>, and the content is a
+simple feature name:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span><span class="s2">&quot;&quot;</span><span class="n">name</span><span class="s2">&quot;: PrepareNextChannel}]</span>
+</pre></div>
+</div>
+<p>Once you select <cite>Preview</cite>, the feature list will be displayed in the
+<span class="guilabel">Preview</span> window. If you are satisfied with the feature list, select
+<cite>OK</cite> to save it.</p>
 <img alt="../_images/step_3.png" src="../_images/step_3.png" />
-<p>3. You could edit the list of features directly by modifying the text, or through a
-popup menu that is available by right clicking the feature name. The popup menu
+</li>
+<li><p>You can edit the list of features directly by modifying the text, or through a
+popup menu that is available by right clicking the feature tile. The popup menu
 allows you to add a new feature, delete a feature, or edit a feature. In this
-example, click “Insert After”, and a new feature “PrepareNextChannel”
+example, click <span class="guilabel">Insert After</span>, and a new feature <code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code>
 will be inserted by default.</p>
 <img alt="../_images/step_4.png" src="../_images/step_4.png" />
 <img alt="../_images/step_5.png" src="../_images/step_5.png" />
-<p>4. To change the identity of the inserted feature, you can select a different feature
+</li>
+<li><p>To change the identity of the inserted feature, you can select a different feature
 form the drop-down menu. For example, the feature can be changed from
-PrepareNextChannel to LoopByCount. The parameters of the feature can be changed
-automatically in the popup window.</p>
+<code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code> to <code class="docutils literal notranslate"><span class="pre">LoopByCount</span></code>. The parameters of the feature can be
+changed automatically in the popup window.</p>
 <img alt="../_images/step_6.png" src="../_images/step_6.png" />
-<p>5. If you click the preview button, a graphical representation of the feature list will
+</li>
+<li><p>If you click the preview button, a graphical representation of the feature list will
 be displayed.</p>
 <img alt="../_images/step_7.png" src="../_images/step_7.png" />
-<p>6. If you want a loop structure, type a pair of parentheses around the features, then
-click “Preview”. Given this design, you can loop through arbitrary features in a
-user-selected format.</p>
-<img alt="How to create a custom feature list." src="../_images/step_8.png" />
-<p>7. After editing the feature list, click “Add”. The new feature list will show up
-under the “Features” menu.</p>
-</section>
-<section id="loading-custom-functions">
-<h2>Loading Custom Functions<a class="headerlink" href="#loading-custom-functions" title="Permalink to this heading"></a></h2>
-<p>1. You could load customized functions in the software by selecting the menu
-“Features-&gt;Advanced Setting”.</p>
-<img alt="../_images/step_10.png" src="../_images/step_10.png" />
-<p>2. In the popup window, choose the feature name with which you want to use the
-dynamic customized functions as feature parameters.</p>
-<img alt="../_images/step_11.png" src="../_images/step_11.png" />
-<img alt="../_images/step_12.png" src="../_images/step_12.png" />
-<p>3. Click “Add”, A new line will appear and allow you to edit the parameter options.
-Type the function name which is defined in your python file.</p>
-<img alt="../_images/step_13.png" src="../_images/step_13.png" />
-<ol class="arabic simple" start="4">
-<li><p>Then click “Load” to choose your python file.</p></li>
+</li>
 </ol>
-<img alt="../_images/step_14.png" src="../_images/step_14.png" />
-<p>5. When you run a feature list containing the feature you just set, the new function
-name will appear and you can choose the one you just added.</p>
-<img alt="../_images/step_15.png" src="../_images/step_15.png" />
+<ol class="arabic" start="6">
+<li><p>If you want a loop structure, type a pair of parentheses around the features, then
+click <span class="guilabel">Preview</span>. Given this design, you can loop through arbitrary
+features in a user-selected format.</p>
+<img alt="How to create a custom feature list." src="../_images/step_8.png" />
+</li>
+<li><p>After editing the feature list, click <span class="guilabel">Add</span>. The new feature list will
+show up under the <span class="guilabel">Features</span> menu.</p></li>
+</ol>
 </section>
-<section id="editing-function-parameters">
-<h2>Editing Function Parameters<a class="headerlink" href="#editing-function-parameters" title="Permalink to this heading"></a></h2>
-<p>1. Select the feature list you want to run, choose “Customized” acquisition mode, and
-then click “Acquire”. A feature edit popup window will show up. In this popup window,
-you can see the structure of the selected feature list.</p>
+<section id="editing-feature-lists-on-the-fly">
+<h3>Editing Feature Lists on the Fly<a class="headerlink" href="#editing-feature-lists-on-the-fly" title="Permalink to this heading"></a></h3>
+<ol class="arabic">
+<li><p>Select the feature list you want to run, choose “Customized” acquisition mode, and
+then click <span class="guilabel">Acquire</span>. A feature edit popup window will show up. In this
+popup window, you can see the structure of the selected feature list.</p>
 <img alt="../_images/step_16.png" src="../_images/step_16.png" />
 <img alt="../_images/step_17.png" src="../_images/step_17.png" />
 <img alt="../_images/step_18.png" src="../_images/step_18.png" />
-<p>2. Click one feature in the preview window, a parameter window will show up. Then you
+</li>
+<li><p>Click one feature in the preview window, a parameter window will show up. Then you
 could set the parameter you want. Close the parameter window.</p>
 <img alt="../_images/step_19.png" src="../_images/step_19.png" />
-<ol class="arabic simple" start="3">
-<li><p>Click “Confirm”. The feature list will start to run.</p></li>
-</ol>
+</li>
+<li><p>Click “Confirm”. The feature list will start to run.</p>
 <img alt="../_images/step_20.png" src="../_images/step_20.png" />
-</section>
-<section id="deleting-features">
-<h2>Deleting Features<a class="headerlink" href="#deleting-features" title="Permalink to this heading"></a></h2>
-<ol class="arabic simple">
-<li><p>Select the feature list you want to delete in the <cite>Features</cite> menu.</p></li>
+</li>
 </ol>
-<p>2. Then, navigate back to the <cite>Features</cite> menu and select <cite>Delete Selected Feature</cite>
-List”. The feature list will be removed from the menu and the software.</p>
+</section>
+<section id="deleting-feature-lists">
+<h3>Deleting Feature Lists<a class="headerlink" href="#deleting-feature-lists" title="Permalink to this heading"></a></h3>
+<ol class="arabic">
+<li><p>Select the feature list you want to delete in the <span class="guilabel">Features</span> menu.</p></li>
+<li><p>Then, navigate back to the <span class="guilabel">Features</span> menu and select
+<span class="guilabel">Delete Selected Feature</span> The feature list will be removed from the menu
+and the software.</p>
 <img alt="../_images/step_9.png" src="../_images/step_9.png" />
+</li>
+</ol>
+</section>
+</section>
+<section id="customizing-feature-functionality-in-the-gui">
+<h2>Customizing Feature Functionality in the GUI<a class="headerlink" href="#customizing-feature-functionality-in-the-gui" title="Permalink to this heading"></a></h2>
+<p>Features can be optionally customized within the GUI. For example instead of
+re-programming a feature and loading it again, we can swap Python functions in
+and out of features. This can be helpful, e.g., when you are prototyping a function
+to automatically detect an object within an image and want to try a few different
+options.</p>
+<section id="loading-custom-functions">
+<h3>Loading Custom Functions<a class="headerlink" href="#loading-custom-functions" title="Permalink to this heading"></a></h3>
+<ol class="arabic">
+<li><p>You can load customized functions in the software by selecting the menu
+<span class="menuselection">Features ‣ Advanced Setting</span>.</p>
+<img alt="../_images/step_10.png" src="../_images/step_10.png" />
+</li>
+<li><p>In the popup window, choose the feature name with which you want to use the
+dynamic customized functions as feature parameters.</p>
+<img alt="../_images/step_11.png" src="../_images/step_11.png" />
+<img alt="../_images/step_12.png" src="../_images/step_12.png" />
+</li>
+<li><p>Click <span class="guilabel">Add</span>, A new line will appear and allow you to edit the parameter
+options. Type the function name which is defined in your python file.</p>
+<img alt="../_images/step_13.png" src="../_images/step_13.png" />
+</li>
+<li><p>Then click <span class="guilabel">Load</span> to choose your Oython file.</p>
+<img alt="../_images/step_14.png" src="../_images/step_14.png" />
+</li>
+<li><p>When you run a feature list containing the feature you just set, the new function
+name will appear and you can choose the one you just added.</p>
+<img alt="../_images/step_15.png" src="../_images/step_15.png" />
+</li>
+</ol>
+</section>
 </section>
 </section>
 
@@ -424,7 +523,7 @@ List”. The feature list will be removed from the menu and the software.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../hardware/contributing_hardware.html" class="btn btn-neutral float-left" title="Adding New Hardware" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../contributing/contributing_guidelines.html" class="btn btn-neutral float-right" title="Contributing Guidelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../_autosummary/navigate.model.features.adaptive_optics.html" class="btn btn-neutral float-right" title="navigate.model.features.adaptive_optics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

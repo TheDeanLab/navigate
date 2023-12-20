@@ -25,6 +25,7 @@ navigate.model.analysis
 
 .. autosummary::
    :toctree:
+   :template: custom_module.rst
    :recursive:
 
    navigate.model.analysis.boundary_detect

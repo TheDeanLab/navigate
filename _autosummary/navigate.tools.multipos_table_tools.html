@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.tools.sdf" href="navigate.tools.sdf.html" />
-    <link rel="prev" title="navigate.tools.main_functions" href="navigate.tools.main_functions.html" /> 
+    <link rel="next" title="navigate.tools.multipos_table_tools.calc_num_tiles" href="navigate.tools.multipos_table_tools.calc_num_tiles.html" />
+    <link rel="prev" title="navigate.tools.main_functions.evaluate_parser_input_arguments" href="navigate.tools.main_functions.evaluate_parser_input_arguments.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -67,7 +67,13 @@
 <li class="toctree-l3"><a class="reference internal" href="navigate.tools.image_loaders.html">navigate.tools.image_loaders</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.tools.linear_algebra.html">navigate.tools.linear_algebra</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.tools.main_functions.html">navigate.tools.main_functions</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">navigate.tools.multipos_table_tools</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">navigate.tools.multipos_table_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="navigate.tools.multipos_table_tools.calc_num_tiles.html">navigate.tools.multipos_table_tools.calc_num_tiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.tools.multipos_table_tools.compute_tiles_from_bounding_box.html">navigate.tools.multipos_table_tools.compute_tiles_from_bounding_box</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.tools.multipos_table_tools.sign.html">navigate.tools.multipos_table_tools.sign</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.tools.multipos_table_tools.update_table.html">navigate.tools.multipos_table_tools.update_table</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.tools.sdf.html">navigate.tools.sdf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.tools.waveform_template_funcs.html">navigate.tools.waveform_template_funcs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.tools.xml_tools.html">navigate.tools.xml_tools</a></li>
@@ -109,16 +115,16 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_num_tiles</span></code>(dist, overlap, roi_length)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.tools.multipos_table_tools.calc_num_tiles.html#navigate.tools.multipos_table_tools.calc_num_tiles" title="navigate.tools.multipos_table_tools.calc_num_tiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_num_tiles</span></code></a>(dist, overlap, roi_length)</p></td>
 <td><p>Calculate the number of tiles to divide a space dist along a single axis with an ROI of size roi_length and a fractional overlap between ROIs of overlap.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_tiles_from_bounding_box</span></code>(x_start, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.tools.multipos_table_tools.compute_tiles_from_bounding_box.html#navigate.tools.multipos_table_tools.compute_tiles_from_bounding_box" title="navigate.tools.multipos_table_tools.compute_tiles_from_bounding_box"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_tiles_from_bounding_box</span></code></a>(x_start, ...)</p></td>
 <td><p>Create a grid of ROIs to image based on start position, number of tiles, and signed FOV length in each dimension.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sign</span></code>(x)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.tools.multipos_table_tools.sign.html#navigate.tools.multipos_table_tools.sign" title="navigate.tools.multipos_table_tools.sign"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sign</span></code></a>(x)</p></td>
 <td><p>Return the sign of x.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_table</span></code>(table, pos[, append])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.tools.multipos_table_tools.update_table.html#navigate.tools.multipos_table_tools.update_table" title="navigate.tools.multipos_table_tools.update_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_table</span></code></a>(table, pos[, append])</p></td>
 <td><p>Updates and redraws table based on given list.</p></td>
 </tr>
 </tbody>
@@ -129,8 +135,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="navigate.tools.main_functions.html" class="btn btn-neutral float-left" title="navigate.tools.main_functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.tools.sdf.html" class="btn btn-neutral float-right" title="navigate.tools.sdf" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.tools.main_functions.evaluate_parser_input_arguments.html" class="btn btn-neutral float-left" title="navigate.tools.main_functions.evaluate_parser_input_arguments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.tools.multipos_table_tools.calc_num_tiles.html" class="btn btn-neutral float-right" title="navigate.tools.multipos_table_tools.calc_num_tiles" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

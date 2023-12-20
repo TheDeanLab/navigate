@@ -12,6 +12,7 @@ navigate.tools.sdf
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       box
       sphere

@@ -12,6 +12,7 @@ navigate.model.waveforms
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       camera_exposure
       dc_value

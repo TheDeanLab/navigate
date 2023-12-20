@@ -16,6 +16,8 @@ navigate.model.devices.filter\_wheel.filter\_wheel\_base
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       FilterWheelBase
    

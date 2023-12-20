@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.devices.APIs.sutter" href="navigate.model.devices.APIs.sutter.html" />
+    <link rel="prev" title="navigate.model.devices.APIs.omicron.LuxxLaser.stopwatch" href="navigate.model.devices.APIs.omicron.LuxxLaser.stopwatch.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.model.devices.APIs.html">navigate.model.devices.APIs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.camera.html">navigate.model.devices.camera</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.daq.html">navigate.model.devices.daq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.filter_wheel.html">navigate.model.devices.filter_wheel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.galvo.html">navigate.model.devices.galvo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.lasers.html">navigate.model.devices.lasers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.objectives.html">navigate.model.devices.objectives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.remote_focus.html">navigate.model.devices.remote_focus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.shutter.html">navigate.model.devices.shutter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.stages.html">navigate.model.devices.stages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.zoom.html">navigate.model.devices.zoom</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.dummy.html">navigate.model.dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.html">navigate.model.devices</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.APIs.html">navigate.model.devices.APIs</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.APIs.omicron.html">navigate.model.devices.APIs.omicron</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.APIs.omicron.LuxxLaser.html">navigate.model.devices.APIs.omicron.LuxxLaser</a></li>
+      <li class="breadcrumb-item active">navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-devices-apis-omicron-luxxlaser-luxxlaser">
+<h1>navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser<a class="headerlink" href="#navigate-model-devices-apis-omicron-luxxlaser-luxxlaser" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.devices.APIs.omicron.LuxxLaser.</span></span><span class="sig-name descname"><span class="pre">LuxxLaser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comport</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.model.devices.lasers.laser_base.LaserBase.html#navigate.model.devices.lasers.laser_base.LaserBase" title="navigate.model.devices.lasers.laser_base.LaserBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">LaserBase</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comport</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.__init__" title="Permalink to this definition"></a></dt>
+<dd><p># Luxx Laser Class
+# LUXX488, 200 mW, is COM19
+# LUXX642, 140 mW, is COM17
+# LIGHTHUB ULTRA, is COM20
+# Open port (<em>auto</em> stands for <strong>/dev/ttyUSB0</strong> in Linux or <strong>COM17</strong>
+# in Windows, because it is what I use); then get device model;
+# finally, get maximum output power and store it in <strong>pmax</strong> variable.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.__init__" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(comport)</p></td>
+<td><p># Luxx Laser Class # LUXX488, 200 mW, is COM19 # LUXX642, 140 mW, is COM17 # LIGHTHUB ULTRA, is COM20 # Open port (<em>auto</em> stands for <strong>/dev/ttyUSB0</strong> in Linux or <strong>COM17</strong> # in Windows, because it is what I use); then get device model; # finally, get maximum output power and store it in <strong>pmax</strong> variable.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.ask" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.ask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ask</span></code></a>(command)</p></td>
+<td><p># Write, then read.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.close" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
+<td><p># Close the port before exit.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_autostart" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_autostart"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_autostart</span></code></a>()</p></td>
+<td><p># Check if light is emitted on powerup.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_errors" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_errors</span></code></a>()</p></td>
+<td><p># print contents of failure byte # Bit description: # 15  Diode power exceeded maximum value # 14  An internal error occured # 12  The temperature at the diode exceeded the valid temperature range # 11  The ambient temperature exceeded the minimum or maximum value # 10  The current through the diode exceeded the maximum allowed value # 9   The interlock loop is not closed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_mode" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_mode</span></code></a>()</p></td>
+<td><p># Get the current mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_parameters" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parameters</span></code></a>()</p></td>
+<td><p># print a table showing laser status.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_power" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_power</span></code></a>()</p></td>
+<td><p># Get the current power value in mW</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.initialize_laser" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.initialize_laser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_laser</span></code></a>()</p></td>
+<td><p># Initialize lasers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.read" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>()</p></td>
+<td><p># Read all information from the port and return it as string.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_autostart" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_autostart"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_autostart</span></code></a>(state)</p></td>
+<td><p># Decide if light is emitted on powerup.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_mode" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mode</span></code></a>(mode)</p></td>
+<td><p># The device is able to work in the following modes: #  * Standby #      Laser is ready, but no emission is produced.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_power" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_power</span></code></a>(power)</p></td>
+<td><p>Set the desired power in mW TODO: Intermittent failure due to list index out of range in self.ask (line 115)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.smart_ask" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.smart_ask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smart_ask</span></code></a>(command)</p></td>
+<td><p>#  TODO: Not working. Depends on broken print_hex function. Several commands return information coded in ASCII HEX numbers. The relevant are bits in the registers. For convenient representation, we will print(these bytes in tables. This is relevant for the following commands:     * GOM     * GFB     * GLF     * GLP For all other commands the behavior is identical to <strong>ask</strong> function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.start" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>()</p></td>
+<td><p># Start the emission (takes about 3 seconds)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.stop" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<td><p># Stop the emission immediately</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.turn_off" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.turn_off"><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_off</span></code></a>()</p></td>
+<td><p>Turn off the laser</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.turn_on" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.turn_on"><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_on</span></code></a>()</p></td>
+<td><p>Turn on the laser</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.write" title="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(command)</p></td>
+<td><p># Send <em>command</em> to device.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.ask">
+<span class="sig-name descname"><span class="pre">ask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.ask" title="Permalink to this definition"></a></dt>
+<dd><p># Write, then read.
+# Uses regular expressions to clean up response from the device
+# !UK = Unknown command</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.close" title="Permalink to this definition"></a></dt>
+<dd><p># Close the port before exit.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_autostart">
+<span class="sig-name descname"><span class="pre">get_autostart</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_autostart" title="Permalink to this definition"></a></dt>
+<dd><p># Check if light is emitted on powerup.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_errors">
+<span class="sig-name descname"><span class="pre">get_errors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_errors" title="Permalink to this definition"></a></dt>
+<dd><p># print contents of failure byte
+# Bit description:
+# 15  Diode power exceeded maximum value
+# 14  An internal error occured
+# 12  The temperature at the diode exceeded the valid temperature range
+# 11  The ambient temperature exceeded the minimum or maximum value
+# 10  The current through the diode exceeded the maximum allowed value
+# 9   The interlock loop is not closed. Please close the interlockt loop
+# 8   Overvoltage or Undervoltage lockout occured. Bring supply voltage to
+#     a valid range
+# 4   If CDRH-Bit is set and no CDRH-Kit is connected or
+#     CDRH-Bit is not set but a CDRH-Kit is connected
+#     CDRH-Kit is a box with a key, a LED and an interlock
+# 0   Soft interlock: If an interlock error occurs, this bit is set.
+#     It can only be reset by resetting the whole system, even if the
+#     interlock error is not present anymore.
+# Bits 1, 2, 3, 5, 6, 7, 13 are reserved</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_mode">
+<span class="sig-name descname"><span class="pre">get_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_mode" title="Permalink to this definition"></a></dt>
+<dd><p># Get the current mode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_parameters">
+<span class="sig-name descname"><span class="pre">get_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_parameters" title="Permalink to this definition"></a></dt>
+<dd><p># print a table showing laser status.
+# Bit description:
+# 15  Auto PowerUP if ONE
+# 14  Autostart (emission at powerup) if ONE
+# 13  Adhoc USB - Laser sends info messages from time to time if ONE
+# 8   Power control (APC) mode if ONE; current control (ACC) if ZERO
+# 7   External analog input enabled if ONE
+# 4   Mod level: ONE - active; ZERO - not active
+# 3   Bias level: ONE - active; ZERO - not active
+# Bits 0, 1, 2, 5, 6, 9, 10, 11, 12 are reserved</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_power">
+<span class="sig-name descname"><span class="pre">get_power</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_power" title="Permalink to this definition"></a></dt>
+<dd><p># Get the current power value in mW</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.initialize_laser">
+<span class="sig-name descname"><span class="pre">initialize_laser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.initialize_laser" title="Permalink to this definition"></a></dt>
+<dd><p># Initialize lasers.
+# Sets the laser to the maximum power, and sets the mode to CW-APC.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.read" title="Permalink to this definition"></a></dt>
+<dd><p># Read all information from the port and return it as string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_autostart">
+<span class="sig-name descname"><span class="pre">set_autostart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_autostart" title="Permalink to this definition"></a></dt>
+<dd><p># Decide if light is emitted on powerup.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_mode">
+<span class="sig-name descname"><span class="pre">set_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_mode" title="Permalink to this definition"></a></dt>
+<dd><p># The device is able to work in the following modes:
+#  * Standby
+#      Laser is ready, but no emission is produced. However, if we
+#      it is turned on (e.g. with <strong>start</strong> function), then change to
+#      other mode will result in immediate emission, i.e. without
+#      3 seconds delay.
+#  * CW-ACC
+#      constant wave, automatic current control
+#  * CW-APC
+#      constant wave, automatic power control
+#  * Analog
+#      the output power is dependent on the analog input; however,
+#      it cannot exceed the specified with <strong>set_power</strong> value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_power">
+<span class="sig-name descname"><span class="pre">set_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_power" title="Permalink to this definition"></a></dt>
+<dd><p>Set the desired power in mW
+TODO: Intermittent failure due to list index out of range in self.ask (line 115)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.smart_ask">
+<span class="sig-name descname"><span class="pre">smart_ask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.smart_ask" title="Permalink to this definition"></a></dt>
+<dd><p>#  TODO: Not working.  Depends on broken print_hex function.
+Several commands return information coded in ASCII HEX numbers.
+The relevant are bits in the registers. For convenient
+representation, we will print(these bytes in tables.
+This is relevant for the following commands:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>GOM</p></li>
+<li><p>GFB</p></li>
+<li><p>GLF</p></li>
+<li><p>GLP</p></li>
+</ul>
+</div></blockquote>
+<p>For all other commands the behavior is identical to <strong>ask</strong> function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.start" title="Permalink to this definition"></a></dt>
+<dd><p># Start the emission (takes about 3 seconds)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.stop" title="Permalink to this definition"></a></dt>
+<dd><p># Stop the emission immediately</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.turn_off">
+<span class="sig-name descname"><span class="pre">turn_off</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.turn_off" title="Permalink to this definition"></a></dt>
+<dd><p>Turn off the laser</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.turn_on">
+<span class="sig-name descname"><span class="pre">turn_on</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.turn_on" title="Permalink to this definition"></a></dt>
+<dd><p>Turn on the laser</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.write" title="Permalink to this definition"></a></dt>
+<dd><p># Send <em>command</em> to device. Preceed it with “?” und end with CR.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.configuration">
+<span class="sig-name descname"><span class="pre">configuration</span></span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Configuration dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.device_config">
+<span class="sig-name descname"><span class="pre">device_config</span></span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.device_config" title="Permalink to this definition"></a></dt>
+<dd><p>Laser ID</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.microscope_name">
+<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.microscope_name" title="Permalink to this definition"></a></dt>
+<dd><p>Name of the microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.devices.APIs.omicron.LuxxLaser.stopwatch.html" class="btn btn-neutral float-left" title="navigate.model.devices.APIs.omicron.LuxxLaser.stopwatch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.devices.APIs.sutter.html" class="btn btn-neutral float-right" title="navigate.model.devices.APIs.sutter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

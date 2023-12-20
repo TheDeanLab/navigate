@@ -12,6 +12,7 @@ navigate.model.devices.APIs.omicron.LuxxLaser
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       print_hex
       stopwatch
@@ -23,6 +24,8 @@ navigate.model.devices.APIs.omicron.LuxxLaser
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       LuxxLaser
    

@@ -1,0 +1,52 @@
+navigate.model.devices.stages.stage\_synthetic.SyntheticStage
+=============================================================
+
+.. currentmodule:: navigate.model.devices.stages.stage_synthetic
+
+.. autoclass:: SyntheticStage
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SyntheticStage.__init__
+      ~SyntheticStage.close
+      ~SyntheticStage.get_abs_position
+      ~SyntheticStage.get_axis_position
+      ~SyntheticStage.get_position_dict
+      ~SyntheticStage.get_speed
+      ~SyntheticStage.load_sample
+      ~SyntheticStage.move_absolute
+      ~SyntheticStage.move_axis_absolute
+      ~SyntheticStage.report_position
+      ~SyntheticStage.scanr
+      ~SyntheticStage.set_speed
+      ~SyntheticStage.start_scan
+      ~SyntheticStage.stop
+      ~SyntheticStage.stop_scan
+      ~SyntheticStage.unload_sample
+      ~SyntheticStage.update_waveform
+      ~SyntheticStage.verify_abs_position
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticStage.default_speed
+      ~SyntheticStage.axes_mapping
+      ~SyntheticStage.axes
+      ~SyntheticStage.stage_feedback
+      ~SyntheticStage.stage_limits
+   
+   

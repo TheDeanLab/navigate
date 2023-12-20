@@ -25,8 +25,8 @@
 
 .. autosummary::
    :toctree:
+   :template: custom_module.rst
    :recursive:
-
 
    navigate.model.analysis
    navigate.model.concurrency
@@ -40,5 +40,4 @@
    navigate.model.model
    navigate.model.plugins_model
    navigate.model.waveforms
-
 

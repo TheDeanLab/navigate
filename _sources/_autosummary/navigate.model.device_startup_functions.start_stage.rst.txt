@@ -1,0 +1,6 @@
+navigate.model.device\_startup\_functions.start\_stage
+======================================================
+
+.. currentmodule:: navigate.model.device_startup_functions
+
+.. autofunction:: start_stage

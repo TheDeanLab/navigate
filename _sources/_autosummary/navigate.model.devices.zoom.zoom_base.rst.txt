@@ -16,6 +16,8 @@ navigate.model.devices.zoom.zoom\_base
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       ZoomBase
    

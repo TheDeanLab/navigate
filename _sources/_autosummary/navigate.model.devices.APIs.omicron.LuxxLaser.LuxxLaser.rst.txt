@@ -1,0 +1,51 @@
+navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser
+=======================================================
+
+.. currentmodule:: navigate.model.devices.APIs.omicron.LuxxLaser
+
+.. autoclass:: LuxxLaser
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LuxxLaser.__init__
+      ~LuxxLaser.ask
+      ~LuxxLaser.close
+      ~LuxxLaser.get_autostart
+      ~LuxxLaser.get_errors
+      ~LuxxLaser.get_mode
+      ~LuxxLaser.get_parameters
+      ~LuxxLaser.get_power
+      ~LuxxLaser.initialize_laser
+      ~LuxxLaser.read
+      ~LuxxLaser.set_autostart
+      ~LuxxLaser.set_mode
+      ~LuxxLaser.set_power
+      ~LuxxLaser.smart_ask
+      ~LuxxLaser.start
+      ~LuxxLaser.stop
+      ~LuxxLaser.turn_off
+      ~LuxxLaser.turn_on
+      ~LuxxLaser.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LuxxLaser.configuration
+      ~LuxxLaser.microscope_name
+      ~LuxxLaser.device_config
+   
+   

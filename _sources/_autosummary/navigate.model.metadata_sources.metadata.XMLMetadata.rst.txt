@@ -1,0 +1,51 @@
+navigate.model.metadata\_sources.metadata.XMLMetadata
+=====================================================
+
+.. currentmodule:: navigate.model.metadata_sources.metadata
+
+.. autoclass:: XMLMetadata
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~XMLMetadata.__init__
+      ~XMLMetadata.set_from_configuration_experiment
+      ~XMLMetadata.set_shape_from_configuration_experiment
+      ~XMLMetadata.set_stack_order_from_configuration_experiment
+      ~XMLMetadata.to_xml
+      ~XMLMetadata.write_xml
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~XMLMetadata.configuration
+      ~XMLMetadata.per_stack
+      ~XMLMetadata.shape
+      ~XMLMetadata.voxel_size
+      ~XMLMetadata.dx
+      ~XMLMetadata.dy
+      ~XMLMetadata.dz
+      ~XMLMetadata.dt
+      ~XMLMetadata.dc
+      ~XMLMetadata.shape_x
+      ~XMLMetadata.shape_y
+      ~XMLMetadata.shape_z
+      ~XMLMetadata.shape_t
+      ~XMLMetadata.shape_c
+      ~XMLMetadata.positions
+      ~XMLMetadata.active_microscope
+   
+   

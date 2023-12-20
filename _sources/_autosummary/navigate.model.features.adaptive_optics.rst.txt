@@ -12,6 +12,7 @@ navigate.model.features.adaptive\_optics
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       fourier_annulus
       gauss
@@ -25,6 +26,8 @@ navigate.model.features.adaptive\_optics
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       TonyWilson
    

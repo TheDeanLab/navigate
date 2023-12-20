@@ -12,6 +12,7 @@ navigate.model.analysis.image\_contrast
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       fast_normalized_dct_shannon_entropy
    

@@ -25,6 +25,7 @@ navigate.model.metadata\_sources
 
 .. autosummary::
    :toctree:
+   :template: custom_module.rst
    :recursive:
 
    navigate.model.metadata_sources.bdv_metadata

@@ -12,6 +12,7 @@ navigate.tools.waveform\_template\_funcs
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       get_waveform_template_parameters
    

@@ -25,9 +25,8 @@
 
 .. autosummary::
    :toctree:
+   :template: custom_module.rst
    :recursive:
 
-
    navigate.config.config
-
 

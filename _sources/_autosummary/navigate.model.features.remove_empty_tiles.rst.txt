@@ -12,6 +12,7 @@ navigate.model.features.remove\_empty\_tiles
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       detect_tissue
       detect_tissue2
@@ -23,6 +24,8 @@ navigate.model.features.remove\_empty\_tiles
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       DetectTissueInStack
       DetectTissueInStackAndRecord

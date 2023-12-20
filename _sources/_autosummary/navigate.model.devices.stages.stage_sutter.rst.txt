@@ -12,6 +12,7 @@ navigate.model.devices.stages.stage\_sutter
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       build_MP285_connection
    
@@ -22,6 +23,8 @@ navigate.model.devices.stages.stage\_sutter
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       SutterStage
    

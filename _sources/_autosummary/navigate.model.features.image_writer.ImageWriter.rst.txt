@@ -1,0 +1,50 @@
+navigate.model.features.image\_writer.ImageWriter
+=================================================
+
+.. currentmodule:: navigate.model.features.image_writer
+
+.. autoclass:: ImageWriter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ImageWriter.__init__
+      ~ImageWriter.calculate_and_check_disk_space
+      ~ImageWriter.close
+      ~ImageWriter.generate_image_name
+      ~ImageWriter.generate_meta_data
+      ~ImageWriter.save_image
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ImageWriter.data_buffer
+      ~ImageWriter.number_of_frames
+      ~ImageWriter.save_directory
+      ~ImageWriter.sub_dir
+      ~ImageWriter.num_of_channels
+      ~ImageWriter.num_of_positions
+      ~ImageWriter.num_of_timepoints
+      ~ImageWriter.num_of_slices
+      ~ImageWriter.current_time_point
+      ~ImageWriter.config_table
+      ~ImageWriter.big_tiff
+      ~ImageWriter.mip
+      ~ImageWriter.mip_directory
+      ~ImageWriter.file_type
+      ~ImageWriter.data_source
+   
+   

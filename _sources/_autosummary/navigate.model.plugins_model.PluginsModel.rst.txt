@@ -1,0 +1,26 @@
+navigate.model.plugins\_model.PluginsModel
+==========================================
+
+.. currentmodule:: navigate.model.plugins_model
+
+.. autoclass:: PluginsModel
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PluginsModel.__init__
+      ~PluginsModel.load_plugins
+   
+   
+
+   
+   
+   

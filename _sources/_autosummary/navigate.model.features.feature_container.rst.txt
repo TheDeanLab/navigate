@@ -12,6 +12,7 @@ navigate.model.features.feature\_container
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       dummy_True
       dummy_func
@@ -25,6 +26,8 @@ navigate.model.features.feature\_container
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       Container
       DataContainer

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.features.feature_container.SignalNode &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.features.feature_container.TreeNode" href="navigate.model.features.feature_container.TreeNode.html" />
+    <link rel="prev" title="navigate.model.features.feature_container.SignalContainer" href="navigate.model.features.feature_container.SignalContainer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.dummy.html">navigate.model.dummy</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.adaptive_optics.html">navigate.model.features.adaptive_optics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.auto_tile_scan.html">navigate.model.features.auto_tile_scan</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.autofocus.html">navigate.model.features.autofocus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.html">navigate.model.features.common_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.cva_conpro.html">navigate.model.features.cva_conpro</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.model.features.feature_container.html">navigate.model.features.feature_container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.feature_related_functions.html">navigate.model.features.feature_related_functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.image_writer.html">navigate.model.features.image_writer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.remove_empty_tiles.html">navigate.model.features.remove_empty_tiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.restful_features.html">navigate.model.features.restful_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.volume_search.html">navigate.model.features.volume_search</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.features.html">navigate.model.features</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.features.feature_container.html">navigate.model.features.feature_container</a></li>
+      <li class="breadcrumb-item active">navigate.model.features.feature_container.SignalNode</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.features.feature_container.SignalNode.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-features-feature-container-signalnode">
+<h1>navigate.model.features.feature_container.SignalNode<a class="headerlink" href="#navigate-model-features-feature-container-signalnode" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.SignalNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.features.feature_container.</span></span><span class="sig-name descname"><span class="pre">SignalNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'one-step'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_related</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">need_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.feature_container.SignalNode" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.model.features.feature_container.TreeNode.html#navigate.model.features.feature_container.TreeNode" title="navigate.model.features.feature_container.TreeNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">TreeNode</span></code></a></p>
+<p>SignalNode class for representing a signal-processing node in a control sequence
+tree.</p>
+<p>This class represents a signal-processing node in a control sequence tree used for
+controlling the behavior of a microscope or similar device. It inherits from the
+TreeNode class and adds signal processing capabilities.</p>
+<section id="notes">
+<h2>Notes:<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>This class is used to represent signal-processing nodes in a control sequence
+tree where each node corresponds to a feature or action in the control sequence.</p></li>
+<li><p>The <cite>node_funcs</cite> attribute contains a dictionary of functions associated with this
+node, which are executed in response to specific signals or events.</p></li>
+<li><p>The <cite>node_type</cite> attribute specifies whether the node is a ‘one-step’ node or a
+‘multi-step’ node.</p></li>
+<li><p>The <cite>device_related</cite> attribute indicates whether the node is related to device
+control.</p></li>
+<li><p>The <cite>need_response</cite> attribute indicates whether a response is expected from this
+node when it is executed.</p></li>
+<li><p>The <cite>wait_response</cite> attribute indicates whether the node is currently waiting for
+a response, typically set to True after running the <cite>main</cite> function and before
+running the <cite>main-response</cite> function when <cite>need_response</cite> is True.</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.SignalNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'one-step'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_related</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">need_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.feature_container.SignalNode.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the SignalNode object.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>feature_name<span class="classifier">str</span></dt><dd><p>The name or identifier of the feature associated with this node.</p>
+</dd>
+<dt>func_dict<span class="classifier">dict</span></dt><dd><p>A dictionary containing functions associated with this node. The dictionary
+should include keys for different signals or events and corresponding
+unction references to be executed when those signals are received.</p>
+</dd>
+<dt>node_type<span class="classifier">str, optional</span></dt><dd><p>The type of the node, which can be ‘one-step’ or ‘multi-step’. Default is
+‘one-step’.</p>
+</dd>
+<dt>device_related<span class="classifier">bool, optional</span></dt><dd><p>A boolean indicating whether the node is related to device control. Default
+is False.</p>
+</dd>
+<dt>need_response<span class="classifier">bool, optional</span></dt><dd><p>A boolean indicating whether a response is needed from this node. Default is
+False.</p>
+</dd>
+<dt>wait_response<span class="classifier">bool, optional</span></dt><dd><p>A boolean indicating whether the node is currently waiting for a response.
+Default is False.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.feature_container.SignalNode.__init__" title="navigate.model.features.feature_container.SignalNode.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(feature_name, func_dict, *[, ...])</p></td>
+<td><p>Initialize the SignalNode object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.feature_container.SignalNode.run" title="navigate.model.features.feature_container.SignalNode.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>(*args[, wait_response])</p></td>
+<td><p>Execute the main function associated with this node and handle response.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.feature_container.SignalNode.set_property" title="navigate.model.features.feature_container.SignalNode.set_property"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_property</span></code></a>(**kwargs)</p></td>
+<td><p>Set the properties of the TreeNode object using keyword arguments.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.SignalNode.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_response</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.feature_container.SignalNode.run" title="Permalink to this definition"></a></dt>
+<dd><p>Execute the main function associated with this node and handle response.</p>
+<p>This method is used to execute the main function associated with this node and
+handle response logic based on the node’s properties. It can be used with or
+without waiting for a response.</p>
+<section id="id1">
+<h3>Parameters:<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt><a href="#id2"><span class="problematic" id="id3">*</span></a>args<span class="classifier">any</span></dt><dd><p>Additional arguments to pass to the main function.</p>
+</dd>
+<dt>wait_response<span class="classifier">bool, optional</span></dt><dd><p>A boolean indicating whether to wait for a response from this node. Default
+is False.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>tuple</dt><dd><p>A tuple containing the result of executing the main function and a boolean
+indicating whether the node execution is complete (True if complete,
+otherwise False).</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.SignalNode.set_property">
+<span class="sig-name descname"><span class="pre">set_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.feature_container.SignalNode.set_property" title="Permalink to this definition"></a></dt>
+<dd><p>Set the properties of the TreeNode object using keyword arguments.</p>
+<p>This method allows setting or updating the properties of the TreeNode object
+using keyword arguments. The method iterates through the provided keyword-
+argument pairs and updates the corresponding attributes of the TreeNode
+object.</p>
+<section id="id4">
+<h3>Parameters:<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt><a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs<span class="classifier">dict</span></dt><dd><p>Keyword arguments with attribute names as keys and values to set as
+values.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.SignalNode.device_related">
+<span class="sig-name descname"><span class="pre">device_related</span></span><a class="headerlink" href="#navigate.model.features.feature_container.SignalNode.device_related" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean indicating whether the node is related to device control.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.SignalNode.is_initialized">
+<span class="sig-name descname"><span class="pre">is_initialized</span></span><a class="headerlink" href="#navigate.model.features.feature_container.SignalNode.is_initialized" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean indicating whether the node has been initialized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.SignalNode.need_response">
+<span class="sig-name descname"><span class="pre">need_response</span></span><a class="headerlink" href="#navigate.model.features.feature_container.SignalNode.need_response" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean indicating whether a response is needed from this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.SignalNode.node_funcs">
+<span class="sig-name descname"><span class="pre">node_funcs</span></span><a class="headerlink" href="#navigate.model.features.feature_container.SignalNode.node_funcs" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary containing functions associated with this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.SignalNode.node_name">
+<span class="sig-name descname"><span class="pre">node_name</span></span><a class="headerlink" href="#navigate.model.features.feature_container.SignalNode.node_name" title="Permalink to this definition"></a></dt>
+<dd><p>The name or identifier of the feature associated with this node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.feature_container.SignalNode.node_type">
+<span class="sig-name descname"><span class="pre">node_type</span></span><a class="headerlink" href="#navigate.model.features.feature_container.SignalNode.node_type" title="Permalink to this definition"></a></dt>
+<dd><p>The type of the node, which can be ‘one-step’ or ‘multi-step’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.features.feature_container.SignalContainer.html" class="btn btn-neutral float-left" title="navigate.model.features.feature_container.SignalContainer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.features.feature_container.TreeNode.html" class="btn btn-neutral float-right" title="navigate.model.features.feature_container.TreeNode" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

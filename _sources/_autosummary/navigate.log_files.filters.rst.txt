@@ -16,6 +16,8 @@ navigate.log\_files.filters
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       NonPerfFilter
       PerformanceFilter

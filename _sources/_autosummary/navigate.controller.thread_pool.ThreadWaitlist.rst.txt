@@ -1,0 +1,32 @@
+navigate.controller.thread\_pool.ThreadWaitlist
+===============================================
+
+.. currentmodule:: navigate.controller.thread_pool
+
+.. autoclass:: ThreadWaitlist
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ThreadWaitlist.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ThreadWaitlist.waitlistLock
+      ~ThreadWaitlist.waitlist
+   
+   

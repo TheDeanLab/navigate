@@ -12,6 +12,7 @@ navigate.model.devices.zoom.zoom\_dynamixel
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       build_dynamixel_zoom_connection
    
@@ -22,6 +23,8 @@ navigate.model.devices.zoom.zoom\_dynamixel
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       DynamixelZoom
    

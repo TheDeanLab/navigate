@@ -1,0 +1,6 @@
+navigate.tools.waveform\_template\_funcs.get\_waveform\_template\_parameters
+============================================================================
+
+.. currentmodule:: navigate.tools.waveform_template_funcs
+
+.. autofunction:: get_waveform_template_parameters

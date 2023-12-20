@@ -12,6 +12,7 @@ navigate.config.config
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       build_nested_dict
       get_configuration_paths

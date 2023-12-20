@@ -16,6 +16,8 @@ navigate.model.devices.APIs.coherent.ObisLaser
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       ObisLaser
    

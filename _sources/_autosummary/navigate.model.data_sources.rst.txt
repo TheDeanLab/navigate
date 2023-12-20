@@ -12,6 +12,7 @@ navigate.model.data\_sources
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       get_data_source
    
@@ -31,6 +32,7 @@ navigate.model.data\_sources
 
 .. autosummary::
    :toctree:
+   :template: custom_module.rst
    :recursive:
 
    navigate.model.data_sources.bdv_data_source

@@ -16,6 +16,8 @@ navigate.model.data\_sources.data\_source
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       DataSource
    

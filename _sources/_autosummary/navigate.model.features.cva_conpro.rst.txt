@@ -16,6 +16,8 @@ navigate.model.features.cva\_conpro
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       ConstantVelocityAcquisition
    

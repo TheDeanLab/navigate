@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.features.volume_search.VolumeSearch &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contributing Guidelines" href="../contributing/contributing_guidelines.html" />
+    <link rel="prev" title="navigate.model.features.volume_search.draw_box" href="navigate.model.features.volume_search.draw_box.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../feature_container/feature_container_home.html#currently-implemented-features">Currently Implemented Features</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.adaptive_optics.html">navigate.model.features.adaptive_optics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.auto_tile_scan.html">navigate.model.features.auto_tile_scan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.autofocus.html">navigate.model.features.autofocus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.common_features.html">navigate.model.features.common_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.cva_conpro.html">navigate.model.features.cva_conpro</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.image_writer.html">navigate.model.features.image_writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.remove_empty_tiles.html">navigate.model.features.remove_empty_tiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.restful_features.html">navigate.model.features.restful_features</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.features.volume_search.html">navigate.model.features.volume_search</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.volume_search.draw_box.html">navigate.model.features.volume_search.draw_box</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">navigate.model.features.volume_search.VolumeSearch</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../feature_container/feature_container_home.html#feature-objects">Feature Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../feature_container/feature_container_home.html#custom-feature-lists">Custom Feature Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../feature_container/feature_container_home.html#customizing-feature-functionality-in-the-gui">Customizing Feature Functionality in the GUI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../feature_container/feature_container_home.html">Feature Container</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.features.volume_search.html">navigate.model.features.volume_search</a></li>
+      <li class="breadcrumb-item active">navigate.model.features.volume_search.VolumeSearch</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.features.volume_search.VolumeSearch.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-features-volume-search-volumesearch">
+<h1>navigate.model.features.volume_search.VolumeSearch<a class="headerlink" href="#navigate-model-features-volume-search-volumesearch" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.features.volume_search.</span></span><span class="sig-name descname"><span class="pre">VolumeSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Nanoscale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N/A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>VolumeSearch.</p>
+<p>Find the outer boundary of a tissue, moving the stage through z. Assumes
+there is no tissue out-of-frame in the x,y-directions.</p>
+<p>Construct a list of stage positions that will tile the entire tissue
+boundary in x,y,z at target_resolution, target_zoom. Current resolution
+and zoom is self.model.active_microscope_name and
+self.model.configuration[“experiment”][“MicroscopeState”][“zoom”].</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Nanoscale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N/A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize VolumeSearch</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="navigate.model.model.Model.html#navigate.model.model.Model" title="navigate.model.model.Model"><em>navigate.model.model.Model</em></a>) – Navigate Model</p></li>
+<li><p><strong>target_resolution</strong> (<em>str</em>) – Name of microscope to use for tiled imaging of tissue</p></li>
+<li><p><strong>target_zoom</strong> (<em>str</em>) – Resolution of microscope (target_resolution) to use for tiled imaging
+of tissue</p></li>
+<li><p><strong>flipx</strong> (<em>bool</em>) – Flip the direction in which new tiles are added.</p></li>
+<li><p><strong>flipy</strong> (<em>bool</em>) – Flip the direction in which new tiles are added.</p></li>
+<li><p><strong>overlap</strong> (<em>float</em>) – Value between 0 and 1 indicating percent overlap of tiles.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – If True, save debug images to disk.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.__init__" title="navigate.model.features.volume_search.VolumeSearch.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, target_resolution, ...])</p></td>
+<td><p>Initialize VolumeSearch</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.cleanup" title="navigate.model.features.volume_search.VolumeSearch.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a>()</p></td>
+<td><p>Cleanup function</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.data_func" title="navigate.model.features.volume_search.VolumeSearch.data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_func</span></code></a>(frame_ids)</p></td>
+<td><p>Data function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.end_data_func" title="navigate.model.features.volume_search.VolumeSearch.end_data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_data_func</span></code></a>()</p></td>
+<td><p>End data function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.init_data_func" title="navigate.model.features.volume_search.VolumeSearch.init_data_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_data_func</span></code></a>()</p></td>
+<td><p>Initialize data function</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.pre_signal_func" title="navigate.model.features.volume_search.VolumeSearch.pre_signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_signal_func</span></code></a>()</p></td>
+<td><p>Initialize signal function</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.signal_end" title="navigate.model.features.volume_search.VolumeSearch.signal_end"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_end</span></code></a>()</p></td>
+<td><p>Signal end function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.signal_func" title="navigate.model.features.volume_search.VolumeSearch.signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_func</span></code></a>()</p></td>
+<td><p>Signal function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.signal_response_func" title="navigate.model.features.volume_search.VolumeSearch.signal_response_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_response_func</span></code></a>(*args)</p></td>
+<td><p>Signal response function.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.model" title="navigate.model.features.volume_search.VolumeSearch.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
+<td><p>Navigate Model</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.target_resolution" title="navigate.model.features.volume_search.VolumeSearch.target_resolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">target_resolution</span></code></a></p></td>
+<td><p>Name of microscope to use for tiled imaging of tissue</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.target_zoom" title="navigate.model.features.volume_search.VolumeSearch.target_zoom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">target_zoom</span></code></a></p></td>
+<td><p>Resolution of microscope (target_resolution) to use for tiled imaging</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.z_steps" title="navigate.model.features.volume_search.VolumeSearch.z_steps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_steps</span></code></a></p></td>
+<td><p>Number of z-steps to take</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.z_step_size" title="navigate.model.features.volume_search.VolumeSearch.z_step_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_step_size</span></code></a></p></td>
+<td><p>Size of z-step</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.z_pos" title="navigate.model.features.volume_search.VolumeSearch.z_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_pos</span></code></a></p></td>
+<td><p>Current z-position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.f_step_size" title="navigate.model.features.volume_search.VolumeSearch.f_step_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_step_size</span></code></a></p></td>
+<td><p>Size of focus step</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.f_pos" title="navigate.model.features.volume_search.VolumeSearch.f_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_pos</span></code></a></p></td>
+<td><p>Current focus position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.f_offset" title="navigate.model.features.volume_search.VolumeSearch.f_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_offset</span></code></a></p></td>
+<td><p>Current z-index</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.curr_z_index" title="navigate.model.features.volume_search.VolumeSearch.curr_z_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curr_z_index</span></code></a></p></td>
+<td><p>Current z-index</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.sinx" title="navigate.model.features.volume_search.VolumeSearch.sinx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sinx</span></code></a></p></td>
+<td><p>1 if flipx is False, -1 if flipx is True</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.siny" title="navigate.model.features.volume_search.VolumeSearch.siny"><code class="xref py py-obj docutils literal notranslate"><span class="pre">siny</span></code></a></p></td>
+<td><p>1 if flipy is False, -1 if flipy is True</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.overlap" title="navigate.model.features.volume_search.VolumeSearch.overlap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">overlap</span></code></a></p></td>
+<td><p>Percent overlap of tiles</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.has_tissue_queue" title="navigate.model.features.volume_search.VolumeSearch.has_tissue_queue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_tissue_queue</span></code></a></p></td>
+<td><p>Queue for communicating whether tissue was found</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.direction" title="navigate.model.features.volume_search.VolumeSearch.direction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">direction</span></code></a></p></td>
+<td><p>1 if moving up, -1 if moving down</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.has_tissue" title="navigate.model.features.volume_search.VolumeSearch.has_tissue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_tissue</span></code></a></p></td>
+<td><p>True if tissue was found</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.first_boundary" title="navigate.model.features.volume_search.VolumeSearch.first_boundary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">first_boundary</span></code></a></p></td>
+<td><p>Boundary of tissue</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.pre_boundary" title="navigate.model.features.volume_search.VolumeSearch.pre_boundary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_boundary</span></code></a></p></td>
+<td><p>Boundary of tissue</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.end_flag" title="navigate.model.features.volume_search.VolumeSearch.end_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_flag</span></code></a></p></td>
+<td><p>True if the search is complete</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.config_table" title="navigate.model.features.volume_search.VolumeSearch.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<td><p>Feature configuration</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.debug" title="navigate.model.features.volume_search.VolumeSearch.debug"><code class="xref py py-obj docutils literal notranslate"><span class="pre">debug</span></code></a></p></td>
+<td><p>True if debug mode is enabled</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.volume_search.VolumeSearch.volumes_selected" title="navigate.model.features.volume_search.VolumeSearch.volumes_selected"><code class="xref py py-obj docutils literal notranslate"><span class="pre">volumes_selected</span></code></a></p></td>
+<td><p>Debug image</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.cleanup">
+<span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.cleanup" title="Permalink to this definition"></a></dt>
+<dd><p>Cleanup function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.data_func">
+<span class="sig-name descname"><span class="pre">data_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.data_func" title="Permalink to this definition"></a></dt>
+<dd><p>Data function.</p>
+<p>Find the tissue boundary in the current frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>frame_ids</strong> (<em>list</em>) – List of frame ids to process.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the data function should be called again.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.end_data_func">
+<span class="sig-name descname"><span class="pre">end_data_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.end_data_func" title="Permalink to this definition"></a></dt>
+<dd><p>End data function.</p>
+<p>Map the tissue boundary to stage positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the search is complete.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.init_data_func">
+<span class="sig-name descname"><span class="pre">init_data_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.init_data_func" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize data function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.pre_signal_func">
+<span class="sig-name descname"><span class="pre">pre_signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.pre_signal_func" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize signal function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.signal_end">
+<span class="sig-name descname"><span class="pre">signal_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.signal_end" title="Permalink to this definition"></a></dt>
+<dd><p>Signal end function.</p>
+<p>Check if the search is complete.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the search is complete.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.signal_func">
+<span class="sig-name descname"><span class="pre">signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.signal_func" title="Permalink to this definition"></a></dt>
+<dd><p>Signal function.</p>
+<p>Move the stage to the next z-position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the signal function should be called again.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.signal_response_func">
+<span class="sig-name descname"><span class="pre">signal_response_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.signal_response_func" title="Permalink to this definition"></a></dt>
+<dd><p>Signal response function.</p>
+<p>Check if tissue was found. If not, move the stage to the next z-position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the signal function should be called again.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.config_table">
+<span class="sig-name descname"><span class="pre">config_table</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.config_table" title="Permalink to this definition"></a></dt>
+<dd><p>Feature configuration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.curr_z_index">
+<span class="sig-name descname"><span class="pre">curr_z_index</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.curr_z_index" title="Permalink to this definition"></a></dt>
+<dd><p>Current z-index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.debug" title="Permalink to this definition"></a></dt>
+<dd><p>True if debug mode is enabled</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.direction">
+<span class="sig-name descname"><span class="pre">direction</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.direction" title="Permalink to this definition"></a></dt>
+<dd><p>1 if moving up, -1 if moving down</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.end_flag">
+<span class="sig-name descname"><span class="pre">end_flag</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.end_flag" title="Permalink to this definition"></a></dt>
+<dd><p>True if the search is complete</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.f_offset">
+<span class="sig-name descname"><span class="pre">f_offset</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.f_offset" title="Permalink to this definition"></a></dt>
+<dd><p>Current z-index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.f_pos">
+<span class="sig-name descname"><span class="pre">f_pos</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.f_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Current focus position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.f_step_size">
+<span class="sig-name descname"><span class="pre">f_step_size</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.f_step_size" title="Permalink to this definition"></a></dt>
+<dd><p>Size of focus step</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.first_boundary">
+<span class="sig-name descname"><span class="pre">first_boundary</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.first_boundary" title="Permalink to this definition"></a></dt>
+<dd><p>Boundary of tissue</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.has_tissue">
+<span class="sig-name descname"><span class="pre">has_tissue</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.has_tissue" title="Permalink to this definition"></a></dt>
+<dd><p>True if tissue was found</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.has_tissue_queue">
+<span class="sig-name descname"><span class="pre">has_tissue_queue</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.has_tissue_queue" title="Permalink to this definition"></a></dt>
+<dd><p>Queue for communicating whether tissue was found</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Queue</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.model" title="Permalink to this definition"></a></dt>
+<dd><p>Navigate Model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="navigate.model.model.Model.html#navigate.model.model.Model" title="navigate.model.model.Model">navigate.model.model.Model</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.overlap">
+<span class="sig-name descname"><span class="pre">overlap</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.overlap" title="Permalink to this definition"></a></dt>
+<dd><p>Percent overlap of tiles</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.pre_boundary">
+<span class="sig-name descname"><span class="pre">pre_boundary</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.pre_boundary" title="Permalink to this definition"></a></dt>
+<dd><p>Boundary of tissue</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.sinx">
+<span class="sig-name descname"><span class="pre">sinx</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.sinx" title="Permalink to this definition"></a></dt>
+<dd><p>1 if flipx is False, -1 if flipx is True</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.siny">
+<span class="sig-name descname"><span class="pre">siny</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.siny" title="Permalink to this definition"></a></dt>
+<dd><p>1 if flipy is False, -1 if flipy is True</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.target_resolution">
+<span class="sig-name descname"><span class="pre">target_resolution</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.target_resolution" title="Permalink to this definition"></a></dt>
+<dd><p>Name of microscope to use for tiled imaging of tissue</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.target_zoom">
+<span class="sig-name descname"><span class="pre">target_zoom</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.target_zoom" title="Permalink to this definition"></a></dt>
+<dd><p>Resolution of microscope (target_resolution) to use for tiled imaging</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.volumes_selected">
+<span class="sig-name descname"><span class="pre">volumes_selected</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.volumes_selected" title="Permalink to this definition"></a></dt>
+<dd><p>Debug image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.z_pos">
+<span class="sig-name descname"><span class="pre">z_pos</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.z_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Current z-position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.z_step_size">
+<span class="sig-name descname"><span class="pre">z_step_size</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.z_step_size" title="Permalink to this definition"></a></dt>
+<dd><p>Size of z-step</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.volume_search.VolumeSearch.z_steps">
+<span class="sig-name descname"><span class="pre">z_steps</span></span><a class="headerlink" href="#navigate.model.features.volume_search.VolumeSearch.z_steps" title="Permalink to this definition"></a></dt>
+<dd><p>Number of z-steps to take</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.features.volume_search.draw_box.html" class="btn btn-neutral float-left" title="navigate.model.features.volume_search.draw_box" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../contributing/contributing_guidelines.html" class="btn btn-neutral float-right" title="Contributing Guidelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+navigate.tools.image\_loaders.LazyTiff
+======================================
+
+.. currentmodule:: navigate.tools.image_loaders
+
+.. autoclass:: LazyTiff
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LazyTiff.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LazyTiff.shape
+   
+   

@@ -12,6 +12,7 @@ navigate.model.features.volume\_search
    .. rubric:: Functions
 
    .. autosummary::
+      :toctree:
    
       draw_box
    
@@ -22,6 +23,8 @@ navigate.model.features.volume\_search
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom_class.rst
    
       VolumeSearch
    

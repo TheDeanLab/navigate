@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plugin &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contributing Guidelines" href="../contributing/contributing_guidelines.html" />
+    <link rel="prev" title="navigate.model.features.volume_search.VolumeSearch" href="../_autosummary/navigate.model.features.volume_search.VolumeSearch.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware_home.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_container/feature_container_home.html">Feature Container</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Plugin</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plugin-tempate">Plugin Tempate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plugin-configuration">Plugin Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plugin-with-gui">Plugin With GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plugin-with-device">Plugin With Device</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plugin-with-a-new-feature">Plugin With A New Feature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-acquisition-model">Custom Acquisition Model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Plugin</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/plugin/plugin_home.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="plugin">
+<span id="id1"></span><h1>Plugin<a class="headerlink" href="#plugin" title="Permalink to this heading"></a></h1>
+<p>Navigate is designed with extensibility. Users can seamlessly integrate custom
+GUI plugins, device plugins, new feature plugins, and even define specific acquisition
+modes.</p>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h2>
+<p>The Navigate <strong>plugin system</strong> gives user the flexibility to extend its functionaity according
+to users’ specific needs. Navigate will load plugins automatically and users can use their
+plugins with Navigate seamlessly.</p>
+</section>
+<section id="plugin-tempate">
+<h2>Plugin Tempate<a class="headerlink" href="#plugin-tempate" title="Permalink to this heading"></a></h2>
+<p>A comprehensive <strong>plugin template</strong> is povided. Users could download the <strong>plugin template</strong> from
+<a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">github</a> and build plugins on it.</p>
+<p>Plugin Structure:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>plugin_name/
+    ├── controler/
+    │   ├── plugin_name_controller.py
+    |   ├── ...
+    ├── model/
+    |   ├── devices/
+    │   │   └── plugin_device/
+    │   │       ├── device_startup_functions.py
+    │   │       ├── plugin_device.py
+    │   │       └── synthetic_plugin_device.py
+    │   └── features/
+    │           ├── plugin_feature.py
+    │           ├── ...
+    │
+    ├── view/
+    |   ├── plugin_name_frame.py
+    |   ├── ...
+    │
+    ├── feature_list.py
+    ├── plugin_acquisiton_mode.py
+    └── plugin_config.yml
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The template shows a plugin with GUI, device, feature, feature_list and acquisition mode.
+If your plugin only incoporates some of these components, you should remove unused folders and files.</p>
+</div>
+</section>
+<section id="plugin-configuration">
+<h2>Plugin Configuration<a class="headerlink" href="#plugin-configuration" title="Permalink to this heading"></a></h2>
+<p>There should always have a <strong>plugin_config.yml</strong> file under the plugin folder, which tells Navigate
+the plugin name, the GUI as a Tab or Popup and custom acquisition mode name. A typical plugin config
+is:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>name: Plugin Name
+view: Popup # or Tab
+acquisition_modes:
+  - name: Plugin Acquisition
+    file_name: plugin_acquisition_mode.py
+</pre></div>
+</div>
+</section>
+<section id="plugin-with-gui">
+<h2>Plugin With GUI<a class="headerlink" href="#plugin-with-gui" title="Permalink to this heading"></a></h2>
+<p>Navigate supports a plugin with its own GUI. The custom plugin GUI can be integrated as a tab or a popup.
+Users should specify the view option in <cite>plugin_config.yml</cite>. The name in the plugin_config.yml will be used
+as a menu name if the plugin GUI as a popup. Users could find the menu under <cite>Plugins</cite> in Navigate window.</p>
+<p>When creating a new plugin with GUI, ensure that the plugin name is consistent with the naming
+conventions for the associated Python files (<cite>plugin_name_controller.py</cite> and <cite>plugin_name_frame.py</cite>).
+Both Python filenames should be in lowercase.</p>
+<p>For example, if your plugin is named <cite>My Plugin</cite> (there is a space in between), the associated Python files
+should be named: “my_plugin_frame.py” and “my_plugin_controller.py”</p>
+</section>
+<section id="plugin-with-device">
+<h2>Plugin With Device<a class="headerlink" href="#plugin-with-device" title="Permalink to this heading"></a></h2>
+<p>The Navigate Software allows you to integrate a new device. There could be more than one device inside a plugin,
+if they are different kinds of device, put them into different folders. For a kind of device, there should be
+a <cite>device_startup_functions.py</cite> tells Navigate how to start the device and the reference name of the device in
+system <cite>configuration.yaml</cite>.</p>
+<p>Device type name and reference name are given as following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DEVICE_TYPE_NAME</span> <span class="o">=</span> <span class="s2">&quot;plugin_device&quot;</span>  <span class="c1"># Same as in configuraion.yaml, for example &quot;stage&quot;, &quot;filter_wheel&quot;, &quot;remote_focus_device&quot;...</span>
+<span class="n">DEVICE_REF_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;serial_number&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>A function to load the device connection should be given,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_device</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span> <span class="n">is_synthetic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="k">return</span> <span class="n">device_connection</span>
+</pre></div>
+</div>
+<p>A function to start the device should be given,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">start_device</span><span class="p">(</span><span class="n">microscope_name</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="n">is_synthetic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="k">return</span> <span class="n">device_object</span>
+</pre></div>
+</div>
+<p>The template of <cite>device_startup_functions.py</cite> could be find in the <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template/blob/main/src/plugins-template/model/devices/plugin_device/device_startup_functions.py">template</a>.</p>
+</section>
+<section id="plugin-with-a-new-feature">
+<h2>Plugin With A New Feature<a class="headerlink" href="#plugin-with-a-new-feature" title="Permalink to this heading"></a></h2>
+<p>Navigate allows users to add new features. New feature objects and feature lists can be a plugin or a component
+of a plugin. Features and feature lists are automatically loaded into Navigate.</p>
+<p>Please visit <a class="reference external" href="https://thedeanlab.github.io/navigate/feature_container/feature_container_home.html">here</a> for details about how to build a new feature object and feature list.</p>
+</section>
+<section id="custom-acquisition-model">
+<h2>Custom Acquisition Model<a class="headerlink" href="#custom-acquisition-model" title="Permalink to this heading"></a></h2>
+<p>Navigate offers seamless support for custom acquisition modes, and registering a new mode is straightforward.</p>
+<ol class="arabic simple">
+<li><p>Download the tempate <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template/blob/main/src/plugins-template/plugin_acquisition_mode.py">plugin_acquisition_mode.py</a> .</p></li>
+<li><p>Update the feature_list.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@AcquisitionMode</span>
+<span class="k">class</span> <span class="nc">PluginAcquisitionMode</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_mode</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1"># update here</span>
+        <span class="p">]</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Update functions.</p></li>
+</ol>
+<p>Users should tell Navigate what Navigate should do before and after acquisition.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">prepare_acquisition_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">):</span>
+    <span class="c1"># update here</span>
+
+<span class="k">def</span> <span class="nf">end_acquisition_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">):</span>
+    <span class="c1"># update here</span>
+
+<span class="k">def</span> <span class="nf">prepare_acquisition_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="c1"># update here</span>
+
+<span class="k">def</span> <span class="nf">end_acquisition_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="c1"># update here</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Register the acquisition mode in <cite>plugin_config.yml</cite>.</p></li>
+</ol>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>acquisition_modes:
+    - name: Custom Acquisition
+        file_name: plugin_acquisition_mode.py
+</pre></div>
+</div>
+<p>There are more plugin examples, please visit <a class="reference external" href="https://github.com/TheDeanLab/navigate/tree/develop/src/navigate/plugins">Navigate</a> and <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugins">Navigate Plugins</a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../_autosummary/navigate.model.features.volume_search.VolumeSearch.html" class="btn btn-neutral float-left" title="navigate.model.features.volume_search.VolumeSearch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../contributing/contributing_guidelines.html" class="btn btn-neutral float-right" title="Contributing Guidelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -478,6 +478,11 @@ for your stage should be found by launching PIMikroMove, which should come with
 your stage. Stage names (e.g. ``L-509.20DG10``) can also be found in PIMikroMove
 or on a label on the side of your stage.
 
+.. note::
+    PI L-509.20DG10 has a unidirectional repeatability of 100 nm, bidirectional
+    repeatability of 2 microns, and a minimum incremental motion of 100 nm.
+    This is potentially too coarse.
+
 Configuration File
 ^^^^^^^^^^^^^^^^^^
 
@@ -761,8 +766,26 @@ Configuration File
 
 Lasers
 ======
+We currently support laser control via voltage signals. In the near-future, we will consider implementing
+laser control via serial communication for power control, but digital modulation will still be controlled via
+voltage signals.
 
-We currently support laser control via voltage signals.
+Omicron LightHUB Ultra
+----------------------
+
+.. note::
+    Omicron laser source includes both Coherent- and LuxX lasers, which vary
+    according to wavelength. LuxX lasers should be operated in an ACC operating
+    mode with the analog modulation option enabled. The Coherent Obis lasers should be
+    set in the mixed modulation mode.
+
+Coherent Obis
+----------------------
+
+.. note::
+    Coherent Obis lasers should be set in the mixed modulation mode. It is not uncommon
+    for the slew rate from the data acquisition card to be insufficient to drive the modulation
+    of the laser if the laser is set to an analog modulation mode.
 
 DAQ Control
 -----------

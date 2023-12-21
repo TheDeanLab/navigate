@@ -55,8 +55,10 @@ these zoom values changes the magnification of the microscope.
 Below the horizontal divider is access to the 
 :ref:`Waveform Parameters <user_guide/gui_walkthrough:waveform parameters>` settings 
 panel and the 
-:ref:`Configure Microscope <user_guide/gui_walkthrough:configure microscope>` settings 
+:ref:`Configure Microscope <user_guide/gui_walkthrough:configure microscopes>` settings 
 panel.
+
+.. _stage_control_menu:
 
 Stage Control
 -------------
@@ -73,7 +75,8 @@ a sample.
 
 The middle part provides similar functionality to the 
 :ref:`Multiposition Settings Notebook <user_guide/gui_walkthrough:multiposition>`.
-Here, we can launch the `Tiling Wizard <user_guide/gui_walkthrough:tiling wizard>`, 
+Here, we can launch the 
+:ref:`Tiling Wizard <user_guide/gui_walkthrough:multi-position tiling wizard>`, 
 load and export (save) positions stored in the Multipositon Settings Notebook, and add 
 the current stage position to the multiposition table.
 
@@ -206,9 +209,9 @@ to save data.
 
 * :guilabel:`Save Data` tells the software to save acquired data to disk when checked. 
   If this is selected, a 
-  :ref:`saving popup window <user_guide/gui_walkthrough:saving dialog>` will appear 
-  when :guilabel:`Acquire` is pressed, unless you are in "Continuous Scan" mode, which
-  is designed for live previews only.
+  :ref:`saving popup window <user_guide/gui_walkthrough:file saving dialog>` will 
+  appear when :guilabel:`Acquire` is pressed, unless you are in "Continuous Scan" mode, 
+  which is designed for live previews only.
 * :guilabel:`Timepoints` indicates how many time points this acquisition should 
   acquire.
 * :guilabel:`Stack Acq Time` provides an estimate of how long a single z-stack will
@@ -232,7 +235,7 @@ e.g. tiling.
   :ref:`Multiposition Settings Notebook <user_guide/gui_walkthrough:multiposition>`
   during the acquisition.
 * :guilabel:`Launch Tiling Wizard` launches the 
-  :ref:`Tiling Wizard <user_guide/gui_walkthrough:tiling wizard>`.
+  :ref:`Tiling Wizard <user_guide/gui_walkthrough:multi-position tiling wizard>`.
 
 Quick Launch Buttons
 ^^^^^^^^^^^^^^^^^^^^
@@ -255,60 +258,359 @@ settings.
 Camera Modes
 ^^^^^^^^^^^^
 
+The camera modes section is designed for switching between normal mode of operation,
+where the camera exposes all pixels semi-simultaneously, and light-sheet mode, where
+the camera exposes only a few pixels at a time, termed the rollign shutter width, and 
+progressively images from the top to the bottom of the camera chip or vice versa.
+
+* :guilabel:`Sensor Mode` is used to switch between "Normal" and "Light-Sheet" 
+  (progressive) exposure.
+* :guilabel:`Readout Direction` indicates if the rolling shutter should move from the
+  bottom to the top of the camera chip or vice versa.
+* :guilabel:`Number of Pixels` sets the rolling shutter width on the camera.
+
 Framerate Info
 ^^^^^^^^^^^^^^
+
+This displays information concerning the speed of acquisition and optionally allows the
+user to average these values over multiple images.
+
+* :guilabel:`Exposure Time (ms)` displays the set camera exposure time.
+* :guilabel:`Readout Time (ms)` displays how long it takes to read a frame from the
+  camera. This includes exposure time.
+* :guilabel:`Framerate (Hz)` displays how long it takes to acquire an image. This is
+  based on an internal "wait ticket" approach, where the software times how long it
+  waits for a frame to come in after receiving the previous frame. This frequency 
+  includes not only camera readout time, but, e.g. how long the software had to wait
+  for the stage to finish moving before taking the next image in a z-stack. It is the
+  most accurate time estimate in the software.
+* :guilabel:`Images to Average` tells the camera to average frames.
 
 Region of Interest Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+These allows the user to set the size of the our region of interest in pixels. The
+camera can also be told optionally to bin pixels. The corresponding field of view
+is displayed by calculating the number of pixels multiplied by the camera's effective
+pixel size, which is set in the 
+:ref:`Mechanical Zoom <user_guide/hardware/supported_hardware:mechanical zoom>`.
+
+:guilabel:`Default FOVs` includes buttons to quickly change the FOV to preset values.
+
+:guilabel:`ROI center` indicates about what point the pixels crop on the camera.
 
 .. _stage_control_notebook:
 
 Stage Control
 -------------
 
-Stage control.
-
 .. image:: images/settings_stage.png
+
+The Stage Control Settings Notebook is a tab (optionally, a popup) that controls the 
+stage positions. It is split into six parts: stage positions, x and y movement, z 
+movement, focus movement, theta movement, and stop stage and joystick buttons.
+
+By default, the stage is expected to have x, y, z, focus and theta (rotation) axes. If
+your stage does not have one of these axes, you can choose to not use that control. See
+the :ref:`stage subsection <user_guide/software_configuration:stage subsection>` for
+more information.
+
+Stage Positions
+^^^^^^^^^^^^^^^
+
+The entry boxes report the current position of each stage axis. If a user changes the
+value in the entry box, the stage will move to that value (provided it is within the
+stage bounds if stage limits are enabled, see `here <stage_control_menu>`).
+
+XY Movement
+^^^^^^^^^^^
+
+This includes the movement buttons for the X and Y axes. The left and right buttons
+control X, while the up and down buttons control Y. The entry box in the middle of the
+buttons indicates the step size along these axes in microns. It can be changed by the
+user.
+
+Z Movement
+^^^^^^^^^^
+
+This controls the movement of the Z stage. The entry box indicates the step size along
+this axis and it can be changed by the user.
+
+Focus Movement
+^^^^^^^^^^^^^^
+
+This controls the movement of the focus stage. The entry box indicates the step size 
+along this axis and it can be changed by the user.
+
+Theta Movement
+^^^^^^^^^^^^^^
+
+This controls the movement of the rotation stage. The entry box indicates the step size
+along this axis and it can be changed by the user.
+
+Buttons
+^^^^^^^
+
+The :guilabel:`STOP` button halts all stage axes and updates the stage positions to
+wherever the stage stopped.
+
+The :guilabel:`Enable Joystick` button disables control over the axes associated with
+the joystick (see the 
+:ref:`stage subsection <user_guide/software_configuration:stage subsection>`).
+
+.. note:: 
+    
+    It is not necessary to press this button to use a joystick. The joystick can be 
+    used along with the software controls. However, if you are running the acquisition
+    in "Continous Scan" and use the joystick without pressing 
+    :guilabel:`Enable Joystick`, the stage positions may not update unless you press 
+    :guilabel:`STOP`. In "Continous Scan", if you try to move with the joystick and 
+    then the software stage controls without first pressing  :guilabel:`STOP`, it is
+    likely the stage will update to the software's position of choice and undo whatever
+    joystick movement you did. 
+
+
+.. tip:: 
+
+    If you have the screen real estate, it is often helpful to convert the Stage
+    Control Settings Notebook to a popup. Right click on the tab and press
+    :guilabel:`Popout Tab`.
+
+    .. image:: images/popout_right_click.png
+
+    |
+
+    Once this is done, you should be able to move the stage controls next to the
+    main navigate window.
+
+    .. image:: images/popout_stage.png
+
 
 Multiposition
 -------------
 
-Multiposition.
-
 .. image:: images/settings_multiposition.png
 
+The Multiposition Settings Notebook is a tab (optionally, a popup) that helps the user
+set up and visualize a multi-position acquisition for tiling a large sample. It is
+split into two parts: buttons and the multi-position table.
+
+Buttons
+^^^^^^^
+
+* :guilabel:`Launch Tiling Wizard` launches the 
+  :ref:`Tiling Wizard <user_guide/gui_walkthrough:multi-position tiling wizard>`
+* :guilabel:`Eliminate Empty Positions` is not implemented and does nothing.
+* :guilabel:`Save Positions To Disk` saves the multi-position table to a file.
+* :guilabel:`Load Positions From Disk` loads a multi-position file into the table.
+
+
+Multi-Position Table
+^^^^^^^^^^^^^^^^^^^^
+
+The multi-position table lists stage positions that are included in a multi-position
+acquisition. 
+
+* Double-clicking on the integer to the left of a row moves the stage to
+  that position.
+
+* Double-clicking on a table cell allows the user to edit the stage position in that 
+  cell.
+
+* Right-clicking on the integer to the left of a row yields a popup with four options:
+
+    .. image:: images/multiposition_right_click.png
+
+  * :guilabel:`Insert New Position` adds an empy row to the table.
+  * :guilabel:`Add Current Position` adds a row containing the current stage position 
+    to the table.
+  * :guilabel:`Add New Position(s)` yields a popup that asks the user how many new rows
+    to add and then inserts that number of empty rows upon confirmation.
+  * :guilabel:`Delete Position(s)` deletes the selected positions. Selection is 
+    indicated by a blue highlight of the integer to the left of a row.
 
 Display Notebooks
 ==================
 
-blah
+The display notebooks provide visual feedback of the images taken on the camera and
+of the galvo and remote focus waveforms sent to the DAQ.
 
+Camera View
+-----------
+
+.. image:: images/display_camera.png
+
+The Camera View Display Notebook is is a tab (optionally, a popup) that is split into
+two parts. The left part displays the latest image acquired by the camera. The right 
+part modifies this display and is split into LUT, Image Metrics, and Image Display.
+
+Left-clicking on the image toggles crosshairs that indicate the center of the field of
+view. 
+
+LUT
+^^^
+
+The :guilabel:`LUT` section of the camera view allows the user to change the lookup
+table the image uses to display. The options are "Gray", "Gradient" and "Rainbow". 
+
+:guilabel:`Flip XY` transposes the image in the display. This can produce intuitive 
+results in the display when clicking on the XY stage movements buttons (i.e. with 
+:guilabel:`Flip XY` enabled, the sample moves along the direction expected when a 
+stage movement button is clicked).
+
+:guilabel:`Autoscale` toggles automatic image histogram scaling ona nd off. When 
+:guilabel:`Autoscale` is enabled, the image automatically scales intensity between
+the minimum and maximum pixel value in the image produced by the camera. When 
+:guilabel:`Autoscale` is disabled, the image is scaled between :guilabel:`Min Counts`
+and :guilabel:`Max Counts`.
+
+Image Metrics
+^^^^^^^^^^^^^
+
+:guilabel:`Frames to Avg` is unimplemented, but should average this many frames coming
+from the camera and display the average in the viewer.
+
+:guilabel:`Image Max Counts` tells us the maximum pixel count in the image.
+
+:guilabel:`Channel` informs us which color channel we are looking at. It indexes into
+the selected channels in the 
+:ref:`Channel Settings <user_guide/gui_walkthrough:channel settings>` 
+(i.e. ``0`` is the first selected channel).
+
+Image Display
+^^^^^^^^^^^^^
+
+This should toggle in between live mode and maximum projections in multiple dimensions,
+but it is currently not implemented.
+
+Waveform Settings
+-----------------
+
+.. image:: images/display_waveform.png
+
+The Waveform Settings Display Notebook is a tab (optionally, a popup) is split into two
+sections: a waveform display section at the top and a settings section at the bottom.
+
+Waveform Display
+^^^^^^^^^^^^^^^^
+
+The waveform display shows the waveforms sent to the remote focus devices (top) and the
+galvos (bottom). Each channel and each device gets its own color, which is then
+displayed in the legend. The dotted black line indicates when the camera is acquiring
+in relation to the waveforms. This can be considered identical to what is sent to the
+DAQ.
+
+Settings
+^^^^^^^^
+
+:guilabel:`Sample Rate` changes the frequency of the samples sent to the DAQ. It is not
+recommended that a user change this.
+
+:guilabel:`Waveform Template` changes the 
+:ref:`waveform template <user_guide/software_configuration:waveform templates file>` 
+used to generate the waveforms.
 
 Additional GUIs
 ===============
 
 This section includes popups and other non-main sections of the GUI.
 
-Saving Dialog
--------------
+File Saving Dialog
+------------------
+
+.. image:: images/save_dialog.png
+
+The file saving dialog pops up if an 
+:ref:`acquisition mode <user_guide/gui_walkthrough:acquisition bar>` other than 
+"Continuous Scan" is selected 
+and :ref:`save data <user_guide/gui_walkthrough:timepoint settings>` is checked.
+
+* :guilabel:`Root Directory` indicates the local directory to which the software will
+  save the data.
+* :guilabel:`User` is the name of the user acquiring the data.
+* :guilabel:`Tissue Type` is the type of tissue being imaged.
+* :guilabel:`Cell Type` is the cell type being imaged.
+* :guilabel:`Label` indicates the dyes used in the acquisition.
+* :guilabel:`Solvent` indicates the immersion solvent of the tissue/cell.
+* :guilabel:`File Type` indicates what type of file to save to.
 
 Waveform Parameters
 -------------------
 
-blah
+.. image:: images/waveform_parameters.png
 
-Configure Microscope
---------------------
+This is used to update the waveforms shown in 
+:ref:`Waveform Settings <user_guide/gui_walkthrough:waveform settings>`.
 
-blah
+* For each laser, the :guilabel:`Amplitude` and :guilabel:`Offset` correspond to the
+  amplitude and offset of the sawtooth waveform sent to the remote focus device.
+* For each galvo, the :guilabel:`Amplitude` and :guilabel:`Offset` correspond to the
+  amplitude and offset of the waveform sent to the galvo, by default a triangle wave.
+  The :guilabel:`Galvo <int> Frequency (Hz)` sets the frequency of the waveform sent
+  to the galvo. :guilabel:`Estimate Frequency` estimates the frequency needed for a
+  sawtooth wave to sweep over the full camera chip without aliasing with the light-
+  sheet rolling shutter speed.
+* :guilabel:`Percent Delay` introduces a delay before the remote focus sawtooth starts.
+* :guilabel:`Percent Smoothing` smooths the remote focus waveform.
+* :guilabel:`Settle Duration (ms)` introduces a delay after the remote focus sawtooth 
+  ends.
 
-Tiling Wizard
--------------
+Configure Microscopes
+---------------------
 
-blah
+.. image:: images/configure_microscopes.png
+
+The configure microscopes window allows a user with multiple microscopes defined in 
+their :ref:`configuration file <user_guide/software_configuration:configuration file>`
+to select which microscope is primary and launch both microscopes simultaneously. The
+primary microscope will have control over any hardware shared between both microscopes.
+This window also provides a GUI interface to look at what hardware is in use.
+
+Multi-Position Tiling Wizard
+----------------------------
+
+.. image:: images/tiling_wizard.png
+
+The tiling wizard helps the user set up a tiled acquisition of a sample large enough
+that it cannot be imaged in a single field of view.
+
+* :guilabel:`Set <axis> Start` indicates the starting position of an axis.
+* :guilabel:`Set <axis> End` indicates the end position of an axis.
+* :guilabel:`<axis> Distance` indicates difference between the start and end position.
+* :guilabel:`<axis> FOV Dist` indicates the field of view along that axis. The Distance
+  between start and end will be split into tiles of this size along this axis.
+* :guilabel:`Num. Tiles` indicates how many tiles exist along this axis. It is roughly
+  (End - Start)/FOV dist.
+* :guilabel:`% Overlap` indicates the percent of the the that should overlap along each
+  axis. It is a percent of the FOV Dist.
+* :guilabel:`Populate Multi-Position Table` puts all of the tiles in the 
+  :ref:`multi-position table <user_guide/gui_walkthrough:multi-position table>`.
+
+For an example of how to use the tiling wizard, see 
+:ref:`Tiling a sample larger than the field of view <user_guide/case_studies/acquire_mesospimbt:tiling a sample larger than the field of view>`.
 
 Autofocus Settings
 ------------------
 
-blah
+.. image:: case_studies/images/autofocus_settings.png
+
+The autofocus settings panel controls parameters of the autofocus 
+:doc:`feature <features>`.
+
+* :guilabel:`Device Type` indicates if we want to apply the autofocus routine to A
+  stage or to a remote focus device.
+* :guilabel:`Device Reference` indices the stage axis, or the DAQ analog output for
+  the remote focus device.
+* The :guilabel:`Coarse` and :guilabel:`Fine` rows allow us to select a range and step
+  size, both in microns (or volts, if using the remote focus device), over which we 
+  should  search for an optimal focus value. If coarse and fine are selected, the 
+  coarse search will be performed first and the fine search will be performed about 
+  the coarse position with the highest value.
+* :guilabel:`Inverse Power Tent Fit` will attempt to find a more accurate position for
+  the optimal focus based on fitting a power tent to the search values. It will only
+  use the fit if its :math:`R^2` value is higher than ``0.9``.
+* :guilabel:`Autofocus` runs the autofocus with the set parameters.
+
+Once the settings have been updated here, any run autofocus operation will use the new
+settings.
+

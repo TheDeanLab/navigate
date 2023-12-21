@@ -83,33 +83,34 @@ PXI-6723
   the ``CTR0Out`` pin. With an SCB-68A breakout box, the positive lead is pin 2, the
   ground is pin 36.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
 
-.. code-block:: yaml
+.. collapse:: Configuration File
 
-  hardware:
-    daq:
-      type: NI
+    .. code-block:: yaml
 
-  microscopes:
-    microscope_name:
-      daq:
-        hardware:
-          name: daq
+      hardware:
+        daq:
           type: NI
-        sample_rate: 100000
-        sweep_time: 0.2
 
-        # triggers
-        master_trigger_out_line: PCI6738/port0/line1 # Should exactly match both name and port
-        camera_trigger_out_line: /PCI6738/ctr0 # Should exactly match both name and port
-        trigger_source: /PCI6738/PFI0 # Should exactly match both name and port
+      microscopes:
+        microscope_name:
+          daq:
+            hardware:
+              name: daq
+              type: NI
+            sample_rate: 100000
+            sweep_time: 0.2
 
-        # Digital Laser Outputs
-        laser_port_switcher: PCI6738/port0/line0
-        laser_switch_state: False
+            # triggers
+            master_trigger_out_line: PCI6738/port0/line1 # Should exactly match both name and port
+            camera_trigger_out_line: /PCI6738/ctr0 # Should exactly match both name and port
+            trigger_source: /PCI6738/PFI0 # Should exactly match both name and port
 
+            # Digital Laser Outputs
+            laser_port_switcher: PCI6738/port0/line0
+            laser_switch_state: False
+
+|
 
 Cameras
 =======
@@ -133,55 +134,56 @@ Hamamatsu Flash 4.0 v3/Fusion
 * Connect the `camera_trigger_out_line` to the External Trigger of the Hamamatsu
   Camera. Commonly, this is done with a counter port, e.g., ``/PXI6259/ctr0``
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    camera:
-      -
-        type: HamamatsuOrca # First Camera
-        serial_number: 302153
+      hardware:
+        camera:
+          -
+            type: HamamatsuOrca # First Camera
+            serial_number: 302153
 
-  microscopes:
-    microscope_name:
-      camera:
-        hardware:
-          name: camera
-          type: HamamatsuOrca
-          serial_number: 302153
-        x_pixels: 2048.0
-        y_pixels: 2048.0
-        flip_x: True
-        flip_y: False
-        pixel_size_in_microns: 6.5
-        subsampling: [1, 2, 4]
-        sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
-        readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
-        lightsheet_rolling_shutter_width: 608
-        defect_correct_mode: 1.0
-        binning: 1x1
-        readout_speed: 2.0
-        trigger_active: 1.0
-        trigger_mode: 1.0 # external light-sheet mode
-        trigger_polarity: 2.0  # positive pulse
-        trigger_source: 2.0  # 2 = external, 3 = software.
-        exposure_time: 20 # Use milliseconds throughout.
-        delay_percent: 20
-        pulse_percent: 1
-        line_interval: 0.000075
-        display_acquisition_subsampling: 4
-        average_frame_rate: 4.969
-        frames_to_average: 1
-        exposure_time_range:
-          min: 1
-          max: 1000
-          step: 1
-        x_pixels_step: 4
-        y_pixels_step: 4
-        x_pixels_min: 4
-        y_pixels_min: 4
+      microscopes:
+        microscope_name:
+          camera:
+            hardware:
+              name: camera
+              type: HamamatsuOrca
+              serial_number: 302153
+            x_pixels: 2048.0
+            y_pixels: 2048.0
+            flip_x: True
+            flip_y: False
+            pixel_size_in_microns: 6.5
+            subsampling: [1, 2, 4]
+            sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
+            readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
+            lightsheet_rolling_shutter_width: 608
+            defect_correct_mode: 1.0
+            binning: 1x1
+            readout_speed: 2.0
+            trigger_active: 1.0
+            trigger_mode: 1.0 # external light-sheet mode
+            trigger_polarity: 2.0  # positive pulse
+            trigger_source: 2.0  # 2 = external, 3 = software.
+            exposure_time: 20 # Use milliseconds throughout.
+            delay_percent: 20
+            pulse_percent: 1
+            line_interval: 0.000075
+            display_acquisition_subsampling: 4
+            average_frame_rate: 4.969
+            frames_to_average: 1
+            exposure_time_range:
+              min: 1
+              max: 1000
+              step: 1
+            x_pixels_step: 4
+            y_pixels_step: 4
+            x_pixels_min: 4
+            y_pixels_min: 4
+
+|
 
 Hamamatsu Lightning
 -------------------
@@ -189,49 +191,50 @@ Hamamatsu Lightning
 The Hamamatsu Lightning has a slightly different class than the Flash/Fusion as it
 reads out 4 rows at a time rather than 1 in rolling shutter mode.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    camera:
-      -
-        type:  HamamatsuOrcaLightning
-        serial_number: 000035
+      hardware:
+        camera:
+          -
+            type:  HamamatsuOrcaLightning
+            serial_number: 000035
 
-  microscopes:
-    microscope_name:
-      camera:
-        hardware:
-          name: camera
-          type: HamamatsuOrcaLightning
-          serial_number: 000035
-        x_pixels: 4608.0
-        y_pixels: 2592.0
-        pixel_size_in_microns: 5.5
-        subsampling: [1, 2, 4]
-        sensor_mode: Normal  # 12 for progressive, 1 for normal.
-        readout_direction: Bottom-to-Top  # Top-to-Bottom', 'Bottom-to-Top'
-        lightsheet_rolling_shutter_width: 608
-        defect_correct_mode: 2.0
-        binning: 1x1
-        readout_speed: 0x7FFFFFFF
-        trigger_active: 1.0
-        trigger_mode: 1.0 # external light-sheet mode
-        trigger_polarity: 2.0  # positive pulse
-        trigger_source: 2.0  # 2 = external, 3 = software.
-        exposure_time: 20 # Use milliseconds throughout.
-        delay_percent: 8 #5.0
-        pulse_percent: 1
-        line_interval: 0.000075
-        display_acquisition_subsampling: 4
-        average_frame_rate: 4.969
-        frames_to_average: 1
-        exposure_time_range:
-          min: 1
-          max: 1000
-          step: 1
+      microscopes:
+        microscope_name:
+          camera:
+            hardware:
+              name: camera
+              type: HamamatsuOrcaLightning
+              serial_number: 000035
+            x_pixels: 4608.0
+            y_pixels: 2592.0
+            pixel_size_in_microns: 5.5
+            subsampling: [1, 2, 4]
+            sensor_mode: Normal  # 12 for progressive, 1 for normal.
+            readout_direction: Bottom-to-Top  # Top-to-Bottom', 'Bottom-to-Top'
+            lightsheet_rolling_shutter_width: 608
+            defect_correct_mode: 2.0
+            binning: 1x1
+            readout_speed: 0x7FFFFFFF
+            trigger_active: 1.0
+            trigger_mode: 1.0 # external light-sheet mode
+            trigger_polarity: 2.0  # positive pulse
+            trigger_source: 2.0  # 2 = external, 3 = software.
+            exposure_time: 20 # Use milliseconds throughout.
+            delay_percent: 8 #5.0
+            pulse_percent: 1
+            line_interval: 0.000075
+            display_acquisition_subsampling: 4
+            average_frame_rate: 4.969
+            frames_to_average: 1
+            exposure_time_range:
+              min: 1
+              max: 1000
+              step: 1
+
+|
 
 Photometrics Iris 15
 --------------------
@@ -246,99 +249,101 @@ Photometrics Iris 15
   manufacturer-provided PVCamTest software.
 
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  camera:
-    type: Photometrics
-    camera_connection: PMPCIECam00
-    serial_number: 1
-
-  camera:
-      hardware:
-        name: camera
+      camera:
         type: Photometrics
+        camera_connection: PMPCIECam00
         serial_number: 1
-      x_pixels: 5056.0
-      y_pixels: 2960.0
-      pixel_size_in_microns: 4.25
-      subsampling: [1, 2, 4]
-      sensor_mode: Normal
-      readout_direction: Bottom-to-Top
-      lightsheet_rolling_shutter_width: 608
-      defect_correct_mode: 2.0
-      binning: 1x1
-      readout_speed: 0x7FFFFFFF
-      trigger_active: 1.0
-      trigger_mode: 1.0
-      trigger_polarity: 2.0
-      trigger_source: 2.0
-      exposure_time: 20
-      delay_percent: 25
-      pulse_percent: 1
-      line_interval: 0.000075
-      display_acquisition_subsampling: 4
-      average_frame_rate: 4.969
-      frames_to_average: 1
-      exposure_time_range:
-        min: 1
-        max: 1000
-        step: 1
+
+      camera:
+          hardware:
+            name: camera
+            type: Photometrics
+            serial_number: 1
+          x_pixels: 5056.0
+          y_pixels: 2960.0
+          pixel_size_in_microns: 4.25
+          subsampling: [1, 2, 4]
+          sensor_mode: Normal
+          readout_direction: Bottom-to-Top
+          lightsheet_rolling_shutter_width: 608
+          defect_correct_mode: 2.0
+          binning: 1x1
+          readout_speed: 0x7FFFFFFF
+          trigger_active: 1.0
+          trigger_mode: 1.0
+          trigger_polarity: 2.0
+          trigger_source: 2.0
+          exposure_time: 20
+          delay_percent: 25
+          pulse_percent: 1
+          line_interval: 0.000075
+          display_acquisition_subsampling: 4
+          average_frame_rate: 4.969
+          frames_to_average: 1
+          exposure_time_range:
+            min: 1
+            max: 1000
+            step: 1
+
+|
 
 Synthetic Camera
 ----------------
 
 The synthetic camera simulates noise images from an sCMOS camera.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  camera:
-    type: SyntheticCamera
-    serial_number: 12345
-
-   microscopes:
-    microscope_name:
       camera:
-        hardware:
-          name: camera
-          type: SyntheticCamera
-          serial_number: 12345
-        x_pixels: 2048.0
-        y_pixels: 2048.0
-        flip_x: True
-        flip_y: False
-        pixel_size_in_microns: 6.5
-        subsampling: [1, 2, 4]
-        sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
-        readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
-        lightsheet_rolling_shutter_width: 608
-        defect_correct_mode: 1.0
-        binning: 1x1
-        readout_speed: 2.0
-        trigger_active: 1.0
-        trigger_mode: 1.0 # external light-sheet mode
-        trigger_polarity: 2.0  # positive pulse
-        trigger_source: 2.0  # 2 = external, 3 = software.
-        exposure_time: 20 # Use milliseconds throughout.
-        delay_percent: 20
-        pulse_percent: 1
-        line_interval: 0.000075
-        display_acquisition_subsampling: 4
-        average_frame_rate: 4.969
-        frames_to_average: 1
-        exposure_time_range:
-          min: 1
-          max: 1000
-          step: 1
-        x_pixels_step: 4
-        y_pixels_step: 4
-        x_pixels_min: 4
-        y_pixels_min: 4
+        type: SyntheticCamera
+        serial_number: 12345
+
+       microscopes:
+        microscope_name:
+          camera:
+            hardware:
+              name: camera
+              type: SyntheticCamera
+              serial_number: 12345
+            x_pixels: 2048.0
+            y_pixels: 2048.0
+            flip_x: True
+            flip_y: False
+            pixel_size_in_microns: 6.5
+            subsampling: [1, 2, 4]
+            sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
+            readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
+            lightsheet_rolling_shutter_width: 608
+            defect_correct_mode: 1.0
+            binning: 1x1
+            readout_speed: 2.0
+            trigger_active: 1.0
+            trigger_mode: 1.0 # external light-sheet mode
+            trigger_polarity: 2.0  # positive pulse
+            trigger_source: 2.0  # 2 = external, 3 = software.
+            exposure_time: 20 # Use milliseconds throughout.
+            delay_percent: 20
+            pulse_percent: 1
+            line_interval: 0.000075
+            display_acquisition_subsampling: 4
+            average_frame_rate: 4.969
+            frames_to_average: 1
+            exposure_time_range:
+              min: 1
+              max: 1000
+              step: 1
+            x_pixels_step: 4
+            y_pixels_step: 4
+            x_pixels_min: 4
+            y_pixels_min: 4
+
+|
 
 Remote Focusing Devices
 =======================
@@ -365,28 +370,29 @@ serial and a DAQ port to get this device to run.
 
 * `LFA-2010 Linear Focus Actuator <https://www.equipsolutions.com/products/linear-focus-actuators/lfa-2010-linear-focus-actuator/>`_
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
 
-.. code-block:: yaml
+.. collapse:: Configuration File
 
-  microscopes:
-    microscope_name:
-      remote_focus_device:
-        hardware:
-          name: remote_focus
-          type: EquipmentSolutions
-          channel: PCI6738/ao2
-          comport: COM7
-          min: -5
-          max: 5
-        delay_percent: 7.5
-        ramp_rising_percent: 85
-        ramp_falling_percent: 5.0
-        amplitude: 0.7
-        offset: 2.3
-        smoothing: 0.0
+    .. code-block:: yaml
 
+      microscopes:
+        microscope_name:
+          remote_focus_device:
+            hardware:
+              name: remote_focus
+              type: EquipmentSolutions
+              channel: PCI6738/ao2
+              comport: COM7
+              min: -5
+              max: 5
+            delay_percent: 7.5
+            ramp_rising_percent: 85
+            ramp_falling_percent: 5.0
+            amplitude: 0.7
+            offset: 2.3
+            smoothing: 0.0
+
+|
 
 Thorlabs BLINK
 --------------
@@ -400,29 +406,31 @@ Optotune Focus Tunable Lens
 `These devices <https://www.optotune.com/tunable-lenses>`_ are controlled with an
 analog signal from the DAQ.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-  daq:
-    type: NI
-
-  remote_focus_device:
       hardware:
-        name: daq
+      daq:
         type: NI
-        channel: PXI6259/ao2
-        min: -5
-        max: 5
-      # Optotune EL-16-40-TC-VIS-5D-1-C
-      delay_percent: 7.5
-      ramp_rising_percent: 85
-      ramp_falling_percent: 2.5
-      amplitude: 0.7
-      offset: 2.3
-      smoothing: 0.0
+
+      remote_focus_device:
+          hardware:
+            name: daq
+            type: NI
+            channel: PXI6259/ao2
+            min: -5
+            max: 5
+          # Optotune EL-16-40-TC-VIS-5D-1-C
+          delay_percent: 7.5
+          ramp_rising_percent: 85
+          ramp_falling_percent: 2.5
+          amplitude: 0.7
+          offset: 2.3
+          smoothing: 0.0
+
+
+|
 
 Synthetic Remote Focus Device
 -----------------------------
@@ -451,28 +459,29 @@ which corresponds to the `Tiger Controller AA Command <https://asiimaging.com/do
     will differentially drive the two vertical posts, causing them to torque and
     potentially damage one another.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    stage:
-      type: ASI
-      serial_number: 123456789
-      port: COM8
-      baudrate: 115200
-
-  microscopes:
-    microscope:
-      stage:
-        hardware:
-          name: stage
+      hardware:
+        stage:
           type: ASI
           serial_number: 123456789
-          axes: [x, y, z, f] # Software
-          axes_mapping: [M, Y, X, Z]
-          feedback_alignment: [90, 90, 90, 90]
+          port: COM8
+          baudrate: 115200
+
+      microscopes:
+        microscope:
+          stage:
+            hardware:
+              name: stage
+              type: ASI
+              serial_number: 123456789
+              axes: [x, y, z, f] # Software
+              axes_mapping: [M, Y, X, Z]
+              feedback_alignment: [90, 90, 90, 90]
+
+|
 
 Sutter MP-285
 -------------
@@ -490,34 +499,35 @@ the software is restarted, it should work.
   Sometimes the Coherent Connection software messes with the MP-285 serial
   communication if it is connected to the lasers.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    stage:
-    -
-      type: MP285
-      port: COM2
-      timeout: 0.25
-      baudrate: 9600
-      serial_number: 0000
-      stages: None
-
-  microscopes:
-    microscope_name:
-      stage:
-        hardware:
-          name: stage1
+      hardware:
+        stage:
+        -
           type: MP285
+          port: COM2
+          timeout: 0.25
+          baudrate: 9600
           serial_number: 0000
-          axes: [y, x, f]
-          axes_mapping: [z, y, x]
-          volts_per_micron: None
-          axes_channels: None
-          max: 25000
-          min: 0
+          stages: None
+
+      microscopes:
+        microscope_name:
+          stage:
+            hardware:
+              name: stage1
+              type: MP285
+              serial_number: 0000
+              axes: [y, x, f]
+              axes_mapping: [z, y, x]
+              volts_per_micron: None
+              axes_channels: None
+              max: 25000
+              min: 0
+
+|
 
 Physik Instrumente
 ------------------
@@ -536,66 +546,67 @@ or on a label on the side of your stage.
     repeatability of 2 microns, and a minimum incremental motion of 100 nm.
     This is potentially too coarse.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    stage:
-      -
-        type: PI
-        controllername: C-884
-        stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
-        refmode: FRF FRF FRF FRF FRF FRF
-        serial_number: 119060508
-      -
-  microscopes:
-    microscope_name:
-      stage:
-        hardware:
-          name: stage
-          type: PI
-          serial_number: 119060508
-          axes: [x, y, z, theta, f]
-        y_unload_position: 10000
-        y_load_position: 90000
+      hardware:
+        stage:
+          -
+            type: PI
+            controllername: C-884
+            stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
+            refmode: FRF FRF FRF FRF FRF FRF
+            serial_number: 119060508
+          -
+      microscopes:
+        microscope_name:
+          stage:
+            hardware:
+              name: stage
+              type: PI
+              serial_number: 119060508
+              axes: [x, y, z, theta, f]
+            y_unload_position: 10000
+            y_load_position: 90000
 
-        startfocus: 75000
-        x_max: 100000
-        x_min: -100000
-        y_max: 100000
-        y_min: -100000
-        z_max: 100000
-        z_min: -100000
-        f_max: 100000
-        f_min: 0
-        theta_max: 360
-        theta_min: 0
+            startfocus: 75000
+            x_max: 100000
+            x_min: -100000
+            y_max: 100000
+            y_min: -100000
+            z_max: 100000
+            z_min: -100000
+            f_max: 100000
+            f_min: 0
+            theta_max: 360
+            theta_min: 0
 
-        x_rot_position: 2000
-        y_rot_position: 2000
-        z_rot_position: 2000
+            x_rot_position: 2000
+            y_rot_position: 2000
+            z_rot_position: 2000
 
-        x_step: 500
-        y_step: 500
-        z_step: 500
-        theta_step: 30
-        f_step: 500
+            x_step: 500
+            y_step: 500
+            z_step: 500
+            theta_step: 30
+            f_step: 500
 
-        position:
-          x_pos: 25250
-          y_pos: 40000
-          z_pos: 40000
-          f_pos: 70000
-          theta_pos: 0
-        velocity: 1000
+            position:
+              x_pos: 25250
+              y_pos: 40000
+              z_pos: 40000
+              f_pos: 70000
+              theta_pos: 0
+            velocity: 1000
 
-        x_offset: 0
-        y_offset: 0
-        z_offset: 0
-        f_offset: 0
-        theta_offset: 0
+            x_offset: 0
+            y_offset: 0
+            z_offset: 0
+            f_offset: 0
+            theta_offset: 0
+
+|
 
 Thorlabs
 --------
@@ -603,31 +614,32 @@ Thorlabs
 We currently support the `KIM001 <https://www.thorlabs.com/thorproduct.cfm?partnumber=KIM001>`_
 controller.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    stage:
-      -
-        type: Thorlabs
-        serial_number: 74000375
+      hardware:
+        stage:
+          -
+            type: Thorlabs
+            serial_number: 74000375
 
-  microscopes:
-    microscope_name:
-      stage:
-          hardware:
-            -
-              name: stage
-              type: Thorlabs
-              serial_number: 74000375
-              axes: [f]
-              axes_mapping: [1]
-              volts_per_micron: None
-              axes_channels: None
-              max: None
-              min: None
+      microscopes:
+        microscope_name:
+          stage:
+              hardware:
+                -
+                  name: stage
+                  type: Thorlabs
+                  serial_number: 74000375
+                  axes: [f]
+                  axes_mapping: [1]
+                  volts_per_micron: None
+                  axes_channels: None
+                  max: None
+                  min: None
+
+|
 
 .. _galvo_stage:
 
@@ -642,69 +654,71 @@ passed from the software stage controls, to a voltage. Note that we use
 ``GalvoNIStage`` whether or not the device is a galvo or a piezo since the logic is
 identical.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    stage:
-    -
-      type: GalvoNIStage
-      port: COM9999
-      timeout: 0.25
-      baudrate: 9600
-      serial_number: 0000
-      stages: None
-      distance_threshold: 20
-      settle_duration_ms: 5
+      hardware:
+        stage:
+        -
+          type: GalvoNIStage
+          port: COM9999
+          timeout: 0.25
+          baudrate: 9600
+          serial_number: 0000
+          stages: None
+          distance_threshold: 20
+          settle_duration_ms: 5
 
-  microscopes:
-    microscope_name:
-      stage:
-        hardware:
-            name: stage3
-            type: GalvoNIStage
-            serial_number: 0000
-            axes: [z]
-            axes_mapping: [PCI6738/ao6] #48/49
-            volts_per_micron: 0.05*x
-            max: 10
-            min: 0
-            distance_threshold: 5
-            settle_duration_ms: 5
+      microscopes:
+        microscope_name:
+          stage:
+            hardware:
+                name: stage3
+                type: GalvoNIStage
+                serial_number: 0000
+                axes: [z]
+                axes_mapping: [PCI6738/ao6] #48/49
+                volts_per_micron: 0.05*x
+                max: 10
+                min: 0
+                distance_threshold: 5
+                settle_duration_ms: 5
+
+|
 
 Synthetic Stage
 ---------------
 
 We use this to fake a stage.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    stage:
-    -
-      type: syntheticstage
-      port: COM9999
-      timeout: 0.25
-      baudrate: 9600
-      serial_number: 0000
-      stages: None
+      hardware:
+        stage:
+        -
+          type: syntheticstage
+          port: COM9999
+          timeout: 0.25
+          baudrate: 9600
+          serial_number: 0000
+          stages: None
 
-  microscopes:
-    microscope_name:
-      stage:
-        hardware:
-            name: stage2
-            type: syntheticstage
-            serial_number: 0000
-            axes: [theta]
-            axes_mapping: [theta]
-            max: 360
-            min: 0
+      microscopes:
+        microscope_name:
+          stage:
+            hardware:
+                name: stage2
+                type: syntheticstage
+                serial_number: 0000
+                axes: [theta]
+                axes_mapping: [theta]
+                max: 360
+                min: 0
+
+|
 
 Filter Wheels
 =============
@@ -716,70 +730,73 @@ change the names of available filters to match what is in the filter wheel or tu
 Sutter
 ------
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    filter_wheel:
-      type: SutterFilterWheel
-      port: COM10
-      baudrate: 9600
-      number_of_wheels: 1
-
-  microscopes:
-    microscope_name:
-      filter_wheel:
       hardware:
-        name: filter_wheel
-        type: SutterFilterWheel
-        wheel_number: 1
-      filter_wheel_delay: .030 # in seconds
-      available_filters:
-        Empty-1: 0
-        525-30: 1
-        600-52: 2
-        670-30: 3
-        647-LP: 4
-        Empty-2: 5
-        Empty-3: 6
-        Empty-4: 7
+        filter_wheel:
+          type: SutterFilterWheel
+          port: COM10
+          baudrate: 9600
+          number_of_wheels: 1
+
+      microscopes:
+        microscope_name:
+          filter_wheel:
+          hardware:
+            name: filter_wheel
+            type: SutterFilterWheel
+            wheel_number: 1
+          filter_wheel_delay: .030 # in seconds
+          available_filters:
+            Empty-1: 0
+            525-30: 1
+            600-52: 2
+            670-30: 3
+            647-LP: 4
+            Empty-2: 5
+            Empty-3: 6
+            Empty-4: 7
+
+
+|
 
 ASI
 ---
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    filter_wheel:
-      type: ASI
-      port: COM10
-      baudrate: 115200
-      number_of_wheels: 1
-
-  microscopes:
-    microscope_name:
-      filter_wheel:
-        hardware:
-          name: filter_wheel
+      hardware:
+        filter_wheel:
           type: ASI
-          wheel_number: 1
-        filter_wheel_delay: .030 # in seconds
-        available_filters:
-          BLU - FF01-442/42-32: 0
-          GFP - FF01-515/30-32: 1
-          RFP - FF01-595/31-32: 2
-          Far-Red - FF01-670/30-32: 3
-          Blocked1: 4
-          Empty: 5
-          Blocked3: 6
-          Blocked4: 7
-          Blocked5: 8
-          Blocked6: 9
+          port: COM10
+          baudrate: 115200
+          number_of_wheels: 1
+
+      microscopes:
+        microscope_name:
+          filter_wheel:
+            hardware:
+              name: filter_wheel
+              type: ASI
+              wheel_number: 1
+            filter_wheel_delay: .030 # in seconds
+            available_filters:
+              BLU - FF01-442/42-32: 0
+              GFP - FF01-515/30-32: 1
+              RFP - FF01-595/31-32: 2
+              Far-Red - FF01-670/30-32: 3
+              Blocked1: 4
+              Empty: 5
+              Blocked3: 6
+              Blocked4: 7
+              Blocked5: 8
+              Blocked6: 9
+
+|
 
 Galvanometers
 =============
@@ -795,27 +812,28 @@ Technologies/Novanta, Thorlabs, and ScannerMAX Each of these devices
 are externally controlled via analog signals delivered from a data
 acquisition card.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-    microscopes:
-      microscope_name:
-        galvo:
-          -
-            hardware:
-              name: daq
-              type: NI
-              channel: PCI6738/ao0
-              min: -5
-              max: 5
-            waveform: sawtooth
-            frequency: 99.9
-            amplitude: 2.5
-            offset: 0.5
-            duty_cycle: 50
-            phase: 1.57079 # pi/2
+        microscopes:
+          microscope_name:
+            galvo:
+              -
+                hardware:
+                  name: daq
+                  type: NI
+                  channel: PCI6738/ao0
+                  min: -5
+                  max: 5
+                waveform: sawtooth
+                frequency: 99.9
+                amplitude: 2.5
+                offset: 0.5
+                duty_cycle: 50
+                phase: 1.57079 # pi/2
+
+|
 
 Lasers
 ======
@@ -847,34 +865,35 @@ Most lasers are controlled externally via mixed analog and digital modulation.
 The ``onoff`` entry is for digital modulation. The ``power`` entry is for analog
 modulation.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  microscopes:
-    microscope_name:
-      lasers:
-        - wavelength: 488
-          onoff:
-            hardware:
-              name: daq
-              type: NI
-              channel: PCI6738/port1/line5 # 7/41
-              min: 0
-              max: 5
-          power:
-            hardware:
-              name: daq
-              type: NI
-              channel: PCI6738/ao8 #1  # 44/11
-              min: 0
-              max: 5
-          type: Obis
-          index: 0
-          delay_percent: 10
-          pulse_percent: 87
-        - wavelength: 561...
+      microscopes:
+        microscope_name:
+          lasers:
+            - wavelength: 488
+              onoff:
+                hardware:
+                  name: daq
+                  type: NI
+                  channel: PCI6738/port1/line5 # 7/41
+                  min: 0
+                  max: 5
+              power:
+                hardware:
+                  name: daq
+                  type: NI
+                  channel: PCI6738/ao8 #1  # 44/11
+                  min: 0
+                  max: 5
+              type: Obis
+              index: 0
+              delay_percent: 10
+              pulse_percent: 87
+            - wavelength: 561...
+
+|
 
 Shutters
 ========
@@ -886,37 +905,39 @@ Thorlabs
 
 Thorlabs shutters are controlled via a digital on off voltage.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  microscopes:
-    microscope_name:
-      shutter:
-        hardware:
-          name: daq
-          type: NI
-          channel: PXI6259/port0/line0
-          min: 0
-          max: 5
+      microscopes:
+        microscope_name:
+          shutter:
+            hardware:
+              name: daq
+              type: NI
+              channel: PXI6259/port0/line0
+              min: 0
+              max: 5
+
+|
 
 Synthetic Shutter
 -----------------
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    shutter:
       hardware:
-        name: daq
-        type: synthetic
-        channel: PCIE6738/port0/line0
-        min: 0
-        max: 5
+        shutter:
+          hardware:
+            name: daq
+            type: synthetic
+            channel: PCIE6738/port0/line0
+            min: 0
+            max: 5
+
+|
 
 Mechanical Zoom
 ===============
@@ -931,91 +952,95 @@ Dynamixel Zoom
 This software supports the
 `Dynamixel Smart Actuator <https://www.dynamixel.com/>`_.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+..Note::
 
-The ``positions`` specify the voltage of the actuator at different zoom positions.
-The ``stage_positions`` account for focal shifts in between the different zoom values
-(the MVXPLAPO does not have a consistent focal plane). These may change depending on
-the immersion media. Here it is specified for a ``BABB`` (Benzyl Alcohol Benzyl
-Benzoate) immersion media.  The ``pixel_size`` specifies the effective pixel size of
-the system at each zoom.
+    The ``positions`` specify the voltage of the actuator at different zoom positions.
+    The ``stage_positions`` account for focal shifts in between the different zoom values
+    (the MVXPLAPO does not have a consistent focal plane). These may change depending on
+    the immersion media. Here it is specified for a ``BABB`` (Benzyl Alcohol Benzyl
+    Benzoate) immersion media.  The ``pixel_size`` specifies the effective pixel size of
+    the system at each zoom.
 
-.. code-block:: yaml
+.. collapse:: Configuration File
 
-  hardware:
-    zoom:
-      type: DynamixelZoom
-      servo_id: 1
-      port: COM18
-      baudrate: 1000000
+    .. code-block:: yaml
 
-  microscopes:
-    microscope_name:
-      zoom:
-        hardware:
-            name: zoom
-            type: DynamixelZoom
-            servo_id: 1
-        position:
-            0.63x: 0
-            1x: 627
-            2x: 1711
-            3x: 2301
-            4x: 2710
-            5x: 3079
-            6x: 3383
-        pixel_size:
-            0.63x: 9.7
-            1x: 6.38
-            2x: 3.14
-            3x: 2.12
-            4x: 1.609
-            5x: 1.255
-            6x: 1.044
-        stage_positions:
-            BABB:
-                f:
-                    0.63x: 0
-                    1x: 1
-                    2x: 2
-                    3x: 3
-                    4x: 4
-                    5x: 5
-                    6x: 6
+      hardware:
+        zoom:
+          type: DynamixelZoom
+          servo_id: 1
+          port: COM18
+          baudrate: 1000000
+
+      microscopes:
+        microscope_name:
+          zoom:
+            hardware:
+                name: zoom
+                type: DynamixelZoom
+                servo_id: 1
+            position:
+                0.63x: 0
+                1x: 627
+                2x: 1711
+                3x: 2301
+                4x: 2710
+                5x: 3079
+                6x: 3383
+            pixel_size:
+                0.63x: 9.7
+                1x: 6.38
+                2x: 3.14
+                3x: 2.12
+                4x: 1.609
+                5x: 1.255
+                6x: 1.044
+            stage_positions:
+                BABB:
+                    f:
+                        0.63x: 0
+                        1x: 1
+                        2x: 2
+                        3x: 3
+                        4x: 4
+                        5x: 5
+                        6x: 6
+
+|
 
 .. _synthetic_zoom:
 
 Synthetic Zoom
 --------------
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  hardware:
-    zoom:
-      type: synthetic
-      servo_id: 1
-      port: COM18
-      baudrate: 1000000
-
-  microscopes:
-    microscope_name:
-      zoom:
-        hardware:
-          name: zoom
+      hardware:
+        zoom:
           type: synthetic
           servo_id: 1
-        position:
-          36X: 0
-        pixel_size:
-          36X: 0.180
-        stage_positions:
-          BABB:
-            f:
+          port: COM18
+          baudrate: 1000000
+
+      microscopes:
+        microscope_name:
+          zoom:
+            hardware:
+              name: zoom
+              type: synthetic
+              servo_id: 1
+            position:
               36X: 0
+            pixel_size:
+              36X: 0.180
+            stage_positions:
+              BABB:
+                f:
+                  36X: 0
+
+|
 
 Deformable Mirrors
 ==================
@@ -1029,17 +1054,19 @@ The ``flat_path`` provides a path to a system correction ``.wcs`` file, an Imagi
 Optic proprietary file that stores actuator voltages and corresponding Zernike
 coefficients.
 
-Configuration File
-^^^^^^^^^^^^^^^^^^
+.. collapse:: Configuration File
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-  mirror:
-    type: ImagineOpticsMirror
-
-  mirror:
-      hardware:
-        name: mirror
+      mirror:
         type: ImagineOpticsMirror
-        flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
-      n_modes: 32
+
+      mirror:
+          hardware:
+            name: mirror
+            type: ImagineOpticsMirror
+            flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+          n_modes: 32
+
+
+|

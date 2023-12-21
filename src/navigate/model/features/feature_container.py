@@ -900,34 +900,40 @@ def load_features(model, feature_list):
         signal_root, data_root = None, None
         pre_signal, pre_data = None, None
         for temp in feature_list:
-            continue_loop_list = []
+            break_to_next = True
             if type(temp) is dict:
                 signal_head, data_head = create_node(temp)
                 signal_tail = signal_head
                 data_tail = data_head
+                break_loop_list1, break_loop_list2 = [], []
                 if "yes" in temp:
                     if temp["yes"] == "break":
                         break_list.append(["child", signal_head, data_head, 1])
                     elif temp["yes"] == "continue":
                         continue_list.append(("child", signal_head, data_head))
                     else:
-                        signal_child_head, data_child_head, signal_child_tail, data_child_tail = build_feature_tree(temp["yes"])
+                        signal_child_head, data_child_head, signal_child_tail, data_child_tail = build_feature_tree(temp["yes"], continue_list, break_loop_list1)
                         signal_head.child = signal_child_head
                         data_head.child = data_child_head
                         signal_tail = signal_child_tail
                         data_tail = data_child_tail
+                        break_to_next = False
                 if "no" in temp:
                     if temp["no"] == "break":
                         break_list.append(["sibling", signal_head, data_head, 1])
                     elif temp["no"] == "continue":
                         continue_list.append(("sibling", signal_head, data_head))
                     else:
-                        signal_sibling_head, data_sibling_head, signal_sibling_tail, data_sibling_tail = build_feature_tree(temp["no"])
+                        signal_sibling_head, data_sibling_head, signal_sibling_tail, data_sibling_tail = build_feature_tree(temp["no"], continue_list, break_loop_list2)
                         signal_head.sibling = signal_sibling_head
                         data_head.sibling = data_sibling_head
+                        break_to_next = False
+                break_list += break_loop_list1
+                break_list += break_loop_list2
             elif type(temp) is tuple:
                     for node in break_list:
                         node[-1] += 1
+                    continue_loop_list = []
                     signal_head, data_head, signal_tail, data_tail = build_feature_tree(
                         temp, continue_loop_list, break_list
                     )
@@ -944,20 +950,22 @@ def load_features(model, feature_list):
                             node[2].sibling = data_tail
                     for node in break_list:
                         node[-1] -= 1
+                    break_to_next = False
             else:
                 signal_head, data_head, signal_tail, data_tail = build_feature_tree(
-                        temp, continue_loop_list, break_list
+                        temp, continue_list, break_list
                     )
-            for i in range(len(break_list)-1, -1, -1):
-                node = break_list[i]
-                if node[-1] == 0:
-                    if node[0] == "child":
-                        node[1].child = signal_head
-                        node[2].child = data_head
-                    else:
-                        node[1].sibling = signal_head
-                        node[2].sibling = data_head
-                    break_list.pop()
+            if break_to_next:
+                for i in range(len(break_list)-1, -1, -1):
+                    node = break_list[i]
+                    if node[-1] <= 0:
+                        if node[0] == "child":
+                            node[1].child = signal_head
+                            node[2].child = data_head
+                        else:
+                            node[1].sibling = signal_head
+                            node[2].sibling = data_head
+                        break_list.pop()
             if pre_signal:
                 pre_signal.sibling = signal_head
                 pre_data.sibling = data_head

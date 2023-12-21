@@ -33,7 +33,6 @@
    navigate.tools.decorators
    navigate.tools.file_functions
    navigate.tools.image
-   navigate.tools.image_loaders
    navigate.tools.linear_algebra
    navigate.tools.main_functions
    navigate.tools.multipos_table_tools

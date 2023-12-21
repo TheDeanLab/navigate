@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imaging on a mesoSPIM BT &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Imaging on the CT-ASLM-V1 and CT-ASLM-V2" href="acquire_CT-ASLM-V1_and_CT-ASLM-V2.html" />
+    <link rel="prev" title="Setting up an Axially Swept Light-Sheet Microscope" href="setup_voodoo.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            navigate
+              <img src="../../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../software_installation.html">Software Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_microscope.html">Setting up a microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="case_studies_home.html">Case Studies</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="setup_voodoo.html">Setting up an Axially Swept Light-Sheet Microscope</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Imaging on a mesoSPIM BT</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setting-the-beam-parameters">Setting the beam parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#loading-and-finding-the-sample">Loading and finding the sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imaging-a-z-stack">Imaging a Z-Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tiling-a-sample-larger-than-the-field-of-view">Tiling a sample larger than the field of view</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="acquire_CT-ASLM-V1_and_CT-ASLM-V2.html">Imaging on the CT-ASLM-V1 and CT-ASLM-V2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acquire_exASLM.html">Imaging on an Upright ASLM</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plugin/plugin_home.html">Plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="case_studies_home.html">Case Studies</a></li>
+      <li class="breadcrumb-item active">Imaging on a mesoSPIM BT</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user_guide/case_studies/acquire_mesospimbt.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="imaging-on-a-mesospim-bt">
+<h1>Imaging on a mesoSPIM BT<a class="headerlink" href="#imaging-on-a-mesospim-bt" title="Permalink to this heading"></a></h1>
+<p>This is a case study in using the software to image with a <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2023.06.16.545256v1">mesoSPIM BT microscope</a>.</p>
+<section id="setting-the-beam-parameters">
+<h2>Setting the beam parameters<a class="headerlink" href="#setting-the-beam-parameters" title="Permalink to this heading"></a></h2>
+<p>Make sure the imaging chamber is empty or, if a sample is mounted, the sample is not in
+the beam path.</p>
+<ol class="arabic simple">
+<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button.
+Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
+<li><p>Go to the <span class="guilabel">Channels</span> tab. Choose the wavelength you want to align. Set the
+laser’s <span class="guilabel">Power</span> to <cite>100.0</cite>. Change <span class="guilabel">Filter</span> to an “Empty”
+option.</p></li>
+<li><p>Go to the <span class="menuselection">Microscope Configuration ‣ Waveform Parameters</span>. A popup
+named <span class="guilabel">Waveform Parameter Settings</span> will appear. Make sure the
+<span class="guilabel">Mode</span> matches “mesoSPIM BT” and the <span class="guilabel">Magnification</span> matches the
+magnification of the objective you are using.</p></li>
+<li><p><span class="guilabel">Galvo 0</span> digitally sweeps the beam across the field of view. To align the
+axially-swept light sheet parameters, set the <span class="guilabel">Galvo 0</span>
+<span class="guilabel">Amplitude</span> to <cite>0.0</cite>. Set the <span class="guilabel">Offset</span> so that the beam is
+centered in the field of view. Click the <span class="guilabel">Camera View</span> to toggle the
+crosshairs, which indicate the center of the field of view. Adjust the
+<span class="guilabel">F</span> (focus) value in the <span class="guilabel">Stage Control</span> panel until the beam is
+as thin/focused as possible.</p></li>
+<li><p>The empty filter makes us susceptible to seeing particles scattering light in the
+chamber. This can effect the software’s autoscaling routine. To ensure we are
+looking at the beam correctly, uncheck <span class="guilabel">Autoscale</span> and set the
+<span class="guilabel">Min Counts</span> and <span class="guilabel">Max Counts</span> so the beam is visible, but not
+saturating the display.</p></li>
+<li><p>Set the wavelength’s <span class="guilabel">Amplitude</span> to <cite>0.0</cite>. Set the wavelength’s
+<span class="guilabel">Offset</span> so that the beam is focused in the center of the field of view.</p></li>
+<li><p>Go to <span class="guilabel">Camera Settings</span> and ensure that “Light-Sheet” is selected under
+<span class="guilabel">Sensor Mode</span>. Slowly increase the wavelength’s <span class="guilabel">Amplitude</span>
+until the beam becomes a straight line across the screen. If the beam does not
+become straighter, try changing the camera’s <span class="guilabel">Readout Direction</span>.</p></li>
+<li><p>Once the beam is straight, slowly change the wavelength’s <span class="guilabel">Offset</span> until
+the beam has an even thickness across the field of view.</p></li>
+<li><p>Slowly increase <span class="guilabel">Galvo 0</span>’s <span class="guilabel">Amplitude</span> until the entire field
+of view is just covered by the swept beam.</p></li>
+<li><p>Under <span class="guilabel">Waveform Parameter Settings</span>, press <span class="guilabel">Save Configuration</span>.</p></li>
+<li><p>Under the <span class="guilabel">Channels</span> tab, restore the filter to its non-empty position.</p></li>
+</ol>
+</section>
+<section id="loading-and-finding-the-sample">
+<h2>Loading and finding the sample<a class="headerlink" href="#loading-and-finding-the-sample" title="Permalink to this heading"></a></h2>
+<ol class="arabic">
+<li><p>Load the sample on the microscope.</p></li>
+<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button.
+Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
+<li><p>Scroll around with the stage either via joystick or using the controls in the
+<span class="guilabel">Stage Control</span> tab until the sample comes into view.</p>
+<img alt="../../_images/find_sample.png" src="../../_images/find_sample.png" />
+</li>
+<li><p>Focus on the sample using the focus axis. Optionally, use Autofocus by going to
+<span class="menuselection">Autofocus ‣ Autofocus Settings</span>. Press <span class="guilabel">Autofocus</span>.
+Ensure there is a clear peak in the resulting plot.</p>
+<img alt="../../_images/autofocus_settings.png" src="../../_images/autofocus_settings.png" />
+<p>If there is not, the autofocusing routine did not work. Try increasing the laser
+power and/or bringing the sample more into focus manually. If it did work, the
+sample should now be in focus.</p>
+<img alt="../../_images/autofocus_image.png" src="../../_images/autofocus_image.png" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sometimes there isn’t a clear peak, but there is a clear trend toward a peak.
+In this case, the autofocus is converging, but the true focus position is
+outside the range of your search. Run autofocus again to achieve convergence.</p>
+<img alt="../../_images/autofocus_settings_partial.png" src="../../_images/autofocus_settings_partial.png" />
+</div>
+</li>
+</ol>
+</section>
+<section id="imaging-a-z-stack">
+<span id="z-stack"></span><h2>Imaging a Z-Stack<a class="headerlink" href="#imaging-a-z-stack" title="Permalink to this heading"></a></h2>
+<ol class="arabic">
+<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button.
+Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
+<li><p>Using the <span class="guilabel">Stage Control</span>, go to a shallow Z-position in the sample. Under
+the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquistion Settings (um)</span> press
+<span class="guilabel">Set Start Pos/Foc</span>.</p>
+<img alt="../../_images/set_start_pos.png" src="../../_images/set_start_pos.png" />
+</li>
+<li><p>Go to a deep Z-position in the sample. Press <span class="guilabel">Set End Pos/Foc</span>.</p>
+<img alt="../../_images/set_end_pos.png" src="../../_images/set_end_pos.png" />
+</li>
+<li><p>Select “Z-Stack” from the dropdown next to the <span class="guilabel">Acquire</span> button.
+Press <span class="guilabel">Acquire</span>.</p></li>
+<li><p>Enter the sample parameters in the <span class="guilabel">File Saving Dialog</span> that pops up.
+Press <span class="guilabel">Acquire Data</span>.</p>
+<img alt="../../_images/save_dialog.png" src="../../_images/save_dialog.png" />
+</li>
+</ol>
+</section>
+<section id="tiling-a-sample-larger-than-the-field-of-view">
+<h2>Tiling a sample larger than the field of view<a class="headerlink" href="#tiling-a-sample-larger-than-the-field-of-view" title="Permalink to this heading"></a></h2>
+<p>This assumes you have already set the start and end positions in
+<span class="guilabel">Stack Acquistion Settings (um)</span> (see <a class="reference internal" href="#z-stack"><span class="std std-ref">Imaging a Z-Stack</span></a>).</p>
+<ol class="arabic">
+<li><p>Under the <span class="guilabel">Channels</span> tab, press <span class="guilabel">Launch Tiling Wizard</span>.</p>
+<img alt="../../_images/tiling_wizard.png" src="../../_images/tiling_wizard.png" />
+</li>
+<li><p>Go to thickest part of the sample. Navigate to the lower bound of the x-axis and
+press <span class="guilabel">Set X Start</span>. Navigate to the upper bound of the x-axis and press
+<span class="guilabel">Set X End</span>. Repeat for all axes except for focus.</p></li>
+<li><p>Ensure the sample is in focus and press <span class="guilabel">Set F Start</span> and
+<span class="guilabel">Set F End</span> without changing the focus position.</p></li>
+<li><p>Press <span class="guilabel">Populate Multi-Position Table</span>. Navigate to the
+<span class="guilabel">Multiposition</span> tab and ensure the locations populated.</p>
+<img alt="../../_images/multiposition_table.png" src="../../_images/multiposition_table.png" />
+</li>
+<li><p>Under the <span class="guilabel">Channels</span>, make sure <span class="guilabel">Enable</span> is checked under
+<span class="guilabel">Multi-Position Acquisition</span>.</p></li>
+<li><p>Under the <span class="guilabel">Channels</span>, make sure <span class="guilabel">Save Data</span> is checked under
+<span class="guilabel">Timepoint Settings</span>.</p></li>
+<li><p>Select “Z-Stack” from the dropdown next to the <span class="guilabel">Acquire</span> button. Press
+<span class="guilabel">Acquire</span>.</p></li>
+<li><p>Enter the sample parameters in the <span class="guilabel">File Saving Dialog</span> that pops up.
+Press <span class="guilabel">Acquire Data</span>.</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="setup_voodoo.html" class="btn btn-neutral float-left" title="Setting up an Axially Swept Light-Sheet Microscope" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="acquire_CT-ASLM-V1_and_CT-ASLM-V2.html" class="btn btn-neutral float-right" title="Imaging on the CT-ASLM-V1 and CT-ASLM-V2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -132,17 +132,21 @@ settings to allow ``pip``/ ``conda`` to install the proper packages.
 * This can be done by going to Environment Variables for Windows, or another OS
   equivalent.
 * Create the following new System Variables:
+
     * Variable = HTTP_PROXY; Value = http://proxy.swmed.edu:3128
     * Variable = HTTPS_PROXY; Value = http://proxy.swmed.edu:3128 (please see that
       they are both http, this is purposeful and not a typo)
+
 * If you continue to have issues then change the value of Variable HTTPS_PROXY to
   https://proxy.swmed.edu:3128
 * If you still have issues then you will need to create/update both configuration
   files for conda and pip to include proxy settings, if they are not in the paths
   below you will need to create them. This assumes a Windows perspective. Mac/Linux
   users will have different paths, they can be found online.
+
     * ``conda``'s configuration file can be found at C:\\Users\\UserProfile\\.condarc
     * ``pip``'s configiguration file can be found at C:\\Users\\UserProfile\\pip\\pip.ini
+
 * You can also try to set the proxy from within the Anaconda Prompt:
 *  ``set https_proxy=http://username:password@proxy.example.com:8080``
 *  ``set http_proxy=http://username:password@proxy.example.com:8080``

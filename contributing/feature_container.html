@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feature Container &mdash; navigate 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.features.adaptive_optics" href="../_autosummary/navigate.model.features.adaptive_optics.html" />
+    <link rel="prev" title="Contributing Guidelines" href="contributing_guidelines.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting up a microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Feature Container</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#currently-implemented-features">Currently Implemented Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.html">navigate.model.features.adaptive_optics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.auto_tile_scan.html">navigate.model.features.auto_tile_scan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.autofocus.html">navigate.model.features.autofocus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.html">navigate.model.features.common_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.cva_conpro.html">navigate.model.features.cva_conpro</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.image_writer.html">navigate.model.features.image_writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.html">navigate.model.features.remove_empty_tiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.restful_features.html">navigate.model.features.restful_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/navigate.model.features.volume_search.html">navigate.model.features.volume_search</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-objects">Feature Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-custom-feature-object">Creating A Custom Feature Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-interact-with-other-devices">How to interact with other devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-pause-and-resume-data-threads-in-the-model">How to pause and resume data threads in the model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-feature-lists">Custom Feature Lists</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-custom-feature-list-in-python">Creating a Custom Feature List in Python</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Feature Container</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/contributing/feature_container.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="feature-container">
+<span id="features"></span><h1>Feature Container<a class="headerlink" href="#feature-container" title="Permalink to this heading"></a></h1>
+<p>The navigate <strong>feature container</strong> allows for reconfigurable acquisition and
+analysis. The feature container runs a tree of <strong>features</strong>, where each
+feature may perform a <em>signal</em> operation, where it modifies the state of
+microscope hardware, a <em>data</em> operation, where it performs an analysis on
+acquired image data, or both.</p>
+<p>Once a feature is executed, any features dependent on this feature’s execution
+will execute (for example, move the stage, then snap a picture). Following
+this, the next set of features in sequence will be executed.</p>
+<p>Examples of some existing features include
+<code class="docutils literal notranslate"><span class="pre">navigate.model.features.common_features.ZStackAcquisition</span></code>, which acquires a
+z-stack, and <code class="docutils literal notranslate"><span class="pre">navigate.model.features.autofocus.Autofocus</span></code>, which finds the
+ideal plane of focus of a sample using a Discrete Cosine Transform.</p>
+<section id="currently-implemented-features">
+<h2>Currently Implemented Features<a class="headerlink" href="#currently-implemented-features" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.html">navigate.model.features.adaptive_optics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.fourier_annulus.html">navigate.model.features.adaptive_optics.fourier_annulus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.gauss.html">navigate.model.features.adaptive_optics.gauss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.poly2.html">navigate.model.features.adaptive_optics.poly2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.r_squared.html">navigate.model.features.adaptive_optics.r_squared</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.adaptive_optics.TonyWilson.html">navigate.model.features.adaptive_optics.TonyWilson</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.auto_tile_scan.html">navigate.model.features.auto_tile_scan</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.auto_tile_scan.CalculateFocusRange.html">navigate.model.features.auto_tile_scan.CalculateFocusRange</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.autofocus.html">navigate.model.features.autofocus</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.autofocus.power_tent.html">navigate.model.features.autofocus.power_tent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.autofocus.Autofocus.html">navigate.model.features.autofocus.Autofocus</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.html">navigate.model.features.common_features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.ChangeResolution.html">navigate.model.features.common_features.ChangeResolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.FindTissueSimple2D.html">navigate.model.features.common_features.FindTissueSimple2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.LoopByCount.html">navigate.model.features.common_features.LoopByCount</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.html">navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.PrepareNextChannel.html">navigate.model.features.common_features.PrepareNextChannel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.Snap.html">navigate.model.features.common_features.Snap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.StackPause.html">navigate.model.features.common_features.StackPause</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.WaitToContinue.html">navigate.model.features.common_features.WaitToContinue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.common_features.ZStackAcquisition.html">navigate.model.features.common_features.ZStackAcquisition</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.cva_conpro.html">navigate.model.features.cva_conpro</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.cva_conpro.ConstantVelocityAcquisition.html">navigate.model.features.cva_conpro.ConstantVelocityAcquisition</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.image_writer.html">navigate.model.features.image_writer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.image_writer.ImageWriter.html">navigate.model.features.image_writer.ImageWriter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.html">navigate.model.features.remove_empty_tiles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.detect_tissue.html">navigate.model.features.remove_empty_tiles.detect_tissue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.detect_tissue2.html">navigate.model.features.remove_empty_tiles.detect_tissue2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.DetectTissueInStack.html">navigate.model.features.remove_empty_tiles.DetectTissueInStack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord.html">navigate.model.features.remove_empty_tiles.DetectTissueInStackAndRecord</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.remove_empty_tiles.RemoveEmptyPositions.html">navigate.model.features.remove_empty_tiles.RemoveEmptyPositions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.restful_features.html">navigate.model.features.restful_features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.restful_features.prepare_service.html">navigate.model.features.restful_features.prepare_service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.restful_features.IlastikSegmentation.html">navigate.model.features.restful_features.IlastikSegmentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/navigate.model.features.volume_search.html">navigate.model.features.volume_search</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.volume_search.draw_box.html">navigate.model.features.volume_search.draw_box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/navigate.model.features.volume_search.VolumeSearch.html">navigate.model.features.volume_search.VolumeSearch</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="feature-objects">
+<span id="id1"></span><h2>Feature Objects<a class="headerlink" href="#feature-objects" title="Permalink to this heading"></a></h2>
+<p>Each feature is an object that accepts a pointer to <code class="docutils literal notranslate"><span class="pre">navigate.model.model</span></code> in its
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code>  arguments and contains a configuration dictionary that dictates
+feature behavior in its <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function. A complete configuration
+dictionary is shown below. As few or as many of these options can be specified
+as needed. Each function is considered a leaf or node of the feature tree.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">config_table</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;signal&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;init&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_func_signal</span><span class="p">,</span>
+                                <span class="s1">&#39;main&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_func_signal</span><span class="p">,</span>
+                                <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_func_signal</span><span class="p">,</span>
+                                <span class="s1">&#39;cleanup&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleanup_func_signal</span><span class="p">},</span>
+                         <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;init&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_func_data</span><span class="p">,</span>
+                                  <span class="s1">&#39;main&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_func_data</span><span class="p">,</span>
+                                  <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_func_data</span><span class="p">,</span>
+                                  <span class="s1">&#39;cleanup&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleanup_func_data</span><span class="p">},</span>
+                         <span class="s1">&#39;node&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;node_type&#39;</span><span class="p">:</span> <span class="s1">&#39;multi-step&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;device_related&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                  <span class="s1">&#39;need_response&#39;</span><span class="p">:</span> <span class="kc">True</span> <span class="p">},</span>
+                        <span class="p">}</span>
+</pre></div>
+</div>
+<p>Both <code class="docutils literal notranslate"><span class="pre">signal</span></code> and <code class="docutils literal notranslate"><span class="pre">data</span></code> configuration entries are themselves
+dictionaries that can contain <code class="docutils literal notranslate"><span class="pre">init</span></code>, <code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">end</span></code> and/or
+<code class="docutils literal notranslate"><span class="pre">cleanup</span></code> entries.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">init</span></code> entries dictate pre-processing steps that must be run before the
+main function of the feature starts.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">main</span></code> entries dictate the primary operation of the feature, and are run once per
+acqusition step. They return <code class="docutils literal notranslate"><span class="pre">True</span></code> if the acquistion should proceed and <code class="docutils literal notranslate"><span class="pre">False</span></code>
+if the acquistion should be ended.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">end</span></code> entries are run once per main function returning <code class="docutils literal notranslate"><span class="pre">True</span></code>. They check if the
+acquisition should end, if we are at any boundary points of the <code class="docutils literal notranslate"><span class="pre">main</span></code> function
+(e.g. if we need to change positions in a multi-position z-stack acquistion),
+and describe any closing operations that must be performed when exiting the feature</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cleanup</span></code> entries dictate what happens if the node fails. This is for
+failsafe controls such as “turn off all lasers”.</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">node</span></code> configuration dictionary contains general properties of feature
+nodes. <code class="docutils literal notranslate"><span class="pre">node_type</span></code> can be <code class="docutils literal notranslate"><span class="pre">one-step</span></code> or <code class="docutils literal notranslate"><span class="pre">multi-step</span></code>, the latter indicating
+we have an <code class="docutils literal notranslate"><span class="pre">init</span></code>, a <code class="docutils literal notranslate"><span class="pre">main</span></code> and an <code class="docutils literal notranslate"><span class="pre">end</span></code>. <code class="docutils literal notranslate"><span class="pre">device_related</span></code> is set to
+<code class="docutils literal notranslate"><span class="pre">True</span></code> if we have a <code class="docutils literal notranslate"><span class="pre">multi-step</span></code> signal container. <code class="docutils literal notranslate"><span class="pre">need_response</span></code> is set
+to true if the signal node waits on hardware (e.g. waits for a stage to confirm
+it has indeed moved) before proceeding.</p>
+<p>Each of the functions that are the value entries in <code class="docutils literal notranslate"><span class="pre">self.config_table</span></code>
+dictionaries are methods of the feature object.</p>
+<section id="creating-a-custom-feature-object">
+<h3>Creating A Custom Feature Object<a class="headerlink" href="#creating-a-custom-feature-object" title="Permalink to this heading"></a></h3>
+<p>Each feature object is defined as a class. Creating a new feature is the same as
+creating any Python class, but with a few requirements. The first parameter of the
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code> function (after <code class="docutils literal notranslate"><span class="pre">self</span></code>) must be <code class="docutils literal notranslate"><span class="pre">model</span></code>, which gives the feature
+object full access to the navigate model. All the other parameters are keyword
+arguments and must have default values. The init function should always have a
+<code class="docutils literal notranslate"><span class="pre">config_table</span></code> attribute (see <a class="reference internal" href="#feature-objects"><span class="std std-ref">above</span></a> for a description of
+the <code class="docutils literal notranslate"><span class="pre">config_table</span></code>).</p>
+<p>In the example below, we will create a custom feature that moves to a specified
+position in navigate’s multi-position table and calculates the sharpness of the image
+at this position using the Normalized DCT Shannon Entropy metric. An example
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function for our <code class="docutils literal notranslate"><span class="pre">FeatureExample</span></code> class is below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.analysis.image_contrast</span> <span class="kn">import</span> <span class="n">fast_normalized_dct_shannon_entropy</span>
+
+<span class="k">class</span> <span class="nc">FeatureExample</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">position_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_id</span> <span class="o">=</span> <span class="n">position_id</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_table</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;signal&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;init&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_func_signal</span><span class="p">,</span>
+                    <span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_func_signal</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_func_data</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;device_related&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<ol class="arabic">
+<li><p>Get multi-position table position from the GUI.</p>
+<p>All the GUI parameters are stored in <code class="docutils literal notranslate"><span class="pre">model.configuration[&quot;experiment&quot;]</span></code> during
+runtime. Below, we create a function to get all the position stored at
+<code class="docutils literal notranslate"><span class="pre">position_id</span></code> from the multi-position table in the GUI when we launch our
+feature.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pre_func_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">configuration</span><span class="p">[</span><span class="s2">&quot;experiment&quot;</span><span class="p">][</span><span class="s2">&quot;MultiPositions&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_position</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">position_id</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_stage_position</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_position</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">axis</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">current_position</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+</pre></div>
+</div>
+<p>More GUI parameters can be found in <a class="reference external" href="https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/config/experiment.yml">experiment.yml</a></p>
+</li>
+<li><p>Use the stage to move to this position.</p>
+<p>Now, we move stage to the <code class="docutils literal notranslate"><span class="pre">target_position</span></code> we grabbed from the multi-position
+table.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_func_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">_abs&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_position</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">move_stage</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">wait_until_done</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Take a picture and process the resulting image.</p></li>
+</ol>
+<blockquote>
+<div><p>In parallel with our signal function call, the camera will acquire an image.
+The image captured by the camera will be stored in the <code class="docutils literal notranslate"><span class="pre">model</span></code> <code class="docutils literal notranslate"><span class="pre">data_buffer</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">data</span></code> functions run after an image is  acquired. We add code to deal with
+this image in the <code class="docutils literal notranslate"><span class="pre">&quot;main&quot;</span></code> data function. Here, we calculate the Shannon entropy
+of the image.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_func_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">):</span>
+    <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">frame_ids</span><span class="p">:</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">data_buffer</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+        <span class="n">entropy</span> <span class="o">=</span> <span class="n">fast_normalized_dct_shannon_entropy</span><span class="p">(</span><span class="n">image</span><span class="p">,</span>
+            <span class="n">psf_support_diameter_xy</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;entropy of image:&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">entropy</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Now, we’ve create a whole new feature and can use it as we wish.</p>
+</section>
+<section id="how-to-interact-with-other-devices">
+<h3>How to interact with other devices<a class="headerlink" href="#how-to-interact-with-other-devices" title="Permalink to this heading"></a></h3>
+<p>We interact with all devices through <code class="docutils literal notranslate"><span class="pre">self.model.active_microscope</span></code>.
+Here is an example to open shutter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">active_microscope</span><span class="o">.</span><span class="n">shutter</span><span class="o">.</span><span class="n">open_shutter</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-pause-and-resume-data-threads-in-the-model">
+<h3>How to pause and resume data threads in the model<a class="headerlink" href="#how-to-pause-and-resume-data-threads-in-the-model" title="Permalink to this heading"></a></h3>
+<p>The image data acquired from the camera are handled in an independent thread. As such,
+the <em>signal</em> and <em>data</em> operations by default run in parallel and do not block each
+other. Sometimes, we want to be sure a device is ready or has moved. For example, in
+<code class="docutils literal notranslate"><span class="pre">FeatureExample</span></code>, we have no guarantee that the stage finished moving before the
+image was taken. The <code class="docutils literal notranslate"><span class="pre">wait_until_done</span></code> call only blocks the signal thread from
+progressing before the stage finishs its move. To ensure the data thread also waits,
+we need to pause the data thread until the stage is ready.</p>
+<p>Here is an example of how we can pause and resume the data thread:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pause_data_thread</span><span class="p">()</span>
+
+<span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">move_stage</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">wait_until_done</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># ...</span>
+
+<span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">resume_data_thread</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We can of course replace <code class="docutils literal notranslate"><span class="pre">self.model.move_stage(pos,</span> <span class="pre">wait_until_done=True)</span></code> with
+whatever task we want to wait for before resuming image acqusition.</p>
+<p>Model functions can be found <a class="reference internal" href="../_autosummary/navigate.model.model.Model.html"><span class="doc">in the API</span></a>.</p>
+</section>
+</section>
+<section id="custom-feature-lists">
+<h2>Custom Feature Lists<a class="headerlink" href="#custom-feature-lists" title="Permalink to this heading"></a></h2>
+<p>The navigate software allows you to chain feature objects into lists to build
+acquisition workflows.</p>
+<section id="creating-a-custom-feature-list-in-python">
+<h3>Creating a Custom Feature List in Python<a class="headerlink" href="#creating-a-custom-feature-list-in-python" title="Permalink to this heading"></a></h3>
+<p>To create a customized feature list, follow these steps:</p>
+<ol class="arabic simple">
+<li><p>Import the necessary modules:</p></li>
+</ol>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.tools.decorators</span> <span class="kn">import</span> <span class="n">FeatureList</span>
+<span class="kn">from</span> <span class="nn">navigate.model.features.feature_related_functions</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">FeatureList</span></code> is a decorator that registers the list of features.
+<code class="docutils literal notranslate"><span class="pre">feature_related_functions</span></code> contains convienience imports that allow us to call
+<code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code> instead of
+<code class="docutils literal notranslate"><span class="pre">navigate.model.features.common_features.PrepareNextChannel</span></code>.
+This makes for more readable code.</p>
+</div></blockquote>
+<ol class="arabic simple">
+<li><p>Create the feature list.</p></li>
+</ol>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@FeatureList</span>
+<span class="k">def</span> <span class="nf">feature_example</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">LoopByCount</span><span class="p">,</span>
+                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;experiment.MicroscopeState.selected_channels&quot;</span><span class="p">,),</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>In this example, the feature list takes one image per selected channel in the GUI.
+<code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code> sets up the channel and <code class="docutils literal notranslate"><span class="pre">LoopByCount</span></code> call this setup once
+per selected channel.</p>
+</div></blockquote>
+<ol class="arabic">
+<li><p>Now, open navigate.</p></li>
+<li><p>Go to the <span class="guilabel">Features</span> menu.</p>
+<img alt="../_images/step_1.png" src="../_images/step_1.png" />
+</li>
+<li><p>Import the customized feature. Select <span class="guilabel">Add Custom Feature List</span> from the
+<span class="guilabel">Features</span> menu. A dialog box will appear, allowing you to select the
+Python file containing your customized feature list function.</p>
+<img alt="../_images/step_2.png" src="../_images/step_2.png" />
+</li>
+<li><p>Choose the Python file containing your customized feature list function. navigate
+will load the specified feature list, making it available for use in your
+experiments and analyses. It will appear at the bottom of the <span class="guilabel">Features</span>
+menu.</p></li>
+</ol>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="contributing_guidelines.html" class="btn btn-neutral float-left" title="Contributing Guidelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../_autosummary/navigate.model.features.adaptive_optics.html" class="btn btn-neutral float-right" title="navigate.model.features.adaptive_optics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

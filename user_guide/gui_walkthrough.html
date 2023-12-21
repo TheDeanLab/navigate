@@ -19,10 +19,11 @@
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Setting up a microscope" href="setup_microscope.html" />
+    <link rel="next" title="Setting Up A Microscope" href="setup_microscope.html" />
     <link rel="prev" title="Software Installation" href="../software_installation.html" /> 
 </head>
 
@@ -56,14 +57,71 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User Interface Walkthrough</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#menu-bar">Menu Bar</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#file">File</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#microscope-configuration">Microscope Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-control">Stage Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#autofocus">Autofocus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#features">Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plugins">Plugins</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#window">Window</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#acquisition-bar">Acquisition Bar</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#settings-notebooks">Settings Notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#display-notebooks">Display Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#settings-notebooks">Settings Notebooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#channels">Channels</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#channel-settings">Channel Settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#stack-acquisition-settings-mu-text-m">Stack Acquisition Settings (<span class="math notranslate nohighlight">\(\mu\text{m}\)</span>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#timepoint-settings">Timepoint Settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multi-position-acquisition">Multi-Position Acquisition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#quick-launch-buttons">Quick Launch Buttons</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="setup_microscope.html">Setting up a microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#camera-settings">Camera Settings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#camera-modes">Camera Modes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#framerate-info">Framerate Info</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#region-of-interest-settings">Region of Interest Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-control-notebook">Stage Control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#stage-positions">Stage Positions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#xy-movement">XY Movement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#z-movement">Z Movement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#focus-movement">Focus Movement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#theta-movement">Theta Movement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#buttons">Buttons</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#multiposition">Multiposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Buttons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multi-position-table">Multi-Position Table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#display-notebooks">Display Notebooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#camera-view">Camera View</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#lut">LUT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#image-metrics">Image Metrics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#image-display">Image Display</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#waveform-settings">Waveform Settings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#waveform-display">Waveform Display</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings">Settings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#additional-guis">Additional GUIs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-saving-dialog">File Saving Dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#waveform-parameters">Waveform Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-microscopes">Configure Microscopes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-position-tiling-wizard">Multi-Position Tiling Wizard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#autofocus-settings">Autofocus Settings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="setup_microscope.html">Setting Up A Microscope</a></li>
 <li class="toctree-l1"><a class="reference internal" href="acquiring_home.html">Acquiring Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="case_studies/case_studies_home.html">Case Studies</a></li>
 </ul>
@@ -128,6 +186,73 @@ is helpful for debugging code and configuration problems.</p>
 <p><span class="guilabel">Open Configuration Files</span> opens the folder containing the software’s
 <a class="reference internal" href="software_configuration.html#configuration-file"><span class="std std-ref">configuration file</span></a>.</p>
 </section>
+<section id="microscope-configuration">
+<h3>Microscope Configuration<a class="headerlink" href="#microscope-configuration" title="Permalink to this heading"></a></h3>
+<img alt="../_images/menu_microscope_configuration.png" src="../_images/menu_microscope_configuration.png" />
+<p>The <span class="guilabel">Microscope Configuration</span> menu is split into two parts, above and below
+the horizontal divider.</p>
+<p>Above the horizontal divider it lists the names of all
+microscopes named in the <code class="docutils literal notranslate"><span class="pre">microscopes</span></code> section of the
+<a class="reference internal" href="software_configuration.html#configuration-file"><span class="std std-ref">configuration file</span></a>. Mousing over a
+microscope name reveals all zoom values available under the
+<a class="reference internal" href="hardware/supported_hardware.html#mechanical-zoom"><span class="std std-ref">Mechanical Zoom</span></a>. Selecting one of
+these zoom values changes the magnification of the microscope.</p>
+<p>Below the horizontal divider is access to the
+<a class="reference internal" href="#waveform-parameters"><span class="std std-ref">Waveform Parameters</span></a> settings
+panel and the
+<a class="reference internal" href="#configure-microscopes"><span class="std std-ref">Configure Microscope</span></a> settings
+panel.</p>
+</section>
+<section id="stage-control">
+<span id="stage-control-menu"></span><h3>Stage Control<a class="headerlink" href="#stage-control" title="Permalink to this heading"></a></h3>
+<img alt="../_images/menu_stage_control.png" src="../_images/menu_stage_control.png" />
+<p>The stage control menu is split by horizontal dividers into three parts.</p>
+<p>The top part provides similar functionality to the
+<a class="reference internal" href="#stage-control-notebook"><span class="std std-ref">Stage Control Settings Notebook</span></a>. It allows movement
+of the stage along x, y, z, focus and theta. Here, you can see the <code class="docutils literal notranslate"><span class="pre">w</span></code>, <code class="docutils literal notranslate"><span class="pre">s</span></code>, <code class="docutils literal notranslate"><span class="pre">a</span></code>
+and <code class="docutils literal notranslate"><span class="pre">d</span></code> keys are bound to movement in x and y, and these can be used to scroll around
+a sample.</p>
+<p>The middle part provides similar functionality to the
+<a class="reference internal" href="#multiposition"><span class="std std-ref">Multiposition Settings Notebook</span></a>.
+Here, we can launch the
+<a class="reference internal" href="#multi-position-tiling-wizard"><span class="std std-ref">Tiling Wizard</span></a>,
+load and export (save) positions stored in the Multipositon Settings Notebook, and add
+the current stage position to the multiposition table.</p>
+<p>The bottom part of the menu is used to enable and disable the stage limits set in the
+configuration file (see the
+<a class="reference internal" href="software_configuration.html#stage-subsection"><span class="std std-ref">stage subsection</span></a>).</p>
+</section>
+<section id="autofocus">
+<h3>Autofocus<a class="headerlink" href="#autofocus" title="Permalink to this heading"></a></h3>
+<img alt="../_images/menu_autofocus.png" src="../_images/menu_autofocus.png" />
+<p>The autofocus menu has two options: <span class="guilabel">Perform Autofocus</span>, which autofocus the
+sample using the current autofocus settings, and <span class="guilabel">Autofocus Settings</span>, which
+launches the <a class="reference internal" href="#autofocus-settings"><span class="std std-ref">Autofocus Settings</span></a>
+popup.</p>
+</section>
+<section id="features">
+<h3>Features<a class="headerlink" href="#features" title="Permalink to this heading"></a></h3>
+<img alt="../_images/menu_features.png" src="../_images/menu_features.png" />
+<p>This menu provides access to acqusition feature lists. An explanation of features,
+feature lists, and the use and operation of this menu is provided under
+<a class="reference internal" href="features.html"><span class="doc">Reconfigurable Acquisitions Using Features</span></a>.</p>
+</section>
+<section id="plugins">
+<h3>Plugins<a class="headerlink" href="#plugins" title="Permalink to this heading"></a></h3>
+<img alt="../_images/menu_plugins.png" src="../_images/menu_plugins.png" />
+<p>This menu provides an access point for <a class="reference internal" href="../plugin/plugin_home.html"><span class="doc">plugins</span></a> that feature
+a popup GUI.</p>
+</section>
+<section id="window">
+<h3>Window<a class="headerlink" href="#window" title="Permalink to this heading"></a></h3>
+<img alt="../_images/menu_window.png" src="../_images/menu_window.png" />
+<p>This menu is split into two parts by a horizontal divider and provides some GUI controls.</p>
+<p>The top part allows the user to switch between the main
+<a class="reference internal" href="#settings-notebooks"><span class="std std-ref">Settings Notebooks</span></a>.</p>
+<p>The bottom part provides an option to move the camera display to a popup window and
+provides access to a help popup that features some keyboard shortcuts and tricks for
+using the software.</p>
+</section>
 </section>
 <section id="acquisition-bar">
 <h2>Acquisition Bar<a class="headerlink" href="#acquisition-bar" title="Permalink to this heading"></a></h2>
@@ -143,9 +268,423 @@ is helpful for debugging code and configuration problems.</p>
 </section>
 <section id="settings-notebooks">
 <h2>Settings Notebooks<a class="headerlink" href="#settings-notebooks" title="Permalink to this heading"></a></h2>
+<p>The settings notebooks are a series of tabs that control microscope settings, including
+laser power, camera settings and stage positions and many others.</p>
+<section id="channels">
+<h3>Channels<a class="headerlink" href="#channels" title="Permalink to this heading"></a></h3>
+<img alt="../_images/settings_channels.png" src="../_images/settings_channels.png" />
+<p>The Channels Settings Notebook is a tab (optionally, a popup) split into five sections:
+channel settings, stack acquistion settings, timepoint settings, multi-position
+acquisition and quick launch buttons.</p>
+<section id="channel-settings">
+<h4>Channel Settings<a class="headerlink" href="#channel-settings" title="Permalink to this heading"></a></h4>
+<p>This is used to set up acquisition color channels. A channel is considered to be a
+combination of an illuminating laser wavelength and a detection filter. Each channel
+has its own power, exposure time, interval and defocus. The checkbox on the left
+indicates if a channel should be used during acquisition. An acquisition loops through
+the channels in sequence.</p>
+<ul class="simple">
+<li><p><span class="guilabel">Laser</span> is the name of the laser, taken from the
+<a class="reference internal" href="software_configuration.html"><span class="doc">configuration file</span></a>, and usually expressed in
+nanometers.</p></li>
+<li><p><span class="guilabel">Power</span> is the power of the laser between 0 and 100 percent.</p></li>
+<li><p><span class="guilabel">Filter</span> is the name of the filter selected in the detection path filter
+wheel. Filter names are stored in the configuration file.</p></li>
+<li><p><span class="guilabel">Exp. Time (ms)</span> is the exposure time of the camera in milliseconds.</p></li>
+<li><p><span class="guilabel">Interval</span> indicates how often this channel should be used in an
+acquisition. For example, in two-color imaging, CH1 may images a process twice as
+fast as in CH2. Setting the CH2 interval to 2 allows us to image both channels at
+a similar rate.</p></li>
+<li><p><span class="guilabel">Defocus</span> indicates the defocus between two channels in micrometers. The
+defocus values are always relative to the focus of the first channel imaged. This
+setting is useful for compensating for chromatic aberration.</p></li>
+</ul>
+</section>
+<section id="stack-acquisition-settings-mu-text-m">
+<h4>Stack Acquisition Settings (<span class="math notranslate nohighlight">\(\mu\text{m}\)</span>)<a class="headerlink" href="#stack-acquisition-settings-mu-text-m" title="Permalink to this heading"></a></h4>
+<p>These are the settings used for a standard Z-Stack Acquisition.</p>
+<p><span class="guilabel">Pos</span> indicates z-positions. <span class="guilabel">Foc</span> indicates focus positions. The
+z-stack can optionally ramp through focus along with z.</p>
+<p><span class="guilabel">Start</span> and <span class="guilabel">End</span> are always expressed relative to the center of
+the z-stack. <span class="guilabel">Abs Z Start</span> and <span class="guilabel">Abs Z Stop</span> provide true stage
+positions at the start and end of the z-stack.</p>
+<p>The buttons <span class="guilabel">Set Start Pos/Foc</span> and <span class="guilabel">Set End Pos/Foc</span> grab the
+current z and focus positions from the stage and enter them into the corresponding
+start and end (stop) GUI boxes.</p>
+<p>The <span class="guilabel">Step Size</span> is expressed in microns and can be modified by the user. Upon
+modificiation, <span class="guilabel"># slices</span> will automatically update.</p>
+<p><span class="guilabel">Laser Cycling Settings</span> provide the options “Per Stack” and “Per Z”. In “Per
+Stack” mode, the software will move through all positions before changing to another
+color channel. In “Per Z” mode, the software will acquire all color channels selected
+before moving to the next position in the z-stack.</p>
+</section>
+<section id="timepoint-settings">
+<h4>Timepoint Settings<a class="headerlink" href="#timepoint-settings" title="Permalink to this heading"></a></h4>
+<p>These are used for acquiring data over multiple timepoints and for toggling the option
+to save data.</p>
+<ul class="simple">
+<li><p><span class="guilabel">Save Data</span> tells the software to save acquired data to disk when checked.
+If this is selected, a
+<a class="reference internal" href="#file-saving-dialog"><span class="std std-ref">saving popup window</span></a> will
+appear when <span class="guilabel">Acquire</span> is pressed, unless you are in “Continuous Scan” mode,
+which is designed for live previews only.</p></li>
+<li><p><span class="guilabel">Timepoints</span> indicates how many time points this acquisition should
+acquire.</p></li>
+<li><p><span class="guilabel">Stack Acq Time</span> provides an estimate of how long a single z-stack will
+take to acquire.</p></li>
+<li><p><span class="guilabel">Stack Pause (s)</span> indicates how much waiting time the software should
+introduce in between acquisition steps (e.g. in between taking z-stacks).</p></li>
+<li><p><span class="guilabel">Time Interval (hh:mm:ss)</span> provides an estimate of how long each time point
+takes to acquire. This is (stack acquisition + stack pause) x number of channels to
+image.</p></li>
+<li><p><span class="guilabel">Experiment Duration (hh:mm:ss)</span> provides an estimate of how long the full
+acquisition will take.</p></li>
+</ul>
+</section>
+<section id="multi-position-acquisition">
+<h4>Multi-Position Acquisition<a class="headerlink" href="#multi-position-acquisition" title="Permalink to this heading"></a></h4>
+<p>This contains settings to set up acquisition over multiple positions in the sample,
+e.g. tiling.</p>
+<ul class="simple">
+<li><p><span class="guilabel">Enable</span> indicates that the software should move through the positions
+listed in the
+<a class="reference internal" href="#multiposition"><span class="std std-ref">Multiposition Settings Notebook</span></a>
+during the acquisition.</p></li>
+<li><p><span class="guilabel">Launch Tiling Wizard</span> launches the
+<a class="reference internal" href="#multi-position-tiling-wizard"><span class="std std-ref">Tiling Wizard</span></a>.</p></li>
+</ul>
+</section>
+<section id="quick-launch-buttons">
+<h4>Quick Launch Buttons<a class="headerlink" href="#quick-launch-buttons" title="Permalink to this heading"></a></h4>
+<p>This provides access to the
+<a class="reference internal" href="#waveform-parameters"><span class="std std-ref">Waveform Parameters</span></a> and
+<a class="reference internal" href="#autofocus-settings"><span class="std std-ref">Autofocus Settings</span></a>
+popups.</p>
+</section>
+</section>
+<section id="camera-settings">
+<h3>Camera Settings<a class="headerlink" href="#camera-settings" title="Permalink to this heading"></a></h3>
+<img alt="../_images/settings_camera.png" src="../_images/settings_camera.png" />
+<p>The Channels Settings Notebook is a tab (optionally, a popup) that controls the camera.
+It is split into three sections: camera modes, framerate info and region of interest
+settings.</p>
+<section id="camera-modes">
+<h4>Camera Modes<a class="headerlink" href="#camera-modes" title="Permalink to this heading"></a></h4>
+<p>The camera modes section is designed for switching between normal mode of operation,
+where the camera exposes all pixels semi-simultaneously, and light-sheet mode, where
+the camera exposes only a few pixels at a time, termed the rollign shutter width, and
+progressively images from the top to the bottom of the camera chip or vice versa.</p>
+<ul class="simple">
+<li><p><span class="guilabel">Sensor Mode</span> is used to switch between “Normal” and “Light-Sheet”
+(progressive) exposure.</p></li>
+<li><p><span class="guilabel">Readout Direction</span> indicates if the rolling shutter should move from the
+bottom to the top of the camera chip or vice versa.</p></li>
+<li><p><span class="guilabel">Number of Pixels</span> sets the rolling shutter width on the camera.</p></li>
+</ul>
+</section>
+<section id="framerate-info">
+<h4>Framerate Info<a class="headerlink" href="#framerate-info" title="Permalink to this heading"></a></h4>
+<p>This displays information concerning the speed of acquisition and optionally allows the
+user to average these values over multiple images.</p>
+<ul class="simple">
+<li><p><span class="guilabel">Exposure Time (ms)</span> displays the set camera exposure time.</p></li>
+<li><p><span class="guilabel">Readout Time (ms)</span> displays how long it takes to read a frame from the
+camera. This includes exposure time.</p></li>
+<li><p><span class="guilabel">Framerate (Hz)</span> displays how long it takes to acquire an image. This is
+based on an internal “wait ticket” approach, where the software times how long it
+waits for a frame to come in after receiving the previous frame. This frequency
+includes not only camera readout time, but, e.g. how long the software had to wait
+for the stage to finish moving before taking the next image in a z-stack. It is the
+most accurate time estimate in the software.</p></li>
+<li><p><span class="guilabel">Images to Average</span> tells the camera to average frames.</p></li>
+</ul>
+</section>
+<section id="region-of-interest-settings">
+<h4>Region of Interest Settings<a class="headerlink" href="#region-of-interest-settings" title="Permalink to this heading"></a></h4>
+<p>These allows the user to set the size of the our region of interest in pixels. The
+camera can also be told optionally to bin pixels. The corresponding field of view
+is displayed by calculating the number of pixels multiplied by the camera’s effective
+pixel size, which is set in the
+<a class="reference internal" href="hardware/supported_hardware.html#mechanical-zoom"><span class="std std-ref">Mechanical Zoom</span></a>.</p>
+<p><span class="guilabel">Default FOVs</span> includes buttons to quickly change the FOV to preset values.</p>
+<p><span class="guilabel">ROI center</span> indicates about what point the pixels crop on the camera.</p>
+</section>
+</section>
+<section id="stage-control-notebook">
+<span id="id1"></span><h3>Stage Control<a class="headerlink" href="#stage-control-notebook" title="Permalink to this heading"></a></h3>
+<img alt="../_images/settings_stage.png" src="../_images/settings_stage.png" />
+<p>The Stage Control Settings Notebook is a tab (optionally, a popup) that controls the
+stage positions. It is split into six parts: stage positions, x and y movement, z
+movement, focus movement, theta movement, and stop stage and joystick buttons.</p>
+<p>By default, the stage is expected to have x, y, z, focus and theta (rotation) axes. If
+your stage does not have one of these axes, you can choose to not use that control. See
+the <a class="reference internal" href="software_configuration.html#stage-subsection"><span class="std std-ref">stage subsection</span></a> for
+more information.</p>
+<section id="stage-positions">
+<h4>Stage Positions<a class="headerlink" href="#stage-positions" title="Permalink to this heading"></a></h4>
+<p>The entry boxes report the current position of each stage axis. If a user changes the
+value in the entry box, the stage will move to that value (provided it is within the
+stage bounds if stage limits are enabled, see <cite>here &lt;stage_control_menu&gt;</cite>).</p>
+</section>
+<section id="xy-movement">
+<h4>XY Movement<a class="headerlink" href="#xy-movement" title="Permalink to this heading"></a></h4>
+<p>This includes the movement buttons for the X and Y axes. The left and right buttons
+control X, while the up and down buttons control Y. The entry box in the middle of the
+buttons indicates the step size along these axes in microns. It can be changed by the
+user.</p>
+</section>
+<section id="z-movement">
+<h4>Z Movement<a class="headerlink" href="#z-movement" title="Permalink to this heading"></a></h4>
+<p>This controls the movement of the Z stage. The entry box indicates the step size along
+this axis and it can be changed by the user.</p>
+</section>
+<section id="focus-movement">
+<h4>Focus Movement<a class="headerlink" href="#focus-movement" title="Permalink to this heading"></a></h4>
+<p>This controls the movement of the focus stage. The entry box indicates the step size
+along this axis and it can be changed by the user.</p>
+</section>
+<section id="theta-movement">
+<h4>Theta Movement<a class="headerlink" href="#theta-movement" title="Permalink to this heading"></a></h4>
+<p>This controls the movement of the rotation stage. The entry box indicates the step size
+along this axis and it can be changed by the user.</p>
+</section>
+<section id="buttons">
+<h4>Buttons<a class="headerlink" href="#buttons" title="Permalink to this heading"></a></h4>
+<p>The <span class="guilabel">STOP</span> button halts all stage axes and updates the stage positions to
+wherever the stage stopped.</p>
+<p>The <span class="guilabel">Enable Joystick</span> button disables control over the axes associated with
+the joystick (see the
+<a class="reference internal" href="software_configuration.html#stage-subsection"><span class="std std-ref">stage subsection</span></a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is not necessary to press this button to use a joystick. The joystick can be
+used along with the software controls. However, if you are running the acquisition
+in “Continous Scan” and use the joystick without pressing
+<span class="guilabel">Enable Joystick</span>, the stage positions may not update unless you press
+<span class="guilabel">STOP</span>. In “Continous Scan”, if you try to move with the joystick and
+then the software stage controls without first pressing  <span class="guilabel">STOP</span>, it is
+likely the stage will update to the software’s position of choice and undo whatever
+joystick movement you did.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If you have the screen real estate, it is often helpful to convert the Stage
+Control Settings Notebook to a popup. Right click on the tab and press
+<span class="guilabel">Popout Tab</span>.</p>
+<img alt="../_images/popout_right_click.png" src="../_images/popout_right_click.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>Once this is done, you should be able to move the stage controls next to the
+main navigate window.</p>
+<img alt="../_images/popout_stage.png" src="../_images/popout_stage.png" />
+</div>
+</section>
+</section>
+<section id="multiposition">
+<h3>Multiposition<a class="headerlink" href="#multiposition" title="Permalink to this heading"></a></h3>
+<img alt="../_images/settings_multiposition.png" src="../_images/settings_multiposition.png" />
+<p>The Multiposition Settings Notebook is a tab (optionally, a popup) that helps the user
+set up and visualize a multi-position acquisition for tiling a large sample. It is
+split into two parts: buttons and the multi-position table.</p>
+<section id="id2">
+<h4>Buttons<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
+<ul class="simple">
+<li><p><span class="guilabel">Launch Tiling Wizard</span> launches the
+<a class="reference internal" href="#multi-position-tiling-wizard"><span class="std std-ref">Tiling Wizard</span></a></p></li>
+<li><p><span class="guilabel">Eliminate Empty Positions</span> is not implemented and does nothing.</p></li>
+<li><p><span class="guilabel">Save Positions To Disk</span> saves the multi-position table to a file.</p></li>
+<li><p><span class="guilabel">Load Positions From Disk</span> loads a multi-position file into the table.</p></li>
+</ul>
+</section>
+<section id="multi-position-table">
+<h4>Multi-Position Table<a class="headerlink" href="#multi-position-table" title="Permalink to this heading"></a></h4>
+<p>The multi-position table lists stage positions that are included in a multi-position
+acquisition.</p>
+<ul>
+<li><p>Double-clicking on the integer to the left of a row moves the stage to
+that position.</p></li>
+<li><p>Double-clicking on a table cell allows the user to edit the stage position in that
+cell.</p></li>
+<li><p>Right-clicking on the integer to the left of a row yields a popup with four options:</p>
+<blockquote>
+<div><img alt="../_images/multiposition_right_click.png" src="../_images/multiposition_right_click.png" />
+</div></blockquote>
+<ul class="simple">
+<li><p><span class="guilabel">Insert New Position</span> adds an empy row to the table.</p></li>
+<li><p><span class="guilabel">Add Current Position</span> adds a row containing the current stage position
+to the table.</p></li>
+<li><p><span class="guilabel">Add New Position(s)</span> yields a popup that asks the user how many new rows
+to add and then inserts that number of empty rows upon confirmation.</p></li>
+<li><p><span class="guilabel">Delete Position(s)</span> deletes the selected positions. Selection is
+indicated by a blue highlight of the integer to the left of a row.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
 </section>
 <section id="display-notebooks">
 <h2>Display Notebooks<a class="headerlink" href="#display-notebooks" title="Permalink to this heading"></a></h2>
+<p>The display notebooks provide visual feedback of the images taken on the camera and
+of the galvo and remote focus waveforms sent to the DAQ.</p>
+<section id="camera-view">
+<h3>Camera View<a class="headerlink" href="#camera-view" title="Permalink to this heading"></a></h3>
+<img alt="../_images/display_camera.png" src="../_images/display_camera.png" />
+<p>The Camera View Display Notebook is is a tab (optionally, a popup) that is split into
+two parts. The left part displays the latest image acquired by the camera. The right
+part modifies this display and is split into LUT, Image Metrics, and Image Display.</p>
+<p>Left-clicking on the image toggles crosshairs that indicate the center of the field of
+view.</p>
+<section id="lut">
+<h4>LUT<a class="headerlink" href="#lut" title="Permalink to this heading"></a></h4>
+<p>The <span class="guilabel">LUT</span> section of the camera view allows the user to change the lookup
+table the image uses to display. The options are “Gray”, “Gradient” and “Rainbow”.</p>
+<p><span class="guilabel">Flip XY</span> transposes the image in the display. This can produce intuitive
+results in the display when clicking on the XY stage movements buttons (i.e. with
+<span class="guilabel">Flip XY</span> enabled, the sample moves along the direction expected when a
+stage movement button is clicked).</p>
+<p><span class="guilabel">Autoscale</span> toggles automatic image histogram scaling ona nd off. When
+<span class="guilabel">Autoscale</span> is enabled, the image automatically scales intensity between
+the minimum and maximum pixel value in the image produced by the camera. When
+<span class="guilabel">Autoscale</span> is disabled, the image is scaled between <span class="guilabel">Min Counts</span>
+and <span class="guilabel">Max Counts</span>.</p>
+</section>
+<section id="image-metrics">
+<h4>Image Metrics<a class="headerlink" href="#image-metrics" title="Permalink to this heading"></a></h4>
+<p><span class="guilabel">Frames to Avg</span> is unimplemented, but should average this many frames coming
+from the camera and display the average in the viewer.</p>
+<p><span class="guilabel">Image Max Counts</span> tells us the maximum pixel count in the image.</p>
+<p><span class="guilabel">Channel</span> informs us which color channel we are looking at. It indexes into
+the selected channels in the
+<a class="reference internal" href="#channel-settings"><span class="std std-ref">Channel Settings</span></a>
+(i.e. <code class="docutils literal notranslate"><span class="pre">0</span></code> is the first selected channel).</p>
+</section>
+<section id="image-display">
+<h4>Image Display<a class="headerlink" href="#image-display" title="Permalink to this heading"></a></h4>
+<p>This should toggle in between live mode and maximum projections in multiple dimensions,
+but it is currently not implemented.</p>
+</section>
+</section>
+<section id="waveform-settings">
+<h3>Waveform Settings<a class="headerlink" href="#waveform-settings" title="Permalink to this heading"></a></h3>
+<img alt="../_images/display_waveform.png" src="../_images/display_waveform.png" />
+<p>The Waveform Settings Display Notebook is a tab (optionally, a popup) is split into two
+sections: a waveform display section at the top and a settings section at the bottom.</p>
+<section id="waveform-display">
+<h4>Waveform Display<a class="headerlink" href="#waveform-display" title="Permalink to this heading"></a></h4>
+<p>The waveform display shows the waveforms sent to the remote focus devices (top) and the
+galvos (bottom). Each channel and each device gets its own color, which is then
+displayed in the legend. The dotted black line indicates when the camera is acquiring
+in relation to the waveforms. This can be considered identical to what is sent to the
+DAQ.</p>
+</section>
+<section id="settings">
+<h4>Settings<a class="headerlink" href="#settings" title="Permalink to this heading"></a></h4>
+<p><span class="guilabel">Sample Rate</span> changes the frequency of the samples sent to the DAQ. It is not
+recommended that a user change this.</p>
+<p><span class="guilabel">Waveform Template</span> changes the
+<a class="reference internal" href="software_configuration.html#waveform-templates-file"><span class="std std-ref">waveform template</span></a>
+used to generate the waveforms.</p>
+</section>
+</section>
+</section>
+<section id="additional-guis">
+<h2>Additional GUIs<a class="headerlink" href="#additional-guis" title="Permalink to this heading"></a></h2>
+<p>This section includes popups and other non-main sections of the GUI.</p>
+<section id="file-saving-dialog">
+<h3>File Saving Dialog<a class="headerlink" href="#file-saving-dialog" title="Permalink to this heading"></a></h3>
+<img alt="../_images/save_dialog1.png" src="../_images/save_dialog1.png" />
+<p>The file saving dialog pops up if an
+<a class="reference internal" href="#acquisition-bar"><span class="std std-ref">acquisition mode</span></a> other than
+“Continuous Scan” is selected
+and <a class="reference internal" href="#timepoint-settings"><span class="std std-ref">save data</span></a> is checked.</p>
+<ul class="simple">
+<li><p><span class="guilabel">Root Directory</span> indicates the local directory to which the software will
+save the data.</p></li>
+<li><p><span class="guilabel">User</span> is the name of the user acquiring the data.</p></li>
+<li><p><span class="guilabel">Tissue Type</span> is the type of tissue being imaged.</p></li>
+<li><p><span class="guilabel">Cell Type</span> is the cell type being imaged.</p></li>
+<li><p><span class="guilabel">Label</span> indicates the dyes used in the acquisition.</p></li>
+<li><p><span class="guilabel">Solvent</span> indicates the immersion solvent of the tissue/cell.</p></li>
+<li><p><span class="guilabel">File Type</span> indicates what type of file to save to.</p></li>
+<li><p><span class="guilabel">Notes</span> is for any additional information the user wants to store with the
+file.</p></li>
+</ul>
+</section>
+<section id="waveform-parameters">
+<h3>Waveform Parameters<a class="headerlink" href="#waveform-parameters" title="Permalink to this heading"></a></h3>
+<img alt="../_images/waveform_parameters.png" src="../_images/waveform_parameters.png" />
+<p>This is used to update the waveforms shown in
+<a class="reference internal" href="#waveform-settings"><span class="std std-ref">Waveform Settings</span></a>.</p>
+<ul class="simple">
+<li><p>For each laser, the <span class="guilabel">Amplitude</span> and <span class="guilabel">Offset</span> correspond to the
+amplitude and offset of the sawtooth waveform sent to the remote focus device.</p></li>
+<li><p>For each galvo, the <span class="guilabel">Amplitude</span> and <span class="guilabel">Offset</span> correspond to the
+amplitude and offset of the waveform sent to the galvo, by default a triangle wave.
+The <span class="guilabel">Galvo &lt;int&gt; Frequency (Hz)</span> sets the frequency of the waveform sent
+to the galvo. <span class="guilabel">Estimate Frequency</span> estimates the frequency needed for a
+sawtooth wave to sweep over the full camera chip without aliasing with the light-
+sheet rolling shutter speed.</p></li>
+<li><p><span class="guilabel">Percent Delay</span> introduces a delay before the remote focus sawtooth starts.</p></li>
+<li><p><span class="guilabel">Percent Smoothing</span> smooths the remote focus waveform.</p></li>
+<li><p><span class="guilabel">Settle Duration (ms)</span> introduces a delay after the remote focus sawtooth
+ends.</p></li>
+</ul>
+</section>
+<section id="configure-microscopes">
+<h3>Configure Microscopes<a class="headerlink" href="#configure-microscopes" title="Permalink to this heading"></a></h3>
+<img alt="../_images/configure_microscopes.png" src="../_images/configure_microscopes.png" />
+<p>The configure microscopes window allows a user with multiple microscopes defined in
+their <a class="reference internal" href="software_configuration.html#configuration-file"><span class="std std-ref">configuration file</span></a>
+to select which microscope is primary and launch both microscopes simultaneously. The
+primary microscope will have control over any hardware shared between both microscopes.
+This window also provides a GUI interface to look at what hardware is in use.</p>
+</section>
+<section id="multi-position-tiling-wizard">
+<h3>Multi-Position Tiling Wizard<a class="headerlink" href="#multi-position-tiling-wizard" title="Permalink to this heading"></a></h3>
+<img alt="../_images/tiling_wizard1.png" src="../_images/tiling_wizard1.png" />
+<p>The tiling wizard helps the user set up a tiled acquisition of a sample large enough
+that it cannot be imaged in a single field of view.</p>
+<ul class="simple">
+<li><p><span class="guilabel">Set &lt;axis&gt; Start</span> indicates the starting position of an axis.</p></li>
+<li><p><span class="guilabel">Set &lt;axis&gt; End</span> indicates the end position of an axis.</p></li>
+<li><p><span class="guilabel">&lt;axis&gt; Distance</span> indicates difference between the start and end position.</p></li>
+<li><p><span class="guilabel">&lt;axis&gt; FOV Dist</span> indicates the field of view along that axis. The Distance
+between start and end will be split into tiles of this size along this axis.</p></li>
+<li><p><span class="guilabel">Num. Tiles</span> indicates how many tiles exist along this axis. It is roughly
+(End - Start)/FOV dist.</p></li>
+<li><p><span class="guilabel">% Overlap</span> indicates the percent of the the that should overlap along each
+axis. It is a percent of the FOV Dist.</p></li>
+<li><p><span class="guilabel">Populate Multi-Position Table</span> puts all of the tiles in the
+<a class="reference internal" href="#multi-position-table"><span class="std std-ref">multi-position table</span></a>.</p></li>
+</ul>
+<p>For an example of how to use the tiling wizard, see
+<a class="reference internal" href="case_studies/acquire_mesospimbt.html#tiling-a-sample-larger-than-the-field-of-view"><span class="std std-ref">Tiling a sample larger than the field of view</span></a>.</p>
+</section>
+<section id="autofocus-settings">
+<h3>Autofocus Settings<a class="headerlink" href="#autofocus-settings" title="Permalink to this heading"></a></h3>
+<img alt="../_images/autofocus_settings.png" src="../_images/autofocus_settings.png" />
+<p>The autofocus settings panel controls parameters of the autofocus
+<a class="reference internal" href="features.html"><span class="doc">feature</span></a>.</p>
+<ul class="simple">
+<li><p><span class="guilabel">Device Type</span> indicates if we want to apply the autofocus routine to A
+stage or to a remote focus device.</p></li>
+<li><p><span class="guilabel">Device Reference</span> indices the stage axis, or the DAQ analog output for
+the remote focus device.</p></li>
+<li><p>The <span class="guilabel">Coarse</span> and <span class="guilabel">Fine</span> rows allow us to select a range and step
+size, both in microns (or volts, if using the remote focus device), over which we
+should  search for an optimal focus value. If coarse and fine are selected, the
+coarse search will be performed first and the fine search will be performed about
+the coarse position with the highest value.</p></li>
+<li><p><span class="guilabel">Inverse Power Tent Fit</span> will attempt to find a more accurate position for
+the optimal focus based on fitting a power tent to the search values. It will only
+use the fit if its <span class="math notranslate nohighlight">\(R^2\)</span> value is higher than <code class="docutils literal notranslate"><span class="pre">0.9</span></code>.</p></li>
+<li><p><span class="guilabel">Autofocus</span> runs the autofocus with the set parameters.</p></li>
+</ul>
+<p>Once the settings have been updated here, any run autofocus operation will use the new
+settings.</p>
+</section>
 </section>
 </section>
 
@@ -154,7 +693,7 @@ is helpful for debugging code and configuration problems.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../software_installation.html" class="btn btn-neutral float-left" title="Software Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="setup_microscope.html" class="btn btn-neutral float-right" title="Setting up a microscope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="setup_microscope.html" class="btn btn-neutral float-right" title="Setting Up A Microscope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

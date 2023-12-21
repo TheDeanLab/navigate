@@ -68,7 +68,6 @@ class MultiPositionController(GUIController):
         self.table.loadCSV = self.load_positions
         self.table.exportCSV = self.export_positions
         self.table.insertRow = self.insert_row_func
-        self.table.generatePositions = self.generate_positions
         self.table.addStagePosition = self.add_stage_position
 
         self.view.master.tiling_buttons.buttons["tiling"].config(
@@ -264,18 +263,6 @@ class MultiPositionController(GUIController):
         self.table.redraw()
         self.table.tableChanged()
         self.show_verbose_info("insert a row before current row")
-
-    def generate_positions(self):
-        """Generate positions in the Multi-Position Acquisition Interface.
-
-        This function opens a dialog to let the user input start and end position
-        Then it will generate positions for the user.
-
-        Example
-        -------
-        >>> generate_positions()
-        """
-        pass
 
     def add_stage_position(self):
         """Add the current stage position to the Multi-Position Acquisition Interface.

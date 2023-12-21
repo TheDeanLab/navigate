@@ -303,20 +303,6 @@ class MenuController(GUIController):
                     None,
                     None,
                 ],
-                "Generate Positions": [
-                    "standard",
-                    self.parent_controller.multiposition_tab_controller.generate_positions,  # noqa: E501
-                    None,
-                    None,
-                    None,
-                ],
-                "Move to Selected Position": [
-                    "standard",
-                    self.parent_controller.multiposition_tab_controller.move_to_position,  # noqa: E501
-                    None,
-                    None,
-                    None,
-                ],
                 "add_separator_1": [None, None, None, None, None],
             },
         }

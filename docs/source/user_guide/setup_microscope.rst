@@ -1,5 +1,5 @@
 =======================
-Setting up a microscope
+Setting Up A Microscope
 =======================
 
 .. toctree::

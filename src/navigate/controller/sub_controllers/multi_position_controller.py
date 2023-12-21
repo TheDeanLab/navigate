@@ -68,7 +68,6 @@ class MultiPositionController(GUIController):
         self.table.loadCSV = self.load_positions
         self.table.exportCSV = self.export_positions
         self.table.insertRow = self.insert_row_func
-        self.table.generatePositions = self.generate_positions
         self.table.addStagePosition = self.add_stage_position
 
         self.view.master.tiling_buttons.buttons["tiling"].config(

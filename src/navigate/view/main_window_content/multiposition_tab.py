@@ -383,7 +383,6 @@ class MultiPositionTable(Table):
         self.loadCSV = None
         self.exportCSV = None
         self.insertRow = None
-        self.generatePositions = None
         self.addStagePosition = None
 
     def show(self, callback=None):

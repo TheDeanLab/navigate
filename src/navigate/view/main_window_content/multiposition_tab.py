@@ -436,7 +436,6 @@ class MultiPositionTable(Table):
 
         popupmenu.add_command(label="Load Positions from Disk", command=self.loadCSV)
         popupmenu.add_command(label="Save Positions to Disk", command=self.exportCSV)
-        popupmenu.add_command(label="Generate Position", command=self.generatePositions)
         popupmenu.bind("<FocusOut>", popupFocusOut)
         popupmenu.focus_set()
         popupmenu.post(event.x_root, event.y_root)

@@ -12,7 +12,7 @@ Menu Bar
 ========
 
 File
-^^^^
+----
 
 .. image:: images/menu_file.png
 
@@ -37,6 +37,92 @@ is helpful for debugging code and configuration problems.
 :guilabel:`Open Configuration Files` opens the folder containing the software's
 :ref:`configuration file <user_guide/software_configuration:configuration file>`.
 
+Microscope Configuration
+------------------------
+
+.. image:: images/menu_microscope_configuration.png
+
+The :guilabel:`Microscope Configuration` menu is split into two parts, above and below
+the horizontal divider.
+
+Above the horizontal divider it lists the names of all 
+microscopes named in the ``microscopes`` section of the 
+:ref:`configuration file <user_guide/software_configuration:configuration file>`. Mousing over a
+microscope name reveals all zoom values available under the 
+:ref:`Mechanical Zoom <user_guide/hardware/supported_hardware:mechanical zoom>`. Selecting one of
+these zoom values changes the magnification of the microscope.
+
+Below the horizontal divider is access to the 
+:ref:`Waveform Parameters <user_guide/gui_walkthrough:waveform parameters>` settings 
+panel and the 
+:ref:`Configure Microscope <user_guide/gui_walkthrough:configure microscope>` settings 
+panel.
+
+Stage Control
+-------------
+
+.. image:: images/menu_stage_control.png
+
+The stage control menu is split by horizontal dividers into three parts. 
+
+The top part provides similar functionality to the 
+:ref:`Stage Control Settings Notebook <stage_control_notebook>`. It allows movement
+of the stage along x, y, z, focus and theta. Here, you can see the ``w``, ``s``, ``a``
+and ``d`` keys are bound to movement in x and y, and these can be used to scroll around
+a sample.
+
+The middle part provides similar functionality to the 
+:ref:`Multiposition Settings Notebook <user_guide/gui_walkthrough:multiposition>`.
+Here, we can launch the `Tiling Wizard <user_guide/gui_walkthrough:tiling wizard>`, 
+load and export (save) positions stored in the Multipositon Settings Notebook, and add 
+the current stage position to the multiposition table.
+
+The bottom part of the menu is used to enable and disable the stage limits set in the
+configuration file (see the 
+:ref:`stage subsection <user_guide/software_configuration:stage subsection>`).
+
+Autofocus
+---------
+
+.. image:: images/menu_autofocus.png
+
+The autofocus menu has two options: :guilabel:`Perform Autofocus`, which autofocus the
+sample using the current autofocus settings, and :guilabel:`Autofocus Settings`, which
+launches the :ref:`Autofocus Settings <user_guide/gui_walkthrough:autofocus settings>`
+popup.
+
+Features
+--------
+
+.. image:: images/menu_features.png
+
+This menu provides access to acqusition feature lists. An explanation of features,
+feature lists, and the use and operation of this menu is provided under
+:doc:`Reconfigurable Acquisitions Using Features <features>`.
+
+
+Plugins
+-------
+
+.. image:: images/menu_plugins.png
+
+This menu provides an access point for :doc:`plugins <../plugin/plugin_home>` that feature
+a popup GUI. 
+
+Window
+------
+
+.. image:: images/menu_window.png
+
+This menu is split into two parts by a horizontal divider and provides some GUI controls. 
+
+The top part allows the user to switch between the main
+:ref:`Settings Notebooks <user_guide/gui_walkthrough:settings notebooks>`.
+
+The bottom part provides an option to move the camera display to a popup window and
+provides access to a help popup that features some keyboard shortcuts and tricks for
+using the software.
+
 Acquisition Bar
 ===============
 
@@ -52,5 +138,177 @@ Left-to-right, the acquistion bar provides
 Settings Notebooks
 ==================
 
+The settings notebooks are a series of tabs that control microscope settings, including
+laser power, camera settings and stage positions and many others.
+
+Channels
+--------
+
+.. image:: images/settings_channels.png
+
+The Channels Settings Notebook is a tab (optionally, a popup) split into five sections:
+channel settings, stack acquistion settings, timepoint settings, multi-position 
+acquisition and quick launch buttons.
+
+Channel Settings
+^^^^^^^^^^^^^^^^
+
+This is used to set up acquisition color channels. A channel is considered to be a 
+combination of an illuminating laser wavelength and a detection filter. Each channel
+has its own power, exposure time, interval and defocus. The checkbox on the left
+indicates if a channel should be used during acquisition. An acquisition loops through
+the channels in sequence.
+
+* :guilabel:`Laser` is the name of the laser, taken from the 
+  :doc:`configuration file <software_configuration>`, and usually expressed in 
+  nanometers.
+* :guilabel:`Power` is the power of the laser between 0 and 100 percent.
+* :guilabel:`Filter` is the name of the filter selected in the detection path filter
+  wheel. Filter names are stored in the configuration file.
+* :guilabel:`Exp. Time (ms)` is the exposure time of the camera in milliseconds.
+* :guilabel:`Interval` indicates how often this channel should be used in an 
+  acquisition. For example, in two-color imaging, CH1 may images a process twice as 
+  fast as in CH2. Setting the CH2 interval to 2 allows us to image both channels at
+  a similar rate.
+* :guilabel:`Defocus` indicates the defocus between two channels in micrometers. The
+  defocus values are always relative to the focus of the first channel imaged. This 
+  setting is useful for compensating for chromatic aberration.
+
+Stack Acquisition Settings (:math:`\mu\text{m}`)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These are the settings used for a standard Z-Stack Acquisition. 
+
+:guilabel:`Pos` indicates z-positions. :guilabel:`Foc` indicates focus positions. The
+z-stack can optionally ramp through focus along with z.
+
+:guilabel:`Start` and :guilabel:`End` are always expressed relative to the center of 
+the z-stack. :guilabel:`Abs Z Start` and :guilabel:`Abs Z Stop` provide true stage 
+positions at the start and end of the z-stack. 
+
+The buttons :guilabel:`Set Start Pos/Foc` and :guilabel:`Set End Pos/Foc` grab the
+current z and focus positions from the stage and enter them into the corresponding
+start and end (stop) GUI boxes.
+
+The :guilabel:`Step Size` is expressed in microns and can be modified by the user. Upon
+modificiation, :guilabel:`# slices` will automatically update.
+
+:guilabel:`Laser Cycling Settings` provide the options "Per Stack" and "Per Z". In "Per
+Stack" mode, the software will move through all positions before changing to another
+color channel. In "Per Z" mode, the software will acquire all color channels selected
+before moving to the next position in the z-stack.
+
+Timepoint Settings
+^^^^^^^^^^^^^^^^^^
+
+These are used for acquiring data over multiple timepoints and for toggling the option
+to save data.
+
+* :guilabel:`Save Data` tells the software to save acquired data to disk when checked. 
+  If this is selected, a 
+  :ref:`saving popup window <user_guide/gui_walkthrough:saving dialog>` will appear 
+  when :guilabel:`Acquire` is pressed, unless you are in "Continuous Scan" mode, which
+  is designed for live previews only.
+* :guilabel:`Timepoints` indicates how many time points this acquisition should 
+  acquire.
+* :guilabel:`Stack Acq Time` provides an estimate of how long a single z-stack will
+  take to acquire.
+* :guilabel:`Stack Pause (s)` indicates how much waiting time the software should 
+  introduce in between acquisition steps (e.g. in between taking z-stacks).
+* :guilabel:`Time Interval (hh:mm:ss)` provides an estimate of how long each time point
+  takes to acquire. This is (stack acquisition + stack pause) x number of channels to
+  image.
+* :guilabel:`Experiment Duration (hh:mm:ss)` provides an estimate of how long the full
+  acquisition will take.
+
+Multi-Position Acquisition
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This contains settings to set up acquisition over multiple positions in the sample, 
+e.g. tiling.
+
+* :guilabel:`Enable` indicates that the software should move through the positions 
+  listed in the 
+  :ref:`Multiposition Settings Notebook <user_guide/gui_walkthrough:multiposition>`
+  during the acquisition.
+* :guilabel:`Launch Tiling Wizard` launches the 
+  :ref:`Tiling Wizard <user_guide/gui_walkthrough:tiling wizard>`.
+
+Quick Launch Buttons
+^^^^^^^^^^^^^^^^^^^^
+
+This provides access to the 
+:ref:`Waveform Parameters <user_guide/gui_walkthrough:waveform parameters>` and
+:ref:`Autofocus Settings <user_guide/gui_walkthrough:autofocus settings>` 
+popups.
+
+
+Camera Settings
+---------------
+
+.. image:: images/settings_camera.png
+
+The Channels Settings Notebook is a tab (optionally, a popup) that controls the camera.
+It is split into three sections: camera modes, framerate info and region of interest
+settings.
+
+Camera Modes
+^^^^^^^^^^^^
+
+Framerate Info
+^^^^^^^^^^^^^^
+
+Region of Interest Settings
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. _stage_control_notebook:
+
+Stage Control
+-------------
+
+Stage control.
+
+.. image:: images/settings_stage.png
+
+Multiposition
+-------------
+
+Multiposition.
+
+.. image:: images/settings_multiposition.png
+
+
 Display Notebooks
 ==================
+
+blah
+
+
+Additional GUIs
+===============
+
+This section includes popups and other non-main sections of the GUI.
+
+Saving Dialog
+-------------
+
+Waveform Parameters
+-------------------
+
+blah
+
+Configure Microscope
+--------------------
+
+blah
+
+Tiling Wizard
+-------------
+
+blah
+
+Autofocus Settings
+------------------
+
+blah

@@ -29,6 +29,8 @@ Multiscale Microscope
      - Novanta CRS 4 KHz Resonant Galvo and Thorlabs GVS112 Linear Galvo
    * - Zoom
      - Dynamixel MX-28R
+   * - Other
+     - NA
 
 .. collapse:: Configuration File
 
@@ -65,7 +67,8 @@ Expansion ASLM
      - Novanta CRS 4 KHz Resonant Galvo
    * - Zoom
      - N/A
-
+   * - Other
+     - NA
 
 .. collapse:: Configuration File
 
@@ -102,7 +105,8 @@ OPM-V2
      - Novanta CRS 4 KHz Resonant Galvo, and 2x Novanta Linear Galvos for shearing and tiling.
    * - Zoom
      - N/A
-
+   * - Other
+     - NA
 
 .. collapse:: Configuration File
 
@@ -114,8 +118,34 @@ OPM-V2
 OPM-V3
 ======
 
-- Laser source
-- VAST
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Equipment
+     - Description
+   * - Lasers
+     - Omicron LightHUB Ultra with 488 and 561 nm lasers.
+   * - Stages
+     - A piezo for adjusting the position of the tertiary objective, and a galvo for acquisition of z-stacks.
+   * - Stage Controllers
+     - N/A
+   * - Cameras
+     - Hamamatsu Flash 4.0
+   * - Filter Wheel
+     - N/A
+   * - Remote Focusing Units
+     - N/A
+   * - Data Acquisition Cards
+     - National Instruments PCIe-6738
+   * - Galvo
+     - Two Novanta galvos for shearing and lateral sweeping of the illumination beam.
+   * - Zoom
+     - N/A
+   * - Other
+     - VAST large object flow cytometer and Imagine Optics deformable mirror for wavefront correction.
+   * - Other
+     - NA
 
 .. collapse:: Configuration File
 
@@ -151,7 +181,8 @@ CT-ASLM-V1
      - Novanta CRS 4 KHz Resonant Galvo
    * - Zoom
      - N/A
-
+   * - Other
+     - NA
 
 .. collapse:: Configuration File
 
@@ -187,7 +218,8 @@ CT-ASLM-V2
      - Novanta CRS 4 KHz Resonant Galvo
    * - Zoom
      - N/A
-
+   * - Other
+     - NA
 
 .. collapse:: Configuration File
 
@@ -224,7 +256,8 @@ Spectral TIRF
      - 2x Novanta Linear Galvos.
    * - Zoom
      - N/A
-
+   * - Other
+     - NA
 
 .. collapse:: Configuration File
 
@@ -261,7 +294,8 @@ Live-Cell ASLM
      - Novanta CRS 4 KHz Resonant Galvo
    * - Zoom
      - N/A
-
+   * - Other
+     - NA
 
 .. collapse:: Configuration File
 
@@ -299,7 +333,8 @@ BioFrontiers OPM
      - Thorlabs GVS112 Linear Galvo
    * - Zoom
      - N/A
-
+   * - Other
+     - NA
 
 .. collapse:: Configuration File
 

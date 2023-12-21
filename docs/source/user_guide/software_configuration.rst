@@ -29,7 +29,8 @@ It may help to open
 along in this file when reading the next sections.
 
 See the :ref:`Setting up an Axially Swept Light-Sheet Microscope <setup_aslm>` case
-study for a general walkthrough of how to build your own configuration file.
+study for a general walkthrough of how to build your own configuration file and see
+:doc:`Implementations <hardware/implementations>` for examples of configuration files.
 
 .. _hardware_section:
 

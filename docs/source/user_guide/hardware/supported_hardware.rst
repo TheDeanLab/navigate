@@ -5,83 +5,57 @@ Supported Hardware
 Data Acquisition Card
 =====================
 
-Data acquisition cards control analog and digital inputs and outputs. The software
-uses them for hardware-timed control of voice coil and galvo mirror sweeping synced
-with camera acquisition and, optionally, stage movements.
+Data acquisition cards deliver and receive analog and digital signals.
+To acquire an image, the software calculates all of the analog and digital waveforms and
+queues these waveforms on the data acquisition card. Upon receipt of a trigger (either from the software itself,
+or an external piece of hardware), all
+of the analog and digital signals are delivered in parallel. This provides
+deterministic behavior on a per-frame basis, which is necessary for proper acquisition of light-sheet data.
+It does not however provide us with deterministic behavior between image
+frames, and some jitter in timing is anticipated.
+
 
 .. _hardware_ni:
 
-NI
---
+National Instruments (NI)
+--------------------------
+In principle, most NI-based data acquisition cards should work with the software, so long
+as there are a sufficient number of analog and digital ports, and the sampling rate (typically 100 kHz)
+is high enough per port.
 
-We have used several different NI-based data acquisition cards to run the software.
-These include PCIe-6738, PXIe-6259, and PXIe-6733. Prior to installing the card within
+Prior to installing the card within
 the computer, first install the `NI-DAQmx drivers <https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560>`_.
 Once installed, connect the PCIe or PXIe-based device to the computer. A functioning
 system should be recognized by the operating system, and visible in the Windows Device
 Manager as a **NI Data Acquisition Device**.
 
+
 .. tip::
 
-    To find the device pin outs for your NI-based data acquisition card, open up NI
-    MAX, find the card under devices, right-click and select "device pin outs".
+    **The most important aspect is to wire up the breakout box properly.**
+
+    To find the device pin outs for your NI-based data acquisition card, open NI
+    MAX, find the card under devices, right-click and select "device pinouts".
 
     Important: Should you use the SCB-68A breakout box, do not look at the pinout on
     the back of the cover. This is misleading. You must look at the device pinouts in
     NI MAX.
 
-The most important aspect is to wire up the triggering properly. The software first
-calculates all of the analog and digital waveforms, creates the NI tasks, and then
-queues these waveforms on the data acquisition board. Upon receipt of a trigger, all
-of the analog an digital tasks are delivered in parallel. This provides us with
-deterministic behavior on a per-frame basis, which is necessary for proper ASLM-style
-acquisitions. It does not however provide us with deterministic behavior between image
-frames, and some jitter in timing is anticipated.
-
 Wiring
+^^^^^^^
 
 - Identify the device name in NI MAX, and change it if you would like. Common names are
   ``Dev1``, ``Dev2``, etc. This name must correspond with the pinouts provided in the
   configuration file.
 
 - Connect the ``master_trigger_out_line`` to the ``trigger_source`` with a direct wire,
-  commonly ``PXI6259/port0/line1`` and ``/PXI6259/PFI0``
+  commonly ``PXI6259/port0/line1`` and ``/PXI6259/PFI0``. In this example, the default name
+  for the device (e.g., ``Dev1``) has been changed to ``PXI6259``.
 
-.. note::
-
-    For NI-based cards, ``port0/line1`` is the equivalent of ``P0.1``.
-    There are multiple pins for each PFIO, including source, out, gate, etc. You must
-    use the out terminal.
-
-PCIe-6738
-^^^^^^^^^
-
-The PCIe-6738 can only create one software-timed analog task for every four channels.
-As such, the lasers much be attached to analog output ports outside of the banks used
-by the galvo/remote focus units. For example, if you use ao0, ao2, and ao6 for the
-remote focus, galvo, and galvo stage, the lasers should be connected to ao8, ao9, and
-ao10. In such a configuration, they will not compete with the other analog output
-ports. Since only one task will be created created on the ao8, ao9, ao10 bank at a time
-(only one laser is on at a time), only one laser can be on at a time. If we wanted to
-turn lasers on simultaneously, we could distribute the lasers across independent banks
-(e.g. ao8, ao14, ao19).
-
-
-PXI-6259
-^^^^^^^^
-
-The PXI-6259 can create one software-timed analog task per channel. As such, the
-galvo/remote focus/lasers can be attached to any of the analog output ports.
-
-PXI-6723
-^^^^^^^^
-
-- Connect the ``master_trigger_out_line`` to the ``trigger_source`` with a direct wire,
-  commonly ``PXI6723/port0/line1`` and ``/PXI6723/PFI0``. With an SCB-68A breakout box,
-  connect pin 17 directly to pin 11.
 - Connect the ``camera_trigger_out_line`` to the ``Ext. Trigger`` on the camera using
-  the ``CTR0Out`` pin. With an SCB-68A breakout box, the positive lead is pin 2, the
-  ground is pin 36.
+  the ``CTR0Out`` pin.
+
+- These values must precisely match those in the configuration file. An example is provided below:
 
 
 .. collapse:: Configuration File
@@ -100,17 +74,66 @@ PXI-6723
               type: NI
             sample_rate: 100000
             sweep_time: 0.2
-
-            # triggers
-            master_trigger_out_line: PCI6738/port0/line1 # Should exactly match both name and port
-            camera_trigger_out_line: /PCI6738/ctr0 # Should exactly match both name and port
-            trigger_source: /PCI6738/PFI0 # Should exactly match both name and port
-
-            # Digital Laser Outputs
+            master_trigger_out_line: PCI6738/port0/line1
+            camera_trigger_out_line: /PCI6738/ctr0
+            trigger_source: /PCI6738/PFI0
             laser_port_switcher: PCI6738/port0/line0
             laser_switch_state: False
 
 |
+
+.. note::
+
+    For NI-based cards, ``port0/line1`` is the equivalent of ``P0.1``.
+    There are multiple pins for each PFIO, including source, out, gate, etc. You must
+    use the out terminal.
+
+The software has been tested with the following NI-based cards:
+
+PCIe/PXIe-6738
+^^^^^^^^^^^^^^^^^
+The PCIe-6738 can only create one software-timed analog task for every four channels.
+As such, the lasers much be attached to analog output ports outside of the banks (shown as solid lines in the device pinout) used
+by the galvo/remote focus units. For example, if you use ao0, ao2, and ao6 for the
+remote focus, galvo, and galvo stage, the lasers should be connected to ao8, ao9, and
+ao10. In such a configuration, they will not compete with the other analog output
+ports. Since only one task will be created created on the ao8, ao9, ao10 bank at a time
+(only one laser is on at a time), only one laser can be on at a time. If we wanted to
+turn lasers on simultaneously, we could distribute the lasers across independent banks
+(e.g. ao8, ao14, ao19).
+
+.. collapse:: Device Pinout
+
+    .. image:: images/6738_pinout.gif
+
+|
+
+PCIe/PXIe-6259
+^^^^^^^^^^^^^^^
+
+The PXI-6259 can create one software-timed analog task per channel. As such, the
+galvo/remote focus/lasers can be attached to any of the analog output ports. The 6259 has
+two connectors, and it is important to make sure that the analog and digital ports that you
+are using are connected to the correct connector. For example, if you are using ``ao0``, this is
+located on ``connector 0``.
+
+.. collapse:: Device Pinout
+
+    .. image:: images/6259_pinout.gif
+
+|
+
+PCIe/PXIe-6723
+^^^^^^^^^^^^^^^
+
+The PXI-6723 can also create one software-timed analog task per channel. As such, the analog
+outputs can be wired up as is most convenient.
+
+.. collapse:: Device Pinout
+
+    .. image:: images/6723_pinout.gif
+
+---------
 
 Cameras
 =======
@@ -121,10 +144,11 @@ shutter modes of contemporary scientific CMOS cameras.
 Hamamatsu Flash 4.0 v3/Fusion
 -----------------------------
 
-* Insert the USB that came with the camera into the computer and install HCImageLive.
+* Insert the USB that came with the camera into the computer and install HCImageLive. Alternatively,
+download DCAM-API. The software can be found `here <https://dcam-api.com>`_.
 * When prompted with the DCAM-API Setup
 
-    * Install the Active Silicon Firebird drivers for the FrameGrabber
+    * If you are going to use the Frame Grabber, install the Active Silicon Firebird drivers.
     * Select ... next to the tools button, and install DCAM tools onto the computer.
 
 * Shutdown the computer and install the Hamamatsu frame grabber into an appropriate
@@ -294,7 +318,8 @@ Photometrics Iris 15
 Synthetic Camera
 ----------------
 
-The synthetic camera simulates noise images from an sCMOS camera.
+The synthetic camera simulates noise images from an sCMOS camera. If no camera is present,
+the synthetic camera class must be used.
 
 .. collapse:: Configuration File
 
@@ -345,6 +370,10 @@ The synthetic camera simulates noise images from an sCMOS camera.
 
 |
 
+
+---------
+
+
 Remote Focusing Devices
 =======================
 
@@ -352,23 +381,29 @@ Voice coils, also known as linear actuators, play a crucial role in implementing
 aberration-free remote focusing in navigate. These electromagnetic actuators are used
 to control the axial position of the light-sheet and the sample relative to the
 microscope objective lens. By precisely adjusting the axial position, the focal plane
-can be shifted without moving the objective lens, thus enabling remote focusing.
+can be shifted without moving the objective lens, thus enabling remote focusing. Focus tunable lenses
+serve as an alternative to voice coils owing to their simple operation and high bandwidth. Tunable lenses axially scan
+a beam by introducing defocus into the optical train. Nonetheless, they do not provide the
+higher-order correction provided by voice coils in an aberration-free remote focusing system.
 
 Equipment Solutions
 -------------------
 
-Configuration can be variable. Many of the voice coils we have received require
+Configuration of the device can be variable. Many voice coils we have received require
 establishing serial communication with the device to explicitly place it in an analog
-control mode. More recently, Equipment Solutions has begun delivering devices that
-automatically initialize into an analog control mode, and thus no longer need the
-serial communication to be established. However, we often communicate via both
-serial and a DAQ port to get this device to run.
+control mode. In this case, the comport must be specified properly in the configuration
+file.
 
-* `SCA814 Linear Servo Controller <https://www.equipsolutions.com/products/linear-servo-controllers/sca814-linear-servo-controller/>`_
+More recently, Equipment Solutions has begun delivering devices that
+automatically initialize in an analog control mode, and thus no longer need the
+serial communication to be established. For these devices, we recommend using the analog
+control mode described in the next section.
 
-    * +/- 2.5 Volt Analog Input
-
-* `LFA-2010 Linear Focus Actuator <https://www.equipsolutions.com/products/linear-focus-actuators/lfa-2010-linear-focus-actuator/>`_
+The `LFA-2010 Linear Focus Actuator <https://www.equipsolutions.com/products/linear-focus-actuators/lfa-2010-linear-focus-actuator/>`_
+is controlled with a `SCA814 Linear Servo Controller <https://www.equipsolutions.com/products/linear-servo-controllers/sca814-linear-servo-controller/>`_,
+which accepts a +/- 2.5 Volt analog signal. The minimum and maximum voltages can be set
+in the configuration file to prevent the device from receiving a voltage outside of its
+operating range.
 
 
 .. collapse:: Configuration File
@@ -383,8 +418,8 @@ serial and a DAQ port to get this device to run.
               type: EquipmentSolutions
               channel: PCI6738/ao2
               comport: COM7
-              min: -5
-              max: 5
+              min: -2.5
+              max: 2.5
             delay_percent: 7.5
             ramp_rising_percent: 85
             ramp_falling_percent: 5.0
@@ -394,46 +429,70 @@ serial and a DAQ port to get this device to run.
 
 |
 
-Thorlabs BLINK
---------------
+Analog Controlled Voice Coils and Tunable Lenses
+--------------------------------------------------
 
-The `BLINK <https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK>`_ is a
-pneumatically actuated voice coil that is controlled with analog control signals.
-
-Optotune Focus Tunable Lens
----------------------------
-
-`These devices <https://www.optotune.com/tunable-lenses>`_ are controlled with an
-analog signal from the DAQ.
+In principle, this hardware type can support any analog-controlled voice coil or tunable lens.
+The `BLINK <https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK>`_ and the
+`Optotune Focus Tunable Lens <https://www.optotune.com/tunable-lenses>`_ are
+controlled with an analog signal from the DAQ. The BLINK is a voice coil that is
+pneumatically actuated voice coil. it is recommended that you specify the min and max voltages
+that are compatible with your device to prevent the device from receiving a voltage outside of its
+operating range.
 
 .. collapse:: Configuration File
 
     .. code-block:: yaml
 
-      hardware:
-      daq:
-        type: NI
-
-      remote_focus_device:
-          hardware:
-            name: daq
-            type: NI
-            channel: PXI6259/ao2
-            min: -5
-            max: 5
-          # Optotune EL-16-40-TC-VIS-5D-1-C
-          delay_percent: 7.5
-          ramp_rising_percent: 85
-          ramp_falling_percent: 2.5
-          amplitude: 0.7
-          offset: 2.3
-          smoothing: 0.0
-
+      microscopes:
+        microscope_name:
+          remote_focus_device:
+            hardware:
+              name: remote_focus
+              type: NI
+              channel: PCI6738/ao2
+              comport: COM7
+              min: -2.5
+              max: 2.5
+            delay_percent: 7.5
+            ramp_rising_percent: 85
+            ramp_falling_percent: 5.0
+            amplitude: 0.7
+            offset: 2.3
+            smoothing: 0.0
 
 |
 
 Synthetic Remote Focus Device
 -----------------------------
+If no remote focus device is present, one must configure the software to use a synthetic
+remote focus device.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope_name:
+          remote_focus_device:
+            hardware:
+              name: remote_focus
+              type: SyntheticRemoteFocus
+              channel: PCI6738/ao2
+              comport: COM7
+              min: -2.5
+              max: 2.5
+            delay_percent: 7.5
+            ramp_rising_percent: 85
+            ramp_falling_percent: 5.0
+            amplitude: 0.7
+            offset: 2.3
+            smoothing: 0.0
+
+|
+
+---------
+
 
 Stages
 ======
@@ -445,17 +504,28 @@ across  various modalities. Our unique approach allows seamless integration of s
 from different manufacturers, enabling users to mix and match components for a truly
 versatile and optimized setup tailored to their research needs.
 
+.. Note::
+    The software provides configure specific hardware axes to software axes. This is
+    specified in the configuration file. For example, if specified as follows, the software
+    x, y, z, and f axes can be mapped to the hardware axes M, Y, X, and Z, respectively.
+
+    .. code-block:: yaml
+
+        axes: [x, y, z, f]
+        axes_mapping: [M, Y, X, Z]
+
 ASI Tiger Controller
 --------------------
 
-We are set up to communicate with ASI stages via their
-`Tiger Controller <https://www.asiimaging.com/controllers/tiger-controller/>`_.
-
-There is a ``feedback_alignment`` configuration option specific to these stages,
-which corresponds to the `Tiger Controller AA Command <https://asiimaging.com/docs/commands/aalign>`_.
+The ASI `Tiger Controller <https://www.asiimaging.com/controllers/tiger-controller/>`_. is
+a multi-purpose controller for ASI stages, filter wheels, dichroic sliders,
+and more. We communicate with Tiger Controllers via a serial port. It is recommended that you
+first establish communication with the device using `ASI provided software <https://asiimaging.com/docs/products/tiger>`_.
+For stages in particular, there is a ``feedback_alignment`` configuration option option
+corresponds to the `Tiger Controller AA Command <https://asiimaging.com/docs/commands/aalign>`_.
 
 .. tip::
-    If you are using the FTP-2000 stage, you should not change the F stage axis. This
+    If you are using the FTP-2000 stage, do not change the F stage axis. This
     will differentially drive the two vertical posts, causing them to torque and
     potentially damage one another.
 
@@ -612,7 +682,9 @@ Thorlabs
 --------
 
 We currently support the `KIM001 <https://www.thorlabs.com/thorproduct.cfm?partnumber=KIM001>`_
-controller.
+controller. Importantly, this device shows significant hysterisis, and thus we do not recommend
+it for precise positioning tasks (e.g., autofocusing). It serves as a cost-effective solution
+for manual, user-driven positioning.
 
 .. collapse:: Configuration File
 
@@ -652,7 +724,15 @@ In this case, we treat a standard galvo mirror or piezo as a stage axis. We cont
 allows the user to pass an equation that converts position in microns ``x``, which is
 passed from the software stage controls, to a voltage. Note that we use
 ``GalvoNIStage`` whether or not the device is a galvo or a piezo since the logic is
-identical.
+identical. The voltage signal is delivered via the data acquisition card specified in the
+``axes_mapping`` entry.
+
+.. note::
+
+    The parameters ``distance_threshold`` and ``settle_duration_ms`` are used to provide
+    a settle time for large moves. if the move is larger than the ``distance_threshold``,
+    then a wait duration of ``settle_duration_ms`` is used to allow the stage to settle
+    before the image is acquired.
 
 .. collapse:: Configuration File
 
@@ -678,7 +758,7 @@ identical.
                 type: GalvoNIStage
                 serial_number: 0000
                 axes: [z]
-                axes_mapping: [PCI6738/ao6] #48/49
+                axes_mapping: [PCI6738/ao6]
                 volts_per_micron: 0.05*x
                 max: 10
                 min: 0
@@ -687,10 +767,12 @@ identical.
 
 |
 
-Synthetic Stage
----------------
 
-We use this to fake a stage.
+Synthetic Stage
+------------------
+If no stage is present for a particular axis, one must configure the software to use a synthetic
+stage. For example, not all microscopes have a theta axis.
+
 
 .. collapse:: Configuration File
 
@@ -698,27 +780,31 @@ We use this to fake a stage.
 
       hardware:
         stage:
-        -
-          type: syntheticstage
-          port: COM9999
-          timeout: 0.25
-          baudrate: 9600
-          serial_number: 0000
-          stages: None
+          -
+            type: SyntheticStage
+            serial_number: 74000375
 
       microscopes:
         microscope_name:
           stage:
-            hardware:
-                name: stage2
-                type: syntheticstage
-                serial_number: 0000
-                axes: [theta]
-                axes_mapping: [theta]
-                max: 360
-                min: 0
+              hardware:
+                -
+                  name: stage
+                  type: SyntheticStage
+                  serial_number: 74000375
+                  axes: [theta]
+                  axes_mapping: [purple]
+                  volts_per_micron: None
+                  axes_channels: None
+                  max: None
+                  min: None
 
 |
+
+
+
+---------
+
 
 Filter Wheels
 =============
@@ -729,6 +815,15 @@ change the names of available filters to match what is in the filter wheel or tu
 
 Sutter
 ------
+We typically communicate with Sutter Lambda 10-3 controllers via serial port. It is
+recommended that you first establish communication with the device using manufacturer
+provided software. Alternatively, one can use MicroManager. For some filter wheel types,
+the filter_wheel_delay is calculated according to the size of the move and model of the
+filter wheel. For other filter wheel types, the filter_wheel_delay is a fixed value, which is specified as
+the ``filter_wheel_delay`` entry in the configuration file. The number of filter wheels
+connected to the controller is specified as ``wheel_number`` in the configuration file.
+Currently, both wheels are moved to the same position, but future implementations will
+enable control of both filter wheels independently.
 
 .. collapse:: Configuration File
 
@@ -764,6 +859,8 @@ Sutter
 
 ASI
 ---
+The ASI filter wheel is controlled by the ASI Tiger Controller. Thus, you should provide the same
+``comport`` entry as you did for the stage. A single communication instance is used for both the stage and filter wheel.
 
 .. collapse:: Configuration File
 
@@ -798,14 +895,56 @@ ASI
 
 |
 
+Synthetic Filter Wheel
+----------------------
+If no filter wheel is present, one must configure the software to use a synthetic
+filter wheel.
+
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      hardware:
+        filter_wheel:
+          type: SyntheticFilterWheel
+          port: COM10
+          baudrate: 115200
+          number_of_wheels: 1
+
+      microscopes:
+        microscope_name:
+          filter_wheel:
+            hardware:
+              name: filter_wheel
+              type: SyntheticFilterWheel
+              wheel_number: 1
+            filter_wheel_delay: .030 # in seconds
+            available_filters:
+              BLU - FF01-442/42-32: 0
+              GFP - FF01-515/30-32: 1
+              RFP - FF01-595/31-32: 2
+              Far-Red - FF01-670/30-32: 3
+              Blocked1: 4
+              Empty: 5
+              Blocked3: 6
+              Blocked4: 7
+              Blocked5: 8
+              Blocked6: 9
+
+|
+
+---------
+
+
 Galvanometers
 =============
 
-Galvo mirrors are used for fast scanning and destriping and occasionally as stages
+Galvo mirrors are used for fast scanning, shadow reduction, and occasionally as stages
 (see :ref:`Analog-Controlled Galvo/Piezo <galvo_stage>`).
 
-DAQ Control
------------
+Analog-Controlled Galvo
+-----------------------
 
 Multiple types of galvanometers have been used, including Cambridge
 Technologies/Novanta, Thorlabs, and ScannerMAX Each of these devices
@@ -835,6 +974,40 @@ acquisition card.
 
 |
 
+
+Synthetic Galvo
+---------------
+If no galvo is present, one must configure the software to use a synthetic
+galvo.
+
+---------
+
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+        microscopes:
+          microscope_name:
+            galvo:
+              -
+                hardware:
+                  name: daq
+                  type: SynthticGalvo
+                  channel: PCI6738/ao0
+                  min: -5
+                  max: 5
+                waveform: sawtooth
+                frequency: 99.9
+                amplitude: 2.5
+                offset: 0.5
+                duty_cycle: 50
+                phase: 1.57079 # pi/2
+
+|
+
+
+
 Lasers
 ======
 We currently support laser control via voltage signals. In the near-future, we will consider implementing
@@ -858,8 +1031,8 @@ Coherent Obis
     for the slew rate from the data acquisition card to be insufficient to drive the modulation
     of the laser if the laser is set to an analog modulation mode.
 
-DAQ Control
------------
+Analog/Digital-Controlled Lasers
+--------------------------------
 
 Most lasers are controlled externally via mixed analog and digital modulation.
 The ``onoff`` entry is for digital modulation. The ``power`` entry is for analog
@@ -877,14 +1050,14 @@ modulation.
                 hardware:
                   name: daq
                   type: NI
-                  channel: PCI6738/port1/line5 # 7/41
+                  channel: PCI6738/port1/line5
                   min: 0
                   max: 5
               power:
                 hardware:
                   name: daq
                   type: NI
-                  channel: PCI6738/ao8 #1  # 44/11
+                  channel: PCI6738/ao8 #1  #
                   min: 0
                   max: 5
               type: Obis
@@ -895,13 +1068,17 @@ modulation.
 
 |
 
+
+---------
+
+
 Shutters
 ========
 
 Shutters automatically open at the start of acquisition and close upon finish.
 
-Thorlabs
---------
+Digital-Controlled Shutters
+----------------------------
 
 Thorlabs shutters are controlled via a digital on off voltage.
 
@@ -923,6 +1100,8 @@ Thorlabs shutters are controlled via a digital on off voltage.
 
 Synthetic Shutter
 -----------------
+If no shutter is present, one must configure the software to use a synthetic
+shutter.
 
 .. collapse:: Configuration File
 
@@ -938,6 +1117,10 @@ Synthetic Shutter
             max: 5
 
 |
+
+
+---------
+
 
 Mechanical Zoom
 ===============
@@ -1041,6 +1224,10 @@ Synthetic Zoom
                   36X: 0
 
 |
+
+
+---------
+
 
 Deformable Mirrors
 ==================

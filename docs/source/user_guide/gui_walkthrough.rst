@@ -533,6 +533,8 @@ and :ref:`save data <user_guide/gui_walkthrough:timepoint settings>` is checked.
 * :guilabel:`Label` indicates the dyes used in the acquisition.
 * :guilabel:`Solvent` indicates the immersion solvent of the tissue/cell.
 * :guilabel:`File Type` indicates what type of file to save to.
+* :guilabel:`Notes` is for any additional information the user wants to store with the 
+  file.
 
 Waveform Parameters
 -------------------

@@ -133,6 +133,35 @@ outputs can be wired up as is most convenient.
 
     .. image:: images/6723_pinout.gif
 
+Synthetic Data Acquisition Card
+-------------------------------
+If no data acquisition card is present, one must configure the software to use a synthetic
+data acquisition card.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      hardware:
+        daq:
+          type: SyntheticDAQ
+
+      microscopes:
+        microscope_name:
+          daq:
+            hardware:
+              name: daq
+              type: SyntheticDAQ
+            sample_rate: 100000
+            sweep_time: 0.2
+            master_trigger_out_line: PCI6738/port0/line1
+            camera_trigger_out_line: /PCI6738/ctr0
+            trigger_source: /PCI6738/PFI0
+            laser_port_switcher: PCI6738/port0/line0
+            laser_switch_state: False
+
+|
+
 ---------
 
 Cameras
@@ -165,7 +194,7 @@ download DCAM-API. The software can be found `here <https://dcam-api.com>`_.
       hardware:
         camera:
           -
-            type: HamamatsuOrca # First Camera
+            type: HamamatsuOrca
             serial_number: 302153
 
       microscopes:
@@ -181,17 +210,17 @@ download DCAM-API. The software can be found `here <https://dcam-api.com>`_.
             flip_y: False
             pixel_size_in_microns: 6.5
             subsampling: [1, 2, 4]
-            sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
-            readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
+            sensor_mode: Normal
+            readout_direction: Top-to-Bottom
             lightsheet_rolling_shutter_width: 608
             defect_correct_mode: 1.0
             binning: 1x1
             readout_speed: 2.0
             trigger_active: 1.0
-            trigger_mode: 1.0 # external light-sheet mode
-            trigger_polarity: 2.0  # positive pulse
-            trigger_source: 2.0  # 2 = external, 3 = software.
-            exposure_time: 20 # Use milliseconds throughout.
+            trigger_mode: 1.0
+            trigger_polarity: 2.0
+            trigger_source: 2.0
+            exposure_time: 20
             delay_percent: 20
             pulse_percent: 1
             line_interval: 0.000075
@@ -236,18 +265,18 @@ reads out 4 rows at a time rather than 1 in rolling shutter mode.
             y_pixels: 2592.0
             pixel_size_in_microns: 5.5
             subsampling: [1, 2, 4]
-            sensor_mode: Normal  # 12 for progressive, 1 for normal.
-            readout_direction: Bottom-to-Top  # Top-to-Bottom', 'Bottom-to-Top'
+            sensor_mode: Normal
+            readout_direction: Bottom-to-Top
             lightsheet_rolling_shutter_width: 608
             defect_correct_mode: 2.0
             binning: 1x1
             readout_speed: 0x7FFFFFFF
             trigger_active: 1.0
-            trigger_mode: 1.0 # external light-sheet mode
-            trigger_polarity: 2.0  # positive pulse
-            trigger_source: 2.0  # 2 = external, 3 = software.
-            exposure_time: 20 # Use milliseconds throughout.
-            delay_percent: 8 #5.0
+            trigger_mode: 1.0
+            trigger_polarity: 2.0
+            trigger_source: 2.0
+            exposure_time: 20
+            delay_percent: 8
             pulse_percent: 1
             line_interval: 0.000075
             display_acquisition_subsampling: 4
@@ -342,17 +371,17 @@ the synthetic camera class must be used.
             flip_y: False
             pixel_size_in_microns: 6.5
             subsampling: [1, 2, 4]
-            sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
-            readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
+            sensor_mode: Normal
+            readout_direction: Top-to-Bottom
             lightsheet_rolling_shutter_width: 608
             defect_correct_mode: 1.0
             binning: 1x1
             readout_speed: 2.0
             trigger_active: 1.0
-            trigger_mode: 1.0 # external light-sheet mode
-            trigger_polarity: 2.0  # positive pulse
-            trigger_source: 2.0  # 2 = external, 3 = software.
-            exposure_time: 20 # Use milliseconds throughout.
+            trigger_mode: 1.0
+            trigger_polarity: 2.0
+            trigger_source: 2.0
+            exposure_time: 20
             delay_percent: 20
             pulse_percent: 1
             line_interval: 0.000075
@@ -547,7 +576,7 @@ corresponds to the `Tiger Controller AA Command <https://asiimaging.com/docs/com
               name: stage
               type: ASI
               serial_number: 123456789
-              axes: [x, y, z, f] # Software
+              axes: [x, y, z, f]
               axes_mapping: [M, Y, X, Z]
               feedback_alignment: [90, 90, 90, 90]
 
@@ -843,7 +872,7 @@ enable control of both filter wheels independently.
             name: filter_wheel
             type: SutterFilterWheel
             wheel_number: 1
-          filter_wheel_delay: .030 # in seconds
+          filter_wheel_delay: .030
           available_filters:
             Empty-1: 0
             525-30: 1
@@ -880,7 +909,7 @@ The ASI filter wheel is controlled by the ASI Tiger Controller. Thus, you should
               name: filter_wheel
               type: ASI
               wheel_number: 1
-            filter_wheel_delay: .030 # in seconds
+            filter_wheel_delay: .030
             available_filters:
               BLU - FF01-442/42-32: 0
               GFP - FF01-515/30-32: 1
@@ -919,7 +948,7 @@ filter wheel.
               name: filter_wheel
               type: SyntheticFilterWheel
               wheel_number: 1
-            filter_wheel_delay: .030 # in seconds
+            filter_wheel_delay: .030
             available_filters:
               BLU - FF01-442/42-32: 0
               GFP - FF01-515/30-32: 1
@@ -970,7 +999,7 @@ acquisition card.
                 amplitude: 2.5
                 offset: 0.5
                 duty_cycle: 50
-                phase: 1.57079 # pi/2
+                phase: 1.57079
 
 |
 
@@ -1002,7 +1031,7 @@ galvo.
                 amplitude: 2.5
                 offset: 0.5
                 duty_cycle: 50
-                phase: 1.57079 # pi/2
+                phase: 1.57079
 
 |
 
@@ -1057,7 +1086,7 @@ modulation.
                 hardware:
                   name: daq
                   type: NI
-                  channel: PCI6738/ao8 #1  #
+                  channel: PCI6738/ao8
                   min: 0
                   max: 5
               type: Obis
@@ -1077,8 +1106,8 @@ Shutters
 
 Shutters automatically open at the start of acquisition and close upon finish.
 
-Digital-Controlled Shutters
-----------------------------
+Analog/Digital-Controlled Shutters
+-----------------------------------
 
 Thorlabs shutters are controlled via a digital on off voltage.
 
@@ -1247,6 +1276,29 @@ coefficients.
 
       mirror:
         type: ImagineOpticsMirror
+
+      mirror:
+          hardware:
+            name: mirror
+            type: ImagineOpticsMirror
+            flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+          n_modes: 32
+
+
+|
+
+Synthetic Mirror
+----------------
+It is not necessary to have a deformable mirror to run the software. If no deformable
+mirror is present, but one wants to evaluate the deformable mirror correction features,
+one must configure the software to use a synthetic deformable mirror.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      mirror:
+        type: SyntheticMirror
 
       mirror:
           hardware:

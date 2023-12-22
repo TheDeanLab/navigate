@@ -75,9 +75,8 @@ class FeaturePopupController(GUIController):
         #: list: The list of feature structure.
         self.feature_structure = []
 
-        self.feature_list_graph_controller = FeatureListGraphController(self.view.feature_view_frame, self.view.inputs["content"])
+        self.feature_list_graph_controller = FeatureListGraphController(self.view.feature_view_frame, self.view.inputs["content"], self.view.buttons["preview"])
 
-        self.view.buttons["preview"].configure(command=self.feature_list_graph_controller.draw_feature_list_graph)
         if "add" in self.view.buttons:
             self.view.buttons["add"].configure(command=self.add_feature_list)
             self.view.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
@@ -164,9 +163,11 @@ class FeaturePopupController(GUIController):
         self.view.popup.dismiss()
 
 class FeatureListGraphController:
-    def __init__(self, feature_list_view, feature_content_view):
+    def __init__(self, feature_list_view, feature_content_view, preview_btn):
         self.feature_list_view = feature_list_view
         self.feature_content_view = feature_content_view
+        self.preview_btn = preview_btn
+
         self.feature_list = None
         self.features = []
         self.feature_structure = []
@@ -180,6 +181,9 @@ class FeatureListGraphController:
         for t in temp:
             if inspect.isclass(getattr(feature_related_functions, t)):
                 self.feature_names.append(t)
+
+        # event
+        self.preview_btn.configure(command=self.draw_feature_list_graph)
 
     def update(self, feature_list_content):
         self.feature_list = None
@@ -250,7 +254,9 @@ class FeatureListGraphController:
         for i, feature in enumerate(self.features):
             if type(feature) == str:
                 btn = FeatureIcon(self.feature_list_view, feature)
+                flag = False
             else:
+                flag = True
                 is_decistion_btn = "true" in feature or "false" in feature
                 btn = FeatureIcon(self.feature_list_view, feature["name"].__name__, set_bg=is_decistion_btn)
                 # left click
@@ -259,7 +265,7 @@ class FeatureListGraphController:
             btn.grid(row=0, column=i * 2, sticky="", pady=(30, 0))
             btn["width"] = 20
             # right click
-            btn.bind("<Button-3>", self.show_menu(i))
+            btn.bind("<Button-3>", self.show_menu(i, flag))
             if i == 0:
                 self.feature_list_view.update()
                 feature_icon_width = btn.winfo_width()
@@ -406,11 +412,13 @@ class FeatureListGraphController:
 
             if "true" in feature:
                 self.feature_list_graph_controllers_true[idx] = FeatureListGraphController(popup.feature_list_true_frame.feature_view_frame,
-                                                                                           popup.feature_list_true_frame.content)
+                                                                                           popup.feature_list_true_frame.content,
+                                                                                           popup.preview_btn_true)
                 self.feature_list_graph_controllers_true[idx].update(feature["true"])
             if "false" in feature:
                 self.feature_list_graph_controllers_false[idx] = FeatureListGraphController(popup.feature_list_false_frame.feature_view_frame,
-                                                                                           popup.feature_list_false_frame.content)
+                                                                                           popup.feature_list_false_frame.content,
+                                                                                           popup.preview_btn_false)
                 self.feature_list_graph_controllers_false[idx].update(feature["false"])
 
         def refresh_parameters(popup):
@@ -476,7 +484,7 @@ class FeatureListGraphController:
         return func
     
 
-    def show_menu(self, idx):
+    def show_menu(self, idx, flag=True):
         """Show the popup menu
 
         Parameters
@@ -494,12 +502,13 @@ class FeatureListGraphController:
             """The function to show the popup menu"""
             popup_menu = tk.Menu(self.feature_list_view, tearoff=0)
             popup_menu.add_command(label="Delete", command=lambda: delete_feature(idx))
-            popup_menu.add_command(
-                label="Insert Before", command=lambda: insert_before(idx)
-            )
-            popup_menu.add_command(
-                label="Insert After", command=lambda: insert_after(idx)
-            )
+            if flag:
+                popup_menu.add_command(
+                    label="Insert Before", command=lambda: insert_before(idx)
+                )
+                popup_menu.add_command(
+                    label="Insert After", command=lambda: insert_after(idx)
+                )
             popup_menu.post(event.x_root, event.y_root)
 
         def delete_feature(idx):
@@ -595,7 +604,7 @@ class FeatureListGraphController:
             func
                 The function to insert the feature after the current feature
             """
-            self.features.insert(idx + 1, dict(self.features[idx]))
+            self.features.insert(idx, dict(self.features[idx]) if type(self.features[idx])==dict else self.features[idx])
             i = self.feature_structure.index(idx)
             for _, c in enumerate(self.feature_structure):
                 if type(c) == int and c > idx:

@@ -131,17 +131,21 @@ class FeatureConfigPopup:
 
         row = 3
         if "true" in kwargs:
+            self.preview_btn_true = ttk.Button(content_frame, text="Preview (True)")
+            self.preview_btn_true.grid(row=row, column=0, sticky=tk.NSEW)
             separator = ttk.Separator(content_frame)
-            separator.grid(row=row, column=0, sticky=tk.NSEW, pady=10)
+            separator.grid(row=row+1, column=0, sticky=tk.NSEW, pady=(0,10))
             self.feature_list_true_frame = FeatureListFrame(content_frame)
-            self.feature_list_true_frame.grid(row=row+1, column=0, sticky=tk.NSEW)
-            row += 2
+            self.feature_list_true_frame.grid(row=row+2, column=0, sticky=tk.NSEW)
+            row += 3
 
         if "false" in kwargs:
+            self.preview_btn_false = ttk.Button(content_frame, text="Preview (True)")
+            self.preview_btn_false.grid(row=row, column=0, sticky=tk.NSEW)
             separator = ttk.Separator(content_frame)
-            separator.grid(row=row, column=0, sticky=tk.NSEW, pady=10)
+            separator.grid(row=row+1, column=0, sticky=tk.NSEW, pady=(0,10))
             self.feature_list_false_frame = FeatureListFrame(content_frame)
-            self.feature_list_false_frame.grid(row=row+1, column=0, sticky=tk.NSEW)
+            self.feature_list_false_frame.grid(row=row+2, column=0, sticky=tk.NSEW)
 
         self.build_widgets(args_name, args_value, kwargs.get("parameter_config", {}))
 

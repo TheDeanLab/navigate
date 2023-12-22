@@ -99,6 +99,7 @@ navigate.model.model.Model
       ~Model.ask_to_pause_data_thread
       ~Model.number_of_frames
       ~Model.image_writer
+      ~Model.addon_feature
       ~Model.feature_list
    
    

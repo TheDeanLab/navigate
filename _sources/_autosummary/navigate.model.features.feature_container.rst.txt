@@ -32,6 +32,7 @@ navigate.model.features.feature\_container
       Container
       DataContainer
       DataNode
+      DummyFeature
       SignalContainer
       SignalNode
       TreeNode

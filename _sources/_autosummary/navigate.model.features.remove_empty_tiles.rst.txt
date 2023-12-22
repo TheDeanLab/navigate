@@ -29,6 +29,7 @@ navigate.model.features.remove\_empty\_tiles
    
       DetectTissueInStack
       DetectTissueInStackAndRecord
+      DetectTissueInStackAndReturn
       RemoveEmptyPositions
    
    

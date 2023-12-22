@@ -914,7 +914,7 @@ def load_features(model, feature_list):
                         break_list.append(["child", signal_head, data_head, 1])
                     elif temp["true"] in ["continue", '"continue"', "'continue'"]:
                         continue_list.append(("child", signal_head, data_head))
-                    else:
+                    elif temp["true"]:
                         (
                             signal_child_head,
                             data_child_head,
@@ -933,7 +933,7 @@ def load_features(model, feature_list):
                         break_list.append(["sibling", signal_head, data_head, 1])
                     elif temp["false"] in ["continue", '"continue"', "'continue'"]:
                         continue_list.append(("sibling", signal_head, data_head))
-                    else:
+                    elif temp["false"]:
                         (
                             signal_sibling_head,
                             data_sibling_head,
@@ -1010,10 +1010,15 @@ def load_features(model, feature_list):
             pre_data2 = data_tail2
 
         return signal_root, data_root, pre_signal, pre_data
-
+    
+    break_list = []
     signal_root, data_root, pre_signal, pre_data = build_feature_tree(
-        feature_list, [], []
+        feature_list, [], break_list
     )
+    # add a node placeholder
+    for node in break_list:
+        if node[0] == "child":
+            node[1].child, node[2].child = create_node({"name": DummyFeature})
     return SignalContainer(signal_root, signal_cleanup_list), DataContainer(
         data_root, data_cleanup_list
     )
@@ -1067,3 +1072,9 @@ def dummy_func(*args):
     """
 
     pass
+
+class DummyFeature:
+    def __init__(self, model, *args):
+        self.model = model
+        self.config_table = {}
+

@@ -1,0 +1,3 @@
+"""
+Example plugin model class.
+"""

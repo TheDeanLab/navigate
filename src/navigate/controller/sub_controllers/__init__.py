@@ -1,3 +1,7 @@
+"""
+Sub-controllers for navigate.
+"""
+
 from .stage_controller import StageController  # noqa
 from .acquire_bar_controller import AcquireBarController  # noqa
 from .channels_tab_controller import ChannelsTabController  # noqa

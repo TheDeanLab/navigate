@@ -1,0 +1,3 @@
+"""
+Example plugin custom device.
+"""

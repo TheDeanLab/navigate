@@ -52,7 +52,7 @@ To save an image to disk, follow these steps:
 * A :guilabel:`File Saving Dialog` popup window will appear.
     * With the exception of :guilabel:`Notes`, all fields must be populated. Any spaces in the fields will be replaced with an underscore.
     * :guilabel:`Notes` is saved with the metadata, and can be useful for describing the experiment.
-    * :guillabel:`Solvent` is useful for tissue clearing experiments.
+    * :guilabel:`Solvent` is useful for tissue clearing experiments.
     * :guilabel:`File Type` can be set to :guilabel:`.TIFF`, :guilabel:`OME-TIFF`, :guilabel:`H5`, or :guilabel:`N5`. The
       latter two options are pyramidal file formats that are best used for large datasets and are immediately compatible with `BigDataViewer <https://imagej.net/plugins/bdv/>`_,
       `BigStitcher <https://imagej.net/plugins/bigstitcher/index>`_, and more.

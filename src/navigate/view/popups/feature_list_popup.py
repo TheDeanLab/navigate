@@ -140,7 +140,7 @@ class FeatureConfigPopup:
             row += 3
 
         if "false" in kwargs:
-            self.preview_btn_false = ttk.Button(content_frame, text="Preview (True)")
+            self.preview_btn_false = ttk.Button(content_frame, text="Preview (False)")
             self.preview_btn_false.grid(row=row, column=0, sticky=tk.NSEW)
             separator = ttk.Separator(content_frame)
             separator.grid(row=row+1, column=0, sticky=tk.NSEW, pady=(0,10))

@@ -174,7 +174,7 @@ Hamamatsu Flash 4.0 v3/Fusion
 -----------------------------
 
 * Insert the USB that came with the camera into the computer and install HCImageLive. Alternatively,
-download DCAM-API. The software can be found `here <https://dcam-api.com>`_.
+  download DCAM-API. The software can be found `here <https://dcam-api.com>`_.
 * When prompted with the DCAM-API Setup
 
     * If you are going to use the Frame Grabber, install the Active Silicon Firebird drivers.
@@ -1009,9 +1009,6 @@ Synthetic Galvo
 If no galvo is present, one must configure the software to use a synthetic
 galvo.
 
----------
-
-
 .. collapse:: Configuration File
 
     .. code-block:: yaml
@@ -1164,7 +1161,7 @@ Dynamixel Zoom
 This software supports the
 `Dynamixel Smart Actuator <https://www.dynamixel.com/>`_.
 
-..Note::
+.. note::
 
     The ``positions`` specify the voltage of the actuator at different zoom positions.
     The ``stage_positions`` account for focal shifts in between the different zoom values

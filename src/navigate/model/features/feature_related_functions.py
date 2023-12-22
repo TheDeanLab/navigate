@@ -164,6 +164,10 @@ def convert_str_to_feature_list(content: str):
             else:
                 convert_args_to_tuple(item)
 
+    if content in ["break", '"break"', "'break'"]:
+        return "break"
+    if content in ["continue", '"continue"', "'continue'"]:
+        return "continue"
     try:
         exec_result = {}
         exec(f"result={content}", globals(), exec_result)
@@ -232,6 +236,8 @@ def convert_feature_list_to_str(feature_list):
     [{'name': 'func3', 'args': ('arg3',)}, {'name': 'func4'}]]"
     ```
     """
+    if feature_list == "break" or feature_list == "continue":
+        return f'"{feature_list}"'
 
     result = "["
 
@@ -254,7 +260,17 @@ def convert_feature_list_to_str(feature_list):
                             result += f'"{temp}",'
                         else:
                             result += f"{temp},"
-                    result += ")"
+                    result += "),"
+                if "true" in item:
+                    if type(item["true"]) == str:
+                        result += f'"true": "{item["true"]}",'
+                    else:
+                        result += '"true":' + convert_feature_list_to_str(item["true"]) + ','
+                if "false" in item:
+                    if type(item["false"]) == str:
+                        result += f'"false": "{item["false"]}",'
+                    else:
+                        result += '"false":' + convert_feature_list_to_str(item["false"]) + ','
                 result += "},"
             elif type(item) is tuple:
                 result += "("
@@ -336,7 +352,6 @@ def load_dynamic_parameter_functions(
     ]
     ```
     """
-
     for item in feature_list:
         if type(item) is dict:
             if "args" in item:
@@ -370,5 +385,7 @@ def load_dynamic_parameter_functions(
                             module = importlib.import_module(ref_lib)
                             args[idx] = getattr(module, args[idx]) if module else None
                     item["args"] = tuple(args)
+        elif item == "break" or item == "continue":
+            continue
         else:
             load_dynamic_parameter_functions(item, feature_parameter_setting_path)

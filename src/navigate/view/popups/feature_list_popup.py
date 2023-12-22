@@ -42,7 +42,7 @@ from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 class FeatureIcon(ttk.Button):
     """Feature Icon Widget"""
 
-    def __init__(self, parent, feature_name=""):
+    def __init__(self, parent, feature_name="", set_bg=False):
         """Initialize the Feature Icon Widget
 
         Parameters
@@ -53,6 +53,13 @@ class FeatureIcon(ttk.Button):
             Name of the feature
         """
         ttk.Button.__init__(self, parent, text=feature_name)
+
+        # Create a style
+        style = ttk.Style()
+        style.configure("Custom.TButton", background="red")
+        if set_bg:
+            self.configure(style="Custom.TButton")
+        
         self.configure(padding=(10, 20))
 
 
@@ -121,6 +128,20 @@ class FeatureConfigPopup:
         #: ttk.Frame: Parameter frame
         self.parameter_frame = ttk.Frame(content_frame)
         self.parameter_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=30, pady=30)
+
+        row = 3
+        if "true" in kwargs:
+            separator = ttk.Separator(content_frame)
+            separator.grid(row=row, column=0, sticky=tk.NSEW, pady=10)
+            self.feature_list_true_frame = FeatureListFrame(content_frame)
+            self.feature_list_true_frame.grid(row=row+1, column=0, sticky=tk.NSEW)
+            row += 2
+
+        if "false" in kwargs:
+            separator = ttk.Separator(content_frame)
+            separator.grid(row=row, column=0, sticky=tk.NSEW, pady=10)
+            self.feature_list_false_frame = FeatureListFrame(content_frame)
+            self.feature_list_false_frame.grid(row=row+1, column=0, sticky=tk.NSEW)
 
         self.build_widgets(args_name, args_value, kwargs.get("parameter_config", {}))
 
@@ -265,6 +286,32 @@ class FeatureListPopup:
             self.buttons["confirm"].grid(row=0, column=1, padx=3, pady=3)
         self.buttons["cancel"] = ttk.Button(button_frame, text="Cancel")
         self.buttons["cancel"].grid(row=0, column=2, sticky=tk.SE, padx=3, pady=3)
+
+class FeatureListFrame(ttk.Frame):
+    """Feature list graph frame"""
+    def __init__(self, root, *args, width=800, height=200, **kwargs):
+        super().__init__(root)
+
+        scroll_frame = ttk.Frame(self)
+        scroll_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        canvas = tk.Canvas(scroll_frame, width=width, height=height)
+        scrollbar = ttk.Scrollbar(scroll_frame, orient="horizon", command=canvas.xview)
+        self.feature_view_frame = ttk.Frame(canvas)
+
+        self.feature_view_frame.bind(
+            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=self.feature_view_frame, anchor="nw")
+
+        canvas.configure(xscrollcommand=scrollbar.set)
+
+        canvas.pack(side="top", fill="both", expand=True)
+        scrollbar.pack(side="bottom", fill="x")
+
+        self.content = tk.Text(self, width=100, height=5)
+        self.content.grid(row=2, column=0, sticky=tk.NSEW, padx=10, pady=3)
+
 
 
 class FeatureAdvancedSettingPopup:

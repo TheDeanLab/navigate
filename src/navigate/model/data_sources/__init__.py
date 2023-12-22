@@ -1,3 +1,5 @@
+""" File type specific data sources. """
+
 FILE_TYPES = ["TIFF", "OME-TIFF", "H5", "N5"]
 
 

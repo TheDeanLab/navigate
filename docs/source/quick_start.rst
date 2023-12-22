@@ -1,5 +1,5 @@
 =================================
-Navigate Quick Start Guide
+Quick Start Guide
 =================================
 
 This quick start guide covers how to install **navigate**, launch it in synthetic hardware mode to
@@ -60,4 +60,6 @@ To save an image to disk, follow these steps:
     * Once complete, the data can be visualized using standard image processing software such as `Fiji <https://imagej.net/software/fiji/>`_.
 
 .. image:: user_guide/images/save_dialog.png
+    :align: center
+    :alt: File Saving Dialog
 

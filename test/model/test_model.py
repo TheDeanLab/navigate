@@ -295,7 +295,7 @@ def test_load_feature_list_from_str(model):
         == '[{"name": PrepareNextChannel,},]'
     )
     del feature_lists[-1]
-    feature_str = '[{"name": LoopByCount,"args": ([1, 2.0, True, False, \'abc\'],)},]'
+    feature_str = '[{"name": LoopByCount,"args": ([1, 2.0, True, False, \'abc\'],),},]'
     model.load_feature_list_from_str(feature_str)
     assert len(feature_lists) == l + 1
     assert convert_feature_list_to_str(feature_lists[-1]) == feature_str
@@ -325,9 +325,9 @@ def test_load_feature_records(model):
         feature_lists_path,
         {
             "module_name": None,
-            "feature_list_name": "Test Feature List 1",
+            "feature_list_name": "Test Feature List 5",
             "feature_list": "[({'name': PrepareNextChannel}, "
-            "{'name': LoopByCount, 'args': (3,)})]",
+            "{'name': LoopByCount, 'args': (3,),})]",
         },
         "__test_1.yml",
     )
@@ -336,7 +336,7 @@ def test_load_feature_records(model):
     assert len(feature_lists) == l + len(feature_records) + 1
     assert (
         convert_feature_list_to_str(feature_lists[-1])
-        == '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,)},),]'
+        == '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,),},),]'
     )
 
     del feature_lists[-1]

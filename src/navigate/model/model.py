@@ -234,7 +234,8 @@ class Model:
         self.image_writer = None
 
         # feature list
-        # TODO: put it here now
+        #: list: add on feature in customized mode
+        self.addon_feature = None
         #: list: List of features.
         self.feature_list = []
         # automatically switch resolution

@@ -1,0 +1,34 @@
+navigate.model.devices.APIs.imagineoptics.enums
+===============================================
+
+.. automodule:: navigate.model.devices.APIs.imagineoptics.enums
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      E_MODAL_T
+      E_PUPIL_COVERING_T
+      E_PUPIL_DETECTION_T
+      E_ZERNIKE_NORM_T
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,31 @@
+navigate.model.devices.mirrors.mirror\_synthetic
+================================================
+
+.. automodule:: navigate.model.devices.mirrors.mirror_synthetic
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      SyntheticMirror
+   
+   
+
+   
+   
+   
+
+
+

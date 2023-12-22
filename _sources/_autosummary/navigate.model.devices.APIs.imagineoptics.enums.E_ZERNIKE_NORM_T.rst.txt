@@ -1,0 +1,26 @@
+navigate.model.devices.APIs.imagineoptics.enums.E\_ZERNIKE\_NORM\_T
+===================================================================
+
+.. currentmodule:: navigate.model.devices.APIs.imagineoptics.enums
+
+.. autoclass:: E_ZERNIKE_NORM_T
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~E_ZERNIKE_NORM_T.E_ZERNIKE_NORM_STD
+      ~E_ZERNIKE_NORM_T.E_ZERNIKE_NORM_RMS
+   
+   

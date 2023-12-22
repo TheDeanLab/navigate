@@ -1,0 +1,26 @@
+navigate.model.devices.APIs.imagineoptics.enums.E\_PUPIL\_COVERING\_T
+=====================================================================
+
+.. currentmodule:: navigate.model.devices.APIs.imagineoptics.enums
+
+.. autoclass:: E_PUPIL_COVERING_T
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~E_PUPIL_COVERING_T.E_PUPIL_INSCRIBED
+      ~E_PUPIL_COVERING_T.E_PUPIL_CIRCUMSCRIBED
+   
+   

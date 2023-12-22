@@ -1,0 +1,23 @@
+navigate.model.devices.APIs.photometrics
+========================================
+
+.. automodule:: navigate.model.devices.APIs.photometrics
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

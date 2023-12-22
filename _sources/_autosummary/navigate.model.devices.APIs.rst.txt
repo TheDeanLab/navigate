@@ -28,8 +28,14 @@ navigate.model.devices.APIs
    :template: custom_module.rst
    :recursive:
 
+   navigate.model.devices.APIs.asi
    navigate.model.devices.APIs.coherent
    navigate.model.devices.APIs.dynamixel
+   navigate.model.devices.APIs.hamamatsu
+   navigate.model.devices.APIs.imagineoptics
+   navigate.model.devices.APIs.mcl
    navigate.model.devices.APIs.omicron
+   navigate.model.devices.APIs.photometrics
    navigate.model.devices.APIs.sutter
+   navigate.model.devices.APIs.thorlabs
 

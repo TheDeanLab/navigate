@@ -34,6 +34,7 @@ navigate.model.devices
    navigate.model.devices.filter_wheel
    navigate.model.devices.galvo
    navigate.model.devices.lasers
+   navigate.model.devices.mirrors
    navigate.model.devices.objectives
    navigate.model.devices.remote_focus
    navigate.model.devices.shutter

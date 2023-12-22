@@ -1,0 +1,27 @@
+navigate.model.devices.APIs.imagineoptics.enums.E\_PUPIL\_DETECTION\_T
+======================================================================
+
+.. currentmodule:: navigate.model.devices.APIs.imagineoptics.enums
+
+.. autoclass:: E_PUPIL_DETECTION_T
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~E_PUPIL_DETECTION_T.E_PUPIL_FIXED_RADIUS
+      ~E_PUPIL_DETECTION_T.E_PUPIL_FIXED_CENTER
+      ~E_PUPIL_DETECTION_T.E_PUPIL_AUTOMATIC
+   
+   

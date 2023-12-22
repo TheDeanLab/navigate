@@ -1,0 +1,26 @@
+navigate.model.devices.APIs.imagineoptics.enums.E\_MODAL\_T
+===========================================================
+
+.. currentmodule:: navigate.model.devices.APIs.imagineoptics.enums
+
+.. autoclass:: E_MODAL_T
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~E_MODAL_T.E_MODALCOEF_LEGENDRE
+      ~E_MODAL_T.E_MODALCOEF_ZERNIKE
+   
+   

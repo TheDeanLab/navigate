@@ -910,9 +910,9 @@ def load_features(model, feature_list):
                 data_tail = data_head
                 break_loop_list1, break_loop_list2 = [], []
                 if "true" in temp:
-                    if temp["true"] == "break":
+                    if temp["true"] in ["break", '"break"', "'break'"]:
                         break_list.append(["child", signal_head, data_head, 1])
-                    elif temp["true"] == "continue":
+                    elif temp["true"] in ["continue", '"continue"', "'continue'"]:
                         continue_list.append(("child", signal_head, data_head))
                     else:
                         (
@@ -929,9 +929,9 @@ def load_features(model, feature_list):
                         data_tail = data_child_tail
                         break_to_next = False
                 if "false" in temp:
-                    if temp["false"] == "break":
+                    if temp["false"] in ["break", '"break"', "'break'"]:
                         break_list.append(["sibling", signal_head, data_head, 1])
-                    elif temp["false"] == "continue":
+                    elif temp["false"] in ["continue", '"continue"', "'continue'"]:
                         continue_list.append(("sibling", signal_head, data_head))
                     else:
                         (
@@ -989,6 +989,10 @@ def load_features(model, feature_list):
                             node[1].sibling = signal_head
                             node[2].sibling = data_head
                         break_list.pop()
+            # handle "true": break and "false": break
+            if len(break_list) > 1 and break_list[-1][1] == pre_signal and break_list[-1][0] == pre_signal:
+                continue
+
             if pre_signal:
                 pre_signal.sibling = signal_head
                 pre_data.sibling = data_head

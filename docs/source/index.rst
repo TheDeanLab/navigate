@@ -33,10 +33,11 @@ technology developers.
 
 .. toctree::
    :caption: Getting Started
-   :maxdepth: 1
+   :maxdepth: 2
 
    quick_start
    software_installation
+   i_want_to
 
 .. toctree::
    :caption: User Guide

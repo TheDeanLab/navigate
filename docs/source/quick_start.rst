@@ -13,22 +13,22 @@ Installation
 
 2. Create and Activate Environment
 
-   .. code-block:: bash
+   .. code-block:: console
 
       conda create -n navigate python=3.9.7
       conda activate navigate
 
 3. Install **navigate**
 
-   .. code-block:: bash
+   .. code-block:: console
 
       pip install git+https://github.com/TheDeanLab/navigate.git
 
 4. Launch **navigate** in the synthetic hardware mode. This will allow you to test its functionality without actual hardware.
 
-    .. code-block:: bash
+    .. code-block:: console
 
-       navigate -sh
+      navigate -sh
 
 
 Saving an Image to Disk

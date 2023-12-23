@@ -100,15 +100,103 @@
   <section id="write-a-smart-acquisition-routine-intermediate">
 <h1>Write A Smart Acquisition Routine (Intermediate)<a class="headerlink" href="#write-a-smart-acquisition-routine-intermediate" title="Permalink to this heading"></a></h1>
 <p>navigate’s <a class="reference internal" href="contributing/feature_container.html"><span class="doc">feature container</span></a> enables us to
-write acquisition routines on the fly by chainging existing
-<a class="reference internal" href="user_guide/features.html"><span class="doc">features</span></a> into lists.</p>
-<p>The brackets <code class="docutils literal notranslate"><span class="pre">[]</span></code> create a sequence of events to run in the feature container. As a
-simple test case, we can run a single feature</p>
+write acquisition routines on the fly by chaining existing
+<a class="reference internal" href="user_guide/features.html"><span class="doc">features</span></a> into lists. In this guide, we will use features
+to write a routine that scans through an imaging chamber and only takes images where
+it finds a sample.</p>
+<p>Suppose there are two positions listed in the
+<a class="reference internal" href="user_guide/gui_walkthrough.html#multiposition"><span class="std std-ref">multiposition table</span></a>, one containing
+tissue and one empty, as shown below.</p>
+<img alt="_images/multiposition_tissue.png" src="_images/multiposition_tissue.png" />
+<img alt="_images/multiposition_empty.png" src="_images/multiposition_empty.png" />
+<p>We will build a feature that scans both positions, but only takes a z-stack at the one
+containing tissue. To access the GUI feature list editor, navigate to
+<span class="menuselection">Features ‣ Add Customized Feature List</span>. A window titled “Add New
+Feature List” will pop up. Enter <code class="docutils literal notranslate"><span class="pre">TestFeature</span></code> in the text box at the top of the
+popup. Enter</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">}]</span>
 </pre></div>
 </div>
-<p>This will set up the next color channel for acquisition and then take an image. The
-feature is a</p>
+<p>in the text box at the bottom of this popup and press <span class="guilabel">Preview</span>. The window
+should appear as below.</p>
+<img alt="_images/feature_gui_1.png" src="_images/feature_gui_1.png" />
+<p>The square brackets <code class="docutils literal notranslate"><span class="pre">[]</span></code> create a sequence of events to run in the feature container.
+The <code class="docutils literal notranslate"><span class="pre">{}</span></code> braces contain features. In this case, we have a single feature,
+<code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code>, which will set up the next color channel for acquisition. The
+complete sequence (as it stands) will take an image in the first
+<a class="reference internal" href="user_guide/gui_walkthrough.html#channel-settings"><span class="std std-ref">selected color channel</span></a>.</p>
+<p>We can build much of the rest of our desired acquisition in the GUI. Right-click on the
+<code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code> tile to reveal the editing menu.</p>
+<img alt="_images/feature_gui_2.png" src="_images/feature_gui_2.png" />
+<p>Select <span class="guilabel">Insert After</span>. A second copy of <code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code> will appear in
+the feature list.</p>
+<img alt="_images/feature_gui_3.png" src="_images/feature_gui_3.png" />
+<p>Left-click on this second tile to reveal a popup that allows us to
+select which feature we want to use in this tile.</p>
+<img alt="_images/feature_gui_4.png" src="_images/feature_gui_4.png" />
+<p>Select <code class="docutils literal notranslate"><span class="pre">MoveToNextPositionInMultiPositionTable</span></code> and then close the popup. Your
+feature list editing window should now appear as below.</p>
+<img alt="_images/feature_gui_5.png" src="_images/feature_gui_5.png" />
+<p>Our feature now takes one image of first selected color channel at each position
+in the multiposition table.</p>
+<p>Now, right-click <code class="docutils literal notranslate"><span class="pre">MoveToNextPositionInMultiPositionTable</span></code> and press
+<span class="guilabel">Insert After</span>. Click the new tile and change it to
+<code class="docutils literal notranslate"><span class="pre">DetectTissueInStackAndReturn</span></code>. There are three options associated with this feature.</p>
+<img alt="_images/feature_gui_6.png" src="_images/feature_gui_6.png" />
+<ul class="simple">
+<li><p><span class="guilabel">planes</span> indicates how many planes of the z-stack
+this feature should check for tissue.</p></li>
+<li><p><span class="guilabel">percentage</span> indicates what percent of the total image must contain tissue
+for this feature to return <code class="docutils literal notranslate"><span class="pre">True</span></code> that tissue was detected.</p></li>
+<li><p><span class="guilabel">detect_func</span> is one of the tissue detection functions in
+<a class="reference internal" href="_autosummary/navigate.model.features.remove_empty_tiles.html"><span class="doc">remove_empty_tiles</span></a>.
+If this is set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, it defaults to <code class="docutils literal notranslate"><span class="pre">detect_tissue()</span></code>, which states that
+tissue is present if signal is above the Otsu threshold of the stack of images
+acquired.</p></li>
+</ul>
+<p>Now, right-click <code class="docutils literal notranslate"><span class="pre">DetectTissueInStackAndReturn</span></code> and press
+<span class="guilabel">Insert After</span>. Click the new tile and change it to
+<code class="docutils literal notranslate"><span class="pre">LoopByCount</span></code>.</p>
+<img alt="_images/feature_gui_7.png" src="_images/feature_gui_7.png" />
+<p>We want to iterate over all of the positions in the multi-position table, so we will
+set <code class="docutils literal notranslate"><span class="pre">steps</span></code> to <code class="docutils literal notranslate"><span class="pre">experiment.MicroscopeState.multiposition_count</span></code>.</p>
+<p>Notice that the acquistion protocol does not appear to loop, but rather still moves
+in a sequence. This is because all of the tiles are still in the sequence brackets
+<code class="docutils literal notranslate"><span class="pre">[]</span></code>. We can now enclose the section of the protocol we want to loop in parentheses
+<code class="docutils literal notranslate"><span class="pre">()</span></code> and press <span class="guilabel">Preview</span> to see the update.</p>
+<img alt="_images/feature_gui_8.png" src="_images/feature_gui_8.png" />
+<p>Now, we set up one color channel to image (<code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code>), and then within
+this channel visit every position in the multiposition table, and detect if there is
+tissue. However, we do no yet make any decisions of what to do if tissue is found.
+To do this, we will convert <code class="docutils literal notranslate"><span class="pre">DetectTissueInStackAndReturn</span></code> into a decision node.</p>
+<p>To do this, we add <code class="docutils literal notranslate"><span class="pre">&quot;true&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;false&quot;</span></code> options within the feature braces:
+<code class="docutils literal notranslate"><span class="pre">{&quot;name&quot;:</span> <span class="pre">DetectTissueInStackAndReturn,</span> <span class="pre">&quot;args&quot;:</span> <span class="pre">(1,</span> <span class="pre">0.5,</span> <span class="pre">None),</span> <span class="pre">&quot;true&quot;:</span> <span class="pre">[{&quot;name&quot;:</span> <span class="pre">ZStackAcquisition,&quot;args&quot;:</span> <span class="pre">(False,False,&quot;z-stack&quot;,),}],</span> <span class="pre">&quot;false&quot;:</span> <span class="pre">&quot;continue&quot;,}</span></code>.
+Our <code class="docutils literal notranslate"><span class="pre">&quot;true&quot;</span></code> argument tells the software what to do if tissue is detected. In this
+case, we take a z-stack at the positions where tissue is found. The <code class="docutils literal notranslate"><span class="pre">&quot;false&quot;</span></code>
+argument tells the software how to proceed if no tissue is found. In this case, the
+<code class="docutils literal notranslate"><span class="pre">&quot;continue&quot;</span></code> option tells the software to keep moving through the loop to the next
+position in the multi-position table. Press <span class="guilabel">Preview</span> to see the update.</p>
+<p><code class="docutils literal notranslate"><span class="pre">DetectTissueInStackAndReturn</span></code> now has a red border, indicating it is a decision
+node. Click on it to access the decision node GUI.</p>
+<img alt="_images/feature_gui_9.png" src="_images/feature_gui_9.png" />
+<p>This contains the same settings for <code class="docutils literal notranslate"><span class="pre">DetectTissueInStackAndReturn</span></code> we saw before, but
+now also features GUI editing windows for the results of <code class="docutils literal notranslate"><span class="pre">&quot;true&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;false&quot;</span></code>
+decisions arising from this node.</p>
+<p>Close the node window and press <span class="guilabel">Add</span> in the “Add New Feature List” window.
+This feature is now available under <span class="menuselection">Features ‣ TestFeature</span> and
+can be run in “Customized”
+<a class="reference internal" href="user_guide/gui_walkthrough.html#acquisition-bar"><span class="std std-ref">acquistion mode</span></a>.</p>
+<p>Select “Customized” acquisition mode, select <span class="menuselection">Features ‣ TestFeature</span>,
+and press <span class="guilabel">Acquire</span>. For the positions shown at the start of this guide, the
+software will go to the first position in the multi-position table, decide there is
+tissue present, and take a z-stack. It will then go to the second position in the
+multi-position table, find there is no tissue, and decide not to take a z-stack. It
+will then exit the loop as no more positions are available in the multi-position table.</p>
+<p>Now you can use this feature or build another smart acquisition routine suited to your
+microscope’s needs. See
+<a class="reference internal" href="contributing/feature_container.html#currently-implemented-features"><span class="std std-ref">Currently Implemented Features</span></a>
+for a complete list of features, or build additional features in a
+<a class="reference internal" href="plugin/plugin_home.html"><span class="doc">plugin</span></a>.</p>
 </section>
 
 

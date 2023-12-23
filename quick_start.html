@@ -105,19 +105,19 @@ confirm it is working, and save an image to disk.</p>
 <li><p>Install Miniconda
 Download and install Miniconda from the <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links">official website</a>.</p></li>
 <li><p>Create and Activate Environment</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>navigate<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.9.7
-conda<span class="w"> </span>activate<span class="w"> </span>navigate
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda create -n navigate python=3.9.7</span>
+<span class="go">conda activate navigate</span>
 </pre></div>
 </div>
 </li>
 <li><p>Install <strong>navigate</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/TheDeanLab/navigate.git
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install git+https://github.com/TheDeanLab/navigate.git</span>
 </pre></div>
 </div>
 </li>
 <li><p>Launch <strong>navigate</strong> in the synthetic hardware mode. This will allow you to test its functionality without actual hardware.</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>navigate<span class="w"> </span>-sh
+<div><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">navigate -sh</span>
 </pre></div>
 </div>
 </div></blockquote>

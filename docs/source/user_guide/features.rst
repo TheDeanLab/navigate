@@ -8,7 +8,7 @@ What are features?
 navigate allows users to reconfigure acquisition routines within the GUI by chaining
 so-called "features" together in sequence. A feature is the name given to a single
 acquisition unit such as ``Snap``, which snaps an image, or
-``MoveToNextPositionInMultiPosition Table``, which moves the stage to the next imaging
+``MoveToNextPositionInMultiPositionTable``, which moves the stage to the next imaging
 position indicated in the multi-position table. Some acquisition units, such as
 ``Autofocus`` or ``ZStackAcquisition`` have a bit more going on under the hood, but can
 be used in the same way.

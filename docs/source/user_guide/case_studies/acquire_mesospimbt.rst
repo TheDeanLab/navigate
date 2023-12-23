@@ -13,34 +13,77 @@ the beam path.
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Go to the :guilabel:`Channels` tab. Choose the wavelength you want to align. Set the
-   laser's :guilabel:`Power` to `100.0`. Change :guilabel:`Filter` to an "Empty"
+   laser's :guilabel:`Power` to ``100.0``. Change :guilabel:`Filter` to an "Empty"
    option.
+
+   .. image:: images/meso_beam_1.png
+   
 #. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup
    named :guilabel:`Waveform Parameter Settings` will appear. Make sure the
    :guilabel:`Mode` matches "mesoSPIM BT" and the :guilabel:`Magnification` matches the
    magnification of the objective you are using.
 #. :guilabel:`Galvo 0` digitally sweeps the beam across the field of view. To align the
    axially-swept light sheet parameters, set the :guilabel:`Galvo 0`
-   :guilabel:`Amplitude` to `0.0`. Set the :guilabel:`Offset` so that the beam is
-   centered in the field of view. Click the :guilabel:`Camera View` to toggle the
-   crosshairs, which indicate the center of the field of view. Adjust the
-   :guilabel:`F` (focus) value in the :guilabel:`Stage Control` panel until the beam is
-   as thin/focused as possible.
+   :guilabel:`Amplitude` to ``0.0``. 
+   
+   .. image:: images/meso_beam_2.png
+
 #. The empty filter makes us susceptible to seeing particles scattering light in the
    chamber. This can effect the software's autoscaling routine. To ensure we are
    looking at the beam correctly, uncheck :guilabel:`Autoscale` and set the
    :guilabel:`Min Counts` and :guilabel:`Max Counts` so the beam is visible, but not
    saturating the display.
-#. Set the wavelength's :guilabel:`Amplitude` to `0.0`. Set the wavelength's
+#. Set the wavelength's :guilabel:`Amplitude` to ``0.0``. Set the wavelength's
    :guilabel:`Offset` so that the beam is focused in the center of the field of view.
+
+   .. image:: images/meso_beam_3.png
+
+   .. image:: images/meso_beam_4.png
+
+#. Set the :guilabel:`Galvo 0` :guilabel:`Offset` so that the beam is
+   centered in the field of view. Click the :guilabel:`Camera View` to toggle the
+   crosshairs, which indicate the center of the field of view.
+
+   .. image:: images/meso_beam_5.png
+
+   .. image:: images/meso_beam_6.png
+
 #. Go to :guilabel:`Camera Settings` and ensure that "Light-Sheet" is selected under
    :guilabel:`Sensor Mode`. Slowly increase the wavelength's :guilabel:`Amplitude`
    until the beam becomes a straight line across the screen. If the beam does not
-   become straighter, try changing the camera's :guilabel:`Readout Direction`.
+   become straighter, try changing the camera's 
+   :ref:`Readout Direction <user_guide/gui_walkthrough:camera modes>`. 
+
+
+   .. image:: images/meso_beam_7.png
+
+   .. image:: images/meso_beam_8.png
+
+   Adjust the
+   :guilabel:`F` (focus) value in the :guilabel:`Stage Control` panel until the beam is
+   as thin/focused as possible.
+
+   .. image:: images/meso_beam_9.png
+
 #. Once the beam is straight, slowly change the wavelength's :guilabel:`Offset` until
-   the beam has an even thickness across the field of view.
+   the beam has an even thickness across the field of view. This will also make the 
+   beam a bit thinner.
+
+   .. image:: images/meso_beam_10.png
+
+   .. image:: images/meso_beam_11.png
+
 #. Slowly increase :guilabel:`Galvo 0`'s :guilabel:`Amplitude` until the entire field
    of view is just covered by the swept beam.
+
+   .. image:: images/meso_beam_12.png
+
+   .. image:: images/meso_beam_13.png
+
+   .. image:: images/meso_beam_14.png
+
+   .. image:: images/meso_beam_15.png
+
 #. Under :guilabel:`Waveform Parameter Settings`, press :guilabel:`Save Configuration`.
 #. Under the :guilabel:`Channels` tab, restore the filter to its non-empty position.
 

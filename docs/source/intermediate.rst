@@ -106,10 +106,12 @@ argument tells the software how to proceed if no tissue is found. In this case, 
 ``"continue"`` option tells the software to keep moving through the loop to the next
 position in the multi-position table. Press :guilabel:`Preview` to see the update.
 
+.. image:: images/feature_gui_9.png
+
 ``DetectTissueInStackAndReturn`` now has a red border, indicating it is a decision 
 node. Click on it to access the decision node GUI.
 
-.. image:: images/feature_gui_9.png
+.. image:: images/feature_gui_10.png
 
 This contains the same settings for ``DetectTissueInStackAndReturn`` we saw before, but
 now also features GUI editing windows for the results of ``"true"`` and ``"false"`` 

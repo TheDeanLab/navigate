@@ -23,6 +23,7 @@ jobs:
             [distutils]
             index-servers =
               pypi
+              navigate-micro
     
             [pypi]
             repository: https://upload.pypi.org/legacy/

@@ -31,7 +31,7 @@ jobs:
             password: $env:PYPI_PASSWORD
             
             [navigate-micro]
-            repository: https://github.com/thedeanlab/navigate
+            repository: https://upload.pypi.org/legacy/
             username: $env:PYPI_USERNAME
             password: $env:PYPI_PASSWORD
             "@ | Set-Content -Path $env:USERPROFILE\.pypirc

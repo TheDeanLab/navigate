@@ -28,6 +28,11 @@ jobs:
             repository: https://upload.pypi.org/legacy/
             username: $env:PYPI_USERNAME
             password: $env:PYPI_PASSWORD
+            
+            [navigate-micro]
+            repository: https://github.com/thedeanlab/navigate
+            username: $env:PYPI_USERNAME
+            password: $env:PYPI_PASSWORD
             "@ | Set-Content -Path $env:USERPROFILE\.pypirc
         - name: Set up Python ${{ matrix.python-version }}
           uses: actions/setup-python@v3

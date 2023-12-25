@@ -37,12 +37,12 @@ import os
 import tkinter as tk
 from tkinter import messagebox
 import subprocess
+import webbrowser
 
 # Third Party Imports
 
 # Local Imports
 from navigate.view.popups.ilastik_setting_popup import ilastik_setting_popup
-from navigate.view.popups.help_popup import HelpPopup
 from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
 from navigate.view.popups.adaptiveoptics_popup import AdaptiveOpticsPopup
 from navigate.view.popups.camera_map_setting_popup import CameraMapSettingPopup
@@ -58,7 +58,6 @@ from navigate.controller.sub_controllers import (
     WaveformPopupController,
     MicroscopePopupController,
     FeaturePopupController,
-    HelpPopupController,
     FeatureAdvancedSettingController,
     AdaptiveOpticsPopupController,
 )
@@ -720,14 +719,8 @@ class MenuController(GUIController):
             )
 
     def popup_help(self):
-        """Pop up the help window."""
-        if hasattr(self.parent_controller, "help_controller"):
-            self.parent_controller.help_controller.showup()
-            return
-        help_pop = HelpPopup(self.view)
-        self.parent_controller.help_controller = HelpPopupController(
-            help_pop, self.parent_controller
-        )
+        """Open a web browser to the Navigate documentation."""
+        webbrowser.open_new_tab('https://thedeanlab.github.io/navigate/')
 
     def toggle_stage_limits(self, *args):
         """Toggle stage limits."""

@@ -512,7 +512,7 @@ class Controller:
             # self.menu_controller.feature_id_val.set(0)
 
     def execute(self, command, *args):
-        """Functions listens to the Sub_Gui_Controllers.
+        """Listens to the Sub_Gui_Controllers.
 
         The controller.experiment is passed as an argument to the model, which then
         overwrites the model.experiment. Workaround due to model being in a sub-process.
@@ -662,11 +662,22 @@ class Controller:
 
         elif command == "autofocus":
             """Execute autofocus routine."""
+
+            # Presumably this should be done as part of a thread?
+            if self.model.imaging_mode == "live" and self.model.is_acquiring:
+                print("Stop the current acquisition")
+                self.execute("stop_acquire")
+                args = ("autofocus", "live", "return", *args)
+            else:
+                print("Do not stop the current acquisition")
+                args = ("autofocus", "live", *args)
+
             self.threads_pool.createThread(
                 "camera",
                 self.capture_image,
-                args=("autofocus", "live", *args),
+                args=args,
             )
+
 
         elif command == "load_feature":
             """Tell model to load/unload features."""

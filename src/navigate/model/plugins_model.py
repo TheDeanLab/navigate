@@ -149,11 +149,6 @@ class PluginsModel:
                     feature = getattr(module, feature_name)
                     feature_list_name = feature.feature_list_name
                     feature_list_file_name = "_".join(feature_list_name.split())
-                    if (
-                        f"{feature_list_file_name}.yml" in feature_list_files
-                        or f"{feature_list_file_name}.yaml" in feature_list_files
-                    ):
-                        continue
                     feature_list_content = {
                         "module_name": feature_name,
                         "feature_list_name": feature_list_name,

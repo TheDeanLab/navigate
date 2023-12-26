@@ -83,7 +83,7 @@ class Autofocus:
     move to. If the autofocus_pos_queue is empty, the autofocus is finished.
     """
 
-    def __init__(self, model, device="stage", device_ref="f"):
+    def __init__(self, model, device="stage", device_ref="f", *args, **kwargs):
         """Initialize the Autofocus class.
 
         Parameters

@@ -499,7 +499,7 @@ class Controller:
 
         Parameters
         __________
-        mode : string
+        mode : str
             string = 'live', 'stop'
         """
         self.channels_tab_controller.set_mode(mode)
@@ -519,7 +519,7 @@ class Controller:
 
         Parameters
         __________
-        command : string
+        command : str
             string = 'stage', 'stop_stage', 'move_stage_and_update_info',
         args* : function-specific passes.
         """
@@ -661,23 +661,27 @@ class Controller:
             )
 
         elif command == "autofocus":
-            """Execute autofocus routine."""
+            """Execute autofocus routine.
+            
+            If in live mode, stop the acquisition, execute autofocus, and restart the
+            acquisition. Must interrupt the live acquisition from the controller because 
+            the calls to the model are blocking.
+            
+            """
 
-            # Presumably this should be done as part of a thread?
+            # Is there a better wa to do this that doesn't involve calling the model?
             if self.model.imaging_mode == "live" and self.model.is_acquiring:
-                print("Stop the current acquisition")
                 self.execute("stop_acquire")
-                args = ("autofocus", "live", "return", *args)
+                return_to_live = True
             else:
-                print("Do not stop the current acquisition")
-                args = ("autofocus", "live", *args)
+                return_to_live = False
 
             self.threads_pool.createThread(
                 "camera",
                 self.capture_image,
-                args=args,
+                args=("autofocus", "live", *args),
+                kwargs={"return_to_live": return_to_live},
             )
-
 
         elif command == "load_feature":
             """Tell model to load/unload features."""
@@ -873,14 +877,14 @@ class Controller:
             except RuntimeError:
                 e = RuntimeError
 
-    def capture_image(self, command, mode, *args):
+    def capture_image(self, command, mode, *args, **kwargs):
         """Trigger the model to capture images.
 
         Parameters
         ----------
-        command : string
+        command : str
             string = 'acquire' or 'autofocus'
-        mode : string
+        mode : str
             string = 'continuous', 'z-stack', 'single', or 'projection'
         args : function-specific passes.
         """
@@ -896,7 +900,9 @@ class Controller:
         )
         try:
             work_thread = self.threads_pool.createThread(
-                "model", lambda: self.model.run_command(command, *args)
+                "model", lambda: self.model.run_command(
+                    command, *args, **kwargs
+                )
             )
             work_thread.join()
         except Exception as e:

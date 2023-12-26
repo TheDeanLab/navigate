@@ -629,31 +629,44 @@ class Model:
                 self.signal_thread.start()
 
         elif command == "autofocus":
-            """Autofocus Routine
+            """Autofocus Routine. 
+            
+            If the acquisition is live, stops the acquisition, runs the autofocus, and
+            returns to live mode.
 
             Parameters
             ----------
             Args[0]: device name
             Args[1]: device reference
+            Kwargs["return_to_live"]: bool
+                Return to live mode?
             """
-            print("*** autofocus args:", *args)
+
             autofocus = Autofocus(self, *args)
             autofocus.run()
 
+            if kwargs["return_to_live"]:
+                self.event_queue.put(("acquire", "continuous"))
+
         elif command == "flatten_mirror":
             self.update_mirror(coef=[], flatten=True)
+
         elif command == "zero_mirror":
             self.active_microscope.mirror.zero_flatness()
+
         elif command == "set_mirror":
             coef = list(
                 self.configuration["experiment"]["MirrorParameters"]["modes"].values()
             )
             self.update_mirror(coef=coef)
+
         elif command == "save_wcs_file":
             self.active_microscope.mirror.save_wcs_file(path=args[0])
+
         elif command == "set_mirror_from_wcs":
             coef = self.active_microscope.mirror.set_from_wcs_file(path=args[0])
             self.update_mirror(coef=coef)
+
         elif command == "tony_wilson":
             tony_wilson = TonyWilson(self)
             tony_wilson.run(*args)
@@ -702,9 +715,11 @@ class Model:
                     self.logger.debug(
                         f"run_command - load_feature - Unknown feature {args[0]}."
                     )
+
         elif command == "stage_limits":
             for microscope_name in self.microscopes:
                 self.microscopes[microscope_name].update_stage_limits(args[0])
+
         elif command == "stop":
             """
             Called when user halts the acquisition
@@ -735,6 +750,7 @@ class Model:
         elif command == "exit":
             for camera in self.active_microscope.cameras.values():
                 camera.camera_controller.dev_close()
+
         else:
             self.active_microscope.run_command(command, args)
 

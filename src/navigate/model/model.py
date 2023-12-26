@@ -1400,8 +1400,12 @@ class Model:
             item = load_yaml_file(f"{feature_lists_path}/{temp['yaml_file_name']}")
 
             if item["module_name"]:
-                module = load_module_from_file(item["module_name"], item["filename"])
-                feature = getattr(module, item["module_name"])
+                try:
+                    module = load_module_from_file(item["module_name"], item["filename"])
+                    feature = getattr(module, item["module_name"])
+                except FileNotFoundError:
+                    del feature_records[i]
+                    continue
                 self.feature_list.append(feature())
             elif item["feature_list"]:
                 feature = convert_str_to_feature_list(item["feature_list"])

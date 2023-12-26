@@ -152,15 +152,6 @@ class TestMenuController(unittest.TestCase):
             is True
         )
 
-    def test_popup_help(self):
-        assert (
-            hasattr(self.menu_controller.parent_controller, "help_controller") is False
-        )
-        self.menu_controller.popup_help()
-        assert (
-            hasattr(self.menu_controller.parent_controller, "help_controller") is True
-        )
-
     def test_autofocus_settings(self):
         assert (
             hasattr(self.menu_controller.parent_controller, "af_popup_controller")

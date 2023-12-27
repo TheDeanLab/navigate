@@ -2,34 +2,82 @@
 Write a Custom Plugin (Expert)
 ==============================
 
-navigate's :doc:`plugin system <plugin/plugin_home>` enables us to
-easily incoporate new devices and integrate new features and acquisition modes. In this
-guide, we will add a new device—let's call it 'custom_device' and a GUI window to control the 
-newdevice. This custom device is capable of moving a certain distance, rotating a specified 
-degree, and applying force to halt its movement.
+**navigate's** :doc:`plugin system <plugin/plugin_home>` enables users to
+easily incorporate new devices and integrate new features and acquisition modes. In this
+guide, we will add a new device, titled `custom_device`), and a dedicated GUI window to control it.
+This hypothetical custom device is capable of moving a certain distance,
+rotating a specified number of degrees, and applying a force to halt its movement. Like **navigate**,
+plugins are implemented using a Model-View-Controller architecture. The model
+contains the device-specific code, the view contains the GUI code, and the
+controller contains the code that communicates between the model and the view.
 
-First, fork `navigate-plugin-template <https://github.com/TheDeanLab/navigate-plugin-template>`_ .
+-----------------
 
-Then, rename the 'plugin_device' folder to 'custom_device'. Rename the file 'plugin_device.py' to 'custom_device.py'.
-Edit the code as follows: 
+Initial Steps
+-------------
+
+To ease the addition of a new plugin, we have created a template plugin that can be used as a starting point.
+
+* Fork the `navigate-plugin-template <https://github.com/TheDeanLab/navigate-plugin-template>`_.
+* Rename the `plugin_device` folder to `custom_device`.
+* Rename the file `plugin_device.py` to `custom_device.py`.
+
+-----------------
+
+Model Code
+----------
+
+* Edit the code that communicates with the device as follows:
 
 .. code-block:: python
 
     class CustomDevice:
+        """ A Custom Device Class """
         def __init__(self, device_connection, *args):
+            """ Initialize the Custom Device
+
+            Parameters
+            ----------
+            device_connection : object
+                The device connection object
+            args : list
+                The arguments for the device
+            """
             self.device_connection = device_connection
 
         def move(self, step_size=1.0):
+            """ Move the Custom Device
+
+            Parameters
+            ----------
+            step_size : float
+                The step size of the movement. Default is 1.0 micron.
+            """
             print("*** Custom Device is moving by", step_size)
 
         def stop(self):
+            """ Stop the Custom Device """
             print("*** Stopping the Custom Device!")
 
         def turn(self, angle=0.1):
+            """ Turn the Custom Device
+
+            Parameters
+            ----------
+            angle : float
+                The angle of the rotation. Default is 0.1 degree.
+            """
             print("*** Custom Device is turning by", angle)
 
         @property
         def commands(self):
+            """ Return the commands for the Custom Device """
+
+            Returns
+            -------
+            dict
+                The commands for the Custom Device
+            """
             return {
                 "move_custom_device": lambda *args: self.move(args[0]),
                 "stop_custom_device": lambda *args: self.stop(),
@@ -37,42 +85,78 @@ Edit the code as follows:
             }
 
 
-Edit the code in 'synthetic_device.py' as follows:
+* All devices are accompanied by synthetic versions, which enable the software to run without the
+  actual hardware connected. Thus, in a manner that is similar to the `CustomDevice` class, we
+  edit the code in `synthetic_device.py`, albeit without any calls to the device itself:
 
 .. code-block:: python
 
     class SyntheticDevice:
-    def __init__(self, device_connection, *args):
-        pass
+        """ A Synthetic Device Class """
+        def __init__(self, device_connection, *args):
+            """ Initialize the Synthetic Device
 
-    def move(self, step_size=1.0):
-        print("*** Systhetic Device receive command: move", step_size)
+            Parameters
+            ----------
+            device_connection : object
+                The device connection object
+            args : list
+                The arguments for the device
+            """
+            pass
 
-    def stop(self):
-        print("*** Systhetic Device receive command: stop")
+        def move(self, step_size=1.0):
+            """ Move the Synthetic Device
 
-    def rotate(self, angle=0.1):
-        print("*** Systhetic Device receive command: turn", angle)
+            Parameters
+            ----------
+            step_size : float
+                The step size of the movement. Default is 1.0 micron.
+            """
+            print("*** Synthetic Device receive command: move", step_size)
 
-    @property
-    def commands(self):
-        return {
-            "move_custom_device": lambda *args: self.move(args[0]),
-            "stop_custom_device": lambda *args: self.stop(),
-            "rotate_custom_device": lambda *args: self.rotate(args[0]),
-        }
+        def stop(self):
+            """ Stop the Synthetic Device """
+            print("*** Synthetic Device receive command: stop")
+
+        def rotate(self, angle=0.1):
+            """ Turn the Synthetic Device
+
+            Parameters
+            ----------
+            angle : float
+                The angle of the rotation. Default is 0.1 degree.
+            """
+            print("*** Synthetic Device receive command: turn", angle)
+
+        @property
+        def commands(self):
+            """ Return the commands for the Synthetic Device.
+
+            Returns
+            -------
+            dict
+                The commands for the Synthetic Device
+             """
+            return {
+                "move_custom_device": lambda *args: self.move(args[0]),
+                "stop_custom_device": lambda *args: self.stop(),
+                "rotate_custom_device": lambda *args: self.rotate(args[0]),
+            }
 
 
-Now, let's edit `device_startup_functions.py` which tells Navigate how to connect and start
-the 'custom_device'.
+* Edit `device_startup_functions.py` which tells **navigate** how to connect and start the `custom_device`.
 
 .. code-block:: python
 
+    # Standard library imports
     import os
     from pathlib import Path
 
-    from navigate.tools.common_functions import load_module_from_file
+    # Third party imports
 
+    # Local application imports
+    from navigate.tools.common_functions import load_module_from_file
     from navigate.model.device_startup_functions import (
         auto_redial,
         device_not_found,
@@ -82,10 +166,22 @@ the 'custom_device'.
     DEVICE_TYPE_NAME = "custom_device"
     DEVICE_REF_LIST = ["type"]
 
-
     def load_device(configuration, is_synthetic=False):
-        return DummyDeviceConnection()
+        """ Load the Custom Device
 
+        Parameters
+        ----------
+        configuration : dict
+            The configuration for the Custom Device
+        is_synthetic : bool
+            Whether the device is synthetic or not. Default is False.
+
+        Returns
+        -------
+        object
+            The Custom Device object
+        """
+        return DummyDeviceConnection()
 
     def start_device(microscope_name, device_connection, configuration, is_synthetic=False):
         if is_synthetic:
@@ -115,20 +211,38 @@ the 'custom_device'.
             device_not_found(microscope_name, device_type)
 
 
-Now, let's add a GUI control window. Navigate to the 'view' folder, rename 
-'plugin_name_frame.py' to 'custom_device_frame.py', and edit the code as follows:
+-----------------
+
+View Code
+---------
+* To add a GUI control window, go to the `view` folder, rename `plugin_name_frame.py` to `custom_device_frame.py`, and edit the code as follows:
 
 .. code-block:: python
 
+    # Standard library imports
     import tkinter as tk
     from tkinter import ttk
 
+    # Third party imports
+
+    # Local application imports
     from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 
 
     class CustomDeviceFrame(ttk.Frame):
-
+        """ The Custom Device Frame """
         def __init__(self, root, *args, **kwargs):
+            """ Initialize the Custom Device Frame
+
+            Parameters
+            ----------
+            root : object
+                The root Tk object
+            args : list
+                The arguments for the Custom Device Frame
+            kwargs : dict
+                The keyword arguments for the Custom Device Frame
+            """
             ttk.Frame.__init__(self, root, *args, **kwargs)
 
             # Formatting
@@ -176,44 +290,105 @@ Now, let's add a GUI control window. Navigate to the 'view' folder, rename
         def get_widgets(self):
             return self.inputs
 
-Now, let's build a controller. Navigate to the 'controller' folder, rename 
+* **navigate** comes equipped with a large number of validated widgets, which prevent users from entering invalid values. It is highly recommended that you use these, which include the following:
+* The `LabelInput` widget conveniently combines a label and an input widget into a single object. It is used to create the `step_size` and `angle` widgets in the code below.
+* The `LabelInput` widget can accept multiple types of `input_class` objects, which can include standard tkinter widgets (e.g., spinbox, entry, etc.) or custom widgets. In this example, we use the `ttk.Entry` widget.
+  Preferentially, you would use one of our validated widgets, which include a `ValidatedSpinbox`, `ValidatedEntry`, `ValidatedCombobox`, and `ValidatedMixin`.
+* Further documentation can be found in API Reference
+
+-----------------
+
+Controller Code
+----------------
+Now, let's build a controller. Navigate to the 'controller' folder, rename
 'plugin_name_controller.py' to 'custom_device_controller.py', and edit the code
 as follows:
 
 .. code-block:: python
 
+    # Standard library imports
     import tkinter as tk
 
+    # Third party imports
+
+    # Local application imports
     from navigate.controller.sub_controllers.gui_controller import GUIController
 
 
     class CustomDeviceController(GUIController):
+        """ The Custom Device Controller """
         def __init__(self, view, parent_controller=None):
+            """ Initialize the Custom Device Controller
 
+            Parameters
+            ----------
+            view : object
+                The Custom Device View object
+            parent_controller : object
+                The parent (e.g., main) controller object
+            """
             super().__init__(view, parent_controller)
 
+            # Get the variables and buttons from the view
             self.variables = self.view.get_variables()
             self.buttons = self.view.buttons
 
+            # Set the trace commands for the variables associated with the widgets in the View.
             self.buttons["move"].configure(command=self.move_device)
             self.buttons["rotate"].configure(command=self.rotate_device)
             self.buttons["stop"].configure(command=self.stop_device)
 
         def move_device(self, *args):
+            """ Listen to the move button and move the Custom Device upon clicking.
+
+            Parameters
+            ----------
+            args : list
+                The arguments for the move_device function. Should be included as the tkinter event
+                is passed to this function.
+            """
             self.parent_controller.execute(
                 "move_custom_device", self.variables["step_size"].get()
             )
 
         def rotate_device(self, *args):
+            """ Listen to the rotate button and rotate the Custom Device upon clicking.
+
+            Parameters
+            ----------
+            args : list
+                The arguments for the rotate_device function. Should be included as the tkinter event
+                is passed to this function.
+            """
             self.parent_controller.execute(
                 "rotate_custom_device", self.variables["angle"].get()
             )
 
         def stop_device(self, *args):
+            """ Listen to the stop button and stop the Custom Device upon clicking.
+
+            Parameters
+            ----------
+            args : list
+                The arguments for the stop_device function. Should be included as the tkinter event
+                is passed to this function.
+            """
             self.parent_controller.execute("stop_custom_device")
 
 
-Then, let's update the 'plugin_config.yml' file as follows:
+* In each case above, the sub-controller for the `custom-device` establishes what actions should take
+  place once a button in the view is clicked. In this case, the `move_device`, `rotate_device`, and
+  `stop_device`.
+* The sub-controller then passes the command to the parent controller, which is the main controller
+  for the software. The parent controller then passes the command to the model using an event queue.
+* The model then executes the command, and any updates to the controller from the model are relayed
+  using another event queue.
+
+-----------------
+
+Plugin Configuration
+--------------------
+* The next is to update the 'plugin_config.yml' file as follows:
 
 .. code-block:: none
 
@@ -221,13 +396,13 @@ Then, let's update the 'plugin_config.yml' file as follows:
     view: Popup
 
 
-Now, let's remove the folder './model/features', the file 'feature_list.py', and
-the file 'plugin_acquisition_mode.py'. The plugin folder structure is as follows:
+* Remove the folder `./model/features`, the file `feature_list.py`, and
+the file `plugin_acquisition_mode.py`. The plugin folder structure is as follows:
 
 .. code-block:: none
 
     custom_device/
-        ├── controler/
+        ├── controller/
         │   └── custom_device_controller.py
         |
         ├── model/
@@ -242,12 +417,12 @@ the file 'plugin_acquisition_mode.py'. The plugin folder structure is as follows
         └── plugin_config.yml 
 
 
-Now, let's install this plugin. There are two ways to install a plugin. You could install
-a plugin by putting the whole plugin folder directly into "navigate/plugins/". In this example,
-put "custom_device" folder and all its contents into "navigate/plugins". Another way, you could
-install this plugin through the menu :menuselection:`Plugins --> Install Plugin`, select the plugin
-folder. Then the plugin is ready to use. For this plugin, you could specify a CustomDevice in the
-`configuration.yaml` as follows:
+* Install this plugin. There are two ways to install a plugin. You could install
+  a plugin by putting the whole plugin folder directly into "navigate/plugins/". In this example,
+  put "custom_device" folder and all its contents into "navigate/plugins". Another way, you could
+  install this plugin through the menu :menuselection:`Plugins --> Install Plugin`, select the plugin
+  folder. Then the plugin is ready to use. For this plugin, you could specify a CustomDevice in the
+ `configuration.yaml` as follows:
 
 .. code-block:: none
 
@@ -264,5 +439,5 @@ folder. Then the plugin is ready to use. For this plugin, you could specify a Cu
             ...
             
 
-This custom device will be loaded when you launch Navigate, and you could controller this device
+* The custom device will be loaded when you launch Navigate, and you can now control this device
 through the GUI now.

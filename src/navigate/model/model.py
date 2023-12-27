@@ -646,7 +646,9 @@ class Model:
             autofocus.run()
 
             if kwargs["return_to_live"]:
-                self.event_queue.put(("acquire", "continuous"))
+                while not self.autofocus_on:
+                    time.sleep(0.03)
+                    self.event_queue.put(("live", None))
 
         elif command == "flatten_mirror":
             self.update_mirror(coef=[], flatten=True)

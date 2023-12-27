@@ -97,44 +97,61 @@ class Autofocus:
         """
         #: Model: Model object
         self.model = model
+
         #: float: Maximum entropy
         self.max_entropy = None
+
         #: int: Frame id
         self.f_frame_id = None
+
         #: int: Number of frames
         self.frame_num = None
+
         #: float: Initial position
         self.init_pos = None
+
         #: float: Focus position
         self.f_pos = None
+
         #: float: Focus position
         self.focus_pos = None
+
         #: int: Target frame id
         self.target_frame_id = None
+
         #: int: Number of frames
         self.get_frames_num = None
+
         #: list: Plot data
         self.plot_data = None
+
         #: int: Total frame number
         self.total_frame_num = None
+
         #: float: Fine step size
         self.fine_step_size = None
+
         #: float: Fine position offset
         self.fine_pos_offset = None
+
         #: float: Coarse step size
         self.coarse_step_size = None
+
         #: int: Coarse steps
         self.coarse_steps = None
+
         #: int: Signal id
         self.signal_id = None
 
         #: Queue: Autofocus frame queue
         self.autofocus_frame_queue = Queue()
+
         #: Queue: Autofocus position queue
         self.autofocus_pos_queue = Queue()
 
         #: int: Target channel
         self.target_channel = 1
+
         #: dict: Configuration table
         self.config_table = {
             "signal": {
@@ -151,6 +168,7 @@ class Autofocus:
         }
         #: str: Device name
         self.device = device
+
         #: str: Device reference
         self.device_ref = device_ref
 
@@ -342,7 +360,6 @@ class Autofocus:
 
     def end_func_signal(self):
         """End the autofocus routine."""
-
         return self.signal_id > self.total_frame_num
 
     def pre_func_data(self):

@@ -335,11 +335,8 @@ class ChannelCreator(ttk.Labelframe):
             )
 
         self.filterwheel_pulldowns[num].grid(pady=2)
-        # self.filterwheel_pulldowns[2].grid(pady=2)
         self.laser_pulldowns[num].grid(pady=2)
-        # self.laser_pulldowns[2].grid(pady=2)
         self.channel_checks[num].grid(pady=2)
-        # self.channel_checks[2].grid(pady=2)
 
 
 class StackAcquisitionFrame(ttk.Labelframe):

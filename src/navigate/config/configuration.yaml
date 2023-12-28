@@ -121,7 +121,7 @@ microscopes:
       hardware:
         -
           name: stage
-          type: PI
+          type: syntheticstage
           serial_number: 119060508
           axes: [x, y, z, theta, f]
           axes_mapping: [1, 2, 3, 4, 5]
@@ -355,7 +355,7 @@ microscopes:
           min: None
         -
           name: stage
-          type: Thorlabs
+          type: synthetic
           serial_number: 74000375
           axes: [f]
           axes_mapping: [1]

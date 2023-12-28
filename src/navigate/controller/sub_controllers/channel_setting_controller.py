@@ -62,16 +62,23 @@ class ChannelSettingController(GUIController):
             The configuration controller.
         """
         super().__init__(view, parent_controller)
+
         #: ConfigurationController: The configuration controller.
         self.configuration_controller = configuration_controller
+
         # num: numbers of channels
         self.num = self.configuration_controller.number_of_channels
+        self.view.populate_frame(channels=self.num)
+
         #: str: The mode of the channel setting controller. Either 'live' or 'stop'.
         self.mode = "stop"
+
         #: bool: Whether the channel setting controller is in initialization.
         self.in_initialization = True
+
         #: int: The event id.
         self.event_id = None
+
         #: dict: The channel setting dictionary.
         self.channel_setting_dict = None
 
@@ -103,7 +110,7 @@ class ChannelSettingController(GUIController):
         self.mode = mode
         state = "normal" if mode == "stop" else "disabled"
         state_readonly = "readonly" if mode == "stop" else "disabled"
-        for i in range(5):
+        for i in range(self.num):
             self.view.channel_checks[i].config(state=state)
             self.view.interval_spins[i].config(state=state)
             self.view.laser_pulldowns[i]["state"] = state_readonly

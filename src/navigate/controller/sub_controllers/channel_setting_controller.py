@@ -111,13 +111,16 @@ class ChannelSettingController(GUIController):
         state = "normal" if mode == "stop" else "disabled"
         state_readonly = "readonly" if mode == "stop" else "disabled"
         for i in range(self.num):
+            # State set regardless of operating mode.
             self.view.channel_checks[i].config(state=state)
             self.view.interval_spins[i].config(state=state)
             self.view.laser_pulldowns[i]["state"] = state_readonly
+
             if self.mode != "live" or (
                 self.mode == "live" and not self.view.channel_variables[i].get()
             ):
                 self.view.exptime_pulldowns[i].config(state=state)
+
             if not self.view.channel_variables[i].get():
                 self.view.laserpower_pulldowns[i].config(state=state)
                 self.view.filterwheel_pulldowns[i]["state"] = state
@@ -155,10 +158,11 @@ class ChannelSettingController(GUIController):
         setting_dict : dict
             Dictionary containing the values for the experiment.
         """
+        self.populate_empty_values()
         self.channel_setting_dict = setting_dict
         prefix = "channel_"
         for channel in setting_dict.keys():
-            channel_id = int(channel[len(prefix) :]) - 1
+            channel_id = int(channel[len(prefix):]) - 1
             channel_vals = self.get_vals_by_channel(channel_id)
             if not channel_vals:
                 return
@@ -172,6 +176,32 @@ class ChannelSettingController(GUIController):
             self.view.laserpower_pulldowns[channel_id].validate()
 
         self.show_verbose_info("channel has been set new value")
+
+    def populate_empty_values(self):
+        """Populates the View with empty values.
+
+        If the user changes the number of channels, the new channels need to be populated
+        with a default value.
+        """
+        for i in range(self.num):
+            if self.view.laser_pulldowns[i].get() == "":
+                self.view.laser_pulldowns[i].set(
+                    self.view.laser_pulldowns[i]["values"][0]
+                )
+
+            if self.view.filterwheel_pulldowns[i].get() == "":
+                self.view.filterwheel_pulldowns[i].set(
+                    self.view.filterwheel_pulldowns[i]["values"][0]
+                )
+
+            if self.view.exptime_pulldowns[i].get() == "":
+                self.view.exptime_pulldowns[i].set(100.0)
+
+            if self.view.laserpower_pulldowns[i].get() == "":
+                self.view.laserpower_pulldowns[i].set(10.0)
+
+            if self.view.interval_spins[i].get() == "":
+                self.view.interval_spins[i].set(1.0)
 
     def set_spinbox_range_limits(self, settings):
         """Set the range limits for the spinboxes in the View.
@@ -375,6 +405,7 @@ class ChannelSettingController(GUIController):
         --------
         >>> self.get_index("laser", "488")
         """
+        print("get index", dropdown_name, value)
         if not value:
             return -1
         if dropdown_name == "laser":

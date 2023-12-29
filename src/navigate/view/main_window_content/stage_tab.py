@@ -708,9 +708,6 @@ class XYFrame(ttk.Labelframe):
             self,
             image=self.up_image,
             borderwidth=0
-            # style='arrow.TButton',
-            # width=5
-            # text="\N{UPWARDS BLACK ARROW}"
         )
 
         #: HoverTkButton: Down button.
@@ -718,9 +715,6 @@ class XYFrame(ttk.Labelframe):
             self,
             image=self.down_image,
             borderwidth=0
-            # style='arrow.TButton',
-            # width=10,
-            # text="\N{DOWNWARDS BLACK ARROW}"
         )
 
         #: HoverTkButton: Right button.
@@ -728,9 +722,6 @@ class XYFrame(ttk.Labelframe):
             self,
             image=self.right_image,
             borderwidth=0
-            # style='arrow.TButton',
-            # width=10,
-            # text="\N{RIGHTWARDS BLACK ARROW}"
         )
 
         #: HoverTkButton: Left button.
@@ -738,9 +729,6 @@ class XYFrame(ttk.Labelframe):
             self,
             image=self.left_image,
             borderwidth=0
-            # style='arrow.TButton',
-            # width=10,
-            # text="\N{LEFTWARDS BLACK ARROW}"
         )
 
         #: LabelInput: Increment spinbox.

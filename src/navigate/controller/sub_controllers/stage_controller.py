@@ -242,36 +242,42 @@ class StageController(GUIController):
         for stage in stages:
             if type(stage) is DictProxy:
                 stage_dict = dict(stage)
+            elif type(stage) is dict:
+                stage_dict = stage
+
+            for axis in stage_dict["axes"]:
                 if (stage_dict["type"].lower() == "synthetic") or (
                         stage_dict["type"].lower() == "syntheticstage"):
-                    # disable widgets here.
-                    for axis in stage_dict["axes"]:
-                        if axis == "x":
-                            self.view.xy_frame.up_x_btn.destroy()
-                            self.view.xy_frame.down_x_btn.destroy()
-                            logger.info("Disabled X axis buttons")
-                        # if axis == "x":
-                        #     self.view.xy_frame.up_x_btn.config(state='disabled')
-                        #     self.view.xy_frame.down_x_btn.config(state='disabled')
-                        #     logger.info("Disabled X axis buttons")
-                        # elif axis == "y":
-                        #     self.view.xy_frame.up_y_btn.config(state='disabled')
-                        #     self.view.xy_frame.down_y_btn.config(state='disabled')
-                        #     logger.info("Disabled Y axis buttons")
-                        # elif axis == "z":
-                        #     self.view.z_frame.down_btn.config(state='disabled')
-                        #     self.view.z_frame.up_btn.config(state='disabled')
-                        #     logger.info("Disabled Z axis buttons")
-                        # elif axis == "theta":
-                        #     self.view.theta_frame.down_btn.config(state='disabled')
-                        #     self.view.theta_frame.up_btn.config(state='disabled')
-                        #     logger.info("Disabled Theta axis buttons")
-                        # elif axis == "f":
-                        #     self.view.f_frame.down_btn.config(state='disabled')
-                        #     self.view.f_frame.up_btn.config(state='disabled')
-                        #     logger.info("Disabled F axis buttons")
+                    state = "disabled"
                 else:
-                    pass
+                    state = "normal"
+
+                if axis == "x":
+                    self.view.xy_frame.up_x_btn.config(state=state)
+                    self.view.xy_frame.down_x_btn.config(state=state)
+                    logger.info(f"X axis buttons set to {state}")
+
+                elif axis == "y":
+                    self.view.xy_frame.up_y_btn.config(state=state)
+                    self.view.xy_frame.down_y_btn.config(state=state)
+                    logger.info(f"Y axis buttons set to {state}")
+
+                elif axis == "z":
+                    self.view.z_frame.down_btn.config(state=state)
+                    self.view.z_frame.up_btn.config(state=state)
+                    logger.info(f"Z axis buttons set to {state}")
+
+                elif axis == "theta":
+                    self.view.theta_frame.down_btn.config(state=state)
+                    self.view.theta_frame.up_btn.config(state=state)
+                    logger.info(f"Theta axis buttons set to {state}")
+
+                elif axis == "f":
+                    self.view.f_frame.down_btn.config(state=state)
+                    self.view.f_frame.up_btn.config(state=state)
+                    logger.info(f"Focus axis buttons set to {state}")
+            else:
+                pass
 
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can

@@ -245,7 +245,31 @@ class StageController(GUIController):
                 if (stage_dict["type"].lower() == "synthetic") or (
                         stage_dict["type"].lower() == "syntheticstage"):
                     # disable widgets here.
-                    pass
+                    for axis in stage_dict["axes"]:
+                        if axis == "x":
+                            self.view.xy_frame.up_x_btn.destroy()
+                            self.view.xy_frame.down_x_btn.destroy()
+                            logger.info("Disabled X axis buttons")
+                        # if axis == "x":
+                        #     self.view.xy_frame.up_x_btn.config(state='disabled')
+                        #     self.view.xy_frame.down_x_btn.config(state='disabled')
+                        #     logger.info("Disabled X axis buttons")
+                        # elif axis == "y":
+                        #     self.view.xy_frame.up_y_btn.config(state='disabled')
+                        #     self.view.xy_frame.down_y_btn.config(state='disabled')
+                        #     logger.info("Disabled Y axis buttons")
+                        # elif axis == "z":
+                        #     self.view.z_frame.down_btn.config(state='disabled')
+                        #     self.view.z_frame.up_btn.config(state='disabled')
+                        #     logger.info("Disabled Z axis buttons")
+                        # elif axis == "theta":
+                        #     self.view.theta_frame.down_btn.config(state='disabled')
+                        #     self.view.theta_frame.up_btn.config(state='disabled')
+                        #     logger.info("Disabled Theta axis buttons")
+                        # elif axis == "f":
+                        #     self.view.f_frame.down_btn.config(state='disabled')
+                        #     self.view.f_frame.up_btn.config(state='disabled')
+                        #     logger.info("Disabled F axis buttons")
                 else:
                     pass
 

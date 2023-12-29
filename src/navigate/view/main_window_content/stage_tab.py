@@ -743,9 +743,6 @@ class XYFrame(ttk.Labelframe):
             # text="\N{LEFTWARDS BLACK ARROW}"
         )
 
-        #: HoverTkButton: Zero button.
-        self.zero_xy_btn = HoverTkButton(self, text="ZERO XY")
-
         #: LabelInput: Increment spinbox.
         self.increment_box = LabelInput(
             parent=self,
@@ -800,7 +797,7 @@ class XYFrame(ttk.Labelframe):
             A dictionary of the buttons
         """
 
-        names = ["up_x_btn", "down_x_btn", "up_y_btn", "down_y_btn", "zero_xy_btn"]
+        names = ["up_x_btn", "down_x_btn", "up_y_btn", "down_y_btn"]
         return {k: getattr(self, k) for k in names}
 
     def toggle_button_states(self, joystick_is_on=False, joystick_axes=[]):

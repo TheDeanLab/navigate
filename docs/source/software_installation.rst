@@ -25,13 +25,12 @@ Hardware Considerations
 -----------------------
 
 .. important::
-   The read/write speed of the operating system drive and data storage is crucial.
-   The **navigate** software leverages pyramidal file formats, which require additional overhead for down-sampling operations.
-   Coupled with the demands of larger sCMOS sensors, this necessitates robust CPU performance and rapid data saving capabilities
-   to ensure efficient processing and storage of large datasets. For example, for a standard Hamamatsu camera with a 2048 x 2048 sensor,
-   operating at 16-bit depth and 20 frames per second, the data save rate is approximately ~170 MB/s. With additional down-sampling of
-   2x, 4x, and 8x, this increases to a data save rate of ~220 MB/s, which is well within the capabilities of modern SSDs, but beyond
-   the capabilities of most HDDs.
+   Scientific cameras are capable of rapidly generating large amounts of high-resolution data.
+   As such, the read/write speed of the data storage device is a critical for smooth operation of the software.
+   For example, for a standard Hamamatsu camera with a 2048 x 2048 sensor,
+   operating at 16-bit depth and 20 frames per second, the data save rate is approximately ~170 MB/s.
+   While such capabilities are well within the capabilities of modern SSDs, they are beyond the capabilities of most HDDs.
+   Therefore, it is recommended to use a fast SSD data storage.
 
 
 .. collapse:: Example Hardware Configuration

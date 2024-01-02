@@ -71,7 +71,7 @@ Model Code
 
         @property
         def commands(self):
-            """ Return the commands for the Custom Device """
+            """ Return the commands for the Custom Device
 
             Returns
             -------

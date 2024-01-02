@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Software Installation &mdash; navigate 0.0.1 documentation</title>
+  <title>Software Installation &mdash; navigate 0.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
@@ -50,6 +50,11 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Software Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#computer-specifications">Computer Specifications</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#operating-system-compatibility">Operating System Compatibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hardware-considerations">Hardware Considerations</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#quick-install">Quick install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#developer-install">Developer install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
@@ -98,6 +103,124 @@
              
   <section id="software-installation">
 <h1>Software Installation<a class="headerlink" href="#software-installation" title="Permalink to this heading"></a></h1>
+<section id="computer-specifications">
+<h2>Computer Specifications<a class="headerlink" href="#computer-specifications" title="Permalink to this heading"></a></h2>
+<p><strong>navigate</strong> requires a robust computing environment for optimal performance.
+Below are the recommended specifications:</p>
+<section id="operating-system-compatibility">
+<h3>Operating System Compatibility<a class="headerlink" href="#operating-system-compatibility" title="Permalink to this heading"></a></h3>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The <strong>navigate</strong> software is primarily developed for use on Windows-based systems. This is due to the compatibility of device drivers for various microscope hardware components, such as cameras, stages, and data acquisition cards, which are predominantly designed for the Windows environment.</p>
+<p>While it is possible to launch the software on a Mac using a synthetic hardware mode, users should be aware of known issues with the Tkinter user interface. These issues include improper gridding of widgets and problems with resizing the GUI window. As such, the use of <strong>navigate</strong> software on macOS is not recommended.</p>
+<p>The software remains untested on Linux systems. Therefore, we cannot guarantee its functionality or performance on Linux platforms at this time. Users considering the use of <strong>navigate</strong> software on Linux should proceed with caution and be prepared for potential compatibility issues, especially with respect to device drivers.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For optimal performance and compatibility, it is strongly recommended to run the <strong>navigate</strong> software on a Windows machine, adhering to the specified system specifications.</p>
+</div>
+</section>
+<section id="hardware-considerations">
+<h3>Hardware Considerations<a class="headerlink" href="#hardware-considerations" title="Permalink to this heading"></a></h3>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Scientific cameras are capable of rapidly generating large amounts of high-resolution data.
+As such, the read/write speed of the data storage device is a critical for smooth operation of the software.
+For example, for a standard Hamamatsu camera with a 2048 x 2048 sensor,
+operating at 16-bit depth and 20 frames per second, the data save rate is approximately ~170 MB/s.
+While such capabilities are well within the capabilities of modern SSDs, they are beyond the capabilities of most HDDs.
+Therefore, it is recommended to use a fast SSD data storage.</p>
+</div>
+<details class="summary-example-hardware-configuration">
+<summary>Example Hardware Configuration</summary><ul class="simple">
+<li><dl class="simple">
+<dt><em>Base Platform</em></dt><dd><ul>
+<li><p><strong>Product Name</strong>: <a class="reference external" href="https://www.colfax-intl.com/workstations/sx6300">Colfax SX6300 Workstation</a></p></li>
+<li><p><strong>Colfax Part #</strong>: CX-116263</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><em>Primary and Secondary CPU</em></dt><dd><ul>
+<li><p><strong>CPU Model</strong>: Intel Xeon Silver 4215R</p></li>
+<li><p><strong>Configuration</strong>: 8 Cores / 16 Threads</p></li>
+<li><p><strong>Frequency</strong>: 3.2 GHz</p></li>
+<li><p><strong>Cache</strong>: 11 MB</p></li>
+<li><p><strong>TDP</strong>: 130W</p></li>
+<li><p><strong>Memory Support</strong>: 2400 MHz</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><em>Memory</em></dt><dd><ul>
+<li><p><strong>Type</strong>: Registered ECC DDR4</p></li>
+<li><p><strong>Speed</strong>: 3200 MHz</p></li>
+<li><p><strong>Configuration</strong>: 16 GB per socket, 8 sockets per CPU</p></li>
+<li><p><strong>Total RAM</strong>: &gt;64 GB (recommended)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><em>Operating System Drive</em>:</dt><dd><ul>
+<li><p><strong>Type</strong>: M.2 NVMe SSD</p></li>
+<li><p><strong>Model</strong>: Micron 7450 Max</p></li>
+<li><p><strong>Capacity</strong>: 800 GB</p></li>
+<li><p><strong>Endurance</strong>: 3 DWPD</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><em>Primary Data Drive</em>:</dt><dd><ul>
+<li><p><strong>Type</strong>: NVMe SSD</p></li>
+<li><p><strong>Model</strong>: Samsung PM9A3</p></li>
+<li><p><strong>Capacity</strong>: 7.68 TB</p></li>
+<li><p><strong>Interface</strong>: U.2 Gen4</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><em>Secondary Data Drive</em>:</dt><dd><ul>
+<li><p><strong>Type</strong>: SATA HDD</p></li>
+<li><p><strong>Model</strong>: Seagate Exos X20</p></li>
+<li><p><strong>Capacity</strong>: 20 TB</p></li>
+<li><p><strong>Speed</strong>: 7200 RPM</p></li>
+<li><p><strong>Cache</strong>: 256 MB</p></li>
+<li><p><strong>Interface</strong>: SATA 6.0 Gb/s</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><em>Video Card</em></dt><dd><ul>
+<li><p><strong>Model</strong>: PNY nVidia T1000</p></li>
+<li><p><strong>Memory</strong>: 4 GB</p></li>
+<li><p><strong>Interface</strong>: PCI Express</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><em>Network Interface</em></dt><dd><ul>
+<li><p><strong>Model</strong>: Intel X710-T2L RJ45 Copper</p></li>
+<li><p><strong>Type</strong>: Dual Port 10GbE</p></li>
+<li><p><strong>Interface</strong>: PCI-E x 8</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The specifications listed are based on an example system configuration and can be adjusted based on specific needs and availability.</p>
+</div>
+</details></section>
+</section>
+<hr class="docutils" />
 <section id="quick-install">
 <h2>Quick install<a class="headerlink" href="#quick-install" title="Permalink to this heading"></a></h2>
 <p><strong>Setup your Python Environment</strong></p>

@@ -34,7 +34,6 @@ navigate.view.popups
    navigate.view.popups.camera_map_setting_popup
    navigate.view.popups.camera_view_popup_window
    navigate.view.popups.feature_list_popup
-   navigate.view.popups.help_popup
    navigate.view.popups.ilastik_setting_popup
    navigate.view.popups.microscope_setting_popup_window
    navigate.view.popups.tiling_wizard_popup

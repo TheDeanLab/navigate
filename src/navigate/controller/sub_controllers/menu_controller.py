@@ -654,7 +654,7 @@ class MenuController(GUIController):
 
     def load_experiment(self, *args):
         """Load an experiment file."""
-        filename = tk.filedialog.askopenfilename(
+        filename = filedialog.askopenfilename(
             defaultextension=".yml", filetypes=[("Yaml files", "*.yml *.yaml")]
         )
         if not filename:
@@ -673,7 +673,7 @@ class MenuController(GUIController):
                 "Cannot save current experiment file.",
             )
             return
-        filename = tk.filedialog.asksaveasfilename(
+        filename = filedialog.asksaveasfilename(
             defaultextension=".yml", filetypes=[("Yaml file", "*.yml *.yaml")]
         )
         if not filename:
@@ -682,7 +682,7 @@ class MenuController(GUIController):
 
     def load_images(self):
         """Load images from a file."""
-        filenames = tk.filedialog.askopenfilenames(
+        filenames = filedialog.askopenfilenames(
             defaultextension=".tif", filetypes=[("tiff files", "*.tif *.tiff")]
         )
         if not filenames:
@@ -819,7 +819,7 @@ class MenuController(GUIController):
 
     def load_feature_list(self):
         """Load feature lists from a python file"""
-        filename = tk.filedialog.askopenfilename(
+        filename = filedialog.askopenfilename(
             defaultextension=".py", filetypes=[("Python files", "*.py")]
         )
         if not filename:

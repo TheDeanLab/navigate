@@ -64,7 +64,7 @@ class StageController(GUIController):
              The main view of the microscope
          canvas : tkinter.Canvas
              The canvas of the microscope
-         parent_controller : navigate.controller.microscope_controller.MicroscopeController
+         parent_controller : navigate.controller.Controller
              The parent controller of the stage controller
         """
         super().__init__(view, parent_controller)
@@ -233,11 +233,12 @@ class StageController(GUIController):
             The configuration controller
         """
         microscope_configuration = config.get_microscope_configuration_dict()
-        # widgets = self.view.get_widgets()
         stages = microscope_configuration["stage"]["hardware"]
 
         if type(stages) is ListProxy:
             stages = list(stages)
+        elif type(stages) is DictProxy:
+            stages = [dict(stages)]
 
         for stage in stages:
             if type(stage) is DictProxy:
@@ -247,7 +248,8 @@ class StageController(GUIController):
 
             for axis in stage_dict["axes"]:
                 if (stage_dict["type"].lower() == "synthetic") or (
-                        stage_dict["type"].lower() == "syntheticstage"):
+                    stage_dict["type"].lower() == "syntheticstage"
+                ):
                     state = "disabled"
                 else:
                     state = "normal"

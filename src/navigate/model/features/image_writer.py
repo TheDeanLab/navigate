@@ -224,15 +224,18 @@ class ImageWriter:
         """
 
         for idx in frame_ids:
-            # check the saving flag
-            if self.saving_flags and not self.saving_flags[idx]:
-                continue
 
             if (idx < 0) or (idx > (self.number_of_frames - 1)):
                 msg = f"Received invalid index {idx}. Skipping this frame."
                 logger.debug(msg)
                 print(msg)
                 continue
+
+            # check the saving flag
+            if self.saving_flags:
+                if not self.saving_flags[idx]:
+                    continue
+                self.saving_flags[idx] = False
 
             # Identify channel, z, time, and position indices
             c_idx, z_idx, t_idx, p_idx = self.data_source._cztp_indices(

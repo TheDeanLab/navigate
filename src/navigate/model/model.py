@@ -555,7 +555,9 @@ class Model:
 
             self.signal_thread.name = f"{self.imaging_mode} signal"
             if self.is_save and self.imaging_mode != "live":
-                self.image_writer = ImageWriter(self, saving_flags=self.data_buffer_saving_flags)
+                self.image_writer = ImageWriter(
+                    self, saving_flags=self.data_buffer_saving_flags
+                )
                 self.data_thread = threading.Thread(
                     target=self.run_data_process,
                     kwargs={"data_func": self.image_writer.save_image},
@@ -569,7 +571,10 @@ class Model:
             for m in self.virtual_microscopes:
                 image_writer = (
                     ImageWriter(
-                        self, self.virtual_microscopes[m].data_buffer, m, saving_flags=self.data_buffer_saving_flags
+                        self,
+                        self.virtual_microscopes[m].data_buffer,
+                        m,
+                        saving_flags=self.data_buffer_saving_flags,
                     ).save_image
                     if self.is_save
                     else None
@@ -1432,10 +1437,10 @@ class Model:
         if idx > 0 and idx <= len(self.feature_list):
             return convert_feature_list_to_str(self.feature_list[idx - 1])
         return ""
-    
+
     def mark_saving_flags(self, frame_ids):
         """Mark saving flags for the ImageWriter
-        
+
         Parameters
         ----------
         frame_ids: array

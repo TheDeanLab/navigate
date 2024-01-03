@@ -288,7 +288,9 @@ class ImageWriter:
                 # Close the image, stop the acquisition, log error, and notify user.
                 self.close()
                 self.model.stop_acquisition = True
-                self.model.event_queue.put(("warning", "Insufficient Disk Space. "))
+                self.model.event_queue.put(
+                    ("warning", f"Image writer encountered an error: {e}")
+                )
                 logger.debug(f"Error - ImageWriter: {e}")
                 return
 
@@ -341,6 +343,8 @@ class ImageWriter:
         --------
         >>> self.close()
         """
+        print("Closing")
+        logger.debug("Closing")
         self.data_source.close()
 
     def calculate_and_check_disk_space(self):

@@ -57,6 +57,7 @@ from navigate.model.features.volume_search import VolumeSearch  # noqa
 from navigate.model.features.remove_empty_tiles import (
     DetectTissueInStack,  # noqa
     DetectTissueInStackAndRecord,  # noqa
+    DetectTissueInStackAndReturn,  # noqa
     RemoveEmptyPositions,  # noqa
 )
 from navigate.tools.file_functions import load_yaml_file
@@ -265,12 +266,18 @@ def convert_feature_list_to_str(feature_list):
                     if type(item["true"]) == str:
                         result += f'"true": "{item["true"]}",'
                     else:
-                        result += '"true":' + convert_feature_list_to_str(item["true"]) + ','
+                        result += (
+                            '"true":' + convert_feature_list_to_str(item["true"]) + ","
+                        )
                 if "false" in item:
                     if type(item["false"]) == str:
                         result += f'"false": "{item["false"]}",'
                     else:
-                        result += '"false":' + convert_feature_list_to_str(item["false"]) + ','
+                        result += (
+                            '"false":'
+                            + convert_feature_list_to_str(item["false"])
+                            + ","
+                        )
                 result += "},"
             elif type(item) is tuple:
                 result += "("

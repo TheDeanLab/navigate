@@ -40,7 +40,7 @@ import time
 from navigate.view.popups.waveform_parameter_popup_window import (
     WaveformParameterPopupWindow,
 )
-from navigate.model.dummy import DummyModel
+from test.model.dummy import DummyModel
 from navigate.controller.configuration_controller import ConfigurationController
 
 

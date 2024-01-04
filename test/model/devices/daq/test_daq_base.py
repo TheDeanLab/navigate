@@ -1,6 +1,6 @@
 def test_initialize_daq():
     from navigate.model.devices.daq.daq_base import DAQBase
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     DAQBase(model.configuration)
@@ -10,7 +10,7 @@ def test_calculate_all_waveforms():
     import numpy as np
 
     from navigate.model.devices.daq.daq_base import DAQBase
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     daq = DAQBase(model.configuration)

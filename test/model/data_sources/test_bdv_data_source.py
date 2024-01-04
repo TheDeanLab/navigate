@@ -30,7 +30,7 @@ def recurse_dtype(group):
 @pytest.mark.parametrize("size", [(1024, 2048), (2048, 1024), (2048, 2048)])
 @pytest.mark.parametrize("ext", ["h5", "n5"])
 def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
     from navigate.model.data_sources.bdv_data_source import BigDataViewerDataSource
 
     print(

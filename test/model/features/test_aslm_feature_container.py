@@ -41,7 +41,7 @@ from navigate.model.features.feature_container import (
 )
 from navigate.model.features.common_features import WaitToContinue, LoopByCount
 from navigate.model.features.feature_container import dummy_True
-from navigate.model.dummy import DummyModel
+from test.model.dummy import DummyModel
 
 
 class DummyFeature:

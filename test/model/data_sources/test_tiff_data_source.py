@@ -13,7 +13,7 @@ from navigate.tools.file_functions import delete_folder
 def test_tiff_write_read(is_ome, multiposition, per_stack, z_stack, stop_early):
     import numpy as np
 
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
     from navigate.model.data_sources.tiff_data_source import TiffDataSource
 
     print(

@@ -18,10 +18,6 @@ def image_writer(dummy_model):
     writer.close()
 
 
-def test_generate_metadata(image_writer):
-    assert image_writer.generate_meta_data()
-
-
 def test_image_write_fail(image_writer):
     image_writer.save_image([-1, image_writer.model.data_buffer.shape[0]])
 

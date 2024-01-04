@@ -129,6 +129,22 @@ class Metadata:
         """
         return self._per_stack
 
+    def set_from_dict(self, metadata_config: dict) -> None:
+        """Set from a dictionary
+        
+        Parameters
+        ----------
+        metadata_config : dict
+            dictionary of metadata: "c", "z", "t", "p", "is_dynamic", "per_stack"
+        """
+        self.shape_c = metadata_config.get("c", self.shape_c)
+        self.shape_z = metadata_config.get("z", self.shape_z)
+        self.shape_t = metadata_config.get("t", self.shape_t)
+        self.positions = metadata_config.get("p", self.positions)
+        if metadata_config.get("is_dynamic", False):
+            self._multiposition = True
+        self._per_stack = metadata_config.get("per_stack", self._per_stack)
+    
     def set_from_configuration_experiment(self) -> None:
         """Set from configuration experiment"""
         if (
@@ -165,8 +181,6 @@ class Metadata:
             or (state["image_mode"] == "ConstantVelocityAcquisition")
         ):
             self.shape_z = int(state["number_z_steps"])
-        elif state["image_mode"] == "confocal-projection":
-            self.shape_z = int(state["n_plane"])
         else:
             self.shape_z = 1
         self.shape_t = int(state["timepoints"])

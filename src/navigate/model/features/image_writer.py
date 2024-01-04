@@ -51,7 +51,7 @@ logger = logging.getLogger(p)
 class ImageWriter:
     """Class for saving acquired data to disk."""
 
-    def __init__(self, model, data_buffer=None, sub_dir="", image_name=None, saving_flags=None):
+    def __init__(self, model, data_buffer=None, sub_dir="", image_name=None, saving_flags=None, saving_config={}):
         """Class for saving acquired data to disk.
 
         Parameters
@@ -87,38 +87,6 @@ class ImageWriter:
 
         #: str : Sub-directory for saving data to disk.
         self.sub_dir = sub_dir
-
-        #: int : Number of channels in the experiment.
-        self.num_of_channels = len(
-            [
-                k
-                for k, v in self.model.configuration["experiment"]["MicroscopeState"][
-                    "channels"
-                ].items()
-                if v["is_selected"]
-            ]
-        )
-
-        #: int : Number of positions in the experiment.
-        self.num_of_positions = (
-            self.model.configuration["experiment"]["MicroscopeState"][
-                "multiposition_count"
-            ]
-            if self.model.configuration["experiment"]["MicroscopeState"][
-                "is_multiposition"
-            ]
-            else 1
-        )
-
-        #: int : Number of time points in the experiment.
-        self.num_of_timepoints = self.model.configuration["experiment"][
-            "MicroscopeState"
-        ]["timepoints"]
-
-        #: int : Number of z-slices in the experiment.
-        self.num_of_slices = self.model.configuration["experiment"]["MicroscopeState"][
-            "number_z_steps"
-        ]
 
         #: int : Current time point for saving data.
         self.current_time_point = 0
@@ -200,6 +168,8 @@ class ImageWriter:
         self.data_source.set_metadata_from_configuration_experiment(
             self.model.configuration
         )
+
+        self.data_source.set_metadata(saving_config)
 
         # Make sure that there is enough disk space to save the data.
         self.calculate_and_check_disk_space()
@@ -329,20 +299,6 @@ class ImageWriter:
         )
         self.current_time_point += 1
         return image_name
-
-    def generate_meta_data(self):
-        """Generate meta data for the image.
-
-        TODO: Is this a vestigial function? DELETE???
-
-        Returns
-        -------
-        dict
-            Meta data for the image.
-
-        """
-        print("meta data: write", self.model.frame_id)
-        return True
 
     def close(self):
         """Close the data source we are writing to.

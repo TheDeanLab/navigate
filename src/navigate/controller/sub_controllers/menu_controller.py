@@ -35,7 +35,7 @@ import logging
 import platform
 import os
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 import subprocess
 import webbrowser
 
@@ -436,6 +436,10 @@ class MenuController(GUIController):
         }
         self.populate_menu(configuration_dict)
 
+        # plugins
+        self.view.menubar.menu_plugins.add_command(label="Install Plugin", command=self.install_plugin)
+        self.view.menubar.menu_plugins.add_separator()
+
         # add-on features
         self.feature_list_names = [
             "None",
@@ -505,6 +509,7 @@ class MenuController(GUIController):
             label="Advanced Setting", command=self.popup_feature_advanced_setting
         )
         self.view.menubar.menu_features.add_separator()
+
         # add feature lists from previous loaded ones
         feature_lists_path = get_navigate_path() + "/feature_lists"
         if not os.path.exists(feature_lists_path):
@@ -523,6 +528,9 @@ class MenuController(GUIController):
             )
             self.feature_list_names.append(feature["feature_list_name"])
             self.feature_list_count += 1
+
+        # Note: Any menu items added below this return statement will not
+        # be populated if feature_records does not exist.
 
     def toggle_save(self, *args):
         """Toggle save button
@@ -650,7 +658,7 @@ class MenuController(GUIController):
 
     def load_experiment(self, *args):
         """Load an experiment file."""
-        filename = tk.filedialog.askopenfilename(
+        filename = filedialog.askopenfilename(
             defaultextension=".yml", filetypes=[("Yaml files", "*.yml *.yaml")]
         )
         if not filename:
@@ -663,13 +671,13 @@ class MenuController(GUIController):
         Updates model.experiment and saves it to file.
         """
         if not self.parent_controller.update_experiment_setting():
-            tk.messagebox.showerror(
+            messagebox.showerror(
                 title="Warning",
                 message="Incorrect/missing settings. "
                 "Cannot save current experiment file.",
             )
             return
-        filename = tk.filedialog.asksaveasfilename(
+        filename = filedialog.asksaveasfilename(
             defaultextension=".yml", filetypes=[("Yaml file", "*.yml *.yaml")]
         )
         if not filename:
@@ -678,7 +686,7 @@ class MenuController(GUIController):
 
     def load_images(self):
         """Load images from a file."""
-        filenames = tk.filedialog.askopenfilenames(
+        filenames = filedialog.askopenfilenames(
             defaultextension=".tif", filetypes=[("tiff files", "*.tif *.tiff")]
         )
         if not filenames:
@@ -815,7 +823,7 @@ class MenuController(GUIController):
 
     def load_feature_list(self):
         """Load feature lists from a python file"""
-        filename = tk.filedialog.askopenfilename(
+        filename = filedialog.askopenfilename(
             defaultextension=".py", filetypes=[("Python files", "*.py")]
         )
         if not filename:
@@ -956,3 +964,26 @@ class MenuController(GUIController):
         self.parent_controller.feature_advanced_setting_controller = (
             FeatureAdvancedSettingController(self.view, self.parent_controller)
         )
+
+    def install_plugin(self, *args):
+        """Install a plugin"""
+        folder_path = filedialog.askdirectory()
+        if not folder_path:
+            return
+        if os.path.exists(os.path.join(folder_path, "plugin_config.yml")):
+            plugin_config = load_yaml_file(os.path.join(folder_path, "plugin_config.yml"))
+            plugins_dict = load_yaml_file(os.path.join(get_navigate_path(), "config", "plugins_config.yml"))
+            plugin_name = plugin_config["name"]
+            if plugin_name in plugins_dict:
+                messagebox.showwarning(title="Warning",
+                    message=f"Plugin {plugin_name} already exists,"
+                    "Cannot install the selected one.",
+                )
+                return
+            else:
+                plugins_dict[plugin_name] = folder_path
+                save_yaml_file(os.path.join(get_navigate_path(), "config"), plugins_dict, "plugins_config.yml")
+                messagebox.showwarning(title="Plugin",
+                    message=f"Plugin {plugin_name} is installed!"
+                    "Please restart Navigate!",
+                )

@@ -337,7 +337,6 @@ class BigDataViewerDataSource(DataSource):
                 ).astype(int),
                 1,
             )
-            print(self._shapes)
         return self._shapes
 
     @property
@@ -414,7 +413,9 @@ class BigDataViewerDataSource(DataSource):
         # Check if this was the last frame to write
         c, z, t, p = self._cztp_indices(self._current_frame, self.metadata.per_stack)
         if (z == 0) and (c == 0) and ((t >= self.shape_t) or (p >= self.positions)):
-            self.setup(self.shape_c*self.positions, self.shape_c*(p+1), create_flag=False)
+            self.setup(
+                self.shape_c * self.positions, self.shape_c * (p + 1), create_flag=False
+            )
             self.positions = p + 1
 
     def _h5_ds_name(self, t, c, p):

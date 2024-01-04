@@ -1,3 +1,0 @@
-"""
-Confocal Projection Plugin
-"""

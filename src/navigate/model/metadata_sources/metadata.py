@@ -181,6 +181,9 @@ class Metadata:
         else:
             self.positions = 1
 
+        # tiff
+        if state["image_mode"] == "customized":
+            self._multiposition = True
         # let the data sources have the ability to save more frames
         # self._multiposition = True
         # self.positions = len(

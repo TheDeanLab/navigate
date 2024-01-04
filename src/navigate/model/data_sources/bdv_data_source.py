@@ -337,7 +337,6 @@ class BigDataViewerDataSource(DataSource):
                 ).astype(int),
                 1,
             )
-            print(self._shapes)
         return self._shapes
 
     @property
@@ -414,7 +413,10 @@ class BigDataViewerDataSource(DataSource):
         # Check if this was the last frame to write
         c, z, t, p = self._cztp_indices(self._current_frame, self.metadata.per_stack)
         if (z == 0) and (c == 0) and ((t >= self.shape_t) or (p >= self.positions)):
-            self.close()
+            self.setup(
+                self.shape_c * self.positions, self.shape_c * (p + 1), create_flag=False
+            )
+            self.positions = p + 1
 
     def _h5_ds_name(self, t, c, p):
         """Get the HDF5 dataset name for the given timepoint, channel, and position.
@@ -471,15 +473,20 @@ class BigDataViewerDataSource(DataSource):
         self.metadata.parse_xml(xml_fn)
         self.get_shape_from_metadata()
 
-    def _setup_h5(self):
+    def _setup_h5(self, *args, create_flag=True):
         """Set up the HDF5 file.
 
         This function creates the file and the datasets to populate.
         """
-        self.image = h5py.File(self.file_name, "a")
+        if create_flag:
+            self.image = h5py.File(self.file_name, "a")
+
+        setup_start, setup_end = 0, self.shape_c * self.positions
+        if len(args) >= 2:
+            setup_start, setup_end = args[0], args[1]
 
         # Create setups
-        for i in range(self.shape_c * self.positions):
+        for i in range(setup_start, setup_end):
             setup_group_name = f"s{i:02}"
             if setup_group_name in self.image:
                 del self.image[setup_group_name]
@@ -497,7 +504,7 @@ class BigDataViewerDataSource(DataSource):
         # Create the datasets to populate
         for t in range(self.shape_t):
             time_group_name = f"t{t:05}"
-            for i in range(self.shape_c * self.positions):
+            for i in range(setup_start, setup_end):
                 setup_group_name = f"s{i:02}"
                 for j in range(self.subdivisions.shape[0]):
                     dataset_name = "/".join(
@@ -513,7 +520,7 @@ class BigDataViewerDataSource(DataSource):
                         dtype="int16",
                     )
 
-    def _setup_n5(self):
+    def _setup_n5(self, *args, create_flag=True):
         """Set up the N5 file.
 
         This function creates the file and the datasets to populate. By default,
@@ -526,10 +533,15 @@ class BigDataViewerDataSource(DataSource):
             https://github.com/bigdataviewer/bigdataviewer-core/blob/master/BDV%20N5%20format.md
 
         """
-        self.__store = zarr.N5Store(self.file_name)
-        self.image = zarr.group(store=self.__store, overwrite=True)
+        if create_flag:
+            self.__store = zarr.N5Store(self.file_name)
+            self.image = zarr.group(store=self.__store, overwrite=True)
 
-        for i in range(self.shape_c * self.positions):
+        setup_start, setup_end = 0, self.shape_c * self.positions
+        if len(args) >= 2:
+            setup_start, setup_end = args[0], args[1]
+
+        for i in range(setup_start, setup_end):
             setup_group_name = f"setup{i}"
             setup = self.image.create_group(setup_group_name)
             setup.attrs["downsamplingFactors"] = self.resolutions.tolist()

@@ -51,7 +51,7 @@ logger = logging.getLogger(p)
 class ImageWriter:
     """Class for saving acquired data to disk."""
 
-    def __init__(self, model, data_buffer=None, sub_dir="", image_name=None):
+    def __init__(self, model, data_buffer=None, sub_dir="", image_name=None, saving_flags=None):
         """Class for saving acquired data to disk.
 
         Parameters
@@ -78,6 +78,9 @@ class ImageWriter:
 
         #: int : Number of frames in the experiment.
         self.number_of_frames = self.model.number_of_frames
+
+        #: array : Array of saving flags
+        self.saving_flags = saving_flags
 
         #: str : Directory for saving data to disk.
         self.save_directory = ""
@@ -221,11 +224,18 @@ class ImageWriter:
         """
 
         for idx in frame_ids:
+
             if (idx < 0) or (idx > (self.number_of_frames - 1)):
                 msg = f"Received invalid index {idx}. Skipping this frame."
                 logger.debug(msg)
                 print(msg)
                 continue
+
+            # check the saving flag
+            if self.saving_flags:
+                if not self.saving_flags[idx]:
+                    continue
+                self.saving_flags[idx] = False
 
             # Identify channel, z, time, and position indices
             c_idx, z_idx, t_idx, p_idx = self.data_source._cztp_indices(

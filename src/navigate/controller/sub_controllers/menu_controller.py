@@ -436,6 +436,10 @@ class MenuController(GUIController):
         }
         self.populate_menu(configuration_dict)
 
+        # plugins
+        self.view.menubar.menu_plugins.add_command(label="Install Plugin", command=self.install_plugin)
+        self.view.menubar.menu_plugins.add_separator()
+
         # add-on features
         self.feature_list_names = [
             "None",
@@ -505,6 +509,7 @@ class MenuController(GUIController):
             label="Advanced Setting", command=self.popup_feature_advanced_setting
         )
         self.view.menubar.menu_features.add_separator()
+
         # add feature lists from previous loaded ones
         feature_lists_path = get_navigate_path() + "/feature_lists"
         if not os.path.exists(feature_lists_path):
@@ -524,9 +529,8 @@ class MenuController(GUIController):
             self.feature_list_names.append(feature["feature_list_name"])
             self.feature_list_count += 1
 
-        # plugins
-        self.view.menubar.menu_plugins.add_command(label="Install Plugin", command=self.install_plugin)
-        self.view.menubar.menu_plugins.add_separator()
+        # Note: Any menu items added below this return statement will not
+        # be populated if feature_records does not exist.
 
     def toggle_save(self, *args):
         """Toggle save button

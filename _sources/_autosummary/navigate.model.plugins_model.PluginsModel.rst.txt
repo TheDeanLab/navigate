@@ -23,4 +23,10 @@ navigate.model.plugins\_model.PluginsModel
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PluginsModel.plugins_path
+   
    

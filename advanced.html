@@ -53,7 +53,14 @@
 <li class="toctree-l1 current"><a class="reference internal" href="i_want_to.html">I Want To…</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="beginner.html">Acquire an Image (Beginner)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="intermediate.html">Write A Smart Acquisition Routine (Intermediate)</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Write a Custom Plugin (Expert)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Write a Custom Plugin (Expert)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#initial-steps">Initial Steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-code">Model Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#view-code">View Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#controller-code">Controller Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-configuration">Plugin Configuration</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -99,6 +106,439 @@
              
   <section id="write-a-custom-plugin-expert">
 <h1>Write a Custom Plugin (Expert)<a class="headerlink" href="#write-a-custom-plugin-expert" title="Permalink to this heading"></a></h1>
+<p><strong>navigate’s</strong> <a class="reference internal" href="plugin/plugin_home.html"><span class="doc">plugin system</span></a> enables users to
+easily incorporate new devices and integrate new features and acquisition modes. In this
+guide, we will add a new device, titled <cite>custom_device</cite>), and a dedicated GUI window to control it.
+This hypothetical custom device is capable of moving a certain distance,
+rotating a specified number of degrees, and applying a force to halt its movement. Like <strong>navigate</strong>,
+plugins are implemented using a Model-View-Controller architecture. The model
+contains the device-specific code, the view contains the GUI code, and the
+controller contains the code that communicates between the model and the view.</p>
+<hr class="docutils" />
+<section id="initial-steps">
+<h2>Initial Steps<a class="headerlink" href="#initial-steps" title="Permalink to this heading"></a></h2>
+<p>To ease the addition of a new plugin, we have created a template plugin that can be used as a starting point.</p>
+<ul class="simple">
+<li><p>Fork the <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate-plugin-template</a>.</p></li>
+<li><p>Rename the <cite>plugin_device</cite> folder to <cite>custom_device</cite>.</p></li>
+<li><p>Rename the file <cite>plugin_device.py</cite> to <cite>custom_device.py</cite>.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="model-code">
+<h2>Model Code<a class="headerlink" href="#model-code" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Edit the code that communicates with the device as follows:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CustomDevice</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; A Custom Device Class &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialize the Custom Device</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        device_connection : object</span>
+<span class="sd">            The device connection object</span>
+<span class="sd">        args : list</span>
+<span class="sd">            The arguments for the device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device_connection</span> <span class="o">=</span> <span class="n">device_connection</span>
+
+    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Move the Custom Device</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        step_size : float</span>
+<span class="sd">            The step size of the movement. Default is 1.0 micron.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** Custom Device is moving by&quot;</span><span class="p">,</span> <span class="n">step_size</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Stop the Custom Device &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** Stopping the Custom Device!&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">turn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Turn the Custom Device</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        angle : float</span>
+<span class="sd">            The angle of the rotation. Default is 0.1 degree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** Custom Device is turning by&quot;</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">commands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the commands for the Custom Device</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            The commands for the Custom Device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;move_custom_device&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="s2">&quot;stop_custom_device&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">(),</span>
+            <span class="s2">&quot;rotate_custom_device&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>All devices are accompanied by synthetic versions, which enable the software to run without the
+actual hardware connected. Thus, in a manner that is similar to the <cite>CustomDevice</cite> class, we
+edit the code in <cite>synthetic_device.py</cite>, albeit without any calls to the device itself:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SyntheticDevice</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; A Synthetic Device Class &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialize the Synthetic Device</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        device_connection : object</span>
+<span class="sd">            The device connection object</span>
+<span class="sd">        args : list</span>
+<span class="sd">            The arguments for the device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Move the Synthetic Device</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        step_size : float</span>
+<span class="sd">            The step size of the movement. Default is 1.0 micron.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** Synthetic Device receive command: move&quot;</span><span class="p">,</span> <span class="n">step_size</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Stop the Synthetic Device &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** Synthetic Device receive command: stop&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Turn the Synthetic Device</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        angle : float</span>
+<span class="sd">            The angle of the rotation. Default is 0.1 degree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** Synthetic Device receive command: turn&quot;</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">commands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the commands for the Synthetic Device.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            The commands for the Synthetic Device</span>
+<span class="sd">         &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;move_custom_device&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="s2">&quot;stop_custom_device&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">(),</span>
+            <span class="s2">&quot;rotate_custom_device&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Edit <cite>device_startup_functions.py</cite> which tells <strong>navigate</strong> how to connect and start the <cite>custom_device</cite>.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Standard library imports</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># Third party imports</span>
+
+<span class="c1"># Local application imports</span>
+<span class="kn">from</span> <span class="nn">navigate.tools.common_functions</span> <span class="kn">import</span> <span class="n">load_module_from_file</span>
+<span class="kn">from</span> <span class="nn">navigate.model.device_startup_functions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">auto_redial</span><span class="p">,</span>
+    <span class="n">device_not_found</span><span class="p">,</span>
+    <span class="n">DummyDeviceConnection</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">DEVICE_TYPE_NAME</span> <span class="o">=</span> <span class="s2">&quot;custom_device&quot;</span>
+<span class="n">DEVICE_REF_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">load_device</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span> <span class="n">is_synthetic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Load the Custom Device</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    configuration : dict</span>
+<span class="sd">        The configuration for the Custom Device</span>
+<span class="sd">    is_synthetic : bool</span>
+<span class="sd">        Whether the device is synthetic or not. Default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    object</span>
+<span class="sd">        The Custom Device object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">DummyDeviceConnection</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">start_device</span><span class="p">(</span><span class="n">microscope_name</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="n">is_synthetic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">is_synthetic</span><span class="p">:</span>
+        <span class="n">device_type</span> <span class="o">=</span> <span class="s2">&quot;synthetic&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">device_type</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">[</span><span class="s2">&quot;configuration&quot;</span><span class="p">][</span><span class="s2">&quot;microscopes&quot;</span><span class="p">][</span><span class="n">microscope_name</span><span class="p">][</span>
+            <span class="s2">&quot;custom_device&quot;</span>
+        <span class="p">][</span><span class="s2">&quot;hardware&quot;</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">device_type</span> <span class="o">==</span> <span class="s2">&quot;CustomDevice&quot;</span><span class="p">:</span>
+        <span class="n">custom_device</span> <span class="o">=</span> <span class="n">load_module_from_file</span><span class="p">(</span>
+            <span class="s2">&quot;custom_device&quot;</span><span class="p">,</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;custom_device.py&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">custom_device</span><span class="o">.</span><span class="n">CustomDevice</span><span class="p">(</span>
+            <span class="n">microscope_name</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="n">configuration</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">device_type</span> <span class="o">==</span> <span class="s2">&quot;synthetic&quot;</span><span class="p">:</span>
+        <span class="n">synthetic_device</span> <span class="o">=</span> <span class="n">load_module_from_file</span><span class="p">(</span>
+            <span class="s2">&quot;custom_synthetic_device&quot;</span><span class="p">,</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;synthetic_device.py&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">synthetic_device</span><span class="o">.</span><span class="n">SyntheticDevice</span><span class="p">(</span>
+            <span class="n">microscope_name</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="n">configuration</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">device_not_found</span><span class="p">(</span><span class="n">microscope_name</span><span class="p">,</span> <span class="n">device_type</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="view-code">
+<h2>View Code<a class="headerlink" href="#view-code" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>To add a GUI control window, go to the <cite>view</cite> folder, rename <cite>plugin_name_frame.py</cite> to <cite>custom_device_frame.py</cite>, and edit the code as follows:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Standard library imports</span>
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">ttk</span>
+
+<span class="c1"># Third party imports</span>
+
+<span class="c1"># Local application imports</span>
+<span class="kn">from</span> <span class="nn">navigate.view.custom_widgets.LabelInputWidgetFactory</span> <span class="kn">import</span> <span class="n">LabelInput</span>
+
+
+<span class="k">class</span> <span class="nc">CustomDeviceFrame</span><span class="p">(</span><span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The Custom Device Frame &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialize the Custom Device Frame</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        root : object</span>
+<span class="sd">            The root Tk object</span>
+<span class="sd">        args : list</span>
+<span class="sd">            The arguments for the Custom Device Frame</span>
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            The keyword arguments for the Custom Device Frame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ttk</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Formatting</span>
+        <span class="n">tk</span><span class="o">.</span><span class="n">Grid</span><span class="o">.</span><span class="n">columnconfigure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tk</span><span class="o">.</span><span class="n">Grid</span><span class="o">.</span><span class="n">rowconfigure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Dictionary for widgets and buttons</span>
+        <span class="c1">#: dict: Dictionary of the widgets in the frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;step_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">LabelInput</span><span class="p">(</span>
+            <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Step Size&quot;</span><span class="p">,</span>
+            <span class="n">label_args</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;padding&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)},</span>
+            <span class="n">input_class</span><span class="o">=</span><span class="n">ttk</span><span class="o">.</span><span class="n">Entry</span><span class="p">,</span>
+            <span class="n">input_var</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;step_size&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;step_size&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;angle&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">LabelInput</span><span class="p">(</span>
+            <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Angle&quot;</span><span class="p">,</span>
+            <span class="n">label_args</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;padding&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">0</span><span class="p">)},</span>
+            <span class="n">input_class</span><span class="o">=</span><span class="n">ttk</span><span class="o">.</span><span class="n">Entry</span><span class="p">,</span>
+            <span class="n">input_var</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">DoubleVar</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;angle&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;angle&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s2">&quot;move&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;MOVE&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s2">&quot;rotate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;ROTATE&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s2">&quot;stop&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ttk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;STOP&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s2">&quot;move&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s2">&quot;rotate&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s2">&quot;stop&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+    <span class="c1"># Getters</span>
+    <span class="k">def</span> <span class="nf">get_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">variables</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">get_variable</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">variables</span>
+
+    <span class="k">def</span> <span class="nf">get_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>navigate</strong> comes equipped with a large number of validated widgets, which prevent users from entering invalid values. It is highly recommended that you use these, which include the following:</p></li>
+<li><p>The <cite>LabelInput</cite> widget conveniently combines a label and an input widget into a single object. It is used to create the <cite>step_size</cite> and <cite>angle</cite> widgets in the code below.</p></li>
+<li><p>The <cite>LabelInput</cite> widget can accept multiple types of <cite>input_class</cite> objects, which can include standard tkinter widgets (e.g., spinbox, entry, etc.) or custom widgets. In this example, we use the <cite>ttk.Entry</cite> widget.
+Preferentially, you would use one of our validated widgets, which include a <cite>ValidatedSpinbox</cite>, <cite>ValidatedEntry</cite>, <cite>ValidatedCombobox</cite>, and <cite>ValidatedMixin</cite>.</p></li>
+<li><p>Further documentation can be found in API Reference</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="controller-code">
+<h2>Controller Code<a class="headerlink" href="#controller-code" title="Permalink to this heading"></a></h2>
+<p>Now, let’s build a controller. Navigate to the ‘controller’ folder, rename
+‘plugin_name_controller.py’ to ‘custom_device_controller.py’, and edit the code
+as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Standard library imports</span>
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+
+<span class="c1"># Third party imports</span>
+
+<span class="c1"># Local application imports</span>
+<span class="kn">from</span> <span class="nn">navigate.controller.sub_controllers.gui_controller</span> <span class="kn">import</span> <span class="n">GUIController</span>
+
+
+<span class="k">class</span> <span class="nc">CustomDeviceController</span><span class="p">(</span><span class="n">GUIController</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The Custom Device Controller &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">,</span> <span class="n">parent_controller</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialize the Custom Device Controller</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        view : object</span>
+<span class="sd">            The Custom Device View object</span>
+<span class="sd">        parent_controller : object</span>
+<span class="sd">            The parent (e.g., main) controller object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">parent_controller</span><span class="p">)</span>
+
+        <span class="c1"># Get the variables and buttons from the view</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">get_variables</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">buttons</span>
+
+        <span class="c1"># Set the trace commands for the variables associated with the widgets in the View.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s2">&quot;move&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">move_device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s2">&quot;rotate&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rotate_device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s2">&quot;stop&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_device</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">move_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Listen to the move button and move the Custom Device upon clicking.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        args : list</span>
+<span class="sd">            The arguments for the move_device function. Should be included as the tkinter event</span>
+<span class="sd">            is passed to this function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_controller</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;move_custom_device&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;step_size&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">rotate_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Listen to the rotate button and rotate the Custom Device upon clicking.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        args : list</span>
+<span class="sd">            The arguments for the rotate_device function. Should be included as the tkinter event</span>
+<span class="sd">            is passed to this function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_controller</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;rotate_custom_device&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;angle&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">stop_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Listen to the stop button and stop the Custom Device upon clicking.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        args : list</span>
+<span class="sd">            The arguments for the stop_device function. Should be included as the tkinter event</span>
+<span class="sd">            is passed to this function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_controller</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;stop_custom_device&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>In each case above, the sub-controller for the <cite>custom-device</cite> establishes what actions should take
+place once a button in the view is clicked. In this case, the <cite>move_device</cite>, <cite>rotate_device</cite>, and
+<cite>stop_device</cite>.</p></li>
+<li><p>The sub-controller then passes the command to the parent controller, which is the main controller
+for the software. The parent controller then passes the command to the model using an event queue.</p></li>
+<li><p>The model then executes the command, and any updates to the controller from the model are relayed
+using another event queue.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="plugin-configuration">
+<h2>Plugin Configuration<a class="headerlink" href="#plugin-configuration" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>The next is to update the ‘plugin_config.yml’ file as follows:</p></li>
+</ul>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>name: Custom Device
+view: Popup
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Remove the folder <cite>./model/features</cite>, the file <cite>feature_list.py</cite>, and</p></li>
+</ul>
+<p>the file <cite>plugin_acquisition_mode.py</cite>. The plugin folder structure is as follows:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>custom_device/
+    ├── controller/
+    │   └── custom_device_controller.py
+    |
+    ├── model/
+    |   └── devices/
+    │       └── custom_device/
+    │           ├── device_startup_functions.py
+    │           ├── custom_device.py
+    │           └── synthetic_device.py
+    ├── view/
+    |   └── custom_device_frame.py
+    │
+    └── plugin_config.yml
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Install this plugin. There are two ways to install a plugin. You could install
+a plugin by putting the whole plugin folder directly into “navigate/plugins/”. In this example,
+put “custom_device” folder and all its contents into “navigate/plugins”. Another way, you could
+install this plugin through the menu <span class="menuselection">Plugins ‣ Install Plugin</span>, select the plugin
+folder. Then the plugin is ready to use. For this plugin, you could specify a CustomDevice in the</p></li>
+</ul>
+<blockquote>
+<div><p><cite>configuration.yaml</cite> as follows:</p>
+</div></blockquote>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>microscopes:
+    Mesoscale:
+        daq:
+            hardware:
+                name: daq
+                type: NI
+        ...
+        custom_device:
+            hardware:
+                type: CustomDevice
+        ...
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>The custom device will be loaded when you launch Navigate, and you can now control this device</p></li>
+</ul>
+<p>through the GUI now.</p>
+</section>
 </section>
 
 

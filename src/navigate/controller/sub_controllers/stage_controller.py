@@ -29,11 +29,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+
+# Standard Library Imports
 import tkinter as tk
-
-
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from multiprocessing.managers import ListProxy, DictProxy
 import logging
+
+# Third Party Imports
+
+# Local Imports
+from navigate.controller.sub_controllers.gui_controller import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -59,7 +64,7 @@ class StageController(GUIController):
              The main view of the microscope
          canvas : tkinter.Canvas
              The canvas of the microscope
-         parent_controller : navigate.controller.microscope_controller.MicroscopeController
+         parent_controller : navigate.controller.Controller
              The parent controller of the stage controller
         """
         super().__init__(view, parent_controller)
@@ -167,6 +172,8 @@ class StageController(GUIController):
     def initialize(self):
         """Initialize the Stage limits of steps and positions."""
         config = self.parent_controller.configuration_controller
+        self.disable_synthetic_stages(config)
+
         self.position_min = config.get_stage_position_limits("_min")
         self.position_max = config.get_stage_position_limits("_max")
 
@@ -216,6 +223,63 @@ class StageController(GUIController):
 
         self.joystick_axes = self.new_joystick_axes
         self.flip_flags = config.stage_flip_flags
+
+    def disable_synthetic_stages(self, config):
+        """Disable synthetic stages.
+
+        Parameters
+        ----------
+        config : ConfigurationController
+            The configuration controller
+        """
+        microscope_configuration = config.get_microscope_configuration_dict()
+        stages = microscope_configuration["stage"]["hardware"]
+
+        if type(stages) is ListProxy:
+            stages = list(stages)
+        elif type(stages) is DictProxy:
+            stages = [dict(stages)]
+
+        for stage in stages:
+            if type(stage) is DictProxy:
+                stage_dict = dict(stage)
+            elif type(stage) is dict:
+                stage_dict = stage
+
+            for axis in stage_dict["axes"]:
+                if (stage_dict["type"].lower() == "synthetic") or (
+                    stage_dict["type"].lower() == "syntheticstage"
+                ):
+                    state = "disabled"
+                else:
+                    state = "normal"
+
+                if axis == "x":
+                    self.view.xy_frame.up_x_btn.config(state=state)
+                    self.view.xy_frame.down_x_btn.config(state=state)
+                    logger.info(f"X axis buttons set to {state}")
+
+                elif axis == "y":
+                    self.view.xy_frame.up_y_btn.config(state=state)
+                    self.view.xy_frame.down_y_btn.config(state=state)
+                    logger.info(f"Y axis buttons set to {state}")
+
+                elif axis == "z":
+                    self.view.z_frame.down_btn.config(state=state)
+                    self.view.z_frame.up_btn.config(state=state)
+                    logger.info(f"Z axis buttons set to {state}")
+
+                elif axis == "theta":
+                    self.view.theta_frame.down_btn.config(state=state)
+                    self.view.theta_frame.up_btn.config(state=state)
+                    logger.info(f"Theta axis buttons set to {state}")
+
+                elif axis == "f":
+                    self.view.f_frame.down_btn.config(state=state)
+                    self.view.f_frame.up_btn.config(state=state)
+                    logger.info(f"Focus axis buttons set to {state}")
+            else:
+                pass
 
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can

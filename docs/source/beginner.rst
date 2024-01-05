@@ -3,13 +3,13 @@ Acquire an Image (Beginner)
 ===========================
 
 This guide will describe how to acquire a single image, and z-stack image series using the
-navigate sofware package. Please see refer to :ref:`multiposition table <user_guide/gui_walkthrough:multiposition>` for imaging a multiposiition series or :ref:`case studies <user_guide/case_studies/case_studies_home>` for specialized examples using device-specific microscope configurations.
+navigate sofware package. Please see refer to :ref:`multiposition table <user_guide/gui_walkthrough:multiposition>` for imaging a multiposition series or :doc:`case studies <user_guide/case_studies/case_studies_home>` for specialized examples using device-specific microscope configurations.
 
 Loading and finding the sample
 ==============================
 
 #. Load the sample into the microscope chamber.
-#. open navigate software by opening an anaconda prompt, activating navigate using the command conda activate navigate, and typing navigate into the command window.
+#. open navigate software by opening an anaconda prompt, activating navigate by entering the command ``conda activate navigate`` into the command window, press :guilabel:`Enter` and subsequently typing ``navigate`` and press :guilabel:`Enter` into the anaconda command window.
 
 .. image:: images/beginner/open-navigate.png
 
@@ -19,7 +19,7 @@ Loading and finding the sample
 
 #. Select the appropriate filter using the :guilabel:`filter dropdown menu` for the selected channel.
 
-.. image:: images/beginner/channel-filter-selector.png
+.. image:: images/beginner/channel-selector-filter.png
 
 #. Specify the :guilabel:`Power` for that laser and specifc :guilabel:`Filter` for that laser.
 #. Under the :guilabel:`Exp. Time (ms)` tab, specify the camera exposure time in milliseconds.
@@ -38,7 +38,7 @@ Loading and finding the sample
 
 .. image:: images/beginner/stage-movement-panel.png
 
-#. If enabled in the hardware, use the :guilabel:`Focus Movement` controls to adjust the detection objective position relative to the camera to adjust the focus. Check :ref:`configuration settings <user_guide/software_configuration>` for more information.
+#. If enabled in the hardware, use the :guilabel:`Focus Movement` controls to adjust the detection objective position relative to the camera to adjust the focus. Check :doc:`configuration settings <user_guide/software_configuration>` for more information.
 
 #. Press the :guilabel:`Stop` button in the acquisition bar to Stop Acquisition
 
@@ -62,7 +62,7 @@ Acquiring a single image
    each channel.
 #. Set :guilabel:`Interval` to be ``1.0`` for each channel.
 #. Set :guilabel:`Defocus` to be ``0`` for each channel.
-#. Select :guilabel:`Normal` in the :guilabel:`Readout Direction` dropdown menu under the :guilabel:`Camera Modes` section in the :guilabel:`Camera settings` tab to acquire all pixels at once. Select :guilabel:`Light-Sheet` if using a rolling shutter. Refer to :ref:`ASLM <user_guide/case_studies/setup_voodoo>` for more information.
+#. Select :guilabel:`Normal` in the :guilabel:`Readout Direction` dropdown menu under the :guilabel:`Camera Modes` section in the :guilabel:`Camera settings` tab to acquire all pixels at once. Select :guilabel:`Light-Sheet` if using a rolling shutter. Refer to :doc:`ASLM <user_guide/case_studies/setup_voodoo>` for more information.
 
 .. image:: images/beginner/sensor-mode.png
 
@@ -116,10 +116,10 @@ Acquiring a z-stack
 .. image:: images/beginner/press-end-pos.png
 
 #. Make sure :guilabel:`Set Foc` is ``0`` for both the :guilabel:`Set Start Pos` and
-   :guilabel:`End Pos` if focus movement is not enabled. Check :ref:`configuration settings <user_guide/software_configuration>` for more information.
+   :guilabel:`End Pos` if focus movement is not enabled. Check :doc:`configuration settings <user_guide/software_configuration>` for more information.
 
 #. Type the desired step size (units um) in the :guilabel:`Step Size` dialog box in
-   :guilabel:`Stack Acquistion Settings (um)`. The minimum step size and step increments are defined in stage section in the :guilabel:`experiment.yaml` file. More information can be found in :ref:`configuration settings <user_guide/software_configuration>`
+   :guilabel:`Stack Acquistion Settings (um)`. The minimum step size and step increments are defined in stage section in the :guilabel:`experiment.yaml` file. More information can be found in :doc:`configuration settings <user_guide/software_configuration>`
 
 .. image:: images/beginner/define-step-size.png
 
@@ -130,7 +130,7 @@ Acquiring a z-stack
    each channel.
 #. Set :guilabel:`Interval` to be ``1.0`` for each channel.
 #. Set :guilabel:`Defocus` to be ``0`` for each channel.
-#. Select :guilabel:`Normal` in the :guilabel:`Readout Direction` dropdown menu under the :guilabel:`Camera Modes` section in the :guilabel:`Camera settings` tab. Select :guilabel:`Light-Sheet` if using rolling shutter. Refer to :ref:`ASLM <user_guide/case_studies/setup_voodoo>` for more information.
+#. Select :guilabel:`Normal` in the :guilabel:`Readout Direction` dropdown menu under the :guilabel:`Camera Modes` section in the :guilabel:`Camera settings` tab. Select :guilabel:`Light-Sheet` if using rolling shutter. Refer to :doc:`ASLM <user_guide/case_studies/setup_voodoo>` for more information.
 #. Define imaging region across camera chip in the :guilabel:`Region of Interest Settings` section under the :guilabel:`Camera Settings` tab.
 #. If using channels for imaging, Select either :guilabel:`Per Z` or :guilabel:`Per Stack` under :guilabel:`Laser Cycling Settings` in the :guilabel:`Stack Acquisition Settings (um)` section under the :guilabel:`Channels` tab. :guilabel:`Per Z` acquires each channel before moving the stage to a new position and :guilabel:`Per Stack` acquires all images in a stack acquistion for a single channel before moving back to the start position restarting acquistion for the subsequent channel until all channels are imaged.
 

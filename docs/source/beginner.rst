@@ -94,7 +94,7 @@ Acquiring a single image
 Acquiring a z-stack
 =================
 
-#. Using the :guilabel:`Channel checkbox` in the :guilabel:`Channel Settings` section, under the :guilabel:`Channels` tab, select the desired laser for imaging.
+#. Using the :guilabel:`Channels` in the :guilabel:`Channel Settings` section, under the :guilabel:`Channels` tab, select the desired laser for imaging.
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Using the :guilabel:`Stage Control`, go to the desired start z-position in the sample.

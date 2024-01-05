@@ -25,7 +25,7 @@ Loading and finding the sample
 #. Under the :guilabel:`Exp. Time (ms)` tab, specify the camera exposure time in milliseconds.
 #. Set the :guilabel:`Interval` to ``1.0`` for each channel.
 #. Set the :guilabel:`Defocus` to  ``0`` for each channel.
-#. Select :guilabel:`Continuous Scan` in the dropdown next to the :guilabel:`Acquire` button in the Acquire Bar.
+#. Select "Continuous Scan" in the dropdown next to the :guilabel:`Acquire` button in the Acquire Bar.
 
 .. image:: images/beginner/continuous-scan-dropdown.png
 
@@ -48,7 +48,7 @@ Acquiring a single image
 ======================
 
 #. Using the :guilabel:`Channel` boxes in the :guilabel:`Channel Settings` section, under the :guilabel:`Channels` tab, select the desired laser(s) for imaging.
-#. Select :guilabel:`Continuous Scan` from the dropdown next to the :guilabel:`Acquire` button.
+#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 
 .. image:: images/beginner/continuous-scan-sample.png

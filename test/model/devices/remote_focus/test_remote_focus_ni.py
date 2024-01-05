@@ -3,11 +3,9 @@ import pytest
 
 @pytest.mark.hardware
 def test_remote_focus_ni_functions():
-    import random
-
     from navigate.model.devices.daq.daq_ni import NIDAQ
     from navigate.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     daq = NIDAQ(model.configuration)

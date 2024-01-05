@@ -37,7 +37,7 @@ import unittest
 
 # Local Imports
 from navigate.model.devices.zoom.zoom_synthetic import SyntheticZoom
-from navigate.model.dummy import DummyModel
+from test.model.dummy import DummyModel
 
 
 class TestZoomSynthetic(unittest.TestCase):

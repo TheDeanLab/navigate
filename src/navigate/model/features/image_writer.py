@@ -51,7 +51,7 @@ logger = logging.getLogger(p)
 class ImageWriter:
     """Class for saving acquired data to disk."""
 
-    def __init__(self, model, data_buffer=None, sub_dir="", image_name=None):
+    def __init__(self, model, data_buffer=None, sub_dir="", image_name=None, saving_flags=None, saving_config={}):
         """Class for saving acquired data to disk.
 
         Parameters
@@ -79,43 +79,14 @@ class ImageWriter:
         #: int : Number of frames in the experiment.
         self.number_of_frames = self.model.number_of_frames
 
+        #: array : Array of saving flags
+        self.saving_flags = saving_flags
+
         #: str : Directory for saving data to disk.
         self.save_directory = ""
 
         #: str : Sub-directory for saving data to disk.
         self.sub_dir = sub_dir
-
-        #: int : Number of channels in the experiment.
-        self.num_of_channels = len(
-            [
-                k
-                for k, v in self.model.configuration["experiment"]["MicroscopeState"][
-                    "channels"
-                ].items()
-                if v["is_selected"]
-            ]
-        )
-
-        #: int : Number of positions in the experiment.
-        self.num_of_positions = (
-            self.model.configuration["experiment"]["MicroscopeState"][
-                "multiposition_count"
-            ]
-            if self.model.configuration["experiment"]["MicroscopeState"][
-                "is_multiposition"
-            ]
-            else 1
-        )
-
-        #: int : Number of time points in the experiment.
-        self.num_of_timepoints = self.model.configuration["experiment"][
-            "MicroscopeState"
-        ]["timepoints"]
-
-        #: int : Number of z-slices in the experiment.
-        self.num_of_slices = self.model.configuration["experiment"]["MicroscopeState"][
-            "number_z_steps"
-        ]
 
         #: int : Current time point for saving data.
         self.current_time_point = 0
@@ -198,6 +169,8 @@ class ImageWriter:
             self.model.configuration
         )
 
+        self.data_source.set_metadata(saving_config)
+
         # Make sure that there is enough disk space to save the data.
         self.calculate_and_check_disk_space()
 
@@ -221,11 +194,18 @@ class ImageWriter:
         """
 
         for idx in frame_ids:
+
             if (idx < 0) or (idx > (self.number_of_frames - 1)):
                 msg = f"Received invalid index {idx}. Skipping this frame."
                 logger.debug(msg)
                 print(msg)
                 continue
+
+            # check the saving flag
+            if self.saving_flags:
+                if not self.saving_flags[idx]:
+                    continue
+                self.saving_flags[idx] = False
 
             # Identify channel, z, time, and position indices
             c_idx, z_idx, t_idx, p_idx = self.data_source._cztp_indices(
@@ -319,20 +299,6 @@ class ImageWriter:
         )
         self.current_time_point += 1
         return image_name
-
-    def generate_meta_data(self):
-        """Generate meta data for the image.
-
-        TODO: Is this a vestigial function? DELETE???
-
-        Returns
-        -------
-        dict
-            Meta data for the image.
-
-        """
-        print("meta data: write", self.model.frame_id)
-        return True
 
     def close(self):
         """Close the data source we are writing to.

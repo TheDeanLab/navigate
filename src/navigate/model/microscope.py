@@ -274,25 +274,26 @@ class Microscope:
             )
 
             if device_ref_name not in devices_dict["stages"]:
-                logger.debug("stage has not been loaded!")
+                logger.debug(f"{device_ref_name} stage not found in the devices_dict!")
                 raise Exception(
-                    "Stage not found. \n"
+                    "Stage not found. "
                     "This often arises when the configuration.yaml file is "
                     "incorrectly specified. Please check the "
                     "configuration.yaml file and try again. Things to "
-                    "check include: \n",
+                    "check include: ",
                     "1. If no stage is physically connected to the "
                     "microscope, one must still be listed in the "
                     "configuration.yaml file. We recommend that you use a"
-                    "`SyntheticStage`. \n"
+                    "`SyntheticStage`. "
                     "2. If a stage is physically connected to the "
                     "microscope, make sure that it is corrected defined in "
                     "both the `hardware` and `microscopes` sections of the "
                     "configuration.yaml file. Importantly, name, "
-                    "type, and serial numbers must match.\n"
+                    "type, and serial numbers must match. "
                     "3. You may be using a stage that is not supported by "
                     "Navigate. Please check the list of supported stages in "
-                    "the documentation.",
+                    "the documentation."
+                    f"The stage that failed to load is: {device_ref_name}"
                 )
 
             # SHARED DEVICES

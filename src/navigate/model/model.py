@@ -169,8 +169,10 @@ class Model:
         )
         #: str: Binning mode.
         self.binning = "1x1"
-        #: int: Number of frames in the data buffer.
+        #: array: stage positions.
         self.data_buffer_positions = None
+        #: array: saving flags for a frame
+        self.data_buffer_saving_flags = None
         #: bool: Is the model acquiring?
         self.is_acquiring = False
 
@@ -531,15 +533,12 @@ class Model:
                 self.signal_container, self.data_container = load_features(
                     self, self.addon_feature
                 )
+                self.data_buffer_saving_flags = [False] * self.number_of_frames
             else:
                 self.signal_container, self.data_container = load_features(
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
                 )
-
-            # if self.imaging_mode == "single":
-            #     self.configuration["experiment"]["MicroscopeState"][
-            #         "stack_cycling_mode"
-            #     ] = "per_z"
+                self.data_buffer_saving_flags = None
 
             if self.imaging_mode == "projection":
                 self.move_stage({"z_abs": 0})
@@ -551,7 +550,11 @@ class Model:
 
             self.signal_thread.name = f"{self.imaging_mode} signal"
             if self.is_save and self.imaging_mode != "live":
-                self.image_writer = ImageWriter(self)
+                saving_config = {}
+                plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
+                if plugin_obj and hasattr(plugin_obj, "update_saving_config"):
+                    saving_config = getattr(plugin_obj, "update_saving_config")(self)
+                self.image_writer = ImageWriter(self, saving_flags=self.data_buffer_saving_flags, saving_config=saving_config)
                 self.data_thread = threading.Thread(
                     target=self.run_data_process,
                     kwargs={"data_func": self.image_writer.save_image},
@@ -565,7 +568,11 @@ class Model:
             for m in self.virtual_microscopes:
                 image_writer = (
                     ImageWriter(
-                        self, self.virtual_microscopes[m].data_buffer, m
+                        self,
+                        self.virtual_microscopes[m].data_buffer,
+                        m,
+                        saving_flags=self.data_buffer_saving_flags,
+                        saving_config=saving_config
                     ).save_image
                     if self.is_save
                     else None
@@ -874,11 +881,6 @@ class Model:
 
             wait_num = self.camera_wait_iterations
 
-            # Leave it here for now to work with current ImageWriter workflow
-            # Will move it feature container later
-            if data_func:
-                data_func(frame_ids)
-
             if hasattr(self, "data_container"):
                 if self.data_container.is_closed:
                     self.logger.info("Navigate Model - Data container is closed.")
@@ -886,6 +888,10 @@ class Model:
                     break
 
                 self.data_container.run(frame_ids)
+
+            # ImageWriter to save images
+            if data_func:
+                data_func(frame_ids)
 
             # show image
             self.logger.info(f"Navigate Model - Sent through pipe{frame_ids[0]}")
@@ -1433,3 +1439,16 @@ class Model:
         if idx > 0 and idx <= len(self.feature_list):
             return convert_feature_list_to_str(self.feature_list[idx - 1])
         return ""
+
+    def mark_saving_flags(self, frame_ids):
+        """Mark saving flags for the ImageWriter
+
+        Parameters
+        ----------
+        frame_ids: array
+            a list of frame ids
+        """
+        if not self.data_buffer_saving_flags:
+            return
+        for id in frame_ids:
+            self.data_buffer_saving_flags[id] = True

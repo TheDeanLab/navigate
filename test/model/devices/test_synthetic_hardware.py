@@ -36,7 +36,7 @@ import unittest
 # Third Party Imports
 
 # Local Imports
-from navigate.model.dummy import DummyModel
+from test.model.dummy import DummyModel
 
 
 class TestSyntheticHardware(unittest.TestCase):

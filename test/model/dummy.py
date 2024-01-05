@@ -162,8 +162,11 @@ class DummyModel:
     def __init__(self):
         """Initialize the Dummy model."""
         # Set up the model, experiment, waveform dictionaries
-        base_directory = Path(__file__).resolve().parent.parent
-        configuration_directory = Path.joinpath(base_directory, "config")
+        base_directory = Path(__file__).resolve().parent.parent.parent
+        configuration_directory = Path.joinpath(base_directory,
+                                                "src",
+                                                "navigate",
+                                                "config")
 
         config = Path.joinpath(configuration_directory, "configuration.yaml")
         experiment = Path.joinpath(configuration_directory, "experiment.yml")

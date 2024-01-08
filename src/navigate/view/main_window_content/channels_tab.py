@@ -247,7 +247,7 @@ class ChannelCreator(ttk.Labelframe):
                     width=6,
                 )
             )
-            self.laser_pulldowns[num].state(["readonly"])
+            self.laser_pulldowns[num].config(state = "readonly")
             self.laser_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
@@ -278,7 +278,7 @@ class ChannelCreator(ttk.Labelframe):
                     width=10,
                 )
             )
-            self.filterwheel_pulldowns[num].state(["readonly"])
+            self.filterwheel_pulldowns[num].config(state = "readonly")
             self.filterwheel_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
@@ -334,9 +334,10 @@ class ChannelCreator(ttk.Labelframe):
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-        self.filterwheel_pulldowns[num].grid(pady=2)
-        self.laser_pulldowns[num].grid(pady=2)
-        self.channel_checks[num].grid(pady=2)
+            if num % 2 == 1:
+                self.filterwheel_pulldowns[num].grid(pady=2)
+                self.laser_pulldowns[num].grid(pady=2)
+                self.channel_checks[num].grid(pady=2)
 
 
 class StackAcquisitionFrame(ttk.Labelframe):

@@ -123,7 +123,7 @@ class ChannelSettingController(GUIController):
 
             if not self.view.channel_variables[i].get():
                 self.view.laserpower_pulldowns[i].config(state=state)
-                self.view.filterwheel_pulldowns[i]["state"] = state
+                self.view.filterwheel_pulldowns[i]["state"] = state_readonly
                 self.view.defocus_spins[i].config(state=state)
 
     def initialize(self):

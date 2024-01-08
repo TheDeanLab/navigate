@@ -554,7 +554,11 @@ class Model:
                 plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
                 if plugin_obj and hasattr(plugin_obj, "update_saving_config"):
                     saving_config = getattr(plugin_obj, "update_saving_config")(self)
-                self.image_writer = ImageWriter(self, saving_flags=self.data_buffer_saving_flags, saving_config=saving_config)
+                self.image_writer = ImageWriter(
+                    self,
+                    saving_flags=self.data_buffer_saving_flags,
+                    saving_config=saving_config,
+                )
                 self.data_thread = threading.Thread(
                     target=self.run_data_process,
                     kwargs={"data_func": self.image_writer.save_image},
@@ -572,7 +576,7 @@ class Model:
                         self.virtual_microscopes[m].data_buffer,
                         m,
                         saving_flags=self.data_buffer_saving_flags,
-                        saving_config=saving_config
+                        saving_config=saving_config,
                     ).save_image
                     if self.is_save
                     else None
@@ -1049,6 +1053,15 @@ class Model:
             self.active_microscope.daq.run_acquisition()
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()
+            if self.active_microscope.current_channel == 0:
+                self.stop_acquisition = True
+                self.event_queue.put(
+                    (
+                        "warning",
+                        "There is an error happened. Please read the log files for details!",
+                    )
+                )
+                return
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}"
             )
@@ -1407,7 +1420,9 @@ class Model:
 
             if item["module_name"]:
                 try:
-                    module = load_module_from_file(item["module_name"], item["filename"])
+                    module = load_module_from_file(
+                        item["module_name"], item["filename"]
+                    )
                     feature = getattr(module, item["module_name"])
                 except FileNotFoundError:
                     del feature_records[i]

@@ -38,7 +38,7 @@ import random
 
 # Local Imports
 from navigate.model.devices.stages.stage_galvo import GalvoNIStage
-from navigate.model.dummy import DummyModel
+from test.model.dummy import DummyModel
 from navigate.tools.common_functions import copy_proxy_object
 
 

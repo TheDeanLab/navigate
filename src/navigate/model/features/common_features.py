@@ -1173,6 +1173,7 @@ class ZStackAcquisition:
             A list of frame IDs received during data acquisition.
 
         """
+        self.model.mark_saving_flags(frame_ids)
         self.received_frames += len(frame_ids)
         if self.image_writer is not None:
             self.image_writer.save_image(frame_ids)

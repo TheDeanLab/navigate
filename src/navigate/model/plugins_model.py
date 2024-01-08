@@ -42,16 +42,20 @@ from navigate.config.config import get_navigate_path
 
 
 class PluginsModel:
+    """Plugins manaager in the model side"""
+
     def __init__(self):
+        """Initialize plugins manager class"""
+        #: str: plugins default path.
         self.plugins_path = os.path.join(
             Path(__file__).resolve().parent.parent, "plugins"
         )
 
     def load_plugins(self):
+        """Load plugins"""
         devices_dict = {}
         plugin_acquisition_modes = {}
-        plugins = os.listdir(self.plugins_path)
-        feature_lists_path = get_navigate_path() + "/feature_lists"
+        feature_lists_path = os.path.join(get_navigate_path(), "feature_lists")
         if not os.path.exists(feature_lists_path):
             os.makedirs(feature_lists_path)
         feature_list_files = [
@@ -60,20 +64,69 @@ class PluginsModel:
             if (temp.endswith(".yml") or temp.endswith(".yaml"))
             and os.path.isfile(os.path.join(feature_lists_path, temp))
         ]
+        plugins = os.listdir(self.plugins_path)
+        plugins_dict = {}
+        # load plugins form plugins folder
         for f in plugins:
             if not os.path.isdir(os.path.join(self.plugins_path, f)):
                 continue
-
             # read "plugin_config.yml"
             plugin_config = load_yaml_file(
                 os.path.join(self.plugins_path, f, "plugin_config.yml")
             )
+            if plugin_config:
+                plugins_dict[plugin_config.get("name", f)] = os.path.join(
+                    self.plugins_path, f
+                )
+
+        # load plugins from plugins_config
+        plugins_config_path = os.path.join(
+            get_navigate_path(), "config", "plugins_config.yml"
+        )
+        if not os.path.exists(plugins_config_path):
+            save_yaml_file(
+                os.path.join(get_navigate_path(), "config"), {}, "plugins_config.yml"
+            )
+        else:
+            plugins_config = load_yaml_file(plugins_config_path)
+            verified_plugins_config = {}
+            for plugin_name, plugin_path in plugins_config.items():
+                if not plugin_path:
+                    print(
+                        f"Plugin '{plugin_name}' is not installed correctly. Please reinstall it if necessary."
+                    )
+                    continue
+                if os.path.exists(plugin_path):
+                    if plugin_name in plugins_dict:
+                        print(
+                            f"There are two plugins named '{plugin_name}'. Please rename Plugin '{plugin_name}' in plugins folder!"
+                        )
+                    plugins_dict[plugin_name] = plugin_path
+                    verified_plugins_config[plugin_name] = plugin_path
+                else:
+                    print(
+                        f"Couldn't load plugin '{plugin_name}', please make sure it exits!"
+                    )
+            save_yaml_file(
+                os.path.join(get_navigate_path(), "config"),
+                verified_plugins_config,
+                "plugins_config.yml",
+            )
+
+        for _, plugin_path in plugins_dict.items():
+            if not os.path.isdir(plugin_path):
+                continue
+
+            # read "plugin_config.yml"
+            plugin_config = load_yaml_file(
+                os.path.join(plugin_path, "plugin_config.yml")
+            )
             if plugin_config is None:
                 continue
-            plugin_name = plugin_config.get("name", f)
+            plugin_name = plugin_config.get("name", _)
 
             # feature
-            features_dir = os.path.join(self.plugins_path, f, "model", "features")
+            features_dir = os.path.join(plugin_path, "model", "features")
             if os.path.exists(features_dir):
                 features = os.listdir(features_dir)
                 for feature in features:
@@ -84,7 +137,7 @@ class PluginsModel:
                             if inspect.isclass(getattr(temp, c)):
                                 setattr(feature_related_functions, c, getattr(temp, c))
             # feature list
-            plugin_feature_list = os.path.join(self.plugins_path, f, "feature_list.py")
+            plugin_feature_list = os.path.join(plugin_path, "feature_list.py")
             if os.path.exists(plugin_feature_list):
                 module = load_module_from_file("feature_list_temp", plugin_feature_list)
                 features = [
@@ -96,11 +149,6 @@ class PluginsModel:
                     feature = getattr(module, feature_name)
                     feature_list_name = feature.feature_list_name
                     feature_list_file_name = "_".join(feature_list_name.split())
-                    if (
-                        f"{feature_list_file_name}.yml" in feature_list_files
-                        or f"{feature_list_file_name}.yaml" in feature_list_files
-                    ):
-                        continue
                     feature_list_content = {
                         "module_name": feature_name,
                         "feature_list_name": feature_list_name,
@@ -116,7 +164,7 @@ class PluginsModel:
             acquisition_modes = plugin_config.get("acquisition_modes", [])
             for acquisition_mode_config in acquisition_modes:
                 acquisition_file = os.path.join(
-                    self.plugins_path, f, acquisition_mode_config["file_name"]
+                    plugin_path, acquisition_mode_config["file_name"]
                 )
                 if os.path.exists(acquisition_file):
                     module = load_module_from_file(
@@ -135,17 +183,20 @@ class PluginsModel:
                         )
 
             # device
-            device_dir = os.path.join(self.plugins_path, f, "model", "devices")
+            device_dir = os.path.join(plugin_path, "model", "devices")
             if os.path.exists(device_dir):
                 devices = os.listdir(device_dir)
                 for device in devices:
                     device_path = os.path.join(device_dir, device)
                     if not os.path.isdir(device_path):
                         continue
-                    module = load_module_from_file(
-                        "device_module",
-                        os.path.join(device_path, "device_startup_functions.py"),
-                    )
+                    try:
+                        module = load_module_from_file(
+                            "device_module",
+                            os.path.join(device_path, "device_startup_functions.py"),
+                        )
+                    except FileNotFoundError:
+                        continue
                     if module:
                         try:
                             device_type_name = module.DEVICE_TYPE_NAME

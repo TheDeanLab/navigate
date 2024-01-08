@@ -37,7 +37,7 @@ def test_synthetic_filter_wheel_functions():
     from navigate.model.devices.filter_wheel.filter_wheel_synthetic import (
         SyntheticFilterWheel,
     )
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][

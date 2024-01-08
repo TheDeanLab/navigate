@@ -37,7 +37,7 @@ import unittest
 
 # Local Imports
 from navigate.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
-from navigate.model.dummy import DummyModel
+from test.model.dummy import DummyModel
 
 
 class TestSyntheticShutter(unittest.TestCase):

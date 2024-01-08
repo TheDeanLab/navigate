@@ -35,23 +35,32 @@ import os
 import inspect
 import tkinter as tk
 
+from navigate.config.config import get_navigate_path
 from navigate.view.custom_widgets.popup import PopUp
-from navigate.tools.file_functions import load_yaml_file
+from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.tools.common_functions import combine_funcs, load_module_from_file
 from navigate.tools.decorators import AcquisitionMode
 from navigate.model.features import feature_related_functions
 
 
 class PluginsController:
+    """Plugins manaager in the controller side"""
+
     def __init__(self, view, parent_controller):
+        """Initialize plugins manager class"""
+        #: object: tkinter frame object.
         self.view = view
+        #: object: navigate controller.
         self.parent_controller = parent_controller
+        #: str: plugins default path.
         self.plugins_path = os.path.join(
             Path(__file__).resolve().parent.parent.parent, "plugins"
         )
+        #: dict: installed plugins with GUI
         self.plugins_dict = {}
 
     def populate_experiment_setting(self):
+        """populate experiment values to plugin GUI"""
         for plugin_name in self.plugins_dict:
             try:
                 self.plugins_dict[plugin_name].populate_experiment_setting()
@@ -59,28 +68,42 @@ class PluginsController:
                 pass
 
     def load_plugins(self):
+        """Load plugins"""
         plugins = os.listdir(self.plugins_path)
-        for f in plugins:
-            if not os.path.isdir(os.path.join(self.plugins_path, f)):
+        installed_plugins = dict(
+            [(f, os.path.join(self.plugins_path, f)) for f in plugins]
+        )
+        # load plugins from plugins_config
+        plugins_config_path = os.path.join(
+            get_navigate_path(), "config", "plugins_config.yml"
+        )
+        if not os.path.exists(plugins_config_path):
+            save_yaml_file(get_navigate_path(), {}, "plugins_config.yml")
+        else:
+            plugins_config = load_yaml_file(plugins_config_path)
+            for plugin_name, plugin_path in plugins_config.items():
+                if plugin_path and os.path.exists(plugin_path):
+                    installed_plugins[plugin_name] = plugin_path
+        for _, plugin_path in installed_plugins.items():
+            if not os.path.isdir(plugin_path):
                 continue
 
             # read "plugin_config.yml"
             plugin_config = load_yaml_file(
-                os.path.join(self.plugins_path, f, "plugin_config.yml")
+                os.path.join(plugin_path, "plugin_config.yml")
             )
             if plugin_config is None:
                 continue
-            plugin_name = plugin_config.get("name", f)
+            plugin_name = plugin_config.get("name", _)
             plugin_file_name = "_".join(plugin_name.lower().split())
             plugin_class_name = "".join(plugin_name.title().split())
             if "view" in plugin_config:
                 # verify if "frame_name" and "file_name" are given and correct
                 view_file = os.path.join(
-                    self.plugins_path, f, "view", f"{plugin_file_name}_frame.py"
+                    plugin_path, "view", f"{plugin_file_name}_frame.py"
                 )
                 controller_file = os.path.join(
-                    self.plugins_path,
-                    f,
+                    plugin_path,
                     "controller",
                     f"{plugin_file_name}_controller.py",
                 )
@@ -116,7 +139,7 @@ class PluginsController:
                             plugin_name, plugin_frame, plugin_controller
                         )
             # feature
-            features_dir = os.path.join(self.plugins_path, f, "model", "features")
+            features_dir = os.path.join(plugin_path, "model", "features")
             if os.path.exists(features_dir):
                 features = os.listdir(features_dir)
                 for feature in features:
@@ -133,7 +156,7 @@ class PluginsController:
             acquisition_modes = plugin_config.get("acquisition_modes", [])
             for acquisition_mode_config in acquisition_modes:
                 acquisition_file = os.path.join(
-                    self.plugins_path, f, acquisition_mode_config["file_name"]
+                    plugin_path, acquisition_mode_config["file_name"]
                 )
                 if os.path.exists(acquisition_file):
                     module = load_module_from_file(
@@ -151,6 +174,17 @@ class PluginsController:
                         )
 
     def build_tab_window(self, plugin_name, frame, controller):
+        """Build tab for a plugin
+
+        Parameters
+        ----------
+        plugin_name : str
+            plugin name.
+        frame: object
+            navigate frame object
+        controller: object
+            navigate controller
+        """
         plugin_frame = frame(self.view.settings)
         self.view.settings.add(plugin_frame, text=plugin_name, sticky=tk.NSEW)
         plugin_controller = controller(plugin_frame, self.parent_controller)
@@ -160,6 +194,17 @@ class PluginsController:
         self.plugins_dict[controller_name] = plugin_controller
 
     def build_popup_window(self, plugin_name, frame, controller):
+        """Build popup window for plugins
+
+        Parameters
+        ----------
+        plugin_name : str
+            plugin name.
+        frame: object
+            navigate frame object
+        controller: object
+            navigate controller
+        """
         controller_name = (
             "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
         )

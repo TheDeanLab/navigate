@@ -33,6 +33,7 @@
 
 # Standard Library Imports
 import logging
+import tkinter as tk
 
 # Third Party Imports
 
@@ -516,33 +517,38 @@ class TilingWizardController(GUIController):
             axis = [axis]
 
         for ax in axis:
-            # Calculate signed fov
-            if ax == "y":
-                y = float(self.cam_settings_widgets["FOV_X"].get()) * sign(
-                    float(self.variables["x_end"].get())
-                    - float(self.variables["x_start"].get())
-                )
-            elif ax == "x":
-                x = float(self.cam_settings_widgets["FOV_Y"].get()) * sign(
-                    float(self.variables["y_end"].get())
-                    - float(self.variables["y_start"].get())
-                )
-            elif ax == "z":
-                z = float(self.stack_acq_widgets["end_position"].get()) - float(
-                    self.stack_acq_widgets["start_position"].get()
-                )
-            elif ax == "f":
-                f = float(self.stack_acq_widgets["end_focus"].get()) - float(
-                    self.stack_acq_widgets["start_focus"].get()
-                )
+            try:
+                # Calculate signed fov
+                if ax == "y":
+                    y = float(self.cam_settings_widgets["FOV_X"].get()) * sign(
+                        float(self.variables["x_end"].get())
+                        - float(self.variables["x_start"].get())
+                    )
+                elif ax == "x":
+                    x = float(self.cam_settings_widgets["FOV_Y"].get()) * sign(
+                        float(self.variables["y_end"].get())
+                        - float(self.variables["y_start"].get())
+                    )
+                elif ax == "z":
+                    z = float(self.stack_acq_widgets["end_position"].get()) - float(
+                        self.stack_acq_widgets["start_position"].get()
+                    )
+                elif ax == "f":
+                    f = float(self.stack_acq_widgets["end_focus"].get()) - float(
+                        self.stack_acq_widgets["start_focus"].get()
+                    )
 
-            # for ax in self._axes:
-            # self._fov[ax] = locals().get(ax)
-            self.variables[f"{ax}_fov"].set(
-                abs(locals().get(ax))
-            )  # abs(self._fov[ax]))
+                # for ax in self._axes:
+                # self._fov[ax] = locals().get(ax)
+                self.variables[f"{ax}_fov"].set(
+                    abs(locals().get(ax))
+                )  # abs(self._fov[ax]))
 
-            self.calculate_tiles(ax)
+                self.calculate_tiles(ax)
+            except ValueError as e:
+                logger.debug(f"Controller - Tiling Wizard - Caught ValueError: {e}. "\
+                             "Declining to update FOV.")
+                pass
 
     def showup(self):
         """Show the tiling wizard

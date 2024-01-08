@@ -38,7 +38,6 @@ import random
 
 # Local Imports
 from navigate.model.devices.stages.stage_base import StageBase
-from navigate.model.dummy import DummyModel
 
 
 class TestStageBase:

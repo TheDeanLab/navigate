@@ -2,7 +2,7 @@ def test_remote_focus_synthetic_functions():
     from navigate.model.devices.remote_focus.remote_focus_synthetic import (
         SyntheticRemoteFocus,
     )
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][

@@ -1,6 +1,6 @@
 def test_filter_wheel_base_functions():
     from navigate.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][

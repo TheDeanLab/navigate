@@ -1041,11 +1041,11 @@ class Model:
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
         stage_pos = self.get_stage_position()
-        self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
-        self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]
-        self.data_buffer_positions[self.frame_id][2] = stage_pos["z_pos"]
-        self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
-        self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
+        self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
+        self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
+        self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
+        self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
+        self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
 
         # Run the acquisition
         try:

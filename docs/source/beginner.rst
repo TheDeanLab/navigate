@@ -21,7 +21,7 @@ Loading and finding the sample
 
     .. image:: images/beginner/channel-selector.png
 
-#. Select the appropriate filter using the :guilabel:`filter` dropdown menu for the selected channel.
+#. Select the appropriate filter using the :guilabel:`Filter` dropdown menu for the selected channel.
 
     .. image:: images/beginner/channel-selector-filter.png
 
@@ -37,7 +37,7 @@ Loading and finding the sample
 
     .. image:: images/beginner/continuous-scan-acquire.png
 
-#. Move the stage either via joystick or using the :guilabel:`X Y movement` and/or :guilabel:`Z movement` controls in the
+#. Move the stage either via joystick or the :guilabel:`X Y movement` and/or :guilabel:`Z movement` controls under the
    :guilabel:`Stage Control` tab until the sample comes into view and is in focus with the camera.
 
     .. image:: images/beginner/stage-movement-panel.png
@@ -57,7 +57,7 @@ Acquiring a single image
 
     .. image:: images/beginner/continuous-scan-sample.png
 
-#. Similar to loading and finding the sample, move the stage via joystick or using the controls in the
+#. Similar to loading and finding the sample, move the stage via joystick or the controls in the
    :guilabel:`Stage Control` tab to find the desired region of the sample to image.
 #. Once desired imaging region is found, Select the number of color channels needed imaging in the :guilabel:`Channel tab`
    under :guilabel: `Channel Settings`. Select the correct filter for each channel by
@@ -66,7 +66,7 @@ Acquiring a single image
    each channel.
 #. Set :guilabel:`Interval` to be ``1.0`` for each channel.
 #. Set :guilabel:`Defocus` to be ``0`` for each channel.
-#. Select :guilabel:`Normal` in the :guilabel:`Readout Direction` dropdown menu under the :guilabel:`Camera Modes` section in the :guilabel:`Camera settings` tab to acquire all pixels at once. Select :guilabel:`Light-Sheet` if using a rolling shutter. Refer to :doc:`ASLM <user_guide/case_studies/setup_voodoo>` for more information.
+#. Select "Normal" in the :guilabel:`Readout Direction` dropdown menu under the :guilabel:`Camera Modes` section in the :guilabel:`Camera settings` tab to acquire all pixels at once. Select "Light-Sheet" if using a rolling shutter. Refer to :doc:`ASLM <user_guide/case_studies/setup_voodoo>` for more information.
 
     .. image:: images/beginner/sensor-mode.png
 
@@ -101,7 +101,7 @@ Acquiring a z-stack
 #. Using the :guilabel:`Channels` in the :guilabel:`Channel Settings` section, under the :guilabel:`Channels` tab, select the desired laser for imaging.
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
-#. Using the :guilabel:`Stage Control`, go to the desired start z-position in the sample.
+#. Using the :guilabel:`Stage Control`, go to the desired z-position in the sample.
 
     .. image:: images/beginner/stage-control-start-pos-zstack.png
 
@@ -110,7 +110,7 @@ Acquiring a z-stack
 
     .. image:: images/beginner/press-start-pos.png
 
-#. Using the :guilabel:`Stage Control`, go to a deep z-position within the sample.
+#. Using the :guilabel:`Stage Control`, go to a different z-position within the sample.
 
     .. image:: images/beginner/stage-control-end-pos-zstack.png
 
@@ -120,7 +120,7 @@ Acquiring a z-stack
     .. image:: images/beginner/press-end-pos.png
 
 #. Make sure :guilabel:`Set Foc` is ``0`` for both the :guilabel:`Set Start Pos` and
-   :guilabel:`End Pos` if focus movement is not enabled. Check :doc:`configuration settings <user_guide/software_configuration>` for more information.
+   :guilabel:`End Pos`.  Check :doc:`configuration settings <user_guide/software_configuration>` for more information to determine if focus is enabled in hardware. Refer to :doc:`configuration settings <user_guide/case_studies/acquire_mesospimbt>` for how to acquire a z-stack if focus is enabled.
 
 #. Type the desired step size (units um) in the :guilabel:`Step Size` dialog box in
    :guilabel:`Stack Acquistion Settings (um)`. The minimum step size and step increments are defined in stage section in the :guilabel:`experiment.yaml` file. More information can be found in :doc:`configuration settings <user_guide/software_configuration>`

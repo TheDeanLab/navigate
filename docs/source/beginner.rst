@@ -68,7 +68,7 @@ Acquiring a single image
 
     .. image:: images/beginner/sensor-mode.png
 
-#. Define imaging region across camera chip in the :guilabel:`Region of Interest Settings` section under the :guilabel:`Camera Settings` tab.
+#. Define an imaging region across the camera chip using the :guilabel:`Region of Interest Settings` section under the :guilabel:`Camera Settings` tab.
 
     .. image:: images/beginner/ROI-definition.png
 
@@ -132,8 +132,8 @@ Acquiring a z-stack
    each channel.
 #. Set :guilabel:`Interval` to be ``1.0`` for each channel.
 #. Set :guilabel:`Defocus` to be ``0`` for each channel.
-#. Select :guilabel:`Normal` in the :guilabel:`Readout Direction` dropdown menu under the :guilabel:`Camera Modes` section in the :guilabel:`Camera settings` tab. Select :guilabel:`Light-Sheet` if using rolling shutter. Refer to :doc:`ASLM <user_guide/case_studies/setup_voodoo>` for more information.
-#. Define imaging region across camera chip in the :guilabel:`Region of Interest Settings` section under the :guilabel:`Camera Settings` tab.
+#. #. Select "Normal" in the :guilabel:`Readout Direction` dropdown menu under the :guilabel:`Camera Modes` section in the :guilabel:`Camera settings` tab to acquire all pixels at once. Select "Light-Sheet" if using a rolling shutter. Refer to :doc:`ASLM <user_guide/case_studies/setup_voodoo>` for more information.
+#. Define an imaging region across the camera chip in the :guilabel:`Region of Interest Settings` section under the :guilabel:`Camera Settings` tab.
 #. If using channels for imaging, Select either :guilabel:`Per Z` or :guilabel:`Per Stack` under :guilabel:`Laser Cycling Settings` in the :guilabel:`Stack Acquisition Settings (um)` section under the :guilabel:`Channels` tab. :guilabel:`Per Z` acquires each channel before moving the stage to a new position and :guilabel:`Per Stack` acquires all images in a stack acquistion for a single channel before moving back to the start position restarting acquistion for the subsequent channel until all channels are imaged.
 
     .. image:: images/beginner/laser-cycling-settings.png
@@ -145,9 +145,9 @@ Acquiring a z-stack
 
    Press :guilabel:`Acquire`.
 #. Enter the sample parameters, notes, location to save file, and filetype in the :guilabel:`File Saving Dialog` that pops up.
-#. Press :guilabel:`Acquire Data`.
+#. Press :guilabel:`Acquire Data` to initiate acquisition. Acquisition will automatically stop once the image series is acquired.
 
 Acquiring a multi-position z-stack
 ================================
 
-#. Please refer to :ref:`multiposition table <user_guide/gui_walkthrough:multiposition>` documentation on how to image a multiposition z-stack.
+#. Please refer to the :ref:`multiposition table <user_guide/gui_walkthrough:multiposition>` documentation on how to image a multiposition z-stack.

@@ -10,10 +10,8 @@ Loading and finding the sample
 
 #. Load the sample into the microscope chamber.
 #. open navigate software by opening an anaconda prompt
-#. activate navigate conda environment by entering the command ``conda activate navigate`` into the anaconda command window
-#. press :kbd:`Enter`
-#. subsequently type the command ``navigate`` into the anaconda command window
-#. press :kbd:`Enter`
+#. activate navigate conda environment by entering the command ``conda activate navigate`` into the anaconda command window and press :kbd:`Enter`
+#. Type the command ``navigate`` into the anaconda command window and press :kbd:`Enter`
 
     .. image:: images/beginner/open-navigate.png
 

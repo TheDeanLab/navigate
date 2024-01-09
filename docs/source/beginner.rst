@@ -180,7 +180,7 @@ Acquiring a Z-Stack
 * Set :guilabel:`Defocus` to be ``0`` for each channel.
 * * Select "Normal" in the :guilabel:`Readout Direction` dropdown menu under the :guilabel:`Camera Modes` section in the :guilabel:`Camera settings` tab to acquire all pixels at once. Select "Light-Sheet" if using a rolling shutter. Refer to :doc:`ASLM <user_guide/case_studies/setup_voodoo>` for more information.
 * Define an imaging region across the camera chip in the :guilabel:`Region of Interest Settings` section under the :guilabel:`Camera Settings` tab.
-* If using channels for imaging, Select either :guilabel:`Per Z` or :guilabel:`Per Stack` under :guilabel:`Laser Cycling Settings` in the :guilabel:`Stack Acquisition Settings (um)` section under the :guilabel:`Channels` tab. :guilabel:`Per Z` acquires each channel before moving the stage to a new position and :guilabel:`Per Stack` acquires all images in a stack acquistion for a single channel before moving back to the start position restarting acquistion for the subsequent channel until all channels are imaged.
+* If using multiple channels for imaging, Select either :guilabel:`Per Z` or :guilabel:`Per Stack` under :guilabel:`Laser Cycling Settings` in the :guilabel:`Stack Acquisition Settings (um)` section under the :guilabel:`Channels` tab. :guilabel:`Per Z` acquires each channel before moving the stage to a new position and :guilabel:`Per Stack` acquires all images in a stack acquistion for a single channel before moving the stage back to the start position and restarting acquistion for the subsequent channel until all channels are imaged.
 
     .. image:: images/beginner/laser-cycling-settings.png
 

@@ -3,7 +3,7 @@ Acquire an Image (Beginner)
 ===========================
 
 This guide will describe how to acquire a single image and a z-stack using the
-**navigate** software package. Please refer to :ref:`multiposition table <user_guide/gui_walkthrough:multiposition>` for imaging in a
+**navigate** software package. Please refer to :ref:`multiposition documentation <user_guide/gui_walkthrough:multiposition>` for imaging in a
 multiposition format or :doc:`case studies <user_guide/case_studies/case_studies_home>` for specialized examples using device-specific
 microscope configurations.
 
@@ -20,8 +20,9 @@ To start, you need to open the Anaconda Prompt. Follow these steps:
 3. Click on the Anaconda Prompt application to open it.
 
 .. note::
-   Ensure that Anaconda is already installed on your system. If not, download and install it from the
-   `Anaconda website <https://docs.conda.io/projects/miniconda/en/latest/>`_.
+   Ensure that Anaconda and **navigate** are already installed on your system.
+   If not, please refer to our :ref:`Quick_Start_Guide` for more information.
+
 
 Activate Conda Environment
 --------------------------
@@ -47,7 +48,7 @@ After activating the environment, **navigate** should now be shown in parenthese
 
 The navigate software package will launch and the main window will appear.
 
-.. image:: images/beginner/open-navigate.png
+    .. image:: images/beginner/open-navigate.png
 
 Configure the Channel Settings
 =============================================
@@ -68,55 +69,61 @@ Configure the Channel Settings
     * Specify the :guilabel:`Defocus` to be ``0``. This feature allows you to adjust for chromatic aberrations
       that result in focal shifts between each imaging channel.
 
+Configure the Camera Settings
+============================================
+* Select the :guilabel:`Camera Settings` tab, which is located on the left side of the main window.
+
+* Select :guilabel:`Normal` in the :guilabel:`Sensor Modes` dropdown menu within the :guilabel:`Camera Modes` section.
+  If you are using the rolling shutter, select :guilabel:`Light-Sheet` and specify its :guilabel:`Readout Direction`
+  and :guilabel:`Number of Pixels`. For more information on how to configure the rolling shutter
+  for ASLM operation, please refer to :doc:`ASLM <user_guide/case_studies/setup_voodoo>`.
+
+    .. image:: images/beginner/sensor-mode.png
+
+* Specify the :guilabel:`Region of Interest Settings` by entering the appropriate
+  :guilabel:`Number of Pixels` for both the :guilabel:`Width` and :guilabel:`Height` values.
+  Alternatively, one can select from one of several default values in the :guilabel:`Default FOVs` section.
+  The :guilabel:`FOV Dimension (microns)` is automatically calculated based on the :guilabel:`Number of Pixels`
+
+    .. image:: images/beginner/ROI-definition.png
+
+.. note::
+    If multiple channels are selected, each channel will be acquired with the same camera
+    :guilabel:`Sensor Mode`, :guilabel:`Readout Direction`, and :guilabel:`Region of Interest Settings`.
+
+
 Acquire in a Continuous Scan Mode
 =================================
 
-* Select "Continuous Scan" in the dropdown next to the :guilabel:`Acquire` button in the Acquire Bar.
+* Select :guilabel:`Continuous Scan` in the dropdown next to the :guilabel:`Acquire` button in the Acquire Bar.
 
-.. note::
-    If multiple channels are selected, each channel will be imaged sequentially.
-
-.. image:: images/beginner/continuous-scan-dropdown.png
+    .. image:: images/beginner/continuous-scan-dropdown.png
 
 * Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 
     .. image:: images/beginner/continuous-scan-acquire.png
 
-* Move the stage either via joystick or the :guilabel:`X Y movement` and/or :guilabel:`Z movement` controls under the
+* Move the stage either via joystick or the :guilabel:`X Y Movement` and/or :guilabel:`Z Movement` controls under the
    :guilabel:`Stage Control` tab until the sample comes into view and is in focus with the camera.
 
     .. image:: images/beginner/stage-movement-panel.png
 
-* If enabled in the hardware, use the :guilabel:`Focus Movement` controls to adjust the detection objective position relative to the camera to adjust the focus. Check :doc:`configuration settings <user_guide/software_configuration>` for more information.
+* If enabled in the hardware, use the :guilabel:`Focus Movement` controls to adjust the
+  detection objective position relative to the camera to adjust the focus.
+  Check :doc:`configuration settings <user_guide/software_configuration>` for more information.
 
 * Press the :guilabel:`Stop` button in the acquisition bar to Stop Acquisition
 
     .. image:: images/beginner/stop-acquisition.png
 
+
+.. note::
+    If multiple channels are selected, each channel will be imaged sequentially.
+    The order of imaging is determined by the order of the channels in the :guilabel:`Channel Settings` section.
+
 Acquiring a Single Image
-======================
+=========================
 
-* Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
-   Press :guilabel:`Acquire`. This will launch a live acquisition mode.
-
-    .. image:: images/beginner/continuous-scan-sample.png
-
-* Similar to loading and finding the sample, move the stage via joystick or the controls in the
-   :guilabel:`Stage Control` tab to find the desired region of the sample to image.
-* Once desired imaging region is found, Select the number of color channels needed imaging in the :guilabel:`Channel tab`
-   under :guilabel: `Channel Settings`. Select the correct filter for each channel by
-   using the dropdown menu after each channel under the :guilabel:`Filter`. (Note, if multiple channels are selected, channels will be acquired sequentially)
-* Change the camera exposure time by changing number in the :guilabel:`Exp. Time (ms)` for
-   each channel.
-* Set :guilabel:`Interval` to be ``1.0`` for each channel.
-* Set :guilabel:`Defocus` to be ``0`` for each channel.
-* Select "Normal" in the :guilabel:`Readout Direction` dropdown menu under the :guilabel:`Camera Modes` section in the :guilabel:`Camera settings` tab to acquire all pixels at once. Select "Light-Sheet" if using a rolling shutter. Refer to :doc:`ASLM <user_guide/case_studies/setup_voodoo>` for more information.
-
-    .. image:: images/beginner/sensor-mode.png
-
-* Define an imaging region across the camera chip using the :guilabel:`Region of Interest Settings` section under the :guilabel:`Camera Settings` tab.
-
-    .. image:: images/beginner/ROI-definition.png
 
 * Check the :guilabel:`Save Data` box in the :guilabel:`Timepoint Settings` section under the :guilabel:`Channels` tab to save the acquired images. Check this box before acquiring data.
 
@@ -140,11 +147,8 @@ Acquiring a Single Image
 
 
 Acquiring a Z-Stack
-=================
+===================
 
-* Using the :guilabel:`Channels` in the :guilabel:`Channel Settings` section, under the :guilabel:`Channels` tab, select the desired laser for imaging.
-* Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
-   Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 * Using the :guilabel:`Stage Control`, go to the desired z-position in the sample.
 
     .. image:: images/beginner/stage-control-start-pos-zstack.png

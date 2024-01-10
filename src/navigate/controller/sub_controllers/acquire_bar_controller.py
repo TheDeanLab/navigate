@@ -77,7 +77,6 @@ class AcquireBarController(GUIController):
             "Continuous Scan": "live",
             "Z-Stack": "z-stack",
             "Single Acquisition": "single",
-            "Alignment": "alignment",
             "Projection": "projection",
             "Customized": "customized",
             "Constant Velocity Acquistion": "ConstantVelocityAcquisition",
@@ -430,7 +429,7 @@ class AcquireBarController(GUIController):
         time_widgets = self.parent_view.stack_timepoint_frame.get_widgets()
 
         # Grey out time widgets when in Continuous Scan or Alignment modes
-        if mode == "live" or mode == "alignment":
+        if mode == "live":
             state = "disabled"
         else:
             state = "normal"

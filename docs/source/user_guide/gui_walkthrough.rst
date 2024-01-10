@@ -159,8 +159,8 @@ Channel Settings
 This is used to set up acquisition color channels. A channel is considered to be a 
 combination of an illuminating laser wavelength and a detection filter. Each channel
 has its own power, exposure time, interval and defocus. The checkbox on the left
-indicates if a channel should be used during acquisition. An acquisition loops through
-the channels in sequence.
+indicates if a channel should be used (is selected) during acquisition. An acquisition 
+may loop through the channels in sequence.
 
 * :guilabel:`Laser` is the name of the laser, taken from the 
   :doc:`configuration file <software_configuration>`, and usually expressed in 
@@ -177,8 +177,8 @@ the channels in sequence.
   defocus values are always relative to the focus of the first channel imaged. This 
   setting is useful for compensating for chromatic aberration.
 
-Stack Acquisition Settings (:math:`\mu\text{m}`)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Stack Acquisition Settings
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 These are the settings used for a standard Z-Stack Acquisition. 
 

@@ -49,7 +49,7 @@ Loading Custom Functions
    .. image:: images/step_13.png
 
 
-#. Then click :guilabel:`Load` to choose your Oython file.
+#. Then click :guilabel:`Load` to choose your Python file.
 
 
    .. image:: images/step_14.png
@@ -160,7 +160,7 @@ Editing Feature Lists on the Fly
    .. image:: images/step_19.png
 
 
-#. Click “Confirm”. The feature list will start to run.
+#. Click "Confirm". The feature list will start to run.
 
 
    .. image:: images/step_20.png
@@ -175,3 +175,41 @@ Deleting Feature Lists
 
 
    .. image:: images/step_9.png
+
+Text Representation of Feature Lists
+-------------------------------------
+
+At the bottom of each of the :guilabel:`Feature List Configuration` frames above, there
+is a text box with a textual representation of the feature list. As an alternative to
+point-and-click editing, a user can update feature lists by editing this textual 
+representation and then pressing :guilabel:`Preview`.
+
+The square brackets ``[]`` create a sequence of events to run in the feature container.
+The ``{}`` braces contain features. The parentheses ``()`` indicate a loop. 
+
+As an example, let's look at the feature list that describes the 
+:ref:`Continous Scan <acquiring_howto:continuous scan>` mode:
+
+.. code-block:: python
+
+    [
+      (
+        {"name": PrepareNextChannel},
+        {
+            "name": LoopByCount,
+            "args": ("experiment.MicroscopeState.selected_channels",),
+        },
+      )
+    ]
+
+Here, we have a sequence defined by ``[]`` containing one element, a loop, indicated
+by the closed parentheses. There are two features within this loop. One feature has the 
+name
+:ref:`PrepareNextChannel <../_autosummary/navigate.model.features.common_features.PrepareNextChannel>`
+and the other 
+:ref:`LoopByCount <../_autosummary/navigate.model.features.common_features.LoopByCount>`.
+The parentheses indicate we will keep looping through both of these features until 
+stopping critera is met. In this case, the looping will stop when ``LoopByCount``
+returns ``False`` due to running out of ``selected_channels`` to loop through. That is,
+it will end once all :ref:`selected channel <gui_walkthrough:channel settings>` have
+been imaged.

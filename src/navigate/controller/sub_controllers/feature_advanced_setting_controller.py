@@ -179,16 +179,20 @@ class FeatureAdvancedSettingController:
 
     def save_parameters(self):
         """Save the parameters to yaml file"""
+        unloaded_functions = []
         feature_parameter_config = {}
         for arg_name in self.popup.inputs.keys():
             for row in self.popup.inputs[arg_name]:
-                if row and self.is_valid_function(row[0].get(), row[1].get()):
-                    if not feature_parameter_config.get(arg_name, None):
-                        feature_parameter_config[arg_name] = {}
-                    if row[1].get() == "None":
-                        feature_parameter_config[arg_name][row[0].get()] = None
+                if row and row[0].get().strip():
+                    if self.is_valid_function(row[0].get(), row[1].get()):
+                        if not feature_parameter_config.get(arg_name, None):
+                            feature_parameter_config[arg_name] = {}
+                        if row[1].get() == "None":
+                            feature_parameter_config[arg_name][row[0].get()] = None
+                        else:
+                            feature_parameter_config[arg_name][row[0].get()] = row[1].get()
                     else:
-                        feature_parameter_config[arg_name][row[0].get()] = row[1].get()
+                        unloaded_functions.append(row[0].get())
 
         # save to yaml file
         parameter_config_path = (
@@ -201,6 +205,17 @@ class FeatureAdvancedSettingController:
             feature_parameter_config,
             self.popup.feature_name_widget.get() + ".yml",
         )
+        if unloaded_functions:
+            if len(unloaded_functions) == 1:
+                alert_message = f"Function {unloaded_functions[0]} isn't loaded!"
+            else: 
+                alert_message = f"Functions {', '.join(unloaded_functions)} are not loaded!"
+            messagebox.showwarning(
+                title="Warning",
+                message=alert_message
+            )
+        self.popup.popup.attributes("-topmost", 1)
+
 
     def exit_func(self):
         """Exit the popup window"""

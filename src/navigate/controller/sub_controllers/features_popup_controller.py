@@ -44,7 +44,7 @@ from navigate.view.popups.feature_list_popup import FeatureIcon, FeatureConfigPo
 from navigate.view.custom_widgets.ArrowLabel import ArrowLabel
 from navigate.controller.sub_controllers.gui_controller import GUIController
 from navigate.tools.image import create_arrow_image
-from navigate.tools.file_functions import load_yaml_file
+from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.model.features.feature_related_functions import (
     convert_str_to_feature_list, convert_feature_list_to_str
 )
@@ -136,6 +136,18 @@ class FeaturePopupController(GUIController):
         feature_list_content = "".join(content.split("\n"))
         self.parent_controller.execute(
             "load_feature", self.feature_list_id, feature_list_content
+        )
+        # save to yaml file
+        feature_lists_path = get_navigate_path() + "/feature_lists"
+        feature_list_name = self.view.inputs["feature_list_name"].get()
+        save_yaml_file(
+            feature_lists_path,
+            {
+                "module_name": None,
+                "feature_list_name": feature_list_name,
+                "feature_list": feature_list_content,
+            },
+            f"{'_'.join(feature_list_name.split(' '))}.yml",
         )
         #: bool: Whether the acquisition should start.
         self.start_acquisiton_flag = True

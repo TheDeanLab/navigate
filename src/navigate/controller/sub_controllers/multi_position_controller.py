@@ -31,7 +31,7 @@
 
 
 # Standard Library Imports
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import math
 import logging
 
@@ -211,8 +211,10 @@ class MultiPositionController(GUIController):
         df.columns = map(lambda v: v.upper(), df.columns)
         cmp_header = df.columns == ["X", "Y", "Z", "R", "F"]
         if not cmp_header.all():
-            #  TODO: show error message
-            print("The csv file isn't right, it should contain [X, Y, Z, R, F]")
+            messagebox.showwarning(
+                title="Warning",
+                message="The csv file isn't right, it should contain [X, Y, Z, R, F]"
+            )
             logger.info("The csv file isn't right, it should contain [X, Y, Z, R, F]")
             return
         model = TableModel(dataframe=df)

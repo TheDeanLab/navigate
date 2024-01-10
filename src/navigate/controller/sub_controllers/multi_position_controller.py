@@ -217,7 +217,10 @@ class MultiPositionController(GUIController):
             return
         model = TableModel(dataframe=df)
         self.table.updateModel(model)
-        self.table.redraw()
+        try:
+            self.table.redraw()
+        except KeyError:
+            pass
         self.show_verbose_info("loaded csv file", filename)
 
     def export_positions(self):

@@ -34,6 +34,7 @@
 import tkinter as tk
 import platform
 import os
+import warnings
 
 # Third Party Imports
 
@@ -77,6 +78,13 @@ def main():
     --------
     >>> python main.py --synthetic-hardware
     """
+    if platform.system() != 'Windows':
+        print("WARNING: navigate was built to operate on a Windows platform. "
+              "While much of the software will work for evaluation purposes, some "
+              "unanticipated behaviors may occur. For example, it is known that the "
+              "Tkinter-based GUI does not grid symmetrically, nor resize properly "
+              "on MacOS. Testing on Linux operating systems has not been performed.")
+
     # Start the GUI, withdraw main screen, and show splash screen.
     root = tk.Tk()
     root.withdraw()
@@ -116,6 +124,4 @@ def main():
 
 
 if __name__ == "__main__":
-    if platform.system() == "Darwin":
-        print("Apple OS Not Fully Supported. ")
     main()

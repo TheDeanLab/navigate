@@ -71,11 +71,14 @@ class ChannelsTabController(GUIController):
             The parent controller of this controller.
         """
         super().__init__(view, parent_controller)
+
         #: bool: Whether or not the user has selected to save the data.
         self.is_save = False
+
         #: str: The current acquisition mode.
         self.mode = "stop"
-        #: bool: Whether or not the controller is in the initialization phase.
+
+        #: bool: Whether the controller is in the initialization phase.
         self.in_initialization = True
 
         # sub-controllers

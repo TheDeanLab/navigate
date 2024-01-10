@@ -4,6 +4,8 @@
 Setting up an Axially Swept Light-Sheet Microscope
 ==================================================
 
+Important points
+================
 The key to properly setting up the navigate software is to sequentially enable select
 devices, and troubleshoot each one independently. By carefully and methodically
 adding devices, and checking that they are functional, one can be confident that the
@@ -13,6 +15,10 @@ Photometrics camera, as long as the drivers are installed and the camera is
 recognized by the computer. The microscope will operate in a sample scanning format
 for volumetric image acquisition.
 
+-------------
+
+First steps
+============
 
 #. Launch the software in synthetic hardware mode. This requires that the conda
    environment has been established, and that the software has been installed. Once the
@@ -40,6 +46,14 @@ for volumetric image acquisition.
    functional. If any problems are encountered, please submit a ticket on
    `GitHub <https://github.com/TheDeanLab/navigate>`_ under the "Issues" tab.
 
+-------------
+
+Sequentially adding devices
+===========================
+
+Data Acquisition Card
+---------------------
+
 #. We will now begin sequentially adding non-synthetic devices to the configuration
    file. The first device to add is the NI data acquisition card. Of course, the data
    acquisition card's drivers must be `installed <https://www.ni
@@ -64,6 +78,11 @@ for volumetric image acquisition.
    not, double-check the configuration file and make sure that the
    ``master_trigger_out_line`` is connected to the ``trigger_source``.
 
+----------
+
+Camera
+------
+
 #. Next, we will add the camera. The camera must be connected to the computer via a USB
    or the dedicated frame-grabber cable. The camera drivers must also be installed. The
    camera drivers can be found on the `DCAM-API Website <https://dcam-api.com>`_.
@@ -75,6 +94,11 @@ for volumetric image acquisition.
 
 #. Restart the software and begin an acquisition in the "Continuous Scan" mode. The
    camera should now be delivering frames to the software.
+
+----------
+
+Filter Wheel
+------------
 
 #. Set up the Filter Wheel. First, identify the comport via the device manager
    on Windows. Change the ``filter_wheel`` type to ``SutterFilterWheel`` or equivalent
@@ -88,6 +112,11 @@ for volumetric image acquisition.
    "Continuous Scan" mode again and ensure that the filter wheel is changing filters
    between each acquisition.
 
+----------
+
+Lasers
+------
+
 #. Set up the lasers. Ideally, the lasers will operate in a mixed modulation mode,
    which requires that the NI card provides both analog and digital signals to each
    laser. This allows blanking of the laser, as well as control of its intensity. Open
@@ -99,8 +128,13 @@ for volumetric image acquisition.
 
 #. Configure the lasers in the ``hardware`` and ``microscopes`` sections of the
    configuration to type ``NI``. Here, you can specify the wavelength of each laser, as
-   well as the minimium and maximum volts to deliver to the laser in both the analog
+   well as the minimum and maximum volts to deliver to the laser in both the analog
    (``power``) and digital (``onoff``) sections.
+
+----------
+
+Remote focusing unit
+--------------------
 
 #. Configure the Voice Coil. Most voice coils only require an analog signal to
    control, which can be delivered via the type ``NI`` in the ``hardware`` and
@@ -108,12 +142,22 @@ for volumetric image acquisition.
    analog signal upon each power cycle (e.g., ``EquipmentSolutions``). In this
    case, you will also need to specify the COM port.
 
+----------
+
+Galvos
+------
+
 #. Set up the galvos. Galvos can be used for a wide variety of tasks, including
    shadow reduction, digitally scanned light-sheet formation, and also for stepping the
    beam in z during the acquisition of a z-stack. If the galvo will be used for a
    z-stack, it should be configured in the ``stage`` section. All other galvos are
    placed in ``galvo`` section. For a sample-scanning ASLM, we use a resonant galvo
    to perform shadow reduction.
+
+----------
+
+Stages
+------
 
 #. Install and configure the Stages. You will need to specify stages for the ``x``,
    ``y``, ``z``, ``theta``, and ``f`` axes. If you do not need one of these stages,
@@ -130,4 +174,4 @@ for volumetric image acquisition.
         axes: [x] # software axes
         axes_mapping: [z] #hardware axes
 
-   Importantly, any stage you designate as z will be used for acquisition of a z-stack.
+   Importantly, any stage you designate as ``z`` will be used for acquisition of a z-stack.

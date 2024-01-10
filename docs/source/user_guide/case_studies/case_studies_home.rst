@@ -25,6 +25,7 @@ light sheet microscopes. These include:
   specimens with very large lateral extents without the overhead associated with stepping and settling
   the sample stage. Tiling in ``X``, ``Y``, and ``Z`` is provided by a motorized stage.
 
+-------------------
 
 .. toctree::
    :maxdepth: 2

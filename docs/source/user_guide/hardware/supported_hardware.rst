@@ -14,6 +14,7 @@ deterministic behavior on a per-frame basis, which is necessary for proper acqui
 It does not however provide us with deterministic behavior between image
 frames, and some jitter in timing is anticipated.
 
+------------------
 
 .. _hardware_ni:
 

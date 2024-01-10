@@ -5,11 +5,13 @@ Imaging on the CT-ASLM-V1 and CT-ASLM-V2
 This is a case study in using the software to image with a
 `CT-ASLM-V1 and CT-ASLM-V2 microscopes <https://www.nature.com/articles/s41592-019-0615-4>`_.
 
+-----------------
+
 Setting up the chamber
 ======================
 
-Make sure the chamber is clean and dry. If in doubt, fill the chamber with diH2O to see
-if there is any residue. To clean the chamber, rinse it with diH2O and ethanol, then
+Make sure the chamber is clean and dry. If in doubt, fill the chamber with deionized water to see
+if there is any residue. To clean the chamber, rinse it with deionized water and ethanol, then
 gently clean the chamber with Q-tips. Repeat the process a few times and end the
 process with a rinse of 100% ethanol. Gently clean the objectives with lens paper and
 100% ethanol. Finally, let the chamber air dry. To speed up the drying process, one
@@ -17,6 +19,8 @@ can gently blow some air into the chamber.
 
 Once the chamber is completely dry, fill the chamber with imaging media.
 
+
+-----------------
 
 Sample loading and finding the samples
 ======================================
@@ -44,6 +48,8 @@ It's recommended to start the software before loading the sample on the stage.
    saturated.
 
 
+-----------------
+
 .. _z_stack_stelzer:
 
 Imaging a Z-Stack with Stelzer mode
@@ -59,7 +65,7 @@ offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) lateral resolution.
 #. Put a slit into the setup.
 #. Select the channel with a proper laser under the :guilabel:`Channels` tab and set
    the laser power to an appropriate value.
-#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
+#. Select :guilabel:`Continuous Scan` from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. If needed, slowly adjust the slit opening until the image sharpness looks uniform
    across the whole field of view. Uncheck :guilabel:`Autoscale` in
@@ -87,6 +93,8 @@ offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) lateral resolution.
 #. Select "Z-Stack" from the dropdown next to the :guilabel:`Acquire` button. Press
    :guilabel:`Acquire`. A popup named :guilabel:`File Saving Dialog` will appear.
 #. Fill out the fields and press :guilabel:`Acquire Data`.
+
+-----------------
 
 .. _z_stack_aslm:
 
@@ -137,6 +145,8 @@ around 950 nm (CT-ASLM-V1) and 480 nm (CT-ASLM-V2) isotropic resolution.
    :guilabel:`Acquire`. A popup named :guilabel:`File Saving Dialog` will appear.
 #. Fill out the fields and press :guilabel:`Acquire Data`.
 
+
+-----------------
 
 Tiling a sample larger than the field of view
 =============================================

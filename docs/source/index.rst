@@ -13,23 +13,32 @@ in arbitrary orders to create custom acquisition protocols. **navigate** is desi
 a diverse user base, from biologists with no programming experience to advanced
 technology developers.
 
+**Project Philosophy**
+=========================
+
+* Prioritize standard library imports for maximum stability, ahd minimize external dependencies.
+* Abstraction layer to drive different camera types, etc.
+* Plugin architecture for extensibility.
+* Maximize productivity for biological users through robust graphical user interface-based workflows.
+* Performant and responsive.
+* Brutally obvious, well-documented, clean code organized in an industry standard Model-View-Controller architecture.
+
 .. note::
 
    This project is under active development. See our `GitHub repository for updates
    <https://github.com/TheDeanLab/navigate>`_.
 
-**Project Philosophy**
-=========================
+.. warning::
 
-* Minimal number of dependencies. Prioritize standard library imports for maximum stability.
-* Abstraction layer to drive different camera types, etc.
-* Brutally obvious, well-documented, clean code.
-* Maximize productivity for biological users.
-* Performant and responsive.
-* Model-View-Controller architecture.
+    Please be advised that while the Dean Lab has implemented several safeguards in the
+    automation of hardware, including but not limited to stage limits, voltage minimums,
+    and maximums, are more, there are inherent risks associated with the use of such
+    automated systems. Despite these precautions, the complexity and nature of automated
+    hardware can lead to unpredictable outcomes. Therefore, the Dean Lab and UT
+    Southwestern expressly disclaim any responsibility for any damages, losses, or
+    injuries that may arise from or be related to the use of **navigate**.
+    Users should be aware of these risks and agree to utilize **navigate** at their own risk.
 
-**Contents**
-============
 
 .. toctree::
    :caption: Getting Started
@@ -56,33 +65,18 @@ technology developers.
    contributing/feature_container
    plugin/plugin_home
    api
-
-**Outlook**
-============
-In the future, **navigate** will be accompanied by a hardware platform, **navigate-hardware**, which streamlines
-the process of building advanced light-sheet microscopes through simplified optical, electronic, and mechanical
-designs. **navigate-hardware** will be open-source and modular, allowing users to easily
-customize their microscope to suit their needs. Supported variants will include
-`Oblique Plane Microscopy <https://elifesciences.org/articles/57681>`_,
-`Field Synthesis <https://www.nature.com/articles/s41592-019-0327-9>`_,
-and `Axially Swept Light-Sheet Microscopy <https://www.nature.com/articles/s41596-022-00706-6>`_.
+   genindex
 
 **Authors**
 ============
 **Navigate** includes key contributions from numerous individuals, both past and present,
-in `The Dean Lab <https://www.dean-lab.org>`_. These include Zach Marin, Annie Wang,
-Dax Collison, Kevin Dean, Dushyant Mehra, Sampath Rapuri, Renil Gupta, Samir Mamtani,
-Andrew Jamieson, Andrew York, Nathaniel Thayer, and more.
+in `The Dean Lab <https://www.dean-lab.org>`_. Please see the accompanying manuscript for a full list of contributors.
 
 **Funding**
 ============
 **navigate** is supported by the
 `UT Southwestern and University of North Carolina Center for Cell Signaling
-<https://cellularsignaltransduction.org>`_, a Biomedical Technology Development and Dissemination
-Center funded by the NIH National Institute of General Medical Science (RM1GM145399).
-
-**Index and search**
-====================
-
-* :ref:`genindex`
-* :ref:`Search <search>`
+<https://cellularsignaltransduction.org>`_, a Biomedical Technology Development and Dissemination (BTDD)
+Center funded by the NIH National Institute of General Medical Science (RM1GM145399), and
+the `Center for Metastatic Tumor Imaging <https://www.metastasis-imaging.org>`_ program, a
+Cellular Cancer Biology Imaging Research (CCBIR) program funded by the NIH National Cancer Institute (U54CA268072).

@@ -2,12 +2,13 @@
 Write a Custom Plugin (Expert)
 ==============================
 
-**navigate's** :doc:`plugin system <plugin/plugin_home>` enables users to
+**navigate**'s :doc:`plugin system <plugin/plugin_home>` enables users to
 easily incorporate new devices and integrate new features and acquisition modes. In this
-guide, we will add a new device, titled `custom_device`), and a dedicated GUI window to control it.
-This hypothetical custom device is capable of moving a certain distance,
-rotating a specified number of degrees, and applying a force to halt its movement. Like **navigate**,
-plugins are implemented using a Model-View-Controller architecture. The model
+guide, we will add a new device, titled `custom_device`, and a dedicated GUI window to control it.
+This hypothetical `custom_device` is capable of moving a certain distance,
+rotating a specified number of degrees, and applying a force to halt its movement.
+
+Like **navigate**, plugins are implemented using a Model-View-Controller architecture. The model
 contains the device-specific code, the view contains the GUI code, and the
 controller contains the code that communicates between the model and the view.
 
@@ -85,13 +86,13 @@ Model Code
             }
 
 
-* All devices are accompanied by synthetic versions, which enable the software to run without the
-  actual hardware connected. Thus, in a manner that is similar to the `CustomDevice` class, we
+* All devices are accompanied by synthetic versions, which enables the software to run without the
+  hardware connected. Thus, in a manner that is similar to the `CustomDevice` class, we
   edit the code in `synthetic_device.py`, albeit without any calls to the device itself:
 
 .. code-block:: python
 
-    class SyntheticDevice:
+    class SyntheticCustomDevice:
         """ A Synthetic Device Class """
         def __init__(self, device_connection, *args):
             """ Initialize the Synthetic Device
@@ -184,6 +185,24 @@ Model Code
         return DummyDeviceConnection()
 
     def start_device(microscope_name, device_connection, configuration, is_synthetic=False):
+        """ Start the Custom Device
+
+        Parameters
+        ----------
+        microscope_name : str
+            The name of the microscope
+        device_connection : object
+            The device connection object
+        configuration : dict
+            The configuration for the Custom Device
+        is_synthetic : bool
+            Whether the device is synthetic or not. Default is False.
+
+        Returns
+        -------
+        object
+            The Custom Device object
+        """
         if is_synthetic:
             device_type = "synthetic"
         else:
@@ -210,6 +229,12 @@ Model Code
         else:
             device_not_found(microscope_name, device_type)
 
+.. tip::
+
+    **navigate** establishes communication with each device independently, and
+    passes the instance of that device to class that controls it (e.g., in this case, the
+    `CustomDevice` class). This allows **navigate** to be initialized with multiple imaging configurations,
+    some of which may share devices.
 
 -----------------
 
@@ -290,17 +315,30 @@ View Code
         def get_widgets(self):
             return self.inputs
 
-* **navigate** comes equipped with a large number of validated widgets, which prevent users from entering invalid values. It is highly recommended that you use these, which include the following:
-* The `LabelInput` widget conveniently combines a label and an input widget into a single object. It is used to create the `step_size` and `angle` widgets in the code below.
-* The `LabelInput` widget can accept multiple types of `input_class` objects, which can include standard tkinter widgets (e.g., spinbox, entry, etc.) or custom widgets. In this example, we use the `ttk.Entry` widget.
-  Preferentially, you would use one of our validated widgets, which include a `ValidatedSpinbox`, `ValidatedEntry`, `ValidatedCombobox`, and `ValidatedMixin`.
-* Further documentation can be found in API Reference
+.. tip::
+
+    **navigate** comes equipped with a large number of validated widgets,
+    which prevent users from entering invalid values that can crash the program or result in
+    undesirable outcomes. It is highly recommended that you use these, which include the following:
+
+        * The `LabelInput` widget conveniently combines a label and an input widget into a single object.
+          It is used to create the `step_size` and `angle` widgets in the code above.
+
+        * The `LabelInput` widget can accept multiple types of `input_class` objects,
+          which can include standard tkinter widgets (e.g., spinbox, entry, etc.) or custom
+          widgets. In this example, we use the `ttk.Entry` widget.
+
+        * Other examples of validated widgets include a `ValidatedSpinbox`, `ValidatedEntry`,
+          `ValidatedCombobox`, and `ValidatedMixin`.
+
+        * Please see the :any:`navigate.view.custom_widgets` module for more details.
+
 
 -----------------
 
 Controller Code
 ----------------
-Now, let's build a controller. Navigate to the 'controller' folder, rename
+Now, let's build a controller. Open the 'controller' folder, rename
 'plugin_name_controller.py' to 'custom_device_controller.py', and edit the code
 as follows:
 
@@ -377,27 +415,31 @@ as follows:
 
 
 * In each case above, the sub-controller for the `custom-device` establishes what actions should take
-  place once a button in the view is clicked. In this case, the `move_device`, `rotate_device`, and
+  place once a button in the view is clicked. In this case, the methods `move_device`, `rotate_device`, and
   `stop_device`.
-* The sub-controller then passes the command to the parent controller, which is the main controller
-  for the software. The parent controller then passes the command to the model using an event queue.
-* The model then executes the command, and any updates to the controller from the model are relayed
-  using another event queue.
+* This triggers a sequence of events that include:
+    * The sub-controller passes the command to the parent controller, which is the main controller
+      for the software.
+    * The parent controller passes the command to the model, which is operating in its own sub-process,
+      using an event queue. This eliminates the need for the controller to know anything about the model
+      and prevents race conditions.
+    * The model then executes command, and any updates to the controller from the model are relayed
+      using another event queue.
 
 -----------------
 
 Plugin Configuration
 --------------------
-* The next is to update the 'plugin_config.yml' file as follows:
+* Next, update the 'plugin_config.yml' file as follows:
 
-.. code-block:: none
+.. code-block:: yaml
 
     name: Custom Device
     view: Popup
 
 
 * Remove the folder `./model/features`, the file `feature_list.py`, and
-the file `plugin_acquisition_mode.py`. The plugin folder structure is as follows:
+  the file `plugin_acquisition_mode.py`. The plugin folder structure is as follows:
 
 .. code-block:: none
 
@@ -417,17 +459,18 @@ the file `plugin_acquisition_mode.py`. The plugin folder structure is as follows
         └── plugin_config.yml 
 
 
-* Install this plugin. There are two ways to install a plugin. You could install
-  a plugin by putting the whole plugin folder directly into "navigate/plugins/". In this example,
-  put "custom_device" folder and all its contents into "navigate/plugins". Another way, you could
-  install this plugin through the menu :menuselection:`Plugins --> Install Plugin`, select the plugin
-  folder. Then the plugin is ready to use. For this plugin, you could specify a CustomDevice in the
- `configuration.yaml` as follows:
+* Install the plugin using one of two methods:
+    * You can install a plugin by putting the whole plugin folder directly into ``navigate/plugins/``.
+      In this example, put "custom_device" folder and all its contents into "navigate/plugins".
+    * You can install this plugin through the menu :menuselection:`Plugins --> Install Plugin` by selecting the plugin
+      folder.
+* The plugin is ready to use. For this plugin, you can now specify a CustomDevice in the
+  `configuration.yaml` as follows:
 
-.. code-block:: none
+.. code-block:: yaml
 
     microscopes:
-        Mesoscale:
+        microscope_1:
             daq:
                 hardware:
                     name: daq
@@ -439,5 +482,4 @@ the file `plugin_acquisition_mode.py`. The plugin folder structure is as follows
             ...
             
 
-* The custom device will be loaded when you launch Navigate, and you can now control this device
-through the GUI now.
+* The `custom_device` will be loaded when you launch **navigate**, and you can now control this device through the GUI now.

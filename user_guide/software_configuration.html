@@ -81,6 +81,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -113,27 +114,35 @@
 <p>This section outlines the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">experiment.yml</span></code>,
 <code class="docutils literal notranslate"><span class="pre">rest_api_config.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">waveform_templates.yml</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">waveform_constants.yml</span></code> files.</p>
+<hr class="docutils" />
 <section id="configuration-file">
 <h2>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this heading"></a></h2>
-<p>In order for the navigate software to function, you will need to configure the
+<p>In order for the <strong>navigate</strong> software to function, you will need to configure the
 specifications of the various hardware that you will be using. The first time you
-launch the software, navigate will create a copy of the
+launch the software, <strong>navigate</strong> will create a copy of the
 <code class="docutils literal notranslate"><span class="pre">navigate\config\configuration.yaml</span></code> and the rest of the configuration files in
 <code class="docutils literal notranslate"><span class="pre">C:\Users\Username\AppData\Local\.navigate\config</span></code> on  Windows or <code class="docutils literal notranslate"><span class="pre">~/.navigate</span></code> on
-Mac/Linux. navigate uses these local copies of the configuration files to store
+Mac/Linux. <strong>navigate</strong> uses these local copies of the configuration files to store
 information specific to the setup attached to the computer it is installed on.</p>
 <p>To avoid confusion, we recommend launching the software in the synthetic hardware
-mode initially. Within your Terminal, or Anaconda Prompt, activate your Navigate Python
+mode initially. Within your Terminal, or Anaconda Prompt, activate your <strong>navigate</strong> Python
 environment and launch the software by typing: <code class="docutils literal notranslate"><span class="pre">navigate</span> <span class="pre">-sh</span></code>. Thereafter, you should
 only modify the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file in your local <code class="docutils literal notranslate"><span class="pre">.navigate</span></code> directory. The
 local copy avoids conflicts between different microscopes after pulling new
 changes on GitHub.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Once <strong>navigate</strong> is open in the synthetic hardware mode, you can open the
+<code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file by going to <span class="menuselection">File</span> menu and selecting
+<a class="reference internal" href="gui_walkthrough.html#file"><span class="std std-ref">Open Configuration Files</span></a>.</p>
+</div>
 <p>It may help to open
 <code class="docutils literal notranslate"><span class="pre">C:\Users\Username\AppData\Local\.navigate\config\configuration.yaml</span></code> and follow
 along in this file when reading the next sections.</p>
 <p>See the <a class="reference internal" href="case_studies/setup_voodoo.html#setup-aslm"><span class="std std-ref">Setting up an Axially Swept Light-Sheet Microscope</span></a> case
 study for a general walkthrough of how to build your own configuration file and see
 <a class="reference internal" href="hardware/implementations.html"><span class="doc">Implementations</span></a> for examples of configuration files.</p>
+<hr class="docutils" />
 <section id="hardware-section">
 <span id="id1"></span><h3>Hardware Section<a class="headerlink" href="#hardware-section" title="Permalink to this heading"></a></h3>
 <p>The first section of the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file is called <code class="docutils literal notranslate"><span class="pre">hardware</span></code>. It contains
@@ -178,12 +187,12 @@ computer/software.</p>
 <li><p>A National Instruments DAQ (possibly multiple).</p></li>
 <li><p>Two Hamamatsu Orca (Flash or Fusion) cameras with different serial numbers for
 identification.</p></li>
-<li><p>A Sutter filter wheel controller connected via USB on port 19. This control two
+<li><p>A Sutter filter wheel controller connected via USB on port <code class="docutils literal notranslate"><span class="pre">COM19</span></code>. This control two
 filter wheels.</p></li>
-<li><p>A Physik Instrumente controller with access to 5 stages in <code class="docutils literal notranslate"><span class="pre">FRF</span></code> refrence mode
-(see PI’s documentation). This is identified by serial number.</p></li>
-<li><p>A Thorlabs stage (with a single axis). This is identified by a serial number.</p></li>
-<li><p>A Dynamixel zoom device connected via USB on port 18.</p></li>
+<li><p>A Physik Instrumente controller, identified by serial number, with access to 5 stages in <code class="docutils literal notranslate"><span class="pre">FRF</span></code> refrence mode
+(see PI’s documentation).</p></li>
+<li><p>A Thorlabs stage (with a single axis), identified by a serial number.</p></li>
+<li><p>A Dynamixel zoom device connected via USB on port <code class="docutils literal notranslate"><span class="pre">COM18</span></code>.</p></li>
 </ul>
 <p>Make sure that the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> specifies the hardware on your microscope.
 For example, if you wanted to remove the Thorlabs stage and replace the PI stage with
@@ -203,12 +212,12 @@ types of a single hardware.</p>
 <p>The type of the device is needed when deciding which Python object to instantiate
 on startup of the software (eg <code class="docutils literal notranslate"><span class="pre">type:</span> <span class="pre">ASI</span></code>). The other fields (eg <code class="docutils literal notranslate"><span class="pre">port:</span> <span class="pre">COM7</span></code>)
 change depending on the manufacturer’s API. They help the API communicate with the
-computer you are using, which in turn allows the navigate software to communicate
+computer you are using, which in turn allows the <strong>navigate</strong> software to communicate
 with the device.</p>
 </div>
 <p>Running the software with our current microscope setup would fail. It turns out our
-ASI stage only moves in the x, y, z and f axes. Later, you will see we need a way to
-handle theta axis. To address this, we will change our <code class="docutils literal notranslate"><span class="pre">stage</span></code> block of the YAML to
+ASI stage only moves in the <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">Z</span></code> and <code class="docutils literal notranslate"><span class="pre">F</span></code> axes. Later, you will see we need a way to
+handle <code class="docutils literal notranslate"><span class="pre">Theta</span></code> axis. To address this, we will change our <code class="docutils literal notranslate"><span class="pre">stage</span></code> block of the YAML to
 also load a <code class="docutils literal notranslate"><span class="pre">SyntheticStage</span></code>:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span>
@@ -226,6 +235,7 @@ the Synthetic typing will allow the software to run without it. Another example 
 be replacing the zoom type with <code class="docutils literal notranslate"><span class="pre">SyntheticZoom</span></code> in the instance your microscope does
 not use that hardware. Your system will still run as you expect.</p>
 </section>
+<hr class="docutils" />
 <section id="microscope-section">
 <h3>Microscope Section<a class="headerlink" href="#microscope-section" title="Permalink to this heading"></a></h3>
 <p>The second section of <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> contains the microscope configurations
@@ -254,6 +264,7 @@ synthetic.</p>
 Additional explanations of a few specific sections of the microscope configuration are
 below. Notably, the <code class="docutils literal notranslate"><span class="pre">zoom</span></code> section of the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> specifies effective
 pixel size.</p>
+<hr class="docutils" />
 <section id="stage-subsection">
 <h4>Stage Subsection<a class="headerlink" href="#stage-subsection" title="Permalink to this heading"></a></h4>
 <p>The stage section of the microscope 1) puts the stage control from the <code class="docutils literal notranslate"><span class="pre">hardware</span></code>
@@ -298,38 +309,40 @@ specifies joystick-controlled axes.</p>
 </div>
 <p>First we set the axes controlled by each piece of hardware and a mapping from the
 hardware’s API axes to our software’s axes. For example, the ASI <code class="docutils literal notranslate"><span class="pre">M</span></code> axis is mapped
-onto our software’s <code class="docutils literal notranslate"><span class="pre">x</span></code> axis below.</p>
+onto our software’s <code class="docutils literal notranslate"><span class="pre">X</span></code> axis below.</p>
 <p>As you may recall from the <a class="reference internal" href="#hardware-section"><span class="std std-ref">Hardware Section</span></a>, we needed to
-add the <code class="docutils literal notranslate"><span class="pre">SyntheticStage</span></code> to control <code class="docutils literal notranslate"><span class="pre">theta</span></code>. We now specify in the microscope that
-<code class="docutils literal notranslate"><span class="pre">theta</span></code> is controlled by the synthetic stage in the <code class="docutils literal notranslate"><span class="pre">hardware</span></code> section of
+add the <code class="docutils literal notranslate"><span class="pre">SyntheticStage</span></code> to control <code class="docutils literal notranslate"><span class="pre">Theta</span></code>. We now specify in the microscope that
+<code class="docutils literal notranslate"><span class="pre">Theta</span></code> is controlled by the synthetic stage in the <code class="docutils literal notranslate"><span class="pre">hardware</span></code> section of
 <code class="docutils literal notranslate"><span class="pre">microscope1</span></code>.</p>
-<p>Below this, we specify that only x, y and z axes may be controlled by a joystick and
+<p>Below this, we specify that only <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code> and <code class="docutils literal notranslate"><span class="pre">Z</span></code> axes may be controlled by a joystick and
 we set the stage bounds for each of the axes.</p>
 <p>Finally, we set the offset for each stage axis. This is an offset relative to other
 microscopes (e.g. <code class="docutils literal notranslate"><span class="pre">microscope2</span></code>) specified in <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code>. In this case,
 <code class="docutils literal notranslate"><span class="pre">microscope1</span></code> is the reference microscope. Additional microscopes may ask the stage
 to move to a different offset in order to observe the sample at the same position as
 <code class="docutils literal notranslate"><span class="pre">microscope1</span></code>.</p>
+<hr class="docutils" />
 <section id="stage-axes-definition">
 <h5>Stage Axes Definition<a class="headerlink" href="#stage-axes-definition" title="Permalink to this heading"></a></h5>
 <p>Many times, the coordinate system of the stage hardware do not agree with the optical
 definition of each axes identity. For example, many stages define their vertical
-dimension as <code class="docutils literal notranslate"><span class="pre">z</span></code>, whereas optically, we often define this axis as <code class="docutils literal notranslate"><span class="pre">x</span></code>. Thus, there is
+dimension as <code class="docutils literal notranslate"><span class="pre">Z</span></code>, whereas optically, we often define this axis as <code class="docutils literal notranslate"><span class="pre">X</span></code>. Thus, there is
 often a need to map the mechanical axes to the optical axes, and this is done with
-the axes mapping dictionary entry in the stage hardware section. By default, stage axes
-are read in as <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>, <code class="docutils literal notranslate"><span class="pre">theta</span></code>, <code class="docutils literal notranslate"><span class="pre">f</span></code>, where <code class="docutils literal notranslate"><span class="pre">theta</span></code> is rotation and f
+the <code class="docutils literal notranslate"><span class="pre">axes_mapping</span></code> dictionary entry in the stage hardware section. By default, stage axes
+are read in as <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">Z</span></code>, <code class="docutils literal notranslate"><span class="pre">Theta</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, where <code class="docutils literal notranslate"><span class="pre">Theta</span></code> is rotation and <code class="docutils literal notranslate"><span class="pre">F</span></code>
 is focus, but this can be changed by changing axes mapping.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">theta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
 <span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">r</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
-<p>If, on a certain microscope, the <code class="docutils literal notranslate"><span class="pre">z</span></code> stage axis corresponds to the optical y-axis,
+<p>If, on a certain microscope, the <code class="docutils literal notranslate"><span class="pre">Z</span></code> stage axis corresponds to the optical y-axis,
 and vice versa, you would then have to import the stages as following:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">theta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
 <span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">r</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
 </section>
+<hr class="docutils" />
 <section id="joystick-axes-definition">
 <h5>Joystick Axes Definition<a class="headerlink" href="#joystick-axes-definition" title="Permalink to this heading"></a></h5>
 <p>If you are using a joystick, it is possible to disable GUI control of the stage axes
@@ -338,15 +351,19 @@ appear in the stage field as following:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">joystick_axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
-<p>Note that these axes should agree with the optical axes. If, on the same microscope
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These axes should agree with the optical axes. If, on the same microscope
 as mentioned in the Stage Axes Definition section, the joystick were to control
-the optical y-axis corresponding to the stage z axis, you would have to put <code class="docutils literal notranslate"><span class="pre">y</span></code> in
+the optical y-axis corresponding to the stage z axis, you would have to put <code class="docutils literal notranslate"><span class="pre">Y</span></code> in
 the joystick axes brackets as following:</p>
+</div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">joystick_axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">y</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
 </section>
 </section>
+<hr class="docutils" />
 <section id="zoom-subsection">
 <h4>Zoom Subsection<a class="headerlink" href="#zoom-subsection" title="Permalink to this heading"></a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">zoom</span></code> section of <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> specifies control over microscope
@@ -410,6 +427,7 @@ For example,</p>
 </div>
 </section>
 </section>
+<hr class="docutils" />
 <section id="gui-section">
 <h3>GUI Section<a class="headerlink" href="#gui-section" title="Permalink to this heading"></a></h3>
 <p>The third and final section of the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file is the GUI parameters.</p>
@@ -454,21 +472,39 @@ For example,</p>
 </pre></div>
 </div>
 <p>The values in each field relate to GUI widgets.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">channels</span></code> section indicates GUI settings for the channel settings under
-<span class="guilabel">Channels</span>, <span class="guilabel">Channel Settings</span>. <cite>count</cite> specifies how many channels
-should be displayed. <cite>laser_power</cite>, <cite>exposure_time</cite> and <cite>interval_time</cite> are used to set
+<ul>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">channels</span></code> section indicates GUI settings for the channel settings under
+<span class="guilabel">Channels</span>, <span class="guilabel">Channel Settings</span>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>count</cite> specifies how many channels should be displayed.</p></li>
+<li><p><cite>laser_power</cite>, <cite>exposure_time</cite> and <cite>interval_time</cite> are used to set
 the minimum, maximum and step size values for <span class="guilabel">Power</span>,
-<span class="guilabel">Exp. Time (ms)</span> and <span class="guilabel">Interval</span>, respectively.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">stack_acquisition</span></code> section indicates GUI settings for the stack acquisition
-settings under <span class="guilabel">Channels</span>, <span class="guilabel">Stack Acquisition Settings (um)</span>.
-<cite>step_size</cite>, <cite>start_pos</cite> and <cite>end_pos</cite> are used to set the minimum, maximum and step
+<span class="guilabel">Exp. Time (ms)</span> and <span class="guilabel">Interval</span>, respectively.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">stack_acquisition</span></code> section indicates GUI settings for the stack acquisition
+settings under <span class="guilabel">Channels</span>, <span class="guilabel">Stack Acquisition Settings (um)</span>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>step_size</cite>, <cite>start_pos</cite> and <cite>end_pos</cite> are used to set the minimum, maximum and step
 size values for <span class="guilabel">Step Size</span>, <span class="guilabel">Start</span> and <span class="guilabel">End</span>,
-respectively.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">timepoint</span></code> section indicates GUI settings for the timepoint
-settings under <span class="guilabel">Channels</span>, <span class="guilabel">Timepoint Settings</span>.
-<cite>timepoints</cite> and <cite>stack_pause</cite> are used to set the minimum, maximum and step
+respectively.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">timepoint</span></code> section indicates GUI settings for the timepoint
+settings under <span class="guilabel">Channels</span>, <span class="guilabel">Timepoint Settings</span>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>timepoints</cite> and <cite>stack_pause</cite> are used to set the minimum, maximum and step
 size values for <span class="guilabel">Timepoints</span> and <span class="guilabel">Stack Pause (s)</span>,
-respectively.</p>
+respectively.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This section is still under development. The plan going forward is to have all
@@ -476,6 +512,7 @@ widgets be controlled in this manner.</p>
 </div>
 </section>
 </section>
+<hr class="docutils" />
 <section id="experiment-file">
 <h2>Experiment File<a class="headerlink" href="#experiment-file" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">experiment.yml</span></code> file stores information about the current state of the program.
@@ -483,6 +520,7 @@ This includes laser and camera parameters, saving options, z-stack settings and 
 more. This file does not need to be edited by the user. The program will update it
 automatically and save changes automatically on exit.</p>
 </section>
+<hr class="docutils" />
 <section id="waveform-constants-file">
 <h2>Waveform Constants File<a class="headerlink" href="#waveform-constants-file" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">waveform_constants.yml</span></code> file stores the waveform parameters that can be edited
@@ -490,17 +528,19 @@ by going to <span class="menuselection">Microscope Configuration ‣ Waveform Pa
 file does not need to be edited by the user. The program will update it automatically
 and save changes automatically on exit.</p>
 </section>
+<hr class="docutils" />
 <section id="waveform-templates-file">
 <h2>Waveform Templates File<a class="headerlink" href="#waveform-templates-file" title="Permalink to this heading"></a></h2>
 <p>The waveform templates file stores default behavior for the number of repeats for
 specific waveforms. This file only needs to be edited if the user wishes to introduce
 a new waveform behavior to the application.</p>
 </section>
+<hr class="docutils" />
 <section id="rest-api-configuration-file">
 <h2>Rest API Configuration File<a class="headerlink" href="#rest-api-configuration-file" title="Permalink to this heading"></a></h2>
 <p>The REST API configuration file specifies where the REST API should look to get
 and post data. This is only needed if you are using a plugin that requires the
-REST API, such as our communication with Ilastik.</p>
+REST API, such as our communication with <a class="reference external" href="https://www.ilastik.org">ilastik</a>.</p>
 </section>
 </section>
 

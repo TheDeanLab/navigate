@@ -64,6 +64,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -98,23 +99,31 @@ termed <a class="reference internal" href="contributing/feature_container.html#f
 in arbitrary orders to create custom acquisition protocols. <strong>navigate</strong> is designed to accommodate the needs of
 a diverse user base, from biologists with no programming experience to advanced
 technology developers.</p>
+<section id="project-philosophy">
+<h2><strong>Project Philosophy</strong><a class="headerlink" href="#project-philosophy" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Prioritize standard library imports for maximum stability, ahd minimize external dependencies.</p></li>
+<li><p>Abstraction layer to drive different camera types, etc.</p></li>
+<li><p>Plugin architecture for extensibility.</p></li>
+<li><p>Maximize productivity for biological users through robust graphical user interface-based workflows.</p></li>
+<li><p>Performant and responsive.</p></li>
+<li><p>Brutally obvious, well-documented, clean code organized in an industry standard Model-View-Controller architecture.</p></li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This project is under active development. See our <a class="reference external" href="https://github.com/TheDeanLab/navigate">GitHub repository for updates</a>.</p>
 </div>
-<section id="project-philosophy">
-<h2><strong>Project Philosophy</strong><a class="headerlink" href="#project-philosophy" title="Permalink to this heading"></a></h2>
-<ul class="simple">
-<li><p>Minimal number of dependencies. Prioritize standard library imports for maximum stability.</p></li>
-<li><p>Abstraction layer to drive different camera types, etc.</p></li>
-<li><p>Brutally obvious, well-documented, clean code.</p></li>
-<li><p>Maximize productivity for biological users.</p></li>
-<li><p>Performant and responsive.</p></li>
-<li><p>Model-View-Controller architecture.</p></li>
-</ul>
-</section>
-<section id="contents">
-<h2><strong>Contents</strong><a class="headerlink" href="#contents" title="Permalink to this heading"></a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Please be advised that while the Dean Lab has implemented several safeguards in the
+automation of hardware, including but not limited to stage limits, voltage minimums,
+and maximums, are more, there are inherent risks associated with the use of such
+automated systems. Despite these precautions, the complexity and nature of automated
+hardware can lead to unpredictable outcomes. Therefore, the Dean Lab and UT
+Southwestern expressly disclaim any responsibility for any damages, losses, or
+injuries that may arise from or be related to the use of <strong>navigate</strong>.
+Users should be aware of these risks and agree to utilize <strong>navigate</strong> at their own risk.</p>
+</div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
@@ -190,7 +199,7 @@ technology developers.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#introduction">Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#plugin-tempate">Plugin Tempate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#plugin-template">Plugin Template</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#plugin-configuration">Plugin Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#plugin-with-gui">Plugin With GUI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#plugin-with-device">Plugin With Device</a></li>
@@ -207,38 +216,22 @@ technology developers.</p>
 <li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.view.html">navigate.view</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
 </ul>
 </div>
-</section>
-<section id="outlook">
-<h2><strong>Outlook</strong><a class="headerlink" href="#outlook" title="Permalink to this heading"></a></h2>
-<p>In the future, <strong>navigate</strong> will be accompanied by a hardware platform, <strong>navigate-hardware</strong>, which streamlines
-the process of building advanced light-sheet microscopes through simplified optical, electronic, and mechanical
-designs. <strong>navigate-hardware</strong> will be open-source and modular, allowing users to easily
-customize their microscope to suit their needs. Supported variants will include
-<a class="reference external" href="https://elifesciences.org/articles/57681">Oblique Plane Microscopy</a>,
-<a class="reference external" href="https://www.nature.com/articles/s41592-019-0327-9">Field Synthesis</a>,
-and <a class="reference external" href="https://www.nature.com/articles/s41596-022-00706-6">Axially Swept Light-Sheet Microscopy</a>.</p>
 </section>
 <section id="authors">
 <h2><strong>Authors</strong><a class="headerlink" href="#authors" title="Permalink to this heading"></a></h2>
 <p><strong>Navigate</strong> includes key contributions from numerous individuals, both past and present,
-in <a class="reference external" href="https://www.dean-lab.org">The Dean Lab</a>. These include Zach Marin, Annie Wang,
-Dax Collison, Kevin Dean, Dushyant Mehra, Sampath Rapuri, Renil Gupta, Samir Mamtani,
-Andrew Jamieson, Andrew York, Nathaniel Thayer, and more.</p>
+in <a class="reference external" href="https://www.dean-lab.org">The Dean Lab</a>. Please see the accompanying manuscript for a full list of contributors.</p>
 </section>
 <section id="funding">
 <h2><strong>Funding</strong><a class="headerlink" href="#funding" title="Permalink to this heading"></a></h2>
 <p><strong>navigate</strong> is supported by the
-<a class="reference external" href="https://cellularsignaltransduction.org">UT Southwestern and University of North Carolina Center for Cell Signaling</a>, a Biomedical Technology Development and Dissemination
-Center funded by the NIH National Institute of General Medical Science (RM1GM145399).</p>
-</section>
-<section id="index-and-search">
-<h2><strong>Index and search</strong><a class="headerlink" href="#index-and-search" title="Permalink to this heading"></a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search</span></a></p></li>
-</ul>
+<a class="reference external" href="https://cellularsignaltransduction.org">UT Southwestern and University of North Carolina Center for Cell Signaling</a>, a Biomedical Technology Development and Dissemination (BTDD)
+Center funded by the NIH National Institute of General Medical Science (RM1GM145399), and
+the <a class="reference external" href="https://www.metastasis-imaging.org">Center for Metastatic Tumor Imaging</a> program, a
+Cellular Cancer Biology Imaging Research (CCBIR) program funded by the NIH National Cancer Institute (U54CA268072).</p>
 </section>
 </section>
 

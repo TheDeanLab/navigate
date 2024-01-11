@@ -77,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -106,12 +107,12 @@
              
   <section id="write-a-custom-plugin-expert">
 <h1>Write a Custom Plugin (Expert)<a class="headerlink" href="#write-a-custom-plugin-expert" title="Permalink to this heading"></a></h1>
-<p><strong>navigate’s</strong> <a class="reference internal" href="plugin/plugin_home.html"><span class="doc">plugin system</span></a> enables users to
+<p><strong>navigate</strong>’s <a class="reference internal" href="plugin/plugin_home.html"><span class="doc">plugin system</span></a> enables users to
 easily incorporate new devices and integrate new features and acquisition modes. In this
-guide, we will add a new device, titled <cite>custom_device</cite>), and a dedicated GUI window to control it.
-This hypothetical custom device is capable of moving a certain distance,
-rotating a specified number of degrees, and applying a force to halt its movement. Like <strong>navigate</strong>,
-plugins are implemented using a Model-View-Controller architecture. The model
+guide, we will add a new device, titled <cite>custom_device</cite>, and a dedicated GUI window to control it.
+This hypothetical <cite>custom_device</cite> is capable of moving a certain distance,
+rotating a specified number of degrees, and applying a force to halt its movement.</p>
+<p>Like <strong>navigate</strong>, plugins are implemented using a Model-View-Controller architecture. The model
 contains the device-specific code, the view contains the GUI code, and the
 controller contains the code that communicates between the model and the view.</p>
 <hr class="docutils" />
@@ -185,11 +186,11 @@ controller contains the code that communicates between the model and the view.</
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>All devices are accompanied by synthetic versions, which enable the software to run without the
-actual hardware connected. Thus, in a manner that is similar to the <cite>CustomDevice</cite> class, we
+<li><p>All devices are accompanied by synthetic versions, which enables the software to run without the
+hardware connected. Thus, in a manner that is similar to the <cite>CustomDevice</cite> class, we
 edit the code in <cite>synthetic_device.py</cite>, albeit without any calls to the device itself:</p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SyntheticDevice</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SyntheticCustomDevice</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; A Synthetic Device Class &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialize the Synthetic Device</span>
@@ -281,6 +282,24 @@ edit the code in <cite>synthetic_device.py</cite>, albeit without any calls to t
     <span class="k">return</span> <span class="n">DummyDeviceConnection</span><span class="p">()</span>
 
 <span class="k">def</span> <span class="nf">start_device</span><span class="p">(</span><span class="n">microscope_name</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="n">is_synthetic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Start the Custom Device</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    microscope_name : str</span>
+<span class="sd">        The name of the microscope</span>
+<span class="sd">    device_connection : object</span>
+<span class="sd">        The device connection object</span>
+<span class="sd">    configuration : dict</span>
+<span class="sd">        The configuration for the Custom Device</span>
+<span class="sd">    is_synthetic : bool</span>
+<span class="sd">        Whether the device is synthetic or not. Default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    object</span>
+<span class="sd">        The Custom Device object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">is_synthetic</span><span class="p">:</span>
         <span class="n">device_type</span> <span class="o">=</span> <span class="s2">&quot;synthetic&quot;</span>
     <span class="k">else</span><span class="p">:</span>
@@ -307,6 +326,13 @@ edit the code in <cite>synthetic_device.py</cite>, albeit without any calls to t
     <span class="k">else</span><span class="p">:</span>
         <span class="n">device_not_found</span><span class="p">(</span><span class="n">microscope_name</span><span class="p">,</span> <span class="n">device_type</span><span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>navigate</strong> establishes communication with each device independently, and
+passes the instance of that device to class that controls it (e.g., in this case, the
+<cite>CustomDevice</cite> class). This allows <strong>navigate</strong> to be initialized with multiple imaging configurations,
+some of which may share devices.</p>
 </div>
 </section>
 <hr class="docutils" />
@@ -387,18 +413,29 @@ edit the code in <cite>synthetic_device.py</cite>, albeit without any calls to t
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p><strong>navigate</strong> comes equipped with a large number of validated widgets, which prevent users from entering invalid values. It is highly recommended that you use these, which include the following:</p></li>
-<li><p>The <cite>LabelInput</cite> widget conveniently combines a label and an input widget into a single object. It is used to create the <cite>step_size</cite> and <cite>angle</cite> widgets in the code below.</p></li>
-<li><p>The <cite>LabelInput</cite> widget can accept multiple types of <cite>input_class</cite> objects, which can include standard tkinter widgets (e.g., spinbox, entry, etc.) or custom widgets. In this example, we use the <cite>ttk.Entry</cite> widget.
-Preferentially, you would use one of our validated widgets, which include a <cite>ValidatedSpinbox</cite>, <cite>ValidatedEntry</cite>, <cite>ValidatedCombobox</cite>, and <cite>ValidatedMixin</cite>.</p></li>
-<li><p>Further documentation can be found in API Reference</p></li>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>navigate</strong> comes equipped with a large number of validated widgets,
+which prevent users from entering invalid values that can crash the program or result in
+undesirable outcomes. It is highly recommended that you use these, which include the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The <cite>LabelInput</cite> widget conveniently combines a label and an input widget into a single object.
+It is used to create the <cite>step_size</cite> and <cite>angle</cite> widgets in the code above.</p></li>
+<li><p>The <cite>LabelInput</cite> widget can accept multiple types of <cite>input_class</cite> objects,
+which can include standard tkinter widgets (e.g., spinbox, entry, etc.) or custom
+widgets. In this example, we use the <cite>ttk.Entry</cite> widget.</p></li>
+<li><p>Other examples of validated widgets include a <cite>ValidatedSpinbox</cite>, <cite>ValidatedEntry</cite>,
+<cite>ValidatedCombobox</cite>, and <cite>ValidatedMixin</cite>.</p></li>
+<li><p>Please see the <a class="reference internal" href="_autosummary/navigate.view.custom_widgets.html#module-navigate.view.custom_widgets" title="navigate.view.custom_widgets"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">navigate.view.custom_widgets</span></code></a> module for more details.</p></li>
 </ul>
+</div></blockquote>
+</div>
 </section>
 <hr class="docutils" />
 <section id="controller-code">
 <h2>Controller Code<a class="headerlink" href="#controller-code" title="Permalink to this heading"></a></h2>
-<p>Now, let’s build a controller. Navigate to the ‘controller’ folder, rename
+<p>Now, let’s build a controller. Open the ‘controller’ folder, rename
 ‘plugin_name_controller.py’ to ‘custom_device_controller.py’, and edit the code
 as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Standard library imports</span>
@@ -473,28 +510,37 @@ as follows:</p>
 </div>
 <ul class="simple">
 <li><p>In each case above, the sub-controller for the <cite>custom-device</cite> establishes what actions should take
-place once a button in the view is clicked. In this case, the <cite>move_device</cite>, <cite>rotate_device</cite>, and
+place once a button in the view is clicked. In this case, the methods <cite>move_device</cite>, <cite>rotate_device</cite>, and
 <cite>stop_device</cite>.</p></li>
-<li><p>The sub-controller then passes the command to the parent controller, which is the main controller
-for the software. The parent controller then passes the command to the model using an event queue.</p></li>
-<li><p>The model then executes the command, and any updates to the controller from the model are relayed
+<li><dl class="simple">
+<dt>This triggers a sequence of events that include:</dt><dd><ul>
+<li><p>The sub-controller passes the command to the parent controller, which is the main controller
+for the software.</p></li>
+<li><p>The parent controller passes the command to the model, which is operating in its own sub-process,
+using an event queue. This eliminates the need for the controller to know anything about the model
+and prevents race conditions.</p></li>
+<li><p>The model then executes command, and any updates to the controller from the model are relayed
 using another event queue.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
 </ul>
 </section>
 <hr class="docutils" />
 <section id="plugin-configuration">
 <h2>Plugin Configuration<a class="headerlink" href="#plugin-configuration" title="Permalink to this heading"></a></h2>
 <ul class="simple">
-<li><p>The next is to update the ‘plugin_config.yml’ file as follows:</p></li>
+<li><p>Next, update the ‘plugin_config.yml’ file as follows:</p></li>
 </ul>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>name: Custom Device
-view: Popup
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Custom Device</span>
+<span class="nt">view</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Popup</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Remove the folder <cite>./model/features</cite>, the file <cite>feature_list.py</cite>, and</p></li>
+<li><p>Remove the folder <cite>./model/features</cite>, the file <cite>feature_list.py</cite>, and
+the file <cite>plugin_acquisition_mode.py</cite>. The plugin folder structure is as follows:</p></li>
 </ul>
-<p>the file <cite>plugin_acquisition_mode.py</cite>. The plugin folder structure is as follows:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>custom_device/
     ├── controller/
     │   └── custom_device_controller.py
@@ -512,32 +558,35 @@ view: Popup
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Install this plugin. There are two ways to install a plugin. You could install
-a plugin by putting the whole plugin folder directly into “navigate/plugins/”. In this example,
-put “custom_device” folder and all its contents into “navigate/plugins”. Another way, you could
-install this plugin through the menu <span class="menuselection">Plugins ‣ Install Plugin</span>, select the plugin
-folder. Then the plugin is ready to use. For this plugin, you could specify a CustomDevice in the</p></li>
+<li><dl class="simple">
+<dt>Install the plugin using one of two methods:</dt><dd><ul>
+<li><p>You can install a plugin by putting the whole plugin folder directly into <code class="docutils literal notranslate"><span class="pre">navigate/plugins/</span></code>.
+In this example, put “custom_device” folder and all its contents into “navigate/plugins”.</p></li>
+<li><p>You can install this plugin through the menu <span class="menuselection">Plugins ‣ Install Plugin</span> by selecting the plugin
+folder.</p></li>
 </ul>
-<blockquote>
-<div><p><cite>configuration.yaml</cite> as follows:</p>
-</div></blockquote>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>microscopes:
-    Mesoscale:
-        daq:
-            hardware:
-                name: daq
-                type: NI
-        ...
-        custom_device:
-            hardware:
-                type: CustomDevice
-        ...
+</dd>
+</dl>
+</li>
+<li><p>The plugin is ready to use. For this plugin, you can now specify a CustomDevice in the
+<cite>configuration.yaml</cite> as follows:</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">microscope_1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">daq</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daq</span>
+<span class="w">                </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">        </span><span class="nt">custom_device</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CustomDevice</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>The custom device will be loaded when you launch Navigate, and you can now control this device</p></li>
+<li><p>The <cite>custom_device</cite> will be loaded when you launch <strong>navigate</strong>, and you can now control this device through the GUI now.</p></li>
 </ul>
-<p>through the GUI now.</p>
 </section>
 </section>
 

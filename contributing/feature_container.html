@@ -89,6 +89,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -117,18 +118,18 @@
              
   <section id="feature-container">
 <span id="features"></span><h1>Feature Container<a class="headerlink" href="#feature-container" title="Permalink to this heading"></a></h1>
-<p>The navigate <strong>feature container</strong> allows for reconfigurable acquisition and
-analysis. The feature container runs a tree of <strong>features</strong>, where each
-feature may perform a <em>signal</em> operation, where it modifies the state of
-microscope hardware, a <em>data</em> operation, where it performs an analysis on
+<p><strong>navigate</strong> includes a <strong>feature container</strong> that enables reconfigurable acquisition and
+analysis workflows. The feature container runs a tree of <strong>features</strong>, where each
+feature may perform a <em>signal</em> operation, which modifies the state of the
+microscope’s hardware, or a <em>data</em> operation, where it performs an analysis on
 acquired image data, or both.</p>
 <p>Once a feature is executed, any features dependent on this feature’s execution
 will execute (for example, move the stage, then snap a picture). Following
 this, the next set of features in sequence will be executed.</p>
-<p>Examples of some existing features include
-<code class="docutils literal notranslate"><span class="pre">navigate.model.features.common_features.ZStackAcquisition</span></code>, which acquires a
+<p>Examples of some existing features include <code class="docutils literal notranslate"><span class="pre">navigate.model.features.common_features.ZStackAcquisition</span></code>, which acquires a
 z-stack, and <code class="docutils literal notranslate"><span class="pre">navigate.model.features.autofocus.Autofocus</span></code>, which finds the
 ideal plane of focus of a sample using a Discrete Cosine Transform.</p>
+<hr class="docutils" />
 <section id="currently-implemented-features">
 <h2>Currently Implemented Features<a class="headerlink" href="#currently-implemented-features" title="Permalink to this heading"></a></h2>
 <div class="toctree-wrapper compound">
@@ -191,6 +192,7 @@ ideal plane of focus of a sample using a Discrete Cosine Transform.</p>
 </li>
 </ul>
 </div>
+<hr class="docutils" />
 </section>
 <section id="feature-objects">
 <span id="id1"></span><h2>Feature Objects<a class="headerlink" href="#feature-objects" title="Permalink to this heading"></a></h2>
@@ -220,7 +222,7 @@ dictionaries that can contain <code class="docutils literal notranslate"><span c
 <li><p><code class="docutils literal notranslate"><span class="pre">init</span></code> entries dictate pre-processing steps that must be run before the
 main function of the feature starts.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">main</span></code> entries dictate the primary operation of the feature, and are run once per
-acqusition step. They return <code class="docutils literal notranslate"><span class="pre">True</span></code> if the acquistion should proceed and <code class="docutils literal notranslate"><span class="pre">False</span></code>
+acqusition step. They return <code class="docutils literal notranslate"><span class="pre">True</span></code> if the acquisition should proceed and <code class="docutils literal notranslate"><span class="pre">False</span></code>
 if the acquistion should be ended.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">end</span></code> entries are run once per main function returning <code class="docutils literal notranslate"><span class="pre">True</span></code>. They check if the
 acquisition should end, if we are at any boundary points of the <code class="docutils literal notranslate"><span class="pre">main</span></code> function
@@ -237,17 +239,18 @@ to true if the signal node waits on hardware (e.g. waits for a stage to confirm
 it has indeed moved) before proceeding.</p>
 <p>Each of the functions that are the value entries in <code class="docutils literal notranslate"><span class="pre">self.config_table</span></code>
 dictionaries are methods of the feature object.</p>
+<hr class="docutils" />
 <section id="creating-a-custom-feature-object">
 <h3>Creating A Custom Feature Object<a class="headerlink" href="#creating-a-custom-feature-object" title="Permalink to this heading"></a></h3>
 <p>Each feature object is defined as a class. Creating a new feature is the same as
 creating any Python class, but with a few requirements. The first parameter of the
 <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function (after <code class="docutils literal notranslate"><span class="pre">self</span></code>) must be <code class="docutils literal notranslate"><span class="pre">model</span></code>, which gives the feature
-object full access to the navigate model. All the other parameters are keyword
-arguments and must have default values. The init function should always have a
+object full access to the <strong>navigate</strong> model. All the other parameters are keyword
+arguments and must have default values. The <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function should always have a
 <code class="docutils literal notranslate"><span class="pre">config_table</span></code> attribute (see <a class="reference internal" href="#feature-objects"><span class="std std-ref">above</span></a> for a description of
 the <code class="docutils literal notranslate"><span class="pre">config_table</span></code>).</p>
 <p>In the example below, we will create a custom feature that moves to a specified
-position in navigate’s multi-position table and calculates the sharpness of the image
+position in <strong>navigate</strong>’s multi-position table and calculates the sharpness of the image
 at this position using the Normalized DCT Shannon Entropy metric. An example
 <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function for our <code class="docutils literal notranslate"><span class="pre">FeatureExample</span></code> class is below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.analysis.image_contrast</span> <span class="kn">import</span> <span class="n">fast_normalized_dct_shannon_entropy</span>
@@ -350,7 +353,7 @@ whatever task we want to wait for before resuming image acqusition.</p>
 </section>
 <section id="custom-feature-lists">
 <h2>Custom Feature Lists<a class="headerlink" href="#custom-feature-lists" title="Permalink to this heading"></a></h2>
-<p>The navigate software allows you to chain feature objects into lists to build
+<p>The <strong>navigate</strong> software allows you to chain feature objects into lists to build
 acquisition workflows.</p>
 <section id="creating-a-custom-feature-list-in-python">
 <h3>Creating a Custom Feature List in Python<a class="headerlink" href="#creating-a-custom-feature-list-in-python" title="Permalink to this heading"></a></h3>
@@ -391,7 +394,7 @@ This makes for more readable code.</p>
 per selected channel.</p>
 </div></blockquote>
 <ol class="arabic">
-<li><p>Now, open navigate.</p></li>
+<li><p>Now, open <strong>navigate</strong>.</p></li>
 <li><p>Go to the <span class="guilabel">Features</span> menu.</p>
 <img alt="../_images/step_1.png" src="../_images/step_1.png" />
 </li>
@@ -400,7 +403,7 @@ per selected channel.</p>
 Python file containing your customized feature list function.</p>
 <img alt="../_images/step_2.png" src="../_images/step_2.png" />
 </li>
-<li><p>Choose the Python file containing your customized feature list function. navigate
+<li><p>Choose the Python file containing your customized feature list function. <strong>navigate</strong>
 will load the specified feature list, making it available for use in your
 experiments and analyses. It will appear at the bottom of the <span class="guilabel">Features</span>
 menu.</p></li>

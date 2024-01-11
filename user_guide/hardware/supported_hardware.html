@@ -85,6 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -125,6 +126,7 @@ of the analog and digital signals are delivered in parallel. This provides
 deterministic behavior on a per-frame basis, which is necessary for proper acquisition of light-sheet data.
 It does not however provide us with deterministic behavior between image
 frames, and some jitter in timing is anticipated.</p>
+<hr class="docutils" />
 <section id="national-instruments-ni">
 <span id="hardware-ni"></span><h3>National Instruments (NI)<a class="headerlink" href="#national-instruments-ni" title="Permalink to this heading"></a></h3>
 <p>In principle, most NI-based data acquisition cards should work with the software, so long
@@ -814,7 +816,7 @@ for manual, user-driven positioning.</p>
 <p>We sometimes control position via a galvo or piezo with no software API.
 In this case, we treat a standard galvo mirror or piezo as a stage axis. We control the
 “stage” via voltages sent to the galvo or piezo. The <code class="docutils literal notranslate"><span class="pre">volts_per_micron</span></code> setting
-allows the user to pass an equation that converts position in microns <code class="docutils literal notranslate"><span class="pre">x</span></code>, which is
+allows the user to pass an equation that converts position in microns <code class="docutils literal notranslate"><span class="pre">X</span></code>, which is
 passed from the software stage controls, to a voltage. Note that we use
 <code class="docutils literal notranslate"><span class="pre">GalvoNIStage</span></code> whether or not the device is a galvo or a piezo since the logic is
 identical. The voltage signal is delivered via the data acquisition card specified in the

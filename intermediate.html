@@ -70,6 +70,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -99,9 +100,12 @@
              
   <section id="write-a-smart-acquisition-routine-intermediate">
 <h1>Write A Smart Acquisition Routine (Intermediate)<a class="headerlink" href="#write-a-smart-acquisition-routine-intermediate" title="Permalink to this heading"></a></h1>
-<p>navigate’s <a class="reference internal" href="contributing/feature_container.html"><span class="doc">feature container</span></a> enables us to
+<p><strong>navigate</strong>’s <a class="reference internal" href="contributing/feature_container.html"><span class="doc">feature container</span></a> enables us to
 write acquisition routines on the fly by chaining existing
-<a class="reference internal" href="user_guide/features.html"><span class="doc">features</span></a> into lists. In this guide, we will use features
+<a class="reference internal" href="user_guide/features.html"><span class="doc">features</span></a> into lists. Please see
+<a class="reference internal" href="contributing/feature_container.html#currently-implemented-features"><span class="std std-ref">Currently Implemented Features</span></a>
+for a complete list of features, or build additional features as a <a class="reference internal" href="plugin/plugin_home.html"><span class="doc">plugin</span></a>.</p>
+<p>In this guide, we will use features
 to write a routine that scans through an imaging chamber and only takes images where
 it finds a sample.</p>
 <p>Suppose there are two positions listed in the
@@ -147,20 +151,23 @@ in the multiposition table.</p>
 <li><p><span class="guilabel">planes</span> indicates how many planes of the z-stack
 this feature should check for tissue.</p></li>
 <li><p><span class="guilabel">percentage</span> indicates what percent of the total image must contain tissue
-for this feature to return <code class="docutils literal notranslate"><span class="pre">True</span></code> that tissue was detected.</p></li>
+for this feature to return <code class="docutils literal notranslate"><span class="pre">true</span></code> that tissue was detected. 1 indicates that the entire
+image contains tissue, 0.5 indicates that half of the image contains tissue, and so on.</p></li>
 <li><p><span class="guilabel">detect_func</span> is one of the tissue detection functions in
 <a class="reference internal" href="_autosummary/navigate.model.features.remove_empty_tiles.html"><span class="doc">remove_empty_tiles</span></a>.
 If this is set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, it defaults to <code class="docutils literal notranslate"><span class="pre">detect_tissue()</span></code>, which states that
 tissue is present if signal is above the Otsu threshold of the stack of images
 acquired.</p></li>
 </ul>
+<p>In this example, if any plane meets the desired threshold, the feature will return <code class="docutils literal notranslate"><span class="pre">true</span></code> and
+it will be acquired. If no plane meets the desired threshold, the feature will return <code class="docutils literal notranslate"><span class="pre">false</span></code></p>
 <p>Now, right-click <code class="docutils literal notranslate"><span class="pre">DetectTissueInStackAndReturn</span></code> and press
 <span class="guilabel">Insert After</span>. Click the new tile and change it to
 <code class="docutils literal notranslate"><span class="pre">LoopByCount</span></code>.</p>
 <img alt="_images/feature_gui_7.png" src="_images/feature_gui_7.png" />
 <p>We want to iterate over all of the positions in the multi-position table, so we will
 set <code class="docutils literal notranslate"><span class="pre">steps</span></code> to <code class="docutils literal notranslate"><span class="pre">experiment.MicroscopeState.multiposition_count</span></code>.</p>
-<p>Notice that the acquistion protocol does not appear to loop, but rather still moves
+<p>Notice that the acquisition protocol does not appear to loop, but rather still moves
 in a sequence. This is because all of the tiles are still in the sequence brackets
 <code class="docutils literal notranslate"><span class="pre">[]</span></code>. We can now enclose the section of the protocol we want to loop in parentheses
 <code class="docutils literal notranslate"><span class="pre">()</span></code> and press <span class="guilabel">Preview</span> to see the update.</p>
@@ -169,10 +176,19 @@ in a sequence. This is because all of the tiles are still in the sequence bracke
 this channel visit every position in the multiposition table, and detect if there is
 tissue. However, we do no yet make any decisions of what to do if tissue is found.
 To do this, we will convert <code class="docutils literal notranslate"><span class="pre">DetectTissueInStackAndReturn</span></code> into a decision node.</p>
-<p>To do this, we add <code class="docutils literal notranslate"><span class="pre">&quot;true&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;false&quot;</span></code> options within the feature braces:
-<code class="docutils literal notranslate"><span class="pre">{&quot;name&quot;:</span> <span class="pre">DetectTissueInStackAndReturn,</span> <span class="pre">&quot;args&quot;:</span> <span class="pre">(1,</span> <span class="pre">0.5,</span> <span class="pre">None),</span> <span class="pre">&quot;true&quot;:</span> <span class="pre">[{&quot;name&quot;:</span> <span class="pre">ZStackAcquisition,&quot;args&quot;:</span> <span class="pre">(False,False,&quot;z-stack&quot;,),}],</span> <span class="pre">&quot;false&quot;:</span> <span class="pre">&quot;continue&quot;,}</span></code>.
-Our <code class="docutils literal notranslate"><span class="pre">&quot;true&quot;</span></code> argument tells the software what to do if tissue is detected. In this
-case, we take a z-stack at the positions where tissue is found. The <code class="docutils literal notranslate"><span class="pre">&quot;false&quot;</span></code>
+<p>To do this, we add <code class="docutils literal notranslate"><span class="pre">true</span></code> and <code class="docutils literal notranslate"><span class="pre">false</span></code> options within the feature braces:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">DetectTissueInStackAndReturn</span><span class="p">,</span>
+ <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+ <span class="s2">&quot;True&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+         <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">ZStackAcquisition</span><span class="p">,</span>
+         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">false</span><span class="p">,</span> <span class="n">false</span><span class="p">,</span> <span class="s2">&quot;z-stack&quot;</span><span class="p">,),}],</span>
+         <span class="s2">&quot;False&quot;</span><span class="p">:</span> <span class="s2">&quot;continue&quot;</span><span class="p">,</span>
+         <span class="p">}</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Our <code class="docutils literal notranslate"><span class="pre">true</span></code> argument tells the software what to do if tissue is detected. In this
+case, we take a z-stack at the positions where tissue is found. The <code class="docutils literal notranslate"><span class="pre">false</span></code>
 argument tells the software how to proceed if no tissue is found. In this case, the
 <code class="docutils literal notranslate"><span class="pre">&quot;continue&quot;</span></code> option tells the software to keep moving through the loop to the next
 position in the multi-position table. Press <span class="guilabel">Preview</span> to see the update.</p>
@@ -181,12 +197,12 @@ position in the multi-position table. Press <span class="guilabel">Preview</span
 node. Click on it to access the decision node GUI.</p>
 <img alt="_images/feature_gui_10.png" src="_images/feature_gui_10.png" />
 <p>This contains the same settings for <code class="docutils literal notranslate"><span class="pre">DetectTissueInStackAndReturn</span></code> we saw before, but
-now also features GUI editing windows for the results of <code class="docutils literal notranslate"><span class="pre">&quot;true&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;false&quot;</span></code>
+now also features GUI editing windows for the results of <code class="docutils literal notranslate"><span class="pre">true</span></code> and <code class="docutils literal notranslate"><span class="pre">false</span></code>
 decisions arising from this node.</p>
 <p>Close the node window and press <span class="guilabel">Add</span> in the “Add New Feature List” window.
 This feature is now available under <span class="menuselection">Features ‣ TestFeature</span> and
 can be run in “Customized”
-<a class="reference internal" href="user_guide/gui_walkthrough.html#acquisition-bar"><span class="std std-ref">acquistion mode</span></a>.</p>
+<a class="reference internal" href="user_guide/gui_walkthrough.html#acquisition-bar"><span class="std std-ref">acquisition mode</span></a>.</p>
 <p>Select “Customized” acquisition mode, select <span class="menuselection">Features ‣ TestFeature</span>,
 and press <span class="guilabel">Acquire</span>. For the positions shown at the start of this guide, the
 software will go to the first position in the multi-position table, decide there is
@@ -194,10 +210,7 @@ tissue present, and take a z-stack. It will then go to the second position in th
 multi-position table, find there is no tissue, and decide not to take a z-stack. It
 will then exit the loop as no more positions are available in the multi-position table.</p>
 <p>Now you can use this feature or build another smart acquisition routine suited to your
-microscope’s needs. See
-<a class="reference internal" href="contributing/feature_container.html#currently-implemented-features"><span class="std std-ref">Currently Implemented Features</span></a>
-for a complete list of features, or build additional features in a
-<a class="reference internal" href="plugin/plugin_home.html"><span class="doc">plugin</span></a>.</p>
+microscope’s needs.</p>
 </section>
 
 

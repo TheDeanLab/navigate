@@ -62,7 +62,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Imaging on a mesoSPIM BT</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#setting-the-beam-parameters">Setting the beam parameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#loading-and-finding-the-sample">Loading and finding the sample</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#imaging-a-z-stack">Imaging a Z-Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imaging-a-z-stack">Imaging a z-stack</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tiling-a-sample-larger-than-the-field-of-view">Tiling a sample larger than the field of view</a></li>
 </ul>
 </li>
@@ -77,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -107,6 +108,7 @@
   <section id="imaging-on-a-mesospim-bt">
 <h1>Imaging on a mesoSPIM BT<a class="headerlink" href="#imaging-on-a-mesospim-bt" title="Permalink to this heading"></a></h1>
 <p>This is a case study in using the software to image with a <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2023.06.16.545256v1">mesoSPIM BT microscope</a>.</p>
+<hr class="docutils" />
 <section id="setting-the-beam-parameters">
 <h2>Setting the beam parameters<a class="headerlink" href="#setting-the-beam-parameters" title="Permalink to this heading"></a></h2>
 <p>Make sure the imaging chamber is empty or, if a sample is mounted, the sample is not in
@@ -123,7 +125,17 @@ option.</p>
 named <span class="guilabel">Waveform Parameter Settings</span> will appear. Make sure the
 <span class="guilabel">Mode</span> matches “mesoSPIM BT” and the <span class="guilabel">Magnification</span> matches the
 magnification of the objective you are using.</p></li>
-<li><p><span class="guilabel">Galvo 0</span> digitally sweeps the beam across the field of view. To align the
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <span class="guilabel">Mode</span> is the name of the microscope as defined in the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file.
+Likewise, the <span class="guilabel">Magnification</span> is the magnification(s) for that microscope as defined in the
+<code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file.</p>
+<p>The mesoSPIM BT largely operates at a fixed magnification. However, the original
+mesoSPIM used a variable magnification research grade macro zoom microscope.</p>
+</div>
+<ol class="arabic">
+<li><p><span class="guilabel">Galvo 0</span> digitally sweeps the beam across the field of view in the <code class="docutils literal notranslate"><span class="pre">X</span></code> direction. To align the
 axially-swept light sheet parameters, set the <span class="guilabel">Galvo 0</span>
 <span class="guilabel">Amplitude</span> to <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
 <img alt="../../_images/meso_beam_2.png" src="../../_images/meso_beam_2.png" />
@@ -144,7 +156,7 @@ crosshairs, which indicate the center of the field of view.</p>
 <img alt="../../_images/meso_beam_5.png" src="../../_images/meso_beam_5.png" />
 <img alt="../../_images/meso_beam_6.png" src="../../_images/meso_beam_6.png" />
 </li>
-<li><p>Go to <span class="guilabel">Camera Settings</span> and ensure that “Light-Sheet” is selected under
+<li><p>Go to <span class="guilabel">Camera Settings</span> and ensure that <span class="guilabel">Light-Sheet</span> is selected under
 <span class="guilabel">Sensor Mode</span>. Slowly increase the wavelength’s <span class="guilabel">Amplitude</span>
 until the beam becomes a straight line across the screen. If the beam does not
 become straighter, try changing the camera’s
@@ -162,8 +174,17 @@ beam a bit thinner.</p>
 <img alt="../../_images/meso_beam_10.png" src="../../_images/meso_beam_10.png" />
 <img alt="../../_images/meso_beam_11.png" src="../../_images/meso_beam_11.png" />
 </li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Proper alignment of the ASLM scan is critical to the quality of the image. We recommend
+iterating the <span class="guilabel">Amplitude</span>, <span class="guilabel">Offset</span>, and <span class="guilabel">F</span> until the beam
+is uniformly as thin as possible throughout the entire field of view.</p>
+</div>
+<ol class="arabic">
 <li><p>Slowly increase <span class="guilabel">Galvo 0</span>’s <span class="guilabel">Amplitude</span> until the entire field
-of view is just covered by the swept beam.</p>
+of view is just covered by the digitally scanned beam. Over-scanning the beam will
+result in a loss of light, but also provide a more uniform illumination for tiling applications.</p>
 <img alt="../../_images/meso_beam_12.png" src="../../_images/meso_beam_12.png" />
 <img alt="../../_images/meso_beam_13.png" src="../../_images/meso_beam_13.png" />
 <img alt="../../_images/meso_beam_14.png" src="../../_images/meso_beam_14.png" />
@@ -173,6 +194,7 @@ of view is just covered by the swept beam.</p>
 <li><p>Under the <span class="guilabel">Channels</span> tab, restore the filter to its non-empty position.</p></li>
 </ol>
 </section>
+<hr class="docutils" />
 <section id="loading-and-finding-the-sample">
 <h2>Loading and finding the sample<a class="headerlink" href="#loading-and-finding-the-sample" title="Permalink to this heading"></a></h2>
 <ol class="arabic">
@@ -183,11 +205,11 @@ Press <span class="guilabel">Acquire</span>. This will launch a live acquisition
 <span class="guilabel">Stage Control</span> tab until the sample comes into view.</p>
 <img alt="../../_images/find_sample.png" src="../../_images/find_sample.png" />
 </li>
-<li><p>Focus on the sample using the focus axis. Optionally, use Autofocus by going to
+<li><p>Focus on the sample using the <code class="docutils literal notranslate"><span class="pre">F</span></code> axis. Optionally, use Autofocus by going to
 <span class="menuselection">Autofocus ‣ Autofocus Settings</span>. Press <span class="guilabel">Autofocus</span>.
 Ensure there is a clear peak in the resulting plot.</p>
 <img alt="../../_images/autofocus_settings.png" src="../../_images/autofocus_settings.png" />
-<p>If there is not, the autofocusing routine did not work. Try increasing the laser
+<p>If there is not a clear peak, the autofocusing routine did not work. Try increasing the laser
 power and/or bringing the sample more into focus manually. If it did work, the
 sample should now be in focus.</p>
 <img alt="../../_images/autofocus_image.png" src="../../_images/autofocus_image.png" />
@@ -200,14 +222,15 @@ outside the range of your search. Run autofocus again to achieve convergence.</p
 </div>
 </li>
 </ol>
+<hr class="docutils" />
 </section>
 <section id="imaging-a-z-stack">
-<span id="z-stack"></span><h2>Imaging a Z-Stack<a class="headerlink" href="#imaging-a-z-stack" title="Permalink to this heading"></a></h2>
+<span id="z-stack"></span><h2>Imaging a z-stack<a class="headerlink" href="#imaging-a-z-stack" title="Permalink to this heading"></a></h2>
 <ol class="arabic">
 <li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button.
 Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
 <li><p>Using the <span class="guilabel">Stage Control</span>, go to a shallow Z-position in the sample. Under
-the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquistion Settings (um)</span> press
+the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquisition Settings (um)</span> press
 <span class="guilabel">Set Start Pos/Foc</span>.</p>
 <img alt="../../_images/set_start_pos.png" src="../../_images/set_start_pos.png" />
 </li>
@@ -222,16 +245,17 @@ Press <span class="guilabel">Acquire Data</span>.</p>
 </li>
 </ol>
 </section>
+<hr class="docutils" />
 <section id="tiling-a-sample-larger-than-the-field-of-view">
 <h2>Tiling a sample larger than the field of view<a class="headerlink" href="#tiling-a-sample-larger-than-the-field-of-view" title="Permalink to this heading"></a></h2>
 <p>This assumes you have already set the start and end positions in
-<span class="guilabel">Stack Acquistion Settings (um)</span> (see <a class="reference internal" href="#z-stack"><span class="std std-ref">Imaging a Z-Stack</span></a>).</p>
+<span class="guilabel">Stack Acquisition Settings (um)</span> (see <a class="reference internal" href="#z-stack"><span class="std std-ref">Imaging a Z-Stack</span></a>).</p>
 <ol class="arabic">
 <li><p>Under the <span class="guilabel">Channels</span> tab, press <span class="guilabel">Launch Tiling Wizard</span>.</p>
 <img alt="../../_images/tiling_wizard.png" src="../../_images/tiling_wizard.png" />
 </li>
-<li><p>Go to thickest part of the sample. Navigate to the lower bound of the x-axis and
-press <span class="guilabel">Set X Start</span>. Navigate to the upper bound of the x-axis and press
+<li><p>Go to thickest part of the sample. Go to the lower bound of the <code class="docutils literal notranslate"><span class="pre">X</span></code> axis and
+press <span class="guilabel">Set X Start</span>. Go to the upper bound of the <code class="docutils literal notranslate"><span class="pre">X</span></code> axis and press
 <span class="guilabel">Set X End</span>. Repeat for all axes except for focus.</p></li>
 <li><p>Ensure the sample is in focus and press <span class="guilabel">Set F Start</span> and
 <span class="guilabel">Set F End</span> without changing the focus position.</p></li>

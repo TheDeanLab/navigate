@@ -78,6 +78,7 @@
 <li class="toctree-l1"><a class="reference internal" href="feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -111,14 +112,28 @@ and documentation. If you are contributing code, please create it in a fork and
 branch separate from the main <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch and then make a pull request
 to the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch for code review. Some best practices for new code are
 outlined below.</p>
-<p>If you are considering refactoring part of the code, please reach prior to
-starting this process. We are happy to bring you and this discussion to our
+<p>If you are considering refactoring part of the code, please reach out to us prior to
+starting this process. We are happy to invite you to our
 regular software development meeting.</p>
+<hr class="docutils" />
 <section id="general-principles">
 <h2>General Principles<a class="headerlink" href="#general-principles" title="Permalink to this heading"></a></h2>
-<ul class="simple">
+<ul>
 <li><p>We use a <a class="reference external" href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">model-view-controller architecture</a>.
-New functionality should keep this strong separation.</p></li>
+New functionality should keep this strong separation.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The model operates in its own subprocess and is responsible for
+communicating with hardware and performing image handling and processing tasks.</p></li>
+<li><p>The view is responsible for displaying the user interface and
+communicating with the controller.</p></li>
+<li><p>The controller is responsible for managing the user interface and
+communicating with the model. It relays user input in the form of
+traces and commands to the model and relays model output in the form of
+images and data to the view.</p></li>
+</ul>
+</div></blockquote>
+</li>
 <li><p>Please do not create new configuration variables unless absolutely
 necessary, especially in the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">experiment.yaml</span></code>
 files. A new variable is necessary only if no variable stores similar
@@ -131,17 +146,22 @@ discussing this with the software team in advance.</p></li>
 live system prior to merging into the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch.</p></li>
 </ul>
 </section>
+<hr class="docutils" />
 <section id="coding-style">
 <h2>Coding Style<a class="headerlink" href="#coding-style" title="Permalink to this heading"></a></h2>
 <p>We follow the <a class="reference external" href="https://peps.python.org/pep-0008/">PEP8 code style guide</a>.
 All class names are written in <code class="docutils literal notranslate"><span class="pre">CamelCase</span></code> and all
 variable names are <code class="docutils literal notranslate"><span class="pre">lowercase_and_separated_by_underscores</span></code>.</p>
 </section>
+<hr class="docutils" />
 <section id="documentation">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h2>
-<p>All classes and functions should have docstrings written in
-<a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html">Numpydoc style</a>.</p>
+<p>We use <a class="reference external" href="https://www.sphinx-doc.org/en/master/">Sphinx</a> to generate
+documentation from documented methods, attributes, and classes. Please document
+all new methods, attributes, and classes using Sphinx compatible version of
+<a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html">Numpydoc</a>.</p>
 </section>
+<hr class="docutils" />
 <section id="scientific-units">
 <h2>Scientific Units<a class="headerlink" href="#scientific-units" title="Permalink to this heading"></a></h2>
 <p>Please express quantities in the following units when they are in the standard model/
@@ -150,8 +170,11 @@ different unit to a piece of hardware.</p>
 <ul class="simple">
 <li><p>Time - Milliseconds</p></li>
 <li><p>Distance - Micrometers</p></li>
+<li><p>Voltage - Volts</p></li>
+<li><p>Rotation - Degrees</p></li>
 </ul>
 </section>
+<hr class="docutils" />
 <section id="pre-commit-hooks">
 <h2>Pre-Commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="Permalink to this heading"></a></h2>
 <p>We leverage pre-commit workflows to enforce consistent code formatting and automate
@@ -169,6 +192,7 @@ actually used in as part of an <code class="docutils literal notranslate"><span 
 </pre></div>
 </div>
 </section>
+<hr class="docutils" />
 <section id="dictionary-parsing">
 <h2>Dictionary Parsing<a class="headerlink" href="#dictionary-parsing" title="Permalink to this heading"></a></h2>
 <p>The configuration file is loaded a large dictionary object, and it is easy to have
@@ -185,21 +209,24 @@ dictionary.  In the case that this key is not available, it then by default retu
 <code class="docutils literal notranslate"><span class="pre">sawtooth</span></code>. If however the <code class="docutils literal notranslate"><span class="pre">waveform</span></code> key is found, it will provide the value
 associated with it.</p>
 </section>
+<hr class="docutils" />
 <section id="unit-tests">
 <h2>Unit Tests<a class="headerlink" href="#unit-tests" title="Permalink to this heading"></a></h2>
 <p>Each line of code is unit tested to ensure it behaves appropriately
 and alert future coders to modifications that break expected functionality.
 Guidelines for writing good unit tests can be found <a class="reference external" href="https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test">here</a>
 and <a class="reference external" href="https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0">over here</a>,
-or see examples of other unit tests in this application’s <code class="docutils literal notranslate"><span class="pre">test</span></code> folder. We
+or see examples of other unit tests in this repository’s <code class="xref any docutils literal notranslate"><span class="pre">test</span></code> folder. We
 use the <a class="reference external" href="https://docs.pytest.org/en/7.2.x/">pytest library</a> to evaluate unit
 tests. Please check that unit tests pass on your machine before making a pull request.</p>
 </section>
+<hr class="docutils" />
 <section id="developing-with-a-mac">
 <h2>Developing with a Mac<a class="headerlink" href="#developing-with-a-mac" title="Permalink to this heading"></a></h2>
-<p>Many of us in the lab have Apple products and use them for development.
+<p>Many of us have Apple products and use them for development.
 However, there are some issues that you may encounter when developing on a Mac.
 Below are some of the issues we have encountered and how to resolve them.</p>
+<hr class="docutils" />
 <section id="shared-memory-limits">
 <h3>Shared memory limits<a class="headerlink" href="#shared-memory-limits" title="Permalink to this heading"></a></h3>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">OSError: You tried to simultaneously open more SharedNDArrays than are</span>

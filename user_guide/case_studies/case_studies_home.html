@@ -71,6 +71,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -99,13 +100,40 @@
              
   <section id="case-studies">
 <h1>Case Studies<a class="headerlink" href="#case-studies" title="Permalink to this heading"></a></h1>
+<p>Light sheet microscopy is a very versatile technique. Here we present some case studies
+that demonstrate how <strong>navigate</strong> can be used to acquire data from different types of
+light sheet microscopes. These include:</p>
+<ul class="simple">
+<li><p>An Axially Swept Light-Sheet Microscope that scans the beam in both the laser propagation (<code class="docutils literal notranslate"><span class="pre">Y</span></code>)
+and detection (<code class="docutils literal notranslate"><span class="pre">Z</span></code>) directions synchronously with a piezo mounted objective.
+Tiling in <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, and <code class="docutils literal notranslate"><span class="pre">Z</span></code> is provided by a motorized stage.</p></li>
+<li><p>A Digitally Scanned Axially Swept Light-Sheet Microscope that scans the beam laterally
+(<code class="docutils literal notranslate"><span class="pre">X</span></code>) with galvanometric mirrors to create a virtual sheet of light, and axially
+(<code class="docutils literal notranslate"><span class="pre">Y</span></code>) with an electronically tunable lens. The sample is moved in the detection direction
+(<code class="docutils literal notranslate"><span class="pre">Z</span></code>) to acquire a stack. Tiling in <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, and <code class="docutils literal notranslate"><span class="pre">Z</span></code> is provided by a motorized stage.</p></li>
+<li><p>An Axially Swept Light-Sheet Microscope that scans the beam in the laser propagation
+direction (<code class="docutils literal notranslate"><span class="pre">Y</span></code>), but acquires a stack by moving the sample in the detection direction (<code class="docutils literal notranslate"><span class="pre">Z</span></code>.
+Tiling in <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, and <code class="docutils literal notranslate"><span class="pre">Z</span></code> is provided by a motorized stage.</p></li>
+<li><p>An Axially Swept Light-Sheet Microscope that is configured in an upright, di-SPIM-like,
+geometry. The beam is scanned in the laser propagation direction (<code class="docutils literal notranslate"><span class="pre">Y</span></code>), but the sample
+is scanned at a constant velocity in a direction that is 45 degrees to the detection and
+laser propagation directions (<code class="docutils literal notranslate"><span class="pre">X</span></code>). Acquiring data in this format permits imaging of thinner (e.g., ~2 mm)
+specimens with very large lateral extents without the overhead associated with stepping and settling
+the sample stage. Tiling in <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, and <code class="docutils literal notranslate"><span class="pre">Z</span></code> is provided by a motorized stage.</p></li>
+</ul>
+<hr class="docutils" />
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="setup_voodoo.html">Setting up an Axially Swept Light-Sheet Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_voodoo.html">Setting up an Axially Swept Light-Sheet Microscope</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="setup_voodoo.html#important-points">Important points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup_voodoo.html#first-steps">First steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup_voodoo.html#sequentially-adding-devices">Sequentially adding devices</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="acquire_mesospimbt.html">Imaging on a mesoSPIM BT</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="acquire_mesospimbt.html#setting-the-beam-parameters">Setting the beam parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="acquire_mesospimbt.html#loading-and-finding-the-sample">Loading and finding the sample</a></li>
-<li class="toctree-l2"><a class="reference internal" href="acquire_mesospimbt.html#imaging-a-z-stack">Imaging a Z-Stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acquire_mesospimbt.html#imaging-a-z-stack">Imaging a z-stack</a></li>
 <li class="toctree-l2"><a class="reference internal" href="acquire_mesospimbt.html#tiling-a-sample-larger-than-the-field-of-view">Tiling a sample larger than the field of view</a></li>
 </ul>
 </li>

@@ -79,6 +79,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -110,21 +111,23 @@
 <h1>Reconfigurable Acquisitions Using Features<a class="headerlink" href="#reconfigurable-acquisitions-using-features" title="Permalink to this heading"></a></h1>
 <section id="what-are-features">
 <h2>What are features?<a class="headerlink" href="#what-are-features" title="Permalink to this heading"></a></h2>
-<p>navigate allows users to reconfigure acquisition routines within the GUI by chaining
+<p><strong>navigate</strong> allows users to reconfigure acquisition routines within the GUI by chaining
 so-called “features” together in sequence. A feature is the name given to a single
 acquisition unit such as <code class="docutils literal notranslate"><span class="pre">Snap</span></code>, which snaps an image, or
 <code class="docutils literal notranslate"><span class="pre">MoveToNextPositionInMultiPositionTable</span></code>, which moves the stage to the next imaging
-position indicated in the multi-position table. Some acquisition units, such as
+position indicated in the <span class="guilabel">Multiposition Table</span>. Some acquisition units, such as
 <code class="docutils literal notranslate"><span class="pre">Autofocus</span></code> or <code class="docutils literal notranslate"><span class="pre">ZStackAcquisition</span></code> have a bit more going on under the hood, but can
 be used in the same way.</p>
 </section>
+<hr class="docutils" />
 <section id="customizing-feature-functionality-in-the-gui">
 <h2>Customizing Feature Functionality in the GUI<a class="headerlink" href="#customizing-feature-functionality-in-the-gui" title="Permalink to this heading"></a></h2>
 <p>Features can be optionally customized within the GUI. For example instead of
-re-programming a feature and loading it again, we can swap Python functions in
+reprogramming a feature and loading it again, we can swap Python functions in
 and out of features. This can be helpful, e.g., when you are prototyping a function
 to automatically detect an object within an image and want to try a few different
 options.</p>
+<hr class="docutils" />
 <section id="loading-custom-functions">
 <h3>Loading Custom Functions<a class="headerlink" href="#loading-custom-functions" title="Permalink to this heading"></a></h3>
 <ol class="arabic">
@@ -132,7 +135,7 @@ options.</p>
 <span class="menuselection">Features ‣ Advanced Setting</span>.</p>
 <img alt="../_images/step_10.png" src="../_images/step_10.png" />
 </li>
-<li><p>In the popup window, choose the feature name with which you want to use the
+<li><p>In the <span class="guilabel">Advanced Setting</span> popup window, choose the feature name with which you want to use the
 dynamic customized functions as feature parameters.</p>
 <img alt="../_images/step_11.png" src="../_images/step_11.png" />
 <img alt="../_images/step_12.png" src="../_images/step_12.png" />
@@ -141,7 +144,7 @@ dynamic customized functions as feature parameters.</p>
 options. Type the function name which is defined in your python file.</p>
 <img alt="../_images/step_13.png" src="../_images/step_13.png" />
 </li>
-<li><p>Then click <span class="guilabel">Load</span> to choose your Oython file.</p>
+<li><p>Then click <span class="guilabel">Load</span> to choose your Python file.</p>
 <img alt="../_images/step_14.png" src="../_images/step_14.png" />
 </li>
 <li><p>When you run a feature list containing the feature you just set, the new function
@@ -149,13 +152,9 @@ name will appear and you can choose the one you just added.</p>
 <img alt="../_images/step_15.png" src="../_images/step_15.png" />
 </li>
 </ol>
-<section id="custom-feature-lists">
-<h4>Custom Feature Lists<a class="headerlink" href="#custom-feature-lists" title="Permalink to this heading"></a></h4>
-<p>The navigate software allows you to chain feature objects into lists to build
-acquisition workflows.</p>
 </section>
 </section>
-</section>
+<hr class="docutils" />
 <section id="creating-a-custom-feature-list-in-the-gui">
 <h2>Creating a Custom Feature List in the GUI<a class="headerlink" href="#creating-a-custom-feature-list-in-the-gui" title="Permalink to this heading"></a></h2>
 <p>Once you have loaded your feature list, the next step is to use it in combination with
@@ -207,30 +206,32 @@ features in a user-selected format.</p>
 show up under the <span class="guilabel">Features</span> menu.</p></li>
 </ol>
 </section>
+<hr class="docutils" />
 <section id="editing-feature-lists-on-the-fly">
 <h2>Editing Feature Lists on the Fly<a class="headerlink" href="#editing-feature-lists-on-the-fly" title="Permalink to this heading"></a></h2>
 <ol class="arabic">
 <li><p>Select the feature list you want to run, choose “Customized” acquisition mode, and
-then click <span class="guilabel">Acquire</span>. A feature edit popup window will show up. In this
+then click <span class="guilabel">Acquire</span>. A <span class="guilabel">Feature List Configuration</span> popup window will show up. In this
 popup window, you can see the structure of the selected feature list.</p>
 <img alt="../_images/step_16.png" src="../_images/step_16.png" />
 <img alt="../_images/step_17.png" src="../_images/step_17.png" />
 <img alt="../_images/step_18.png" src="../_images/step_18.png" />
 </li>
-<li><p>Click one feature in the preview window, a parameter window will show up. Then you
-could set the parameter you want. Close the parameter window.</p>
+<li><p>Click one feature in the preview window, a <span class="guilabel">Feature Parameters</span> window will show up. Then you
+could set the parameters you want (e.g., <span class="guilabel">planes</span> in this screenshot). Close the <span class="guilabel">Feature Parameters</span> window.</p>
 <img alt="../_images/step_19.png" src="../_images/step_19.png" />
 </li>
-<li><p>Click “Confirm”. The feature list will start to run.</p>
+<li><p>Click <span class="guilabel">Confirm</span>. The feature list will start to run.</p>
 <img alt="../_images/step_20.png" src="../_images/step_20.png" />
 </li>
 </ol>
 </section>
+<hr class="docutils" />
 <section id="deleting-feature-lists">
 <h2>Deleting Feature Lists<a class="headerlink" href="#deleting-feature-lists" title="Permalink to this heading"></a></h2>
 <ol class="arabic">
 <li><p>Select the feature list you want to delete in the <span class="guilabel">Features</span> menu.</p></li>
-<li><p>Then, navigate back to the <span class="guilabel">Features</span> menu and select
+<li><p>Then, go back to the <span class="guilabel">Features</span> menu and select
 <span class="guilabel">Delete Selected Feature</span> The feature list will be removed from the menu
 and the software.</p>
 <img alt="../_images/step_9.png" src="../_images/step_9.png" />

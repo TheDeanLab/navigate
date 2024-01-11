@@ -69,6 +69,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
 </ul>
 
         </div>
@@ -105,19 +106,19 @@ confirm it is working, and save an image to disk.</p>
 <li><p>Install Miniconda
 Download and install Miniconda from the <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links">official website</a>.</p></li>
 <li><p>Create and Activate Environment</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda create -n navigate python=3.9.7</span>
-<span class="go">conda activate navigate</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(base)</span> <span class="go">conda create -n navigate python=3.9.7</span>
+<span class="gp gp-VirtualEnv">(base)</span> <span class="go">conda activate navigate</span>
 </pre></div>
 </div>
 </li>
 <li><p>Install <strong>navigate</strong></p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install git+https://github.com/TheDeanLab/navigate.git</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">pip install git+https://github.com/TheDeanLab/navigate.git</span>
 </pre></div>
 </div>
 </li>
 <li><p>Launch <strong>navigate</strong> in the synthetic hardware mode. This will allow you to test its functionality without actual hardware.</p>
 <blockquote>
-<div><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">navigate -sh</span>
+<div><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">navigate -sh</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -128,26 +129,34 @@ Download and install Miniconda from the <a class="reference external" href="http
 <h2>Saving an Image to Disk<a class="headerlink" href="#saving-an-image-to-disk" title="Permalink to this heading"></a></h2>
 <p>To save an image to disk, follow these steps:</p>
 <ul class="simple">
-<li><p>Launch Navigate in synthetic hardware mode as described above.</p></li>
-<li><p>On the <span class="guilabel">Acquire Bar</span>, make sure that the operation mode is set to <span class="guilabel">Continuous Scan</span>.</p></li>
+<li><p>Launch <strong>navigate</strong> in synthetic hardware mode as described above.</p></li>
+<li><p>On the <span class="guilabel">Acquire Bar</span>, make sure that the operation mode is set to “Continuous Scan”.</p></li>
 <li><p>Press <span class="guilabel">Acquire</span> (<kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">ctrl</kbd> <kbd class="kbd docutils literal notranslate"></kbd>+<kbd class="kbd docutils literal notranslate"></kbd> <kbd class="kbd docutils literal notranslate">enter</kbd></kbd>) and confirm that a synthetic noise image is
-displayed in the <span class="guilabel">Camera View</span> window. At least
-one channel must be selected in the <span class="guilabel">Channel Settings</span> window, and all of the parameters (e.g., <span class="guilabel">Power</span>) in that row populated.</p></li>
-<li><p>In the Stack Acquisition Settings window, press the <span class="guilabel">Set Start Pos/Foc</span> button. This specifies the
-starting position and focus for the stack acquisition.</p></li>
-<li><p>Select the <span class="guilabel">Stage Control</span> tab (<kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">ctrl</kbd> <kbd class="kbd docutils literal notranslate"></kbd>+<kbd class="kbd docutils literal notranslate"></kbd> <kbd class="kbd docutils literal notranslate">3</kbd></kbd>), move the Z stage to the desired position (e.g., 100 um),
+displayed in the <span class="guilabel">Camera View</span> window.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>At least one channel must be selected in the <span class="guilabel">Channel Settings</span> window, and all of the parameters
+(e.g., <span class="guilabel">Power</span>) in that row must be populated.</p>
+</div>
+<ul class="simple">
+<li><p>In the <span class="guilabel">Stack Acquisition Settings window</span>, press the <span class="guilabel">Set Start Pos/Foc</span> button. This specifies the
+starting <code class="docutils literal notranslate"><span class="pre">Z</span></code> and <code class="docutils literal notranslate"><span class="pre">F</span></code> (e.g., Focus) positions for the stack acquisition.</p></li>
+<li><p>Select the <span class="guilabel">Stage Control</span> tab (<kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">ctrl</kbd> <kbd class="kbd docutils literal notranslate"></kbd>+<kbd class="kbd docutils literal notranslate"></kbd> <kbd class="kbd docutils literal notranslate">3</kbd></kbd>), move the <code class="docutils literal notranslate"><span class="pre">Z</span></code> stage to the desired position (e.g., <code class="docutils literal notranslate"><span class="pre">100</span></code> μm),
 go back to the <span class="guilabel">Channels</span> tab (<kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">ctrl</kbd> <kbd class="kbd docutils literal notranslate"></kbd>+<kbd class="kbd docutils literal notranslate"></kbd> <kbd class="kbd docutils literal notranslate">1</kbd></kbd>),
-and press the <span class="guilabel">Set End Pos/Foc</span> button. This specifies the ending position and focus for the stack acquisition.</p></li>
-<li><p>In the <span class="guilabel">Stack Acquisition Settings</span> frame, you can now adjust the step size, which automatically adjusts the number of slices in a z-stack.</p></li>
-<li><p>In the <span class="guilabel">Timepoint Settings</span> window, select <span class="guilabel">Save Data</span> (<kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">ctrl</kbd> <kbd class="kbd docutils literal notranslate"></kbd>+<kbd class="kbd docutils literal notranslate"></kbd> <kbd class="kbd docutils literal notranslate">enter</kbd></kbd>). If the number of timepoints is set to 1, only a single stack will be acquired.</p></li>
-<li><p>Change the <span class="guilabel">Acquire Bar</span> to the <span class="guilabel">Z-Stack</span> mode, and press <span class="guilabel">Acquire</span> (<kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">ctrl</kbd> <kbd class="kbd docutils literal notranslate"></kbd>+<kbd class="kbd docutils literal notranslate"></kbd> <kbd class="kbd docutils literal notranslate">enter</kbd></kbd>).</p></li>
+and press the <span class="guilabel">Set End Pos/Foc</span> button. This specifies the ending <code class="docutils literal notranslate"><span class="pre">Z</span></code> and <code class="docutils literal notranslate"><span class="pre">F</span></code> positions for the stack acquisition.</p></li>
+<li><p>In the <span class="guilabel">Stack Acquisition Settings</span> frame, you can now adjust the step size, which determines the number of slices in a z-stack.</p></li>
+<li><p>In the <span class="guilabel">Timepoint Settings</span> window, select <span class="guilabel">Save Data</span> (<kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">ctrl</kbd> <kbd class="kbd docutils literal notranslate"></kbd>+<kbd class="kbd docutils literal notranslate"></kbd> <kbd class="kbd docutils literal notranslate">enter</kbd></kbd>).
+If the number of timepoints is set to <code class="docutils literal notranslate"><span class="pre">1</span></code>, only a single stack will be acquired.</p></li>
+<li><p>Change the <span class="guilabel">Acquire Bar</span> to the “Z-Stack” mode, and press <span class="guilabel">Acquire</span> (<kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">ctrl</kbd> <kbd class="kbd docutils literal notranslate"></kbd>+<kbd class="kbd docutils literal notranslate"></kbd> <kbd class="kbd docutils literal notranslate">enter</kbd></kbd>).</p></li>
 <li><dl class="simple">
 <dt>A <span class="guilabel">File Saving Dialog</span> popup window will appear.</dt><dd><ul>
 <li><p>With the exception of <span class="guilabel">Notes</span>, all fields must be populated. Any spaces in the fields will be replaced with an underscore.</p></li>
 <li><p><span class="guilabel">Notes</span> is saved with the metadata, and can be useful for describing the experiment.</p></li>
 <li><p><span class="guilabel">Solvent</span> is useful for tissue clearing experiments.</p></li>
 <li><p><span class="guilabel">File Type</span> can be set to <span class="guilabel">.TIFF</span>, <span class="guilabel">OME-TIFF</span>, <span class="guilabel">H5</span>, or <span class="guilabel">N5</span>. The
-latter two options are pyramidal file formats that are best used for large datasets and are immediately compatible with <a class="reference external" href="https://imagej.net/plugins/bdv/">BigDataViewer</a>,
+latter two options are pyramidal file formats that are best used for large datasets and are immediately compatible with
+<a class="reference external" href="https://imagej.net/plugins/bdv/">BigDataViewer</a>,
 <a class="reference external" href="https://imagej.net/plugins/bigstitcher/index">BigStitcher</a>, and more.</p></li>
 <li><p>Press <span class="guilabel">Acquire Data</span> to begin the acquisition.</p></li>
 <li><p>Once complete, the data can be visualized using standard image processing software such as <a class="reference external" href="https://imagej.net/software/fiji/">Fiji</a>.</p></li>

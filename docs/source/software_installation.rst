@@ -12,14 +12,24 @@ Operating System Compatibility
 ------------------------------
 
 .. important::
-   The **navigate** software is primarily developed for use on Windows-based systems. This is due to the compatibility of device drivers for various microscope hardware components, such as cameras, stages, and data acquisition cards, which are predominantly designed for the Windows environment.
+   **navigate** is developed for use on Windows-based systems. This is due to the
+   compatibility of device drivers for various microscope hardware components, such as
+   cameras, stages, and data acquisition cards, which are predominantly designed for the
+   Windows environment.
 
-   While it is possible to launch the software on a Mac using a synthetic hardware mode, users should be aware of known issues with the Tkinter user interface. These issues include improper gridding of widgets and problems with resizing the GUI window. As such, the use of **navigate** software on macOS is not recommended.
+   While it is possible to launch the software on a Mac using a synthetic hardware mode,
+   users should be aware of known issues with the Tkinter user interface. These issues
+   include improper positioning of widgets and problems with resizing the GUI window.
+   As such, the use of **navigate** on macOS is not recommended.
 
-   The software remains untested on Linux systems. Therefore, we cannot guarantee its functionality or performance on Linux platforms at this time. Users considering the use of **navigate** software on Linux should proceed with caution and be prepared for potential compatibility issues, especially with respect to device drivers.
+   The software remains untested on Linux systems. Therefore, we cannot guarantee its
+   functionality or performance on Linux platforms at this time. Users considering the
+   use of **navigate** software on Linux should proceed with caution and be prepared for
+   potential compatibility issues, especially with respect to device drivers.
 
 .. note::
-   For optimal performance and compatibility, it is strongly recommended to run the **navigate** software on a Windows machine, adhering to the specified system specifications.
+   For optimal performance and compatibility, it is strongly recommended to run
+   **navigate** on a Windows machine, adhering to the specified system specifications.
 
 Hardware Considerations
 -----------------------
@@ -30,7 +40,7 @@ Hardware Considerations
    For example, for a standard Hamamatsu camera with a 2048 x 2048 sensor,
    operating at 16-bit depth and 20 frames per second, the data save rate is approximately ~170 MB/s.
    While such capabilities are well within the capabilities of modern SSDs, they are beyond the capabilities of most HDDs.
-   Therefore, it is recommended to use a fast SSD data storage.
+   Therefore, it is recommended to use a fast SSD data saving operations.
 
 
 .. collapse:: Example Hardware Configuration
@@ -101,7 +111,7 @@ and install the appropriate version based on your operating system.
     It is also handy to have the `conda cheatsheet <https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf>`_
     open when first using miniconda to get accustomed to the commands available.
 
-* Windows: Use the Windows taskbar search to find "Anaconda Prompt (Miniconda3)".
+* Windows: Use the Windows taskbar search to find ``Anaconda Prompt (Miniconda3)``.
   Given how frequently you will use this, we recommend pinning it to your taskbar.
 * Linux/Mac: Open a Terminal.
 
@@ -121,13 +131,21 @@ The active environment is shown in parentheses on the far-left.  Originally, we 
 the miniconda ``(base)`` environment. After activating the navigate environment, it
 should now show ``(navigate)``.
 
-**Intall navigate via pip**
+**Install navigate via pip**
+
+To install the latest stable release of **navigate**, run the following command:
+
+.. code-block:: console
+
+    (navigate) MyComputer ~ $ pip install navigate-micro
+
+To install the developmental version of **navigate**, run the following command:
 
 .. code-block:: console
 
     (navigate) MyComputer ~ $ pip install git+https://github.com/TheDeanLab/navigate.git
 
-**Run the Navigate software**
+**Run navigate software**
 
 .. code-block:: console
 
@@ -137,7 +155,7 @@ should now show ``(navigate)``.
 
     If you are running the software on a computer that does not have the appropriate
     hardware you will need to add  the flag ``-sh`` (``--synthetic-hardware``) after
-    navigate.
+    **navigate**.
 
     .. code-block:: console
 
@@ -148,12 +166,12 @@ upon opening a new Anaconda prompt:
 
 .. code-block:: console
 
-    (base) MyComputer ~ $ conda activate navigate
-    (navigate) MyComputer ~ $ navigate
+    (base) conda activate navigate
+    (navigate) navigate
 
 .. note::
 
-    If you are running Windows, you can create a desktop shortcut to navigate by
+    If you are running Windows, you can create a desktop shortcut to **navigate** by
     right-clicking the Desktop, navigating to New and then Shortcut and entering
     ``%windir%\system32\cmd.exe "/c" C:\path\to\miniconda\Scripts\activate.bat navigate && navigate``
     into the location text box.
@@ -212,26 +230,27 @@ an editable package locally on your machine.
 Troubleshooting
 ===============
 
-If running the software on campus at UTSW you may need to update some of your proxy
-settings to allow ``pip``/ ``conda`` to install the proper packages.
+If running the software at an institution with a proxy, you may need to update your proxy
+settings to allow ``pip`` and ``conda`` to install the proper packages.
 
 * This can be done by going to Environment Variables for Windows, or another OS
   equivalent.
-* Create the following new System Variables:
+* Create the following new System Variables (please see that
+      they are both http, this is purposeful and not a typo):
 
-    * Variable = HTTP_PROXY; Value = http://proxy.swmed.edu:3128
-    * Variable = HTTPS_PROXY; Value = http://proxy.swmed.edu:3128 (please see that
-      they are both http, this is purposeful and not a typo)
+    * Variable = HTTP_PROXY; Value = http://proxy.your_university.edu:1234
+    * Variable = HTTPS_PROXY; Value = http://proxy.your_university.edu:1234
 
 * If you continue to have issues then change the value of Variable HTTPS_PROXY to
-  https://proxy.swmed.edu:3128
+  https://proxy.your_university.edu:1234
+
 * If you still have issues then you will need to create/update both configuration
   files for conda and pip to include proxy settings, if they are not in the paths
   below you will need to create them. This assumes a Windows perspective. Mac/Linux
   users will have different paths, they can be found online.
 
-    * ``conda``'s configuration file can be found at C:\\Users\\UserProfile\\.condarc
-    * ``pip``'s configiguration file can be found at C:\\Users\\UserProfile\\pip\\pip.ini
+    * The ``conda`` configuration file can be found at C:\\Users\\UserProfile\\.condarc
+    * The ``pip`` configuration file can be found at C:\\Users\\UserProfile\\pip\\pip.ini
 
 * You can also try to set the proxy from within the Anaconda Prompt:
 *  ``set https_proxy=http://username:password@proxy.example.com:8080``

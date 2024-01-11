@@ -2,9 +2,13 @@
 Write A Smart Acquisition Routine (Intermediate)
 ================================================
 
-navigate's :doc:`feature container <contributing/feature_container>` enables us to
+**navigate**'s :doc:`feature container <contributing/feature_container>` enables us to
 write acquisition routines on the fly by chaining existing 
-:doc:`features <user_guide/features>` into lists. In this guide, we will use features 
+:doc:`features <user_guide/features>` into lists. Please see
+:ref:`Currently Implemented Features <contributing/feature_container:currently implemented features>`
+for a complete list of features, or build additional features as a :doc:`plugin <plugin/plugin_home>`.
+
+In this guide, we will use features
 to write a routine that scans through an imaging chamber and only takes images where 
 it finds a sample.
 
@@ -32,7 +36,7 @@ should appear as below.
 .. image:: images/feature_gui_1.png
 
 The square brackets ``[]`` create a sequence of events to run in the feature container.
-The ``{}`` braces contain features. In this case, we have a single feature, 
+The ``{}`` braces contain features. In this case, we have a single feature,
 ``PrepareNextChannel``, which will set up the next color channel for acquisition. The
 complete sequence (as it stands) will take an image in the first 
 :ref:`selected color channel <user_guide/gui_walkthrough:channel settings>`.
@@ -68,16 +72,21 @@ Now, right-click ``MoveToNextPositionInMultiPositionTable`` and press
 
 * :guilabel:`planes` indicates how many planes of the z-stack
   this feature should check for tissue.
+
 * :guilabel:`percentage` indicates what percent of the total image must contain tissue
-  for this feature to return ``True`` that tissue was detected.
+  for this feature to return ``true`` that tissue was detected. 1 indicates that the entire
+  image contains tissue, 0.5 indicates that half of the image contains tissue, and so on.
+
 * :guilabel:`detect_func` is one of the tissue detection functions in 
   :doc:`remove_empty_tiles <_autosummary/navigate.model.features.remove_empty_tiles>`. 
   If this is set to ``None``, it defaults to ``detect_tissue()``, which states that 
   tissue is present if signal is above the Otsu threshold of the stack of images 
   acquired.
 
+In this example, if any plane meets the desired threshold, the feature will return ``true`` and
+it will be acquired. If no plane meets the desired threshold, the feature will return ``false``
 
-Now, right-click ``DetectTissueInStackAndReturn`` and press 
+Now, right-click ``DetectTissueInStackAndReturn`` and press
 :guilabel:`Insert After`. Click the new tile and change it to 
 ``LoopByCount``.
 
@@ -86,7 +95,7 @@ Now, right-click ``DetectTissueInStackAndReturn`` and press
 We want to iterate over all of the positions in the multi-position table, so we will
 set ``steps`` to ``experiment.MicroscopeState.multiposition_count``.
 
-Notice that the acquistion protocol does not appear to loop, but rather still moves
+Notice that the acquisition protocol does not appear to loop, but rather still moves
 in a sequence. This is because all of the tiles are still in the sequence brackets 
 ``[]``. We can now enclose the section of the protocol we want to loop in parentheses
 ``()`` and press :guilabel:`Preview` to see the update.
@@ -98,10 +107,21 @@ this channel visit every position in the multiposition table, and detect if ther
 tissue. However, we do no yet make any decisions of what to do if tissue is found.
 To do this, we will convert ``DetectTissueInStackAndReturn`` into a decision node.
 
-To do this, we add ``"true"`` and ``"false"`` options within the feature braces:
-``{"name": DetectTissueInStackAndReturn, "args": (1, 0.5, None), "true": [{"name": ZStackAcquisition,"args": (False,False,"z-stack",),}], "false": "continue",}``.
-Our ``"true"`` argument tells the software what to do if tissue is detected. In this
-case, we take a z-stack at the positions where tissue is found. The ``"false"`` 
+To do this, we add ``true`` and ``false`` options within the feature braces:
+
+.. code-block:: python
+
+    {"name": DetectTissueInStackAndReturn,
+     "args": (1, 0.5, None),
+     "True": [
+            {
+             "name": ZStackAcquisition,
+             "args": (false, false, "z-stack",),}],
+             "False": "continue",
+             }.
+
+Our ``true`` argument tells the software what to do if tissue is detected. In this
+case, we take a z-stack at the positions where tissue is found. The ``false``
 argument tells the software how to proceed if no tissue is found. In this case, the
 ``"continue"`` option tells the software to keep moving through the loop to the next
 position in the multi-position table. Press :guilabel:`Preview` to see the update.
@@ -114,13 +134,13 @@ node. Click on it to access the decision node GUI.
 .. image:: images/feature_gui_10.png
 
 This contains the same settings for ``DetectTissueInStackAndReturn`` we saw before, but
-now also features GUI editing windows for the results of ``"true"`` and ``"false"`` 
+now also features GUI editing windows for the results of ``true`` and ``false``
 decisions arising from this node.
 
 Close the node window and press :guilabel:`Add` in the "Add New Feature List" window.
 This feature is now available under :menuselection:`Features --> TestFeature` and 
-can be run in "Customized" 
-:ref:`acquistion mode <user_guide/gui_walkthrough:acquisition bar>`.
+can be run in "Customized"
+:ref:`acquisition mode <user_guide/gui_walkthrough:acquisition bar>`.
 
 Select "Customized" acquisition mode, select :menuselection:`Features --> TestFeature`,
 and press :guilabel:`Acquire`. For the positions shown at the start of this guide, the
@@ -130,7 +150,4 @@ multi-position table, find there is no tissue, and decide not to take a z-stack.
 will then exit the loop as no more positions are available in the multi-position table.
 
 Now you can use this feature or build another smart acquisition routine suited to your
-microscope's needs. See 
-:ref:`Currently Implemented Features <contributing/feature_container:currently implemented features>`
-for a complete list of features, or build additional features in a 
-:doc:`plugin <plugin/plugin_home>`.
+microscope's needs.

@@ -8,15 +8,25 @@ branch separate from the main ``develop`` branch and then make a pull request
 to the ``develop`` branch for code review. Some best practices for new code are
 outlined below.
 
-If you are considering refactoring part of the code, please reach prior to
-starting this process. We are happy to bring you and this discussion to our
+If you are considering refactoring part of the code, please reach out to us prior to
+starting this process. We are happy to invite you to our
 regular software development meeting.
+
+-------------------
 
 General Principles
 ==================
 
 - We use a `model-view-controller architecture <https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller>`_.
   New functionality should keep this strong separation.
+    - The model operates in its own subprocess and is responsible for
+      communicating with hardware and performing image handling and processing tasks.
+    - The view is responsible for displaying the user interface and
+      communicating with the controller.
+    - The controller is responsible for managing the user interface and
+      communicating with the model. It relays user input in the form of
+      traces and commands to the model and relays model output in the form of
+      images and data to the view.
 - Please do not create new configuration variables unless absolutely
   necessary, especially in the ``configuration.yaml`` and ``experiment.yaml``
   files. A new variable is necessary only if no variable stores similar
@@ -28,6 +38,8 @@ General Principles
 - All code that modifies microscope control behavior must be reviewed and tested on a
   live system prior to merging into the ``develop`` branch.
 
+-------------------
+
 Coding Style
 ============
 
@@ -35,12 +47,17 @@ We follow the `PEP8 code style guide <https://peps.python.org/pep-0008/>`_.
 All class names are written in ``CamelCase`` and all
 variable names are ``lowercase_and_separated_by_underscores``.
 
+-------------------
+
 Documentation
 =============
 
-All classes and functions should have docstrings written in
-`Numpydoc style <https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy
-.html>`_.
+We use `Sphinx <https://www.sphinx-doc.org/en/master/>`_ to generate
+documentation from documented methods, attributes, and classes. Please document
+all new methods, attributes, and classes using Sphinx compatible version of
+`Numpydoc <https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html>`_.
+
+-------------------
 
 Scientific Units
 ================
@@ -51,6 +68,10 @@ different unit to a piece of hardware.
 
 * Time - Milliseconds
 * Distance - Micrometers
+* Voltage - Volts
+* Rotation - Degrees
+
+-------------------
 
 Pre-Commit Hooks
 ================
@@ -69,6 +90,8 @@ To avoid this error, you can add a ``# noqa`` comment to the end of the line to 
 
         from navigate.model.device_startup_functions import start_stage  # noqa
 
+-------------------
+
 Dictionary Parsing
 ==================
 
@@ -86,6 +109,8 @@ dictionary.  In the case that this key is not available, it then by default retu
 ``sawtooth``. If however the ``waveform`` key is found, it will provide the value
 associated with it.
 
+-------------------
+
 Unit Tests
 ==========
 
@@ -93,16 +118,20 @@ Each line of code is unit tested to ensure it behaves appropriately
 and alert future coders to modifications that break expected functionality.
 Guidelines for writing good unit tests can be found `here <https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test>`_
 and `over here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0>`_,
-or see examples of other unit tests in this application's ``test`` folder. We
+or see examples of other unit tests in this repository's :any:`test` folder. We
 use the `pytest library <https://docs.pytest.org/en/7.2.x/>`_ to evaluate unit
 tests. Please check that unit tests pass on your machine before making a pull request.
+
+-------------------
 
 Developing with a Mac
 =====================
 
-Many of us in the lab have Apple products and use them for development.
+Many of us have Apple products and use them for development.
 However, there are some issues that you may encounter when developing on a Mac.
 Below are some of the issues we have encountered and how to resolve them.
+
+-------------------
 
 Shared memory limits
 ^^^^^^^^^^^^^^^^^^^^

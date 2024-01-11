@@ -5,22 +5,26 @@ Reconfigurable Acquisitions Using Features
 What are features?
 ------------------
 
-navigate allows users to reconfigure acquisition routines within the GUI by chaining
+**navigate** allows users to reconfigure acquisition routines within the GUI by chaining
 so-called "features" together in sequence. A feature is the name given to a single
 acquisition unit such as ``Snap``, which snaps an image, or
 ``MoveToNextPositionInMultiPositionTable``, which moves the stage to the next imaging
-position indicated in the multi-position table. Some acquisition units, such as
+position indicated in the :guilabel:`Multiposition Table`. Some acquisition units, such as
 ``Autofocus`` or ``ZStackAcquisition`` have a bit more going on under the hood, but can
 be used in the same way.
+
+-----------
 
 Customizing Feature Functionality in the GUI
 --------------------------------------------
 
 Features can be optionally customized within the GUI. For example instead of
-re-programming a feature and loading it again, we can swap Python functions in
+reprogramming a feature and loading it again, we can swap Python functions in
 and out of features. This can be helpful, e.g., when you are prototyping a function
 to automatically detect an object within an image and want to try a few different
 options.
+
+-----------
 
 Loading Custom Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -32,7 +36,7 @@ Loading Custom Functions
    .. image:: images/step_10.png
 
 
-#. In the popup window, choose the feature name with which you want to use the
+#. In the :guilabel:`Advanced Setting` popup window, choose the feature name with which you want to use the
    dynamic customized functions as feature parameters.
 
 
@@ -49,7 +53,7 @@ Loading Custom Functions
    .. image:: images/step_13.png
 
 
-#. Then click :guilabel:`Load` to choose your Oython file.
+#. Then click :guilabel:`Load` to choose your Python file.
 
 
    .. image:: images/step_14.png
@@ -61,11 +65,7 @@ Loading Custom Functions
    .. image:: images/step_15.png
 
 
-Custom Feature Lists
-====================
-
-The navigate software allows you to chain feature objects into lists to build
-acquisition workflows.
+-----------
 
 Creating a Custom Feature List in the GUI
 -----------------------------------------
@@ -136,11 +136,13 @@ features:
 #. After editing the feature list, click :guilabel:`Add`. The new feature list will
    show up under the :guilabel:`Features` menu.
 
+-----------
+
 Editing Feature Lists on the Fly
 --------------------------------
 
 #. Select the feature list you want to run, choose "Customized" acquisition mode, and
-   then click :guilabel:`Acquire`. A feature edit popup window will show up. In this
+   then click :guilabel:`Acquire`. A :guilabel:`Feature List Configuration` popup window will show up. In this
    popup window, you can see the structure of the selected feature list.
 
 
@@ -153,23 +155,25 @@ Editing Feature Lists on the Fly
    .. image:: images/step_18.png
 
 
-#. Click one feature in the preview window, a parameter window will show up. Then you
-   could set the parameter you want. Close the parameter window.
+#. Click one feature in the preview window, a :guilabel:`Feature Parameters` window will show up. Then you
+   could set the parameters you want (e.g., :guilabel:`planes` in this screenshot). Close the :guilabel:`Feature Parameters` window.
 
 
    .. image:: images/step_19.png
 
 
-#. Click “Confirm”. The feature list will start to run.
+#. Click :guilabel:`Confirm`. The feature list will start to run.
 
 
    .. image:: images/step_20.png
+
+-----------
 
 Deleting Feature Lists
 ----------------------
 
 #. Select the feature list you want to delete in the :guilabel:`Features` menu.
-#. Then, navigate back to the :guilabel:`Features` menu and select
+#. Then, go back to the :guilabel:`Features` menu and select
    :guilabel:`Delete Selected Feature` The feature list will be removed from the menu
    and the software.
 

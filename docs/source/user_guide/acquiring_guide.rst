@@ -2,12 +2,16 @@
 Acquiring Data
 ==============
 
-``navigate`` features standard acquisition modes including Continous/Live, Single Frame
-and Z-Stack, which can be saved to TIFF, H5 and N5 data formats. Saving is toggled under 
-the GUI's :ref:`timepoint settings <user_guide/gui_walkthrough:timepoint settings>`.
+This provides detailed descriptions of **navigate's** acquisition modes and 
+saving capabilites. For a how to on acquiring data, please see 
+:doc:`Acquiring an Image <beginner>`.
 
 Standard Acquisition Modes
 ==========================
+
+**navigate** features standard acquisition modes including Continous/Live, Single Frame
+and Z-Stack, which can be saved to TIFF, H5 and N5 data formats. Saving is toggled under 
+the GUI's :ref:`timepoint settings <user_guide/gui_walkthrough:timepoint settings>`.
 
 These modes (and other custom modes) can be selected in the program's 
 :ref:`acquisition bar <user_guide/gui_walkthrough:acquisition bar>` dropdown list.

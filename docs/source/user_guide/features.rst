@@ -216,7 +216,7 @@ name
 and the other 
 :ref:`LoopByCount <../_autosummary/navigate.model.features.common_features.LoopByCount>`.
 The parentheses indicate we will keep looping through both of these features until 
-stopping critera is met. In this case, the looping will stop when ``LoopByCount``
+stopping criteria is met. In this case, the looping will stop when ``LoopByCount``
 returns ``False`` due to running out of ``selected_channels`` to loop through. That is,
 it will end once all :ref:`selected channel <gui_walkthrough:channel settings>` have
 been imaged.

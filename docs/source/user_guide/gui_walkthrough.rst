@@ -88,7 +88,7 @@ The middle part provides similar functionality to the
 :ref:`Multiposition Settings Notebook <user_guide/gui_walkthrough:multiposition>`.
 Here, we can launch the 
 :ref:`Tiling Wizard <user_guide/gui_walkthrough:multi-position tiling wizard>`, 
-load and export (save) positions stored in the :guilabel:`Multipositon Settings Notebook`, and add
+load and export (save) positions stored in the :guilabel:`Multiposition Settings Notebook`, and add
 the current stage position to the multiposition table.
 
 The bottom part of the menu is used to enable and disable the stage limits set in the

@@ -38,7 +38,7 @@ To save an image to disk, follow these steps:
 
 * Launch **navigate** in synthetic hardware mode as described above.
 
-* On the :guilabel:`Acquire Bar`, make sure that the operation mode is set to :guilabel:`Continuous Scan`.
+* On the :guilabel:`Acquire Bar`, make sure that the operation mode is set to "Continuous Scan".
 
 * Press :guilabel:`Acquire` (:kbd:`ctrl + enter`) and confirm that a synthetic noise image is
   displayed in the :guilabel:`Camera View` window.
@@ -59,7 +59,7 @@ To save an image to disk, follow these steps:
 * In the :guilabel:`Timepoint Settings` window, select :guilabel:`Save Data` (:kbd:`ctrl + enter`).
   If the number of timepoints is set to ``1``, only a single stack will be acquired.
 
-* Change the :guilabel:`Acquire Bar` to the :guilabel:`Z-Stack` mode, and press :guilabel:`Acquire` (:kbd:`ctrl + enter`).
+* Change the :guilabel:`Acquire Bar` to the "Z-Stack" mode, and press :guilabel:`Acquire` (:kbd:`ctrl + enter`).
 
 * A :guilabel:`File Saving Dialog` popup window will appear.
     * With the exception of :guilabel:`Notes`, all fields must be populated. Any spaces in the fields will be replaced with an underscore.

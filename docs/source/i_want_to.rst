@@ -9,8 +9,7 @@ organized into three levels of difficulty: beginner, intermediate, and advanced.
 - The beginner tutorials are intended for users who have little to no experience with
   computer programming and simply wish to acquire an image.
 
-- The intermediate tutorials are intended for users who have some experience with
-  computer programming and wish to learn how to use the graphical user interface to
+- The intermediate tutorials are intended for users who want to learn how to use the graphical user interface to
   create their own smart acquisition workflows.
 
 - The advanced tutorials are intended for users who have experience with computer

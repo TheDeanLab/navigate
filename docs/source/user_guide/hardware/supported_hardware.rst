@@ -751,7 +751,7 @@ Analog-Controlled Galvo/Piezo
 We sometimes control position via a galvo or piezo with no software API.
 In this case, we treat a standard galvo mirror or piezo as a stage axis. We control the
 "stage" via voltages sent to the galvo or piezo. The ``volts_per_micron`` setting
-allows the user to pass an equation that converts position in microns ``x``, which is
+allows the user to pass an equation that converts position in microns ``X``, which is
 passed from the software stage controls, to a voltage. Note that we use
 ``GalvoNIStage`` whether or not the device is a galvo or a piezo since the logic is
 identical. The voltage signal is delivered via the data acquisition card specified in the

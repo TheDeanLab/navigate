@@ -122,8 +122,8 @@ types of a single hardware.
     with the device.
 
 Running the software with our current microscope setup would fail. It turns out our
-ASI stage only moves in the ``x``, ``y``, ``z`` and ``f`` axes. Later, you will see we need a way to
-handle ``theta`` axis. To address this, we will change our ``stage`` block of the YAML to
+ASI stage only moves in the ``X``, ``Y``, ``Z`` and ``F`` axes. Later, you will see we need a way to
+handle ``Theta`` axis. To address this, we will change our ``stage`` block of the YAML to
 also load a ``SyntheticStage``:
 
 .. code-block:: yaml
@@ -228,14 +228,14 @@ specifies joystick-controlled axes.
 
 First we set the axes controlled by each piece of hardware and a mapping from the
 hardware's API axes to our software's axes. For example, the ASI ``M`` axis is mapped
-onto our software's ``x`` axis below.
+onto our software's ``X`` axis below.
 
 As you may recall from the :ref:`Hardware Section <hardware_section>`, we needed to
-add the ``SyntheticStage`` to control ``theta``. We now specify in the microscope that
-``theta`` is controlled by the synthetic stage in the ``hardware`` section of
+add the ``SyntheticStage`` to control ``Theta``. We now specify in the microscope that
+``Theta`` is controlled by the synthetic stage in the ``hardware`` section of
 ``microscope1``.
 
-Below this, we specify that only ``x``, ``y`` and ``z`` axes may be controlled by a joystick and
+Below this, we specify that only ``X``, ``Y`` and ``Z`` axes may be controlled by a joystick and
 we set the stage bounds for each of the axes.
 
 Finally, we set the offset for each stage axis. This is an offset relative to other
@@ -251,10 +251,10 @@ Stage Axes Definition
 
 Many times, the coordinate system of the stage hardware do not agree with the optical
 definition of each axes identity. For example, many stages define their vertical
-dimension as ``z``, whereas optically, we often define this axis as ``x``. Thus, there is
+dimension as ``Z``, whereas optically, we often define this axis as ``X``. Thus, there is
 often a need to map the mechanical axes to the optical axes, and this is done with
 the ``axes_mapping`` dictionary entry in the stage hardware section. By default, stage axes
-are read in as ``x``, ``y``, ``z``, ``theta``, ``f``, where ``theta`` is rotation and ``f``
+are read in as ``X``, ``Y``, ``Z``, ``Theta``, ``F``, where ``Theta`` is rotation and ``F``
 is focus, but this can be changed by changing axes mapping.
 
 .. code-block:: yaml
@@ -262,7 +262,7 @@ is focus, but this can be changed by changing axes mapping.
     axes: [x, y, z, theta, f]
     axes_mapping: [x, y, z, r, f]
 
-If, on a certain microscope, the ``z`` stage axis corresponds to the optical y-axis,
+If, on a certain microscope, the ``Z`` stage axis corresponds to the optical y-axis,
 and vice versa, you would then have to import the stages as following:
 
 .. code-block:: yaml
@@ -287,7 +287,7 @@ appear in the stage field as following:
 
     These axes should agree with the optical axes. If, on the same microscope
     as mentioned in the Stage Axes Definition section, the joystick were to control
-    the optical y-axis corresponding to the stage z axis, you would have to put ``y`` in
+    the optical y-axis corresponding to the stage z axis, you would have to put ``Y`` in
     the joystick axes brackets as following:
 
 .. code-block:: yaml

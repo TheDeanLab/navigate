@@ -80,8 +80,8 @@ The stage control menu is split by horizontal dividers into three parts.
 
 The top part provides similar functionality to the 
 :ref:`Stage Control Settings Notebook <stage_control_notebook>`. It allows movement
-of the stage along ``x``, ``y``, ``z``, ``focus`` and ``theta``. Here, you can see the ``w``, ``s``, ``a``
-and ``d`` keys are bound to movement in ``x`` and ``y``, and these can be used to scroll around
+of the stage along ``X``, ``Y``, ``Z``, ``focus`` and ``Theta``. Here, you can see the ``w``, ``s``, ``a``
+and ``d`` keys are bound to movement in ``X`` and ``Y``, and these can be used to scroll around
 a sample.
 
 The middle part provides similar functionality to the 
@@ -214,14 +214,14 @@ Stack Acquisition Settings (:math:`\mu\text{m}`)
 These are the settings used for a standard Z-Stack Acquisition. 
 
 :guilabel:`Pos` indicates z-positions. :guilabel:`Foc` indicates focus positions. The
-z-stack can optionally ramp through ``focus`` along with ``z``.
+z-stack can optionally ramp through ``focus`` along with ``Z``.
 
 :guilabel:`Start` and :guilabel:`End` are always expressed relative to the center of 
 the z-stack. :guilabel:`Abs Z Start` and :guilabel:`Abs Z Stop` provide true stage 
 positions at the start and end of the z-stack. 
 
 The buttons :guilabel:`Set Start Pos/Foc` and :guilabel:`Set End Pos/Foc` grab the
-current ``z`` and ``focus`` positions from the stage and enter them into the corresponding
+current ``Z`` and ``focus`` positions from the stage and enter them into the corresponding
 start and end (stop) GUI boxes.
 
 The :guilabel:`Step Size` is expressed in microns and can be modified by the user. Upon
@@ -544,7 +544,7 @@ The :guilabel:`Camera View` Notebook is is a tab (optionally, a popup) that is s
 two parts. The left part displays the latest image acquired by the camera. The right 
 part modifies this display and is split into :guilabel:`LUT`, :guilabel:`Image Metrics`, and :guilabel:`Image Display`.
 
-:kbd:`Left-clicking` on the image toggles cross-hairs that indicate the center of the field of
+:kbd:`Left-clicking` on the image toggles crosshairs that indicate the center of the field of
 view. 
 
 -------------------

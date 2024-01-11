@@ -159,8 +159,8 @@ Galvos
 Stages
 ------
 
-#. Install and configure the Stages. You will need to specify stages for the ``x``,
-   ``y``, ``z``, ``theta``, and ``f`` axes. If you do not need one of these stages,
+#. Install and configure the Stages. You will need to specify stages for the ``X``,
+   ``Y``, ``Z``, ``Theta``, and ``F`` axes. If you do not need one of these stages,
    it should remain specified as a ``SyntheticStage``. It is also important to make
    sure that you map the stage coordinates to the software coordinates. For example,
    with the Sutter MP285, the vertical movement of the stage is its z axis. However,
@@ -174,4 +174,4 @@ Stages
         axes: [x] # software axes
         axes_mapping: [z] #hardware axes
 
-   Importantly, any stage you designate as ``z`` will be used for acquisition of a z-stack.
+   Importantly, any stage you designate as ``Z`` will be used for acquisition of a z-stack.

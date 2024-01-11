@@ -74,7 +74,7 @@ Now, right-click ``MoveToNextPositionInMultiPositionTable`` and press
   this feature should check for tissue.
 
 * :guilabel:`percentage` indicates what percent of the total image must contain tissue
-  for this feature to return ``True`` that tissue was detected. 1 indicates that the entire
+  for this feature to return ``true`` that tissue was detected. 1 indicates that the entire
   image contains tissue, 0.5 indicates that half of the image contains tissue, and so on.
 
 * :guilabel:`detect_func` is one of the tissue detection functions in 
@@ -83,8 +83,8 @@ Now, right-click ``MoveToNextPositionInMultiPositionTable`` and press
   tissue is present if signal is above the Otsu threshold of the stack of images 
   acquired.
 
-In this example, if any plane meets the desired threshold, the feature will return ``True`` and
-it will be acquired. If no plane meets the desired threshold, the feature will return ``False``
+In this example, if any plane meets the desired threshold, the feature will return ``true`` and
+it will be acquired. If no plane meets the desired threshold, the feature will return ``false``
 
 Now, right-click ``DetectTissueInStackAndReturn`` and press
 :guilabel:`Insert After`. Click the new tile and change it to 
@@ -107,7 +107,7 @@ this channel visit every position in the multiposition table, and detect if ther
 tissue. However, we do no yet make any decisions of what to do if tissue is found.
 To do this, we will convert ``DetectTissueInStackAndReturn`` into a decision node.
 
-To do this, we add ``True`` and ``False`` options within the feature braces:
+To do this, we add ``true`` and ``false`` options within the feature braces:
 
 .. code-block:: python
 
@@ -116,12 +116,12 @@ To do this, we add ``True`` and ``False`` options within the feature braces:
      "True": [
             {
              "name": ZStackAcquisition,
-             "args": (False, False, "z-stack",),}],
+             "args": (false, false, "z-stack",),}],
              "False": "continue",
              }.
 
-Our ``True`` argument tells the software what to do if tissue is detected. In this
-case, we take a z-stack at the positions where tissue is found. The ``False``
+Our ``true`` argument tells the software what to do if tissue is detected. In this
+case, we take a z-stack at the positions where tissue is found. The ``false``
 argument tells the software how to proceed if no tissue is found. In this case, the
 ``"continue"`` option tells the software to keep moving through the loop to the next
 position in the multi-position table. Press :guilabel:`Preview` to see the update.
@@ -134,15 +134,15 @@ node. Click on it to access the decision node GUI.
 .. image:: images/feature_gui_10.png
 
 This contains the same settings for ``DetectTissueInStackAndReturn`` we saw before, but
-now also features GUI editing windows for the results of ``True`` and ``False``
+now also features GUI editing windows for the results of ``true`` and ``false``
 decisions arising from this node.
 
 Close the node window and press :guilabel:`Add` in the "Add New Feature List" window.
 This feature is now available under :menuselection:`Features --> TestFeature` and 
-can be run in :guilabel:`Customized`
+can be run in "Customized"
 :ref:`acquisition mode <user_guide/gui_walkthrough:acquisition bar>`.
 
-Select :guilabel:`Customized` acquisition mode, select :menuselection:`Features --> TestFeature`,
+Select "Customized" acquisition mode, select :menuselection:`Features --> TestFeature`,
 and press :guilabel:`Acquire`. For the positions shown at the start of this guide, the
 software will go to the first position in the multi-position table, decide there is
 tissue present, and take a z-stack. It will then go to the second position in the 

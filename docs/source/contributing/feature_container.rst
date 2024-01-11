@@ -14,8 +14,8 @@ Once a feature is executed, any features dependent on this feature's execution
 will execute (for example, move the stage, then snap a picture). Following
 this, the next set of features in sequence will be executed.
 
-Examples of some existing features include ``ZStackAcquisition``, which acquires a
-z-stack, and ``Autofocus``, which finds the
+Examples of some existing features include ``navigate.model.features.common_features.ZStackAcquisition``, which acquires a
+z-stack, and ``navigate.model.features.autofocus.Autofocus``, which finds the
 ideal plane of focus of a sample using a Discrete Cosine Transform.
 
 -----------------

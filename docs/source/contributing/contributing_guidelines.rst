@@ -21,7 +21,6 @@ General Principles
   New functionality should keep this strong separation.
     - The model operates in its own subprocess and is responsible for
       communicating with hardware and performing image handling and processing tasks.
-      All core logic is contained in the model.
     - The view is responsible for displaying the user interface and
       communicating with the controller.
     - The controller is responsible for managing the user interface and
@@ -118,7 +117,7 @@ Unit Tests
 Each line of code is unit tested to ensure it behaves appropriately
 and alert future coders to modifications that break expected functionality.
 Guidelines for writing good unit tests can be found `here <https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test>`_
-and `here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0>`_,
+and `over here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0>`_,
 or see examples of other unit tests in this repository's :any:`test` folder. We
 use the `pytest library <https://docs.pytest.org/en/7.2.x/>`_ to evaluate unit
 tests. Please check that unit tests pass on your machine before making a pull request.

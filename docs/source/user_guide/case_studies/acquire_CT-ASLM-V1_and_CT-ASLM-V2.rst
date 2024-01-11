@@ -40,7 +40,7 @@ It's recommended to start the software before loading the sample on the stage.
 #. Set the wavelength's :guilabel:`Amplitude` and :guilabel:`Offset` to ``0.0``.
 #. Select the channel with a proper laser under the :guilabel:`Channels` tab and set
    the laser power to an appropriate value.
-#. Select :guilabel:`Continuous Scan` from the dropdown next to the :guilabel:`Acquire` button.
+#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Scroll around with the stage either via joystick or using the controls in the
    :guilabel:`Stage Control` tab until the sample comes into view.
@@ -68,7 +68,7 @@ offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) axial resolution.
 #. Put a slit into the setup.
 #. Select the channel with a proper laser under the :guilabel:`Channels` tab and set
    the laser power to an appropriate value.
-#. Select :guilabel:`Continuous Scan` from the dropdown next to the :guilabel:`Acquire` button.
+#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. If needed, slowly adjust the slit opening until the image sharpness looks uniform
    across the whole field of view. Uncheck :guilabel:`Autoscale` in

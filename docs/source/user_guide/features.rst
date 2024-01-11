@@ -141,7 +141,7 @@ features:
 Editing Feature Lists on the Fly
 --------------------------------
 
-#. Select the feature list you want to run, choose :guilabel:`Customized` acquisition mode, and
+#. Select the feature list you want to run, choose "Customized" acquisition mode, and
    then click :guilabel:`Acquire`. A :guilabel:`Feature List Configuration` popup window will show up. In this
    popup window, you can see the structure of the selected feature list.
 

@@ -116,12 +116,12 @@
 <h1>navigate.model.features.image_writer.ImageWriter<a class="headerlink" href="#navigate-model-features-image-writer-imagewriter" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="navigate.model.features.image_writer.ImageWriter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.features.image_writer.</span></span><span class="sig-name descname"><span class="pre">ImageWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.features.image_writer.</span></span><span class="sig-name descname"><span class="pre">ImageWriter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class for saving acquired data to disk.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.features.image_writer.ImageWriter.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Class for saving acquired data to disk.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -152,10 +152,7 @@ indicating where to save data</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.generate_image_name" title="navigate.model.features.image_writer.ImageWriter.generate_image_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_image_name</span></code></a>(current_channel[, ext])</p></td>
 <td><p>Generates a string for the filename, e.g., CH00_000000.tif.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.generate_meta_data" title="navigate.model.features.image_writer.ImageWriter.generate_meta_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_meta_data</span></code></a>()</p></td>
-<td><p>Generate meta data for the image.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.save_image" title="navigate.model.features.image_writer.ImageWriter.save_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_image</span></code></a>(frame_ids)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.save_image" title="navigate.model.features.image_writer.ImageWriter.save_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_image</span></code></a>(frame_ids)</p></td>
 <td><p>Save the data to disk.</p></td>
 </tr>
 </tbody>
@@ -169,43 +166,34 @@ indicating where to save data</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.number_of_frames" title="navigate.model.features.image_writer.ImageWriter.number_of_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_frames</span></code></a></p></td>
 <td><p>Number of frames in the experiment.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.save_directory" title="navigate.model.features.image_writer.ImageWriter.save_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_directory</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.saving_flags" title="navigate.model.features.image_writer.ImageWriter.saving_flags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">saving_flags</span></code></a></p></td>
+<td><p>Array of saving flags</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.save_directory" title="navigate.model.features.image_writer.ImageWriter.save_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_directory</span></code></a></p></td>
 <td><p>Directory for saving data to disk.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.sub_dir" title="navigate.model.features.image_writer.ImageWriter.sub_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sub_dir</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.sub_dir" title="navigate.model.features.image_writer.ImageWriter.sub_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sub_dir</span></code></a></p></td>
 <td><p>Sub-directory for saving data to disk.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.num_of_channels" title="navigate.model.features.image_writer.ImageWriter.num_of_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_of_channels</span></code></a></p></td>
-<td><p>Number of channels in the experiment.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.num_of_positions" title="navigate.model.features.image_writer.ImageWriter.num_of_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_of_positions</span></code></a></p></td>
-<td><p>Number of positions in the experiment.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.num_of_timepoints" title="navigate.model.features.image_writer.ImageWriter.num_of_timepoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_of_timepoints</span></code></a></p></td>
-<td><p>Number of time points in the experiment.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.num_of_slices" title="navigate.model.features.image_writer.ImageWriter.num_of_slices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_of_slices</span></code></a></p></td>
-<td><p>Number of z-slices in the experiment.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.current_time_point" title="navigate.model.features.image_writer.ImageWriter.current_time_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_time_point</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.current_time_point" title="navigate.model.features.image_writer.ImageWriter.current_time_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_time_point</span></code></a></p></td>
 <td><p>Current time point for saving data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.config_table" title="navigate.model.features.image_writer.ImageWriter.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.config_table" title="navigate.model.features.image_writer.ImageWriter.config_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_table</span></code></a></p></td>
 <td><p>Dictionary of functions to call for each configuration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.big_tiff" title="navigate.model.features.image_writer.ImageWriter.big_tiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">big_tiff</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.big_tiff" title="navigate.model.features.image_writer.ImageWriter.big_tiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">big_tiff</span></code></a></p></td>
 <td><p>Is 32 vs 64-bit file format.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.mip" title="navigate.model.features.image_writer.ImageWriter.mip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mip</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.mip" title="navigate.model.features.image_writer.ImageWriter.mip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mip</span></code></a></p></td>
 <td><p>Maximum intensity projection image.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.mip_directory" title="navigate.model.features.image_writer.ImageWriter.mip_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mip_directory</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.mip_directory" title="navigate.model.features.image_writer.ImageWriter.mip_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mip_directory</span></code></a></p></td>
 <td><p>Directory for saving maximum intensity projection images.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.file_type" title="navigate.model.features.image_writer.ImageWriter.file_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">file_type</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.file_type" title="navigate.model.features.image_writer.ImageWriter.file_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">file_type</span></code></a></p></td>
 <td><p>File type for saving data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.data_source" title="navigate.model.features.image_writer.ImageWriter.data_source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_source</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.image_writer.ImageWriter.data_source" title="navigate.model.features.image_writer.ImageWriter.data_source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_source</span></code></a></p></td>
 <td><p>Data source for saving data to disk.</p></td>
 </tr>
 </tbody>
@@ -248,21 +236,6 @@ of saved color channel.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="navigate.model.features.image_writer.ImageWriter.generate_meta_data">
-<span class="sig-name descname"><span class="pre">generate_meta_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter.generate_meta_data" title="Permalink to this definition"></a></dt>
-<dd><p>Generate meta data for the image.</p>
-<p>TODO: Is this a vestigial function? DELETE???</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Meta data for the image.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -367,50 +340,6 @@ of saved color channel.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.features.image_writer.ImageWriter.num_of_channels">
-<span class="sig-name descname"><span class="pre">num_of_channels</span></span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter.num_of_channels" title="Permalink to this definition"></a></dt>
-<dd><p>Number of channels in the experiment.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.features.image_writer.ImageWriter.num_of_positions">
-<span class="sig-name descname"><span class="pre">num_of_positions</span></span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter.num_of_positions" title="Permalink to this definition"></a></dt>
-<dd><p>Number of positions in the experiment.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.features.image_writer.ImageWriter.num_of_slices">
-<span class="sig-name descname"><span class="pre">num_of_slices</span></span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter.num_of_slices" title="Permalink to this definition"></a></dt>
-<dd><p>Number of z-slices in the experiment.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.features.image_writer.ImageWriter.num_of_timepoints">
-<span class="sig-name descname"><span class="pre">num_of_timepoints</span></span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter.num_of_timepoints" title="Permalink to this definition"></a></dt>
-<dd><p>Number of time points in the experiment.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.features.image_writer.ImageWriter.number_of_frames">
 <span class="sig-name descname"><span class="pre">number_of_frames</span></span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter.number_of_frames" title="Permalink to this definition"></a></dt>
 <dd><p>Number of frames in the experiment.</p>
@@ -428,6 +357,17 @@ of saved color channel.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.image_writer.ImageWriter.saving_flags">
+<span class="sig-name descname"><span class="pre">saving_flags</span></span><a class="headerlink" href="#navigate.model.features.image_writer.ImageWriter.saving_flags" title="Permalink to this definition"></a></dt>
+<dd><p>Array of saving flags</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array</p>
 </dd>
 </dl>
 </dd></dl>

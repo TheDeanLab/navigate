@@ -2,7 +2,7 @@
 Imaging on an Upright ASLM
 ==========================
 
-This is a case study in using the software to image with an upright ASLM microscope.
+This is a case study in using the software to image with an upright ASLM microscope. The upright ASLM equipped with an ASI FTP2000 and an ASLM microscope in an upright configuration. This microscope configuration allows for imaging across large scan ranges and imaging during scanning which we term constant velocity acquisition. This tutorial aims to show how it is possible to image the sample while imaging in both ASLM mode and normal lightsheet mode.
 
 
 Loading and finding the sample
@@ -21,7 +21,7 @@ Loading and finding the sample
 Imaging a Z-Stack using Stop and Settle Mode
 ============================================
 
-#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
+#. Select :guilabel:`Continuous Scan` from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Using the :guilabel:`Stage Control`, go to a shallow z-position in the sample.
    Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)`
@@ -62,7 +62,7 @@ Imaging a Z-Stack using Constant Velocity Acquisition Mode
    :guilabel:`Stack Acquistion Settings (um)`. Step size can only be increments of
    0.1 and the minimum is 0.2.
 #. Select the number of color channels needed imaging in the :guilabel:`Channel tab`
-   under :guilabel: `Channel Settings`. Select the correct filter for each channel by
+   under :guilabel:`Channel Settings`. Select the correct filter for each channel by
    using the dropdown menu after each channel under the :guilabel:`Filter`.
 #. Change the exposure time by changing number in the :guilabel:`Exp. Time (ms)` for
    each channel. For the ORCA Lightning camera using ASLM mode, the minimum frame rate

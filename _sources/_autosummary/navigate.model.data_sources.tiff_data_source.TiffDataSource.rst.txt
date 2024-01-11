@@ -22,6 +22,7 @@ navigate.model.data\_sources.tiff\_data\_source.TiffDataSource
       ~TiffDataSource.get_shape_from_metadata
       ~TiffDataSource.read
       ~TiffDataSource.set_bigtiff
+      ~TiffDataSource.set_metadata
       ~TiffDataSource.set_metadata_from_configuration_experiment
       ~TiffDataSource.write
    

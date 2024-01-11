@@ -24,6 +24,7 @@ navigate.model.metadata\_sources.bdv\_metadata.BigDataViewerMetadata
       ~BigDataViewerMetadata.get_affine_parameters
       ~BigDataViewerMetadata.parse_xml
       ~BigDataViewerMetadata.set_from_configuration_experiment
+      ~BigDataViewerMetadata.set_from_dict
       ~BigDataViewerMetadata.set_shape_from_configuration_experiment
       ~BigDataViewerMetadata.set_stack_order_from_configuration_experiment
       ~BigDataViewerMetadata.stage_positions_to_affine_matrix

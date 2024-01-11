@@ -21,6 +21,7 @@ navigate.model.data\_sources.bdv\_data\_source.BigDataViewerDataSource
       ~BigDataViewerDataSource.get_shape_from_metadata
       ~BigDataViewerDataSource.get_slice
       ~BigDataViewerDataSource.read
+      ~BigDataViewerDataSource.set_metadata
       ~BigDataViewerDataSource.set_metadata_from_configuration_experiment
       ~BigDataViewerDataSource.write
    

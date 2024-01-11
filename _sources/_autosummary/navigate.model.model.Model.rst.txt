@@ -33,6 +33,7 @@ navigate.model.model.Model
       ~Model.load_feature_list_from_str
       ~Model.load_feature_records
       ~Model.load_images
+      ~Model.mark_saving_flags
       ~Model.move_stage
       ~Model.pause_data_thread
       ~Model.prepare_acquisition
@@ -79,6 +80,7 @@ navigate.model.model.Model
       ~Model.img_height
       ~Model.binning
       ~Model.data_buffer_positions
+      ~Model.data_buffer_saving_flags
       ~Model.is_acquiring
       ~Model.f_position
       ~Model.max_entropy

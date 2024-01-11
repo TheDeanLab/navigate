@@ -33,7 +33,6 @@
    navigate.model.data_sources
    navigate.model.device_startup_functions
    navigate.model.devices
-   navigate.model.dummy
    navigate.model.features
    navigate.model.metadata_sources
    navigate.model.microscope

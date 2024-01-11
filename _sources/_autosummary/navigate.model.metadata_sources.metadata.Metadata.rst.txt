@@ -18,6 +18,7 @@ navigate.model.metadata\_sources.metadata.Metadata
    
       ~Metadata.__init__
       ~Metadata.set_from_configuration_experiment
+      ~Metadata.set_from_dict
       ~Metadata.set_shape_from_configuration_experiment
       ~Metadata.set_stack_order_from_configuration_experiment
    

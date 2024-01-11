@@ -19,6 +19,7 @@ navigate.model.metadata\_sources.ome\_tiff\_metadata.OMETIFFMetadata
       ~OMETIFFMetadata.__init__
       ~OMETIFFMetadata.ome_tiff_xml_dict
       ~OMETIFFMetadata.set_from_configuration_experiment
+      ~OMETIFFMetadata.set_from_dict
       ~OMETIFFMetadata.set_shape_from_configuration_experiment
       ~OMETIFFMetadata.set_stack_order_from_configuration_experiment
       ~OMETIFFMetadata.to_xml

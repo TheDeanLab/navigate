@@ -74,7 +74,6 @@
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a></li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.dummy.html">navigate.model.dummy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
@@ -196,52 +195,55 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.load_images" title="navigate.model.model.Model.load_images"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_images</span></code></a>([filenames])</p></td>
 <td><p>Load/Unload images to the Synthetic Camera</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.move_stage" title="navigate.model.model.Model.move_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_stage</span></code></a>(pos_dict[, wait_until_done])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.mark_saving_flags" title="navigate.model.model.Model.mark_saving_flags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mark_saving_flags</span></code></a>(frame_ids)</p></td>
+<td><p>Mark saving flags for the ImageWriter</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.move_stage" title="navigate.model.model.Model.move_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_stage</span></code></a>(pos_dict[, wait_until_done])</p></td>
 <td><p>Moves the stages.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.pause_data_thread" title="navigate.model.model.Model.pause_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_thread</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.pause_data_thread" title="navigate.model.model.Model.pause_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_thread</span></code></a>()</p></td>
 <td><p>Pause the data thread.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.prepare_acquisition" title="navigate.model.model.Model.prepare_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_acquisition</span></code></a>([turn_off_flags])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.prepare_acquisition" title="navigate.model.model.Model.prepare_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_acquisition</span></code></a>([turn_off_flags])</p></td>
 <td><p>Prepare the acquisition.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.release_pipe" title="navigate.model.model.Model.release_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_pipe</span></code></a>(pipe_name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.release_pipe" title="navigate.model.model.Model.release_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_pipe</span></code></a>(pipe_name)</p></td>
 <td><p>Close a data pipe.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.resume_data_thread" title="navigate.model.model.Model.resume_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resume_data_thread</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.resume_data_thread" title="navigate.model.model.Model.resume_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resume_data_thread</span></code></a>()</p></td>
 <td><p>Resume the data thread.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_acquisition" title="navigate.model.model.Model.run_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_acquisition</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_acquisition" title="navigate.model.model.Model.run_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_acquisition</span></code></a>()</p></td>
 <td><p>Run acquisition along with a feature list one time.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_command" title="navigate.model.model.Model.run_command"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_command</span></code></a>(command, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_command" title="navigate.model.model.Model.run_command"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_command</span></code></a>(command, *args, **kwargs)</p></td>
 <td><p>Receives commands from the controller.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_data_process" title="navigate.model.model.Model.run_data_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_data_process</span></code></a>([num_of_frames, data_func])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_data_process" title="navigate.model.model.Model.run_data_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_data_process</span></code></a>([num_of_frames, data_func])</p></td>
 <td><p>Run the data process.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_live_acquisition" title="navigate.model.model.Model.run_live_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_live_acquisition</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.run_live_acquisition" title="navigate.model.model.Model.run_live_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_live_acquisition</span></code></a>()</p></td>
 <td><p>Stream live image to the GUI.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.simplified_data_process" title="navigate.model.model.Model.simplified_data_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simplified_data_process</span></code></a>(microscope, ...[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.simplified_data_process" title="navigate.model.model.Model.simplified_data_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simplified_data_process</span></code></a>(microscope, ...[, ...])</p></td>
 <td><p>Run the data process.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.snap_image" title="navigate.model.model.Model.snap_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snap_image</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.snap_image" title="navigate.model.model.Model.snap_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snap_image</span></code></a>()</p></td>
 <td><p>Acquire an image after updating the waveforms.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.stop_stage" title="navigate.model.model.Model.stop_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_stage</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.stop_stage" title="navigate.model.model.Model.stop_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_stage</span></code></a>()</p></td>
 <td><p>Stop the stages.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.terminate" title="navigate.model.model.Model.terminate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">terminate</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.terminate" title="navigate.model.model.Model.terminate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">terminate</span></code></a>()</p></td>
 <td><p>Terminate the model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.update_data_buffer" title="navigate.model.model.Model.update_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_data_buffer</span></code></a>([img_width, img_height])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.update_data_buffer" title="navigate.model.model.Model.update_data_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_data_buffer</span></code></a>([img_width, img_height])</p></td>
 <td><p>Update the Data Buffer</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.update_ilastik_setting" title="navigate.model.model.Model.update_ilastik_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ilastik_setting</span></code></a>([...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.update_ilastik_setting" title="navigate.model.model.Model.update_ilastik_setting"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ilastik_setting</span></code></a>([...])</p></td>
 <td><p>Update the ilastik setting.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.update_mirror" title="navigate.model.model.Model.update_mirror"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_mirror</span></code></a>([coef, flatten])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.update_mirror" title="navigate.model.model.Model.update_mirror"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_mirror</span></code></a>([coef, flatten])</p></td>
 <td><p>Update the mirror.</p></td>
 </tr>
 </tbody>
@@ -310,72 +312,75 @@
 <td><p>Binning mode.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.data_buffer_positions" title="navigate.model.model.Model.data_buffer_positions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_buffer_positions</span></code></a></p></td>
-<td><p>Number of frames in the data buffer.</p></td>
+<td><p>stage positions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.is_acquiring" title="navigate.model.model.Model.is_acquiring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_acquiring</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.data_buffer_saving_flags" title="navigate.model.model.Model.data_buffer_saving_flags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_buffer_saving_flags</span></code></a></p></td>
+<td><p>saving flags for a frame</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.is_acquiring" title="navigate.model.model.Model.is_acquiring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_acquiring</span></code></a></p></td>
 <td><p>Is the model acquiring?</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.f_position" title="navigate.model.model.Model.f_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_position</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.f_position" title="navigate.model.model.Model.f_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f_position</span></code></a></p></td>
 <td><p>Current focus position.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.max_entropy" title="navigate.model.model.Model.max_entropy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_entropy</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.max_entropy" title="navigate.model.model.Model.max_entropy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_entropy</span></code></a></p></td>
 <td><p>Autofocus maximum entropy.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.focus_pos" title="navigate.model.model.Model.focus_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">focus_pos</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.focus_pos" title="navigate.model.model.Model.focus_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">focus_pos</span></code></a></p></td>
 <td><p>Autofocus maximum entropy position.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.signal_thread" title="navigate.model.model.Model.signal_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_thread</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.signal_thread" title="navigate.model.model.Model.signal_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_thread</span></code></a></p></td>
 <td><p>Signal thread.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.data_thread" title="navigate.model.model.Model.data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_thread</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.data_thread" title="navigate.model.model.Model.data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_thread</span></code></a></p></td>
 <td><p>Data thread.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.show_img_pipe" title="navigate.model.model.Model.show_img_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_img_pipe</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.show_img_pipe" title="navigate.model.model.Model.show_img_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_img_pipe</span></code></a></p></td>
 <td><p>Show image pipe.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.plot_pipe" title="navigate.model.model.Model.plot_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pipe</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.plot_pipe" title="navigate.model.model.Model.plot_pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pipe</span></code></a></p></td>
 <td><p>Plot pipe.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.event_queue" title="navigate.model.model.Model.event_queue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">event_queue</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.event_queue" title="navigate.model.model.Model.event_queue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">event_queue</span></code></a></p></td>
 <td><p>Waveform queue.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.frame_id" title="navigate.model.model.Model.frame_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">frame_id</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.frame_id" title="navigate.model.model.Model.frame_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">frame_id</span></code></a></p></td>
 <td><p>Frame ID.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.autofocus_on" title="navigate.model.model.Model.autofocus_on"><code class="xref py py-obj docutils literal notranslate"><span class="pre">autofocus_on</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.autofocus_on" title="navigate.model.model.Model.autofocus_on"><code class="xref py py-obj docutils literal notranslate"><span class="pre">autofocus_on</span></code></a></p></td>
 <td><p>Autofocus on?</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.is_live" title="navigate.model.model.Model.is_live"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_live</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.is_live" title="navigate.model.model.Model.is_live"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_live</span></code></a></p></td>
 <td><p>Is the model live?</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.is_save" title="navigate.model.model.Model.is_save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_save</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.is_save" title="navigate.model.model.Model.is_save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_save</span></code></a></p></td>
 <td><p>Is the model saving the data?</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.stop_acquisition" title="navigate.model.model.Model.stop_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_acquisition</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.stop_acquisition" title="navigate.model.model.Model.stop_acquisition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_acquisition</span></code></a></p></td>
 <td><p>Stop signal and data threads?</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.stop_send_signal" title="navigate.model.model.Model.stop_send_signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_send_signal</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.stop_send_signal" title="navigate.model.model.Model.stop_send_signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_send_signal</span></code></a></p></td>
 <td><p>Stop signal thread?</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.pause_data_event" title="navigate.model.model.Model.pause_data_event"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_event</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.pause_data_event" title="navigate.model.model.Model.pause_data_event"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_event</span></code></a></p></td>
 <td><p>Pause data event.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.pause_data_ready_lock" title="navigate.model.model.Model.pause_data_ready_lock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_ready_lock</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.pause_data_ready_lock" title="navigate.model.model.Model.pause_data_ready_lock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_data_ready_lock</span></code></a></p></td>
 <td><p>Pause data ready lock.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.ask_to_pause_data_thread" title="navigate.model.model.Model.ask_to_pause_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ask_to_pause_data_thread</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.ask_to_pause_data_thread" title="navigate.model.model.Model.ask_to_pause_data_thread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ask_to_pause_data_thread</span></code></a></p></td>
 <td><p>Ask to pause data thread?</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.number_of_frames" title="navigate.model.model.Model.number_of_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_frames</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.number_of_frames" title="navigate.model.model.Model.number_of_frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_frames</span></code></a></p></td>
 <td><p>Number of frames in the data buffer.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.image_writer" title="navigate.model.model.Model.image_writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_writer</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.image_writer" title="navigate.model.model.Model.image_writer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_writer</span></code></a></p></td>
 <td><p>Image writer.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.addon_feature" title="navigate.model.model.Model.addon_feature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addon_feature</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.addon_feature" title="navigate.model.model.Model.addon_feature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addon_feature</span></code></a></p></td>
 <td><p>add on feature in customized mode</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.model.Model.feature_list" title="navigate.model.model.Model.feature_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">feature_list</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.model.Model.feature_list" title="navigate.model.model.Model.feature_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">feature_list</span></code></a></p></td>
 <td><p>List of features.</p></td>
 </tr>
 </tbody>
@@ -608,6 +613,17 @@ string of the feature list</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filenames</strong> (<em>list</em>) – List of filenames to load.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.model.Model.mark_saving_flags">
+<span class="sig-name descname"><span class="pre">mark_saving_flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.model.Model.mark_saving_flags" title="Permalink to this definition"></a></dt>
+<dd><p>Mark saving flags for the ImageWriter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>frame_ids</strong> (<em>array</em>) – a list of frame ids</p>
 </dd>
 </dl>
 </dd></dl>
@@ -920,10 +936,21 @@ waveforms into the buffers of the DAQ cards.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.model.Model.data_buffer_positions">
 <span class="sig-name descname"><span class="pre">data_buffer_positions</span></span><a class="headerlink" href="#navigate.model.model.Model.data_buffer_positions" title="Permalink to this definition"></a></dt>
-<dd><p>Number of frames in the data buffer.</p>
+<dd><p>stage positions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.model.Model.data_buffer_saving_flags">
+<span class="sig-name descname"><span class="pre">data_buffer_saving_flags</span></span><a class="headerlink" href="#navigate.model.model.Model.data_buffer_saving_flags" title="Permalink to this definition"></a></dt>
+<dd><p>saving flags for a frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array</p>
 </dd>
 </dl>
 </dd></dl>

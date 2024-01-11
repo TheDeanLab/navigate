@@ -20,7 +20,6 @@ navigate.model.features.image\_writer.ImageWriter
       ~ImageWriter.calculate_and_check_disk_space
       ~ImageWriter.close
       ~ImageWriter.generate_image_name
-      ~ImageWriter.generate_meta_data
       ~ImageWriter.save_image
    
    
@@ -33,12 +32,9 @@ navigate.model.features.image\_writer.ImageWriter
    
       ~ImageWriter.data_buffer
       ~ImageWriter.number_of_frames
+      ~ImageWriter.saving_flags
       ~ImageWriter.save_directory
       ~ImageWriter.sub_dir
-      ~ImageWriter.num_of_channels
-      ~ImageWriter.num_of_positions
-      ~ImageWriter.num_of_timepoints
-      ~ImageWriter.num_of_slices
       ~ImageWriter.current_time_point
       ~ImageWriter.config_table
       ~ImageWriter.big_tiff

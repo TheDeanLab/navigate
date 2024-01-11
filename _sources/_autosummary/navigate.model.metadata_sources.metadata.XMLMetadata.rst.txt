@@ -18,6 +18,7 @@ navigate.model.metadata\_sources.metadata.XMLMetadata
    
       ~XMLMetadata.__init__
       ~XMLMetadata.set_from_configuration_experiment
+      ~XMLMetadata.set_from_dict
       ~XMLMetadata.set_shape_from_configuration_experiment
       ~XMLMetadata.set_stack_order_from_configuration_experiment
       ~XMLMetadata.to_xml

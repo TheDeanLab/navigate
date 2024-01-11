@@ -20,6 +20,7 @@ navigate.model.data\_sources.data\_source.DataSource
       ~DataSource.close
       ~DataSource.get_shape_from_metadata
       ~DataSource.read
+      ~DataSource.set_metadata
       ~DataSource.set_metadata_from_configuration_experiment
       ~DataSource.write
    

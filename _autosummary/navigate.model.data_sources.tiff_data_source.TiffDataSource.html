@@ -80,7 +80,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a></li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.dummy.html">navigate.model.dummy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
@@ -166,10 +165,13 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.set_bigtiff" title="navigate.model.data_sources.tiff_data_source.TiffDataSource.set_bigtiff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_bigtiff</span></code></a>(is_bigtiff)</p></td>
 <td><p>Set whether this is a bigtiff file.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.set_metadata_from_configuration_experiment" title="navigate.model.data_sources.tiff_data_source.TiffDataSource.set_metadata_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_metadata_from_configuration_experiment</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.set_metadata" title="navigate.model.data_sources.tiff_data_source.TiffDataSource.set_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_metadata</span></code></a>(metadata_config)</p></td>
+<td><p>Sets the metadata</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.set_metadata_from_configuration_experiment" title="navigate.model.data_sources.tiff_data_source.TiffDataSource.set_metadata_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_metadata_from_configuration_experiment</span></code></a>(...)</p></td>
 <td><p>Sets the metadata from according to the microscope configuration.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.write" title="navigate.model.data_sources.tiff_data_source.TiffDataSource.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(data, **kw)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.write" title="navigate.model.data_sources.tiff_data_source.TiffDataSource.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(data, **kw)</p></td>
 <td><p>Write data to a tiff file.</p></td>
 </tr>
 </tbody>
@@ -259,6 +261,17 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>is_bigtiff</strong> (<em>bool</em>) – Is this a bigtiff file?</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.data_sources.tiff_data_source.TiffDataSource.set_metadata">
+<span class="sig-name descname"><span class="pre">set_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.set_metadata" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the metadata</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>metadata_config</strong> (<em>dict</em>) – shape configuration: “c”, “z”, “t”, “p”, “is_dynamic”, “per_stack”</p>
 </dd>
 </dl>
 </dd></dl>

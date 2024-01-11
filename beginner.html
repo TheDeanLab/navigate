@@ -51,7 +51,20 @@
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="i_want_to.html">I Want To…</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Acquire an Image (Beginner)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Acquire an Image (Beginner)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#launching-the-software-package">Launching the Software Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#open-anaconda-prompt">Open Anaconda Prompt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#activate-conda-environment">Activate Conda Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#launch-the-software-package">Launch the Software Package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-the-channel-settings">Configure the Channel Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-the-camera-settings">Configure the Camera Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#acquire-in-a-continuous-scan-mode">Acquire in a Continuous Scan Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#acquiring-a-single-image">Acquiring a Single Image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#acquiring-a-z-stack">Acquiring a Z-Stack</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="intermediate.html">Write A Smart Acquisition Routine (Intermediate)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="advanced.html">Write a Custom Plugin (Expert)</a></li>
 </ul>
@@ -99,6 +112,299 @@
              
   <section id="acquire-an-image-beginner">
 <h1>Acquire an Image (Beginner)<a class="headerlink" href="#acquire-an-image-beginner" title="Permalink to this heading"></a></h1>
+<p>This guide will describe how to acquire a single image and a z-stack using the
+<strong>navigate</strong> software package.</p>
+<section id="launching-the-software-package">
+<h2>Launching the Software Package<a class="headerlink" href="#launching-the-software-package" title="Permalink to this heading"></a></h2>
+<section id="open-anaconda-prompt">
+<h3>Open Anaconda Prompt<a class="headerlink" href="#open-anaconda-prompt" title="Permalink to this heading"></a></h3>
+<p>To start, you need to open the Anaconda Prompt. Follow these steps:</p>
+<ol class="arabic simple">
+<li><p>On Windows, click on the Start menu.</p></li>
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">Anaconda</span> <span class="pre">Prompt</span></code> into the search bar.</p></li>
+<li><p>Click on the Anaconda Prompt application to open it.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure that Anaconda and <strong>navigate</strong> are already installed on your system.
+If not, please refer to our <a class="reference internal" href="quick_start.html#quick-start-guide"><span class="std std-ref">Quick Start Guide</span></a> for more information.</p>
+</div>
+</section>
+<section id="activate-conda-environment">
+<h3>Activate Conda Environment<a class="headerlink" href="#activate-conda-environment" title="Permalink to this heading"></a></h3>
+<p>Once the Anaconda Prompt is open, activate the desired conda environment. By default,
+the command prompt will open the base environment (as shown in parentheses). To activate <strong>navigate</strong> environment,
+type the following command into the Anaconda command window and press <kbd class="kbd docutils literal notranslate">Enter</kbd></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>base<span class="o">)</span><span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>navigate
+</pre></div>
+</div>
+</section>
+<section id="launch-the-software-package">
+<h3>Launch the Software Package<a class="headerlink" href="#launch-the-software-package" title="Permalink to this heading"></a></h3>
+<p>After activating the environment, <strong>navigate</strong> should now be shown in parentheses. After you have already
+<span class="xref std std-ref">configured</span>  <strong>navigate</strong>, you can launch it by typing the following
+command into the Anaconda command window:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>navigate<span class="o">)</span><span class="w"> </span>navigate
+</pre></div>
+</div>
+<p>The <strong>navigate</strong> software package will launch and the main window will appear.</p>
+<blockquote>
+<div><img alt="Opening **navigate**." src="_images/open-navigate.png" />
+</div></blockquote>
+</section>
+</section>
+<hr class="docutils" />
+<section id="configure-the-channel-settings">
+<h2>Configure the Channel Settings<a class="headerlink" href="#configure-the-channel-settings" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>Select the <span class="guilabel">Channels</span> tab, which is located on the left side of the main window.</p></li>
+<li><p>Under the <span class="guilabel">Channel Settings</span> section, select the number of channels needed for imaging. For each channel selected,
+you will need to configure the acquisition settings:</p>
+<blockquote>
+<div><img alt="Channel settings in the **navigate** software package." src="_images/channel-selector.png" />
+<ul class="simple">
+<li><p>Select the appropriate <span class="guilabel">Laser</span> from the dropdown menu.</p></li>
+<li><p>Select the appropriate <span class="guilabel">Power</span> for the laser.</p></li>
+<li><p>Select the appropriate emission <span class="guilabel">Filter</span> from the dropdown menu.</p></li>
+</ul>
+<img alt="Changing the emission filter in **navigate**." src="_images/channel-selector-filter.png" />
+<ul class="simple">
+<li><p>Specify the camera <span class="guilabel">Exp. Time (ms)</span>. A good default value is <code class="docutils literal notranslate"><span class="pre">100</span></code> or <code class="docutils literal notranslate"><span class="pre">200</span></code> ms.</p></li>
+<li><p>Specify the <span class="guilabel">Interval</span> to be <code class="docutils literal notranslate"><span class="pre">1.0</span></code>. While this feature is not currently implemented,
+future releases will allow users to image different channels at different time intervals.</p></li>
+<li><p>Specify the <span class="guilabel">Defocus</span> to be <code class="docutils literal notranslate"><span class="pre">0</span></code>. This feature allows you to adjust for chromatic aberrations
+that result in focal shifts between each imaging channel.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="configure-the-camera-settings">
+<h2>Configure the Camera Settings<a class="headerlink" href="#configure-the-camera-settings" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>Select the <span class="guilabel">Camera Settings</span> tab, which is located on the left side of the main window.</p></li>
+<li><p>For standard imaging applications, select <span class="guilabel">Normal</span> in the <span class="guilabel">Sensor Modes</span> dropdown menu within the <span class="guilabel">Camera Modes</span> section.</p></li>
+<li><p>If you are using the rolling shutter, select <span class="guilabel">Light-Sheet</span> and specify its <span class="guilabel">Readout Direction</span>
+and <span class="guilabel">Number of Pixels</span>.</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For more information on how to configure the rolling shutter
+for ASLM operation, please refer to <a class="reference internal" href="user_guide/case_studies/setup_voodoo.html"><span class="doc">ASLM</span></a>.</p>
+</div>
+<img alt="Changing the camera sensor mode in **navigate**." src="_images/sensor-mode.png" />
+</div></blockquote>
+</li>
+<li><dl>
+<dt>Choose the size of your camera’s field of view.</dt><dd><ul class="simple">
+<li><p>Specify the <span class="guilabel">Region of Interest Settings</span> by entering the appropriate
+<span class="guilabel">Number of Pixels</span> for both the <span class="guilabel">Width</span> and <span class="guilabel">Height</span> values.</p></li>
+<li><p>Alternatively, one can select from one of several default values in the <span class="guilabel">Default FOVs</span> section.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <span class="guilabel">FOV Dimensions (microns)</span> is automatically calculated based on the <span class="guilabel">Number of Pixels</span>
+and the <cite>pixel_size</cite> as specified in the <cite>zoom</cite> section of your your <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">zoom</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">pixel_size</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">20x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.325</span><span class="w"> </span><span class="c1"># magnification, and pixel size in microns</span>
+</pre></div>
+</div>
+</div>
+<img alt="Changing the camera region of interest in **navigate**." src="_images/ROI-definition.png" />
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If multiple channels are selected, each channel will be acquired with the same camera
+<span class="guilabel">Sensor Mode</span>, <span class="guilabel">Readout Direction</span>, and <span class="guilabel">Region of Interest Settings</span>.</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="acquire-in-a-continuous-scan-mode">
+<h2>Acquire in a Continuous Scan Mode<a class="headerlink" href="#acquire-in-a-continuous-scan-mode" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>Select “Continuous Scan” in the dropdown next to the <span class="guilabel">Acquire</span> button in the Acquire Bar.</p>
+<blockquote>
+<div><img alt="Selecting the continuous scan mode in **navigate**." src="_images/continuous-scan-dropdown.png" />
+</div></blockquote>
+</li>
+<li><p>Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If multiple channels are selected, each channel will be imaged sequentially.
+The order of imaging is determined by the order of the channels in the
+<span class="guilabel">Channel Settings</span> section of the <span class="guilabel">Channels</span> tab.</p>
+</div>
+<img alt="Launching the continuous scan mode in **navigate**." src="_images/continuous-scan-acquire.png" />
+</div></blockquote>
+</li>
+<li><dl>
+<dt>Move the stage to identify the location of the sample.</dt><dd><ul>
+<li><p>Select the <span class="guilabel">Stage Control</span> tab, and use the graphical user interface to move the stage.
+This includes buttons for moving the stage in <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">Z</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, and <code class="docutils literal notranslate"><span class="pre">Theta</span></code> directions.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The step size for each axis can be adjusted with the spinbox next to each button.</p></li>
+<li><p>For stages loaded in a synthetic mode, buttons will be disabled.</p></li>
+<li><p>Absolute positions can be entered in the text boxes next to each button.</p></li>
+<li><p>Check <a class="reference internal" href="user_guide/software_configuration.html"><span class="doc">configuration settings</span></a> for more information.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Use the manufacturer-provided joystick to position the sample.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The axes for a light-sheet microscope vary in the literature. Here, we define
+the <code class="docutils literal notranslate"><span class="pre">Y</span></code> axis as the direction of the light-sheet propagation, the <code class="docutils literal notranslate"><span class="pre">Z</span></code> axis
+as the direction of the detection objective, and the <code class="docutils literal notranslate"><span class="pre">X</span></code> axis as the direction
+perpendicular to the light-sheet and detection objective axes.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">F</span></code> axis typically controls the position of the detection objective along
+the detection axis.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Theta</span></code> axis typically controls the rotation of the sample.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>One should always be careful when moving the stage.</p>
+<p>If the stage is moved too
+quickly, the sample and/or microscope may be damaged.</p>
+<p>We strongly recommend that
+you implement stage limits in your configuration file. Please refer to the
+<a class="reference internal" href="user_guide/software_configuration.html"><span class="doc">configuration settings</span></a> for more information.</p>
+</div>
+<img alt="Moving the stage in **navigate**." src="_images/stage-movement-panel.png" />
+</dd>
+</dl>
+</li>
+<li><p>Press the <span class="guilabel">Stop</span> button in the acquisition bar to Stop Acquisition</p>
+<blockquote>
+<div><img alt="Stopping the continuous scan mode in **navigate**." src="_images/stop-acquisition.png" />
+</div></blockquote>
+</li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="acquiring-a-single-image">
+<h2>Acquiring a Single Image<a class="headerlink" href="#acquiring-a-single-image" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>Check the <span class="guilabel">Save Data</span> box in the <span class="guilabel">Timepoint Settings</span> section
+under the <span class="guilabel">Channels</span> tab to save the acquired images. Check this box before acquiring data.</p>
+<blockquote>
+<div><img alt="Saving data in **navigate**." src="_images/save-data.png" />
+</div></blockquote>
+</li>
+<li><p>Select <span class="guilabel">Single Acquisition</span> from the dropdown next to the <span class="guilabel">Acquire</span> button.</p>
+<blockquote>
+<div><img alt="Selecting the single acquisition mode in **navigate**." src="_images/single-acquisition-dropdown.png" />
+</div></blockquote>
+</li>
+<li><p>Press <span class="guilabel">Acquire</span> to open the <span class="guilabel">File Saving Dialog</span> interface.
+Enter the sample parameters, notes, location to save file, and filetype in the
+<span class="guilabel">File Saving Dialog</span> that pops up.</p>
+<blockquote>
+<div><img alt="Saving data in **navigate**." src="_images/save-dialog-box.png" />
+</div></blockquote>
+</li>
+<li><p>Press <span class="guilabel">Acquire Data</span> to initiate acquisition. Acquisition will automatically
+stop once the image is acquired.</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Each acquisition will be saved in a separate folder (e.g., <code class="docutils literal notranslate"><span class="pre">Cell01</span></code>, <code class="docutils literal notranslate"><span class="pre">Cell02</span></code>, …)
+within the directory specified in the <span class="guilabel">File Saving Dialog</span> interface.</p>
+<p>Data will not be overwritten between acquisitions.</p>
+</div>
+<img alt="Saving data in **navigate**." src="_images/save-dialog-box-acquire.png" />
+</div></blockquote>
+</li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="acquiring-a-z-stack">
+<h2>Acquiring a Z-Stack<a class="headerlink" href="#acquiring-a-z-stack" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>Using the <span class="guilabel">Stage Control</span>, go to the desired z-position in the sample. Make
+sure that the sample is in focus. To use the autofocus feature, please refer to the
+<a class="reference internal" href="user_guide/gui_walkthrough.html#autofocus-settings"><span class="std std-ref">Autofocus Settings</span></a> for more information.</p>
+<blockquote>
+<div><img alt="Adjusting the stage position in **navigate**." src="_images/stage-control-start-pos-zstack.png" />
+</div></blockquote>
+</li>
+<li><p>Under the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquisition Settings (μm)</span>
+press <span class="guilabel">Set Start Pos</span>.</p>
+<blockquote>
+<div><img alt="Adjusting the stage position in **navigate**." src="_images/press-start-pos.png" />
+</div></blockquote>
+</li>
+<li><p>Using the <span class="guilabel">Stage Control</span>, go to a different z-position within the sample. Again,
+make sure that the sample is in focus.</p>
+<blockquote>
+<div><img alt="Adjusting the stage position in **navigate**." src="_images/stage-control-end-pos-zstack.png" />
+</div></blockquote>
+</li>
+<li><p>Under the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquisition Settings (μm)</span>
+press <span class="guilabel">Set End Pos</span>.</p>
+<blockquote>
+<div><img alt="Adjusting the stage position in **navigate**." src="_images/press-end-pos.png" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If there is a shift in <code class="docutils literal notranslate"><span class="pre">F</span></code> between the start and stop positions, the
+<code class="docutils literal notranslate"><span class="pre">F</span></code> axis will be ramped synchronously with <code class="docutils literal notranslate"><span class="pre">Z</span></code> to maintain focus.</p>
+<p>Check <a class="reference internal" href="user_guide/software_configuration.html"><span class="doc">configuration settings</span></a>
+for more information to determine if focus is enabled in hardware.</p>
+<p>Refer to <a class="reference internal" href="user_guide/case_studies/acquire_mesospimbt.html"><span class="doc">Imaging on a mesoSPIM BT</span></a>
+section for an example of how to acquire a z-stack with a focus ramp.</p>
+</div>
+</div></blockquote>
+</li>
+<li><p>Type the desired step size in microns in the <span class="guilabel">Step Size</span> dialog box in
+<span class="guilabel">Stack Acquisition Settings (μm)</span>.</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The minimum step size, and increment between steps, are graphical user interface
+defaults that are specified in the <code class="docutils literal notranslate"><span class="pre">experiment.yaml</span></code> file. More information can
+<a class="reference internal" href="user_guide/software_configuration.html"><span class="doc">configuration settings</span></a></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">gui</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stack_acquisition</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">step_size</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.100</span>
+<span class="w">      </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">      </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+</pre></div>
+</div>
+</div>
+<img alt="_images/define-step-size.png" src="_images/define-step-size.png" />
+</div></blockquote>
+</li>
+<li><p>If using multiple channels for imaging, select either <span class="guilabel">Per Z</span> or
+<span class="guilabel">Per Stack</span> under <span class="guilabel">Laser Cycling Settings</span> in the
+<span class="guilabel">Stack Acquisition Settings (μm)</span> section under the <span class="guilabel">Channels</span> tab.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="guilabel">Per Z</span> acquires each channel before moving the stage to a new position.</p></li>
+<li><p><span class="guilabel">Per Stack</span> acquires all images in a stack acquisition for a single channel before moving
+the stage back to the start position and restarting acquisition for the subsequent channel
+until all channels are imaged.</p></li>
+</ul>
+<img alt="_images/laser-cycling-settings.png" src="_images/laser-cycling-settings.png" />
+</div></blockquote>
+</li>
+<li><p>Select <span class="guilabel">Z-Stack</span> from the dropdown next to the <span class="guilabel">Acquire</span> button.
+Press <span class="guilabel">Acquire</span>.</p>
+<blockquote>
+<div><img alt="_images/z-stack-acquisition.png" src="_images/z-stack-acquisition.png" />
+</div></blockquote>
+</li>
+<li><p>Enter the sample parameters, notes, location to save file, and filetype in the <span class="guilabel">File Saving Dialog</span> that pops up.</p></li>
+<li><p>Press <span class="guilabel">Acquire Data</span> to initiate acquisition. Acquisition will automatically stop once the image series is acquired.</p></li>
+</ul>
+</section>
 </section>
 
 

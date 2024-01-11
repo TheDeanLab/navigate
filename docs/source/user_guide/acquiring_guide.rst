@@ -3,10 +3,8 @@ Acquiring Data
 ==============
 
 ``navigate`` features standard acquisition modes including Continous/Live, Single Frame
-and Z-Stack that can be saved to TIFF, H5 and N5 data formats. Each acquisition mode is
-implemented as a :doc:`feature list <features>` and can be used in
-conjunction with other feature that can, for example, 
-:doc:`make smart decisions <../intermediate>`.
+and Z-Stack, which can be saved to TIFF, H5 and N5 data formats. Saving is toggled under 
+the GUI's :ref:`timepoint settings <user_guide/gui_walkthrough:timepoint settings>`.
 
 Standard Acquisition Modes
 ==========================
@@ -14,11 +12,15 @@ Standard Acquisition Modes
 These modes (and other custom modes) can be selected in the program's 
 :ref:`acquisition bar <user_guide/gui_walkthrough:acquisition bar>` dropdown list.
 
+Each acquisition mode is implemented as a :doc:`feature list <features>` and can be used 
+in sequence with other features that can, for example, 
+:doc:`make smart decisions <../intermediate>`.
+
 Continuous Scan
 ---------------
 
 This creates a live view of what is on the camera. It is not possible to save data in
-this mode, only to "preview" what is in focus. This mode is helpful for alignment, 
+this mode, only to preview what is in focus. This mode is helpful for alignment, 
 parameter tuning, and scrolling around the sample with the stage. 
 
 It is implemented as
@@ -37,6 +39,12 @@ a :ref:`feature list <user_guide/features:custom feature lists>`, shown in its
       )
     ]
 
+The sequence begins with the `PrepareNextChannel` features and loops over 
+`experiment.MicroscopeState.selected_channels`. As such, continuous mode will
+display a live preview of all 
+:ref:`selected color channels <user_guide/gui_walkthrough:channel settings>` in 
+sequence, then return the first color channel and start again.
+
 Single Acquisition
 ------------------
 
@@ -49,7 +57,11 @@ Z-Stack Acquisition
 
 This takes an image stack over the range and at the step size defined by the
 :ref:`stack acquisition settings <user_guide/gui_walkthrough:stack acquisition settings>`
-and optionally saves the stack to a file. 
+and optionally saves the stack to a file. The color channels will appear as in 
+continuous scan and single acquisition if :guilabel:`Laser Cycling Settings` is set to
+"Per Z" in the stack acquisition settings. A single z-stack will be taken for each 
+color channel, one channel at a time, if :guilabel:`Laser Cycling Settings` is set to 
+"Per Stack".
 
 Z-Stack acquisition is implemented as the feature list below.
 
@@ -65,6 +77,14 @@ Z-Stack acquisition is implemented as the feature list below.
             },
         )
     ]
+
+Note that in the z-stack the color channel looping is abstracted into 
+``ZStackAcquisition``, but we will take one set of z-stacks at each 
+:ref:`timepoint <user_guide/gui_walkthrough:timepoint settings>`. It is also
+worth noting that ``ZStackAcquisition`` handles moving through 
+:ref:`multiple positions <user_guide/gui_walkthrough:multiposition>`.
+``ZStackAcquisition`` will loop over z or c first, as decided by "Per Stack" 
+or "Per Z", and then will loop over positions.
 
 Projection
 ----------

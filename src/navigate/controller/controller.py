@@ -671,10 +671,11 @@ class Controller:
         elif command == "eliminate_tiles":
             """Execute eliminate tiles routine."""
 
-            # Load the Feature. Setting the feature_id_val triggers the trace.
+            self.acquire_bar_controller.set_mode(mode="customized")
             feature_list = self.menu_controller.feature_list_names
             feature_name = "Remove Empty Tiles"
             try:
+                # feature_id_val has a trace, and setting the menu item triggers it.
                 feature_id = feature_list.index(feature_name)
                 self.menu_controller.feature_id_val.set(feature_id)
             except ValueError:
@@ -683,7 +684,6 @@ class Controller:
                                        message="Feature 'Remove Empty Tiles' not found."
                                        )
                 return
-            self.acquire_bar_controller.set_mode(mode="customized")
             self.execute("acquire")
 
         elif command == "load_feature":

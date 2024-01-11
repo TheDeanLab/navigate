@@ -4,7 +4,7 @@ Acquiring Data
 
 This provides detailed descriptions of **navigate's** acquisition modes and 
 saving capabilites. For a how to on acquiring data, please see 
-:doc:`Acquiring an Image <beginner>`.
+:doc:`Acquiring an Image <../beginner>`.
 
 Standard Acquisition Modes
 ==========================

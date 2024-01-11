@@ -3,9 +3,7 @@ Acquire an Image (Beginner)
 ===========================
 
 This guide will describe how to acquire a single image and a z-stack using the
-**navigate** software package. Please refer to :ref:`multiposition documentation <user_guide/gui_walkthrough:multiposition>` for imaging in a
-tiling format or :doc:`case studies <user_guide/case_studies/case_studies_home>` for specialized examples using device-specific
-microscope configurations.
+**navigate** software package. 
 
 Launching the Software Package
 ==============================
@@ -101,7 +99,7 @@ Configure the Camera Settings
     * Alternatively, one can select from one of several default values in the :guilabel:`Default FOVs` section.
 
     .. note::
-        The :guilabel:`FOV Dimension (microns)` is automatically calculated based on the :guilabel:`Number of Pixels`
+        The :guilabel:`FOV Dimensions (microns)` is automatically calculated based on the :guilabel:`Number of Pixels`
         and the `pixel_size` as specified in the `zoom` section of your your ``configuration.yaml`` file.
 
         .. code-block:: yaml
@@ -123,7 +121,7 @@ Configure the Camera Settings
 Acquire in a Continuous Scan Mode
 =================================
 
-* Select :guilabel:`Continuous Scan` in the dropdown next to the :guilabel:`Acquire` button in the Acquire Bar.
+* Select "Continuous Scan" in the dropdown next to the :guilabel:`Acquire` button in the Acquire Bar.
 
     .. image:: images/beginner/continuous-scan-dropdown.png
          :alt: Selecting the continuous scan mode in **navigate**.
@@ -132,7 +130,8 @@ Acquire in a Continuous Scan Mode
 
     .. note::
         If multiple channels are selected, each channel will be imaged sequentially.
-        The order of imaging is determined by the order of the channels in the :guilabel:`Channel Settings` section.
+        The order of imaging is determined by the order of the channels in the 
+        :guilabel:`Channel Settings` section of the :guilabel:`Channels` tab.
 
     .. image:: images/beginner/continuous-scan-acquire.png
          :alt: Launching the continuous scan mode in **navigate**.
@@ -292,8 +291,3 @@ Acquiring a Z-Stack
 
 * Enter the sample parameters, notes, location to save file, and filetype in the :guilabel:`File Saving Dialog` that pops up.
 * Press :guilabel:`Acquire Data` to initiate acquisition. Acquisition will automatically stop once the image series is acquired.
-
-Acquiring a Multi-Position Z-Stack
-================================
-
-* Please refer to the :ref:`multiposition table <user_guide/gui_walkthrough:multiposition>` documentation on how to image a multiposition z-stack.

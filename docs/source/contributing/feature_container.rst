@@ -4,20 +4,21 @@
 Feature Container
 =================
 
-The navigate **feature container** allows for reconfigurable acquisition and
-analysis. The feature container runs a tree of **features**, where each
-feature may perform a *signal* operation, where it modifies the state of
-microscope hardware, a *data* operation, where it performs an analysis on
+**navigate** includes a **feature container** that enables reconfigurable acquisition and
+analysis workflows. The feature container runs a tree of **features**, where each
+feature may perform a *signal* operation, which modifies the state of the
+microscope's hardware, or a *data* operation, where it performs an analysis on
 acquired image data, or both.
 
 Once a feature is executed, any features dependent on this feature's execution
 will execute (for example, move the stage, then snap a picture). Following
 this, the next set of features in sequence will be executed.
 
-Examples of some existing features include
-``navigate.model.features.common_features.ZStackAcquisition``, which acquires a
-z-stack, and ``navigate.model.features.autofocus.Autofocus``, which finds the
+Examples of some existing features include ``ZStackAcquisition``, which acquires a
+z-stack, and ``Autofocus``, which finds the
 ideal plane of focus of a sample using a Discrete Cosine Transform.
+
+-----------------
 
 Currently Implemented Features
 ==============================
@@ -35,6 +36,7 @@ Currently Implemented Features
    ../_autosummary/navigate.model.features.restful_features
    ../_autosummary/navigate.model.features.volume_search
 
+-----------------
 
 .. _feature_objects:
 
@@ -69,7 +71,7 @@ dictionaries that can contain ``init``, ``main``, ``end`` and/or
 - ``init`` entries dictate pre-processing steps that must be run before the
   main function of the feature starts.
 - ``main`` entries dictate the primary operation of the feature, and are run once per
-  acqusition step. They return ``True`` if the acquistion should proceed and ``False``
+  acqusition step. They return ``True`` if the acquisition should proceed and ``False``
   if the acquistion should be ended.
 - ``end`` entries are run once per main function returning ``True``. They check if the
   acquisition should end, if we are at any boundary points of the ``main`` function
@@ -88,19 +90,21 @@ it has indeed moved) before proceeding.
 Each of the functions that are the value entries in ``self.config_table``
 dictionaries are methods of the feature object.
 
+-----------------
+
 Creating A Custom Feature Object
 --------------------------------
 
 Each feature object is defined as a class. Creating a new feature is the same as
 creating any Python class, but with a few requirements. The first parameter of the
 ``__init__`` function (after ``self``) must be ``model``, which gives the feature
-object full access to the navigate model. All the other parameters are keyword
-arguments and must have default values. The init function should always have a
+object full access to the **navigate** model. All the other parameters are keyword
+arguments and must have default values. The ``__init__`` function should always have a
 ``config_table`` attribute (see :ref:`above <feature_objects>` for a description of
 the ``config_table``).
 
 In the example below, we will create a custom feature that moves to a specified
-position in navigate's multi-position table and calculates the sharpness of the image
+position in **navigate**'s multi-position table and calculates the sharpness of the image
 at this position using the Normalized DCT Shannon Entropy metric. An example
 ``__init__()`` function for our ``FeatureExample`` class is below.
 
@@ -218,7 +222,7 @@ Model functions can be found :doc:`in the API <../_autosummary/navigate.model.mo
 Custom Feature Lists
 ====================
 
-The navigate software allows you to chain feature objects into lists to build
+The **navigate** software allows you to chain feature objects into lists to build
 acquisition workflows.
 
 Creating a Custom Feature List in Python
@@ -259,7 +263,7 @@ To create a customized feature list, follow these steps:
   ``PrepareNextChannel`` sets up the channel and ``LoopByCount`` call this setup once
   per selected channel.
 
-#. Now, open navigate.
+#. Now, open **navigate**.
 #. Go to the :guilabel:`Features` menu.
 
 
@@ -274,7 +278,7 @@ To create a customized feature list, follow these steps:
    .. image:: images/step_2.png
 
 
-#. Choose the Python file containing your customized feature list function. navigate
+#. Choose the Python file containing your customized feature list function. **navigate**
    will load the specified feature list, making it available for use in your
    experiments and analyses. It will appear at the bottom of the :guilabel:`Features`
    menu.

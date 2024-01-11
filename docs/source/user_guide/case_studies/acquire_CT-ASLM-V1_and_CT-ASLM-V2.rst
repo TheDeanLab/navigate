@@ -31,18 +31,21 @@ It's recommended to start the software before loading the sample on the stage.
 #. Mount the glass slide onto the sample holder.
 #. Mount the sample holder onto the stage with the sample facing the illumination and
    detection objective so the glass slide is 45 degrees with both objectives.
-#. Put down the slit out of the setup.
-#. Go to :guilabel:`Camera Settings`. Select "Normal" under :guilabel:`Sensor Mode`.
+#. Decrease the numerical aperture of the illumination beam such that it covers the entire
+   field of view. Typically this is achieved with a magnetic mounted slit aperture that can
+   be readily adjusted.
+#. Go to :guilabel:`Camera Settings`. Select :guilabel:`Normal` under :guilabel:`Sensor Mode`.
 #. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup
    named :guilabel:`Waveform Parameter Settings` will appear.
 #. Set the wavelength's :guilabel:`Amplitude` and :guilabel:`Offset` to ``0.0``.
 #. Select the channel with a proper laser under the :guilabel:`Channels` tab and set
    the laser power to an appropriate value.
-#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
+#. Select :guilabel:`Continuous Scan` from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Scroll around with the stage either via joystick or using the controls in the
    :guilabel:`Stage Control` tab until the sample comes into view.
-#. Focus on the sample in the center of the beam. Zoom in by scrolling the mouse.
+#. Focus on the sample in the center of the beam. Zoom in by placing the mouse over the
+   image and scrolling the mouse wheel.
    Slowly adjusting the focus by scrolling the piezo controller to move the
    detection objective along the z axis. Lower the laser power if the image is
    saturated.
@@ -56,12 +59,12 @@ Imaging a Z-Stack with Stelzer mode
 ===================================
 
 Stelzer mode is the normal non-ASLM light sheet mode, it gives more signal while
-offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) lateral resolution.
+offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) axial resolution.
 
 #. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup
    named :guilabel:`Waveform Parameter Settings` will appear.
 #. Set the wavelength's :guilabel:`Amplitude` and :guilabel:`Offset` to ``0.0``.
-#. Go to :guilabel:`Camera Settings`, select "Normal" under :guilabel:`Sensor Mode`.
+#. Go to :guilabel:`Camera Settings`, select :guilabel:`Normal` under :guilabel:`Sensor Mode`.
 #. Put a slit into the setup.
 #. Select the channel with a proper laser under the :guilabel:`Channels` tab and set
    the laser power to an appropriate value.

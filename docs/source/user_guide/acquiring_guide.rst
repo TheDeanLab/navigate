@@ -19,7 +19,9 @@ Continuous Scan
 
 This creates a live view of what is on the camera. It is not possible to save data in
 this mode, only to "preview" what is in focus. This mode is helpful for alignment, 
-parameter tuning, and scrolling around the sample with the stage. It is implemented as
+parameter tuning, and scrolling around the sample with the stage. 
+
+It is implemented as
 a :ref:`feature list <user_guide/features:custom feature lists>`, shown in its 
 :ref:`textual form <user_guide/features:text representation of feature lists>` below.
 
@@ -39,15 +41,17 @@ Single Acquisition
 ------------------
 
 This takes a single image of each 
-:ref:`selected channel <user_guide/gui_walkthrough:channel settings>`. Its feature list
-is identical to that of "Continuous Scan".
+:ref:`selected channel <user_guide/gui_walkthrough:channel settings>` and optionally 
+saves them to a file. Its feature list is identical to that of "Continuous Scan".
 
 Z-Stack Acquisition
 -------------------
 
 This takes an image stack over the range and at the step size defined by the
-:ref:`stack acquisition settings <user_guide/gui_walkthrough:stack acquisition settings>`.
-It is implemented as the feature list below.
+:ref:`stack acquisition settings <user_guide/gui_walkthrough:stack acquisition settings>`
+and optionally saves the stack to a file. 
+
+Z-Stack acquisition is implemented as the feature list below.
 
 .. code-block:: python
 
@@ -67,7 +71,9 @@ Projection
 
 `Projection mode <https://www.nature.com/articles/s41592-021-01175-7>`_ scans a light
 sheet through a sample and sums the full 3D stack as a single image. It is useful for
-fast overviews of 3D data. It is implemented as the feature list
+fast overviews of 3D data. 
+
+It is implemented as the feature list
 
 .. code-block:: python
 

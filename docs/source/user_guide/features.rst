@@ -188,7 +188,7 @@ The square brackets ``[]`` create a sequence of events to run in the feature con
 The ``{}`` braces contain features. The parentheses ``()`` indicate a loop. 
 
 As an example, let's look at the feature list that describes the 
-:ref:`Continous Scan <acquiring_howto:continuous scan>` mode:
+:ref:`Continous Scan <acquiring_guide:continuous scan>` mode:
 
 .. code-block:: python
 

@@ -457,7 +457,9 @@ class MenuController(GUIController):
 
         for i in range(self.feature_list_count):
             self.view.menubar.menu_features.add_radiobutton(
-                label=self.feature_list_names[i], variable=self.feature_id_val, value=i
+                label=self.feature_list_names[i],
+                variable=self.feature_id_val,
+                value=i
             )
         self.feature_id_val.trace_add(
             "write",

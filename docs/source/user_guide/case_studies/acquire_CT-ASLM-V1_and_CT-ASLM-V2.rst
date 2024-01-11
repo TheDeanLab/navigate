@@ -5,11 +5,13 @@ Imaging on the CT-ASLM-V1 and CT-ASLM-V2
 This is a case study in using the software to image with a
 `CT-ASLM-V1 and CT-ASLM-V2 microscopes <https://www.nature.com/articles/s41592-019-0615-4>`_.
 
+-----------------
+
 Setting up the chamber
 ======================
 
-Make sure the chamber is clean and dry. If in doubt, fill the chamber with diH2O to see
-if there is any residue. To clean the chamber, rinse it with diH2O and ethanol, then
+Make sure the chamber is clean and dry. If in doubt, fill the chamber with deionized water to see
+if there is any residue. To clean the chamber, rinse it with deionized water and ethanol, then
 gently clean the chamber with Q-tips. Repeat the process a few times and end the
 process with a rinse of 100% ethanol. Gently clean the objectives with lens paper and
 100% ethanol. Finally, let the chamber air dry. To speed up the drying process, one
@@ -17,6 +19,8 @@ can gently blow some air into the chamber.
 
 Once the chamber is completely dry, fill the chamber with imaging media.
 
+
+-----------------
 
 Sample loading and finding the samples
 ======================================
@@ -27,8 +31,10 @@ It's recommended to start the software before loading the sample on the stage.
 #. Mount the glass slide onto the sample holder.
 #. Mount the sample holder onto the stage with the sample facing the illumination and
    detection objective so the glass slide is 45 degrees with both objectives.
-#. Put down the slit out of the setup.
-#. Go to :guilabel:`Camera Settings`. Select "Normal" under :guilabel:`Sensor Mode`.
+#. Decrease the numerical aperture of the illumination beam such that it covers the entire
+   field of view. Typically this is achieved with a magnetic mounted slit aperture that can
+   be readily adjusted.
+#. Go to :guilabel:`Camera Settings`. Select :guilabel:`Normal` under :guilabel:`Sensor Mode`.
 #. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup
    named :guilabel:`Waveform Parameter Settings` will appear.
 #. Set the wavelength's :guilabel:`Amplitude` and :guilabel:`Offset` to ``0.0``.
@@ -38,11 +44,14 @@ It's recommended to start the software before loading the sample on the stage.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Scroll around with the stage either via joystick or using the controls in the
    :guilabel:`Stage Control` tab until the sample comes into view.
-#. Focus on the sample in the center of the beam. Zoom in by scrolling the mouse.
+#. Focus on the sample in the center of the beam. Zoom in by placing the mouse over the
+   image and scrolling the mouse wheel.
    Slowly adjusting the focus by scrolling the piezo controller to move the
    detection objective along the z axis. Lower the laser power if the image is
    saturated.
 
+
+-----------------
 
 .. _z_stack_stelzer:
 
@@ -50,12 +59,12 @@ Imaging a Z-Stack with Stelzer mode
 ===================================
 
 Stelzer mode is the normal non-ASLM light sheet mode, it gives more signal while
-offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) lateral resolution.
+offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) axial resolution.
 
 #. Go to the :menuselection:`Microscope Configuration --> Waveform Parameters`. A popup
    named :guilabel:`Waveform Parameter Settings` will appear.
 #. Set the wavelength's :guilabel:`Amplitude` and :guilabel:`Offset` to ``0.0``.
-#. Go to :guilabel:`Camera Settings`, select "Normal" under :guilabel:`Sensor Mode`.
+#. Go to :guilabel:`Camera Settings`, select :guilabel:`Normal` under :guilabel:`Sensor Mode`.
 #. Put a slit into the setup.
 #. Select the channel with a proper laser under the :guilabel:`Channels` tab and set
    the laser power to an appropriate value.
@@ -87,6 +96,8 @@ offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) lateral resolution.
 #. Select "Z-Stack" from the dropdown next to the :guilabel:`Acquire` button. Press
    :guilabel:`Acquire`. A popup named :guilabel:`File Saving Dialog` will appear.
 #. Fill out the fields and press :guilabel:`Acquire Data`.
+
+-----------------
 
 .. _z_stack_aslm:
 
@@ -137,6 +148,8 @@ around 950 nm (CT-ASLM-V1) and 480 nm (CT-ASLM-V2) isotropic resolution.
    :guilabel:`Acquire`. A popup named :guilabel:`File Saving Dialog` will appear.
 #. Fill out the fields and press :guilabel:`Acquire Data`.
 
+
+-----------------
 
 Tiling a sample larger than the field of view
 =============================================

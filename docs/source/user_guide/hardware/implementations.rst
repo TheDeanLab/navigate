@@ -2,6 +2,13 @@
 Microscope Implementations
 ==========================
 
+For reference, we describe several microscope implementations that are currently in
+use with the **navigate** software. Each of these implementations is described in
+the following sections, including a list of the equipment used and the configuration
+file used to operate the microscope.
+
+------------------
+
 Multiscale Microscope
 =====================
 
@@ -39,6 +46,7 @@ Multiscale Microscope
 
 
 |
+------------------
 
 Expansion ASLM
 ==============
@@ -76,6 +84,7 @@ Expansion ASLM
        :language: yaml
 
 |
+------------------
 
 OPM-V2
 ======
@@ -114,6 +123,7 @@ OPM-V2
        :language: yaml
 
 |
+------------------
 
 OPM-V3
 ======
@@ -153,6 +163,7 @@ OPM-V3
        :language: yaml
 
 |
+------------------
 
 CT-ASLM-V1
 ==========
@@ -190,6 +201,7 @@ CT-ASLM-V1
        :language: yaml
 
 |
+------------------
 
 CT-ASLM-V2
 ==========
@@ -227,6 +239,7 @@ CT-ASLM-V2
        :language: yaml
 
 |
+------------------
 
 
 Spectral TIRF
@@ -266,6 +279,7 @@ Spectral TIRF
 
 
 |
+------------------
 
 Live-Cell ASLM
 ==============
@@ -304,6 +318,7 @@ Live-Cell ASLM
 
 
 |
+------------------
 
 
 BioFrontiers OPM

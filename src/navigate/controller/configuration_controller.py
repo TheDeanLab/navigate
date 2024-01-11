@@ -56,13 +56,16 @@ class ConfigurationController:
         """
         #: dict: The configuration dictionary.
         self.configuration = configuration
+
         #: str: The microscope name.
         self.microscope_name = None
+
         #: dict: The microscope configuration dictionary.
         self.microscope_config = None
         self.change_microscope()
 
         microscopes_config = configuration["configuration"]["microscopes"]
+
         #: int: The number of galvos.
         self.galvo_num = max(
             map(
@@ -74,7 +77,10 @@ class ConfigurationController:
         )
 
     def change_microscope(self) -> bool:
-        """Get the new microscope configuration dict according to the name
+        """Get the new microscope configuration dict according to the name.
+
+        Gets the name of the microscope, retrieves its configuration, and updates the
+        Configuration Controller's attributes.
 
         Returns
         -------
@@ -372,7 +378,8 @@ class ConfigurationController:
             Number of channels.
         """
         if self.microscope_config is not None:
-            return self.configuration["configuration"]["gui"]["channels"]["count"]
+            return self.configuration[
+                "configuration"]["gui"]["channels"].get("count", 5)
         return 5
 
     @property

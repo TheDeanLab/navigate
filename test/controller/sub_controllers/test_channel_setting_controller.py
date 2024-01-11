@@ -84,7 +84,7 @@ class TestChannelSettingController:
                 )
                 assert (
                     str(self.channel_setting.view.filterwheel_pulldowns[i]["state"])
-                    == state
+                    == state_readonly
                 )
                 assert str(self.channel_setting.view.defocus_spins[i]["state"]) == state
 

@@ -326,10 +326,7 @@ class DetectTissueInStack:
         bool
             True if the data phase should end, False otherwise.
         """
-        if self.received_frames >= self.planes:
-            self.detect_tissue_queue.put(self.has_tissue_flag)
-            return True
-        return False
+        return self.received_frames >= self.planes
 
 
 class DetectTissueInStackAndReturn(DetectTissueInStack):

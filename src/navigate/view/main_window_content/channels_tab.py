@@ -115,8 +115,7 @@ class ChannelCreator(ttk.Labelframe):
     """
 
     def __init__(self, channels_tab, *args, **kwargs):
-        """Initilization of the Channel Creator
-
+        """Initialization of the Channel Creator
 
         Parameters
         ----------
@@ -134,11 +133,6 @@ class ChannelCreator(ttk.Labelframe):
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
-
-        #  Arrays with Widget Variables and widgets themselves
-        #  TODO refactor using dicts for variables and one for widgets,
-        #   allow access to arrays via a key. might be overly complicated.
-        #   Below way is clear just a bit repetitive
 
         #: list: List of the variables for the channel checkbuttons
         self.channel_variables = []
@@ -199,8 +193,21 @@ class ChannelCreator(ttk.Labelframe):
         #: list: List of the frames for the columns
         self.frame_columns = []
 
+    def populate_frame(self, channels):
+        """Populates the frame with the widgets.
+
+        This function populates the frame with the widgets for the channels. By updating
+        the self.label_text list, the columns can be changed. This function is called
+        when the frame is initialized, and when the number of channels is changed in the
+        controller.
+
+        Parameters
+        ----------
+        channels : int
+            The number of channels to be added to the frame.
+        """
+
         #  Creates a column frame for each widget,
-        # this is to help with the lables lining up
         for idx in range(len(self.label_text)):
             self.frame_columns.append(ttk.Frame(self))
             self.frame_columns[idx].columnconfigure(0, weight=1, uniform=1)
@@ -215,12 +222,9 @@ class ChannelCreator(ttk.Labelframe):
         self.frame_columns[5].grid(padx=(1, 4))
         self.frame_columns[0].grid(padx=(4, 1))
 
-        #  Adds and grids widgets to respective column
-        #  TODO add connection to config file to specify the range.
-        #   This will allow custom selection of amount of channels.
-        #   Also may need further refactoring
-        for num in range(0, 5):
-            #  This will add a widget to each column frame for the respective types
+        # Creates the widgets for each channel - populates the rows.
+        for num in range(0, channels):
+
             #  Channel Checkboxes
             self.channel_variables.append(tk.BooleanVar())
             self.channel_checks.append(
@@ -243,7 +247,7 @@ class ChannelCreator(ttk.Labelframe):
                     width=6,
                 )
             )
-            self.laser_pulldowns[num].state(["readonly"])
+            self.laser_pulldowns[num].config(state = "readonly")
             self.laser_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
@@ -274,12 +278,12 @@ class ChannelCreator(ttk.Labelframe):
                     width=10,
                 )
             )
-            self.filterwheel_pulldowns[num].state(["readonly"])
+            self.filterwheel_pulldowns[num].config(state = "readonly")
             self.filterwheel_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-            #  Exposure Time Spinboxes
+            #  Exposure Time Spin boxes
             self.exptime_variables.append(tk.StringVar())
             self.exptime_pulldowns.append(
                 ttk.Spinbox(
@@ -296,7 +300,7 @@ class ChannelCreator(ttk.Labelframe):
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-            #  Time Interval Spinboxes
+            #  Time Interval Spin boxes
             self.interval_variables.append(tk.StringVar())
             self.interval_spins.append(
                 ttk.Spinbox(
@@ -330,12 +334,10 @@ class ChannelCreator(ttk.Labelframe):
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-        self.filterwheel_pulldowns[1].grid(pady=2)
-        self.filterwheel_pulldowns[2].grid(pady=2)
-        self.laser_pulldowns[1].grid(pady=2)
-        self.laser_pulldowns[2].grid(pady=2)
-        self.channel_checks[1].grid(pady=2)
-        self.channel_checks[2].grid(pady=2)
+            if num % 2 == 1:
+                self.filterwheel_pulldowns[num].grid(pady=2)
+                self.laser_pulldowns[num].grid(pady=2)
+                self.channel_checks[num].grid(pady=2)
 
 
 class StackAcquisitionFrame(ttk.Labelframe):

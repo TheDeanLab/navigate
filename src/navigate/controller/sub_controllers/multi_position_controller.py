@@ -88,10 +88,8 @@ class MultiPositionController(GUIController):
 
     def eliminate_tiles(self):
         """Eliminate tiles that do not contain tissue."""
-        print(
-            "TODO: Implement feature that goes to the middle position of each tile, "
-            "evaluates whether or not it consists of tissue, and if not, remove it."
-        )
+
+        self.parent_controller.execute("eliminate_tiles")
 
     def set_positions(self, positions):
         """Set positions to multi-position's table

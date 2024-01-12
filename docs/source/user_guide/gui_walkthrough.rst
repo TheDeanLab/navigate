@@ -88,7 +88,7 @@ The middle part provides similar functionality to the
 :ref:`Multiposition Settings Notebook <user_guide/gui_walkthrough:multiposition>`.
 Here, we can launch the 
 :ref:`Tiling Wizard <user_guide/gui_walkthrough:multi-position tiling wizard>`, 
-load and export (save) positions stored in the :guilabel:`Multipositon Settings Notebook`, and add
+load and export (save) positions stored in the :guilabel:`Multiposition Settings Notebook`, and add
 the current stage position to the multiposition table.
 
 The bottom part of the menu is used to enable and disable the stage limits set in the
@@ -188,8 +188,8 @@ Channel Settings
 This is used to set up acquisition color channels. A channel is considered to be a 
 combination of an illuminating laser wavelength and a detection filter. Each channel
 has its own power, exposure time, interval and defocus. The checkbox on the left
-indicates if a channel should be used during acquisition. An acquisition loops through
-the channels in sequence.
+indicates if a channel should be used (is selected) during acquisition. An acquisition 
+may loop through the channels in sequence.
 
 * :guilabel:`Laser` is the name of the laser, taken from the 
   :doc:`configuration file <software_configuration>`, and usually expressed in 
@@ -205,6 +205,7 @@ the channels in sequence.
 * :guilabel:`Defocus` indicates the defocus between two channels in micrometers. The
   defocus values are always relative to the focus of the first channel imaged. This 
   setting is useful for compensating for chromatic aberration.
+
 
 -------------------
 

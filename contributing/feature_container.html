@@ -222,11 +222,11 @@ dictionaries that can contain <code class="docutils literal notranslate"><span c
 <li><p><code class="docutils literal notranslate"><span class="pre">init</span></code> entries dictate pre-processing steps that must be run before the
 main function of the feature starts.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">main</span></code> entries dictate the primary operation of the feature, and are run once per
-acqusition step. They return <code class="docutils literal notranslate"><span class="pre">True</span></code> if the acquisition should proceed and <code class="docutils literal notranslate"><span class="pre">False</span></code>
-if the acquistion should be ended.</p></li>
+acquisition step. They return <code class="docutils literal notranslate"><span class="pre">True</span></code> if the acquisition should proceed and <code class="docutils literal notranslate"><span class="pre">False</span></code>
+if the acquisition should be ended.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">end</span></code> entries are run once per main function returning <code class="docutils literal notranslate"><span class="pre">True</span></code>. They check if the
 acquisition should end, if we are at any boundary points of the <code class="docutils literal notranslate"><span class="pre">main</span></code> function
-(e.g. if we need to change positions in a multi-position z-stack acquistion),
+(e.g. if we need to change positions in a multi-position z-stack acquisition),
 and describe any closing operations that must be performed when exiting the feature</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cleanup</span></code> entries dictate what happens if the node fails. This is for
 failsafe controls such as “turn off all lasers”.</p></li>
@@ -335,7 +335,7 @@ the <em>signal</em> and <em>data</em> operations by default run in parallel and 
 other. Sometimes, we want to be sure a device is ready or has moved. For example, in
 <code class="docutils literal notranslate"><span class="pre">FeatureExample</span></code>, we have no guarantee that the stage finished moving before the
 image was taken. The <code class="docutils literal notranslate"><span class="pre">wait_until_done</span></code> call only blocks the signal thread from
-progressing before the stage finishs its move. To ensure the data thread also waits,
+progressing before the stage finishes its move. To ensure the data thread also waits,
 we need to pause the data thread until the stage is ready.</p>
 <p>Here is an example of how we can pause and resume the data thread:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pause_data_thread</span><span class="p">()</span>
@@ -347,7 +347,7 @@ we need to pause the data thread until the stage is ready.</p>
 </pre></div>
 </div>
 <p>We can of course replace <code class="docutils literal notranslate"><span class="pre">self.model.move_stage(pos,</span> <span class="pre">wait_until_done=True)</span></code> with
-whatever task we want to wait for before resuming image acqusition.</p>
+whatever task we want to wait for before resuming image acquisition.</p>
 <p>Model functions can be found <a class="reference internal" href="../_autosummary/navigate.model.model.Model.html"><span class="doc">in the API</span></a>.</p>
 </section>
 </section>
@@ -367,7 +367,7 @@ acquisition workflows.</p>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">FeatureList</span></code> is a decorator that registers the list of features.
-<code class="docutils literal notranslate"><span class="pre">feature_related_functions</span></code> contains convienience imports that allow us to call
+<code class="docutils literal notranslate"><span class="pre">feature_related_functions</span></code> contains convenience imports that allow us to call
 <code class="docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code> instead of
 <code class="docutils literal notranslate"><span class="pre">navigate.model.features.common_features.PrepareNextChannel</span></code>.
 This makes for more readable code.</p>

@@ -28,7 +28,7 @@ Plugin Structure:
 .. code-block:: none
 
     plugin_name/
-        ├── controler/
+        ├── controller/
         │   ├── plugin_name_controller.py
         |   ├── ...
         ├── model/
@@ -46,7 +46,7 @@ Plugin Structure:
         |   ├── ...
         │
         ├── feature_list.py
-        ├── plugin_acquisiton_mode.py
+        ├── plugin_acquisition_mode.py
         └── plugin_config.yml 
 
 
@@ -104,7 +104,7 @@ Device type name and reference name are given as following:
 
 .. code-block:: python
 
-    DEVICE_TYPE_NAME = "plugin_device"  # Same as in configuraion.yaml, for example "stage", "filter_wheel", "remote_focus_device"...
+    DEVICE_TYPE_NAME = "plugin_device"  # Same as in configuration.yaml, for example "stage", "filter_wheel", "remote_focus_device"...
     DEVICE_REF_LIST = ["type", "serial_number"]
 
 

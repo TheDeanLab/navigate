@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Case Studies" href="case_studies/case_studies_home.html" />
-    <link rel="prev" title="How to Acquire Data" href="acquiring_howto.html" /> 
+    <link rel="prev" title="Acquiring Data" href="acquiring_guide.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -57,7 +57,7 @@
 <li class="toctree-l1"><a class="reference internal" href="gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup_microscope.html">Setting Up A Microscope</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="acquiring_home.html">Acquiring Data</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="acquiring_howto.html">How to Acquire Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acquiring_guide.html">Acquiring Data</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Reconfigurable Acquisitions Using Features</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#what-are-features">What are features?</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#customizing-feature-functionality-in-the-gui">Customizing Feature Functionality in the GUI</a><ul>
@@ -67,6 +67,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-custom-feature-list-in-the-gui">Creating a Custom Feature List in the GUI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#editing-feature-lists-on-the-fly">Editing Feature Lists on the Fly</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#deleting-feature-lists">Deleting Feature Lists</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#text-representation-of-feature-lists">Text Representation of Feature Lists</a></li>
 </ul>
 </li>
 </ul>
@@ -238,13 +239,47 @@ and the software.</p>
 </li>
 </ol>
 </section>
+<hr class="docutils" />
+<section id="text-representation-of-feature-lists">
+<h2>Text Representation of Feature Lists<a class="headerlink" href="#text-representation-of-feature-lists" title="Permalink to this heading"></a></h2>
+<p>At the bottom of each of the <span class="guilabel">Feature List Configuration</span> frames above, there
+is a text box with a textual representation of the feature list. As an alternative to
+point-and-click editing, a user can update feature lists by editing this textual
+representation and then pressing <span class="guilabel">Preview</span>.</p>
+<p>The square brackets <code class="docutils literal notranslate"><span class="pre">[]</span></code> create a sequence of events to run in the feature container.
+The <code class="docutils literal notranslate"><span class="pre">{}</span></code> braces contain features. The parentheses <code class="docutils literal notranslate"><span class="pre">()</span></code> indicate a loop.</p>
+<p>As an example, let’s look at the feature list that describes the
+<span class="xref std std-ref">Continuous Scan</span> mode:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+  <span class="p">(</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">LoopByCount</span><span class="p">,</span>
+        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;experiment.MicroscopeState.selected_channels&quot;</span><span class="p">,),</span>
+    <span class="p">},</span>
+  <span class="p">)</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Here, we have a sequence defined by <code class="docutils literal notranslate"><span class="pre">[]</span></code> containing one element, a loop, indicated
+by the closed parentheses. There are two features within this loop. One feature has the
+name
+<span class="xref std std-ref">PrepareNextChannel</span>
+and the other
+<span class="xref std std-ref">LoopByCount</span>.
+The parentheses indicate we will keep looping through both of these features until
+stopping criteria is met. In this case, the looping will stop when <code class="docutils literal notranslate"><span class="pre">LoopByCount</span></code>
+returns <code class="docutils literal notranslate"><span class="pre">False</span></code> due to running out of <code class="docutils literal notranslate"><span class="pre">selected_channels</span></code> to loop through. That is,
+it will end once all <span class="xref std std-ref">selected channel</span> have
+been imaged.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="acquiring_howto.html" class="btn btn-neutral float-left" title="How to Acquire Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="acquiring_guide.html" class="btn btn-neutral float-left" title="Acquiring Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="case_studies/case_studies_home.html" class="btn btn-neutral float-right" title="Case Studies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

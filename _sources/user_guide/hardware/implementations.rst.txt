@@ -153,7 +153,7 @@ OPM-V3
    * - Zoom
      - N/A
    * - Other
-     - VAST large object flow cytometer and Imagine Optics deformable mirror for wavefront correction.
+     - VAST large object flow cytometry system and Imagine Optics deformable mirror for wavefront correction.
    * - Other
      - NA
 

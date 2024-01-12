@@ -120,7 +120,7 @@ plugins with <strong>navigate</strong> seamlessly.</p>
 <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">github</a> and build plugins on it.</p>
 <p>Plugin Structure:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>plugin_name/
-    ├── controler/
+    ├── controller/
     │   ├── plugin_name_controller.py
     |   ├── ...
     ├── model/
@@ -138,7 +138,7 @@ plugins with <strong>navigate</strong> seamlessly.</p>
     |   ├── ...
     │
     ├── feature_list.py
-    ├── plugin_acquisiton_mode.py
+    ├── plugin_acquisition_mode.py
     └── plugin_config.yml
 </pre></div>
 </div>
@@ -182,7 +182,7 @@ if they are different kinds of device, put them into different folders. For a ki
 a <cite>device_startup_functions.py</cite> tells <strong>navigate</strong> how to start the device and the reference name of the device in
 system <cite>configuration.yaml</cite>.</p>
 <p>Device type name and reference name are given as following:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DEVICE_TYPE_NAME</span> <span class="o">=</span> <span class="s2">&quot;plugin_device&quot;</span>  <span class="c1"># Same as in configuraion.yaml, for example &quot;stage&quot;, &quot;filter_wheel&quot;, &quot;remote_focus_device&quot;...</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DEVICE_TYPE_NAME</span> <span class="o">=</span> <span class="s2">&quot;plugin_device&quot;</span>  <span class="c1"># Same as in configuration.yaml, for example &quot;stage&quot;, &quot;filter_wheel&quot;, &quot;remote_focus_device&quot;...</span>
 <span class="n">DEVICE_REF_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;serial_number&quot;</span><span class="p">]</span>
 </pre></div>
 </div>

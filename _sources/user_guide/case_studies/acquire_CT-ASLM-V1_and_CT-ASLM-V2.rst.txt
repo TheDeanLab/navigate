@@ -80,12 +80,12 @@ offering around 1040 nm (CT-ASLM-V1) and 500 nm (CT-ASLM-V2) axial resolution.
    :guilabel:`Stage Control` tab.
 #. Move along the Z axis with the joystick or the "Focus" in the
    :guilabel:`Stage Control` tab to one end of the region of interest. Under the
-   :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)`, press
+   :guilabel:`Channels` tab, in :guilabel:`Stack Acquisition Settings (um)`, press
    :guilabel:`Set Start Pos/Foc`.
 #. Go to :guilabel:`Stage Control`, change the Z position in
    :guilabel:`Stage Positions` to set the scan range. Be aware the range for z-piezo
    is 0 - 200. Going outside of the range will cause the stage to have issues.
-#. Go back to :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)`,
+#. Go back to :guilabel:`Channels` tab, in :guilabel:`Stack Acquisition Settings (um)`,
    press :guilabel:`Set End Pos/Foc`.
 #. Setup :guilabel:`Step Size` under the :guilabel:`Channels`, recommend 3.0
    (CT-ASLM-V1) and 1.0 (CT-ASLM-V2).
@@ -136,7 +136,7 @@ around 950 nm (CT-ASLM-V1) and 480 nm (CT-ASLM-V2) isotropic resolution.
 #. Go to :guilabel:`Stage Control`, change the Z position in
    :guilabel:`Stage Positions` to set the scan range. Be aware the range for z-piezo is
    0 - 200. Going outside of the range will cause the stage to have issues.
-#. Go back to :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)`,
+#. Go back to :guilabel:`Channels` tab, in :guilabel:`Stack Acquisition Settings (um)`,
    press :guilabel:`Set End Pos/Foc`.
 #. Setup :guilabel:`Step Size` under the :guilabel:`Channels`, recommend 0.46
    (CT-ASLM-V1) and 0.2 (CT-ASLM-V2) for isotropic imaging.
@@ -162,7 +162,7 @@ Stelzer mode or ASLM mode. (see
 #. Under :guilabel:`Channels` tab, press :guilabel:`Launch Tiling Wizard`. A popup
    named :guilabel:`Multi-Position Tiling Wizard` will appear.
 #. Follow :ref:`Imaging a Z-Stack with Stelzer mode <z_stack_stelzer>` to set up the
-   start and end positions in :guilabel:`Stack Acquistion Settings (um)`. At the same
+   start and end positions in :guilabel:`Stack Acquisition Settings (um)`. At the same
    time, when pressing :guilabel:`Set Start Pos/Foc` to set up the start position, go
    to :guilabel:`Multi-Position Tiling Wizard` and press :guilabel:`Set Z Start`. When
    pressing :guilabel:`Set End Pos/Foc` to set up the end position, go to

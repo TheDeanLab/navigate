@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acquiring Data &mdash; navigate 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Reconfigurable Acquisitions Using Features" href="features.html" />
+    <link rel="prev" title="Acquiring Data" href="acquiring_home.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="acquiring_home.html">Acquiring Data</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Acquiring Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#standard-acquisition-modes">Standard Acquisition Modes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#continuous-scan">Continuous Scan</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#single-acquisition">Single Acquisition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#z-stack-acquisition">Z-Stack Acquisition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#projection">Projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#customized">Customized</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#saving-formats">Saving Formats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tiff-ome-tiff">TIFF/OME-TIFF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bigdataviewer-h5-n5">BigDataViewer H5/N5</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#image-pipeline">Image Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="features.html">Reconfigurable Acquisitions Using Features</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="acquiring_home.html">Acquiring Data</a></li>
+      <li class="breadcrumb-item active">Acquiring Data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user_guide/acquiring_guide.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="acquiring-data">
+<h1>Acquiring Data<a class="headerlink" href="#acquiring-data" title="Permalink to this heading"></a></h1>
+<p>This provides detailed descriptions of <strong>navigate</strong>’s acquisition modes and
+saving capabilities. For a how to on acquiring data, please see
+<a class="reference internal" href="../beginner.html"><span class="doc">Acquiring an Image</span></a>.</p>
+<hr class="docutils" />
+<section id="standard-acquisition-modes">
+<h2>Standard Acquisition Modes<a class="headerlink" href="#standard-acquisition-modes" title="Permalink to this heading"></a></h2>
+<p><strong>navigate</strong> features standard acquisition modes including Continuous/Live, Single Frame
+and Z-Stack, which can be saved to TIFF, H5 and N5 data formats. Saving is toggled under
+the GUI’s <a class="reference internal" href="gui_walkthrough.html#timepoint-settings"><span class="std std-ref">timepoint settings</span></a>.</p>
+<p>These modes (and other custom modes) can be selected in the program’s
+<a class="reference internal" href="gui_walkthrough.html#acquisition-bar"><span class="std std-ref">acquisition bar</span></a> dropdown list.</p>
+<p>Each acquisition mode is implemented as a <a class="reference internal" href="features.html"><span class="doc">feature list</span></a> and can be used
+in sequence with other features that can, for example,
+<a class="reference internal" href="../intermediate.html"><span class="doc">make smart decisions</span></a>.</p>
+<hr class="docutils" />
+<section id="continuous-scan">
+<h3>Continuous Scan<a class="headerlink" href="#continuous-scan" title="Permalink to this heading"></a></h3>
+<p>This creates a live view of what is on the camera. It is not possible to save data in
+this mode, only to preview what is in focus. This mode is helpful for alignment,
+parameter tuning, and scrolling around the sample with the stage.</p>
+<p>It is implemented as
+a <span class="xref std std-ref">feature list</span>, shown in its
+<a class="reference internal" href="features.html#text-representation-of-feature-lists"><span class="std std-ref">textual form</span></a> below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+  <span class="p">(</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">LoopByCount</span><span class="p">,</span>
+        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;experiment.MicroscopeState.selected_channels&quot;</span><span class="p">,),</span>
+    <span class="p">},</span>
+  <span class="p">)</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>The sequence begins with the <cite>PrepareNextChannel</cite> feature and loops over
+<cite>experiment.MicroscopeState.selected_channels</cite>. As such, continuous mode will
+display a live preview of all
+<a class="reference internal" href="gui_walkthrough.html#channel-settings"><span class="std std-ref">selected color channels</span></a> in
+sequence, then return the first color channel and start again.</p>
+</section>
+<hr class="docutils" />
+<section id="single-acquisition">
+<h3>Single Acquisition<a class="headerlink" href="#single-acquisition" title="Permalink to this heading"></a></h3>
+<p>This takes a single image of each
+<a class="reference internal" href="gui_walkthrough.html#channel-settings"><span class="std std-ref">selected channel</span></a> and optionally
+saves them to a file. Its feature list is identical to that of “Continuous Scan”.</p>
+</section>
+<hr class="docutils" />
+<section id="z-stack-acquisition">
+<h3>Z-Stack Acquisition<a class="headerlink" href="#z-stack-acquisition" title="Permalink to this heading"></a></h3>
+<p>This takes an image stack over the range and at the step size defined by the
+<span class="xref std std-ref">stack acquisition settings</span>
+and optionally saves the stack to a file. The color channels will appear as in
+“Continuous Scan” and “Single Acquisition” if <span class="guilabel">Laser Cycling Settings</span> is set to
+“Per Z” in the stack acquisition settings. A single z-stack will be taken for each
+color channel, one channel at a time, if <span class="guilabel">Laser Cycling Settings</span> is set to
+“Per Stack”.</p>
+<p>Z-Stack acquisition is implemented as the feature list below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">ZStackAcquisition</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">StackPause</span><span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">LoopByCount</span><span class="p">,</span>
+            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;experiment.MicroscopeState.timepoints&quot;</span><span class="p">,),</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Note that in the z-stack the color channel looping is abstracted into
+<code class="docutils literal notranslate"><span class="pre">ZStackAcquisition</span></code>, but we will take one set of z-stacks at each
+<a class="reference internal" href="gui_walkthrough.html#timepoint-settings"><span class="std std-ref">timepoint</span></a>. It is also
+worth noting that <code class="docutils literal notranslate"><span class="pre">ZStackAcquisition</span></code> handles moving through
+<a class="reference internal" href="gui_walkthrough.html#multiposition"><span class="std std-ref">multiple positions</span></a>.
+<code class="docutils literal notranslate"><span class="pre">ZStackAcquisition</span></code> will loop over <code class="docutils literal notranslate"><span class="pre">Z</span></code> or <code class="docutils literal notranslate"><span class="pre">C</span></code> first, as decided by “Per Stack”
+or “Per Z”, and then will loop over positions.</p>
+</section>
+<hr class="docutils" />
+<section id="projection">
+<h3>Projection<a class="headerlink" href="#projection" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="https://www.nature.com/articles/s41592-021-01175-7">Projection mode</a> scans a light
+sheet through a sample and sums the full 3D stack as a single image. It is useful for
+fast overviews of 3D data. When combined with a galvanometer in the detection path, it
+provides multiple perspectives of the same object via the Shear Warp Transform.</p>
+<p>It is implemented as the feature list</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">}]</span>
+</pre></div>
+</div>
+<p>The magic of projection mode comes from changing the galvo operation to sweep the light
+sheet through the whole sample during the course of a single frame.</p>
+</section>
+<hr class="docutils" />
+<section id="customized">
+<h3>Customized<a class="headerlink" href="#customized" title="Permalink to this heading"></a></h3>
+<p>The customized acquisition mode can be used to run any feature list of the user’s choosing.
+Data acquisition with <strong>navigate</strong> is almost infinitely reconfigurable with the either the
+<a class="reference internal" href="features.html"><span class="doc">feature container</span></a>, if a desired acquisition can be
+performed using a reconfiguration of existing features and saving formats, or the
+<a class="reference internal" href="../plugin/plugin_home.html"><span class="doc">plugin architecture</span></a>, if new features or saving formats are
+required. We strongly recommend the reader check through the
+<a class="reference internal" href="../_autosummary/navigate.model.features.html"><span class="doc">available features</span></a> and see if they can be
+combined into a acquisition feature list before writing a new acquisition feature.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="saving-formats">
+<h2>Saving Formats<a class="headerlink" href="#saving-formats" title="Permalink to this heading"></a></h2>
+<p><strong>navigate</strong> comes pre-packaged with TIFF, OME-TIFF, and H5/N5
+(<a class="reference external" href="https://imagej.net/plugins/bdv/">BigDataViewer</a>) file saving formats. The
+performance of these saving data sources is limited by write speed to disk. To
+achieve maximal saving speed, we recommend saving all data to a local SSD. See
+<a class="reference internal" href="../software_installation.html#hardware-considerations"><span class="std std-ref">Hardware Considerations</span></a> for more
+information.</p>
+<hr class="docutils" />
+<section id="tiff-ome-tiff">
+<h3>TIFF/OME-TIFF<a class="headerlink" href="#tiff-ome-tiff" title="Permalink to this heading"></a></h3>
+<p><strong>navigate</strong> uses the <a class="reference external" href="https://pypi.org/project/tifffile/">tifffile</a> package to write
+TIFF, BigTIFF, and OME-TIFF data to file. The <strong>navigate</strong> package creates a custom
+<a class="reference internal" href="../_autosummary/navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html"><span class="doc">OME-TIFF XML</span></a>
+to store metadata.</p>
+</section>
+<hr class="docutils" />
+<section id="bigdataviewer-h5-n5">
+<h3>BigDataViewer H5/N5<a class="headerlink" href="#bigdataviewer-h5-n5" title="Permalink to this heading"></a></h3>
+<p><strong>navigate</strong> uses <a class="reference external" href="https://docs.h5py.org/en/stable/index.html">h5py</a> (H5) and
+<a class="reference external" href="https://zarr.readthedocs.io/en/stable/">zarr</a> (N5) to store data in a BigDataViewer
+file format. This is a pyramidal format, necessitating the saving of both the original
+data and down sampled versions of this data. The additional data slows down the write
+speed. The N5 format is faster than H5 because it allows multithreaded writes.</p>
+</section>
+</section>
+<section id="image-pipeline">
+<h2>Image Pipeline<a class="headerlink" href="#image-pipeline" title="Permalink to this heading"></a></h2>
+<p>Images are stored from the camera onto a circular buffer of size <code class="docutils literal notranslate"><span class="pre">databuffer_size</span></code>, a
+setting under <code class="docutils literal notranslate"><span class="pre">experiment.CameraParameters</span></code> in the
+<a class="reference internal" href="software_configuration.html"><span class="doc">software configuration</span></a>. By default, this
+buffer is 100 frames in length.</p>
+<p>Image processing and saving operations (see the
+<a class="reference internal" href="../contributing/feature_container.html"><span class="doc">feature container</span></a> data operations) are
+performed on frames in this buffer. These operations must take less time than it takes
+to add a new frame to the buffer, or the buffer will eventually overflow. This is, in
+part, why saving to an SSD (as opposed to HDD) is critical.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="acquiring_home.html" class="btn btn-neutral float-left" title="Acquiring Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="features.html" class="btn btn-neutral float-right" title="Reconfigurable Acquisitions Using Features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -79,7 +79,7 @@ class AcquireBarController(GUIController):
             "Single Acquisition": "single",
             "Projection": "projection",
             "Customized": "customized",
-            "Constant Velocity Acquistion": "ConstantVelocityAcquisition",
+            "Constant Velocity Acquisition": "ConstantVelocityAcquisition",
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
@@ -428,7 +428,7 @@ class AcquireBarController(GUIController):
         # Get ref to widgets
         time_widgets = self.parent_view.stack_timepoint_frame.get_widgets()
 
-        # Grey out time widgets when in Continuous Scan or Alignment modes
+        # Grey out time widgets when in Continuous mode
         if mode == "live":
             state = "disabled"
         else:

@@ -668,8 +668,27 @@ class Controller:
                 args=("autofocus", "live", *args),
             )
 
+        elif command == "eliminate_tiles":
+            """Execute eliminate tiles routine."""
+
+            self.acquire_bar_controller.set_mode(mode="customized")
+            feature_list = self.menu_controller.feature_list_names
+            feature_name = "Remove Empty Tiles"
+            try:
+                # feature_id_val has a trace, and setting the menu item triggers it.
+                feature_id = feature_list.index(feature_name)
+                self.menu_controller.feature_id_val.set(feature_id)
+            except ValueError:
+                logger.debug("No feature named 'Remove Empty Tiles' found.")
+                messagebox.showwarning(title="Navigate",
+                                       message="Feature 'Remove Empty Tiles' not found."
+                                       )
+                return
+            self.execute("acquire")
+
         elif command == "load_feature":
             """Tell model to load/unload features."""
+
             work_thread = self.threads_pool.createThread(
                 "model", lambda: self.model.run_command("load_feature", *args)
             )
@@ -718,7 +737,9 @@ class Controller:
                 string = 'continuous', 'z-stack', 'single', or 'projection'
             """
             # acquisition mode from plugin
-            plugin_obj = self.plugin_acquisition_modes.get(self.acquire_bar_controller.mode, None)
+            plugin_obj = self.plugin_acquisition_modes.get(
+                self.acquire_bar_controller.mode, None)
+
             if plugin_obj and hasattr(plugin_obj, "prepare_acquisition_controller"):
                 getattr(plugin_obj, "prepare_acquisition_controller")(self)
 

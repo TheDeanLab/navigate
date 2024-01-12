@@ -41,6 +41,8 @@ from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.tools.common_functions import combine_funcs, load_module_from_file
 from navigate.tools.decorators import AcquisitionMode
 from navigate.model.features import feature_related_functions
+from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.view.popups.plugins_popup import PluginsPopup
 
 
 class PluginsController:
@@ -233,3 +235,50 @@ class PluginsController:
             )
 
         return func
+
+
+class UninstallPluginController(GUIController):
+    def __init__(self, view, parent_controller):
+        super().__init__(view, parent_controller)
+
+        self.plugin_config_path = os.path.join(get_navigate_path(), "config")
+
+        self.popup = PluginsPopup(view)
+        self.popup.uninstall_btn.config(command=self.uninstall_plugins)
+        self.popup.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
+        self.refresh_plugins()
+
+    def showup(self):
+        """Show up the popup window"""
+        self.refresh_plugins()
+        self.popup.popup.showup()
+
+    def exit_func(self):
+        """Exit"""
+        self.popup.popup.dismiss()
+        delattr(self.parent_controller, "uninstall_plugin_controller")
+
+    def refresh_plugins(self):
+        """Show installed plugins"""
+        self.plugin_config = load_yaml_file(
+            os.path.join(self.plugin_config_path, "plugins_config.yml")
+        )
+
+        self.popup.build_widgets(self.plugin_config)
+
+    def uninstall_plugins(self, *args):
+        """Uninstall plugins"""
+        flag = False
+        for var in self.popup.variables:
+            if var.get():
+                self.plugin_config.pop(var.get())
+                flag = True
+        if flag:
+            save_yaml_file(
+                self.plugin_config_path, self.plugin_config, "plugins_config.yml"
+            )
+            tk.messagebox.showwarning(
+                title="Navigate",
+                message="Plugins are uninstalled! Please restart Navigate!",
+            )
+            self.showup()

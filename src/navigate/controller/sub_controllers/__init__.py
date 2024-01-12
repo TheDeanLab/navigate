@@ -20,5 +20,6 @@ from .ilastik_popup_controller import IlastikPopupController  # noqa
 from .camera_map_setting_popup_controller import CameraMapSettingPopupController  # noqa
 from .microscope_popup_controller import MicroscopePopupController  # noqa
 from .adaptiveoptics_popup_controller import AdaptiveOpticsPopupController  # noqa
+# from .uninstall_plugin_controller import UninstallPluginController  # noqa
+from .plugins_controller import PluginsController, UninstallPluginController  # noqa
 from .menu_controller import MenuController  # noqa
-from .plugins_controller import PluginsController  # noqa

@@ -1,5 +1,5 @@
 <h1 align="center">
-<img src="./src/navigate/view/icon/mic.ico?raw=true" />
+<img src="https://github.com/TheDeanLab/navigate/blob/develop/src/navigate/view/icon/mic.ico?raw=true" />
 
 navigate
 <h2 align="center">

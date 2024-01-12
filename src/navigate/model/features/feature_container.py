@@ -858,7 +858,7 @@ def load_features(model, feature_list):
 
         return signal_node, data_node
 
-    def build_feature_tree(feature_list):
+    def build_feature_tree(feature_list, continue_list, break_list):
         """Build a child-sibling tree structure from a feature list.
 
         This function recursively builds a child-sibling tree structure from a list
@@ -899,32 +899,126 @@ def load_features(model, feature_list):
 
         signal_root, data_root = None, None
         pre_signal, pre_data = None, None
+        pre_signal2, pre_data2 = None, None
         for temp in feature_list:
+            break_to_next = True
+            signal_tail2 = None
+            data_tail2 = None
             if type(temp) is dict:
                 signal_head, data_head = create_node(temp)
                 signal_tail = signal_head
                 data_tail = data_head
+                break_loop_list1, break_loop_list2 = [], []
+                if "true" in temp:
+                    if temp["true"] in ["break", '"break"', "'break'"]:
+                        break_list.append(["child", signal_head, data_head, 1])
+                    elif temp["true"] in ["continue", '"continue"', "'continue'"]:
+                        continue_list.append(("child", signal_head, data_head))
+                    elif temp["true"]:
+                        (
+                            signal_child_head,
+                            data_child_head,
+                            signal_child_tail,
+                            data_child_tail,
+                        ) = build_feature_tree(
+                            temp["true"], continue_list, break_loop_list1
+                        )
+                        signal_head.child = signal_child_head
+                        data_head.child = data_child_head
+                        signal_tail = signal_child_tail
+                        data_tail = data_child_tail
+                        break_to_next = False
+                if "false" in temp:
+                    if temp["false"] in ["break", '"break"', "'break'"]:
+                        break_list.append(["sibling", signal_head, data_head, 1])
+                    elif temp["false"] in ["continue", '"continue"', "'continue'"]:
+                        continue_list.append(("sibling", signal_head, data_head))
+                    elif temp["false"]:
+                        (
+                            signal_sibling_head,
+                            data_sibling_head,
+                            signal_sibling_tail,
+                            data_sibling_tail,
+                        ) = build_feature_tree(
+                            temp["false"], continue_list, break_loop_list2
+                        )
+                        signal_head.sibling = signal_sibling_head
+                        data_head.sibling = data_sibling_head
+                        if signal_tail == signal_head:
+                            signal_tail = signal_sibling_tail
+                            data_tail = data_sibling_tail
+                        else:
+                            signal_tail2 = signal_sibling_tail
+                            data_tail2 = data_sibling_tail
+                        break_to_next = False
+                break_list += break_loop_list1
+                break_list += break_loop_list2
+            elif type(temp) is tuple:
+                for node in break_list:
+                    node[-1] += 1
+                continue_loop_list = []
+                signal_head, data_head, signal_tail, data_tail = build_feature_tree(
+                    temp, continue_loop_list, break_list
+                )
+                signal_head.device_related = True
+                data_head.device_related = True
+                signal_tail.child = signal_head
+                data_tail.child = data_head
+                for node in continue_loop_list:
+                    if node[0] == "child":
+                        node[1].child = signal_tail
+                        node[2].child = data_tail
+                    else:
+                        node[1].sibling = signal_tail
+                        node[2].sibling = data_tail
+                for node in break_list:
+                    node[-1] -= 1
+                break_to_next = False
             else:
                 signal_head, data_head, signal_tail, data_tail = build_feature_tree(
-                    temp
+                    temp, continue_list, break_list
                 )
-                if type(temp) is tuple:
-                    signal_head.device_related = True
-                    data_head.device_related = True
-                    signal_tail.child = signal_head
-                    data_tail.child = data_head
+            if break_to_next:
+                for i in range(len(break_list) - 1, -1, -1):
+                    node = break_list[i]
+                    if node[-1] <= 0:
+                        if node[0] == "child":
+                            node[1].child = signal_head
+                            node[2].child = data_head
+                        else:
+                            node[1].sibling = signal_head
+                            node[2].sibling = data_head
+                        break_list.pop()
+            # handle "true": break and "false": break
+            if len(break_list) > 1 and break_list[-1][1] == pre_signal and break_list[-1][0] == pre_signal:
+                continue
+
             if pre_signal:
                 pre_signal.sibling = signal_head
                 pre_data.sibling = data_head
             else:
                 signal_root = signal_head
                 data_root = data_head
+
+            if pre_signal2:
+                pre_signal2.sibling = signal_head
+                pre_data2.sibling = data_head
+
             pre_signal = signal_tail
             pre_data = data_tail
+            pre_signal2 = signal_tail2
+            pre_data2 = data_tail2
 
         return signal_root, data_root, pre_signal, pre_data
-
-    signal_root, data_root, pre_signal, pre_data = build_feature_tree(feature_list)
+    
+    break_list = []
+    signal_root, data_root, pre_signal, pre_data = build_feature_tree(
+        feature_list, [], break_list
+    )
+    # add a node placeholder
+    for node in break_list:
+        if node[0] == "child":
+            node[1].child, node[2].child = create_node({"name": DummyFeature})
     return SignalContainer(signal_root, signal_cleanup_list), DataContainer(
         data_root, data_cleanup_list
     )
@@ -978,3 +1072,9 @@ def dummy_func(*args):
     """
 
     pass
+
+class DummyFeature:
+    def __init__(self, model, *args):
+        self.model = model
+        self.config_table = {}
+

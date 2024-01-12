@@ -49,18 +49,18 @@ class TestMain(unittest.TestCase):
         parser = create_parser()
 
         # Boolean arguments
-        input_arguments = ["-sh", "--synthetic_hardware"]
+        input_arguments = ["-sh", "--synthetic-hardware"]
         for arg in input_arguments:
             parser.parse_args([arg])
 
         # Path Arguments.
         navigate_path = Path(get_navigate_path())
         input_arguments = [
-            "--config_file",
-            "--experiment_file",
-            "--waveform_constants_path",
-            "--rest_api_file",
-            "--logging_config",
+            "--config-file",
+            "--experiment-file",
+            "--waveform-constants-path",
+            "--rest-api-file",
+            "--logging-config",
         ]
         for arg in input_arguments:
             parser.parse_args([arg, str(Path.joinpath(navigate_path, "test.yml"))])

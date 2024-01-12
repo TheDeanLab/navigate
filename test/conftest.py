@@ -48,7 +48,7 @@ def dummy_model():
     DummyModel
         Dummy model for testing.
     """
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     return model
@@ -89,7 +89,7 @@ def dummy_controller(dummy_view):
     DummyController
         Dummy controller for testing.
     """
-    from navigate.model.dummy import DummyController
+    from test.model.dummy import DummyController
 
     controller = DummyController(dummy_view)
     return controller

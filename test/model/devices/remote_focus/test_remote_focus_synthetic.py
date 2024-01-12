@@ -2,7 +2,7 @@ def test_remote_focus_synthetic_functions():
     from navigate.model.devices.remote_focus.remote_focus_synthetic import (
         SyntheticRemoteFocus,
     )
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     microscope_name = model.configuration["experiment"]["MicroscopeState"][
@@ -10,8 +10,8 @@ def test_remote_focus_synthetic_functions():
     ]
     rf = SyntheticRemoteFocus(microscope_name, None, model.configuration)
 
-    funcs = ["prepare_task", "start_task", "stop_task", "close_task"]
-    args = [["channel_dummy"], None, None, None]
+    funcs = ["move"]
+    args = [[0.1, None]]
 
     for f, a in zip(funcs, args):
         if a is not None:

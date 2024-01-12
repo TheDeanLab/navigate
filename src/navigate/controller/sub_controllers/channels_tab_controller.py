@@ -71,11 +71,14 @@ class ChannelsTabController(GUIController):
             The parent controller of this controller.
         """
         super().__init__(view, parent_controller)
+
         #: bool: Whether or not the user has selected to save the data.
         self.is_save = False
+
         #: str: The current acquisition mode.
         self.mode = "stop"
-        #: bool: Whether or not the controller is in the initialization phase.
+
+        #: bool: Whether the controller is in the initialization phase.
         self.in_initialization = True
 
         # sub-controllers
@@ -176,102 +179,7 @@ class ChannelsTabController(GUIController):
             command=self.launch_autofocus_settings
         )
 
-        # Get Widgets from confocal_projection_settings in view
-        #: dict: The widgets in the confocal projection settings frame.
-        self.conpro_acq_widgets = self.view.conpro_acq_frame.get_widgets()
-        #: dict: The values in the confocal projection settings frame.
-        self.conpro_acq_vals = self.view.conpro_acq_frame.get_variables()
-
-        # laser/stack cycling event binds
-        self.conpro_acq_vals["cycling"].trace_add("write", self.update_cycling_setting)
-
-        # confocal-projection event binds
-        self.conpro_acq_vals["scanrange"].trace_add("write", self.update_scanrange)
-        self.conpro_acq_vals["n_plane"].trace_add("write", self.update_plane_number)
-        self.conpro_acq_vals["offset_start"].trace_add(
-            "write", self.update_offset_start
-        )
-        self.conpro_acq_vals["offset_end"].trace_add("write", self.update_offset_end)
-
-        # confocal-projection setting variables
-
         self.initialize()
-
-    def update_offset_start(self, *args):
-        """Update offset start value in the controller
-
-        Parameters
-        ----------
-        *args
-            Not used
-
-        Examples
-        --------
-        >>> self.update_offset_start()
-        """
-        try:
-            offset_start = float(self.conpro_acq_vals["offset_start"].get())
-        except tk._tkinter.TclError:
-            offset_start = 0
-        self.microscope_state_dict["offset_start"] = offset_start
-        logger.info(f"Controller updated offset start: {offset_start}")
-
-    def update_offset_end(self, *args):
-        """Update offset end value in the controller
-
-        Parameters
-        ----------
-        *args
-            Not used
-
-        Examples
-        --------
-        >>> self.update_offset_end()
-        """
-        try:
-            offset_end = float(self.conpro_acq_vals["offset_end"].get())
-        except tk._tkinter.TclError:
-            offset_end = 0
-        self.microscope_state_dict["offset_end"] = offset_end
-        logger.info(f"Controller updated offset end: {offset_end}")
-
-    def update_plane_number(self, *args):
-        """Update plane number value in the controller
-
-        Parameters
-        ----------
-        *args
-            Not used
-
-        Examples
-        --------
-        >>> self.update_plane_number()
-        """
-        try:
-            n_plane = float(self.conpro_acq_vals["n_plane"].get())
-        except tk._tkinter.TclError:
-            n_plane = 1
-        self.microscope_state_dict["n_plane"] = n_plane
-        logger.info(f"Controller updated plane number: {n_plane}")
-
-    def update_scanrange(self, *args):
-        """Update scan range value in the controller
-
-        Parameters
-        ----------
-        *args
-            Not used
-
-        Examples
-        --------
-        >>> self.update_scanrange()
-        """
-        try:
-            scanrange = float(self.conpro_acq_vals["scanrange"].get())
-        except tk._tkinter.TclError:
-            scanrange = 0
-        self.microscope_state_dict["scanrange"] = scanrange
-        logger.info(f"Controller updated scan range: {scanrange}")
 
     def initialize(self):
         """Initializes widgets and gets other necessary configuration
@@ -283,7 +191,6 @@ class ChannelsTabController(GUIController):
         config = self.parent_controller.configuration_controller
 
         self.stack_acq_widgets["cycling"].widget["values"] = ["Per Z", "Per Stack"]
-        self.conpro_acq_widgets["cycling"].widget["values"] = ["Per Plane", "Per Stack"]
         self.stage_velocity = config.stage_setting_dict["velocity"]
         self.filter_wheel_delay = config.filter_wheel_setting_dict["filter_wheel_delay"]
         self.channel_setting_controller.initialize()
@@ -307,7 +214,7 @@ class ChannelsTabController(GUIController):
                 "step_size"
             ]
         self.set_info(self.stack_acq_vals, self.microscope_state_dict)
-        self.set_info(self.conpro_acq_vals, self.microscope_state_dict)
+        # self.set_info(self.conpro_acq_vals, self.microscope_state_dict)
         self.set_info(self.timepoint_vals, self.microscope_state_dict)
 
         # check configuration for multiposition settings
@@ -333,11 +240,6 @@ class ChannelsTabController(GUIController):
             "per_stack",
         ]:
             self.microscope_state_dict["conpro_cycling_mode"] = "per_plane"
-        self.conpro_acq_vals["cycling"].set(
-            "Per Plane"
-            if self.microscope_state_dict["conpro_cycling_mode"] == "per_plane"
-            else "Per Stack"
-        )
         self.channel_setting_controller.populate_experiment_values(
             self.microscope_state_dict["channels"]
         )
@@ -614,11 +516,6 @@ class ChannelsTabController(GUIController):
             "per_stack"
             if self.stack_acq_vals["cycling"].get() == "Per Stack"
             else "per_z"
-        )
-        self.microscope_state_dict["conpro_cycling_mode"] = (
-            "per_stack"
-            if self.conpro_acq_vals["cycling"].get() == "Per Stack"
-            else "per_plane"
         )
 
         # recalculate time point settings

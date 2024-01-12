@@ -105,9 +105,6 @@ class GalvoBase:
         #: str: Galvo waveform. Waveform or Sawtooth.
         self.galvo_waveform = self.device_config.get("waveform", "sawtooth")
 
-        #: int: Number of samples.
-        self.samples = int(self.sample_rate * self.sweep_time)
-
         #: dict: Dictionary of galvo waveforms.
         self.waveform_dict = {}
 
@@ -154,7 +151,6 @@ class GalvoBase:
                 # Should Assert.
                 exposure_time = exposure_times[channel_key]
                 self.sweep_time = sweep_times[channel_key]
-                self.samples = int(self.sample_rate * self.sweep_time)
 
                 # galvo Parameters
                 try:
@@ -215,28 +211,6 @@ class GalvoBase:
                 ] = self.galvo_min_voltage
 
         return self.waveform_dict
-
-    def prepare_task(self, channel_key):
-        """Prepare the task for the given channel.
-
-        Parameters
-        ----------
-        channel_key : str
-            Channel key.
-        """
-        pass
-
-    def start_task(self):
-        """Start the task."""
-        pass
-
-    def stop_task(self):
-        """Stop the task."""
-        pass
-
-    def close_task(self):
-        """Close the task."""
-        pass
 
     def turn_off(self):
         """Turn off the galvo."""

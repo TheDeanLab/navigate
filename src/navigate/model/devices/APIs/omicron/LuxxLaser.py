@@ -1,11 +1,11 @@
 import logging
-from pathlib import Path
 
 import serial
 import re
-from time import time
 
-from navigate.model.devices.lasers.LaserBase import LaserBase
+# from time import time
+
+from navigate.model.devices.lasers.laser_base import LaserBase
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -78,7 +78,7 @@ class LuxxLaser(LaserBase):
 
             # Close the port
             self.laser.close()
-            logger.debug(f"Port closed")
+            logger.debug("Port closed")
 
         except serial.SerialException:
             print("Could not close the port")
@@ -275,13 +275,14 @@ class LuxxLaser(LaserBase):
         # 11  The ambient temperature exceeded the minimum or maximum value
         # 10  The current through the diode exceeded the maximum allowed value
         # 9   The interlock loop is not closed. Please close the interlockt loop
-        # 8   Overvoltage or Undervoltage lockout occured. Bring supply voltage to a valid range
+        # 8   Overvoltage or Undervoltage lockout occured. Bring supply voltage to
+        #     a valid range
         # 4   If CDRH-Bit is set and no CDRH-Kit is connected or
         #     CDRH-Bit is not set but a CDRH-Kit is connected
         #     CDRH-Kit is a box with a key, a LED and an interlock
-        # 0   Soft interlock: If an interlock error occurs, this bit is set. It can only be
-        #     reset by resetting the whole system, even if the interlock error is
-        #     not present anymore.
+        # 0   Soft interlock: If an interlock error occurs, this bit is set.
+        #     It can only be reset by resetting the whole system, even if the
+        #     interlock error is not present anymore.
         # Bits 1, 2, 3, 5, 6, 7, 13 are reserved
         """
         self.smart_ask("GFB")
@@ -303,7 +304,7 @@ def stopwatch(func, *func_args, **func_kwargs):
     """
     # Call **func** and print elapsed time
     """
-    start_time = time()
+    # start_time = time()
     result = func(*func_args, **func_kwargs)
     # print("Time elapsed: %5.2f ms" % ((time() - start_time)*1000.0))
     return result

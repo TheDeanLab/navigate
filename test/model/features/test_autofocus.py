@@ -38,7 +38,7 @@ import numpy as np
 # Local imports
 from navigate.model.features.autofocus import power_tent
 from navigate.model.features.autofocus import Autofocus
-from navigate.model.dummy import DummyModel
+from test.model.dummy import DummyModel
 
 
 class TestPowerTentFunction(unittest.TestCase):

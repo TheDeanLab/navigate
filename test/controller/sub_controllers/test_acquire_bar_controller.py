@@ -224,7 +224,6 @@ class TestAcquireBarController:
             ("live", "disabled"),
             ("z-stack", "normal"),
             ("single", "disabled"),
-            ("alignment", "disabled"),
             ("projection", "normal"),
         ],
     )
@@ -268,7 +267,6 @@ class TestAcquireBarController:
             ("live", "disabled"),
             ("z-stack", "normal"),
             ("single", "normal"),
-            ("alignment", "disabled"),
             ("projection", "normal"),
         ],
     )
@@ -368,7 +366,6 @@ class TestAcquireBarController:
             ("Continuous Scan", "live"),
             ("Z-Stack", "z-stack"),
             ("Single Acquisition", "single"),
-            ("Alignment", "alignment"),
             ("Projection", "projection"),
         ],
     )

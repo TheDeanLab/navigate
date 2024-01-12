@@ -31,7 +31,7 @@
 #
 import unittest
 from navigate.model.devices.shutter.laser_shutter_base import ShutterBase
-from navigate.model.dummy import DummyModel
+from test.model.dummy import DummyModel
 
 
 class TestLaserBase(unittest.TestCase):

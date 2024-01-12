@@ -34,6 +34,7 @@
 import tkinter as tk
 import platform
 import os
+import warnings
 
 # Third Party Imports
 
@@ -60,14 +61,14 @@ def main():
     Parameters
     ----------
     *args : iterable
-        --synthetic_hardware
+        --synthetic-hardware
         --sh
-        --config_file
-        --experiment_file
-        --waveform_constants_path
-        --rest_api_file
-        --waveform_templates_file
-        --logging_config
+        --config-file
+        --experiment-file
+        --waveform_constants-path
+        --rest-api-file
+        --waveform-templates-file
+        --logging-config
 
     Returns
     -------
@@ -75,20 +76,24 @@ def main():
 
     Examples
     --------
-    >>> python main.py --synthetic_hardware
+    >>> python main.py --synthetic-hardware
     """
+    if platform.system() != 'Windows':
+        print("WARNING: navigate was built to operate on a Windows platform. "
+              "While much of the software will work for evaluation purposes, some "
+              "unanticipated behaviors may occur. For example, it is known that the "
+              "Tkinter-based GUI does not grid symmetrically, nor resize properly "
+              "on MacOS. Testing on Linux operating systems has not been performed.")
+
     # Start the GUI, withdraw main screen, and show splash screen.
     root = tk.Tk()
     root.withdraw()
 
     # Splash Screen
     current_directory = os.path.dirname(os.path.realpath(__file__))
-    splash_screen = SplashScreen(root, os.path.join(
-        current_directory,
-        "view",
-        "icon",
-        "splash_screen_image.png"
-    ))
+    splash_screen = SplashScreen(
+        root, os.path.join(current_directory, "view", "icon", "splash_screen_image.png")
+    )
 
     # Parse command line arguments
     parser = create_parser()
@@ -119,6 +124,4 @@ def main():
 
 
 if __name__ == "__main__":
-    if platform.system() == "Darwin":
-        print("Apple OS Not Fully Supported. ")
     main()

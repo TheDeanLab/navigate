@@ -1,3 +1,5 @@
+""" Hardware devices. """
+
 from .daq.daq_synthetic import SyntheticDAQ  # noqa
 from .camera.camera_synthetic import SyntheticCamera  # noqa
 from .filter_wheel.filter_wheel_synthetic import SyntheticFilterWheel  # noqa

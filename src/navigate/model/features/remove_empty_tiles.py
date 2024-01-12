@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 from math import ceil
+from queue import Queue
 
 # Third Party Imports
 
@@ -327,6 +328,93 @@ class DetectTissueInStack:
         """
         return self.received_frames >= self.planes
 
+
+class DetectTissueInStackAndReturn(DetectTissueInStack):
+    def __init__(self, model, planes=1, percentage=0.75, detect_func=None):
+        """Initialize the DetectTissueInStackAndReturn class.
+
+        Parameters:
+        -----------
+        model : object
+            The model object representing the microscope.
+        planes : int, optional
+            The number of Z planes to capture in the stack. Default is 1.
+        percentage : float, optional
+            The minimum percentage of tissue required to consider a frame as having
+            tissue. Default is 0.75 (75%).
+        detect_func : function, optional
+            The custom tissue detection function to use. If not specified, the default
+            `detect_tissue` function will be used.
+        """
+        super().__init__(model, planes, percentage, detect_func)
+
+        self.detect_tissue_queue = Queue()
+        self.result_sent_flag = False
+        self.config_table["signal"]["main-response"] = self.signal_response_func
+
+    def pre_func_data(self):
+        """Initialization function for data processing.
+
+        This method is called at the beginning of the data processing phase and
+        initializes variables for tracking received frames and tissue detection.
+
+        Returns:
+        --------
+        None
+        """
+        super().pre_func_data()
+        self.result_sent_flag = False    
+        
+    def signal_response_func(self):
+        """Return the result if there is an tissue"""
+        if self.scan_num >= self.planes:
+            self.model.logger.debug(f"detection signal waiting for result!")
+            has_tissue = self.detect_tissue_queue.get()
+            self.model.logger.debug(f"detection signal get result: {has_tissue}")
+            return has_tissue
+        
+    def in_func_data(self, frame_ids):
+        """Data processing function to analyze image frames for tissue presence.
+
+        This method is called during the data processing phase to analyze image frames
+        for tissue presence. It checks if any of the received frames contain
+        sufficient tissue.
+
+        Parameters:
+        -----------
+        frame_ids : list
+            A list of frame IDs to analyze.
+
+        Returns:
+        --------
+        bool
+            True if tissue is detected, False otherwise.
+        """
+        super().in_func_data(frame_ids)
+
+        if self.has_tissue_flag and not self.result_sent_flag:
+            self.model.logger.debug(f"detection data send result: {self.has_tissue_flag}")
+            self.detect_tissue_queue.put(True)
+            self.result_sent_flag = True
+        return self.has_tissue_flag
+
+    def end_func_data(self):
+        """Data processing function to end the data phase.
+
+        This method is called to determine whether the data phase should end. It checks
+         if the specified number of frames have been received.
+
+        Returns:
+        --------
+        bool
+            True if the data phase should end, False otherwise.
+        """
+        if self.received_frames >= self.planes:
+            if not self.result_sent_flag:
+                self.model.logger.debug(f"detection data send result: {self.has_tissue_flag}")
+                self.detect_tissue_queue.put(self.has_tissue_flag)
+            return True
+        return False
 
 class DetectTissueInStackAndRecord(DetectTissueInStack):
     """Detect Tissue in a Stack of Images and Record Positions.

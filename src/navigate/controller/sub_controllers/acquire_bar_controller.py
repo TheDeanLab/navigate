@@ -77,11 +77,9 @@ class AcquireBarController(GUIController):
             "Continuous Scan": "live",
             "Z-Stack": "z-stack",
             "Single Acquisition": "single",
-            "Alignment": "alignment",
             "Projection": "projection",
-            "Confocal-Projection": "confocal-projection",
             "Customized": "customized",
-            "Constant Velocity Acquistion": "ConstantVelocityAcquisition",
+            "Constant Velocity Acquisition": "ConstantVelocityAcquisition",
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
@@ -91,6 +89,9 @@ class AcquireBarController(GUIController):
         self.view.acquire_btn.config(command=self.launch_popup_window)
         self.view.pull_down.bind("<<ComboboxSelected>>", self.update_microscope_mode)
         self.view.exit_btn.config(command=self.exit_program)
+
+        # framerate information.
+        self.framerate = 0
 
     def progress_bar(self, images_received, microscope_state, mode, stop=False):
         """Update progress bars.
@@ -147,8 +148,6 @@ class AcquireBarController(GUIController):
             number_of_slices = 1
         elif mode == "projection":
             number_of_slices = 1
-        elif mode == "confocal-projection":
-            number_of_slices = microscope_state["n_plane"]
         elif mode == "z-stack" or "ConstantVelocityAcquisition":
             number_of_slices = microscope_state["number_z_steps"]
 
@@ -166,20 +165,33 @@ class AcquireBarController(GUIController):
                 if mode == "live" or mode == "customized":
                     self.view.CurAcq.start()
                     self.view.OvrAcq.start()
+                    self.view.total_acquisition_label.config(text="--:--:--")
 
-                elif (
+                else:
+                    # Calculate the number of images remaining.
+                    # Time is estimated from the framerate, which includes stage
+                    # movement time inherently.
+                    try:
+                        images_remaining = bottom_anticipated_images - images_received
+                        seconds_left = images_remaining / self.framerate
+                        self.update_progress_label(seconds_left)
+                    except ZeroDivisionError:
+                        pass
+
+                if (
                     mode == "z-stack"
-                    or mode == "confocal-projection"
                     or mode == "ConstantVelocityAcquisition"
                 ):
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )
+
                     self.view.CurAcq["value"] = (
                         top_percent_complete % 100
                         if (top_percent_complete > 100.0)
                         else top_percent_complete
                     )
+
                     bottom_anticipated_images = 100 * (
                         images_received / bottom_anticipated_images
                     )
@@ -198,14 +210,36 @@ class AcquireBarController(GUIController):
                     )
                     self.view.CurAcq["value"] = bottom_anticipated_images
                     self.view.OvrAcq["value"] = bottom_anticipated_images
+                else:
+                    self.view.CurAcq.start()
+                    self.view.OvrAcq.start()
 
             elif stop is True:
+                self.update_progress_label(seconds_left=0)
                 self.stop_progress_bar()
 
     def stop_progress_bar(self):
         """Stop moving the continuous progress bar."""
         self.view.CurAcq.stop()
         self.view.OvrAcq.stop()
+
+    def update_progress_label(self, seconds_left):
+        """Update the progress label in the Acquire Bar.
+
+        Formatted time is in HH:MM:SS.
+
+        Parameters
+        ----------
+        seconds_left : int
+            Seconds left in the acquisition.
+        """
+        hours, remainder = divmod(seconds_left, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        self.view.total_acquisition_label.config(
+            text=f"{int(hours):02}"
+                 f":{int(minutes):02}"
+                 f":{int(seconds):02}"
+        )
 
     def set_mode(self, mode):
         """Set imaging mode.
@@ -214,7 +248,6 @@ class AcquireBarController(GUIController):
         ----------
         mode: str
             Mode could be: 'live', 'z-stack', 'single', 'projection',
-            'confocal-projection'
 
         Examples
         --------
@@ -241,6 +274,11 @@ class AcquireBarController(GUIController):
         >>> get_mode()
         """
         return self.mode
+
+    def add_mode(self, mode):
+        if mode not in self.mode_dict:
+            self.mode_dict[mode] = mode
+            self.view.pull_down["values"] = list(self.mode_dict.keys())
 
     def stop_acquire(self):
         """Stop the acquisition.
@@ -342,7 +380,6 @@ class AcquireBarController(GUIController):
         # Update state status of other widgets in the GUI based on what mode is set
         self.update_stack_acq(self.mode)
         self.update_stack_time(self.mode)
-        self.update_conpro_acq(self.mode)
 
     def update_stack_acq(self, mode):
         """Changes state behavior of widgets in the stack acquisition frame based on
@@ -374,31 +411,6 @@ class AcquireBarController(GUIController):
         for key, widget in stack_widgets.items():
             widget.widget["state"] = state
 
-    def update_conpro_acq(self, mode):
-        """Changes state behavior of widgets in the confocal-projection acquisition
-        frame based on mode of microscope
-
-        Parameters
-        ----------
-        mode : str
-            Imaging Mode.
-
-        Examples
-        --------
-        >>> update_conpro_acq('live')
-        """
-
-        # Get ref to widgets
-        conpro_widgets = self.parent_view.conpro_acq_frame.get_widgets()
-
-        # Grey out conpro acq widgets when not confocal-projection
-        if mode == "confocal-projection":
-            state = "normal"
-        else:
-            state = "disabled"
-        for _, widget in conpro_widgets.items():
-            widget.widget["state"] = state
-
     def update_stack_time(self, mode):
         """Changes state behavior of widgets in the stack timepoint frame based on mode
         of microscope
@@ -416,8 +428,8 @@ class AcquireBarController(GUIController):
         # Get ref to widgets
         time_widgets = self.parent_view.stack_timepoint_frame.get_widgets()
 
-        # Grey out time widgets when in Continuous Scan or Alignment modes
-        if mode == "live" or mode == "alignment":
+        # Grey out time widgets when in Continuous mode
+        if mode == "live":
             state = "disabled"
         else:
             state = "normal"

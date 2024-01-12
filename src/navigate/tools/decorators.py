@@ -65,3 +65,12 @@ class FeatureList(object):
 
     def __call__(self, *args, **kwargs):
         return self._feature_list()
+
+
+class AcquisitionMode(object):
+    def __init__(self, obj):
+        self.__obj_class = obj
+        self.__is_acquisition_mode = True
+
+    def __call__(self, *args):
+        return self.__obj_class(*args)

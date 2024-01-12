@@ -31,7 +31,7 @@
 
 
 # Standard Library Imports
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import math
 import logging
 
@@ -68,7 +68,6 @@ class MultiPositionController(GUIController):
         self.table.loadCSV = self.load_positions
         self.table.exportCSV = self.export_positions
         self.table.insertRow = self.insert_row_func
-        self.table.generatePositions = self.generate_positions
         self.table.addStagePosition = self.add_stage_position
 
         self.view.master.tiling_buttons.buttons["tiling"].config(
@@ -89,10 +88,8 @@ class MultiPositionController(GUIController):
 
     def eliminate_tiles(self):
         """Eliminate tiles that do not contain tissue."""
-        print(
-            "TODO: Implement feature that goes to the middle position of each tile, "
-            "evaluates whether or not it consists of tissue, and if not, remove it."
-        )
+
+        self.parent_controller.execute("eliminate_tiles")
 
     def set_positions(self, positions):
         """Set positions to multi-position's table
@@ -212,13 +209,18 @@ class MultiPositionController(GUIController):
         df.columns = map(lambda v: v.upper(), df.columns)
         cmp_header = df.columns == ["X", "Y", "Z", "R", "F"]
         if not cmp_header.all():
-            #  TODO: show error message
-            print("The csv file isn't right, it should contain [X, Y, Z, R, F]")
+            messagebox.showwarning(
+                title="Warning",
+                message="The csv file isn't right, it should contain [X, Y, Z, R, F]"
+            )
             logger.info("The csv file isn't right, it should contain [X, Y, Z, R, F]")
             return
         model = TableModel(dataframe=df)
         self.table.updateModel(model)
-        self.table.redraw()
+        try:
+            self.table.redraw()
+        except KeyError:
+            pass
         self.show_verbose_info("loaded csv file", filename)
 
     def export_positions(self):
@@ -264,18 +266,6 @@ class MultiPositionController(GUIController):
         self.table.redraw()
         self.table.tableChanged()
         self.show_verbose_info("insert a row before current row")
-
-    def generate_positions(self):
-        """Generate positions in the Multi-Position Acquisition Interface.
-
-        This function opens a dialog to let the user input start and end position
-        Then it will generate positions for the user.
-
-        Example
-        -------
-        >>> generate_positions()
-        """
-        pass
 
     def add_stage_position(self):
         """Add the current stage position to the Multi-Position Acquisition Interface.

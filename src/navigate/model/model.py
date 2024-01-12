@@ -53,7 +53,6 @@ from navigate.model.features.common_features import (
     FindTissueSimple2D,
     PrepareNextChannel,
     LoopByCount,
-    ConProAcquisition,  # noqa
     StackPause,
     MoveToNextPositionInMultiPositionTable,
     WaitToContinue,
@@ -78,6 +77,7 @@ from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.model.device_startup_functions import load_devices
 from navigate.model.microscope import Microscope
 from navigate.config.config import get_navigate_path
+from navigate.model.plugins_model import PluginsModel
 
 
 # Logger Setup
@@ -110,7 +110,17 @@ class Model:
         #: dict: Configuration dictionary.
         self.configuration = configuration
 
-        devices_dict = load_devices(configuration, args.synthetic_hardware)
+        plugins = PluginsModel()
+        # load plugin feature and devices
+        plugin_devices, plugin_acquisition_modes = plugins.load_plugins()
+        devices_dict = load_devices(
+            configuration, args.synthetic_hardware, plugin_devices
+        )
+        devices_dict["__plugins__"] = plugin_devices
+
+        #: dict: Dictionary of plugin acquisition modes
+        self.plugin_acquisition_modes = plugin_acquisition_modes
+
         #: dict: Dictionary of virtual microscopes.
         self.virtual_microscopes = {}
         #: dict: Dictionary of physical microscopes.
@@ -119,6 +129,9 @@ class Model:
             self.microscopes[microscope_name] = Microscope(
                 microscope_name, configuration, devices_dict, args.synthetic_hardware
             )
+            self.microscopes[microscope_name].output_event_queue = event_queue
+        # register device commands if there is any.
+
         #: str: Name of the active microscope.
         self.active_microscope = None
         #: str: Name of the active microscope.
@@ -156,8 +169,10 @@ class Model:
         )
         #: str: Binning mode.
         self.binning = "1x1"
-        #: int: Number of frames in the data buffer.
+        #: array: stage positions.
         self.data_buffer_positions = None
+        #: array: saving flags for a frame
+        self.data_buffer_saving_flags = None
         #: bool: Is the model acquiring?
         self.is_acquiring = False
 
@@ -221,7 +236,8 @@ class Model:
         self.image_writer = None
 
         # feature list
-        # TODO: put it here now
+        #: list: add on feature in customized mode
+        self.addon_feature = None
         #: list: List of features.
         self.feature_list = []
         # automatically switch resolution
@@ -342,12 +358,15 @@ class Model:
                 )
             ],
             "projection": [{"name": PrepareNextChannel}],
-            "confocal-projection": [
-                {"name": PrepareNextChannel},
-            ],
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "customized": [],
         }
+        # append plugin acquisition mode
+        for mode in self.plugin_acquisition_modes:
+            self.acquisition_modes_feature_setting[
+                mode
+            ] = self.plugin_acquisition_modes[mode].feature_list
+
         self.load_feature_records()
 
     def update_data_buffer(self, img_width=512, img_height=512):
@@ -477,7 +496,9 @@ class Model:
         **kwargs : dict
             Dictionary of keyword arguments to pass to the command.
         """
-        logging.info("Navigate Model - Received command from controller:", command, args)
+        logging.info(
+            "Navigate Model - Received command from controller:", command, args
+        )
         if not self.data_buffer:
             logging.debug("Navigate Model - Shared Memory Buffer Not Set Up.")
             return
@@ -512,15 +533,12 @@ class Model:
                 self.signal_container, self.data_container = load_features(
                     self, self.addon_feature
                 )
+                self.data_buffer_saving_flags = [False] * self.number_of_frames
             else:
                 self.signal_container, self.data_container = load_features(
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]
                 )
-
-            # if self.imaging_mode == "single":
-            #     self.configuration["experiment"]["MicroscopeState"][
-            #         "stack_cycling_mode"
-            #     ] = "per_z"
+                self.data_buffer_saving_flags = None
 
             if self.imaging_mode == "projection":
                 self.move_stage({"z_abs": 0})
@@ -532,7 +550,15 @@ class Model:
 
             self.signal_thread.name = f"{self.imaging_mode} signal"
             if self.is_save and self.imaging_mode != "live":
-                self.image_writer = ImageWriter(self)
+                saving_config = {}
+                plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
+                if plugin_obj and hasattr(plugin_obj, "update_saving_config"):
+                    saving_config = getattr(plugin_obj, "update_saving_config")(self)
+                self.image_writer = ImageWriter(
+                    self,
+                    saving_flags=self.data_buffer_saving_flags,
+                    saving_config=saving_config,
+                )
                 self.data_thread = threading.Thread(
                     target=self.run_data_process,
                     kwargs={"data_func": self.image_writer.save_image},
@@ -546,7 +572,11 @@ class Model:
             for m in self.virtual_microscopes:
                 image_writer = (
                     ImageWriter(
-                        self, self.virtual_microscopes[m].data_buffer, m
+                        self,
+                        self.virtual_microscopes[m].data_buffer,
+                        m,
+                        saving_flags=self.data_buffer_saving_flags,
+                        saving_config=saving_config,
                     ).save_image
                     if self.is_save
                     else None
@@ -716,6 +746,8 @@ class Model:
         elif command == "exit":
             for camera in self.active_microscope.cameras.values():
                 camera.camera_controller.dev_close()
+        else:
+            self.active_microscope.run_command(command, args)
 
     # main function to update mirror/set experiment mode values
     def update_mirror(self, coef=[], flatten=False):
@@ -794,6 +826,10 @@ class Model:
         for microscope_name in self.virtual_microscopes:
             self.virtual_microscopes[microscope_name].end_acquisition()
 
+        plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
+        if plugin_obj and hasattr(plugin_obj, "end_acquisition_model"):
+            getattr(plugin_obj, "end_acquisition_model")(self)
+
         if hasattr(self, "signal_container"):
             self.signal_container.cleanup()
             delattr(self, "signal_container")
@@ -849,11 +885,6 @@ class Model:
 
             wait_num = self.camera_wait_iterations
 
-            # Leave it here for now to work with current ImageWriter workflow
-            # Will move it feature container later
-            if data_func:
-                data_func(frame_ids)
-
             if hasattr(self, "data_container"):
                 if self.data_container.is_closed:
                     self.logger.info("Navigate Model - Data container is closed.")
@@ -861,6 +892,10 @@ class Model:
                     break
 
                 self.data_container.run(frame_ids)
+
+            # ImageWriter to save images
+            if data_func:
+                data_func(frame_ids)
 
             # show image
             self.logger.info(f"Navigate Model - Sent through pipe{frame_ids[0]}")
@@ -872,7 +907,9 @@ class Model:
 
         self.show_img_pipe.send("stop")
         self.logger.info("Navigate Model - Data thread stopped.")
-        self.logger.info(f"Navigate Model - Received frames in total: {acquired_frame_num}")
+        self.logger.info(
+            f"Navigate Model - Received frames in total: {acquired_frame_num}"
+        )
 
         # release the lock when data thread ends
         if self.pause_data_ready_lock.locked():
@@ -951,7 +988,9 @@ class Model:
 
         show_img_pipe.send("stop")
         self.logger.info("Navigate Model - Data thread stopped.")
-        self.logger.info(f"Navigate Model - Received frames in total: {acquired_frame_num}")
+        self.logger.info(
+            f"Navigate Model - Received frames in total: {acquired_frame_num}"
+        )
 
     def prepare_acquisition(self, turn_off_flags=True):
         """Prepare the acquisition.
@@ -971,6 +1010,10 @@ class Model:
             self.stop_send_signal = False
             self.autofocus_on = False
             self.is_live = False
+
+        plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
+        if plugin_obj and hasattr(plugin_obj, "prepare_acquisition_model"):
+            getattr(plugin_obj, "prepare_acquisition_model")(self)
 
         for m in self.virtual_microscopes:
             self.virtual_microscopes[m].prepare_acquisition()
@@ -998,11 +1041,11 @@ class Model:
         # container functions can inject changes to the stage. NOTE: This line is
         # wildly expensive when get_stage_position() does not cache results.
         stage_pos = self.get_stage_position()
-        self.data_buffer_positions[self.frame_id][0] = stage_pos["x_pos"]
-        self.data_buffer_positions[self.frame_id][1] = stage_pos["y_pos"]
-        self.data_buffer_positions[self.frame_id][2] = stage_pos["z_pos"]
-        self.data_buffer_positions[self.frame_id][3] = stage_pos["theta_pos"]
-        self.data_buffer_positions[self.frame_id][4] = stage_pos["f_pos"]
+        self.data_buffer_positions[self.frame_id][0] = stage_pos.get("x_pos", 0)
+        self.data_buffer_positions[self.frame_id][1] = stage_pos.get("y_pos", 0)
+        self.data_buffer_positions[self.frame_id][2] = stage_pos.get("z_pos", 0)
+        self.data_buffer_positions[self.frame_id][3] = stage_pos.get("theta_pos", 0)
+        self.data_buffer_positions[self.frame_id][4] = stage_pos.get("f_pos", 0)
 
         # Run the acquisition
         try:
@@ -1010,6 +1053,15 @@ class Model:
             self.active_microscope.daq.run_acquisition()
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()
+            if self.active_microscope.current_channel == 0:
+                self.stop_acquisition = True
+                self.event_queue.put(
+                    (
+                        "warning",
+                        "There is an error happened. Please read the log files for details!",
+                    )
+                )
+                return
             self.active_microscope.daq.prepare_acquisition(
                 f"channel_{self.active_microscope.current_channel}"
             )
@@ -1367,8 +1419,14 @@ class Model:
             item = load_yaml_file(f"{feature_lists_path}/{temp['yaml_file_name']}")
 
             if item["module_name"]:
-                module = load_module_from_file(item["module_name"], item["filename"])
-                feature = getattr(module, item["module_name"])
+                try:
+                    module = load_module_from_file(
+                        item["module_name"], item["filename"]
+                    )
+                    feature = getattr(module, item["module_name"])
+                except FileNotFoundError:
+                    del feature_records[i]
+                    continue
                 self.feature_list.append(feature())
             elif item["feature_list"]:
                 feature = convert_str_to_feature_list(item["feature_list"])
@@ -1396,3 +1454,16 @@ class Model:
         if idx > 0 and idx <= len(self.feature_list):
             return convert_feature_list_to_str(self.feature_list[idx - 1])
         return ""
+
+    def mark_saving_flags(self, frame_ids):
+        """Mark saving flags for the ImageWriter
+
+        Parameters
+        ----------
+        frame_ids: array
+            a list of frame ids
+        """
+        if not self.data_buffer_saving_flags:
+            return
+        for id in frame_ids:
+            self.data_buffer_saving_flags[id] = True

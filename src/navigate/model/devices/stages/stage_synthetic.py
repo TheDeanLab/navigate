@@ -73,6 +73,12 @@ class SyntheticStage(StageBase):
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
 
+        self.sample_rate = 10000
+        self.volts_per_micron = "0.1 * x"
+        self.remote_focus_delay = 0.05
+        self.camera_delay_percent = 0.01
+        self.remote_focus_ramp_falling = 0.1
+
     def report_position(self):
         """Report the current position of the stage.
 
@@ -229,4 +235,8 @@ class SyntheticStage(StageBase):
 
     def stop_scan(self):
         """Stop a scan."""
+        pass
+
+    def update_waveform(self, waveform_dict):
+        print("*** update waveform:", waveform_dict.keys())
         pass

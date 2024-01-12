@@ -1,0 +1,3 @@
+"""
+Laser devices.
+"""

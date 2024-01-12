@@ -212,6 +212,17 @@ class DataSource:
         self.metadata.configuration = configuration
         self.get_shape_from_metadata()
 
+    def set_metadata(self, metadata_config: dict) -> None:
+        """Sets the metadata
+        
+        Parameters
+        ----------
+        metadata_config : dict
+            shape configuration: "c", "z", "t", "p", "is_dynamic", "per_stack"
+        """
+        self.metadata.set_from_dict(metadata_config)
+        self.get_shape_from_metadata()
+
     def get_shape_from_metadata(self):
         """Get the shape of the data source from the metadata."""
         # pull new values from the metadata

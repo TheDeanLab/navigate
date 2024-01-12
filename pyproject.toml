@@ -3,8 +3,8 @@ requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "navigate"
-description = "Open source light-sheet microscope controls."
+name = "navigate-micro"
+description = "Open source, smart, light-sheet microscopy control software."
 authors = [{name = "The Dean Lab, UT Southwestern Medical Center"}]
 readme = "README.md"
 license = {file = "LICENSE.md"}
@@ -65,6 +65,7 @@ docs = [
     "sphinx-design",
     "pyyaml",
     "pydata_sphinx_theme==0.10.0rc2",
+    "sphinx-toolbox"
 ]
 
 robot = [

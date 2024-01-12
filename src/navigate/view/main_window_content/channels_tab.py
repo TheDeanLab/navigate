@@ -106,12 +106,6 @@ class ChannelsTab(tk.Frame):
             row=4, column=1, columnspan=2, sticky=tk.NSEW, padx=10, pady=10
         )
 
-        #: ConfocalProjectionFrame: The frame that holds the confocal projection
-        # settings
-        self.conpro_acq_frame = ConfocalProjectionFrame(self)
-        self.conpro_acq_frame.grid(
-            row=5, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
-        )
 
 
 class ChannelCreator(ttk.Labelframe):
@@ -121,8 +115,7 @@ class ChannelCreator(ttk.Labelframe):
     """
 
     def __init__(self, channels_tab, *args, **kwargs):
-        """Initilization of the Channel Creator
-
+        """Initialization of the Channel Creator
 
         Parameters
         ----------
@@ -140,11 +133,6 @@ class ChannelCreator(ttk.Labelframe):
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
-
-        #  Arrays with Widget Variables and widgets themselves
-        #  TODO refactor using dicts for variables and one for widgets,
-        #   allow access to arrays via a key. might be overly complicated.
-        #   Below way is clear just a bit repetitive
 
         #: list: List of the variables for the channel checkbuttons
         self.channel_variables = []
@@ -205,8 +193,21 @@ class ChannelCreator(ttk.Labelframe):
         #: list: List of the frames for the columns
         self.frame_columns = []
 
+    def populate_frame(self, channels):
+        """Populates the frame with the widgets.
+
+        This function populates the frame with the widgets for the channels. By updating
+        the self.label_text list, the columns can be changed. This function is called
+        when the frame is initialized, and when the number of channels is changed in the
+        controller.
+
+        Parameters
+        ----------
+        channels : int
+            The number of channels to be added to the frame.
+        """
+
         #  Creates a column frame for each widget,
-        # this is to help with the lables lining up
         for idx in range(len(self.label_text)):
             self.frame_columns.append(ttk.Frame(self))
             self.frame_columns[idx].columnconfigure(0, weight=1, uniform=1)
@@ -221,12 +222,9 @@ class ChannelCreator(ttk.Labelframe):
         self.frame_columns[5].grid(padx=(1, 4))
         self.frame_columns[0].grid(padx=(4, 1))
 
-        #  Adds and grids widgets to respective column
-        #  TODO add connection to config file to specify the range.
-        #   This will allow custom selection of amount of channels.
-        #   Also may need further refactoring
-        for num in range(0, 5):
-            #  This will add a widget to each column frame for the respective types
+        # Creates the widgets for each channel - populates the rows.
+        for num in range(0, channels):
+
             #  Channel Checkboxes
             self.channel_variables.append(tk.BooleanVar())
             self.channel_checks.append(
@@ -249,7 +247,7 @@ class ChannelCreator(ttk.Labelframe):
                     width=6,
                 )
             )
-            self.laser_pulldowns[num].state(["readonly"])
+            self.laser_pulldowns[num].config(state = "readonly")
             self.laser_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
@@ -280,12 +278,12 @@ class ChannelCreator(ttk.Labelframe):
                     width=10,
                 )
             )
-            self.filterwheel_pulldowns[num].state(["readonly"])
+            self.filterwheel_pulldowns[num].config(state = "readonly")
             self.filterwheel_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-            #  Exposure Time Spinboxes
+            #  Exposure Time Spin boxes
             self.exptime_variables.append(tk.StringVar())
             self.exptime_pulldowns.append(
                 ttk.Spinbox(
@@ -302,7 +300,7 @@ class ChannelCreator(ttk.Labelframe):
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-            #  Time Interval Spinboxes
+            #  Time Interval Spin boxes
             self.interval_variables.append(tk.StringVar())
             self.interval_spins.append(
                 ttk.Spinbox(
@@ -336,12 +334,10 @@ class ChannelCreator(ttk.Labelframe):
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
 
-        self.filterwheel_pulldowns[1].grid(pady=2)
-        self.filterwheel_pulldowns[2].grid(pady=2)
-        self.laser_pulldowns[1].grid(pady=2)
-        self.laser_pulldowns[2].grid(pady=2)
-        self.channel_checks[1].grid(pady=2)
-        self.channel_checks[2].grid(pady=2)
+            if num % 2 == 1:
+                self.filterwheel_pulldowns[num].grid(pady=2)
+                self.laser_pulldowns[num].grid(pady=2)
+                self.channel_checks[num].grid(pady=2)
 
 
 class StackAcquisitionFrame(ttk.Labelframe):
@@ -814,139 +810,3 @@ class QuickLaunchFrame(ttk.Labelframe):
         self.buttons["autofocus_button"].grid(
             row=1, column=2, sticky=tk.NSEW, padx=(4, 4), pady=(4, 4)
         )
-
-
-class ConfocalProjectionFrame(ttk.Labelframe):
-    """Confocal Projection Acquisition Frame
-
-    This frame contains the widgets for the confocal projection acquisition settings.
-    """
-
-    def __init__(self, settings_tab, *args, **kwargs):
-        """Initilization of the Confocal Projection Frame
-
-        Parameters
-        ----------
-        settings_tab : tkinter.ttk.Frame
-            The frame that this frame will be placed in.
-        *args
-            Variable length argument list.
-        **kwargs
-            Arbitrary keyword arguments.
-        """
-        # Init Frame
-        text_label = (
-            "Confocal Projection Settings (" + "\N{GREEK SMALL LETTER MU}" + "m)"
-        )
-        ttk.Labelframe.__init__(self, settings_tab, text=text_label, *args, **kwargs)
-
-        # Formatting
-        tk.Grid.columnconfigure(self, "all", weight=1)
-        tk.Grid.rowconfigure(self, "all", weight=1)
-
-        # Dictionary for widgets and buttons
-        #: dict: Dictionary of the widgets in the frame
-        self.inputs = {}
-
-        # Frames for widgets
-        #: tkinter.Frame: The frame that holds the position and slice settings
-        self.pos_slice = ttk.Frame(self)
-        #: tkinter.Frame: The frame that holds the laser cycling settings
-        self.cycling = ttk.Frame(self)
-
-        # Grid Each Holder Frame
-        self.pos_slice.grid(row=0, column=0, sticky=tk.NSEW)
-        self.cycling.grid(row=1, column=0, sticky=tk.NSEW)
-
-        # ScanRange Label, Spinbox
-        #: tkinter.Label: The label for the scan range spinbox
-        self.scanrange_label = ttk.Label(self.pos_slice, text="Scan Range")
-        self.scanrange_label.grid(row=0, column=0, sticky="S")
-        self.inputs["scanrange"] = LabelInput(
-            parent=self.pos_slice,
-            input_class=ValidatedSpinbox,
-            input_var=tk.DoubleVar(),
-            input_args={"from_": 0.0, "to": 100000, "increment": 0.5, "width": 6},
-        )
-        self.inputs["scanrange"].grid(row=0, column=1, sticky="N", padx=6)
-        self.inputs["scanrange"].label.grid(sticky="N")
-
-        # Plane Number Label, spinbox defaults to 1.
-        #: tkinter.Label: The label for the plane number spinbox
-        self.n_plane = ttk.Label(self.pos_slice, text="# planes")
-        self.n_plane.grid(row=1, column=0, sticky="S")
-        self.inputs["n_plane"] = LabelInput(
-            parent=self.pos_slice,
-            input_class=ValidatedSpinbox,
-            input_var=tk.DoubleVar(),
-            input_args={"from_": 1, "to": 100000, "increment": 1, "width": 6},
-        )
-        self.inputs["n_plane"].grid(row=1, column=1, sticky="N", padx=6)
-        self.inputs["n_plane"].label.grid(sticky="N")
-
-        # Offset Start Label, spinbox
-        #: tkinter.Label: The label for the offset start spinbox
-        self.offset_start = ttk.Label(self.pos_slice, text="Offset Start")
-        self.offset_start.grid(row=0, column=2, sticky="S")
-        self.inputs["offset_start"] = LabelInput(
-            parent=self.pos_slice,
-            input_class=ValidatedSpinbox,
-            input_var=tk.DoubleVar(),
-            input_args={"from_": -300.0, "to": 100000, "increment": 0.1, "width": 6},
-        )
-        self.inputs["offset_start"].grid(row=0, column=3, sticky="N", padx=6)
-        self.inputs["offset_start"].label.grid(sticky="N")
-
-        # Offset End Label, spinbox
-        #: tkinter.Label: The label for the offset end spinbox
-        self.offset_end = ttk.Label(self.pos_slice, text="Offset End")
-        self.offset_end.grid(row=1, column=2, sticky="S")
-        self.inputs["offset_end"] = LabelInput(
-            parent=self.pos_slice,
-            input_class=ValidatedSpinbox,
-            input_var=tk.DoubleVar(),
-            input_args={"from_": -300.0, "to": 100000, "increment": 0.1, "width": 6},
-        )
-        self.inputs["offset_end"].grid(row=1, column=3, sticky="N", padx=6)
-        self.inputs["offset_end"].label.grid(sticky="N")
-
-        # Laser Cycling Settings
-        self.inputs["cycling"] = LabelInput(
-            parent=self.cycling,
-            label="Laser Cycling Settings ",
-            input_class=ValidatedCombobox,
-            input_var=tk.StringVar(),
-            input_args={"width": 8},
-        )
-        self.inputs["cycling"].state(
-            ["readonly"]
-        )  # Makes it so the user cannot type a choice into combobox
-        self.inputs["cycling"].grid(row=2, column=2, sticky="NSEW", padx=6, pady=5)
-
-    # Getters
-    def get_variables(self):
-        """Returns a dictionary of the variables for the widgets in this frame.
-
-        The key is the widget name, value is the variable associated.
-
-        Returns
-        -------
-        variables : dict
-            Dictionary of the variables for the widgets in this frame.
-        """
-        variables = {}
-        for key, widget in self.inputs.items():
-            variables[key] = widget.get_variable()
-        return variables
-
-    def get_widgets(self):
-        """Returns a dictionary of the widgets in this frame.
-
-        The key is the widget name, value is the LabelInput class that has all the data.
-
-        Returns
-        -------
-        self.inputs : dict
-            Dictionary of the widgets in this frame.
-        """
-        return self.inputs

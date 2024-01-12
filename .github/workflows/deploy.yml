@@ -16,6 +16,25 @@ jobs:
           operating-system: [windows-latest]
       steps:
         - uses: actions/checkout@v3
+        - name: Create .pypirc file
+          shell: pwsh
+          run: |
+            @"
+            [distutils]
+            index-servers =
+              pypi
+              navigate-micro
+    
+            [pypi]
+            repository: https://upload.pypi.org/legacy/
+            username: $env:PYPI_USERNAME
+            password: $env:PYPI_PASSWORD
+            
+            [navigate-micro]
+            repository: https://upload.pypi.org/legacy/
+            username: $env:PYPI_USERNAME
+            password: $env:PYPI_PASSWORD
+            "@ | Set-Content -Path $env:USERPROFILE\.pypirc
         - name: Set up Python ${{ matrix.python-version }}
           uses: actions/setup-python@v3
           with:
@@ -31,4 +50,4 @@ jobs:
           run: |
             git tag
             python -m build
-            twine upload dist/*
+            twine upload -r navigate-micro dist/* 

@@ -1,6 +1,6 @@
 def test_initialize_daq_synthetic():
     from navigate.model.devices.daq.daq_synthetic import SyntheticDAQ
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     daq = SyntheticDAQ(model.configuration)
@@ -10,7 +10,7 @@ def test_synthetic_daq_functions():
     import random
 
     from navigate.model.devices.daq.daq_synthetic import SyntheticDAQ
-    from navigate.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     daq = SyntheticDAQ(model.configuration)

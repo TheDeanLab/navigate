@@ -150,9 +150,6 @@ class GalvoNIStage(StageBase):
         #: float: Total duration of the waveform output by the DAQ.
         self.sweep_time = None
 
-        #: int: Number of samples in the waveform output by the DAQ.
-        self.samples = None
-
         #: dict: Dictionary of exposure times for each channel.
         self.exposure_times = None
 
@@ -205,43 +202,13 @@ class GalvoNIStage(StageBase):
             # Only proceed if it is enabled in the GUI
             if channel["is_selected"] is True:
                 # Get the Waveform Parameters
-                # Assumes Remote Focus Delay < Camera Delay.  Should Assert.
-                exposure_time = self.exposure_times[channel_key]
-                self.sweep_time = self.sweep_times[channel_key]
-                self.samples = int(self.sample_rate * self.sweep_time)
+                sweep_time = self.sweep_times[channel_key]
 
-                z_range = microscope_state["scanrange"]
-                z_planes = microscope_state["n_plane"]
-                z_offset_start = microscope_state["offset_start"]
-                z_offset_end = (
-                    microscope_state["offset_end"]
-                    if z_planes > 1
-                    else z_offset_start
+                self.waveform_dict[channel_key] = dc_value(
+                    sample_rate=self.sample_rate,
+                    sweep_time=sweep_time,
+                    amplitude=volts,
                 )
-                waveforms = []
-                if z_planes > 1:
-                    offsets = (
-                        np.arange(int(z_planes))
-                        * (z_offset_end - z_offset_start)
-                        / float(z_planes - 1)
-                    )
-                else:
-                    offsets = [z_offset_start]
-                for z_offset in offsets:
-                    amp = eval(self.volts_per_micron, {"x": 0.5 * (z_range)})
-                    off = eval(self.volts_per_micron, {"x": 0.5 * (z_offset)})
-                    waveforms.append(
-                        remote_focus_ramp(
-                            sample_rate=self.sample_rate,
-                            exposure_time=exposure_time,
-                            sweep_time=self.sweep_time,
-                            remote_focus_delay=self.remote_focus_delay,
-                            camera_delay=self.camera_delay_percent,
-                            fall=self.remote_focus_ramp_falling,
-                            amplitude=amp,
-                            offset=off,
-                        )
-                    )
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.galvo_max_voltage
                 ] = self.galvo_max_voltage
@@ -249,16 +216,52 @@ class GalvoNIStage(StageBase):
                     self.waveform_dict[channel_key] < self.galvo_min_voltage
                 ] = self.galvo_min_voltage
 
-                self.waveform_dict[channel_key] = np.hstack(waveforms)
-                self.samples = int(self.sample_rate * self.sweep_time * z_planes)
-                self.daq.analog_outputs[self.axes_channels[0]] = {
-                    "sample_rate": self.sample_rate,
-                    "samples": self.samples,
-                    "trigger_source": self.trigger_source,
-                    "waveform": self.waveform_dict,
-                }
-
+        self.daq.analog_outputs[self.axes_channels[0]] = {
+            "trigger_source": self.trigger_source,
+            "waveform": self.waveform_dict,
+        }
         return self.waveform_dict
+    
+    def update_waveform(self, waveform_dict):
+        """Update the waveform for the stage.
+
+        Parameters
+        ----------
+        waveform_dict : dict
+            Dictionary of waveforms for each channel
+
+        Returns
+        -------
+        result : bool
+            success or failed
+        """
+        microscope_state = self.configuration["experiment"]["MicroscopeState"]
+        
+        for channel_key in microscope_state["channels"].keys():
+            # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
+            channel = microscope_state["channels"][channel_key]
+
+            # Only proceed if it is enabled in the GUI
+            if channel["is_selected"] is True:
+
+                if channel_key not in waveform_dict:
+                    logger.debug(f"Update waveform in StageGalvo failed! {channel_key}")
+                    print("*** updating waveform in StageGalvo failed!", channel_key)
+                    return False
+
+                waveform_dict[channel_key][
+                    waveform_dict[channel_key] > self.galvo_max_voltage
+                ] = self.galvo_max_voltage
+                waveform_dict[channel_key][
+                    waveform_dict[channel_key] < self.galvo_min_voltage
+                ] = self.galvo_min_voltage
+
+        self.waveform_dict = waveform_dict
+        self.daq.analog_outputs[self.axes_channels[0]] = {
+            "trigger_source": self.trigger_source,
+            "waveform": self.waveform_dict,
+        }
+        return True
 
     def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
         """Implement movement logic along a single axis.
@@ -290,7 +293,6 @@ class GalvoNIStage(StageBase):
         volts = eval(self.volts_per_micron, {"x": axis_abs})
 
         self.ao_task.write(volts, auto_start=True)
-
         # Stage Settle Duration in Milliseconds
         if (
             wait_until_done

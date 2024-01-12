@@ -46,7 +46,7 @@ from navigate.controller.sub_controllers.gui_controller import GUIController
 from navigate.tools.image import create_arrow_image
 from navigate.tools.file_functions import load_yaml_file
 from navigate.model.features.feature_related_functions import (
-    convert_str_to_feature_list,
+    convert_str_to_feature_list, convert_feature_list_to_str
 )
 from navigate.model.features import feature_related_functions
 from navigate.config.config import get_navigate_path
@@ -75,7 +75,8 @@ class FeaturePopupController(GUIController):
         #: list: The list of feature structure.
         self.feature_structure = []
 
-        self.view.buttons["preview"].configure(command=self.draw_feature_list_graph)
+        self.feature_list_graph_controller = FeatureListGraphController(self.view.feature_view_frame, self.view.inputs["content"], self.view.buttons["preview"])
+
         if "add" in self.view.buttons:
             self.view.buttons["add"].configure(command=self.add_feature_list)
             self.view.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
@@ -84,14 +85,6 @@ class FeaturePopupController(GUIController):
             self.view.buttons["confirm"].configure(command=self.update_feature_list)
             self.view.popup.protocol("WM_DELETE_WINDOW", self.cancel_acquisition)
             self.view.buttons["cancel"].configure(command=self.cancel_acquisition)
-
-        # get all feature names
-        #: list: The list of feature names.
-        self.feature_names = []
-        temp = dir(feature_related_functions)
-        for t in temp:
-            if inspect.isclass(getattr(feature_related_functions, t)):
-                self.feature_names.append(t)
 
     def populate_feature_list(self, feature_list_id):
         """Populate the feature list
@@ -105,13 +98,134 @@ class FeaturePopupController(GUIController):
         feature_list_content = self.parent_controller.model.get_feature_list(
             feature_list_id
         )
-        self.view.inputs["content"].delete("1.0", tk.END)
-        self.view.inputs["content"].insert("1.0", feature_list_content)
         self.view.inputs["feature_list_name"].set(
             self.parent_controller.menu_controller.feature_list_names[feature_list_id]
         )
         self.view.inputs["feature_list_name"].widget["state"] = "disabled"
-        self.draw_feature_list_graph()
+        self.feature_list_graph_controller.update(feature_list_content)
+
+    def add_feature_list(self):
+        """Add the feature list"""
+        if not self.verify_feature_list():
+            return
+        content = self.view.inputs["content"].get("1.0", "end-1c")
+        feature_list_content = "".join(content.split("\n"))
+        feature_list_name = self.view.inputs["feature_list_name"].get()
+        if not feature_list_name:
+            messagebox.showerror(
+                title="Feature List Error",
+                message="Please enter a name for this feature list!",
+            )
+            return
+        if not self.parent_controller.menu_controller.add_feature_list(
+            feature_list_name, feature_list_content
+        ):
+            messagebox.showerror(
+                title="Feature List Error",
+                message="Please enter a new list name! "
+                "The one you entered has been exist!",
+            )
+        else:
+            self.exit_func()
+
+    def update_feature_list(self):
+        """Update the feature list"""
+        if not self.verify_feature_list():
+            return
+        content = self.view.inputs["content"].get("1.0", "end-1c")
+        feature_list_content = "".join(content.split("\n"))
+        self.parent_controller.execute(
+            "load_feature", self.feature_list_id, feature_list_content
+        )
+        #: bool: Whether the acquisition should start.
+        self.start_acquisiton_flag = True
+        self.view.popup.dismiss()
+
+    def verify_feature_list(self):
+        """Verify the feature list
+
+        Returns
+        -------
+        feature_list : list
+            The feature list
+        """
+        content = self.view.inputs["content"].get("1.0", "end-1c")
+        return verify_feature_list(content)
+
+    def exit_func(self):
+        """Exit the popup"""
+        self.view.popup.dismiss()
+        delattr(self.parent_controller, "features_popup_controller")
+
+    def cancel_acquisition(self):
+        """Cancel the acquisition"""
+        self.start_acquisiton_flag = False
+        self.view.popup.dismiss()
+
+class FeatureListGraphController:
+    def __init__(self, feature_list_view, feature_content_view, preview_btn):
+        self.feature_list_view = feature_list_view
+        self.feature_content_view = feature_content_view
+        self.preview_btn = preview_btn
+
+        self.feature_list = None
+        self.features = []
+        self.feature_structure = []
+        self.feature_list_graph_controllers_true = {}
+        self.feature_list_graph_controllers_false = {}
+
+        # get all feature names
+        #: list: The list of feature names.
+        self.feature_names = []
+        temp = dir(feature_related_functions)
+        for t in temp:
+            if inspect.isclass(getattr(feature_related_functions, t)):
+                self.feature_names.append(t)
+
+        # event
+        self.preview_btn.configure(command=self.draw_feature_list_graph)
+
+    def update(self, feature_list_content):
+        self.feature_list = None
+        self.features = []
+        self.feature_structure = []
+        self.feature_list_graph_controllers_true = {}
+        self.feature_list_graph_controllers_false = {}
+
+        if type(feature_list_content) == list:
+            feature_list_content = convert_feature_list_to_str(feature_list_content)
+        self.feature_content_view.delete("1.0", tk.END)
+        self.feature_content_view.insert("1.0", feature_list_content)
+        self.draw_feature_list_graph(new_list_flag=True)
+
+    def flatten_feature_list(self, feature_list):
+        """Flatten the feature list
+
+        Parameters
+        ----------
+        feature_list : list
+            The feature list
+
+        """
+        for temp in feature_list:
+            if type(temp) is dict:
+                self.features.append(temp)
+                self.feature_structure.append(len(self.features) - 1)
+            elif temp == "break" or temp == "continue":
+                self.features.append(temp)
+                self.feature_structure.append(len(self.features) - 1)
+            else:
+                self.feature_structure.append("(")
+                self.flatten_feature_list(temp)
+        self.feature_structure.append(")")
+
+    def get_feature_content(self):
+        content = self.feature_content_view.get("1.0", "end-1c")
+        return content
+    
+    def update_feature_content(self):
+        self.feature_content_view.delete("1.0", tk.END)
+        self.feature_content_view.insert("1.0", self.build_feature_list_text())
 
     def draw_feature_list_graph(self, new_list_flag=True):
         """Draw the feature list graph
@@ -122,7 +236,7 @@ class FeaturePopupController(GUIController):
             Whether the feature list is new, by default True
         """
         if new_list_flag:
-            feature_list = self.verify_feature_list()
+            feature_list = verify_feature_list(self.get_feature_content())
             if not feature_list:
                 return
             # flatten feature list
@@ -131,27 +245,33 @@ class FeaturePopupController(GUIController):
             self.flatten_feature_list(feature_list)
             self.feature_structure.pop()
 
-        feature_list_view = self.view.feature_view_frame
-        for child in feature_list_view.winfo_children():
+        for child in self.feature_list_view.winfo_children():
             child.destroy()
 
         l = len(self.features) - 1  # noqa
         feature_icon_width = 228
         al_width = 104
         for i, feature in enumerate(self.features):
-            btn = FeatureIcon(feature_list_view, feature["name"].__name__)
+            if type(feature) == str:
+                btn = FeatureIcon(self.feature_list_view, feature)
+                flag = False
+            else:
+                flag = True
+                is_decistion_btn = "true" in feature or "false" in feature
+                btn = FeatureIcon(self.feature_list_view, feature["name"].__name__, set_bg=is_decistion_btn)
+                # left click
+                btn.bind("<Button-1>", self.show_config_popup(i))
+
             btn.grid(row=0, column=i * 2, sticky="", pady=(30, 0))
             btn["width"] = 20
-            # left click
-            btn.bind("<Button-1>", self.show_config_popup(i))
             # right click
-            btn.bind("<Button-3>", self.show_menu(i))
+            btn.bind("<Button-3>", self.show_menu(i, flag))
             if i == 0:
-                feature_list_view.update()
+                self.feature_list_view.update()
                 feature_icon_width = btn.winfo_width()
             if i < l:
                 al = ArrowLabel(
-                    feature_list_view,
+                    self.feature_list_view,
                     xys=[(0, 20), (40, 20)],
                     direction="right",
                     image_width=40,
@@ -159,11 +279,11 @@ class FeaturePopupController(GUIController):
                 )
                 al.grid(row=0, column=i * 2 + 1, sticky="", pady=(30, 0))
                 if i == 0:
-                    feature_list_view.update()
+                    self.feature_list_view.update()
                     al_width = al.winfo_width()
         # draw loop arrows
         image_width = feature_icon_width * (l + 1) + al_width * l
-        image_height = self.calculate_arrow_image_height(self.feature_structure)
+        image_height = self.calculate_arrow_image_height()
         arrow_height = 50
         stack = []
         arrow_image = None
@@ -229,91 +349,9 @@ class FeaturePopupController(GUIController):
             image_gif = arrow_image.convert("P", palette=Image.ADAPTIVE)
             #: ImageTk.PhotoImage: The image of the feature list graph.
             self.image = ImageTk.PhotoImage(image_gif)
-            al = tk.Label(feature_list_view, image=self.image)
+            al = tk.Label(self.feature_list_view, image=self.image)
             al.grid(row=1, column=0, columnspan=2 * l + 1, sticky="ew")
 
-    def flatten_feature_list(self, feature_list):
-        """Flatten the feature list
-
-        Parameters
-        ----------
-        feature_list : list
-            The feature list
-
-        """
-        for temp in feature_list:
-            if type(temp) is dict:
-                self.features.append(temp)
-                self.feature_structure.append(len(self.features) - 1)
-            else:
-                self.feature_structure.append("(")
-                self.flatten_feature_list(temp)
-        self.feature_structure.append(")")
-
-    def calculate_arrow_image_height(self, feature_structure):
-        """Calculate the height of the arrow image
-
-        Parameters
-        ----------
-        feature_structure : list
-            The feature structure
-
-        Returns
-        -------
-        int
-            The height of the arrow image
-        """
-        image_height = 0
-        h = 0
-        for c in feature_structure:
-            if c == "(":
-                h += 20
-                image_height = max(h, image_height)
-            elif c == ")":
-                h -= 20
-        return image_height + 100
-
-    def build_feature_list_text(self):
-        """Build the feature list text
-
-        Returns
-        -------
-        str
-            The feature list text
-        """
-        content = "["
-        for c in self.feature_structure:
-            if c == "(":
-                content += "("
-                continue
-            elif c == ")":
-                content += ")"
-            else:
-                feature = self.features[c]
-                content += "{" + f'"name": {feature["name"].__name__}'
-                if "args" in feature:
-                    arg_str = ""
-                    for a in feature["args"]:
-                        if a is None:
-                            arg_str += "None"
-                        elif type(a) is bool:
-                            arg_str += str(a)
-                        elif type(a) is int or type(a) is float:
-                            arg_str += str(a)
-                        elif type(a) is dict:
-                            arg_str += str(a)
-                        else:
-                            try:
-                                float(a)
-                                arg_str += a
-                            except (ValueError, TypeError):
-                                arg_str += f'"{a}"'
-                        arg_str += ","
-                    content += f', "args": ({arg_str})'
-                content += "}"
-            content += ","
-        content += "]"
-        return content
 
     def show_config_popup(self, idx):
         """Show the feature configuration popup
@@ -349,14 +387,20 @@ class FeaturePopupController(GUIController):
             if "args" in feature:
                 for i, a in enumerate(feature["args"]):
                     args_value[i] = a
+            kwargs = {}
+            if "true" in feature:
+                kwargs["true"] = True
+            if "false" in feature:
+                kwargs["false"] = True
             popup = FeatureConfigPopup(
-                self.view.popup,
+                self.feature_list_view,
                 features=self.feature_names,
                 feature_name=feature["name"].__name__,
                 args_name=spec.args[2:],
                 args_value=args_value,
                 title="Feature Parameters",
                 parameter_config=feature_parameter_config,
+                **kwargs
             )
             popup.feature_name_widget.widget.bind(
                 "<<ComboboxSelected>>", lambda event: refresh_parameters(popup)
@@ -365,6 +409,17 @@ class FeaturePopupController(GUIController):
             popup.popup.protocol(
                 "WM_DELETE_WINDOW", lambda: update_feature_parameters(popup)
             )
+
+            if "true" in feature:
+                self.feature_list_graph_controllers_true[idx] = FeatureListGraphController(popup.feature_list_true_frame.feature_view_frame,
+                                                                                           popup.feature_list_true_frame.content,
+                                                                                           popup.preview_btn_true)
+                self.feature_list_graph_controllers_true[idx].update(feature["true"])
+            if "false" in feature:
+                self.feature_list_graph_controllers_false[idx] = FeatureListGraphController(popup.feature_list_false_frame.feature_view_frame,
+                                                                                           popup.feature_list_false_frame.content,
+                                                                                           popup.preview_btn_false)
+                self.feature_list_graph_controllers_false[idx].update(feature["false"])
 
         def refresh_parameters(popup):
             """Refresh the feature parameters
@@ -417,15 +472,19 @@ class FeaturePopupController(GUIController):
                         feature["args"][i] = json.loads(a.replace("'", '"'))
                     elif a == "None":
                         feature["args"][i] = None
+            if "true" in feature:
+                feature["true"] = convert_str_to_feature_list(self.feature_list_graph_controllers_true[idx].get_feature_content())
+            if "false" in feature:
+                feature["false"] = convert_str_to_feature_list(self.feature_list_graph_controllers_false[idx].get_feature_content())
             # update text
-            self.view.inputs["content"].delete("1.0", tk.END)
-            self.view.inputs["content"].insert("1.0", self.build_feature_list_text())
+            self.update_feature_content()
             popup.popup.dismiss()
             self.draw_feature_list_graph(False)
 
         return func
+    
 
-    def show_menu(self, idx):
+    def show_menu(self, idx, flag=True):
         """Show the popup menu
 
         Parameters
@@ -441,14 +500,15 @@ class FeaturePopupController(GUIController):
 
         def func(event):
             """The function to show the popup menu"""
-            popup_menu = tk.Menu(self.view.popup, tearoff=0)
+            popup_menu = tk.Menu(self.feature_list_view, tearoff=0)
             popup_menu.add_command(label="Delete", command=lambda: delete_feature(idx))
-            popup_menu.add_command(
-                label="Insert Before", command=lambda: insert_before(idx)
-            )
-            popup_menu.add_command(
-                label="Insert After", command=lambda: insert_after(idx)
-            )
+            if flag:
+                popup_menu.add_command(
+                    label="Insert Before", command=lambda: insert_before(idx)
+                )
+                popup_menu.add_command(
+                    label="Insert After", command=lambda: insert_after(idx)
+                )
             popup_menu.post(event.x_root, event.y_root)
 
         def delete_feature(idx):
@@ -509,8 +569,7 @@ class FeaturePopupController(GUIController):
                         break
 
             # update text
-            self.view.inputs["content"].delete("1.0", tk.END)
-            self.view.inputs["content"].insert("1.0", self.build_feature_list_text())
+            self.update_feature_content()
             self.draw_feature_list_graph(False)
 
         def insert_before(idx):
@@ -529,8 +588,7 @@ class FeaturePopupController(GUIController):
             self.feature_structure.insert(i, idx)
 
             # update text
-            self.view.inputs["content"].delete("1.0", tk.END)
-            self.view.inputs["content"].insert("1.0", self.build_feature_list_text())
+            self.update_feature_content()
             self.draw_feature_list_graph(False)
 
         def insert_after(idx):
@@ -546,7 +604,7 @@ class FeaturePopupController(GUIController):
             func
                 The function to insert the feature after the current feature
             """
-            self.features.insert(idx + 1, dict(self.features[idx]))
+            self.features.insert(idx, dict(self.features[idx]) if type(self.features[idx])==dict else self.features[idx])
             i = self.feature_structure.index(idx)
             for _, c in enumerate(self.feature_structure):
                 if type(c) == int and c > idx:
@@ -554,75 +612,96 @@ class FeaturePopupController(GUIController):
             self.feature_structure.insert(i + 1, idx + 1)
 
             # update text
-            self.view.inputs["content"].delete("1.0", tk.END)
-            self.view.inputs["content"].insert("1.0", self.build_feature_list_text())
+            self.update_feature_content()
             self.draw_feature_list_graph(False)
 
         return func
+    
+    def calculate_arrow_image_height(self):
+        """Calculate the height of the arrow image
 
-    def add_feature_list(self):
-        """Add the feature list"""
-        if not self.verify_feature_list():
-            return
-        content = self.view.inputs["content"].get("1.0", "end-1c")
-        feature_list_content = "".join(content.split("\n"))
-        feature_list_name = self.view.inputs["feature_list_name"].get()
-        if not feature_list_name:
-            messagebox.showerror(
-                title="Feature List Error",
-                message="Please enter a name for this feature list!",
-            )
-            return
-        if not self.parent_controller.menu_controller.add_feature_list(
-            feature_list_name, feature_list_content
-        ):
-            messagebox.showerror(
-                title="Feature List Error",
-                message="Please enter a new list name! "
-                "The one you entered has been exist!",
-            )
-        else:
-            self.exit_func()
-
-    def update_feature_list(self):
-        """Update the feature list"""
-        if not self.verify_feature_list():
-            return
-        content = self.view.inputs["content"].get("1.0", "end-1c")
-        feature_list_content = "".join(content.split("\n"))
-        self.parent_controller.execute(
-            "load_feature", self.feature_list_id, feature_list_content
-        )
-        #: bool: Whether the acquisition should start.
-        self.start_acquisiton_flag = True
-        self.view.popup.dismiss()
-
-    def verify_feature_list(self):
-        """Verify the feature list
+        Parameters
+        ----------
+        feature_structure : list
+            The feature structure
 
         Returns
         -------
-        feature_list : list
-            The feature list
+        int
+            The height of the arrow image
         """
-        content = self.view.inputs["content"].get("1.0", "end-1c")
-        feature_list_content = "".join(content.split("\n"))
-        feature_list = convert_str_to_feature_list(feature_list_content)
-        if feature_list is None:
-            messagebox.showerror(
-                title="Feature List Error",
-                message="There is something wrong for this feature "
-                "list, please verify there is no "
-                "spelling error!",
-            )
-        return feature_list
+        image_height = 0
+        h = 0
+        for c in self.feature_structure:
+            if c == "(":
+                h += 20
+                image_height = max(h, image_height)
+            elif c == ")":
+                h -= 20
+        return image_height + 100
+    
+    def build_feature_list_text(self):
+        """Build the feature list text
 
-    def exit_func(self):
-        """Exit the popup"""
-        self.view.popup.dismiss()
-        delattr(self.parent_controller, "features_popup_controller")
+        Returns
+        -------
+        str
+            The feature list text
+        """
+        content = "["
+        for c in self.feature_structure:
+            if c == "(":
+                content += "("
+                continue
+            elif c == ")":
+                content += ")"
+            else:
+                feature = self.features[c]
+                content += "{" + f'"name": {feature["name"].__name__}, '
+                if "args" in feature:
+                    arg_str = ""
+                    for a in feature["args"]:
+                        if a is None:
+                            arg_str += "None"
+                        elif type(a) is bool:
+                            arg_str += str(a)
+                        elif type(a) is int or type(a) is float:
+                            arg_str += str(a)
+                        elif type(a) is dict:
+                            arg_str += str(a)
+                        else:
+                            try:
+                                float(a)
+                                arg_str += a
+                            except (ValueError, TypeError):
+                                arg_str += f'"{a}"'
+                        arg_str += ","
+                    content += f'"args": ({arg_str}),'
+                # "true"
+                if "true" in feature:
+                    content += f'"true": {convert_feature_list_to_str(feature["true"])},'
+                # "false"
+                if "false" in feature:
+                    content += f'"false": {convert_feature_list_to_str(feature["false"])},'
+                content += "}"
+            content += ","
+        content += "]"
+        return content
 
-    def cancel_acquisition(self):
-        """Cancel the acquisition"""
-        self.start_acquisiton_flag = False
-        self.view.popup.dismiss()
+    
+
+def verify_feature_list(content):
+    feature_list_content = "".join(content.split("\n"))
+    if feature_list_content in ["break", '"break"', "'break'"]:
+        return ["break"]
+    if feature_list_content in ["continue", '"continue"', "'continue'"]:
+        return ["continue"]
+    feature_list = convert_str_to_feature_list(feature_list_content)
+    if feature_list is None:
+        messagebox.showerror(
+            title="Feature List Error",
+            message="There is something wrong for this feature "
+            "list, please verify there is no "
+            "spelling error!",
+        )
+    return feature_list

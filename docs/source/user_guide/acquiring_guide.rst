@@ -59,7 +59,7 @@ Single Acquisition
 ------------------
 
 This takes a single image of each 
-:ref:`selected channels <user_guide/gui_walkthrough:channel settings>` and optionally
+:ref:`selected channel <user_guide/gui_walkthrough:channel settings>` and optionally
 saves them to a file. Its feature list is identical to that of "Continuous Scan".
 
 ----------------

@@ -677,6 +677,7 @@ class DataContainer(Container):
                 self.curr_node = self.curr_node.sibling
             else:
                 self.curr_node = None
+                self.end_flag = True
                 return
 
             if self.curr_node.device_related or self.curr_node.need_response:

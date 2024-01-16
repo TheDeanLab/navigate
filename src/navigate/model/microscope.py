@@ -474,7 +474,7 @@ class Microscope:
         # calculate waveform for galvo stage
         for stage, _ in self.stages_list:
             if type(stage) == GalvoNIStage:
-                stage.switch_mode(self.configuration["experiment"]["MicroscopeState"]["image_mode"], exposure_times, sweep_times)
+                stage.switch_mode("normal", exposure_times, sweep_times)
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,

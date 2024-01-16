@@ -147,9 +147,6 @@ class GalvoNIStage(StageBase):
             self.microscope_name
         ]["daq"]["sample_rate"]
 
-        #: float: Total duration of the waveform output by the DAQ.
-        self.sweep_time = None
-
         #: dict: Dictionary of exposure times for each channel.
         self.exposure_times = None
 
@@ -174,53 +171,6 @@ class GalvoNIStage(StageBase):
             Dictionary of positions for each axis.
         """
         return self.get_position_dict()
-
-    def calculate_waveform(self, exposure_times, sweep_times):
-        """Calculate the waveform for the stage.
-
-        Parameters
-        ----------
-        exposure_times : dict
-            Dictionary of exposure times for each channel
-        sweep_times : dict
-            Dictionary of sweep times for each channel
-
-        Returns
-        -------
-        waveform_dict : dict
-            Dictionary of waveforms for each channel
-        """
-        self.exposure_times = exposure_times
-        self.sweep_times = sweep_times
-        self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
-        microscope_state = self.configuration["experiment"]["MicroscopeState"]
-
-        for channel_key in microscope_state["channels"].keys():
-            # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
-            channel = microscope_state["channels"][channel_key]
-
-            # Only proceed if it is enabled in the GUI
-            if channel["is_selected"] is True:
-                # Get the Waveform Parameters
-                sweep_time = self.sweep_times[channel_key]
-
-                self.waveform_dict[channel_key] = dc_value(
-                    sample_rate=self.sample_rate,
-                    sweep_time=sweep_time,
-                    amplitude=volts,
-                )
-                self.waveform_dict[channel_key][
-                    self.waveform_dict[channel_key] > self.galvo_max_voltage
-                ] = self.galvo_max_voltage
-                self.waveform_dict[channel_key][
-                    self.waveform_dict[channel_key] < self.galvo_min_voltage
-                ] = self.galvo_min_voltage
-
-        self.daq.analog_outputs[self.axes_channels[0]] = {
-            "trigger_source": self.trigger_source,
-            "waveform": self.waveform_dict,
-        }
-        return self.waveform_dict
     
     def update_waveform(self, waveform_dict):
         """Update the waveform for the stage.
@@ -235,6 +185,7 @@ class GalvoNIStage(StageBase):
         result : bool
             success or failed
         """
+        self.switch_mode("waveform")
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         
         for channel_key in microscope_state["channels"].keys():
@@ -291,6 +242,10 @@ class GalvoNIStage(StageBase):
         delta_position = np.abs(axis_abs - current_position)
 
         volts = eval(self.volts_per_micron, {"x": axis_abs})
+        if volts > self.galvo_max_voltage:
+            volts = self.galvo_max_voltage
+        if volts < self.galvo_min_voltage:
+            volts = self.galvo_min_voltage
 
         self.ao_task.write(volts, auto_start=True)
         # Stage Settle Duration in Milliseconds
@@ -345,22 +300,14 @@ class GalvoNIStage(StageBase):
         sweep_times : dict
             Dictionary of sweep times for each channel
         """
-        if mode == "confocal-projection":
-            if self.ao_task:
-                self.ao_task.stop()
-                self.ao_task.close()
-                self.ao_task = None
-            self.calculate_waveform(exposure_times, sweep_times)
-        else:
+        self.exposure_times = exposure_times
+        self.sweep_times = sweep_times
+        if mode == "normal":
             if self.ao_task is None:
                 self.ao_task = nidaqmx.Task()
                 self.ao_task.ao_channels.add_ao_voltage_chan(self.axes_channels[0])
-            volts = eval(
-                self.volts_per_micron,
-                {"x": self.configuration["experiment"]["StageParameters"][self.axes[0]]},
-            )
-            if volts > self.galvo_max_voltage:
-                volts = self.galvo_max_voltage
-            if volts < self.galvo_min_voltage:
-                volts = self.galvo_min_voltage
-            self.ao_task.write(volts, auto_start=True)
+            self.move_axis_absolute("x", float(self.configuration["experiment"]["StageParameters"][self.axes[0]]))
+        elif self.ao_task:
+            self.ao_task.stop()
+            self.ao_task.close()
+            self.ao_task = None

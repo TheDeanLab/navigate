@@ -41,7 +41,6 @@ import copy
 # Local application imports
 from .image_writer import ImageWriter
 from navigate.tools.common_functions import VariableWithLock
-from navigate.model.devices.stages.stage_galvo import GalvoNIStage
 
 
 class ChangeResolution:
@@ -814,12 +813,6 @@ class ZStackAcquisition:
         #: int: The number of channels in the z-stack.
         self.channels = 1
 
-        #: bool: Flag to determine whether there is a NIGalvo Stage
-        self.has_ni_galvo_stage = False
-
-        #: bool: Flag to determine whether to override waveforms in the DAQ
-        self.need_to_update_waveform = False
-
         #: ImageWriter: An image writer object for saving z-stack images.
         self.image_writer = None
         if saving_flag:
@@ -911,16 +904,6 @@ class ZStackAcquisition:
         self.model.active_microscope.central_focus = None
         self.model.active_microscope.current_channel = 0
         self.model.active_microscope.prepare_next_channel()
-
-        # DAQ will queue waveforms if the task isn't closed.
-        # Need to determine whether there is a galvo stage.
-        # If so, need to update the waveform of the task in DAQ only after
-        # the NI Galvo Stage has finished updating the waveform.
-        # prepare_next_channel() writes waveform in the DAQ when preparing acquisition.
-        self.has_ni_galvo_stage = self.model.configuration["configuration"][
-            "microscopes"
-        ][microscope_state["microscope_name"]]["stage"]["has_ni_galvo_stage"]
-        self.need_to_update_waveform = self.has_ni_galvo_stage
 
         self.model.logger.debug(
             f"*** ZStack pre_signal_func: {self.positions}, {self.start_focus}, "
@@ -1052,13 +1035,6 @@ class ZStackAcquisition:
             self.model.resume_data_thread()
             self.should_pause_data_thread = False
 
-        if self.need_to_update_waveform:
-            channel_id = self.model.active_microscope.current_channel
-            self.model.active_microscope.daq.stop_acquisition()
-            self.model.active_microscope.daq.prepare_acquisition(
-                f"channel_{channel_id}"
-            )
-            self.need_to_update_waveform = False
         return True
 
     def signal_end(self):
@@ -1145,11 +1121,9 @@ class ZStackAcquisition:
             self.current_channel_in_list + 1
         ) % self.channels
         # not update DAQ tasks if there is a NI Galvo stage
-        self.model.active_microscope.prepare_next_channel(not self.has_ni_galvo_stage)
+        self.model.active_microscope.prepare_next_channel()
         if self.defocus is not None:
             self.current_focus_position += self.defocus[self.current_channel_in_list]
-        # if there is a NI Galvo stage in the system, need to update DAQ waveforms after moving stage.
-        self.need_to_update_waveform = self.has_ni_galvo_stage
 
     def pre_data_func(self):
         """Initialize data-related parameters before data acquisition.

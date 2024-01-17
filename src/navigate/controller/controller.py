@@ -662,11 +662,17 @@ class Controller:
 
         elif command == "autofocus":
             """Execute autofocus routine."""
-            self.threads_pool.createThread(
-                "camera",
-                self.capture_image,
-                args=("autofocus", "live", *args),
-            )
+            if not self.acquire_bar_controller.is_acquiring:
+                self.threads_pool.createThread(
+                    "camera",
+                    self.capture_image,
+                    args=("autofocus", "live", *args),
+                )
+            elif self.acquire_bar_controller.mode == "live":
+                self.threads_pool.createThread(
+                    "model",
+                    lambda: self.model.run_command("autofocus", *args)
+                )
 
         elif command == "eliminate_tiles":
             """Execute eliminate tiles routine."""

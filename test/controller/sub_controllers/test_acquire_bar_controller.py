@@ -116,7 +116,7 @@ class TestAcquireBarController:
     @pytest.mark.parametrize(
         "mode,mode_expected,value_expected",
         [
-            ("live", "determinate", None),
+            ("live", "indeterminate", None),
             ("single", "determinate", 0),
             ("projection", "determinate", 0),
             ("z-stack", "determinate", 0),

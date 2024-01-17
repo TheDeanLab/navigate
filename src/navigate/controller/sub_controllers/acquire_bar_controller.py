@@ -113,7 +113,7 @@ class AcquireBarController(GUIController):
         """
 
         if images_received == 0:
-            if mode == "continuous":
+            if mode == "live":
                 # Set to Indeterminate mode.
                 self.view.CurAcq["mode"] = "indeterminate"
                 self.view.OvrAcq["mode"] = "indeterminate"

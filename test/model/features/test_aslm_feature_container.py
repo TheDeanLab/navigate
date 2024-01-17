@@ -873,15 +873,19 @@ class TestFeatureContainer(unittest.TestCase):
         assert data_container.root == node
         data_container.run()
         assert feature.running_times_main_func == 1, feature.running_times_main_func
+        assert data_container.end_flag == True
+        data_container.reset()
         data_container.run(True)
         assert node.is_marked == True
         assert feature.running_times_main_func == 1, feature.running_times_main_func
 
         feature.clear()
+        data_container.reset()
         func_dict["cleanup"] = feature.close
         node = DataNode("cleanup_node", func_dict)
         data_container = DataContainer(node)
         data_container.run()
+        data_container.reset()
         data_container.run(True)
         assert feature.is_closed == True
         assert node.is_marked == True
@@ -897,6 +901,7 @@ class TestFeatureContainer(unittest.TestCase):
         assert data_container.root == node
         data_container.run()
         assert feature.running_times_main_func == 1, feature.running_times_main_func
+        data_container.reset()
         data_container.run(True)
         assert feature.running_times_cleanup_func == 1
         assert feature.is_closed == True
@@ -925,6 +930,7 @@ class TestFeatureContainer(unittest.TestCase):
             data_container.run()
             assert feature.running_times_main_func == i, feature.running_times_main_func
         # mark a single node
+        data_container.reset()
         data_container.run(True)
         assert feature.is_closed == True
         assert feature.running_times_cleanup_func == 1
@@ -939,6 +945,7 @@ class TestFeatureContainer(unittest.TestCase):
         assert feature.running_times_main_func == 5
         assert node3.is_marked == False
         # run node1 which is marked
+        data_container.reset()
         data_container.run()
         assert feature.running_times_main_func == 5
         # run node2

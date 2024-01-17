@@ -62,7 +62,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#continuous-scan">Continuous Scan</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#single-acquisition">Single Acquisition</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#z-stack-acquisition">Z-Stack Acquisition</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#projection">Projection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#customized">Customized</a></li>
 </ul>
 </li>
@@ -192,20 +191,6 @@ worth noting that <code class="docutils literal notranslate"><span class="pre">Z
 <a class="reference internal" href="gui_walkthrough.html#multiposition"><span class="std std-ref">multiple positions</span></a>.
 <code class="docutils literal notranslate"><span class="pre">ZStackAcquisition</span></code> will loop over <code class="docutils literal notranslate"><span class="pre">Z</span></code> or <code class="docutils literal notranslate"><span class="pre">C</span></code> first, as decided by “Per Stack”
 or “Per Z”, and then will loop over positions.</p>
-</section>
-<hr class="docutils" />
-<section id="projection">
-<h3>Projection<a class="headerlink" href="#projection" title="Permalink to this heading"></a></h3>
-<p><a class="reference external" href="https://www.nature.com/articles/s41592-021-01175-7">Projection mode</a> scans a light
-sheet through a sample and sums the full 3D stack as a single image. It is useful for
-fast overviews of 3D data. When combined with a galvanometer in the detection path, it
-provides multiple perspectives of the same object via the Shear Warp Transform.</p>
-<p>It is implemented as the feature list</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">}]</span>
-</pre></div>
-</div>
-<p>The magic of projection mode comes from changing the galvo operation to sweep the light
-sheet through the whole sample during the course of a single frame.</p>
 </section>
 <hr class="docutils" />
 <section id="customized">

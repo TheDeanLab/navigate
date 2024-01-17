@@ -51,8 +51,6 @@ navigate.model.features.common\_features.ZStackAcquisition
       ~ZStackAcquisition.defocus
       ~ZStackAcquisition.stack_cycling_mode
       ~ZStackAcquisition.channels
-      ~ZStackAcquisition.has_ni_galvo_stage
-      ~ZStackAcquisition.need_to_update_waveform
       ~ZStackAcquisition.image_writer
       ~ZStackAcquisition.config_table
    

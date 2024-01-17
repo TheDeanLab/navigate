@@ -40,7 +40,7 @@ from pathlib import Path
 # Third party imports
 
 # Local application imports
-from .common_functions import copy_proxy_object
+from navigate.tools.common_functions import copy_proxy_object
 
 
 def create_save_path(saving_settings):

@@ -77,7 +77,6 @@ class AcquireBarController(GUIController):
             "Continuous Scan": "live",
             "Z-Stack": "z-stack",
             "Single Acquisition": "single",
-            "Projection": "projection",
             "Customized": "customized",
             "Constant Velocity Acquisition": "ConstantVelocityAcquisition",
         }
@@ -113,7 +112,7 @@ class AcquireBarController(GUIController):
         """
 
         if images_received == 0:
-            if mode == "live":
+            if mode == "live" or mode == "customized":
                 # Set to Indeterminate mode.
                 self.view.CurAcq["mode"] = "indeterminate"
                 self.view.OvrAcq["mode"] = "indeterminate"
@@ -146,8 +145,6 @@ class AcquireBarController(GUIController):
             number_of_slices = 1
         elif mode == "live" or mode == "customized":
             number_of_slices = 1
-        elif mode == "projection":
-            number_of_slices = 1
         elif mode == "z-stack" or "ConstantVelocityAcquisition":
             number_of_slices = microscope_state["number_z_steps"]
 
@@ -162,7 +159,7 @@ class AcquireBarController(GUIController):
         if images_received > 0:
             # Update progress bars according to imaging mode.
             if stop is False:
-                if mode == "live" or mode == "customized":
+                if mode == "live":
                     self.view.CurAcq.start()
                     self.view.OvrAcq.start()
                     self.view.total_acquisition_label.config(text="--:--:--")
@@ -204,12 +201,6 @@ class AcquireBarController(GUIController):
                     self.view.CurAcq["value"] = top_percent_complete
                     self.view.OvrAcq["value"] = top_percent_complete
 
-                elif mode == "projection":
-                    bottom_anticipated_images = 100 * (
-                        images_received / bottom_anticipated_images
-                    )
-                    self.view.CurAcq["value"] = bottom_anticipated_images
-                    self.view.OvrAcq["value"] = bottom_anticipated_images
                 else:
                     self.view.CurAcq.start()
                     self.view.OvrAcq.start()
@@ -401,9 +392,7 @@ class AcquireBarController(GUIController):
         # Grey out stack acq widgets when not Zstack or projection
         if mode in [
             "z-stack",
-            "projection",
             "ConstantVelocityAcquisition",
-            "customized",
         ]:
             state = "normal"
         else:

@@ -100,25 +100,6 @@ or "Per Z", and then will loop over positions.
 
 ----------------
 
-Projection
-----------
-
-`Projection mode <https://www.nature.com/articles/s41592-021-01175-7>`_ scans a light
-sheet through a sample and sums the full 3D stack as a single image. It is useful for
-fast overviews of 3D data. When combined with a galvanometer in the detection path, it
-provides multiple perspectives of the same object via the Shear Warp Transform.
-
-It is implemented as the feature list
-
-.. code-block:: python
-
-    [{"name": PrepareNextChannel}]
-
-The magic of projection mode comes from changing the galvo operation to sweep the light
-sheet through the whole sample during the course of a single frame.
-
-----------------
-
 Customized
 ----------
 

@@ -357,7 +357,6 @@ class Model:
                     },
                 )
             ],
-            "projection": [{"name": PrepareNextChannel}],
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "customized": [],
         }
@@ -540,10 +539,7 @@ class Model:
                 )
                 self.data_buffer_saving_flags = None
 
-            if self.imaging_mode == "projection":
-                self.move_stage({"z_abs": 0})
-
-            if self.imaging_mode == "live" or self.imaging_mode == "projection":
+            if self.imaging_mode == "live":
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:
                 self.signal_thread = threading.Thread(target=self.run_acquisition)

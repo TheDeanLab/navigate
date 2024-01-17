@@ -306,7 +306,7 @@ class GalvoNIStage(StageBase):
             if self.ao_task is None:
                 self.ao_task = nidaqmx.Task()
                 self.ao_task.ao_channels.add_ao_voltage_chan(self.axes_channels[0])
-            self.move_axis_absolute("x", float(self.configuration["experiment"]["StageParameters"][self.axes[0]]))
+            self.move_axis_absolute(self.axes[0], float(self.configuration["experiment"]["StageParameters"][self.axes[0]]))
         elif self.ao_task:
             self.ao_task.stop()
             self.ao_task.close()

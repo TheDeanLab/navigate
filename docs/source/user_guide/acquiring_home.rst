@@ -7,3 +7,4 @@ Acquiring Data
 
    acquiring_howto
    features
+   plugins

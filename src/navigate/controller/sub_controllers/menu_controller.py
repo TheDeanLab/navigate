@@ -60,6 +60,7 @@ from navigate.controller.sub_controllers import (
     FeaturePopupController,
     FeatureAdvancedSettingController,
     AdaptiveOpticsPopupController,
+    UninstallPluginController,
 )
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
 from navigate.tools.decorators import FeatureList
@@ -437,7 +438,12 @@ class MenuController(GUIController):
         self.populate_menu(configuration_dict)
 
         # plugins
-        self.view.menubar.menu_plugins.add_command(label="Install Plugin", command=self.install_plugin)
+        self.view.menubar.menu_plugins.add_command(
+            label="Install Plugin", command=self.install_plugin
+        )
+        self.view.menubar.menu_plugins.add_command(
+            label="Uninstall Plugins", command=self.popup_uninstall_plugin
+        )
         self.view.menubar.menu_plugins.add_separator()
 
         # add-on features
@@ -457,9 +463,7 @@ class MenuController(GUIController):
 
         for i in range(self.feature_list_count):
             self.view.menubar.menu_features.add_radiobutton(
-                label=self.feature_list_names[i],
-                variable=self.feature_id_val,
-                value=i
+                label=self.feature_list_names[i], variable=self.feature_id_val, value=i
             )
         self.feature_id_val.trace_add(
             "write",
@@ -730,7 +734,7 @@ class MenuController(GUIController):
 
     def popup_help(self):
         """Open a web browser to the Navigate documentation."""
-        webbrowser.open_new_tab('https://thedeanlab.github.io/navigate/')
+        webbrowser.open_new_tab("https://thedeanlab.github.io/navigate/")
 
     def toggle_stage_limits(self, *args):
         """Toggle stage limits."""
@@ -973,19 +977,36 @@ class MenuController(GUIController):
         if not folder_path:
             return
         if os.path.exists(os.path.join(folder_path, "plugin_config.yml")):
-            plugin_config = load_yaml_file(os.path.join(folder_path, "plugin_config.yml"))
-            plugins_dict = load_yaml_file(os.path.join(get_navigate_path(), "config", "plugins_config.yml"))
+            plugin_config = load_yaml_file(
+                os.path.join(folder_path, "plugin_config.yml")
+            )
+            plugins_dict = load_yaml_file(
+                os.path.join(get_navigate_path(), "config", "plugins_config.yml")
+            )
             plugin_name = plugin_config["name"]
             if plugin_name in plugins_dict:
-                messagebox.showwarning(title="Warning",
+                messagebox.showwarning(
+                    title="Warning",
                     message=f"Plugin {plugin_name} already exists,"
                     "Cannot install the selected one.",
                 )
                 return
             else:
                 plugins_dict[plugin_name] = folder_path
-                save_yaml_file(os.path.join(get_navigate_path(), "config"), plugins_dict, "plugins_config.yml")
-                messagebox.showwarning(title="Plugin",
+                save_yaml_file(
+                    os.path.join(get_navigate_path(), "config"),
+                    plugins_dict,
+                    "plugins_config.yml",
+                )
+                messagebox.showwarning(
+                    title="Plugin",
                     message=f"Plugin {plugin_name} is installed!"
                     "Please restart Navigate!",
                 )
+
+    def popup_uninstall_plugin(self, *args):
+        """Uninstall plugin"""
+        if hasattr(self, "uninstall_plugin_controller"):
+            self.uninstall_plugin_controller.showup()
+            return
+        self.uninstall_plugin_controller = UninstallPluginController(self.view, self)

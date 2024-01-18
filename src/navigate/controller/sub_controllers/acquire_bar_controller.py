@@ -372,6 +372,11 @@ class AcquireBarController(GUIController):
         self.update_stack_acq(self.mode)
         self.update_stack_time(self.mode)
 
+        if self.mode == "customized":
+            self.parent_controller.channels_tab_controller.disable_multiposition_btn()
+        else:
+            self.parent_controller.channels_tab_controller.enable_multiposition_btn()
+
     def update_stack_acq(self, mode):
         """Changes state behavior of widgets in the stack acquisition frame based on
         mode of microscope
@@ -510,6 +515,8 @@ class AcquireBarController(GUIController):
             "is_save"
         ]
         self.set_save_option(is_save)
+        if self.mode == "customized":
+            self.parent_controller.channels_tab_controller.disable_multiposition_btn()
 
     def update_experiment_values(self, popup_window):
         """Gets the entries from the popup save dialog and overwrites the

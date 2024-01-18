@@ -110,7 +110,8 @@ class CameraBase:
         self.camera_parameters["supported_readout_directions"] = [
             "Top-to-Bottom",
             "Bottom-to-Top",
-            "Bidirection",
+            "Bidirectional",
+            "Rev. Bidirectional"
         ]
 
         # Initialize offset and variance maps, if present

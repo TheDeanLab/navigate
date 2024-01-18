@@ -93,7 +93,8 @@ class TestCameraSettingController:
         assert list(self.camera_settings.mode_widgets["Readout"].widget["values"]) == [
             "Top-to-Bottom",
             "Bottom-to-Top",
-            "Bidirection"
+            "Bidirectional",
+            "Rev. Bidirectional"
         ]
         assert (
             str(self.camera_settings.mode_widgets["Readout"].widget["state"])

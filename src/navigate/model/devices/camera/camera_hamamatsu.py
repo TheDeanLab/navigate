@@ -338,16 +338,17 @@ class HamamatsuOrca(CameraBase):
             mode : str
                 'Top-to-Bottom', 'Bottom-to-Top', 'bytrigger', or 'diverge'.
         """
-        if mode == "Top-to-Bottom":
-            #  'Forward' readout direction
-            self.camera_controller.set_property_value("readout_direction", 1.0)
-        elif mode == "Bottom-to-Top":
-            #  'Backward' readout direction
-            self.camera_controller.set_property_value("readout_direction", 2.0)
-        elif mode == "Bidirection":
-            self.camera_controller.set_property_value("readout_direction", 3.0)
-        elif mode == "diverge":
-            self.camera_controller.set_property_value("readout_direction", 5.0)
+        readout_direction_dict = {
+            "Top-to-Bottom": 1.0,
+            "Bottom-to-Top": 2.0,
+            "bytrigger": 3.0,
+            "diverge": 5.0,
+            "Bidirectional": 6.0,
+            "Rev. Bidirectional": 7.0,
+        }
+
+        if mode in readout_direction_dict:
+            self.camera_controller.set_property_value("readout_direction", readout_direction_dict[mode])
         else:
             print("Camera readout direction not supported")
             logger.info("Camera readout direction not supported")
@@ -671,7 +672,7 @@ class HamamatsuOrcaFire(HamamatsuOrca):
             Global configuration of the microscope
         """
         HamamatsuOrca.__init__(self, microscope_name, device_connection, configuration)
-        self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom", "Bottom-to-Top", "Bidirection"]
+        self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom", "Bottom-to-Top", "Bidirectional", "Rev. Bidirectional"]
         # get the max image width and height from the camera
         # it seems the camera will reset to its default value when close the connection with the camera.
         self.camera_parameters["x_pixels"] = self.camera_controller.get_property_value("image_width")

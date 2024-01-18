@@ -426,10 +426,15 @@ class Microscope:
 
     def end_acquisition(self):
         """End the acquisition."""
+        self.daq.stop_acquisition()
+        # set NI Galvo stage to normal stage mode
+        if self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "confocal-projection":
+            for stage, _ in self.stages_list:
+                if type(stage) == GalvoNIStage:
+                    stage.switch_mode("normal")
         self.stop_stage()
         if self.central_focus is not None:
             self.move_stage({"f_abs": self.central_focus})
-        self.daq.stop_acquisition()
         if self.camera.is_acquiring:
             self.camera.close_image_series()
         self.shutter.close_shutter()
@@ -469,7 +474,7 @@ class Microscope:
         # calculate waveform for galvo stage
         for stage, _ in self.stages_list:
             if type(stage) == GalvoNIStage:
-                stage.calculate_waveform(exposure_times, sweep_times)
+                stage.switch_mode("normal", exposure_times, sweep_times)
         waveform_dict = {
             "camera_waveform": camera_waveform,
             "remote_focus_waveform": remote_focus_waveform,

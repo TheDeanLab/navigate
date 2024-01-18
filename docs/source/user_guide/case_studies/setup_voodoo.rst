@@ -42,7 +42,7 @@ First steps
    folder with the ``synthetic_configuration.yaml`` file.
 
 #. Restart the software, but this time launch it in a standard operating mode by
-   typing ``navigate`` in the terminal. This confirms that the base configuration file is
+   typing **navigate** in the terminal. This confirms that the base configuration file is
    functional. If any problems are encountered, please submit a ticket on
    `GitHub <https://github.com/TheDeanLab/navigate>`_ under the "Issues" tab.
 
@@ -72,7 +72,7 @@ Data Acquisition Card
    ``configuration.yaml`` file (e.g., ``PXI6259/port0/line1`` if the name of the device
    is "PXI6259" and the pinout is "port0/line1").
 
-#. Open the ``navigate`` software in the standard operating mode, select the
+#. Open the **navigate** software in the standard operating mode, select the
    "Continuous Scan" mode, and press :guilabel:`Acquire`. If the software is operating
    as expected, it should display a synthetically generated image of noise. If it does
    not, double-check the configuration file and make sure that the

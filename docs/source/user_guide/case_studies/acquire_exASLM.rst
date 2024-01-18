@@ -24,16 +24,16 @@ Imaging a Z-Stack using Stop and Settle Mode
 #. Select :guilabel:`Continuous Scan` from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Using the :guilabel:`Stage Control`, go to a shallow z-position in the sample.
-   Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)`
+   Under the :guilabel:`Channels` tab, in :guilabel:`Stack Acquisition Settings (um)`
    press :guilabel:`Set Start Pos`.
 #. Go to a deep z-position in the sample. Press :guilabel:`Set End Pos`.
 #. Make sure :guilabel:`Set Foc` is ``0`` for both the :guilabel:`Set Start Pos` and
    :guilabel:`End Pos`.
 #. Type the desired step size (units um) in the :guilabel:`Step Size` dialog box in
-   :guilabel:`Stack Acquistion Settings (um)`. Step size can only be in increments of
+   :guilabel:`Stack Acquisition Settings (um)`. Step size can only be in increments of
    0.1 and the minimum is 0.2.
 #. Select the number of color channels needed imaging in the :guilabel:`Channel tab`
-   under :guilabel: `Channel Settings`. Select the correct filter for each channel by
+   under :guilabel:`Channel Settings`. Select the correct filter for each channel by
    using the dropdown menu after each channel under the :guilabel:`Filter`.
 #. Change the exposure time by changing number in the :guilabel:`Exp. Time (ms)` for
    each channel. For the ORCA Lightning camera using ASLM mode, the minimum frame rate
@@ -53,13 +53,13 @@ Imaging a Z-Stack using Constant Velocity Acquisition Mode
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Using the :guilabel:`Stage Control`, go to a shallow Z-position in the sample. Under
-   the :guilabel:`Channels` tab, in :guilabel:`Stack Acquistion Settings (um)` press
+   the :guilabel:`Channels` tab, in :guilabel:`Stack Acquisition Settings (um)` press
    :guilabel:`Set Start Pos`.
 #. Go to a deep Z-position in the sample. Press :guilabel:`Set End Pos`.
 #. Make sure :guilabel:`Set Foc` is ``0`` for both the :guilabel:`Set Start Pos` and
    :guilabel:`End Pos`.
 #. Type the desired step size (units um) in the :guilabel:`Step Size` dialog box in
-   :guilabel:`Stack Acquistion Settings (um)`. Step size can only be increments of
+   :guilabel:`Stack Acquisition Settings (um)`. Step size can only be increments of
    0.1 and the minimum is 0.2.
 #. Select the number of color channels needed imaging in the :guilabel:`Channel tab`
    under :guilabel:`Channel Settings`. Select the correct filter for each channel by

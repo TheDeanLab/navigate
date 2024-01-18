@@ -44,9 +44,10 @@ from navigate.view.popups.feature_list_popup import FeatureIcon, FeatureConfigPo
 from navigate.view.custom_widgets.ArrowLabel import ArrowLabel
 from navigate.controller.sub_controllers.gui_controller import GUIController
 from navigate.tools.image import create_arrow_image
-from navigate.tools.file_functions import load_yaml_file
+from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.model.features.feature_related_functions import (
-    convert_str_to_feature_list, convert_feature_list_to_str
+    convert_str_to_feature_list,
+    convert_feature_list_to_str,
 )
 from navigate.model.features import feature_related_functions
 from navigate.config.config import get_navigate_path
@@ -75,7 +76,11 @@ class FeaturePopupController(GUIController):
         #: list: The list of feature structure.
         self.feature_structure = []
 
-        self.feature_list_graph_controller = FeatureListGraphController(self.view.feature_view_frame, self.view.inputs["content"], self.view.buttons["preview"])
+        self.feature_list_graph_controller = FeatureListGraphController(
+            self.view.feature_view_frame,
+            self.view.inputs["content"],
+            self.view.buttons["preview"],
+        )
 
         if "add" in self.view.buttons:
             self.view.buttons["add"].configure(command=self.add_feature_list)
@@ -137,6 +142,24 @@ class FeaturePopupController(GUIController):
         self.parent_controller.execute(
             "load_feature", self.feature_list_id, feature_list_content
         )
+        # save to yaml file
+        feature_lists_path = get_navigate_path() + "/feature_lists"
+        feature_list_name = self.view.inputs["feature_list_name"].get()
+        feature_list_config = load_yaml_file(
+            os.path.join(
+                feature_lists_path, f"{'_'.join(feature_list_name.split(' '))}.yml"
+            )
+        )
+        if feature_list_config and feature_list_config["module_name"] is None:
+            save_yaml_file(
+                feature_lists_path,
+                {
+                    "module_name": None,
+                    "feature_list_name": feature_list_name,
+                    "feature_list": feature_list_content,
+                },
+                f"{'_'.join(feature_list_name.split(' '))}.yml",
+            )
         #: bool: Whether the acquisition should start.
         self.start_acquisiton_flag = True
         self.view.popup.dismiss()
@@ -161,6 +184,7 @@ class FeaturePopupController(GUIController):
         """Cancel the acquisition"""
         self.start_acquisiton_flag = False
         self.view.popup.dismiss()
+
 
 class FeatureListGraphController:
     def __init__(self, feature_list_view, feature_content_view, preview_btn):
@@ -222,7 +246,7 @@ class FeatureListGraphController:
     def get_feature_content(self):
         content = self.feature_content_view.get("1.0", "end-1c")
         return content
-    
+
     def update_feature_content(self):
         self.feature_content_view.delete("1.0", tk.END)
         self.feature_content_view.insert("1.0", self.build_feature_list_text())
@@ -258,7 +282,11 @@ class FeatureListGraphController:
             else:
                 flag = True
                 is_decistion_btn = "true" in feature or "false" in feature
-                btn = FeatureIcon(self.feature_list_view, feature["name"].__name__, set_bg=is_decistion_btn)
+                btn = FeatureIcon(
+                    self.feature_list_view,
+                    feature["name"].__name__,
+                    set_bg=is_decistion_btn,
+                )
                 # left click
                 btn.bind("<Button-1>", self.show_config_popup(i))
 
@@ -352,7 +380,6 @@ class FeatureListGraphController:
             al = tk.Label(self.feature_list_view, image=self.image)
             al.grid(row=1, column=0, columnspan=2 * l + 1, sticky="ew")
 
-
     def show_config_popup(self, idx):
         """Show the feature configuration popup
 
@@ -400,7 +427,7 @@ class FeatureListGraphController:
                 args_value=args_value,
                 title="Feature Parameters",
                 parameter_config=feature_parameter_config,
-                **kwargs
+                **kwargs,
             )
             popup.feature_name_widget.widget.bind(
                 "<<ComboboxSelected>>", lambda event: refresh_parameters(popup)
@@ -411,14 +438,22 @@ class FeatureListGraphController:
             )
 
             if "true" in feature:
-                self.feature_list_graph_controllers_true[idx] = FeatureListGraphController(popup.feature_list_true_frame.feature_view_frame,
-                                                                                           popup.feature_list_true_frame.content,
-                                                                                           popup.preview_btn_true)
+                self.feature_list_graph_controllers_true[
+                    idx
+                ] = FeatureListGraphController(
+                    popup.feature_list_true_frame.feature_view_frame,
+                    popup.feature_list_true_frame.content,
+                    popup.preview_btn_true,
+                )
                 self.feature_list_graph_controllers_true[idx].update(feature["true"])
             if "false" in feature:
-                self.feature_list_graph_controllers_false[idx] = FeatureListGraphController(popup.feature_list_false_frame.feature_view_frame,
-                                                                                           popup.feature_list_false_frame.content,
-                                                                                           popup.preview_btn_false)
+                self.feature_list_graph_controllers_false[
+                    idx
+                ] = FeatureListGraphController(
+                    popup.feature_list_false_frame.feature_view_frame,
+                    popup.feature_list_false_frame.content,
+                    popup.preview_btn_false,
+                )
                 self.feature_list_graph_controllers_false[idx].update(feature["false"])
 
         def refresh_parameters(popup):
@@ -473,16 +508,19 @@ class FeatureListGraphController:
                     elif a == "None":
                         feature["args"][i] = None
             if "true" in feature:
-                feature["true"] = convert_str_to_feature_list(self.feature_list_graph_controllers_true[idx].get_feature_content())
+                feature["true"] = convert_str_to_feature_list(
+                    self.feature_list_graph_controllers_true[idx].get_feature_content()
+                )
             if "false" in feature:
-                feature["false"] = convert_str_to_feature_list(self.feature_list_graph_controllers_false[idx].get_feature_content())
+                feature["false"] = convert_str_to_feature_list(
+                    self.feature_list_graph_controllers_false[idx].get_feature_content()
+                )
             # update text
             self.update_feature_content()
             popup.popup.dismiss()
             self.draw_feature_list_graph(False)
 
         return func
-    
 
     def show_menu(self, idx, flag=True):
         """Show the popup menu
@@ -604,7 +642,12 @@ class FeatureListGraphController:
             func
                 The function to insert the feature after the current feature
             """
-            self.features.insert(idx, dict(self.features[idx]) if type(self.features[idx])==dict else self.features[idx])
+            self.features.insert(
+                idx,
+                dict(self.features[idx])
+                if type(self.features[idx]) == dict
+                else self.features[idx],
+            )
             i = self.feature_structure.index(idx)
             for _, c in enumerate(self.feature_structure):
                 if type(c) == int and c > idx:
@@ -616,7 +659,7 @@ class FeatureListGraphController:
             self.draw_feature_list_graph(False)
 
         return func
-    
+
     def calculate_arrow_image_height(self):
         """Calculate the height of the arrow image
 
@@ -639,7 +682,7 @@ class FeatureListGraphController:
             elif c == ")":
                 h -= 20
         return image_height + 100
-    
+
     def build_feature_list_text(self):
         """Build the feature list text
 
@@ -679,16 +722,19 @@ class FeatureListGraphController:
                     content += f'"args": ({arg_str}),'
                 # "true"
                 if "true" in feature:
-                    content += f'"true": {convert_feature_list_to_str(feature["true"])},'
+                    content += (
+                        f'"true": {convert_feature_list_to_str(feature["true"])},'
+                    )
                 # "false"
                 if "false" in feature:
-                    content += f'"false": {convert_feature_list_to_str(feature["false"])},'
+                    content += (
+                        f'"false": {convert_feature_list_to_str(feature["false"])},'
+                    )
                 content += "}"
             content += ","
         content += "]"
         return content
 
-    
 
 def verify_feature_list(content):
     feature_list_content = "".join(content.split("\n"))

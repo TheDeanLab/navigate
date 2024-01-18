@@ -325,7 +325,7 @@ class MenuController(GUIController):
             self.view.menubar.menu_autofocus: {
                 "Perform Autofocus": [
                     "standard",
-                    lambda x: self.parent_controller.execute("autofocus"),
+                    lambda *args: self.parent_controller.execute("autofocus"),
                     "Ctrl+Shift+A",
                     "<Control-A>",
                     "<Control_L-A>",

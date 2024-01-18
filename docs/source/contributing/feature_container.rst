@@ -71,11 +71,11 @@ dictionaries that can contain ``init``, ``main``, ``end`` and/or
 - ``init`` entries dictate pre-processing steps that must be run before the
   main function of the feature starts.
 - ``main`` entries dictate the primary operation of the feature, and are run once per
-  acqusition step. They return ``True`` if the acquisition should proceed and ``False``
-  if the acquistion should be ended.
+  acquisition step. They return ``True`` if the acquisition should proceed and ``False``
+  if the acquisition should be ended.
 - ``end`` entries are run once per main function returning ``True``. They check if the
   acquisition should end, if we are at any boundary points of the ``main`` function
-  (e.g. if we need to change positions in a multi-position z-stack acquistion),
+  (e.g. if we need to change positions in a multi-position z-stack acquisition),
   and describe any closing operations that must be performed when exiting the feature
 - ``cleanup`` entries dictate what happens if the node fails. This is for
   failsafe controls such as "turn off all lasers".
@@ -200,7 +200,7 @@ the *signal* and *data* operations by default run in parallel and do not block e
 other. Sometimes, we want to be sure a device is ready or has moved. For example, in
 ``FeatureExample``, we have no guarantee that the stage finished moving before the
 image was taken. The ``wait_until_done`` call only blocks the signal thread from
-progressing before the stage finishs its move. To ensure the data thread also waits,
+progressing before the stage finishes its move. To ensure the data thread also waits,
 we need to pause the data thread until the stage is ready.
 
 Here is an example of how we can pause and resume the data thread:
@@ -215,7 +215,7 @@ Here is an example of how we can pause and resume the data thread:
   self.model.resume_data_thread()
 
 We can of course replace ``self.model.move_stage(pos, wait_until_done=True)`` with
-whatever task we want to wait for before resuming image acqusition.
+whatever task we want to wait for before resuming image acquisition.
 
 Model functions can be found :doc:`in the API <../_autosummary/navigate.model.model.Model>`.
 
@@ -238,7 +238,7 @@ To create a customized feature list, follow these steps:
     from navigate.model.features.feature_related_functions import *
 
   ``FeatureList`` is a decorator that registers the list of features.
-  ``feature_related_functions`` contains convienience imports that allow us to call
+  ``feature_related_functions`` contains convenience imports that allow us to call
   ``PrepareNextChannel`` instead of
   ``navigate.model.features.common_features.PrepareNextChannel``.
   This makes for more readable code.

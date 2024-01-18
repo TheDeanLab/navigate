@@ -193,6 +193,7 @@ class FeatureConfigPopup:
             temp.grid(row=i + 2, column=0, sticky=tk.NSEW, padx=30, pady=10)
             if arg_input_class is ttk.Combobox:
                 temp.set_values(values)
+                temp.widget.config(state="readonly")
             temp.set(str(args_value[i]))
 
     def get_widgets(self):

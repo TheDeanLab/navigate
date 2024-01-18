@@ -116,9 +116,9 @@ class TestAcquireBarController:
     @pytest.mark.parametrize(
         "mode,mode_expected,value_expected",
         [
-            ("live", "determinate", None),
+            ("live", "indeterminate", None),
             ("single", "determinate", 0),
-            ("projection", "determinate", 0),
+            ("customized", "indeterminate", None),
             ("z-stack", "determinate", 0),
         ],
     )
@@ -191,13 +191,12 @@ class TestAcquireBarController:
             )
             making_progress = float(self.acquire_bar_controller.view.CurAcq["value"])
             ovr_progress = float(self.acquire_bar_controller.view.OvrAcq["value"])
-            if mode != "projection":  # Ignoring projection until setup
-                assert (
-                    making_progress > 0
-                ), f"Progress bar should be moving in {mode} mode (making_progress)"
-                assert (
-                    ovr_progress > 0
-                ), f"Progress bar should be moving in {mode} mode (ovr_progress)"
+            assert (
+                making_progress > 0
+            ), f"Progress bar should be moving in {mode} mode (making_progress)"
+            assert (
+                ovr_progress > 0
+            ), f"Progress bar should be moving in {mode} mode (ovr_progress)"
             images_received += 1
 
         # Stopping progress bar
@@ -224,7 +223,7 @@ class TestAcquireBarController:
             ("live", "disabled"),
             ("z-stack", "normal"),
             ("single", "disabled"),
-            ("projection", "normal"),
+            ("customized", "disabled"),
         ],
     )
     def test_update_stack_acq(self, mode, expected_state):
@@ -267,7 +266,7 @@ class TestAcquireBarController:
             ("live", "disabled"),
             ("z-stack", "normal"),
             ("single", "normal"),
-            ("projection", "normal"),
+            ("customized", "normal")
         ],
     )
     def test_update_stack_time(self, mode, expected_state):
@@ -306,7 +305,7 @@ class TestAcquireBarController:
                 state == "disabled"
             ), "Widget state not correct for switching back to live mode"
 
-    @pytest.mark.parametrize("mode", ["live", "single", "z-stack", "projection"])
+    @pytest.mark.parametrize("mode", ["live", "single", "z-stack", "customized"])
     def test_get_set_mode(self, mode):
         """Tests the get_mode and set_mode methods of the AcquireBarController class
 
@@ -366,7 +365,7 @@ class TestAcquireBarController:
             ("Continuous Scan", "live"),
             ("Z-Stack", "z-stack"),
             ("Single Acquisition", "single"),
-            ("Projection", "projection"),
+            ("Customized", "customized"),
         ],
     )
     def test_update_microscope_mode(self, user_mode, expected_mode):

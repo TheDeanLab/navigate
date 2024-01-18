@@ -547,7 +547,7 @@ class TestCameraSettingController:
         pass
 
     @pytest.mark.parametrize(
-        "mode", ["single", "live", "customized", "projection", "z-stack", "stop"]
+        "mode", ["single", "live", "customized", "z-stack", "stop"]
     )
     def test_update_number_of_pixels(self, mode):
         import random

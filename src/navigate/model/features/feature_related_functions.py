@@ -357,16 +357,12 @@ def load_dynamic_parameter_functions(
         if type(item) is dict:
             if "args" in item:
                 feature = item["name"]
-                if not hasattr(feature, "__parameter_config"):
-                    config_path = (
-                        f"{feature_parameter_setting_path}/{feature.__name__}.yml"
-                    )
-                    parameter_config = None
-                    if os.path.exists(config_path):
-                        parameter_config = load_yaml_file(config_path)
-                    feature.__parameter_config = parameter_config
-                else:
-                    parameter_config = feature.__parameter_config
+                config_path = (
+                    f"{feature_parameter_setting_path}/{feature.__name__}.yml"
+                )
+                parameter_config = None
+                if os.path.exists(config_path):
+                    parameter_config = load_yaml_file(config_path)
                 if parameter_config:
                     args = list(item["args"])
                     spec = inspect.getfullargspec(feature)
@@ -376,7 +372,10 @@ def load_dynamic_parameter_functions(
                             continue
                         if args[idx] is None:
                             args[idx] = "None"
-                        ref_lib = parameter_config[parameter][args[idx]]
+                        if args[idx] not in parameter_config[parameter]:
+                            ref_lib = None
+                        else:
+                            ref_lib = parameter_config[parameter][args[idx]]
                         if ref_lib is None or ref_lib == "None":
                             args[idx] = None
                         elif os.path.exists(ref_lib):

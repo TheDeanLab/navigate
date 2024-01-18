@@ -357,7 +357,6 @@ class Model:
                     },
                 )
             ],
-            "projection": [{"name": PrepareNextChannel}],
             "ConstantVelocityAcquisition": [{"name": ConstantVelocityAcquisition}],
             "customized": [],
         }
@@ -540,10 +539,7 @@ class Model:
                 )
                 self.data_buffer_saving_flags = None
 
-            if self.imaging_mode == "projection":
-                self.move_stage({"z_abs": 0})
-
-            if self.imaging_mode == "live" or self.imaging_mode == "projection":
+            if self.imaging_mode == "live":
                 self.signal_thread = threading.Thread(target=self.run_live_acquisition)
             else:
                 self.signal_thread = threading.Thread(target=self.run_acquisition)
@@ -647,9 +643,19 @@ class Model:
             Args[0]: device name
             Args[1]: device reference
             """
-            print("*** autofocus args:", *args)
-            autofocus = Autofocus(self, *args)
-            autofocus.run()
+            if self.is_acquiring and self.imaging_mode == "live":
+                if hasattr(self, "signal_container"):
+                    self.signal_container.cleanup()
+                if hasattr(self, "data_container"):
+                    self.data_container.cleanup()
+                self.signal_container, self.data_container = load_features(
+                    self,
+                    [{"name": Autofocus}],
+                )
+            elif not self.is_acquiring:
+                self.is_acquiring = True
+                autofocus = Autofocus(self, *args)
+                autofocus.run()
 
         elif command == "flatten_mirror":
             self.update_mirror(coef=[], flatten=True)
@@ -885,7 +891,7 @@ class Model:
 
             wait_num = self.camera_wait_iterations
 
-            if hasattr(self, "data_container"):
+            if hasattr(self, "data_container") and not self.data_container.end_flag:
                 if self.data_container.is_closed:
                     self.logger.info("Navigate Model - Data container is closed.")
                     self.stop_acquisition = True
@@ -1090,11 +1096,9 @@ class Model:
 
     def run_acquisition(self):
         """Run acquisition along with a feature list one time."""
-        if not hasattr(self, "signal_container"):
+        if not hasattr(self, "signal_container") or self.signal_container.end_flag:
             self.snap_image()
             return
-
-        self.signal_container.reset()
 
         while (
             not self.signal_container.end_flag

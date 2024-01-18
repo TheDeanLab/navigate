@@ -9,17 +9,18 @@ Using Plugins
 Install a Plugin
 ----------------
 
-Once you've built a plugin or downloaded a Navigate plugin, you can easily install it.
-Here, we haved downloaded the `Navigate Confocal-Projection Plugin <https://github.com/TheDeanLab/navigate-confocal-projection>`_.
+Once you've built a plugin or downloaded a **navigate* plugin, you can easily install it.
+Here, we have downloaded the `Navigate Confocal-Projection Plugin <https://github.com/TheDeanLab/navigate-confocal-projection>`_.
 
-#. You can install this navigate-confocal-projection plugin by selecting the menu
+#. You can install the **navigate-confocal-projection** plugin by selecting the menu
    :menuselection:`Plugins --> Install Plugin`.
 
 
    .. image:: images/plugin_1.png
 
 
-#. Select the folder `ConfocalProjectionPlugin` and click :guilabel:`Select`, the plugin is installed.
+#. Select the folder `ConfocalProjectionPlugin` and click :guilabel:`Select`.
+   The plugin is now installed.
 
 
    .. image:: images/plugin_2.png
@@ -27,7 +28,7 @@ Here, we haved downloaded the `Navigate Confocal-Projection Plugin <https://gith
    .. image:: images/plugin_3.png
       
 
-#. Restart `Navigate` to use this installed plugin.
+#. Restart **navigate** to use this installed plugin.
 
 
 -----------
@@ -35,15 +36,15 @@ Here, we haved downloaded the `Navigate Confocal-Projection Plugin <https://gith
 Uninstall a Plugin
 ------------------
 
-Uninstall a plugin is very easy. 
+Uninstalling a plugin is very easy.
 
 #. Select :menuselection:`Plugins --> Uninstall Plugins`. This will open a
-   popup window where you could see all installed plugins.
+   popup window where you can see all of the currently installed plugins.
 
    .. image:: images/plugin_4.png
 
    
-#. Select the plugins you want to uninstall.
+#. Select the plugin you want to uninstall.
 
    .. image:: images/plugin_5.png
 
@@ -53,5 +54,5 @@ Uninstall a plugin is very easy.
    .. image:: images/plugin_6.png
 
 
-#. Restart `Navigate` to fully remove the uninstalled plugin.
+#. Restart **navigate** to fully remove the uninstalled plugin.
 

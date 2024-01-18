@@ -107,7 +107,11 @@ class CameraBase:
         self.camera_parameters["trigger_active"] = 1.0
         self.camera_parameters["trigger_mode"] = 1.0
         self.camera_parameters["trigger_polarity"] = 2.0
-        self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom", "Bottom-to-Top", "Bidirection"]
+        self.camera_parameters["supported_readout_directions"] = [
+            "Top-to-Bottom",
+            "Bottom-to-Top",
+            "Bidirection",
+        ]
 
         # Initialize offset and variance maps, if present
         #: np.ndarray: Offset map

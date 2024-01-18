@@ -447,6 +447,7 @@ def verify_experiment_config(manager, configuration):
     if camera_setting_dict["readout_direction"] not in [
         "Top-to-Bottom",
         "Bottom-to-Top",
+        "Bidirection",
     ]:
         camera_setting_dict["readout_direction"] = "Top-to-Bottom"
 

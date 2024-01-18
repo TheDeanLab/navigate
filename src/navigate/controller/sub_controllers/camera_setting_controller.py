@@ -133,7 +133,10 @@ class CameraSettingController(GUIController):
         self.mode_widgets["Sensor"].widget.selection_clear()
 
         # Readout Mode
-        self.mode_widgets["Readout"].widget["values"] = camera_config_dict["supported_readout_directions"]
+        self.camera_readout_directions = camera_config_dict[
+            "supported_readout_directions"
+        ]
+        self.mode_widgets["Readout"].widget["values"] = self.camera_readout_directions
 
         self.mode_widgets["Readout"].widget["state"] = "disabled"
         self.mode_widgets["Readout"].selection_clear()
@@ -195,6 +198,13 @@ class CameraSettingController(GUIController):
             self.mode_widgets["Readout"].set("")
             self.mode_widgets["Pixels"].set("")
         else:
+            if (
+                self.camera_setting_dict["readout_direction"]
+                not in self.camera_readout_directions
+            ):
+                self.camera_setting_dict[
+                    "readout_direction"
+                ] = self.camera_readout_directions[0]
             self.mode_widgets["Readout"].set(
                 self.camera_setting_dict["readout_direction"]
             )
@@ -314,6 +324,13 @@ class CameraSettingController(GUIController):
 
         elif sensor_value == "Light-Sheet":
             # readout-direction from experiment
+            if (
+                self.camera_setting_dict["readout_direction"]
+                not in self.camera_readout_directions
+            ):
+                self.camera_setting_dict[
+                    "readout_direction"
+                ] = self.camera_readout_directions[0]
             self.mode_widgets["Readout"].widget.set(
                 self.camera_setting_dict["readout_direction"]
             )

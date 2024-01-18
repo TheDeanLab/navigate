@@ -133,10 +133,8 @@ class CameraSettingController(GUIController):
         self.mode_widgets["Sensor"].widget.selection_clear()
 
         # Readout Mode
-        self.mode_widgets["Readout"].widget["values"] = [
-            "Top-to-Bottom",
-            "Bottom-to-Top",
-        ]
+        self.mode_widgets["Readout"].widget["values"] = camera_config_dict["supported_readout_directions"]
+
         self.mode_widgets["Readout"].widget["state"] = "disabled"
         self.mode_widgets["Readout"].selection_clear()
 

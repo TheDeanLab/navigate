@@ -160,6 +160,8 @@ class ChannelsTabController(GUIController):
         # Multi Position Acquisition
         #: bool: Whether or not the user has selected to use multiposition.
         self.is_multiposition = False
+        #: bool: cache multiposition flag
+        self.is_multiposition_cache = False
         #: bool: Whether or not the user has selected to use multiposition.
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(
@@ -315,6 +317,17 @@ class ChannelsTabController(GUIController):
         self.view.stack_timepoint_frame.save_check["state"] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox["state"] = state
         self.view.stack_timepoint_frame.exp_time_spinbox["state"] = state
+
+        # multi-position flag
+        if mode == "stop":
+            self.is_multiposition_val.set(self.is_multiposition_cache)
+            self.toggle_multiposition()
+        else:
+            self.is_multiposition_cache = self.is_multiposition
+            if mode == "customized":
+                self.is_multiposition_val.set(False)
+                self.toggle_multiposition()
+
         self.show_verbose_info("acquisition mode has been changed to", mode)
 
     def update_z_steps(self, *args):
@@ -697,6 +710,14 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict["is_multiposition"] = self.is_multiposition
         self.update_timepoint_setting()
         self.show_verbose_info("Multi-position:", self.is_multiposition)
+
+    def disable_multiposition_btn(self):
+        """Disable multiposition button"""
+        self.view.multipoint_frame.save_check.config(state="disabled")
+
+    def enable_multiposition_btn(self):
+        """Enable multiposition button"""
+        self.view.multipoint_frame.save_check.config(state="normal")
 
     def launch_waveform_parameters(self):
         """Launches waveform parameters popup."""

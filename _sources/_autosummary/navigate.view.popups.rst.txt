@@ -36,6 +36,7 @@ navigate.view.popups
    navigate.view.popups.feature_list_popup
    navigate.view.popups.ilastik_setting_popup
    navigate.view.popups.microscope_setting_popup_window
+   navigate.view.popups.plugins_popup
    navigate.view.popups.tiling_wizard_popup
    navigate.view.popups.tiling_wizard_popup2
    navigate.view.popups.waveform_parameter_popup_window

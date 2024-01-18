@@ -1,23 +1,82 @@
 .. _plugin:
 
-Plugin
-======
+====================
+Plugin Architecture
+====================
+
 **navigate** is designed with extensibility. Users can seamlessly integrate custom
 GUI plugins, device plugins, new feature plugins, and even define specific acquisition
 modes.
 
 -------------------------------------
 
-Introduction
--------------------------------------
+Introduction to Plugins
+########################
 
-The **navigate** **plugin system** gives user the flexibility to extend its functionality according
-to users' specific needs. **navigate** will load plugins automatically and users can use their
+The **navigate** **plugin system** gives users the flexibility to extend its functionality according
+to their specific needs. **navigate** will load plugins automatically and users can use their
 plugins with **navigate** seamlessly.
 
+-----------
+
+Installing a Plugin
+####################
+
+Once you've built a plugin or downloaded a **navigate** plugin, you can easily install it.
+Here, we have downloaded the `Navigate Confocal-Projection Plugin <https://github.com/TheDeanLab/navigate-confocal-projection>`_.
+
+#. You can install the **navigate-confocal-projection** plugin by selecting the menu
+   :menuselection:`Plugins --> Install Plugin`.
+
+
+   .. image:: images/plugin_1.png
+
+
+#. Select the folder `ConfocalProjectionPlugin` and click :guilabel:`Select`.
+   The plugin is now installed.
+
+
+   .. image:: images/plugin_2.png
+
+   .. image:: images/plugin_3.png
+
+
+#. Restart **navigate** to use this installed plugin.
+
+
+-----------
+
+Uninstalling a Plugin
+#####################
+
+Uninstalling a plugin is very easy.
+
+#. Select :menuselection:`Plugins --> Uninstall Plugins`. This will open a
+   popup window where you can see all of the currently installed plugins.
+
+   .. image:: images/plugin_4.png
+
+
+#. Select the plugin you want to uninstall.
+
+   .. image:: images/plugin_5.png
+
+
+#. Click :guilabel:`Uninstall`.
+
+   .. image:: images/plugin_6.png
+
+
+#. Restart **navigate** to fully remove the uninstalled plugin.
+
+
+
 -------------------------------------
 
-Plugin Template
+Designing a Plugin
+##########################
+
+Using a Plugin Template
 -------------------------------------
 
 A comprehensive **plugin template** is provided. Users could download the **plugin template** from
@@ -74,8 +133,8 @@ is:
 
 -------------------------------------
 
-Plugin With GUI
----------------
+Plugin GUI Elements
+--------------------
 
 **navigate** supports a plugin with its own GUI. The custom plugin GUI can be integrated as a tab or a popup.
 Users should specify the view option in `plugin_config.yml`. The name in the plugin_config.yml will be used
@@ -92,7 +151,7 @@ should be named: "my_plugin_frame.py" and "my_plugin_controller.py"
 
 -------------------------------------
 
-Plugin With Device
+Plugin Devices
 ------------------
 
 The **navigate** Software allows you to integrate a new device. There could be more than one device inside a plugin,
@@ -130,7 +189,7 @@ The template of `device_startup_functions.py` could be find in the `template <ht
 
 -------------------------------------
 
-Plugin With A New Feature
+Plugin Features
 -------------------------
 **navigate** allows users to add new features. New feature objects and feature lists can be a plugin or a component
 of a plugin. Features and feature lists are automatically loaded into **navigate**.
@@ -139,7 +198,7 @@ Please visit `here <https://thedeanlab.github.io/**navigate**/feature_container/
 
 -------------------------------------
 
-Custom Acquisition Model
+Custom Acquisition Modes
 ------------------------
 Navigate offers seamless support for custom acquisition modes, and registering a new mode is straightforward.
 
@@ -186,5 +245,6 @@ Users should tell **navigate** what **navigate** should do before and after acqu
             file_name: plugin_acquisition_mode.py
 
 
+-----------
 
 There are more plugin examples, please visit `navigate <https://github.com/TheDeanLab/navigate/tree/develop/src/navigate/plugins>`_ and `Navigate Plugins <https://github.com/TheDeanLab/navigate-plugins>`_.

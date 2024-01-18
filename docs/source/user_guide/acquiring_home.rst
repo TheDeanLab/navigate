@@ -7,4 +7,3 @@ Acquiring Data
 
    acquiring_guide
    features
-   plugins

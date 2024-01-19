@@ -20,10 +20,16 @@ jobs:
             [distutils]
             index-servers =
               pypi
+              testpypi
               navigate-micro
     
             [pypi]
             repository: https://upload.pypi.org/legacy/
+            username: $env:PYPI_USERNAME
+            password: $env:PYPI_PASSWORD
+                        
+            [testpypi]
+            repository: https://test.pypi.org/legacy/
             username: $env:PYPI_USERNAME
             password: $env:PYPI_TEST_PASSWORD
             

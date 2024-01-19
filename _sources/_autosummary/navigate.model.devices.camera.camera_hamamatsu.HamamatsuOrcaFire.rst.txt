@@ -1,0 +1,61 @@
+navigate.model.devices.camera.camera\_hamamatsu.HamamatsuOrcaFire
+=================================================================
+
+.. currentmodule:: navigate.model.devices.camera.camera_hamamatsu
+
+.. autoclass:: HamamatsuOrcaFire
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~HamamatsuOrcaFire.__init__
+      ~HamamatsuOrcaFire.calculate_light_sheet_exposure_time
+      ~HamamatsuOrcaFire.calculate_readout_time
+      ~HamamatsuOrcaFire.close_camera
+      ~HamamatsuOrcaFire.close_image_series
+      ~HamamatsuOrcaFire.get_line_interval
+      ~HamamatsuOrcaFire.get_minimum_waiting_time
+      ~HamamatsuOrcaFire.get_new_frame
+      ~HamamatsuOrcaFire.get_offset_variance_maps
+      ~HamamatsuOrcaFire.initialize_image_series
+      ~HamamatsuOrcaFire.report_settings
+      ~HamamatsuOrcaFire.set_ROI
+      ~HamamatsuOrcaFire.set_binning
+      ~HamamatsuOrcaFire.set_exposure_time
+      ~HamamatsuOrcaFire.set_line_interval
+      ~HamamatsuOrcaFire.set_readout_direction
+      ~HamamatsuOrcaFire.set_sensor_mode
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~HamamatsuOrcaFire.max_image_height
+      ~HamamatsuOrcaFire.max_image_width
+      ~HamamatsuOrcaFire.min_image_height
+      ~HamamatsuOrcaFire.min_image_width
+      ~HamamatsuOrcaFire.offset
+      ~HamamatsuOrcaFire.serial_number
+      ~HamamatsuOrcaFire.step_image_height
+      ~HamamatsuOrcaFire.step_image_width
+      ~HamamatsuOrcaFire.variance
+      ~HamamatsuOrcaFire.configuration
+      ~HamamatsuOrcaFire.camera_controller
+      ~HamamatsuOrcaFire.camera_parameters
+      ~HamamatsuOrcaFire.is_acquiring
+      ~HamamatsuOrcaFire.x_pixels
+      ~HamamatsuOrcaFire.y_pixels
+   
+   

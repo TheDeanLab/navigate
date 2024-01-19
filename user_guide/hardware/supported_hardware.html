@@ -262,8 +262,8 @@ data acquisition card.</p>
 <h2>Cameras<a class="headerlink" href="#cameras" title="Permalink to this heading"></a></h2>
 <p>The software supports camera-based acquisition. It can run both normal and rolling
 shutter modes of contemporary scientific CMOS cameras.</p>
-<section id="hamamatsu-flash-4-0-v3-fusion">
-<h3>Hamamatsu Flash 4.0 v3/Fusion<a class="headerlink" href="#hamamatsu-flash-4-0-v3-fusion" title="Permalink to this heading"></a></h3>
+<section id="hamamatsu-orca-flash-4-0-v3-fusion">
+<h3>Hamamatsu ORCA-Flash 4.0 v3/Fusion<a class="headerlink" href="#hamamatsu-orca-flash-4-0-v3-fusion" title="Permalink to this heading"></a></h3>
 <ul>
 <li><p>Insert the USB that came with the camera into the computer and install HCImageLive. Alternatively,
 download DCAM-API. The software can be found <a class="reference external" href="https://dcam-api.com">here</a>.</p></li>
@@ -282,6 +282,8 @@ HCImageLive or Excap (one of the DCAM tools installed)</p></li>
 <li><p>Connect the <cite>camera_trigger_out_line</cite> to the External Trigger of the Hamamatsu
 Camera. Commonly, this is done with a counter port, e.g., <code class="docutils literal notranslate"><span class="pre">/PXI6259/ctr0</span></code></p></li>
 </ul>
+<p>More about the ORCA-Flash 4.0 v3 and ORCA-Fusion can be found <a class="reference external" href="https://www.hamamatsu.com/us/en/product/cameras/cmos-cameras/C13440-20CU.html">here</a> and
+<a class="reference external" href="https://www.hamamatsu.com/us/en/product/cameras/cmos-cameras/C14440-20UP.html">here</a>, respectively.</p>
 <details class="summary-configuration-file">
 <summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">camera</span><span class="p">:</span>
@@ -333,10 +335,11 @@ Camera. Commonly, this is done with a counter port, e.g., <code class="docutils 
 <div class="line"><br /></div>
 </div>
 </section>
-<section id="hamamatsu-lightning">
-<h3>Hamamatsu Lightning<a class="headerlink" href="#hamamatsu-lightning" title="Permalink to this heading"></a></h3>
-<p>The Hamamatsu Lightning has a slightly different class than the Flash/Fusion as it
-reads out 4 rows at a time rather than 1 in rolling shutter mode.</p>
+<section id="hamamatsu-orca-lightning">
+<h3>Hamamatsu ORCA-Lightning<a class="headerlink" href="#hamamatsu-orca-lightning" title="Permalink to this heading"></a></h3>
+<p>The Hamamatsu ORCA-Lightning has a slightly different class than the Flash/Fusion as it
+reads out 4 rows at a time rather than 1 in rolling shutter mode.
+Learn more <a class="reference external" href="https://www.hamamatsu.com/us/en/product/cameras/cmos-cameras/C14120-20P.html">here</a>.</p>
 <details class="summary-configuration-file">
 <summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">camera</span><span class="p">:</span>
@@ -354,6 +357,56 @@ reads out 4 rows at a time rather than 1 in rolling shutter mode.</p>
 <span class="w">      </span><span class="nt">x_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4608.0</span>
 <span class="w">      </span><span class="nt">y_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2592.0</span>
 <span class="w">      </span><span class="nt">pixel_size_in_microns</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.5</span>
+<span class="w">      </span><span class="nt">subsampling</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">sensor_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Normal</span>
+<span class="w">      </span><span class="nt">readout_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bottom-to-Top</span>
+<span class="w">      </span><span class="nt">lightsheet_rolling_shutter_width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">608</span>
+<span class="w">      </span><span class="nt">defect_correct_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">      </span><span class="nt">binning</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1x1</span>
+<span class="w">      </span><span class="nt">readout_speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0x7FFFFFFF</span>
+<span class="w">      </span><span class="nt">trigger_active</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">trigger_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">trigger_polarity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">      </span><span class="nt">trigger_source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">      </span><span class="nt">exposure_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">      </span><span class="nt">delay_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="w">      </span><span class="nt">pulse_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">line_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.000075</span>
+<span class="w">      </span><span class="nt">display_acquisition_subsampling</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">      </span><span class="nt">average_frame_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.969</span>
+<span class="w">      </span><span class="nt">frames_to_average</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">exposure_time_range</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="hamamatsu-orca-fire">
+<h3>Hamamatsu ORCA-Fire<a class="headerlink" href="#hamamatsu-orca-fire" title="Permalink to this heading"></a></h3>
+<p>The Hamamatsu ORCA-Fire is one of the latest releases from Hamamatsu. It is a
+scientific CMOS camera that offers large 10.5 MPix sensor and greater diversity
+of rolling shutter readout modes. Learn more <a class="reference external" href="https://www.hamamatsu.com/us/en/product/cameras/cmos-cameras/C16240-20UP.html">here</a>.</p>
+<details class="summary-configuration-file">
+<summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrcaFire</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">000035</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">camera</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrcaFire</span>
+<span class="w">        </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">000035</span>
+<span class="w">      </span><span class="nt">x_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4432.0</span>
+<span class="w">      </span><span class="nt">y_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2368.0</span>
+<span class="w">      </span><span class="nt">pixel_size_in_microns</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.6</span>
 <span class="w">      </span><span class="nt">subsampling</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">]</span>
 <span class="w">      </span><span class="nt">sensor_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Normal</span>
 <span class="w">      </span><span class="nt">readout_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bottom-to-Top</span>
@@ -1248,7 +1301,7 @@ the system at each zoom.</p>
 </div>
 </section>
 <section id="synthetic-zoom">
-<span id="id2"></span><h3>Synthetic Zoom<a class="headerlink" href="#synthetic-zoom" title="Permalink to this heading"></a></h3>
+<span id="id6"></span><h3>Synthetic Zoom<a class="headerlink" href="#synthetic-zoom" title="Permalink to this heading"></a></h3>
 <details class="summary-configuration-file">
 <summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">zoom</span><span class="p">:</span>

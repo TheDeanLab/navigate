@@ -104,15 +104,16 @@ class HamamatsuOrca(CameraBase):
         self.camera_parameters["y_pixels_min"] = self.min_image_height
         self.camera_parameters["x_pixels_step"] = self.step_image_width
         self.camera_parameters["y_pixels_step"] = self.step_image_height
-
+        self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom", "Bottom-to-Top"]
         #: object: Camera controller
-        _, speed_max, _ = self.camera_controller.get_property_range("readout_speed")
-        if speed_max is not None:
-            self.camera_controller.set_property_value("readout_speed", int(speed_max))
-            self.camera_parameters["readout_speed"] = int(speed_max)
-        else:
-            self.camera_controller.set_property_value("readout_speed", 1)
-            self.camera_parameters["readout_speed"] = 1
+        if self.camera_controller.get_property_value("readout_speed"):
+            _, speed_max, _ = self.camera_controller.get_property_range("readout_speed")
+            if speed_max is not None:
+                self.camera_controller.set_property_value("readout_speed", int(speed_max))
+                self.camera_parameters["readout_speed"] = int(speed_max)
+            else:
+                self.camera_controller.set_property_value("readout_speed", 1)
+                self.camera_parameters["readout_speed"] = 1
 
         self.camera_parameters[
             "pixel_size_in_microns"
@@ -296,7 +297,7 @@ class HamamatsuOrca(CameraBase):
         ]
         for param in params:
             print(param, self.camera_controller.get_property_value(param))
-            logger.info(param, self.camera_controller.get_property_value(param))
+            logger.info(f"{param}, {self.camera_controller.get_property_value(param)}")
 
     def close_camera(self):
         """Close HamamatsuOrca Camera"""
@@ -337,16 +338,17 @@ class HamamatsuOrca(CameraBase):
             mode : str
                 'Top-to-Bottom', 'Bottom-to-Top', 'bytrigger', or 'diverge'.
         """
-        if mode == "Top-to-Bottom":
-            #  'Forward' readout direction
-            self.camera_controller.set_property_value("readout_direction", 1.0)
-        elif mode == "Bottom-to-Top":
-            #  'Backward' readout direction
-            self.camera_controller.set_property_value("readout_direction", 2.0)
-        elif mode == "bytrigger":
-            self.camera_controller.set_property_value("readout_direction", 3.0)
-        elif mode == "diverge":
-            self.camera_controller.set_property_value("readout_direction", 5.0)
+        readout_direction_dict = {
+            "Top-to-Bottom": 1.0,
+            "Bottom-to-Top": 2.0,
+            "bytrigger": 3.0,
+            "diverge": 5.0,
+            "Bidirectional": 6.0,
+            "Rev. Bidirectional": 7.0,
+        }
+
+        if mode in readout_direction_dict:
+            self.camera_controller.set_property_value("readout_direction", readout_direction_dict[mode])
         else:
             print("Camera readout direction not supported")
             logger.info("Camera readout direction not supported")
@@ -622,6 +624,7 @@ class HamamatsuOrcaLightning(HamamatsuOrca):
             Global configuration of the microscope
         """
         HamamatsuOrca.__init__(self, microscope_name, device_connection, configuration)
+        self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom"]
 
         logger.info("HamamatsuOrcaLightning Initialized")
 
@@ -653,3 +656,64 @@ class HamamatsuOrcaLightning(HamamatsuOrca):
 
         exposure_time = camera_line_interval * (shutter_width / 4) * 1000
         return exposure_time, camera_line_interval
+
+
+class HamamatsuOrcaFire(HamamatsuOrca):
+    def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize HamamatsuOrcaFire class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocesing.managers.DictProxy
+            Global configuration of the microscope
+        """
+        HamamatsuOrca.__init__(self, microscope_name, device_connection, configuration)
+        self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom", "Bottom-to-Top", "Bidirectional", "Rev. Bidirectional"]
+        # get the max image width and height from the camera
+        # it seems the camera will reset to its default value when close the connection with the camera.
+        self.camera_parameters["x_pixels"] = self.camera_controller.get_property_value("image_width")
+        self.camera_parameters["y_pixels"] = self.camera_controller.get_property_value("image_height")
+
+        logger.info("HamamatsuOrcaFire Initialized")
+
+    @property
+    def max_image_width(self):
+        """Get maximum image width.
+
+        Returns
+        -------
+        max_image_width : int
+            Maximum image width.
+        """
+        return self.camera_parameters["x_pixels"]
+
+    @max_image_width.setter
+    def max_image_width(self, value):
+        """Set maximum image width."""
+        pass
+
+    @property
+    def max_image_height(self):
+        """Get maximum image height.
+
+        Returns
+        -------
+        max_image_height : int
+            Maximum image height.
+        """
+        return self.camera_parameters["y_pixels"]
+
+    @max_image_height.setter
+    def max_image_height(self, value):
+        """Set maximum image height.
+
+        Parameters
+        ----------
+        value : int
+            Maximum image height.
+        """
+        pass

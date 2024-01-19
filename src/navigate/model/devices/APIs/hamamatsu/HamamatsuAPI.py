@@ -74,6 +74,8 @@ class DCAMPROP:
         BACKWARD = 2
         BYTRIGGER = 3
         DIVERGE = 5
+        FORWARDBIDIRECTION = 6
+        REVERSEBIDIRECTION = 7
 
     class READOUT_UNIT(IntEnum):
         FRAME = 2

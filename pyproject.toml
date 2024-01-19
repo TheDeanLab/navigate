@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=43.0.0", "wheel"]
+requires = ["setuptools>=43.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -76,4 +76,4 @@ robot = [
 Source = "https://github.com/TheDeanLab/navigate"
 
 [tool.setuptools.dynamic]
-version = {attr = "navigate.__version__"}
+version = {file = "src/navigate/VERSION"}

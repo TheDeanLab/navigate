@@ -171,7 +171,7 @@ Cameras
 The software supports camera-based acquisition. It can run both normal and rolling
 shutter modes of contemporary scientific CMOS cameras.
 
-Hamamatsu Flash 4.0 v3/Fusion
+Hamamatsu ORCA-Flash 4.0 v3/Fusion
 -----------------------------
 
 * Insert the USB that came with the camera into the computer and install HCImageLive. Alternatively,
@@ -187,6 +187,9 @@ Hamamatsu Flash 4.0 v3/Fusion
   HCImageLive or Excap (one of the DCAM tools installed)
 * Connect the `camera_trigger_out_line` to the External Trigger of the Hamamatsu
   Camera. Commonly, this is done with a counter port, e.g., ``/PXI6259/ctr0``
+
+More about the ORCA-Flash 4.0 v3 and ORCA-Fusion can be found `here <https://www.hamamatsu.com/us/en/product/cameras/cmos-cameras/C13440-20CU.html>`_ and
+`here <https://www.hamamatsu.com/us/en/product/cameras/cmos-cameras/C14440-20UP.html>`_, respectively.
 
 .. collapse:: Configuration File
 
@@ -239,11 +242,12 @@ Hamamatsu Flash 4.0 v3/Fusion
 
 |
 
-Hamamatsu Lightning
--------------------
+Hamamatsu ORCA-Lightning
+-------------------------
 
-The Hamamatsu Lightning has a slightly different class than the Flash/Fusion as it
+The Hamamatsu ORCA-Lightning has a slightly different class than the Flash/Fusion as it
 reads out 4 rows at a time rather than 1 in rolling shutter mode.
+Learn more `here <https://www.hamamatsu.com/us/en/product/cameras/cmos-cameras/C14120-20P.html>`_.
 
 .. collapse:: Configuration File
 
@@ -265,6 +269,59 @@ reads out 4 rows at a time rather than 1 in rolling shutter mode.
             x_pixels: 4608.0
             y_pixels: 2592.0
             pixel_size_in_microns: 5.5
+            subsampling: [1, 2, 4]
+            sensor_mode: Normal
+            readout_direction: Bottom-to-Top
+            lightsheet_rolling_shutter_width: 608
+            defect_correct_mode: 2.0
+            binning: 1x1
+            readout_speed: 0x7FFFFFFF
+            trigger_active: 1.0
+            trigger_mode: 1.0
+            trigger_polarity: 2.0
+            trigger_source: 2.0
+            exposure_time: 20
+            delay_percent: 8
+            pulse_percent: 1
+            line_interval: 0.000075
+            display_acquisition_subsampling: 4
+            average_frame_rate: 4.969
+            frames_to_average: 1
+            exposure_time_range:
+              min: 1
+              max: 1000
+              step: 1
+
+|
+
+
+Hamamatsu ORCA-Fire
+-------------------
+
+The Hamamatsu ORCA-Fire is one of the latest releases from Hamamatsu. It is a
+scientific CMOS camera that offers large 10.5 MPix sensor and greater diversity
+of rolling shutter readout modes. Learn more `here <https://www.hamamatsu.com/us/en/product/cameras/cmos-cameras/C16240-20UP.html>`_.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      hardware:
+        camera:
+          -
+            type:  HamamatsuOrcaFire
+            serial_number: 000035
+
+      microscopes:
+        microscope_name:
+          camera:
+            hardware:
+              name: camera
+              type: HamamatsuOrcaFire
+              serial_number: 000035
+            x_pixels: 4432.0
+            y_pixels: 2368.0
+            pixel_size_in_microns: 4.6
             subsampling: [1, 2, 4]
             sensor_mode: Normal
             readout_direction: Bottom-to-Top

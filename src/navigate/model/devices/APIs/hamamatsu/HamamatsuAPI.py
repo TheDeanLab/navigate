@@ -641,6 +641,7 @@ property_dict = {
     "sensor_mode": 4194832,  # 0x00400210, R/W, mode,  "SENSOR MODE"
     "defect_correct_mode": 4653072,  # 0x00470010, R/W, mode,  "DEFECT CORRECT MODE"
     "binning": 4198672,  # 0x00401110, R/W, mode, "BINNING"
+    "subarray_mode": 4202832,  # 0x00402150, R/W, mode,   "SUBARRAY MODE"
     "readout_speed": 4194576,  # 0x00400110, R/W, long,    "READOUT SPEED"
     "readout_direction": 4194608,  # 0x00400130, R/W, mode,   "READOUT DIRECTION"
     "readout_time": 4206608,  # 0x00403010, R/O, sec,   "TIMING READOUT TIME"
@@ -649,8 +650,8 @@ property_dict = {
     "trigger_polarity": 1049120,  # 0x00100220, R/W, mode, "TRIGGER POLARITY"
     "trigger_source": 1048848,  # 0x00100110, R/W, mode,   "TRIGGER SOURCE"
     "trigger_delay": 1049184,  # 0x00100260,	/* R/W, sec,	"TRIGGER DELAY"
-    "internal_line_interval": 4208720,  # 0x00403850, R/W, sec,
-    # "INTERNAL LINE INTERVAL"
+    "internal_line_interval": 4208720,  # 0x00403850, R/W, sec,    "INTERNAL LINE INTERVAL"
+    "internal_line_speed": 4208704,  # 0x00403840, R/W, m/sec,    "INTERNAL LINE SPEED"
     "image_width": 4325904,  # 0x00420210, R/O, long, "IMAGE WIDTH"
     "image_height": 4325920,  # 0x00420220, R/O, long,    "IMAGE HEIGHT"
     "exposuretime_control": 2031920,  # 0x001F0130, R/W, mode,

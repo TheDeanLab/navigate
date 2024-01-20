@@ -285,12 +285,14 @@ class HamamatsuOrca(CameraBase):
             "defect_correct_mode",
             "sensor_mode",
             "binning",
+            "subarray_mode",
             "readout_speed",
             "trigger_active",
             "trigger_mode",
             "trigger_polarity",
             "trigger_source",
             "internal_line_interval",
+            "internal_line_speed",
             "image_height",
             "image_width",
             "exposure_time",
@@ -717,3 +719,33 @@ class HamamatsuOrcaFire(HamamatsuOrca):
             Maximum image height.
         """
         pass
+
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time, shutter_width
+    ):
+        """Convert normal mode exposure time to light-sheet mode exposure time.
+        Calculate the parameters for an acquisition
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Normal mode exposure time.
+        shutter_width : int
+            Width of light-sheet rolling shutter.
+
+        Returns
+        -------
+        exposure_time : float
+            Light-sheet mode exposure time (ms).
+        camera_line_interval : float
+            HamamatsuOrca line interval duration (s).
+        """
+
+        camera_line_interval = (full_chip_exposure_time / 1000) / (
+            shutter_width + self.y_pixels - 1
+        )
+
+        self.camera_parameters["line_interval"] = camera_line_interval
+
+        exposure_time = ((camera_line_interval * shutter_width) // 0.000007309) * 0.007309
+        return exposure_time, camera_line_interval

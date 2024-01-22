@@ -671,9 +671,6 @@ class TonyWilson:
             except Exception as e:
                 print(e)
 
-            if self.save_report:
-                self.model.event_queue.put(("ao_save_report", self.report))
-
         try:
             if self.done_itr:
                 current_report = self.build_report()
@@ -689,5 +686,8 @@ class TonyWilson:
         self.done_itr = False
 
         self.mirror_controller.display_modes(self.best_coefs_overall)
+
+        if self.done_all and self.save_report:
+            self.model.event_queue.put(("ao_save_report", self.report))
 
         return self.frames_done >= self.total_frame_num

@@ -784,10 +784,7 @@ class ZStackAcquisition:
         self.focus_step_size = 0
 
         #: dict: A dictionary defining the multi-position table for z-stack acquisition.
-        self.positions = {}
-
-        #: int: The current index of the position being acquired in the multi-position
-        self.current_position_idx = 0
+        self.position = {}
 
         #: int: The z position of the channel being acquired in the z-stack
         self.current_z_position = 0
@@ -872,32 +869,27 @@ class ZStackAcquisition:
         #: float: The f position of the channel being acquired in the z-stack
         self.restore_f = pos_dict["f_pos"]
 
-        if bool(microscope_state["is_multiposition"]):
-            self.positions = self.model.configuration["experiment"]["MultiPositions"]
-        else:
-            self.positions = [
-                {
-                    "x": float(pos_dict["x_pos"]),
-                    "y": float(pos_dict["y_pos"]),
-                    "z": float(
-                        microscope_state.get(
-                            "stack_z_origin",
-                            pos_dict["z_pos"],
-                        )
-                        if not self.get_origin
-                        else pos_dict["z_pos"]
-                    ),
-                    "theta": float(pos_dict["theta_pos"]),
-                    "f": float(
-                        microscope_state.get(
-                            "stack_focus_origin",
-                            pos_dict["f_pos"],
-                        )
-                        if not self.get_origin
-                        else pos_dict["f_pos"]
-                    ),
-                }
-            ]
+        self.position = {
+            "x": float(pos_dict["x_pos"]),
+            "y": float(pos_dict["y_pos"]),
+            "z": float(
+                microscope_state.get(
+                    "stack_z_origin",
+                    pos_dict["z_pos"],
+                )
+                if not self.get_origin
+                else pos_dict["z_pos"]
+            ),
+            "theta": float(pos_dict["theta_pos"]),
+            "f": float(
+                microscope_state.get(
+                    "stack_focus_origin",
+                    pos_dict["f_pos"],
+                )
+                if not self.get_origin
+                else pos_dict["f_pos"]
+            ),
+        }
 
         # Setup next channel down here, to ensure defocus isn't merged into
         # restore f_pos, positions
@@ -906,12 +898,10 @@ class ZStackAcquisition:
         self.model.active_microscope.prepare_next_channel()
 
         self.model.logger.debug(
-            f"*** ZStack pre_signal_func: {self.positions}, {self.start_focus}, "
+            f"*** ZStack pre_signal_func: {self.position}, {self.start_focus}, "
             f"{self.start_z_position}"
         )
-        self.current_position_idx = 0
         self.z_position_moved_time = 0
-        self.need_to_move_new_position = True
         self.need_to_move_z_position = True
         #: bool: Flag to determine whether to pause the data thread.
         self.should_pause_data_thread = False
@@ -947,52 +937,15 @@ class ZStackAcquisition:
 
             # calculate first z, f position
             self.current_z_position = (
-                self.start_z_position + self.positions[self.current_position_idx]["z"]
+                self.start_z_position + self.position["z"]
             )
             self.current_focus_position = (
-                self.start_focus + self.positions[self.current_position_idx]["f"]
+                self.start_focus + self.position["f"]
             )
             if self.defocus is not None:
                 self.current_focus_position += self.defocus[
                     self.current_channel_in_list
                 ]
-
-            # calculate delta_x, delta_y
-            # TODO: Here.
-            pos_dict = dict(
-                map(
-                    lambda ax: (
-                        f"{ax}_abs",
-                        self.positions[self.current_position_idx][ax],
-                    ),
-                    ["x", "y", "theta"],
-                )
-            )
-
-            if self.current_position_idx > 0:
-                delta_x = (
-                    self.positions[self.current_position_idx]["x"]
-                    - self.positions[self.current_position_idx - 1]["x"]
-                )
-                delta_y = (
-                    self.positions[self.current_position_idx]["y"]
-                    - self.positions[self.current_position_idx - 1]["y"]
-                )
-                delta_z = (
-                    self.positions[self.current_position_idx]["z"]
-                    - self.positions[self.current_position_idx - 1]["z"]
-                    + self.z_stack_distance
-                )
-                delta_f = (
-                    self.positions[self.current_position_idx]["f"]
-                    - self.positions[self.current_position_idx - 1]["f"]
-                    + self.f_stack_distance
-                )
-            else:
-                delta_x = 0
-                delta_y = 0
-                delta_z = 0
-                delta_f = 0
 
             # displacement = [delta_z, delta_f, delta_x, delta_y]
             # Check the distance between current position and previous position,
@@ -1002,14 +955,8 @@ class ZStackAcquisition:
 
             self.should_pause_data_thread = any(
                 distance > self.stage_distance_threshold
-                for distance in [delta_x, delta_y, delta_z, delta_f]
+                for distance in [abs(self.start_focus), abs(self.start_z_position)]
             )
-            if self.should_pause_data_thread:
-                self.model.pause_data_thread()
-                data_thread_is_paused = True
-
-            self.model.move_stage(pos_dict, wait_until_done=True)
-            self.model.logger.debug(f"*** ZStack move stage: {pos_dict}")
 
         if self.need_to_move_z_position:
             # move z, f
@@ -1020,7 +967,7 @@ class ZStackAcquisition:
                 f"(f: {self.current_focus_position})"
             )
 
-            if self.should_pause_data_thread and not data_thread_is_paused:
+            if self.should_pause_data_thread:
                 self.model.pause_data_thread()
 
             self.model.move_stage(
@@ -1076,10 +1023,10 @@ class ZStackAcquisition:
             self.z_position_moved_time = 0
             # calculate first z, f position
             self.current_z_position = (
-                self.start_z_position + self.positions[self.current_position_idx]["z"]
+                self.start_z_position + self.position["z"]
             )
             self.current_focus_position = (
-                self.start_focus + self.positions[self.current_position_idx]["f"]
+                self.start_focus + self.position["f"]
             )
             if (
                 self.z_stack_distance > self.stage_distance_threshold
@@ -1095,21 +1042,7 @@ class ZStackAcquisition:
                     self.need_to_move_new_position = True
             else:
                 self.need_to_move_new_position = True
-
-            if self.need_to_move_new_position:
-                # move to next position
-                self.current_position_idx += 1
-
-        if self.current_position_idx >= len(self.positions):
-            self.current_position_idx = 0
-            # restore z
-            self.model.move_stage(
-                {"z_abs": self.restore_z, "f_abs": self.restore_f},
-                wait_until_done=False,
-            )  # Update position
-            return True
-
-        return False
+        return self.need_to_move_new_position
 
     def update_channel(self):
         """Update the active channel during multi-channel acquisition.
@@ -1133,7 +1066,7 @@ class ZStackAcquisition:
         """
 
         self.received_frames = 0
-        self.total_frames = self.channels * self.number_z_steps * len(self.positions)
+        self.total_frames = self.channels * self.number_z_steps
 
     def in_data_func(self, frame_ids):
         """Handle incoming data frames during data acquisition.

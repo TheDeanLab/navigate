@@ -533,6 +533,25 @@ class Model:
                     self, self.addon_feature
                 )
                 self.data_buffer_saving_flags = [False] * self.number_of_frames
+            elif self.imaging_mode == "z-stack" and self.configuration["experiment"]["MicroscopeState"]["is_multiposition"]:
+                self.signal_container, self.data_container = load_features(
+                    self, [
+                    (
+                        ({"name": MoveToNextPositionInMultiPositionTable},
+                            {"name": ZStackAcquisition},
+                            {
+                                "name": LoopByCount,
+                                "args": ("experiment.MicroscopeState.multiposition_count",),
+                            },
+                        ),
+                        {"name": StackPause},
+                        {
+                            "name": LoopByCount,
+                            "args": ("experiment.MicroscopeState.timepoints",),
+                        },
+                    )]
+                )
+                self.data_buffer_saving_flags = [False] * self.number_of_frames
             else:
                 self.signal_container, self.data_container = load_features(
                     self, self.acquisition_modes_feature_setting[self.imaging_mode]

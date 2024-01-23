@@ -316,6 +316,17 @@ class AdaptiveOpticsPopupController(GUIController):
     def run_tony_wilson(self):
         """Run the tony wilson routine"""
         self.update_experiment_values()
+        # set the saving file name before running
+        if self.widgets["save_report"]["variable"].get():
+            save_dir = self.parent_controller.configuration["experiment"]["Saving"][
+            "save_directory"
+            ]
+
+            self.report_path = filedialog.asksaveasfilename(
+                defaultextension=".json",
+                initialdir=save_dir,
+                filetypes=[("JSON", "*.json")],
+            )
         self.parent_controller.execute("tony_wilson")
 
     def save_report_to_file(self, report):
@@ -324,22 +335,12 @@ class AdaptiveOpticsPopupController(GUIController):
         full_report = {}
 
         for i, page in enumerate(report):
-            full_report[f"iter_{i}"] = page
-
-        save_dir = self.parent_controller.configuration["experiment"]["Saving"][
-            "save_directory"
-        ]
-
-        report_path = filedialog.asksaveasfilename(
-            defaultextension=".json",
-            initialdir=save_dir,
-            filetypes=[("JSON", "*.json")],
-        )
+            full_report[f"iter_{i}"] = page       
 
         import pandas as pd
 
         try:
-            pd.DataFrame(full_report).to_json(report_path)
+            pd.DataFrame(full_report).to_json(self.report_path)
         except Exception:
             pass
 

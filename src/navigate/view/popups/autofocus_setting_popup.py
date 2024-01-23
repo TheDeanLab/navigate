@@ -90,7 +90,7 @@ class AutofocusPopup:
             label="Device Type",
             input_class=ttk.Combobox,
             input_var=tk.StringVar(),
-            input_args={"width": 20},
+            input_args={"width": 20, "state": "readonly"},
             label_args={"padding": (0, 0, 10, 0)},
         )
         self.inputs["device"].grid(row=0, column=0, pady=3, padx=5)
@@ -100,7 +100,7 @@ class AutofocusPopup:
             label="Device Reference",
             input_class=ttk.Combobox,
             input_var=tk.StringVar(),
-            input_args={"width": 20},
+            input_args={"width": 20, "state": "readonly"},
             label_args={"padding": (0, 0, 10, 0)},
         )
         self.inputs["device_ref"].grid(row=0, column=1, pady=3, padx=30)

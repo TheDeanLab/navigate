@@ -312,8 +312,15 @@ class ChannelsTabController(GUIController):
         self.channel_setting_controller.set_mode(mode)
 
         state = "normal" if mode == "stop" else "disabled"
-        for key, widget in self.stack_acq_widgets.items():
-            widget.widget["state"] = state
+        for widget_name in [
+            "start_position",
+            "start_focus",
+            "end_position",
+            "end_focus",
+            "step_size",
+            "cycling",
+        ]:
+            self.stack_acq_widgets[widget_name].widget["state"] = state
         self.view.stack_timepoint_frame.save_check["state"] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox["state"] = state
         self.view.stack_timepoint_frame.exp_time_spinbox["state"] = state

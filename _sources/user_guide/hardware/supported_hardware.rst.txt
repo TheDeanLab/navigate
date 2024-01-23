@@ -105,7 +105,7 @@ turn lasers on simultaneously, we could distribute the lasers across independent
 
 .. collapse:: Device Pinout
 
-    .. image:: images/6738_pinout.gif
+    .. image:: images/6738_pinout.png
 
 |
 
@@ -120,7 +120,7 @@ located on ``connector 0``.
 
 .. collapse:: Device Pinout
 
-    .. image:: images/6259_pinout.gif
+    .. image:: images/6259_pinout.png
 
 |
 
@@ -132,7 +132,7 @@ outputs can be wired up as is most convenient.
 
 .. collapse:: Device Pinout
 
-    .. image:: images/6723_pinout.gif
+    .. image:: images/6723_pinout.png
 
 Synthetic Data Acquisition Card
 -------------------------------

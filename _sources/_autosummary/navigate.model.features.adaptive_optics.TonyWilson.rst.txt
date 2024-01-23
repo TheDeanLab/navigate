@@ -17,6 +17,7 @@ navigate.model.features.adaptive\_optics.TonyWilson
    .. autosummary::
    
       ~TonyWilson.__init__
+      ~TonyWilson.build_report
       ~TonyWilson.end_func_data
       ~TonyWilson.end_func_signal
       ~TonyWilson.get_steps
@@ -42,8 +43,10 @@ navigate.model.features.adaptive\_optics.TonyWilson
       ~TonyWilson.coef_amp
       ~TonyWilson.done_all
       ~TonyWilson.done_itr
+      ~TonyWilson.report
       ~TonyWilson.model
       ~TonyWilson.mirror_controller
+      ~TonyWilson.save_report
       ~TonyWilson.change_coef
       ~TonyWilson.mode_names
    

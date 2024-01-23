@@ -38,6 +38,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
+from navigate.view.custom_widgets.hover import Hover
 from navigate.view.custom_widgets.hovermixin import HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -316,6 +317,8 @@ class ChannelCreator(ttk.Labelframe):
             self.interval_spins[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            hover = Hover(self.interval_spins[num], text="Not Implemented", type="free")
+            hover.setdescription(text="Not Implemented")
 
             # Defocus Spinbox
             self.defocus_variables.append(tk.DoubleVar())

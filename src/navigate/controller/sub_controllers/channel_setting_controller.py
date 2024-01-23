@@ -113,7 +113,7 @@ class ChannelSettingController(GUIController):
         for i in range(self.num):
             # State set regardless of operating mode.
             self.view.channel_checks[i].config(state=state)
-            self.view.interval_spins[i].config(state=state)
+            self.view.interval_spins[i].config(state="disabled")
             self.view.laser_pulldowns[i]["state"] = state_readonly
 
             if self.mode != "live" or (

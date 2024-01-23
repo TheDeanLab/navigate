@@ -35,10 +35,10 @@ import pytest
 class TestChannelSettingController:
     @pytest.fixture(autouse=True)
     def setup_class(self, dummy_controller):
-        from aslm.controller.sub_controllers.channels_tab_controller import (
+        from navigate.controller.sub_controllers.channels_tab_controller import (
             ChannelsTabController,
         )
-        from aslm.controller.sub_controllers.channel_setting_controller import (
+        from navigate.controller.sub_controllers.channel_setting_controller import (
             ChannelSettingController,
         )
 
@@ -84,7 +84,7 @@ class TestChannelSettingController:
                 )
                 assert (
                     str(self.channel_setting.view.filterwheel_pulldowns[i]["state"])
-                    == state
+                    == state_readonly
                 )
                 assert str(self.channel_setting.view.defocus_spins[i]["state"]) == state
 

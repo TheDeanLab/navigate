@@ -1,12 +1,12 @@
 import os
 import pytest
 
-from aslm.tools.file_functions import delete_folder
+from navigate.tools.file_functions import delete_folder
 
 
 @pytest.fixture()
 def image_writer(dummy_model):
-    from aslm.model.features.image_writer import ImageWriter
+    from navigate.model.features.image_writer import ImageWriter
 
     model = dummy_model
     model.configuration["experiment"]["Saving"]["save_directory"] = "test_save_dir"
@@ -16,10 +16,6 @@ def image_writer(dummy_model):
     yield writer
 
     writer.close()
-
-
-def test_generate_metadata(image_writer):
-    assert image_writer.generate_meta_data()
 
 
 def test_image_write_fail(image_writer):

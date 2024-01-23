@@ -38,7 +38,7 @@ import json
 # Third party imports
 
 # Local application imports
-from aslm.tools.file_functions import create_save_path, save_yaml_file, delete_folder, load_yaml_file
+from navigate.tools.file_functions import create_save_path, save_yaml_file, delete_folder, load_yaml_file
 
 
 class CreateSavePathTestCase(unittest.TestCase):

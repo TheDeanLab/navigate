@@ -33,13 +33,14 @@
 # Standard Library Imports
 import pytest
 import random
+from unittest.mock import patch, MagicMock
 
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.stages.stage_galvo import GalvoNIStage
-from aslm.model.dummy import DummyModel
-from aslm.tools.common_functions import copy_proxy_object
+from navigate.model.devices.stages.stage_galvo import GalvoNIStage
+from test.model.dummy import DummyModel
+from navigate.tools.common_functions import copy_proxy_object
 
 
 class TestStageGalvo:
@@ -62,7 +63,8 @@ class TestStageGalvo:
         self.random_single_axis_test = random_single_axis_test
         self.random_multiple_axes_test = random_multiple_axes_test
 
-    def test_stage_attributes(self):
+    @patch('nidaqmx.Task')
+    def test_stage_attributes(self, *args):
         stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
 
         # Methods
@@ -93,19 +95,20 @@ class TestStageGalvo:
     )
     def test_initialize_stage(self, axes):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
-        stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
+        with patch("nidaqmx.Task"):
+            stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
 
-        # Attributes
-        for axis in axes:
-            assert hasattr(stage, f"{axis}_pos")
-            assert hasattr(stage, f"{axis}_min")
-            assert hasattr(stage, f"{axis}_max")
-            assert getattr(stage, f"{axis}_pos") == 0
-            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
-            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
+            # Attributes
+            for axis in axes:
+                assert hasattr(stage, f"{axis}_pos")
+                assert hasattr(stage, f"{axis}_min")
+                assert hasattr(stage, f"{axis}_max")
+                assert getattr(stage, f"{axis}_pos") == 0
+                assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
+                assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
 
-        for i, axis in enumerate(axes):
-            assert stage.axes_mapping[axis] == self.stage_configuration["stage"]["hardware"]["axes_mapping"][i]
+            for i, axis in enumerate(axes):
+                assert stage.axes_mapping[axis] == self.stage_configuration["stage"]["hardware"]["axes_mapping"][i]
 
     @pytest.mark.parametrize(
         "axes",
@@ -117,16 +120,17 @@ class TestStageGalvo:
     )
     def test_report_position(self, axes):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
-        stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
+        with patch("nidaqmx.Task"):
+            stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
 
-        for _ in range(10):
-            pos_dict = {}
-            for axis in axes:
-                pos = random.randrange(-100, 500)
-                pos_dict[f"{axis}_pos"] = float(pos)
-                setattr(stage, f"{axis}_pos", float(pos))
-            temp_pos = stage.report_position()
-            assert pos_dict == temp_pos
+            for _ in range(10):
+                pos_dict = {}
+                for axis in axes:
+                    pos = random.randrange(-100, 500)
+                    pos_dict[f"{axis}_pos"] = float(pos)
+                    setattr(stage, f"{axis}_pos", float(pos))
+                temp_pos = stage.report_position()
+                assert pos_dict == temp_pos
 
     @pytest.mark.parametrize(
         "axes",
@@ -138,11 +142,12 @@ class TestStageGalvo:
     )
     def test_move_axis_absolute(self, axes):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
-        stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
+        with patch("nidaqmx.Task"):
+            stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
 
-        self.random_single_axis_test(stage)
-        stage.stage_limits = False
-        self.random_single_axis_test(stage)
+            self.random_single_axis_test(stage)
+            stage.stage_limits = False
+            self.random_single_axis_test(stage)
 
     @pytest.mark.parametrize(
         "axes",
@@ -154,8 +159,9 @@ class TestStageGalvo:
     )
     def test_move_absolute(self, axes):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
-        stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
+        with patch("nidaqmx.Task"):
+            stage = GalvoNIStage(self.microscope_name, self.daq, self.configuration)
 
-        self.random_multiple_axes_test(stage)
-        stage.stage_limits = False
-        self.random_multiple_axes_test(stage)
+            self.random_multiple_axes_test(stage)
+            stage.stage_limits = False
+            self.random_multiple_axes_test(stage)

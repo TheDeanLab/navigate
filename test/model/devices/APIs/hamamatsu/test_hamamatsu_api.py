@@ -36,7 +36,7 @@ import pytest
 @pytest.mark.hardware
 @pytest.fixture(autouse=True, scope="class")
 def open_camera():
-    from aslm.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
+    from navigate.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
 
     # open camera
     for i in range(10):
@@ -117,7 +117,7 @@ class TestHamamatsuAPI:
     def test_acquisition(self):
         import random
         import time
-        from aslm.model.concurrency.concurrency_tools import SharedNDArray
+        from navigate.model.concurrency.concurrency_tools import SharedNDArray
 
         configuration = {
             "sensor_mode": 12,  # 12 for progressive

@@ -1,17 +1,16 @@
 [build-system]
-requires = ["setuptools>=43.0.0", "wheel"]
+requires = ["setuptools>=43.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ASLM"
-description = "Autonomous Softtware for Light Microscopy."
+name = "navigate-micro"
+description = "Open source, smart, light-sheet microscopy control software."
 authors = [{name = "The Dean Lab, UT Southwestern Medical Center"}]
 readme = "README.md"
 license = {file = "LICENSE.md"}
 dynamic = ["version"]
 classifiers = [
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: TBD",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: Microsoft :: Windows",
@@ -44,7 +43,7 @@ dependencies = [
     ]
 
 [project.scripts]
-aslm = "aslm.main:main"
+navigate = "navigate.main:main"
 
 [project.optional-dependencies]
 dev = [
@@ -54,8 +53,6 @@ dev = [
     "pre-commit",
     "ipykernel",
     "jupyterlab",
-    "ruff-pre-commit@git+https://github.com/astral-sh/ruff-pre-commit.git",
-    "black@git+https://github.com/psf/black"
     ]
 
 docs = [
@@ -68,6 +65,7 @@ docs = [
     "sphinx-design",
     "pyyaml",
     "pydata_sphinx_theme==0.10.0rc2",
+    "sphinx-toolbox"
 ]
 
 robot = [
@@ -75,4 +73,7 @@ robot = [
 ]
 
 [project.urls]
-Source = "https://github.com/TheDeanLab/ASLM"
+Source = "https://github.com/TheDeanLab/navigate"
+
+[tool.setuptools.dynamic]
+version = {file = "src/navigate/VERSION"}

@@ -45,7 +45,7 @@ class TestAPIConfiguration(unittest.TestCase):
         current_path = os.path.abspath(os.path.dirname(__file__))
         root_path = os.path.dirname(os.path.dirname(current_path))
         yaml_path = os.path.join(
-            root_path, "src", "aslm", "config", "rest_api_config.yml"
+            root_path, "src", "navigate", "config", "rest_api_config.yml"
         )
 
         with open(yaml_path) as file:

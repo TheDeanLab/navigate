@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from aslm.tools.linear_algebra import affine_rotation, affine_shear
+from navigate.tools.linear_algebra import affine_rotation, affine_shear
 
 
 class TestAffineRotation(unittest.TestCase):

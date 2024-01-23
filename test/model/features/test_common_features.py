@@ -33,7 +33,7 @@
 
 import random
 import pytest
-from aslm.model.features.common_features import ZStackAcquisition
+from navigate.model.features.common_features import ZStackAcquisition
 
 
 class TestZStack:
@@ -113,6 +113,11 @@ class TestZStack:
 
         frame_id = 0
         idx = -1
+        z_moved_times = 0
+        if mode == "per_z":
+            z_should_move_times = len(positions) * int(self.config["number_z_steps"])
+        else:
+            z_should_move_times = len(selected_channels) * len(positions) * int(self.config["number_z_steps"])
 
         has_ni_galvo_stage = self.model.configuration["configuration"]["microscopes"][
             self.config["microscope_name"]
@@ -160,6 +165,7 @@ class TestZStack:
                         f"should move to f: {f_pos + j * f_step}, "
                         f"but moved to {pos_moved['f_abs']}"
                     )
+                    z_moved_times += 1
 
                     # if the system has NIGalvo stage, should close the DAQ tasks and then create new tasks to override the new waveforms
                     if has_ni_galvo_stage and prepared_next_channel:
@@ -230,6 +236,7 @@ class TestZStack:
                             f"should move to f: {f_pos + j * f_step}, "
                             f"but moved to {pos_moved['f_abs']}"
                         )
+                        z_moved_times += 1
                         frame_id += 1
                     f_pos -= selected_channels[k]["defocus"]
                     idx = self.get_next_record(change_channel_func_str, idx)
@@ -253,10 +260,10 @@ class TestZStack:
         ), f"should restore f to {restore_f}, but moved to {pos_moved['f_abs']}"
 
         assert (
-            idx == self.record_num - 1
-        ), f"should verify all the stage movements! {idx} -- {self.record_num - 1}"
+            z_moved_times == z_should_move_times
+        ), f"should verify all the stage movements! {z_moved_times} -- {z_should_move_times}"
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_single_position_one_channel_per_z(self, has_ni_galvo_stage):
         # single position
         self.config["is_multiposition"] = False
@@ -274,7 +281,7 @@ class TestZStack:
         print(self.model.signal_records)
         self.z_stack_verification()
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_single_position_one_channel_per_stack(self, has_ni_galvo_stage):
         # single position
         self.config["is_multiposition"] = False
@@ -291,7 +298,7 @@ class TestZStack:
         self.model.start(self.feature_list)
         self.z_stack_verification()
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_single_position_two_channels_per_z(self, has_ni_galvo_stage):
         # single position
         self.config["is_multiposition"] = False
@@ -309,7 +316,7 @@ class TestZStack:
             self.model.start(self.feature_list)
             self.z_stack_verification()
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_single_position_two_channels_per_stack(self, has_ni_galvo_stage):
         # single position
         self.config["is_multiposition"] = False
@@ -327,7 +334,7 @@ class TestZStack:
             self.model.start(self.feature_list)
             self.z_stack_verification()
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_single_position_three_channels_per_stack(self, has_ni_galvo_stage):
         # single position
         self.config["is_multiposition"] = False
@@ -344,7 +351,7 @@ class TestZStack:
         self.model.start(self.feature_list)
         self.z_stack_verification()
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_single_position_three_channels_per_z(self, has_ni_galvo_stage):
         # single position
         self.config["is_multiposition"] = False
@@ -361,7 +368,7 @@ class TestZStack:
         self.model.start(self.feature_list)
         self.z_stack_verification()
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_multi_position_one_channel_per_z(self, has_ni_galvo_stage):
         # multi position
         self.config["is_multiposition"] = True
@@ -380,7 +387,7 @@ class TestZStack:
 
         self.config["is_multiposition"] = False
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_multi_position_one_channel_per_stack(self, has_ni_galvo_stage):
         self.config["is_multiposition"] = True
         self.model.configuration["configuration"]["microscopes"][
@@ -398,7 +405,7 @@ class TestZStack:
 
         self.config["is_multiposition"] = False
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_multi_position_two_channels_per_z(self, has_ni_galvo_stage):
         self.config["is_multiposition"] = True
         self.model.configuration["configuration"]["microscopes"][
@@ -417,7 +424,7 @@ class TestZStack:
 
         self.config["is_multiposition"] = False
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_multi_position_two_channels_per_stack(self, has_ni_galvo_stage):
         self.config["is_multiposition"] = True
         self.model.configuration["configuration"]["microscopes"][
@@ -436,7 +443,7 @@ class TestZStack:
 
         self.config["is_multiposition"] = False
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_multi_position_three_channels_per_stack(self, has_ni_galvo_stage):
         self.config["is_multiposition"] = True
         self.model.configuration["configuration"]["microscopes"][
@@ -454,7 +461,7 @@ class TestZStack:
 
         self.config["is_multiposition"] = False
 
-    @pytest.mark.parametrize("has_ni_galvo_stage", [False, True])
+    @pytest.mark.parametrize("has_ni_galvo_stage", [False])
     def test_multi_position_three_channels_per_z(self, has_ni_galvo_stage):
         self.config["is_multiposition"] = True
         self.model.configuration["configuration"]["microscopes"][

@@ -38,7 +38,7 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
-from aslm.view.splash_screen import SplashScreen
+from navigate.view.splash_screen import SplashScreen
 
 
 class TestSplashScreen(unittest.TestCase):
@@ -54,10 +54,10 @@ class TestSplashScreen(unittest.TestCase):
         # Create a SplashScreen instance with an image
         main_directory = Path(__file__).resolve().parent.parent.parent
         image_directory = Path.joinpath(
-            main_directory, "src", "aslm", "view", "icon", "splash_screen_image.png"
+            main_directory, "src", "navigate", "view", "icon", "splash_screen_image.png"
         )
 
-        splash_screen = SplashScreen(self.root, imgDir=image_directory)
+        splash_screen = SplashScreen(self.root, image_path=image_directory)
         # Replace 'your_image.png' with a valid image path
 
         # Check if the SplashScreen is an instance of tk.Toplevel

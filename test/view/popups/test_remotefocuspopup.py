@@ -37,11 +37,11 @@ import time
 # Third Party Imports
 
 # Local Imports
-from aslm.view.popups.waveform_parameter_popup_window import (
+from navigate.view.popups.waveform_parameter_popup_window import (
     WaveformParameterPopupWindow,
 )
-from aslm.model.dummy import DummyModel
-from aslm.controller.configuration_controller import ConfigurationController
+from test.model.dummy import DummyModel
+from navigate.controller.configuration_controller import ConfigurationController
 
 
 def test_waveform_parameter_popup():

@@ -36,7 +36,7 @@ from tkinter import ttk
 import pytest
 
 # Local Imports
-from aslm.view.popups.feature_list_popup import (
+from navigate.view.popups.feature_list_popup import (
     FeatureIcon,
     FeatureConfigPopup,
     FeatureListPopup,

@@ -69,7 +69,7 @@ def test_fast_normalized_dct_shannon_entropy_tent():
     from scipy.ndimage import gaussian_filter
     from scipy.optimize import least_squares
 
-    from aslm.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
+    from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
 
     im = box(0.5)
 
@@ -86,7 +86,7 @@ def test_fast_normalized_dct_shannon_entropy_tent():
 
 
 def test_fast_normalized_dct_shannon_entropy():
-    from aslm.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
+    from navigate.model.analysis.image_contrast import fast_normalized_dct_shannon_entropy
 
     # image_array = np.ones((np.random.randint(1,4),128,128)).squeeze()
     image_array = np.ones((128, 128)).squeeze()
@@ -107,12 +107,12 @@ def test_entropy():
 
 
 try:
-    # from aslm.model.aslm_analysis import Analysis as aslm_analysis
-    from aslm.model.aslm_debug_model import calculate_entropy
+    # from navigate.model.navigate_analysis import Analysis as navigate_analysis
+    from navigate.model.navigate_debug_model import calculate_entropy
 
-    class TestASLMAnalysis(unittest.TestCase):
+    class TestNavigateAnalysis(unittest.TestCase):
         """
-        Unit Tests for the ASLM Analysis Module
+        Unit Tests for the Navigate Analysis Module
         """
 
         @pytest.mark.skip(reason="file path not found")
@@ -123,9 +123,9 @@ try:
             dct_array = np.ones((128, 128))
             otf_support_x = 3
             otf_support_y = 3
-            # This trys to call from the aslm_analysis module however its only
-            # located in the aslm_debug_model
-            # entropy = aslm_analysis.calculate_entropy()
+            # This trys to call from the navigate_analysis module however its only
+            # located in the navigate_debug_model
+            # entropy = navigate_analysis.calculate_entropy()
             entropy = calculate_entropy(
                 self,
                 dct_array=dct_array,

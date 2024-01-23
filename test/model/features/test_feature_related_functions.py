@@ -33,7 +33,7 @@
 import pytest
 
 #local imports
-from aslm.model.features.feature_related_functions import *
+from navigate.model.features.feature_related_functions import *
 
 @pytest.mark.parametrize(
     "feature_list_str, expected_list",
@@ -60,8 +60,8 @@ def test_convert_str_to_feature_list(feature_list_str, expected_list):
      ([], "[]"),
      ([{"name": PrepareNextChannel}], '[{"name": PrepareNextChannel,},]'),
      ([({"name": PrepareNextChannel}, {"name": LoopByCount})], '[({"name": PrepareNextChannel,},{"name": LoopByCount,},),]'),
-     ([({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})], '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,)},),]'),
-     ([{"name": ZStackAcquisition, "args": (True, False, "zstack",)}], '[{"name": ZStackAcquisition,"args": (True,False,"zstack",)},]')
+     ([({"name": PrepareNextChannel}, {"name": LoopByCount, "args": (3,)})], '[({"name": PrepareNextChannel,},{"name": LoopByCount,"args": (3,),},),]'),
+     ([{"name": ZStackAcquisition, "args": (True, False, "zstack",)}], '[{"name": ZStackAcquisition,"args": (True,False,"zstack",),},]')
     ]
 )
 def test_convert_feature_list_to_str(feature_list, expected_str):

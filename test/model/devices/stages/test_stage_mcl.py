@@ -37,7 +37,7 @@ import random
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.stages.stage_mcl import MCLStage
+from navigate.model.devices.stages.stage_mcl import MCLStage
 
 class MockMCLController:
     def __init__(self):

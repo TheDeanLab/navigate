@@ -48,7 +48,7 @@ def dummy_model():
     DummyModel
         Dummy model for testing.
     """
-    from aslm.model.dummy import DummyModel
+    from test.model.dummy import DummyModel
 
     model = DummyModel()
     return model
@@ -71,7 +71,7 @@ def dummy_view(tk_root):
     Returns:
         tkinter.Tk: Dummy view
     """
-    from aslm.view.main_application_window import MainApp
+    from navigate.view.main_application_window import MainApp
 
     view = MainApp(tk_root)
     tk_root.update()
@@ -89,7 +89,7 @@ def dummy_controller(dummy_view):
     DummyController
         Dummy controller for testing.
     """
-    from aslm.model.dummy import DummyController
+    from test.model.dummy import DummyController
 
     controller = DummyController(dummy_view)
     return controller
@@ -106,7 +106,7 @@ def dummy_controller(dummy_view):
 
 # @pytest.fixture(scope="package")
 # def splash_screen(root):
-#     from aslm.view.splash_screen import SplashScreen
+#     from navigate.view.splash_screen import SplashScreen
 
 #     splash_screen = SplashScreen(root, "./icon/splash_screen_image.png")
 
@@ -118,11 +118,11 @@ def dummy_controller(dummy_view):
 #     from types import SimpleNamespace
 #     from pathlib import Path
 
-#     from aslm.controller.controller import Controller
+#     from navigate.controller.controller import Controller
 
 #     # Use configuration files that ship with the code base
 #     configuration_directory = Path.joinpath(
-#         Path(__file__).resolve().parent.parent, "src", "aslm", "config"
+#         Path(__file__).resolve().parent.parent, "src", "navigate", "config"
 #     )
 #     configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
 #     experiment_path = Path.joinpath(configuration_directory, "experiment.yml")

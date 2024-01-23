@@ -38,7 +38,7 @@ import pytest
 import random
 
 # Local Imports
-from aslm.controller.sub_controllers.camera_setting_controller import (
+from navigate.controller.sub_controllers.camera_setting_controller import (
     CameraSettingController,
 )
 
@@ -93,6 +93,8 @@ class TestCameraSettingController:
         assert list(self.camera_settings.mode_widgets["Readout"].widget["values"]) == [
             "Top-to-Bottom",
             "Bottom-to-Top",
+            "Bidirectional",
+            "Rev. Bidirectional"
         ]
         assert (
             str(self.camera_settings.mode_widgets["Readout"].widget["state"])
@@ -547,7 +549,7 @@ class TestCameraSettingController:
         pass
 
     @pytest.mark.parametrize(
-        "mode", ["single", "live", "customized", "projection", "z-stack", "stop"]
+        "mode", ["single", "live", "customized", "z-stack", "stop"]
     )
     def test_update_number_of_pixels(self, mode):
         import random

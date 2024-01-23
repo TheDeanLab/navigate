@@ -37,7 +37,7 @@ import time
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
+from navigate.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
 
 
 class TestSutterFilterWheel(unittest.TestCase):

@@ -38,7 +38,7 @@ import random
 from pipython import GCSError
 
 # Local Imports
-from aslm.model.devices.stages.stage_pi import PIStage
+from navigate.model.devices.stages.stage_pi import PIStage
 
 class MockPIStage:
     def __init__(self):

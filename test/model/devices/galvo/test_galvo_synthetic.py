@@ -31,8 +31,8 @@
 
 import unittest
 from unittest.mock import MagicMock
-from aslm.model.devices.galvo.galvo_synthetic import SyntheticGalvo
-from aslm.config import load_configs, get_configuration_paths
+from navigate.model.devices.galvo.galvo_synthetic import SyntheticGalvo
+from navigate.config import load_configs, get_configuration_paths
 from multiprocessing import Manager
 
 
@@ -75,20 +75,3 @@ class TestGalvoSynthetic(unittest.TestCase):
     def test_dunder_del(self):
         """Test the __del__ method"""
         self.galvo.__del__()
-
-    def test_prepare_task(self):
-        """Test the prepare_task method"""
-        channel_key = "galvo_0"
-        self.galvo.prepare_task(channel_key=channel_key)
-
-    def test_start_task(self):
-        """Test the start_task method"""
-        self.galvo.start_task()
-
-    def test_stop_task(self):
-        """Test the stop_task method"""
-        self.galvo.stop_task()
-
-    def test_close_task(self):
-        """Test the close_task method"""
-        self.galvo.close_task()

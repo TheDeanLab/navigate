@@ -36,8 +36,8 @@ import unittest
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
-from aslm.model.dummy import DummyModel
+from navigate.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
+from test.model.dummy import DummyModel
 
 
 class TestSyntheticShutter(unittest.TestCase):

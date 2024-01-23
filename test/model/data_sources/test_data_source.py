@@ -2,7 +2,7 @@ import numpy as np
 
 
 def test_data_source_mode():
-    from aslm.model.data_sources.data_source import DataSource
+    from navigate.model.data_sources.data_source import DataSource
 
     ds = DataSource()
 
@@ -20,7 +20,7 @@ def test_data_source_mode():
 
 def test_data_source_cztp_indices():
     import itertools
-    from aslm.model.data_sources.data_source import DataSource
+    from navigate.model.data_sources.data_source import DataSource
 
     MAX = 25
 

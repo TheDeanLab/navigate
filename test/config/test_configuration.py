@@ -45,7 +45,7 @@ class TestConfiguration(unittest.TestCase):
         current_path = os.path.abspath(os.path.dirname(__file__))
         root_path = os.path.dirname(os.path.dirname(current_path))
         yaml_path = os.path.join(
-            root_path, "src", "aslm", "config", "configuration.yaml"
+            root_path, "src", "navigate", "config", "configuration.yaml"
         )
 
         with open(yaml_path) as file:

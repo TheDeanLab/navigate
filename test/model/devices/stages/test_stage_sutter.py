@@ -37,8 +37,8 @@ import random
 # Third Party Imports
 
 # Local Imports
-from aslm.model.devices.stages.stage_sutter import SutterStage
-from aslm.model.devices.APIs.sutter.MP285 import MP285
+from navigate.model.devices.stages.stage_sutter import SutterStage
+from navigate.model.devices.APIs.sutter.MP285 import MP285
 
 class MockMP285Stage:
     def __init__(self, ignore_obj):

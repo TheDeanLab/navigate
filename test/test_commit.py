@@ -36,7 +36,7 @@ import unittest
 # Third Party Imports
 
 # Local Imports
-from aslm._commit import get_git_revision_hash
+from navigate._commit import get_git_revision_hash
 
 
 class TestGetGitRevisionHash(unittest.TestCase):

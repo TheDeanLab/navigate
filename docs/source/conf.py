@@ -108,3 +108,20 @@ html_show_sphinx = False
 html_logo = "../../src/navigate/view/icon/mic.png"
 
 pygments_style = "sphinx"
+
+# -- LaTeX output options ----------------------------------------------------
+
+latex_elements = {'preamble': r'''
+                  \usepackage[utf8]{inputenc}
+                  \usepackage{enumitem}
+                  \setlistdepth{99}
+                  \DeclareUnicodeCharacter{03BC}{$\mu$}
+                  ''',
+                  'extraclassoptions': 'openany,oneside'}
+
+latex_documents = [
+  ('index', 'navigate.tex', 'navigate Documentation',
+   'Dean Lab, UT Southwestern Medical Center', 'manual', True),
+]
+
+latex_domain_indices = False

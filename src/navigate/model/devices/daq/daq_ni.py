@@ -232,7 +232,9 @@ class NIDAQ(DAQBase):
             initial_delay=camera_delay,
         )
 
-        # apply waveform templates
+        # apply waveform templates.
+        # waveform_repeat_num = ...
+        # waveform_expand_num
         camera_waveform_repeat_num = self.waveform_repeat_num * self.waveform_expand_num
         self.camera_trigger_task.timing.cfg_implicit_timing(
             sample_mode=nidaqmx.constants.AcquisitionType.FINITE,

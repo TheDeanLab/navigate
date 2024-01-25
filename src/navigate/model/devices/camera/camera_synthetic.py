@@ -225,7 +225,10 @@ class SyntheticCamera(CameraBase):
             for image_file in filenames:
                 try:
                     tif = TiffFile(image_file)
-                    self.tif_images.append(tif.asarray())
+                    if len(tif.pages) == 1:
+                        self.tif_images.append([tif.asarray()])
+                    else: 
+                        self.tif_images.append(tif.asarray())
                     idx += len(tif.pages)
                     if idx >= self.num_of_frame:
                         return

@@ -417,8 +417,8 @@ class Controller:
 
         Returns
         -------
-        bool
-            True if all settings are valid, False otherwise.
+        string
+            Warning info if any
 
         """
         # acquire_bar_controller - update image mode
@@ -439,11 +439,13 @@ class Controller:
         ] = len(positions)
 
         # TODO: validate experiment dict
+
+        channel_warning = self.channels_tab_controller.verify_experiment_values()
+        if channel_warning:
+            return channel_warning
         if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
-            return False
-        if self.configuration["experiment"]["MicroscopeState"]["number_z_steps"] < 1:
-            return False
-        return True
+            return "Scan range shouldn't be 0!"
+        return ""
 
     def resize(self, event):
         """Resize the GUI.
@@ -481,11 +483,11 @@ class Controller:
         bool
             True if all settings are valid, False otherwise.
         """
-        if not self.update_experiment_setting():
+        warning_info = self.update_experiment_setting()
+        if warning_info:
             messagebox.showerror(
                 title="Warning",
-                message="There are some missing/wrong settings! "
-                "Cannot start acquisition!",
+                message=f"Cannot start acquisition!\n{warning_info}",
             )
             return False
 

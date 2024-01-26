@@ -312,15 +312,16 @@ class ChannelsTabController(GUIController):
         self.channel_setting_controller.set_mode(mode)
 
         state = "normal" if mode == "stop" else "disabled"
+        state_readonly = "readonly" if mode == "stop" else "disabled"
         for widget_name in [
             "start_position",
             "start_focus",
             "end_position",
             "end_focus",
             "step_size",
-            "cycling",
         ]:
             self.stack_acq_widgets[widget_name].widget["state"] = state
+        self.stack_acq_widgets["cycling"].widget["state"] = state_readonly
         self.view.stack_timepoint_frame.save_check["state"] = state
         self.view.stack_timepoint_frame.stack_pause_spinbox["state"] = state
         self.view.stack_timepoint_frame.exp_time_spinbox["state"] = state
@@ -816,3 +817,23 @@ class ChannelsTabController(GUIController):
             )
 
         self.show_verbose_info("Received command from child", command, args)
+
+
+    def verify_experiment_values(self):
+        """Verify channel tab settings and return warning info
+        
+        Returns
+        -------
+        string
+            Warning info
+        """
+        warning = self.channel_setting_controller.verify_experiment_values()
+        if warning:
+            return warning
+        if self.microscope_state_dict["number_z_steps"] < 1:
+            return "The number of Z steps should be at least 1!"
+        try:
+            float(self.microscope_state_dict["stack_pause"])
+        except:
+            return "Stack pause should be a valid number!"
+        return None

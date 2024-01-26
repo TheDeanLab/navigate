@@ -293,6 +293,9 @@ class ChannelSettingController(GUIController):
                 except Exception:
                     setting_dict[widget_name] = 0
                     return False
+                setting_range = self.parent_controller.configuration["configuration"]["gui"]["channels"][widget_name]
+                if setting_dict[widget_name] < setting_range["min"] or setting_dict[widget_name] > setting_range["max"]:
+                    return False
             else:
                 setting_dict[widget_name] = channel_vals[widget_name].get()
 
@@ -320,7 +323,8 @@ class ChannelSettingController(GUIController):
                 if channel_vals[widget_name].get() is None:
                     return
             except tk._tkinter.TclError as e:
-                logger.error(f"Tcl Error caught: trying to set position and {e}")
+                channel_vals[widget_name].set(0)
+                # logger.error(f"Tcl Error caught: trying to set position and {e}")
                 return
 
             channel_key = prefix + str(channel_id + 1)
@@ -413,3 +417,32 @@ class ChannelSettingController(GUIController):
         elif dropdown_name == "filter":
             return self.view.filterwheel_pulldowns[0]["values"].index(value)
         return -1
+
+    def verify_experiment_values(self):
+        """Verify channel settings and return warning info
+        
+        Returns
+        -------
+        string
+            Warning info
+        """
+        selected_channel_num = 0
+        setting_range = self.configuration_controller.gui_setting["channels"]
+        for channel_key in self.channel_setting_dict.keys():
+            setting_dict = self.channel_setting_dict[channel_key]
+            if setting_dict["is_selected"]:
+                selected_channel_num += 1
+                # laser power
+                if setting_dict["laser_power"] < setting_range["laser_power"]["min"]:
+                    return "One selected channel has lower laser power!"
+                elif setting_dict["laser_power"] > setting_range["laser_power"]["max"]:
+                    return "One selected channel has larger laser power!"
+                # exposure time
+                if setting_dict["camera_exposure_time"] < setting_range["exposure_time"]["min"]:
+                    return "One selected channel has lower exposure time!"
+                elif setting_dict["camera_exposure_time"] > setting_range["exposure_time"]["max"]:
+                    return "One selected channel has larger exposure time!"
+                
+        if selected_channel_num == 0:
+            return "No selected channel!"
+        return None

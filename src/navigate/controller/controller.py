@@ -776,14 +776,12 @@ class Controller:
                         self.set_mode_of_sub("stop")
                         return
 
-            # if select 'ilastik segmentation',
-            # 'show segmentation',
-            # and in 'single acquisition'
-            self.camera_view_controller.display_mask_flag = (
-                self.acquire_bar_controller.mode == "single"
-                and self.menu_controller.feature_id_val.get() == 4
-                and self.ilastik_controller.show_segmentation_flag
-            )
+                    # if select 'ilastik segmentation' and 'show segmentation',
+                    # TODO: update id if the feature id is changed
+                    self.camera_view_controller.display_mask_flag = (
+                        self.menu_controller.feature_id_val.get() == 4
+                        and self.ilastik_controller.show_segmentation_flag
+                    )
 
             self.stop_acquisition_flag = False
             self.launch_additional_microscopes()

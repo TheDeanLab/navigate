@@ -395,15 +395,13 @@ class AcquireBarController(GUIController):
         stack_widgets = self.parent_view.stack_acq_frame.get_widgets()
 
         # Grey out stack acq widgets when not Zstack or projection
-        if mode in [
-            "z-stack",
-            "ConstantVelocityAcquisition",
-        ]:
-            state = "normal"
-        else:
+        if mode == "live" or mode == "single":
             state = "disabled"
+        else:
+            state = "normal"
         for key, widget in stack_widgets.items():
-            widget.widget["state"] = state
+            if key not in ["number_z_steps", "abs_z_start", "abs_z_end"]:
+                widget.widget["state"] = state
 
     def update_stack_time(self, mode):
         """Changes state behavior of widgets in the stack timepoint frame based on mode

@@ -153,6 +153,7 @@ class ValidatedMixin:
         )
         #: Hover: The hover bubble for the widget
         self.hover = Hover(self, text=None, type="free")
+        self.hover_flag = kwargs.get("hover_flag", False)
 
     def _toggle_error(self, on=False):
         """Toggle the error message
@@ -677,7 +678,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
 
         """
         super()._toggle_error(on)
-        if on:
+        if on and self.hover_flag:
             self.hover.seterror(self.error.get())
         else:
             self.hover.hidetip()
@@ -892,6 +893,9 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         min_val = self.cget("from")
         max_val = self.cget("to")
 
+        if char not in ("-1234567890."):
+            return False
+
         if (
             min_val == "-Infinity"
             or min_val == float("-inf")
@@ -928,6 +932,9 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         proposed_precision = proposed.as_tuple().exponent
         if any([(proposed > max_val), (proposed_precision < self.precision)]):
             return False
+        
+        if proposed < min_val:
+            self._toggle_error(True)
 
         return valid
 
@@ -1069,7 +1076,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         >>> spinbox._toggle_error()
         """
         super()._toggle_error(on)
-        if on:
+        if on and self.hover_flag:
             self.hover.seterror(self.error.get())
         else:
             self.hover.hidetip()

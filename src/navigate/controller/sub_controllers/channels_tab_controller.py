@@ -836,4 +836,6 @@ class ChannelsTabController(GUIController):
             float(self.microscope_state_dict["stack_pause"])
         except:
             return "Stack pause should be a valid number!"
+        if self.microscope_state_dict["timepoints"] < 1:
+            return "Timepoints should be at least 1!"
         return None

@@ -183,8 +183,6 @@ class WaveformPopupController(GUIController):
     def configure_widget_range(self):
         """Update widget ranges and precisions based on the current resolution mode.
 
-        TODO: Hard-coded values for increment and precision.
-
         TODO: Other parameters we wish to enable/disable based on configuration?
 
         TODO: Should we instead change galvo amp/offset behavior based on a waveform
@@ -198,33 +196,32 @@ class WaveformPopupController(GUIController):
         0.01 for low mode.
 
         """
-        if (
-            self.resolution == "high"
-            or self.resolution == "Nanoscale"
-            or self.resolution == "CTASLMv1"
-        ):
-            precision = -4
-            increment = 0.0001
-        else:
-            # resolution is low
-            precision = -3
-            increment = 0.001
-
-        laser_min = self.configuration_controller.remote_focus_dict["hardware"]["min"]
-        laser_max = self.configuration_controller.remote_focus_dict["hardware"]["max"]
+        self.laser_min = self.configuration_controller.remote_focus_dict["hardware"]["min"]
+        self.laser_max = self.configuration_controller.remote_focus_dict["hardware"]["max"]
+        
+        precision = int(self.configuration_controller.remote_focus_dict["hardware"].get("precisition", 0))
+        increment = int(self.configuration_controller.remote_focus_dict["hardware"].get("step", 0))
+        if precision == 0:
+            precision = -4 if self.laser_max < 1 else -3
+        elif precision > 0:
+            precision = - precision
+        if increment == 0:
+            increment = 0.0001 if self.laser_max < 1 else 0.001
+        elif increment < 0:
+            increment = - increment
 
         # set ranges of value for those lasers
         for laser in self.lasers:
-            self.widgets[laser + " Amp"].widget.configure(from_=laser_min)
-            self.widgets[laser + " Amp"].widget.configure(to=laser_max)
+            self.widgets[laser + " Amp"].widget.configure(from_=self.laser_min)
+            self.widgets[laser + " Amp"].widget.configure(to=self.laser_max)
             self.widgets[laser + " Amp"].widget.configure(increment=increment)
             self.widgets[laser + " Amp"].widget.set_precision(precision)
             self.widgets[laser + " Amp"].widget.trigger_focusout_validation()
             # TODO: The offset bounds should adjust based on the amplitude bounds,
             #       so that amp + offset does not exceed the bounds. Can be done
             #       in update_remote_focus_settings()
-            self.widgets[laser + " Off"].widget.configure(from_=laser_min)
-            self.widgets[laser + " Off"].widget.configure(to=laser_max)
+            self.widgets[laser + " Off"].widget.configure(from_=self.laser_min)
+            self.widgets[laser + " Off"].widget.configure(to=self.laser_max)
             self.widgets[laser + " Off"].widget.configure(increment=increment)
             self.widgets[laser + " Off"].widget.set_precision(precision)
             self.widgets[laser + " Off"].widget.trigger_focusout_validation()
@@ -424,6 +421,9 @@ class WaveformPopupController(GUIController):
                 f"{variable_value}"
             )
             if value != variable_value and variable_value != "":
+                value = float(variable_value)
+                if value < self.laser_min or value > self.laser_max:
+                    return
                 self.resolution_info["remote_focus_constants"][self.resolution][
                     self.mag
                 ][laser][remote_focus_name] = variable_value

@@ -9,7 +9,7 @@ light sheet microscopes. These include:
   and detection (``Z``) directions synchronously with a piezo mounted objective.
   Tiling in ``X``, ``Y``, and ``Z`` is provided by a motorized stage.
 
-- A Digitally Scanned Axially Swept Light-Sheet Microscope that scans the beam laterally
+- A Digitally Scanned, Axially Swept Light-Sheet Microscope that scans the beam laterally
   (``X``) with galvanometric mirrors to create a virtual sheet of light, and axially
   (``Y``) with an electronically tunable lens. The sample is moved in the detection direction
   (``Z``) to acquire a stack. Tiling in ``X``, ``Y``, and ``Z`` is provided by a motorized stage.

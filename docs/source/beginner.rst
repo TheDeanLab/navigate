@@ -26,10 +26,11 @@ Activate Conda Environment
 --------------------------
 
 Once the Anaconda Prompt is open, activate the desired conda environment. By default,
-the command prompt will open the base environment (as shown in parentheses). To activate **navigate** environment,
-type the following command into the Anaconda command window and press :kbd:`Enter`
+the command prompt will open the base environment (as shown in parentheses). To 
+activate **navigate** environment, type the following command into the Anaconda command
+window and press :kbd:`Enter`
 
-.. code-block:: bash
+.. code-block:: console
 
    (base) conda activate navigate
 
@@ -37,10 +38,10 @@ Launch the Software Package
 ---------------------------
 
 After activating the environment, **navigate** should now be shown in parentheses. After you have already
-:ref:`configured <user_guide/setup_microscope>`  **navigate**, you can launch it by typing the following
+:doc:`configured <user_guide/setup_microscope>` **navigate**, you can launch it by typing the following
 command into the Anaconda command window:
 
-.. code-block:: bash
+.. code-block:: console
 
    (navigate) navigate
 
@@ -53,11 +54,13 @@ The **navigate** software package will launch and the main window will appear.
 -------------------------
 
 Configure the Channel Settings
-=============================================
+==============================
 
-* Select the :guilabel:`Channels` tab, which is located on the left side of the main window.
-* Under the :guilabel:`Channel Settings` section, select the number of channels needed for imaging. For each channel selected,
-  you will need to configure the acquisition settings:
+* Select the :guilabel:`Channels` tab, which is located on the upper left of the main 
+  window.
+* Under the :guilabel:`Channel Settings` section, select the number of channels needed 
+  for imaging. For each channel selected, you will need to configure the acquisition 
+  settings:
 
     .. image:: images/beginner/channel-selector.png
       :alt: Channel settings in the **navigate** software package.
@@ -69,22 +72,27 @@ Configure the Channel Settings
     .. image:: images/beginner/channel-selector-filter.png
       :alt: Changing the emission filter in **navigate**.
 
-    * Specify the camera :guilabel:`Exp. Time (ms)`. A good default value is ``100`` or ``200`` ms.
-    * Specify the :guilabel:`Interval` to be ``1.0``. While this feature is not currently implemented,
-      future releases will allow users to image different channels at different time intervals.
-    * Specify the :guilabel:`Defocus` to be ``0``. This feature allows you to adjust for chromatic aberrations
-      that result in focal shifts between each imaging channel.
+    * Specify the camera :guilabel:`Exp. Time (ms)`. A good default value is ``100`` or
+      ``200`` ms.
+    * Specify the :guilabel:`Interval` to be ``1.0``. While this feature is not 
+      currently implemented, future releases will allow users to image different 
+      channels at different time intervals.
+    * Specify the :guilabel:`Defocus` to be ``0``. This feature allows you to adjust 
+      for chromatic aberrations that result in focal shifts between each imaging 
+      channel.
 
 -------------------------
 
 Configure the Camera Settings
-============================================
-* Select the :guilabel:`Camera Settings` tab, which is located on the left side of the main window.
+=============================
 
-* For standard imaging applications, select :guilabel:`Normal` in the :guilabel:`Sensor Modes` dropdown menu within the :guilabel:`Camera Modes` section.
+* Select the :guilabel:`Camera Settings` tab.
 
-* If you are using the rolling shutter, select :guilabel:`Light-Sheet` and specify its :guilabel:`Readout Direction`
-  and :guilabel:`Number of Pixels`.
+* For standard imaging applications, select :guilabel:`Normal` in the 
+  :guilabel:`Sensor Modes` dropdown menu within the :guilabel:`Camera Modes` section.
+
+* If you are using the rolling shutter, select :guilabel:`Light-Sheet` and specify its 
+  :guilabel:`Readout Direction` and :guilabel:`Number of Pixels`.
 
     .. note::
         For more information on how to configure the rolling shutter
@@ -95,12 +103,14 @@ Configure the Camera Settings
 
 * Choose the size of your camera's field of view.
     * Specify the :guilabel:`Region of Interest Settings` by entering the appropriate
-      :guilabel:`Number of Pixels` for both the :guilabel:`Width` and :guilabel:`Height` values.
-    * Alternatively, one can select from one of several default values in the :guilabel:`Default FOVs` section.
+      :guilabel:`Number of Pixels` for both the :guilabel:`Width` and :guilabel:`Height` 
+      values. Alternatively, one can select from one of several default values in the 
+      :guilabel:`Default FOVs` section.
 
     .. note::
-        The :guilabel:`FOV Dimensions (microns)` is automatically calculated based on the :guilabel:`Number of Pixels`
-        and the `pixel_size` as specified in the `zoom` section of your your ``configuration.yaml`` file.
+        The :guilabel:`FOV Dimensions (microns)` is automatically calculated based on 
+        the :guilabel:`Number of Pixels` and the `pixel_size` as specified in the 
+        `zoom` section of your your ``configuration.yaml`` file.
 
         .. code-block:: yaml
 
@@ -113,15 +123,17 @@ Configure the Camera Settings
          :alt: Changing the camera region of interest in **navigate**.
 
 .. note::
-    If multiple channels are selected, each channel will be acquired with the same camera
-    :guilabel:`Sensor Mode`, :guilabel:`Readout Direction`, and :guilabel:`Region of Interest Settings`.
+    If multiple channels are selected, each channel will be acquired with the same 
+    camera :guilabel:`Sensor Mode`, :guilabel:`Readout Direction`, and 
+    :guilabel:`Region of Interest Settings`.
 
 -------------------------
 
 Acquire in a Continuous Scan Mode
 =================================
 
-* Select "Continuous Scan" in the dropdown next to the :guilabel:`Acquire` button in the Acquire Bar.
+* Select "Continuous Scan" in the dropdown next to the :guilabel:`Acquire` button in 
+  the :ref:`acquire bar <user_guide/gui_walkthrough:acquisition bar>`.
 
     .. image:: images/beginner/continuous-scan-dropdown.png
          :alt: Selecting the continuous scan mode in **navigate**.
@@ -131,19 +143,22 @@ Acquire in a Continuous Scan Mode
     .. note::
         If multiple channels are selected, each channel will be imaged sequentially.
         The order of imaging is determined by the order of the channels in the 
-        :guilabel:`Channel Settings` section of the :guilabel:`Channels` tab.
+        :guilabel:`Channel Settings` section of the :guilabel:`Channels` tab, and will
+        proceed from the top to the bottom of this channel list.
 
     .. image:: images/beginner/continuous-scan-acquire.png
          :alt: Launching the continuous scan mode in **navigate**.
 
 * Move the stage to identify the location of the sample.
-    * Select the :guilabel:`Stage Control` tab, and use the graphical user interface to move the stage.
-      This includes buttons for moving the stage in ``X``, ``Y``, ``Z``, ``F``, and ``Theta`` directions.
-        * The step size for each axis can be adjusted with the spinbox next to each button.
-        * For stages loaded in a synthetic mode, buttons will be disabled.
-        * Absolute positions can be entered in the text boxes next to each button.
-        * Check :doc:`configuration settings <user_guide/software_configuration>` for more information.
-    * Use the manufacturer-provided joystick to position the sample.
+    * Select the :guilabel:`Stage Control` tab, and use the graphical user interface to 
+      move the stage. This includes buttons for moving the stage in ``X``, ``Y``, ``Z``
+      , ``F``, and ``Theta`` directions.
+      * The step size for each axis can be adjusted with the spinbox next to each button.
+      * For stages loaded in a synthetic mode, buttons will be disabled.
+      * Absolute positions can be entered in the text boxes next to each button.
+      * Check :doc:`configuration settings <user_guide/software_configuration>` for more information.
+    * Alternatively, if available, use the manufacturer-provided joystick to position 
+      the sample.
 
     .. note::
          The axes for a light-sheet microscope vary in the literature. Here, we define
@@ -159,17 +174,16 @@ Acquire in a Continuous Scan Mode
     .. warning::
         One should always be careful when moving the stage.
 
-        If the stage is moved too
-        quickly, the sample and/or microscope may be damaged.
+        If the stage is moved too quickly, the sample and/or microscope may be damaged.
 
-        We strongly recommend that
-        you implement stage limits in your configuration file. Please refer to the
-        :doc:`configuration settings <user_guide/software_configuration>` for more information.
+        We strongly recommend that you implement stage limits in your configuration file. 
+        Please refer to the :doc:`configuration settings <user_guide/software_configuration>` 
+        for more information.
 
     .. image:: images/beginner/stage-movement-panel.png
         :alt: Moving the stage in **navigate**.
 
-* Press the :guilabel:`Stop` button in the acquisition bar to Stop Acquisition
+* Press the :guilabel:`Stop` button in the acquisition bar to stop acquisition.
 
     .. image:: images/beginner/stop-acquisition.png
         :alt: Stopping the continuous scan mode in **navigate**.
@@ -181,12 +195,14 @@ Acquiring a Single Image
 
 
 * Check the :guilabel:`Save Data` box in the :guilabel:`Timepoint Settings` section
-  under the :guilabel:`Channels` tab to save the acquired images. Check this box before acquiring data.
+  under the :guilabel:`Channels` tab to save the acquired images. Check this box 
+  before acquiring data.
 
     .. image:: images/beginner/save-data.png
         :alt: Saving data in **navigate**.
 
-* Select :guilabel:`Single Acquisition` from the dropdown next to the :guilabel:`Acquire` button.
+* Select :guilabel:`Single Acquisition` from the dropdown next to the 
+  :guilabel:`Acquire` button.
 
     .. image:: images/beginner/single-acquisition-dropdown.png
         :alt: Selecting the single acquisition mode in **navigate**.
@@ -198,8 +214,8 @@ Acquiring a Single Image
     .. image:: images/beginner/save-dialog-box.png
         :alt: Saving data in **navigate**.
 
-* Press :guilabel:`Acquire Data` to initiate acquisition. Acquisition will automatically
-  stop once the image is acquired.
+* Press :guilabel:`Acquire Data` to initiate acquisition. Acquisition will 
+  automatically stop once the image is acquired.
 
     .. note::
         Each acquisition will be saved in a separate folder (e.g., ``Cell01``, ``Cell02``, ...)
@@ -217,7 +233,7 @@ Acquiring a Z-Stack
 
 * Using the :guilabel:`Stage Control`, go to the desired z-position in the sample. Make
   sure that the sample is in focus. To use the autofocus feature, please refer to the
-  :ref:`Autofocus Settings <user_guide/gui_walkthrough:autofocus settings>` for more information.
+  :ref:`Autofocus Settings <user_guide/gui_walkthrough:autofocus settings>`.
 
     .. image:: images/beginner/stage-control-start-pos-zstack.png
         :alt: Adjusting the stage position in **navigate**.
@@ -228,8 +244,8 @@ Acquiring a Z-Stack
     .. image:: images/beginner/press-start-pos.png
         :alt: Adjusting the stage position in **navigate**.
 
-* Using the :guilabel:`Stage Control`, go to a different z-position within the sample. Again,
-  make sure that the sample is in focus.
+* Using the :guilabel:`Stage Control`, go to a different z-position within the sample. 
+  Again, make sure that the sample is in focus.
 
     .. image:: images/beginner/stage-control-end-pos-zstack.png
         :alt: Adjusting the stage position in **navigate**.
@@ -255,7 +271,7 @@ Acquiring a Z-Stack
 
     .. note::
         The minimum step size, and increment between steps, are graphical user interface
-        defaults that are specified in the ``experiment.yaml`` file. More information can
+        defaults that are specified in the ``configuration.yaml`` file. More information can
         :doc:`configuration settings <user_guide/software_configuration>`
 
         .. code-block:: yaml
@@ -276,11 +292,11 @@ Acquiring a Z-Stack
   :guilabel:`Per Stack` under :guilabel:`Laser Cycling Settings` in the
   :guilabel:`Stack Acquisition Settings (μm)` section under the :guilabel:`Channels` tab.
 
-    * :guilabel:`Per Z` acquires each channel before moving the stage to a new position.
+    * :guilabel:`Per Z` acquires all channels before moving the stage to a new position.
 
-    * :guilabel:`Per Stack` acquires all images in a stack acquisition for a single channel before moving
-      the stage back to the start position and restarting acquisition for the subsequent channel
-      until all channels are imaged.
+    * :guilabel:`Per Stack` acquires all images in a stack acquisition for a single 
+      channel before moving the stage back to the start position and restarting 
+      acquisition for the subsequent channel until all channels are imaged.
 
     .. image:: images/beginner/laser-cycling-settings.png
 
@@ -289,5 +305,7 @@ Acquiring a Z-Stack
 
     .. image:: images/beginner/z-stack-acquisition.png
 
-* Enter the sample parameters, notes, location to save file, and filetype in the :guilabel:`File Saving Dialog` that pops up.
-* Press :guilabel:`Acquire Data` to initiate acquisition. Acquisition will automatically stop once the image series is acquired.
+* Enter the sample parameters, notes, location to save file, and filetype in the 
+  :guilabel:`File Saving Dialog` that pops up.
+* Press :guilabel:`Acquire Data` to initiate acquisition. Acquisition will 
+  automatically stop once the image series is acquired.

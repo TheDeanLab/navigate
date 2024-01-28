@@ -19,7 +19,7 @@ frames, and some jitter in timing is anticipated.
 .. _hardware_ni:
 
 National Instruments (NI)
---------------------------
+-------------------------
 In principle, most NI-based data acquisition cards should work with the software, so long
 as there are a sufficient number of analog and digital ports, and the sampling rate (typically 100 kHz)
 is high enough per port.
@@ -43,7 +43,7 @@ Manager as a **NI Data Acquisition Device**.
     NI MAX.
 
 Wiring
-^^^^^^^
+^^^^^^
 
 - Identify the device name in NI MAX, and change it if you would like. Common names are
   ``Dev1``, ``Dev2``, etc. This name must correspond with the pinouts provided in the
@@ -171,8 +171,8 @@ Cameras
 The software supports camera-based acquisition. It can run both normal and rolling
 shutter modes of contemporary scientific CMOS cameras.
 
-Hamamatsu ORCA-Flash 4.0 v3/Fusion
------------------------------
+Hamamatsu ORCA-Flash4.0 V3/Fusion
+---------------------------------
 
 * Insert the USB that came with the camera into the computer and install HCImageLive. Alternatively,
   download DCAM-API. The software can be found `here <https://dcam-api.com>`_.
@@ -243,7 +243,7 @@ More about the ORCA-Flash 4.0 v3 and ORCA-Fusion can be found `here <https://www
 |
 
 Hamamatsu ORCA-Lightning
--------------------------
+------------------------
 
 The Hamamatsu ORCA-Lightning has a slightly different class than the Flash/Fusion as it
 reads out 4 rows at a time rather than 1 in rolling shutter mode.
@@ -517,7 +517,7 @@ operating range.
 |
 
 Analog Controlled Voice Coils and Tunable Lenses
---------------------------------------------------
+------------------------------------------------
 
 In principle, this hardware type can support any analog-controlled voice coil or tunable lens.
 The `BLINK <https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK>`_ and the
@@ -856,7 +856,7 @@ identical. The voltage signal is delivered via the data acquisition card specifi
 
 
 Synthetic Stage
-------------------
+---------------
 If no stage is present for a particular axis, one must configure the software to use a synthetic
 stage. For example, not all microscopes have a theta axis.
 
@@ -1108,7 +1108,7 @@ Omicron LightHUB Ultra
     set in the mixed modulation mode.
 
 Coherent Obis
-----------------------
+-------------
 
 .. note::
     Coherent Obis lasers should be set in the mixed modulation mode. It is not uncommon
@@ -1162,7 +1162,7 @@ Shutters
 Shutters automatically open at the start of acquisition and close upon finish.
 
 Analog/Digital-Controlled Shutters
------------------------------------
+----------------------------------
 
 Thorlabs shutters are controlled via a digital on off voltage.
 

@@ -32,7 +32,7 @@ this mode, only to preview what is in focus. This mode is helpful for alignment,
 parameter tuning, and scrolling around the sample with the stage. 
 
 It is implemented as
-a :ref:`feature list <user_guide/features:custom feature lists>`, shown in its 
+a :doc:`feature list <features>`, shown in its 
 :ref:`textual form <user_guide/features:text representation of feature lists>` below.
 
 .. code-block:: python

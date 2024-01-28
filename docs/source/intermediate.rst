@@ -6,11 +6,10 @@ Write A Smart Acquisition Routine (Intermediate)
 write acquisition routines on the fly by chaining existing 
 :doc:`features <user_guide/features>` into lists. Please see
 :ref:`Currently Implemented Features <contributing/feature_container:currently implemented features>`
-for a complete list of features, or build additional features as a :doc:`plugin <plugin/plugin_home>`.
+for a complete list of features. Users can build additionals feature within :doc:`plugins <plugin/plugin_home>`.
 
-In this guide, we will use features
-to write a routine that scans through an imaging chamber and only takes images where 
-it finds a sample.
+In this guide, we will use existing features to write a routine that scans through an 
+imaging chamber and takes z-stacks only where it finds the sample.
 
 Suppose there are two positions listed in the 
 :ref:`multiposition table <user_guide/gui_walkthrough:multiposition>`, one containing
@@ -61,7 +60,7 @@ feature list editing window should now appear as below.
 
 .. image:: images/feature_gui_5.png
 
-Our feature now takes one image of first selected color channel at each position
+Our feature now takes one image of the first selected color channel at each position
 in the multiposition table.
 
 Now, right-click ``MoveToNextPositionInMultiPositionTable`` and press 
@@ -83,8 +82,9 @@ Now, right-click ``MoveToNextPositionInMultiPositionTable`` and press
   tissue is present if signal is above the Otsu threshold of the stack of images 
   acquired.
 
-In this example, if any plane meets the desired threshold, the feature will return ``true`` and
-it will be acquired. If no plane meets the desired threshold, the feature will return ``false``
+In this example, if any plane meets the desired threshold, the feature will return 
+``true`` and it will be acquired. If no plane meets the desired threshold, the feature
+will return ``false``
 
 Now, right-click ``DetectTissueInStackAndReturn`` and press
 :guilabel:`Insert After`. Click the new tile and change it to 
@@ -111,19 +111,16 @@ To do this, we add ``true`` and ``false`` options within the feature braces:
 
 .. code-block:: python
 
-    {"name": DetectTissueInStackAndReturn,
-     "args": (1, 0.5, None),
-     "True": [
-            {
-             "name": ZStackAcquisition,
-             "args": (false, false, "z-stack",),}],
-             "False": "continue",
-             }.
+    {"name": DetectTissueInStackAndReturn, 
+     "args": (1, 0.5, None), 
+     "true": [{"name": ZStackAcquisition,"args": (False,False,"z-stack",),}], 
+     "false": "continue",}
+
 
 Our ``true`` argument tells the software what to do if tissue is detected. In this
 case, we take a z-stack at the positions where tissue is found. The ``false``
 argument tells the software how to proceed if no tissue is found. In this case, the
-``"continue"`` option tells the software to keep moving through the loop to the next
+``continue`` option tells the software to keep moving through the loop to the next
 position in the multi-position table. Press :guilabel:`Preview` to see the update.
 
 .. image:: images/feature_gui_9.png

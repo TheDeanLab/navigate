@@ -423,7 +423,7 @@ class SynchronizedThreadPool:
         if event == "exception":
             print("****in local trace: exception stops the thread")
             logger.debug("****in local trace: exception stops the thread")
-            raise SystemExit()
+            raise SystemExit
         return self.localtrace
 
     def _raiseError(self, threadId):

@@ -107,6 +107,14 @@ class WaveformPopupController(GUIController):
         self.waveforms_enabled = True
         #: dict: Dictionary of amplitude values.
         self.amplitude_dict = None
+        #: float: the minimum value of remote focus device
+        self.laser_min = 0
+        #: float: the maximum value of remote focus device
+        self.laser_max = 1.0
+        #: dict: Dictionary of galvo minimum values
+        self.galvo_min = {}
+        #: dict: Dictionary of galvo maximum values
+        self.galvo_max = {}
 
         # event id list
         #: int: The event id.
@@ -250,6 +258,9 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Freq"].widget.set_precision(precision)
             self.widgets[galvo + " Freq"].widget["state"] = "normal"
             self.widgets[galvo + " Freq"].widget.trigger_focusout_validation()
+
+            self.galvo_min[galvo] = galvo_min
+            self.galvo_max[galvo] = galvo_max
 
         for i in range(len(self.galvos), self.configuration_controller.galvo_num):
             galvo_name = f"Galvo {i}"
@@ -421,7 +432,14 @@ class WaveformPopupController(GUIController):
                 f"{variable_value}"
             )
             if value != variable_value and variable_value != "":
-                value = float(variable_value)
+                # tell parent controller (the device)
+                if self.event_id:
+                    self.view.popup.after_cancel(self.event_id)
+                
+                try:
+                    value = float(variable_value)
+                except ValueError:
+                    return
                 if value < self.laser_min or value > self.laser_max:
                     return
                 self.resolution_info["remote_focus_constants"][self.resolution][
@@ -430,9 +448,6 @@ class WaveformPopupController(GUIController):
                 logger.debug(
                     f"Remote Focus Amplitude/Offset Changed:, {variable_value}"
                 )
-                # tell parent controller (the device)
-                if self.event_id:
-                    self.view.popup.after_cancel(self.event_id)
 
                 # Delay feature.
                 self.event_id = self.view.popup.after(
@@ -458,6 +473,9 @@ class WaveformPopupController(GUIController):
         """
         if not self.update_waveform_parameters_flag:
             return
+        
+        if self.event_id:
+            self.view.popup.after_cancel(self.event_id)
         # Get the values from the widgets.
         try:
             delay = float(self.widgets["Delay"].widget.get())
@@ -480,11 +498,6 @@ class WaveformPopupController(GUIController):
         ] = duty_cycle
 
         # Pass the values to the parent controller.
-        try:
-            if self.event_id:
-                self.view.popup.after_cancel(self.event_id)
-        except KeyError:
-            pass
         self.event_id = self.view.popup.after(
             500,
             lambda: self.parent_controller.execute(
@@ -579,17 +592,21 @@ class WaveformPopupController(GUIController):
                 f"{variable_value} pre if statement"
             )
             if value != variable_value and variable_value != "":
+                # change any galvo parameters as one event
+                if self.event_id:
+                    self.view.popup.after_cancel(self.event_id)
+                
+                try:
+                    value = float(variable_value)
+                except ValueError:
+                    return
+                if value < self.galvo_min[galvo_name] or value > self.galvo_max[galvo_name]:
+                    return
                 self.galvo_setting[galvo_name][self.resolution][self.mag][
                     parameter
                 ] = variable_value
                 logger.debug(f"Galvo parameter {parameter} changed: {variable_value}")
-                # change any galvo parameters as one event
-                try:
-                    if self.event_id:
-                        self.view.popup.after_cancel(self.event_id)
-                except KeyError:
-                    pass
-
+                
                 self.event_id = self.view.popup.after(
                     500,
                     lambda: self.parent_controller.execute("update_setting", "galvo"),

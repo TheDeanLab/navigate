@@ -213,6 +213,8 @@ class ValidatedMixin:
                 index=index,
                 action=action,
             )
+            if valid:
+                self.add_history(event)
         return valid
 
     def _focusout_validate(self, **kwargs):
@@ -324,6 +326,7 @@ class ValidatedMixin:
                 pass
             else:
                 self.undo_history.append(value)
+                self.redo_history = []
             if len(self.undo_history) > 3:
                 self.undo_history.pop(0)
 
@@ -338,24 +341,14 @@ class ValidatedMixin:
         if self.undo_history:
             # Get the redo value
             value = self.undo_history.pop()
-            if self.redo_history and self.redo_history[-1] == value:
+            if self.redo_history and self.redo_history[-1] == self.get():
                 pass
             else:
-                self.redo_history.append(value)
+                self.redo_history.append(self.get())
             if len(self.redo_history) > 3:
                 self.redo_history.pop(0)
 
-            # Restore the undo value
-            if self.undo_history:
-                value = self.undo_history.pop()
-                self.set(value)
-            else:
-                # Don't let the undo history drop to zero.
-                # This lets us restore values.
-                # We have to set the value first to replace the invalid entry.
-                self.set(value)
-                self.redo_history.pop()
-                self.add_history(event)
+            self.set(value)
             return True
         return False
 
@@ -370,10 +363,12 @@ class ValidatedMixin:
         """
         if self.redo_history:
             value = self.get()
-            self.add_history(event)
+            # add back to undo_history
+            self.undo_history.append(value)
+            if len(self.undo_history) > 3:
+                self.undo_history.pop(0)
             value = self.redo_history.pop()
             self.set(value)
-            self.add_history(event)
             return True
         return False
 

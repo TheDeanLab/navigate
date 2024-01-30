@@ -154,6 +154,7 @@ class ValidatedMixin:
         #: Hover: The hover bubble for the widget
         self.hover = Hover(self, text=None, type="free")
         self.hover_flag = kwargs.get("hover_flag", False)
+        self.is_error = False
 
     def _toggle_error(self, on=False):
         """Toggle the error message
@@ -200,10 +201,10 @@ class ValidatedMixin:
             if valid:
                 self.add_history(event)
             else:
-                if self.undo_history:
-                    # Only keep the most recent value in forced undo
-                    self.undo_history = [self.undo_history[-1]]
-                valid = self.undo(event)
+               if self.undo_history:
+                   self.set(self.undo_history[-1])
+                   self._toggle_error(False)
+                   valid = True
         elif event == "key":  # Keystroke into widget
             valid = self._key_validate(
                 proposed=proposed,
@@ -213,7 +214,7 @@ class ValidatedMixin:
                 index=index,
                 action=action,
             )
-            if valid:
+            if valid and not self.is_error:
                 self.add_history(event)
         return valid
 
@@ -324,7 +325,7 @@ class ValidatedMixin:
             # Don't add duplicates
             if self.undo_history and self.undo_history[-1] == value:
                 pass
-            else:
+            elif value != "-" and value != ".":
                 self.undo_history.append(value)
                 self.redo_history = []
             if len(self.undo_history) > 3:
@@ -883,7 +884,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         --------
         >>> spinbox._key_validate('1', 0, '0', '1', 'insert')
         """
-
+        self.is_error = False
         valid = True
         min_val = self.cget("from")
         max_val = self.cget("to")
@@ -929,6 +930,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             return False
         
         if proposed < min_val:
+            self.is_error = True
             self._toggle_error(True)
 
         return valid

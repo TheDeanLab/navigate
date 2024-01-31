@@ -104,10 +104,9 @@
 write acquisition routines on the fly by chaining existing
 <a class="reference internal" href="user_guide/features.html"><span class="doc">features</span></a> into lists. Please see
 <a class="reference internal" href="contributing/feature_container.html#currently-implemented-features"><span class="std std-ref">Currently Implemented Features</span></a>
-for a complete list of features, or build additional features as a <a class="reference internal" href="plugin/plugin_home.html"><span class="doc">plugin</span></a>.</p>
-<p>In this guide, we will use features
-to write a routine that scans through an imaging chamber and only takes images where
-it finds a sample.</p>
+for a complete list of features. Users can build additionals feature within <a class="reference internal" href="plugin/plugin_home.html"><span class="doc">plugins</span></a>.</p>
+<p>In this guide, we will use existing features to write a routine that scans through an
+imaging chamber and takes z-stacks only where it finds the sample.</p>
 <p>Suppose there are two positions listed in the
 <a class="reference internal" href="user_guide/gui_walkthrough.html#multiposition"><span class="std std-ref">multiposition table</span></a>, one containing
 tissue and one empty, as shown below.</p>
@@ -141,7 +140,7 @@ select which feature we want to use in this tile.</p>
 <p>Select <code class="docutils literal notranslate"><span class="pre">MoveToNextPositionInMultiPositionTable</span></code> and then close the popup. Your
 feature list editing window should now appear as below.</p>
 <img alt="_images/feature_gui_5.png" src="_images/feature_gui_5.png" />
-<p>Our feature now takes one image of first selected color channel at each position
+<p>Our feature now takes one image of the first selected color channel at each position
 in the multiposition table.</p>
 <p>Now, right-click <code class="docutils literal notranslate"><span class="pre">MoveToNextPositionInMultiPositionTable</span></code> and press
 <span class="guilabel">Insert After</span>. Click the new tile and change it to
@@ -159,8 +158,9 @@ If this is set to <code class="docutils literal notranslate"><span class="pre">N
 tissue is present if signal is above the Otsu threshold of the stack of images
 acquired.</p></li>
 </ul>
-<p>In this example, if any plane meets the desired threshold, the feature will return <code class="docutils literal notranslate"><span class="pre">true</span></code> and
-it will be acquired. If no plane meets the desired threshold, the feature will return <code class="docutils literal notranslate"><span class="pre">false</span></code></p>
+<p>In this example, if any plane meets the desired threshold, the feature will return
+<code class="docutils literal notranslate"><span class="pre">true</span></code> and it will be acquired. If no plane meets the desired threshold, the feature
+will return <code class="docutils literal notranslate"><span class="pre">false</span></code></p>
 <p>Now, right-click <code class="docutils literal notranslate"><span class="pre">DetectTissueInStackAndReturn</span></code> and press
 <span class="guilabel">Insert After</span>. Click the new tile and change it to
 <code class="docutils literal notranslate"><span class="pre">LoopByCount</span></code>.</p>
@@ -179,18 +179,14 @@ To do this, we will convert <code class="docutils literal notranslate"><span cla
 <p>To do this, we add <code class="docutils literal notranslate"><span class="pre">true</span></code> and <code class="docutils literal notranslate"><span class="pre">false</span></code> options within the feature braces:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">DetectTissueInStackAndReturn</span><span class="p">,</span>
  <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
- <span class="s2">&quot;True&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="p">{</span>
-         <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">ZStackAcquisition</span><span class="p">,</span>
-         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">false</span><span class="p">,</span> <span class="n">false</span><span class="p">,</span> <span class="s2">&quot;z-stack&quot;</span><span class="p">,),}],</span>
-         <span class="s2">&quot;False&quot;</span><span class="p">:</span> <span class="s2">&quot;continue&quot;</span><span class="p">,</span>
-         <span class="p">}</span><span class="o">.</span>
+ <span class="s2">&quot;true&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">ZStackAcquisition</span><span class="p">,</span><span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="s2">&quot;z-stack&quot;</span><span class="p">,),}],</span>
+ <span class="s2">&quot;false&quot;</span><span class="p">:</span> <span class="s2">&quot;continue&quot;</span><span class="p">,}</span>
 </pre></div>
 </div>
 <p>Our <code class="docutils literal notranslate"><span class="pre">true</span></code> argument tells the software what to do if tissue is detected. In this
 case, we take a z-stack at the positions where tissue is found. The <code class="docutils literal notranslate"><span class="pre">false</span></code>
 argument tells the software how to proceed if no tissue is found. In this case, the
-<code class="docutils literal notranslate"><span class="pre">&quot;continue&quot;</span></code> option tells the software to keep moving through the loop to the next
+<code class="docutils literal notranslate"><span class="pre">continue</span></code> option tells the software to keep moving through the loop to the next
 position in the multi-position table. Press <span class="guilabel">Preview</span> to see the update.</p>
 <img alt="_images/feature_gui_9.png" src="_images/feature_gui_9.png" />
 <p><code class="docutils literal notranslate"><span class="pre">DetectTissueInStackAndReturn</span></code> now has a red border, indicating it is a decision

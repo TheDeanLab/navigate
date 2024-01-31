@@ -136,8 +136,8 @@ options.</p>
 <span class="menuselection">Features ‣ Advanced Setting</span>.</p>
 <img alt="../_images/step_10.png" src="../_images/step_10.png" />
 </li>
-<li><p>In the <span class="guilabel">Advanced Setting</span> popup window, choose the feature name with which you want to use the
-dynamic customized functions as feature parameters.</p>
+<li><p>In the <span class="guilabel">Advanced Setting</span> popup window, choose the feature name with which
+you want to use the dynamic customized functions as feature parameters.</p>
 <img alt="../_images/step_11.png" src="../_images/step_11.png" />
 <img alt="../_images/step_12.png" src="../_images/step_12.png" />
 </li>
@@ -218,8 +218,9 @@ popup window, you can see the structure of the selected feature list.</p>
 <img alt="../_images/step_17.png" src="../_images/step_17.png" />
 <img alt="../_images/step_18.png" src="../_images/step_18.png" />
 </li>
-<li><p>Click one feature in the preview window, a <span class="guilabel">Feature Parameters</span> window will show up. Then you
-could set the parameters you want (e.g., <span class="guilabel">planes</span> in this screenshot). Close the <span class="guilabel">Feature Parameters</span> window.</p>
+<li><p>Click one feature in the preview window, a <span class="guilabel">Feature Parameters</span> window
+will show up. Then set the desired parameters (e.g., <span class="guilabel">planes</span>
+in this screenshot). Close the <span class="guilabel">Feature Parameters</span> window.</p>
 <img alt="../_images/step_19.png" src="../_images/step_19.png" />
 </li>
 <li><p>Click <span class="guilabel">Confirm</span>. The feature list will start to run.</p>
@@ -249,7 +250,7 @@ representation and then pressing <span class="guilabel">Preview</span>.</p>
 <p>The square brackets <code class="docutils literal notranslate"><span class="pre">[]</span></code> create a sequence of events to run in the feature container.
 The <code class="docutils literal notranslate"><span class="pre">{}</span></code> braces contain features. The parentheses <code class="docutils literal notranslate"><span class="pre">()</span></code> indicate a loop.</p>
 <p>As an example, let’s look at the feature list that describes the
-<span class="xref std std-ref">Continuous Scan</span> mode:</p>
+<a class="reference internal" href="acquiring_guide.html#continuous-scan"><span class="std std-ref">Continuous Scan</span></a> mode:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
   <span class="p">(</span>
     <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">PrepareNextChannel</span><span class="p">},</span>
@@ -264,13 +265,13 @@ The <code class="docutils literal notranslate"><span class="pre">{}</span></code
 <p>Here, we have a sequence defined by <code class="docutils literal notranslate"><span class="pre">[]</span></code> containing one element, a loop, indicated
 by the closed parentheses. There are two features within this loop. One feature has the
 name
-<span class="xref std std-ref">PrepareNextChannel</span>
+<a class="reference internal" href="../_autosummary/navigate.model.features.common_features.PrepareNextChannel.html"><span class="doc">PrepareNextChannel</span></a>
 and the other
-<span class="xref std std-ref">LoopByCount</span>.
+<a class="reference internal" href="../_autosummary/navigate.model.features.common_features.LoopByCount.html"><span class="doc">LoopByCount</span></a>.
 The parentheses indicate we will keep looping through both of these features until
 stopping criteria is met. In this case, the looping will stop when <code class="docutils literal notranslate"><span class="pre">LoopByCount</span></code>
 returns <code class="docutils literal notranslate"><span class="pre">False</span></code> due to running out of <code class="docutils literal notranslate"><span class="pre">selected_channels</span></code> to loop through. That is,
-it will end once all <span class="xref std std-ref">selected channel</span> have
+it will end once all <a class="reference internal" href="gui_walkthrough.html#channel-settings"><span class="std std-ref">selected channel</span></a> have
 been imaged.</p>
 </section>
 </section>

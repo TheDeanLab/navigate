@@ -194,7 +194,7 @@ If your plugin only incorporates some of these components, you should remove unu
 <hr class="docutils" />
 <section id="plugin-configuration">
 <h3>Plugin Configuration<a class="headerlink" href="#plugin-configuration" title="Permalink to this heading"></a></h3>
-<p>There should always have a <strong>plugin_config.yml</strong> file under the plugin folder, which tells <strong>navigate</strong>
+<p>There should always have a <code class="docutils literal notranslate"><span class="pre">plugin_config.yml</span></code> file under the plugin folder, which tells <strong>navigate</strong>
 the plugin name, the GUI as a Tab or Popup and custom acquisition mode name. A typical plugin config
 is:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>name: Plugin Name
@@ -208,22 +208,23 @@ acquisition_modes:
 <hr class="docutils" />
 <section id="plugin-gui-elements">
 <h3>Plugin GUI Elements<a class="headerlink" href="#plugin-gui-elements" title="Permalink to this heading"></a></h3>
-<p><strong>navigate</strong> supports a plugin with its own GUI. The custom plugin GUI can be integrated as a tab or a popup.
-Users should specify the view option in <cite>plugin_config.yml</cite>. The name in the plugin_config.yml will be used
-as a menu name if the plugin GUI as a popup. Users could find the menu under <cite>Plugins</cite> in <strong>navigate</strong> window.</p>
-<p>When creating a new plugin with GUI, ensure that the plugin name is consistent with the naming
-conventions for the associated Python files (<cite>plugin_name_controller.py</cite> and <cite>plugin_name_frame.py</cite>).
+<p><strong>navigate</strong> supports plugins with their own GUIs. A custom plugin GUI can be integrated as a tab or a popup.
+Users should specify a view option in <code class="docutils literal notranslate"><span class="pre">plugin_config.yml</span></code>. If it is a popup, users can find the plugin under
+the <span class="guilabel">Plugins</span> menu in the <strong>navigate</strong> window. If it is a tab, it will appear next to the
+<a class="reference internal" href="../user_guide/gui_walkthrough.html#settings-notebooks"><span class="std std-ref">Settings Notebooks</span></a>.</p>
+<p>When creating a new plugin with a GUI, ensure that the plugin name is consistent with the naming
+conventions for the associated Python files (<code class="docutils literal notranslate"><span class="pre">plugin_name_controller.py</span></code> and <code class="docutils literal notranslate"><span class="pre">plugin_name_frame.py</span></code>).
 Both Python filenames should be in lowercase.</p>
-<p>For example, if your plugin is named <cite>My Plugin</cite> (there is a space in between), the associated Python files
-should be named: “my_plugin_frame.py” and “my_plugin_controller.py”</p>
+<p>For example, if your plugin is named “My Plugin” (there is a space in between), the associated Python files
+should be named: <code class="docutils literal notranslate"><span class="pre">my_plugin_frame.py</span></code> and <code class="docutils literal notranslate"><span class="pre">my_plugin_controller.py</span></code>.</p>
 </section>
 <hr class="docutils" />
 <section id="plugin-devices">
 <h3>Plugin Devices<a class="headerlink" href="#plugin-devices" title="Permalink to this heading"></a></h3>
-<p>The <strong>navigate</strong> Software allows you to integrate a new device. There could be more than one device inside a plugin,
-if they are different kinds of device, put them into different folders. For a kind of device, there should be
-a <cite>device_startup_functions.py</cite> tells <strong>navigate</strong> how to start the device and the reference name of the device in
-system <cite>configuration.yaml</cite>.</p>
+<p>The <strong>navigate</strong> plugin architecture allows you to integrate new hardware device. There can be more than one
+device inside a plugin. If they are different kinds of device, please put them into different folders. For each
+kind of device, there should be a <code class="docutils literal notranslate"><span class="pre">device_startup_functions.py</span></code> telling <strong>navigate</strong> how to start the device
+and indicating the reference name of the device to be used in <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code>.</p>
 <p>Device type name and reference name are given as following:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DEVICE_TYPE_NAME</span> <span class="o">=</span> <span class="s2">&quot;plugin_device&quot;</span>  <span class="c1"># Same as in configuration.yaml, for example &quot;stage&quot;, &quot;filter_wheel&quot;, &quot;remote_focus_device&quot;...</span>
 <span class="n">DEVICE_REF_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;serial_number&quot;</span><span class="p">]</span>
@@ -241,12 +242,12 @@ system <cite>configuration.yaml</cite>.</p>
     <span class="k">return</span> <span class="n">device_object</span>
 </pre></div>
 </div>
-<p>The template of <cite>device_startup_functions.py</cite> could be find in the <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template/blob/main/src/plugins-template/model/devices/plugin_device/device_startup_functions.py">template</a>.</p>
+<p>The template for <code class="docutils literal notranslate"><span class="pre">device_startup_functions.py</span></code> can be found in the <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template/blob/main/src/plugins-template/model/devices/plugin_device/device_startup_functions.py">plugin template</a>.</p>
 </section>
 <hr class="docutils" />
 <section id="plugin-features">
 <h3>Plugin Features<a class="headerlink" href="#plugin-features" title="Permalink to this heading"></a></h3>
-<p><strong>navigate</strong> allows users to add new features. New feature objects and feature lists can be a plugin or a component
+<p><strong>navigate</strong> allows users to add new features. New feature objects and feature lists can each be a plugin or components
 of a plugin. Features and feature lists are automatically loaded into <strong>navigate</strong>.</p>
 <p>Please visit <a class="reference external" href="https://thedeanlab.github.io/**navigate**/feature_container/feature_container_home.html">here</a> for details about how to build a new feature object and feature list.</p>
 </section>
@@ -254,7 +255,7 @@ of a plugin. Features and feature lists are automatically loaded into <strong>na
 <section id="custom-acquisition-modes">
 <h3>Custom Acquisition Modes<a class="headerlink" href="#custom-acquisition-modes" title="Permalink to this heading"></a></h3>
 <p>Navigate offers seamless support for custom acquisition modes, and registering a new mode is straightforward.</p>
-<p>1. Download the template <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins-template/plugin_acquisition_mode.py">plugin_acquisition_mode.py</a></p>
+<p>1. Download the template for <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins-template/plugin_acquisition_mode.py">plugin_acquisition_mode.py</a></p>
 <ol class="arabic simple" start="2">
 <li><p>Update the <code class="docutils literal notranslate"><span class="pre">feature_list</span></code>.</p></li>
 </ol>
@@ -269,9 +270,9 @@ of a plugin. Features and feature lists are automatically loaded into <strong>na
 </pre></div>
 </div>
 <ol class="arabic simple" start="3">
-<li><p>Update functions.</p></li>
+<li><p>Update the functions.</p></li>
 </ol>
-<p>Users should tell <strong>navigate</strong> what <strong>navigate</strong> should do before and after acquisition.</p>
+<p>Users should tell <strong>navigate</strong> what to do before and after acquisition using the following functions.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">prepare_acquisition_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">):</span>
     <span class="c1"># update here</span>
 
@@ -286,7 +287,7 @@ of a plugin. Features and feature lists are automatically loaded into <strong>na
 </pre></div>
 </div>
 <ol class="arabic simple" start="4">
-<li><p>Register the acquisition mode in <cite>plugin_config.yml</cite>.</p></li>
+<li><p>Register the acquisition mode in <code class="docutils literal notranslate"><span class="pre">plugin_config.yml</span></code>.</p></li>
 </ol>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>acquisition_modes:
     - name: Custom Acquisition
@@ -294,7 +295,7 @@ of a plugin. Features and feature lists are automatically loaded into <strong>na
 </pre></div>
 </div>
 <hr class="docutils" />
-<p>There are more plugin examples, please visit <a class="reference external" href="https://github.com/TheDeanLab/navigate/tree/develop/src/navigate/plugins">navigate</a> and <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugins">Navigate Plugins</a>.</p>
+<p>For more plugin examples, please visit <a class="reference external" href="https://github.com/TheDeanLab/navigate/tree/develop/src/navigate/plugins">navigate</a> and <a class="reference external" href="https://github.com/TheDeanLab/navigate-plugins">Navigate Plugins</a>.</p>
 </section>
 </section>
 </section>

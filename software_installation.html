@@ -56,6 +56,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#quick-install">Quick install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#launching-navigate">Launching <strong>navigate</strong></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#developer-install">Developer install</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
@@ -106,8 +107,7 @@
 <h1>Software Installation<a class="headerlink" href="#software-installation" title="Permalink to this heading"></a></h1>
 <section id="computer-specifications">
 <h2>Computer Specifications<a class="headerlink" href="#computer-specifications" title="Permalink to this heading"></a></h2>
-<p><strong>navigate</strong> requires a robust computing environment for optimal performance.
-Below are the recommended specifications:</p>
+<p>Below are the recommended specifications for <strong>navigate</strong>.</p>
 <section id="operating-system-compatibility">
 <h3>Operating System Compatibility<a class="headerlink" href="#operating-system-compatibility" title="Permalink to this heading"></a></h3>
 <div class="admonition important">
@@ -116,31 +116,34 @@ Below are the recommended specifications:</p>
 compatibility of device drivers for various microscope hardware components, such as
 cameras, stages, and data acquisition cards, which are predominantly designed for the
 Windows environment.</p>
-<p>While it is possible to launch the software on a Mac using a synthetic hardware mode,
-users should be aware of known issues with the Tkinter user interface. These issues
+<p>While it is possible to launch the software on a Mac using synthetic hardware mode,
+users should be aware of known issues with the Tkinter interface. These issues
 include improper positioning of widgets and problems with resizing the GUI window.
-As such, the use of <strong>navigate</strong> on macOS is not recommended.</p>
-<p>The software remains untested on Linux systems. Therefore, we cannot guarantee its
-functionality or performance on Linux platforms at this time. Users considering the
-use of <strong>navigate</strong> software on Linux should proceed with caution and be prepared for
-potential compatibility issues, especially with respect to device drivers.</p>
+As such, the use of <strong>navigate</strong> on MacOS is not recommended.</p>
+<p>The software is untested on Linux systems.Users considering the use of <strong>navigate</strong>
+software on Linux should proceed with caution and be prepared for potential
+compatibility issues, especially with respect to device drivers.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For optimal performance and compatibility, it is strongly recommended to run
-<strong>navigate</strong> on a Windows machine, adhering to the specified system specifications.</p>
+<strong>navigate</strong> on a Windows machine.</p>
 </div>
 </section>
 <section id="hardware-considerations">
 <h3>Hardware Considerations<a class="headerlink" href="#hardware-considerations" title="Permalink to this heading"></a></h3>
+<p><strong>navigate</strong> will run on a mid-range laptop with at least 8 GB of RAM and a processor
+with two cores. Most of its operations are undemanding. Saving data at a reasonable
+rate, however, will require an SSD. The hardware configuration for an example
+microscope control machine is shown below.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>Scientific cameras are capable of rapidly generating large amounts of high-resolution data.
-As such, the read/write speed of the data storage device is a critical for smooth operation of the software.
-For example, for a standard Hamamatsu camera with a 2048 x 2048 sensor,
-operating at 16-bit depth and 20 frames per second, the data save rate is approximately ~170 MB/s.
-While such capabilities are well within the capabilities of modern SSDs, they are beyond the capabilities of most HDDs.
-Therefore, it is recommended to use a fast SSD data saving operations.</p>
+As such, the read/write speed of the data storage device is a critical for smooth operation
+of the software. For example, for a standard Hamamatsu camera with a 2048 x 2048 sensor,
+operating at 16-bit depth and 20 frames per second, the data save rate is approximately ~167 MB/s.
+While such capabilities are well within the capabilities of modern SSDs, they are beyond the
+capabilities of most HDDs. Therefore, it is recommended to use a fast SSD data saving operations.</p>
 </div>
 <details class="summary-example-hardware-configuration">
 <summary>Example Hardware Configuration</summary><ul class="simple">
@@ -227,7 +230,8 @@ Therefore, it is recommended to use a fast SSD data saving operations.</p>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The specifications listed are based on an example system configuration and can be adjusted based on specific needs and availability.</p>
+<p>The specifications listed are based on an example system configuration and can
+be adjusted based on specific needs and availability.</p>
 </div>
 </details></section>
 </section>
@@ -263,25 +267,27 @@ should now show <code class="docutils literal notranslate"><span class="pre">(na
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">MyComputer ~ $ pip install navigate-micro</span>
 </pre></div>
 </div>
-<p>To install the developmental version of <strong>navigate</strong>, run the following command:</p>
+<p>To install the bleeding edge version of <strong>navigate</strong>, run the following command:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">MyComputer ~ $ pip install git+https://github.com/TheDeanLab/navigate.git</span>
 </pre></div>
 </div>
 <p><strong>Run navigate software</strong></p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">MyComputer Navigate $ navigate</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">MyComputer ~ $ navigate</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you are running the software on a computer that does not have the appropriate
-hardware you will need to add  the flag <code class="docutils literal notranslate"><span class="pre">-sh</span></code> (<code class="docutils literal notranslate"><span class="pre">--synthetic-hardware</span></code>) after
-<strong>navigate</strong>.</p>
+<p>If you are running the software on a computer that is not connected to microscope
+hardware, you can add the flag <code class="docutils literal notranslate"><span class="pre">-sh</span></code> (<code class="docutils literal notranslate"><span class="pre">--synthetic-hardware</span></code>) to launch the
+program:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">navigate -sh</span>
 </pre></div>
 </div>
 </div>
-<p>After completing these steps you will only need to do the below to start the software
-upon opening a new Anaconda prompt:</p>
+</section>
+<section id="launching-navigate">
+<h2>Launching <strong>navigate</strong><a class="headerlink" href="#launching-navigate" title="Permalink to this heading"></a></h2>
+<p>Open an <code class="docutils literal notranslate"><span class="pre">Anaconda</span> <span class="pre">Prompt</span> <span class="pre">(Miniconda3)</span></code> and enter the following.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(base)</span> <span class="go">conda activate navigate</span>
 <span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">navigate</span>
 </pre></div>
@@ -334,13 +340,13 @@ an editable package locally on your machine.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If working in a <code class="docutils literal notranslate"><span class="pre">zsh</span></code> shell, e.g. on a modern macOS, add single quotes around the
+<p>If working in a <code class="docutils literal notranslate"><span class="pre">zsh</span></code> shell, e.g. on a modern MacOS, add single quotes around the
 call: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">'.[dev]'</span></code>.</p>
 </div>
 </section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading"></a></h2>
-<p>If running the software at an institution with a proxy, you may need to update your proxy
+<p>If the software is run at an institution with a proxy, you may need to update your proxy
 settings to allow <code class="docutils literal notranslate"><span class="pre">pip</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> to install the proper packages.</p>
 <ul>
 <li><p>This can be done by going to Environment Variables for Windows, or another OS

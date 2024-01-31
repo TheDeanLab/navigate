@@ -113,8 +113,8 @@ branch separate from the main <code class="docutils literal notranslate"><span c
 to the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch for code review. Some best practices for new code are
 outlined below.</p>
 <p>If you are considering refactoring part of the code, please reach out to us prior to
-starting this process. We are happy to invite you to our
-regular software development meeting.</p>
+starting this process. We are happy to invite you to our regular software development
+meeting.</p>
 <hr class="docutils" />
 <section id="general-principles">
 <h2>General Principles<a class="headerlink" href="#general-principles" title="Permalink to this heading"></a></h2>
@@ -158,7 +158,7 @@ variable names are <code class="docutils literal notranslate"><span class="pre">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h2>
 <p>We use <a class="reference external" href="https://www.sphinx-doc.org/en/master/">Sphinx</a> to generate
 documentation from documented methods, attributes, and classes. Please document
-all new methods, attributes, and classes using Sphinx compatible version of
+all new methods, attributes, and classes using a Sphinx compatible version of
 <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html">Numpydoc</a>.</p>
 </section>
 <hr class="docutils" />
@@ -177,17 +177,18 @@ different unit to a piece of hardware.</p>
 <hr class="docutils" />
 <section id="pre-commit-hooks">
 <h2>Pre-Commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="Permalink to this heading"></a></h2>
-<p>We leverage pre-commit workflows to enforce consistent code formatting and automate
-some of the code review process. In some rare cases, the linter may complain about a
-line of code that is actually fine. For example, in the example code below, Ruff
-linter complains that the start_stage class is imported but not used. However, it is
-actually used in as part of an <code class="docutils literal notranslate"><span class="pre">exec</span></code> statement:</p>
+<p>We use <a class="reference external" href="https://pre-commit.com/">pre-commit hooks</a> to enforce consistent code
+formatting and automate some of the code review process. In some rare cases, the
+linter may complain about a line of code that is actually fine. For example, in
+the example code below, Ruff linter complains that the start_stage class is
+imported but not used. However, it is actually used in as part of an
+<code class="docutils literal notranslate"><span class="pre">exec</span></code> statement.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>
 <span class="n">device_name</span> <span class="o">=</span> <span class="n">stage</span>
 <span class="n">exec</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;self.</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2"> = start_</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">(name, device_connection, configuration, i, is_synthetic)&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To avoid this error, you can add a <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">noqa</span></code> comment to the end of the line to tell Ruff to ignore the error:</p>
+<p>To avoid this error, add a <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">noqa</span></code> comment to the end of the line to tell Ruff to ignore the error.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navigate.model.device_startup_functions</span> <span class="kn">import</span> <span class="n">start_stage</span>  <span class="c1"># noqa</span>
 </pre></div>
 </div>
@@ -195,11 +196,12 @@ actually used in as part of an <code class="docutils literal notranslate"><span 
 <hr class="docutils" />
 <section id="dictionary-parsing">
 <h2>Dictionary Parsing<a class="headerlink" href="#dictionary-parsing" title="Permalink to this heading"></a></h2>
-<p>The configuration file is loaded a large dictionary object, and it is easy to have
-small errors in it that can crash the program. To avoid this, when getting
-properties from the configuration dictionary, it is best to use the <code class="docutils literal notranslate"><span class="pre">.get()</span></code> command,
-which provides you with the opportunity to also have a default value should the key
-provided not be found.  For example:</p>
+<p>The <a class="reference internal" href="../user_guide/software_configuration.html"><span class="doc">configuration file</span></a> is loaded as a
+large dictionary object, and it is easy to create small errors in the dictionary that
+can crash the program. To avoid this, when getting properties from the configuration
+dictionary, it is best to use the <code class="docutils literal notranslate"><span class="pre">.get()</span></code> command, which provides you with the
+opportunity to also have a default value should the key provided not be found. For
+example,</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Galvo Waveform Information</span>
 <span class="bp">self</span><span class="o">.</span><span class="n">galvo_waveform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span> <span class="s2">&quot;sawtooth&quot;</span><span class="p">)</span>
 </pre></div>
@@ -216,7 +218,7 @@ associated with it.</p>
 and alert future coders to modifications that break expected functionality.
 Guidelines for writing good unit tests can be found <a class="reference external" href="https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test">here</a>
 and <a class="reference external" href="https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0">over here</a>,
-or see examples of other unit tests in this repository’s <code class="xref any docutils literal notranslate"><span class="pre">test</span></code> folder. We
+or in examples of unit tests in this repository’s <code class="docutils literal notranslate"><span class="pre">test</span></code> folder. We
 use the <a class="reference external" href="https://docs.pytest.org/en/7.2.x/">pytest library</a> to evaluate unit
 tests. Please check that unit tests pass on your machine before making a pull request.</p>
 </section>

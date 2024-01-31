@@ -125,11 +125,11 @@ launch the software, <strong>navigate</strong> will create a copy of the
 Mac/Linux. <strong>navigate</strong> uses these local copies of the configuration files to store
 information specific to the setup attached to the computer it is installed on.</p>
 <p>To avoid confusion, we recommend launching the software in the synthetic hardware
-mode initially. Within your Terminal, or Anaconda Prompt, activate your <strong>navigate</strong> Python
-environment and launch the software by typing: <code class="docutils literal notranslate"><span class="pre">navigate</span> <span class="pre">-sh</span></code>. Thereafter, you should
-only modify the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file in your local <code class="docutils literal notranslate"><span class="pre">.navigate</span></code> directory. The
-local copy avoids conflicts between different microscopes after pulling new
-changes on GitHub.</p>
+mode initially. Within your Terminal, or Anaconda Prompt, activate your <strong>navigate</strong>
+Python environment and launch the software by typing: <code class="docutils literal notranslate"><span class="pre">navigate</span> <span class="pre">-sh</span></code>. Thereafter, you
+should only modify the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file in your local <code class="docutils literal notranslate"><span class="pre">.navigate\config</span></code>
+directory. The local copy avoids conflicts between different microscopes after pulling
+new changes from GitHub.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Once <strong>navigate</strong> is open in the synthetic hardware mode, you can open the
@@ -216,8 +216,8 @@ computer you are using, which in turn allows the <strong>navigate</strong> softw
 with the device.</p>
 </div>
 <p>Running the software with our current microscope setup would fail. It turns out our
-ASI stage only moves in the <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">Z</span></code> and <code class="docutils literal notranslate"><span class="pre">F</span></code> axes. Later, you will see we need a way to
-handle <code class="docutils literal notranslate"><span class="pre">Theta</span></code> axis. To address this, we will change our <code class="docutils literal notranslate"><span class="pre">stage</span></code> block of the YAML to
+ASI stage only moves in the <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">Z</span></code> and <code class="docutils literal notranslate"><span class="pre">F</span></code> axes. We need a way to handle
+the <code class="docutils literal notranslate"><span class="pre">Theta</span></code> axis. To address this, we will change our <code class="docutils literal notranslate"><span class="pre">stage</span></code> block of the YAML to
 also load a <code class="docutils literal notranslate"><span class="pre">SyntheticStage</span></code>:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stage</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span>
@@ -231,7 +231,7 @@ also load a <code class="docutils literal notranslate"><span class="pre">Synthet
 </pre></div>
 </div>
 <p>If your microscope system does not have a device listed in the hardware section using
-the Synthetic typing will allow the software to run without it. Another example would
+the synthetic typing will allow the software to run without it. Another example would
 be replacing the zoom type with <code class="docutils literal notranslate"><span class="pre">SyntheticZoom</span></code> in the instance your microscope does
 not use that hardware. Your system will still run as you expect.</p>
 </section>
@@ -307,15 +307,15 @@ specifies joystick-controlled axes.</p>
 <span class="w">        </span><span class="nt">f_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 </pre></div>
 </div>
-<p>First we set the axes controlled by each piece of hardware and a mapping from the
+<p>First, we set the axes controlled by each piece of hardware and a mapping from the
 hardware’s API axes to our software’s axes. For example, the ASI <code class="docutils literal notranslate"><span class="pre">M</span></code> axis is mapped
 onto our software’s <code class="docutils literal notranslate"><span class="pre">X</span></code> axis below.</p>
 <p>As you may recall from the <a class="reference internal" href="#hardware-section"><span class="std std-ref">Hardware Section</span></a>, we needed to
 add the <code class="docutils literal notranslate"><span class="pre">SyntheticStage</span></code> to control <code class="docutils literal notranslate"><span class="pre">Theta</span></code>. We now specify in the microscope that
 <code class="docutils literal notranslate"><span class="pre">Theta</span></code> is controlled by the synthetic stage in the <code class="docutils literal notranslate"><span class="pre">hardware</span></code> section of
 <code class="docutils literal notranslate"><span class="pre">microscope1</span></code>.</p>
-<p>Below this, we specify that only <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code> and <code class="docutils literal notranslate"><span class="pre">Z</span></code> axes may be controlled by a joystick and
-we set the stage bounds for each of the axes.</p>
+<p>Below this, we specify that only <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code> and <code class="docutils literal notranslate"><span class="pre">Z</span></code> axes may be controlled by a
+joystick and we set the stage bounds for each of the axes.</p>
 <p>Finally, we set the offset for each stage axis. This is an offset relative to other
 microscopes (e.g. <code class="docutils literal notranslate"><span class="pre">microscope2</span></code>) specified in <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code>. In this case,
 <code class="docutils literal notranslate"><span class="pre">microscope1</span></code> is the reference microscope. Additional microscopes may ask the stage
@@ -326,11 +326,11 @@ to move to a different offset in order to observe the sample at the same positio
 <h5>Stage Axes Definition<a class="headerlink" href="#stage-axes-definition" title="Permalink to this heading"></a></h5>
 <p>Many times, the coordinate system of the stage hardware do not agree with the optical
 definition of each axes identity. For example, many stages define their vertical
-dimension as <code class="docutils literal notranslate"><span class="pre">Z</span></code>, whereas optically, we often define this axis as <code class="docutils literal notranslate"><span class="pre">X</span></code>. Thus, there is
-often a need to map the mechanical axes to the optical axes, and this is done with
-the <code class="docutils literal notranslate"><span class="pre">axes_mapping</span></code> dictionary entry in the stage hardware section. By default, stage axes
-are read in as <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">Z</span></code>, <code class="docutils literal notranslate"><span class="pre">Theta</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, where <code class="docutils literal notranslate"><span class="pre">Theta</span></code> is rotation and <code class="docutils literal notranslate"><span class="pre">F</span></code>
-is focus, but this can be changed by changing axes mapping.</p>
+dimension as <code class="docutils literal notranslate"><span class="pre">Z</span></code>, whereas optically, we often define this axis as <code class="docutils literal notranslate"><span class="pre">X</span></code>. Thus, there
+is often a need to map the mechanical axes to the optical axes, and this is done with
+the <code class="docutils literal notranslate"><span class="pre">axes_mapping</span></code> dictionary entry in the stage hardware section. By default, stage
+axes are read in as <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">Z</span></code>, <code class="docutils literal notranslate"><span class="pre">Theta</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, where <code class="docutils literal notranslate"><span class="pre">Theta</span></code> is rotation
+and <code class="docutils literal notranslate"><span class="pre">F</span></code> is focus, but this can be changed by changing axes mapping.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">theta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
 <span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">r</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
 </pre></div>
@@ -354,9 +354,10 @@ appear in the stage field as following:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>These axes should agree with the optical axes. If, on the same microscope
-as mentioned in the Stage Axes Definition section, the joystick were to control
-the optical y-axis corresponding to the stage z axis, you would have to put <code class="docutils literal notranslate"><span class="pre">Y</span></code> in
-the joystick axes brackets as following:</p>
+as mentioned in the <a class="reference internal" href="#stage-axes-definition"><span class="std std-ref">Stage Axes Definition</span></a>
+section, the joystick were to control the optical y-axis corresponding to
+the stage z axis, you would have to put <code class="docutils literal notranslate"><span class="pre">Y</span></code> in the joystick axes brackets
+as following:</p>
 </div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">joystick_axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">y</span><span class="p p-Indicator">]</span>
 </pre></div>
@@ -472,37 +473,31 @@ For example,</p>
 </pre></div>
 </div>
 <p>The values in each field relate to GUI widgets.</p>
-<ul>
+<ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">channels</span></code> section indicates GUI settings for the channel settings under
 <span class="guilabel">Channels</span>, <span class="guilabel">Channel Settings</span>.</p>
-<blockquote>
-<div><ul class="simple">
+<ul>
 <li><p><cite>count</cite> specifies how many channels should be displayed.</p></li>
 <li><p><cite>laser_power</cite>, <cite>exposure_time</cite> and <cite>interval_time</cite> are used to set
 the minimum, maximum and step size values for <span class="guilabel">Power</span>,
 <span class="guilabel">Exp. Time (ms)</span> and <span class="guilabel">Interval</span>, respectively.</p></li>
 </ul>
-</div></blockquote>
 </li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">stack_acquisition</span></code> section indicates GUI settings for the stack acquisition
 settings under <span class="guilabel">Channels</span>, <span class="guilabel">Stack Acquisition Settings (um)</span>.</p>
-<blockquote>
-<div><ul class="simple">
+<ul>
 <li><p><cite>step_size</cite>, <cite>start_pos</cite> and <cite>end_pos</cite> are used to set the minimum, maximum and step
 size values for <span class="guilabel">Step Size</span>, <span class="guilabel">Start</span> and <span class="guilabel">End</span>,
 respectively.</p></li>
 </ul>
-</div></blockquote>
 </li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">timepoint</span></code> section indicates GUI settings for the timepoint
 settings under <span class="guilabel">Channels</span>, <span class="guilabel">Timepoint Settings</span>.</p>
-<blockquote>
-<div><ul class="simple">
+<ul>
 <li><p><cite>timepoints</cite> and <cite>stack_pause</cite> are used to set the minimum, maximum and step
 size values for <span class="guilabel">Timepoints</span> and <span class="guilabel">Stack Pause (s)</span>,
 respectively.</p></li>
 </ul>
-</div></blockquote>
 </li>
 </ul>
 <div class="admonition note">

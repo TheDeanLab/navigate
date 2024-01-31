@@ -889,16 +889,18 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         min_val = self.cget("from")
         max_val = self.cget("to")
 
-        if char not in ("-1234567890."):
-            return False
-
         if (
             min_val == "-Infinity"
             or min_val == float("-inf")
             or max_val == "Infinity"
             or max_val == float("inf")
         ):
-            return True
+            if "inf" in current:
+                self.set("")
+            return char in ("-1234567890.")
+        
+        if char not in ("-1234567890."):
+            return False
 
         no_negative = min_val >= 0
         no_decimal = self.precision >= 0

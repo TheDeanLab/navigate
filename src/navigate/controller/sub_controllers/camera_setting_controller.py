@@ -109,8 +109,8 @@ class CameraSettingController(GUIController):
         self.mode_widgets["Pixels"].get_variable().trace_add(
             "write", self.update_number_of_pixels
         )
-        self.roi_widgets["Width"].get_variable().trace_add("read", self.update_fov)
-        self.roi_widgets["Height"].get_variable().trace_add("read", self.update_fov)
+        self.roi_widgets["Width"].get_variable().trace_add("write", self.update_fov)
+        self.roi_widgets["Height"].get_variable().trace_add("write", self.update_fov)
 
         for btn_name in self.roi_btns:
             self.roi_btns[btn_name].config(command=self.update_roi(btn_name))
@@ -266,12 +266,17 @@ class CameraSettingController(GUIController):
         self.camera_setting_dict["binning"] = self.roi_widgets["Binning"].get()
 
         # Camera FOV Size.
-        x_pixel = self.roi_widgets["Width"].get(self.min_width)
-        y_pixel = self.roi_widgets["Height"].get(self.min_height)
+        x_pixel = self.roi_widgets["Width"].get()
+        y_pixel = self.roi_widgets["Height"].get()
 
         # Round to nearest step
         x_pixels = int(x_pixel // self.step_width) * self.step_width
         y_pixels = int(y_pixel // self.step_height) * self.step_height
+
+        if x_pixels < self.min_width:
+            x_pixels = self.min_width
+        if y_pixels < self.min_height:
+            y_pixels = self.min_height
 
         self.camera_setting_dict["pixel_size"] = self.default_pixel_size
         self.camera_setting_dict["frames_to_average"] = self.framerate_widgets[
@@ -438,17 +443,11 @@ class CameraSettingController(GUIController):
         """
 
         # pixel_size = self.default_pixel_size
-
         try:
-            x_pixel = float(self.roi_widgets["Width"].get(self.min_width))
-            y_pixel = float(self.roi_widgets["Height"].get(self.min_height))
+            x_pixel = float(self.roi_widgets["Width"].get())
+            y_pixel = float(self.roi_widgets["Height"].get())
         except ValueError as e:
-            logger.error(f"{e} similar to TclError")
             return
-
-        # Round to nearest step
-        x_pixel = int(x_pixel // self.step_width) * self.step_width
-        y_pixel = int(y_pixel // self.step_height) * self.step_height
 
         microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"
@@ -464,8 +463,6 @@ class CameraSettingController(GUIController):
 
         self.roi_widgets["FOV_X"].set(physical_dimensions_x)
         self.roi_widgets["FOV_Y"].set(physical_dimensions_y)
-        self.roi_widgets["Width"].set(x_pixel)
-        self.roi_widgets["Height"].set(y_pixel)
 
     def calculate_readout_time(self):
         """Calculate camera readout time.
@@ -519,18 +516,18 @@ class CameraSettingController(GUIController):
             Unused
 
         """
+        if self.mode != "live":
+            return
+
+        if self.pixel_event_id:
+            self.view.after_cancel(self.pixel_event_id)
+        
         pixels = self.mode_widgets["Pixels"].get()
         if pixels == "":
             return
 
-        if self.mode != "live":
-            return
-
         self.camera_setting_dict["number_of_pixels"] = int(pixels)
-
         # tell central controller to update model
-        if self.pixel_event_id:
-            self.view.after_cancel(self.pixel_event_id)
         self.pixel_event_id = self.view.after(
             500,
             lambda: self.parent_controller.execute(

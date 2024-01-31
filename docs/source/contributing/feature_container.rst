@@ -14,9 +14,9 @@ Once a feature is executed, any features dependent on this feature's execution
 will execute (for example, move the stage, then snap a picture). Following
 this, the next set of features in sequence will be executed.
 
-Examples of some existing features include ``navigate.model.features.common_features.ZStackAcquisition``, which acquires a
-z-stack, and ``navigate.model.features.autofocus.Autofocus``, which finds the
-ideal plane of focus of a sample using a Discrete Cosine Transform.
+Examples of some existing features include ``navigate.model.features.common_features.ZStackAcquisition``, 
+which acquires a z-stack, and ``navigate.model.features.autofocus.Autofocus``, 
+which finds the ideal plane of focus of a sample using a discrete cosine transform.
 
 -----------------
 
@@ -241,7 +241,7 @@ To create a customized feature list, follow these steps:
   ``feature_related_functions`` contains convenience imports that allow us to call
   ``PrepareNextChannel`` instead of
   ``navigate.model.features.common_features.PrepareNextChannel``.
-  This makes for more readable code.
+  These functions make for more readable code.
 
 #. Create the feature list.
 

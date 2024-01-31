@@ -36,8 +36,8 @@ Loading Custom Functions
    .. image:: images/step_10.png
 
 
-#. In the :guilabel:`Advanced Setting` popup window, choose the feature name with which you want to use the
-   dynamic customized functions as feature parameters.
+#. In the :guilabel:`Advanced Setting` popup window, choose the feature name with which
+   you want to use the dynamic customized functions as feature parameters.
 
 
    .. image:: images/step_11.png
@@ -155,8 +155,9 @@ Editing Feature Lists on the Fly
    .. image:: images/step_18.png
 
 
-#. Click one feature in the preview window, a :guilabel:`Feature Parameters` window will show up. Then you
-   could set the parameters you want (e.g., :guilabel:`planes` in this screenshot). Close the :guilabel:`Feature Parameters` window.
+#. Click one feature in the preview window, a :guilabel:`Feature Parameters` window 
+   will show up. Then set the desired parameters (e.g., :guilabel:`planes` 
+   in this screenshot). Close the :guilabel:`Feature Parameters` window.
 
 
    .. image:: images/step_19.png
@@ -195,7 +196,7 @@ The square brackets ``[]`` create a sequence of events to run in the feature con
 The ``{}`` braces contain features. The parentheses ``()`` indicate a loop. 
 
 As an example, let's look at the feature list that describes the 
-:ref:`Continuous Scan <acquiring_guide:continuous scan>` mode:
+:ref:`Continuous Scan <user_guide/acquiring_guide:continuous scan>` mode:
 
 .. code-block:: python
 
@@ -212,11 +213,11 @@ As an example, let's look at the feature list that describes the
 Here, we have a sequence defined by ``[]`` containing one element, a loop, indicated
 by the closed parentheses. There are two features within this loop. One feature has the 
 name
-:ref:`PrepareNextChannel <../_autosummary/navigate.model.features.common_features.PrepareNextChannel>`
+:doc:`PrepareNextChannel <../_autosummary/navigate.model.features.common_features.PrepareNextChannel>`
 and the other 
-:ref:`LoopByCount <../_autosummary/navigate.model.features.common_features.LoopByCount>`.
+:doc:`LoopByCount <../_autosummary/navigate.model.features.common_features.LoopByCount>`.
 The parentheses indicate we will keep looping through both of these features until 
 stopping criteria is met. In this case, the looping will stop when ``LoopByCount``
 returns ``False`` due to running out of ``selected_channels`` to loop through. That is,
-it will end once all :ref:`selected channel <gui_walkthrough:channel settings>` have
+it will end once all :ref:`selected channel <user_guide/gui_walkthrough:channel settings>` have
 been imaged.

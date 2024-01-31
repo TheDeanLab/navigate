@@ -32,6 +32,7 @@
 #
 
 # Standard Library Imports
+import os
 import threading
 import ctypes
 import sys
@@ -423,6 +424,8 @@ class SynchronizedThreadPool:
         if event == "exception":
             print("****in local trace: exception stops the thread")
             logger.debug("****in local trace: exception stops the thread")
+            if os.getenv("GITHUB_ACTIONS") == "true":
+                return
             raise SystemExit()
         return self.localtrace
 

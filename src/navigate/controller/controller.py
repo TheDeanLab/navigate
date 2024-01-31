@@ -753,6 +753,9 @@ class Controller:
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
+            
+            # set the display segmentation flag to False
+            self.camera_view_controller.display_mask_flag = False
 
             # ask user to verify feature list parameters if in "customized" mode
             if self.acquire_bar_controller.mode == "customized":

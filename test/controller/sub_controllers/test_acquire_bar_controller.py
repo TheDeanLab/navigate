@@ -223,7 +223,7 @@ class TestAcquireBarController:
             ("live", "disabled"),
             ("z-stack", "normal"),
             ("single", "disabled"),
-            ("customized", "disabled"),
+            ("customized", "normal"),
         ],
     )
     def test_update_stack_acq(self, mode, expected_state):
@@ -250,7 +250,12 @@ class TestAcquireBarController:
         self.acquire_bar_controller.update_stack_acq(mode)
         for key, widget in stack.items():
             state = str(widget.widget["state"])
-            assert state == expected_state, f"Widget state not correct for {mode} mode"
+            if key in ["number_z_steps", "abs_z_start", "abs_z_end"]:
+                assert (
+                    state == "disabled", f"Widget: {key} should be disabled all the time"
+                )
+            else:
+                assert state == expected_state, f"Widget state not correct for {mode} mode"
 
         # Switching back to original live
         self.acquire_bar_controller.update_stack_acq("live")

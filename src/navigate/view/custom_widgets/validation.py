@@ -154,7 +154,6 @@ class ValidatedMixin:
         #: Hover: The hover bubble for the widget
         self.hover = Hover(self, text=None, type="free")
         self.hover_flag = kwargs.get("hover_flag", False)
-        self.is_error = False
 
     def _toggle_error(self, on=False):
         """Toggle the error message
@@ -214,7 +213,7 @@ class ValidatedMixin:
                 index=index,
                 action=action,
             )
-            if valid and not self.is_error:
+            if valid:
                 self.add_history(event)
         return valid
 
@@ -884,8 +883,6 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         --------
         >>> spinbox._key_validate('1', 0, '0', '1', 'insert')
         """
-        self.is_error = False
-        valid = True
         min_val = self.cget("from")
         max_val = self.cget("to")
 
@@ -907,6 +904,9 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         # Allow deletion
         if action == "0":
+            if proposed == "":
+                return True
+            self._is_valid_proposed_value(proposed)
             return True
 
         # Testing keystroke for validity
@@ -920,22 +920,35 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         ):
             return False
 
-        # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-'
-        # and '.'
+        return self._is_valid_proposed_value(proposed)
+    
+    def _is_valid_proposed_value(self, proposed):
+        """Validate a proposed value
+        
+        Returns
+        -------
+        bool
+            True if the proposed is valid, False if not
+        """
         if proposed == "-" or proposed == ".":
+            self._toggle_error(True)
             return True
 
         # Proposed value is a Decimal, so convert and check further
         proposed = Decimal(proposed)
         proposed_precision = proposed.as_tuple().exponent
+        min_val = self.cget("from")
+        max_val = self.cget("to")
         if any([(proposed > max_val), (proposed_precision < self.precision)]):
             return False
         
         if proposed < min_val:
-            self.is_error = True
             self._toggle_error(True)
+            return True
 
-        return valid
+        self._toggle_error(False)
+
+        return True
 
     def _focusout_validate(self, event):
         """Validate the spinbox when it loses focus and set the error message.
@@ -1062,20 +1075,23 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             self.variable.set(current)
         self.trigger_focusout_validation()  # Revalidate with the new maximum
 
-    def _toggle_error(self, on=False):
-        """Toggle the error message of the spinbox.
+    def add_history(self, event):
+        """Add the current value to the history of the widget.
 
         Parameters
         ----------
-        on : bool, optional
-            Whether to turn the error on or off, by default False
-
-        Examples
-        --------
-        >>> spinbox._toggle_error()
+        event : tk.Event
+            The event that triggered the history addition
         """
-        super()._toggle_error(on)
-        if on and self.hover_flag:
-            self.hover.seterror(self.error.get())
-        else:
-            self.hover.hidetip()
+        value = self.get()
+        if value != "":
+            min_val = self.cget("from")
+            max_val = self.cget("to")
+            # Don't add duplicates
+            if self.undo_history and self.undo_history[-1] == value:
+                pass
+            elif value != "-" and value != "." and Decimal(value) >= min_val and Decimal(value) <= max_val:
+                self.undo_history.append(value)
+                self.redo_history = []
+            if len(self.undo_history) > 3:
+                self.undo_history.pop(0)

@@ -281,6 +281,7 @@ class AcquireBarController(GUIController):
         self.stop_progress_bar()
         self.view.acquire_btn.configure(text="Acquire")
         self.view.acquire_btn.configure(state="normal")
+        self.view.pull_down.configure(state="normal")
         self.is_acquiring = False
 
     def set_save_option(self, is_save):
@@ -349,6 +350,7 @@ class AcquireBarController(GUIController):
         else:
             self.is_acquiring = True
             self.view.acquire_btn.configure(state="disabled")
+            self.view.pull_down.configure(state="disabled")
             self.parent_controller.execute("acquire")
 
     def update_microscope_mode(self, *args):

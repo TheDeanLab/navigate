@@ -40,7 +40,6 @@ import numpy as np
 import tkinter as tk
 
 # Local Imports
-from navigate.controller.sub_controllers.widget_functions import validate_wrapper
 from navigate.controller.sub_controllers.gui_controller import GUIController
 from navigate.controller.sub_controllers.channel_setting_controller import (
     ChannelSettingController,
@@ -88,18 +87,7 @@ class ChannelsTabController(GUIController):
             self.parent_controller.configuration_controller,
         )
 
-        # add validation functions to spinbox
-        # this function validate user's input (not from experiment file)
-        # and will stop propagating errors to any 'parent' functions
-        # the only thing is that when the user's input is smaller than the limits,
-        # it will show inputs in red, but still let the function know the inputs changed
-        # I can not block it since the Tkinter's working strategy
-
-        validate_wrapper(self.view.stack_timepoint_frame.stack_pause_spinbox)
-        validate_wrapper(
-            self.view.stack_timepoint_frame.exp_time_spinbox, is_integer=True
-        )
-
+        self.view.stack_timepoint_frame.exp_time_spinbox.set_precision(0)
         # Get Widgets and Buttons from stack_acquisition_settings in view
         #: dict: The widgets in the stack acquisition settings frame.
         self.stack_acq_widgets = self.view.stack_acq_frame.get_widgets()
@@ -224,8 +212,8 @@ class ChannelsTabController(GUIController):
         self.toggle_multiposition()
 
         # validate
-        self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
-        self.view.stack_timepoint_frame.exp_time_spinbox.validate()
+        self.view.stack_timepoint_frame.stack_pause_spinbox.trigger_focusout_validation()
+        self.view.stack_timepoint_frame.exp_time_spinbox.trigger_focusout_validation()
 
         if self.microscope_state_dict["stack_cycling_mode"] not in [
             "per_z",
@@ -830,6 +818,8 @@ class ChannelsTabController(GUIController):
         warning = self.channel_setting_controller.verify_experiment_values()
         if warning:
             return warning
+        if self.microscope_state_dict["number_z_steps"] != self.stack_acq_vals["number_z_steps"].get():
+            return "There is something wrong with the stack settings!"
         if self.microscope_state_dict["number_z_steps"] < 1:
             return "The number of Z steps should be at least 1!"
         try:

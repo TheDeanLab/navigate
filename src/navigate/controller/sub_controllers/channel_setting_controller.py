@@ -37,7 +37,6 @@ import tkinter as tk
 # Third party imports
 
 # Local application imports
-from navigate.controller.sub_controllers.widget_functions import validate_wrapper
 from navigate.controller.sub_controllers.gui_controller import GUIController
 
 
@@ -81,12 +80,6 @@ class ChannelSettingController(GUIController):
 
         #: dict: The channel setting dictionary.
         self.channel_setting_dict = None
-
-        # add validation functions to spinbox
-        for i in range(self.num):
-            validate_wrapper(self.view.exptime_pulldowns[i])
-            validate_wrapper(self.view.interval_spins[i])
-            validate_wrapper(self.view.laserpower_pulldowns[i])
 
         # widget command binds
         for i in range(self.num):
@@ -171,9 +164,9 @@ class ChannelSettingController(GUIController):
                 channel_vals[name].set(channel_value[name])
 
             # validate exposure_time, interval, laser_power
-            self.view.exptime_pulldowns[channel_id].validate()
-            self.view.interval_spins[channel_id].validate()
-            self.view.laserpower_pulldowns[channel_id].validate()
+            self.view.exptime_pulldowns[channel_id].trigger_focusout_validation()
+            self.view.interval_spins[channel_id].trigger_focusout_validation()
+            self.view.laserpower_pulldowns[channel_id].trigger_focusout_validation()
 
         self.show_verbose_info("channel has been set new value")
 
@@ -293,7 +286,8 @@ class ChannelSettingController(GUIController):
                 except Exception:
                     setting_dict[widget_name] = 0
                     return False
-                setting_range = self.parent_controller.configuration["configuration"]["gui"]["channels"][widget_name]
+                ref_name = "exposure_time" if widget_name == "camera_exposure_time" else widget_name
+                setting_range = self.parent_controller.parent_controller.configuration["configuration"]["gui"]["channels"][ref_name]
                 if setting_dict[widget_name] < setting_range["min"] or setting_dict[widget_name] > setting_range["max"]:
                     return False
             else:

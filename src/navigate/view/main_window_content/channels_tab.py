@@ -256,7 +256,7 @@ class ChannelCreator(ttk.Labelframe):
             #  Laser Power Spinbox
             self.laserpower_variables.append(tk.StringVar())
             self.laserpower_pulldowns.append(
-                ttk.Spinbox(
+                ValidatedSpinbox(
                     self.frame_columns[2],
                     from_=0,
                     to=100.0,
@@ -287,7 +287,7 @@ class ChannelCreator(ttk.Labelframe):
             #  Exposure Time Spin boxes
             self.exptime_variables.append(tk.StringVar())
             self.exptime_pulldowns.append(
-                ttk.Spinbox(
+                ValidatedSpinbox(
                     self.frame_columns[4],
                     from_=0,
                     to=5000.0,
@@ -304,7 +304,7 @@ class ChannelCreator(ttk.Labelframe):
             #  Time Interval Spin boxes
             self.interval_variables.append(tk.StringVar())
             self.interval_spins.append(
-                ttk.Spinbox(
+                ValidatedSpinbox(
                     self.frame_columns[5],
                     from_=0,
                     to=5000.0,
@@ -579,7 +579,7 @@ class StackTimePointFrame(ttk.Labelframe):
         #: tk.StringVar: The variable for the timepoints spinbox
         self.exp_time_spinval = tk.StringVar()
         #: ttk.Spinbox: The timepoints spinbox
-        self.exp_time_spinbox = ttk.Spinbox(
+        self.exp_time_spinbox = ValidatedSpinbox(
             self,
             from_=0,
             to=5000,
@@ -619,7 +619,7 @@ class StackTimePointFrame(ttk.Labelframe):
         #: tk.StringVar: The variable for the stack pause spinbox
         self.stack_pause_spinval = tk.StringVar()
         #: ttk.Spinbox: The stack pause spinbox
-        self.stack_pause_spinbox = ttk.Spinbox(
+        self.stack_pause_spinbox = ValidatedSpinbox(
             self,
             from_=0,
             to=5000.0,

@@ -48,7 +48,7 @@ logger = logging.getLogger(p)
 class AcquireBarController(GUIController):
     """Acquire Bar Controller."""
 
-    def __init__(self, view, parent_view, parent_controller):
+    def __init__(self, view, parent_controller):
         """Initialize the Acquire Bar Controller.
 
         Parameters
@@ -62,12 +62,8 @@ class AcquireBarController(GUIController):
         """
         super().__init__(view, parent_controller)
 
-        #: object: Instance of the Main View.
-        self.parent_view = parent_view
-
         #: str: Acquisition image mode.
         self.mode = "live"
-        self.update_stack_acq(self.mode)
         #: bool: Whether the image will be saved.
         self.is_save = False
         #: bool: Whether the microscope is acquiring.
@@ -369,66 +365,12 @@ class AcquireBarController(GUIController):
         """
         self.mode = self.mode_dict[self.view.pull_down.get()]
         self.show_verbose_info("The Microscope State is now:", self.get_mode())
-
+        # acquire_bar_controller - update image mode
+        self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "image_mode"
+        ] = self.mode
         # Update state status of other widgets in the GUI based on what mode is set
-        self.update_stack_acq(self.mode)
-        self.update_stack_time(self.mode)
-
-        if self.mode == "customized":
-            self.parent_controller.channels_tab_controller.disable_multiposition_btn()
-        else:
-            self.parent_controller.channels_tab_controller.enable_multiposition_btn()
-
-    def update_stack_acq(self, mode):
-        """Changes state behavior of widgets in the stack acquisition frame based on
-        mode of microscope
-
-        Parameters
-        ----------
-        mode : str
-            Imaging Mode.
-
-        Examples
-        --------
-        >>> update_stack_acq('live')
-        """
-
-        # Get ref to widgets
-        stack_widgets = self.parent_view.stack_acq_frame.get_widgets()
-
-        # Grey out stack acq widgets when not Zstack or projection
-        if mode == "live" or mode == "single":
-            state = "disabled"
-        else:
-            state = "normal"
-        for key, widget in stack_widgets.items():
-            if key not in ["number_z_steps", "abs_z_start", "abs_z_end"]:
-                widget.widget["state"] = state
-
-    def update_stack_time(self, mode):
-        """Changes state behavior of widgets in the stack timepoint frame based on mode
-        of microscope
-
-        Parameters
-        ----------
-        mode : str
-            Imaging Mode.
-
-        Examples
-        --------
-        >>> update_stack_time('live')
-        """
-
-        # Get ref to widgets
-        time_widgets = self.parent_view.stack_timepoint_frame.get_widgets()
-
-        # Grey out time widgets when in Continuous mode
-        if mode == "live":
-            state = "disabled"
-        else:
-            state = "normal"
-        for key, widget in time_widgets.items():
-            widget["state"] = state
+        self.parent_controller.channels_tab_controller.set_mode("stop")
 
     def update_file_type(self, file_type):
         """Updates the file type when the drop down in save dialog is changed.
@@ -515,8 +457,6 @@ class AcquireBarController(GUIController):
             "is_save"
         ]
         self.set_save_option(is_save)
-        if self.mode == "customized":
-            self.parent_controller.channels_tab_controller.disable_multiposition_btn()
 
     def update_experiment_values(self, popup_window):
         """Gets the entries from the popup save dialog and overwrites the

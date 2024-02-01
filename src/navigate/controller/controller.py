@@ -189,7 +189,7 @@ class Controller:
         # Sub Gui Controllers
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(
-            self.view.acqbar, self.view.settings.channels_tab, self
+            self.view.acqbar, self
         )
         #: ChannelsTabController: Channels Tab Sub-Controller.
         self.channels_tab_controller = ChannelsTabController(
@@ -421,10 +421,6 @@ class Controller:
             Warning info if any
 
         """
-        # acquire_bar_controller - update image mode
-        self.configuration["experiment"]["MicroscopeState"][
-            "image_mode"
-        ] = self.acquire_bar_controller.get_mode()
         self.camera_setting_controller.update_experiment_values()
         # update multi-positions
         positions = self.multiposition_tab_controller.get_positions()

@@ -79,7 +79,7 @@ class TestAcquireBarController:
         v = dummy_controller.view
 
         self.acquire_bar_controller = AcquireBarController(
-            v.acqbar, v.settings.channels_tab, c
+            v.acqbar, c
         )
         self.acquire_bar_controller.populate_experiment_values()
 
@@ -108,7 +108,7 @@ class TestAcquireBarController:
             If the attributes of the AcquireBarController class are not correct
         """
         # Listing off attributes to check existence
-        attrs = ["parent_view", "mode", "is_save", "mode_dict"]
+        attrs = ["mode", "is_save", "mode_dict"]
 
         for attr in attrs:
             assert hasattr(self.acquire_bar_controller, attr)
@@ -216,99 +216,6 @@ class TestAcquireBarController:
 
         assert after_stop == 0, "Progress Bar did not stop"
         assert after_ovr == 0, "Progress Bar did not stop"
-
-    @pytest.mark.parametrize(
-        "mode,expected_state",
-        [
-            ("live", "disabled"),
-            ("z-stack", "normal"),
-            ("single", "disabled"),
-            ("customized", "normal"),
-        ],
-    )
-    def test_update_stack_acq(self, mode, expected_state):
-        """Tests the update_stack_acq method of the AcquireBarController class
-
-        Parameters
-        ----------
-        mode : str
-            Mode of the progress bar
-        expected_state : str
-            Expected state of the progress bar
-
-
-        Raises
-        ------
-        AssertionError
-            If the update_stack_acq method of the
-            AcquireBarController class is not correct
-        """
-
-        stack = self.acquire_bar_controller.parent_view.stack_acq_frame.get_widgets()
-
-        # Checking mode and expected state
-        self.acquire_bar_controller.update_stack_acq(mode)
-        for key, widget in stack.items():
-            state = str(widget.widget["state"])
-            if key in ["number_z_steps", "abs_z_start", "abs_z_end"]:
-                assert (
-                    state == "disabled", f"Widget: {key} should be disabled all the time"
-                )
-            else:
-                assert state == expected_state, f"Widget state not correct for {mode} mode"
-
-        # Switching back to original live
-        self.acquire_bar_controller.update_stack_acq("live")
-        for key, widget in stack.items():
-            state = str(widget.widget["state"])
-            assert (
-                state == "disabled"
-            ), "Widget state not correct for switching back to live mode"
-
-    @pytest.mark.parametrize(
-        "mode,expected_state",
-        [
-            ("live", "disabled"),
-            ("z-stack", "normal"),
-            ("single", "normal"),
-            ("customized", "normal")
-        ],
-    )
-    def test_update_stack_time(self, mode, expected_state):
-        """Tests the update_stack_time method of the AcquireBarController class
-
-        Parameters
-        ----------
-        mode : str
-            Mode of the progress bar
-        expected_state : str
-            Expected state of the progress bar
-
-
-        Raises
-        ------
-        AssertionError
-            If the update_stack_time method of the
-            AcquireBarController class is not correct
-        """
-
-        stack_time = (
-            self.acquire_bar_controller.parent_view.stack_timepoint_frame.get_widgets()
-        )
-
-        # Checking mode and expected state
-        self.acquire_bar_controller.update_stack_time(mode)
-        for key, widget in stack_time.items():
-            state = str(widget["state"])
-            assert state == expected_state, f"Widget state not correct for {mode} mode"
-
-        # Switching back to orginal live
-        self.acquire_bar_controller.update_stack_time("live")
-        for key, widget in stack_time.items():
-            state = str(widget["state"])
-            assert (
-                state == "disabled"
-            ), "Widget state not correct for switching back to live mode"
 
     @pytest.mark.parametrize("mode", ["live", "single", "z-stack", "customized"])
     def test_get_set_mode(self, mode):

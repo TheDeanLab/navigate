@@ -324,7 +324,7 @@ class ValidatedMixin:
             # Don't add duplicates
             if self.undo_history and self.undo_history[-1] == value:
                 pass
-            elif value != "-" and value != ".":
+            else:
                 self.undo_history.append(value)
                 self.redo_history = []
             if len(self.undo_history) > 3:
@@ -1074,6 +1074,24 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         else:
             self.variable.set(current)
         self.trigger_focusout_validation()  # Revalidate with the new maximum
+
+    def _toggle_error(self, on=False):
+        """Toggle the error message of the spinbox.
+
+        Parameters
+        ----------
+        on : bool, optional
+            Whether to turn the error on or off, by default False
+
+        Examples
+        --------
+        >>> spinbox._toggle_error()
+        """
+        super()._toggle_error(on)
+        if on:
+            self.hover.seterror(self.error.get())
+        else:
+            self.hover.hidetip()
 
     def add_history(self, event):
         """Add the current value to the history of the widget.

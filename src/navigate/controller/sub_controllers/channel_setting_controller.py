@@ -155,7 +155,7 @@ class ChannelSettingController(GUIController):
         self.channel_setting_dict = setting_dict
         prefix = "channel_"
         for channel in setting_dict.keys():
-            channel_id = int(channel[len(prefix):]) - 1
+            channel_id = int(channel[len(prefix) :]) - 1
             channel_vals = self.get_vals_by_channel(channel_id)
             if not channel_vals:
                 return
@@ -286,9 +286,18 @@ class ChannelSettingController(GUIController):
                 except Exception:
                     setting_dict[widget_name] = 0
                     return False
-                ref_name = "exposure_time" if widget_name == "camera_exposure_time" else widget_name
-                setting_range = self.parent_controller.parent_controller.configuration["configuration"]["gui"]["channels"][ref_name]
-                if setting_dict[widget_name] < setting_range["min"] or setting_dict[widget_name] > setting_range["max"]:
+                ref_name = (
+                    "exposure_time"
+                    if widget_name == "camera_exposure_time"
+                    else widget_name
+                )
+                setting_range = self.parent_controller.parent_controller.configuration[
+                    "configuration"
+                ]["gui"]["channels"][ref_name]
+                if (
+                    setting_dict[widget_name] < setting_range["min"]
+                    or setting_dict[widget_name] > setting_range["max"]
+                ):
                     return False
             else:
                 setting_dict[widget_name] = channel_vals[widget_name].get()
@@ -414,7 +423,7 @@ class ChannelSettingController(GUIController):
 
     def verify_experiment_values(self):
         """Verify channel settings and return warning info
-        
+
         Returns
         -------
         string
@@ -428,15 +437,15 @@ class ChannelSettingController(GUIController):
                 selected_channel_num += 1
                 # laser power
                 if setting_dict["laser_power"] < setting_range["laser_power"]["min"]:
-                    return "One selected channel has lower laser power!"
+                    return f"Laser power below configured threshold. Please adjust to meet or exceed the specified minimum in the configuration.yaml({setting_range['laser_power']['min']})."
                 elif setting_dict["laser_power"] > setting_range["laser_power"]["max"]:
-                    return "One selected channel has larger laser power!"
+                    return f"Laser power exceeds configured maximum. Please adjust to meet or be below the specified maximum in the configuration.yaml({setting_range['laser_power']['max']})."
                 # exposure time
                 if setting_dict["camera_exposure_time"] < setting_range["exposure_time"]["min"]:
-                    return "One selected channel has lower exposure time!"
+                    return f"Exposure time below configured threshold.Please adjust to meet or exceed the specified minimum in the configuration.yaml({setting_range['exposure_time']['min']})."
                 elif setting_dict["camera_exposure_time"] > setting_range["exposure_time"]["max"]:
-                    return "One selected channel has larger exposure time!"
-                
+                    return f"Exposure time exceeds configured maximum. Please adjust to meet or be below the specified maximum in the configuration.yaml({setting_range['exposure_time']['max']})"
+
         if selected_channel_num == 0:
             return "No selected channel!"
         return None

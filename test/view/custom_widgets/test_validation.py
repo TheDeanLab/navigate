@@ -47,9 +47,10 @@ def test_undo(entry):
     entry.add_history(0)
     entry.set(43.0)
     entry.add_history(0)
+    entry.set(45.0)
     entry.undo(0)
-    assert entry.get() == "42.0"
-    assert entry.redo_history.pop() == "43.0"
+    assert entry.get() == "43.0"
+    assert entry.redo_history.pop() == "45.0"
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
@@ -58,10 +59,11 @@ def test_redo(entry):
     entry.add_history(0)
     entry.set(43.0)
     entry.add_history(0)
+    entry.set(45.0)
     entry.undo(0)
-    assert entry.get() == "42.0"
-    entry.redo(0)
     assert entry.get() == "43.0"
+    entry.redo(0)
+    assert entry.get() == "45.0"
     assert entry.undo_history == ["42.0", "43.0"]
 
 
@@ -69,19 +71,21 @@ def test_redo(entry):
 def test_undo_redo(entry):
     # Random number of entries
     vals = [random.randint(1, 100) for _ in range(random.randint(3, 5))]
-    for val in vals:
+    for i in range(len(vals)-1):
+        val = vals[i]
         entry.set(val)
         entry.add_history(0)
+    entry.set(vals[-1])
 
     n_tries = random.randint(1, 10)
     for _ in range(n_tries):
         entry.undo(0)
         assert entry.redo_history == [str(vals[-1])]
         assert entry.get() == str(vals[-2])
-        assert entry.undo_history == [str(vals[-3])]
+        assert entry.undo_history[-1] == str(vals[-3])
         entry.redo(0)
         assert entry.get() == str(vals[-1])
-        assert entry.undo_history == [str(x) for x in vals[-3:]]
+        assert entry.undo_history[-1] == str(vals[-2])
         assert entry.redo_history == []
 
 

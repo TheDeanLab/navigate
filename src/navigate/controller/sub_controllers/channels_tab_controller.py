@@ -40,7 +40,6 @@ import numpy as np
 import tkinter as tk
 
 # Local Imports
-from navigate.controller.sub_controllers.widget_functions import validate_wrapper
 from navigate.controller.sub_controllers.gui_controller import GUIController
 from navigate.controller.sub_controllers.channel_setting_controller import (
     ChannelSettingController,
@@ -88,18 +87,7 @@ class ChannelsTabController(GUIController):
             self.parent_controller.configuration_controller,
         )
 
-        # add validation functions to spinbox
-        # this function validate user's input (not from experiment file)
-        # and will stop propagating errors to any 'parent' functions
-        # the only thing is that when the user's input is smaller than the limits,
-        # it will show inputs in red, but still let the function know the inputs changed
-        # I can not block it since the Tkinter's working strategy
-
-        validate_wrapper(self.view.stack_timepoint_frame.stack_pause_spinbox)
-        validate_wrapper(
-            self.view.stack_timepoint_frame.exp_time_spinbox, is_integer=True
-        )
-
+        self.view.stack_timepoint_frame.exp_time_spinbox.set_precision(0)
         # Get Widgets and Buttons from stack_acquisition_settings in view
         #: dict: The widgets in the stack acquisition settings frame.
         self.stack_acq_widgets = self.view.stack_acq_frame.get_widgets()
@@ -221,11 +209,12 @@ class ChannelsTabController(GUIController):
 
         # check configuration for multiposition settings
         self.is_multiposition_val.set(self.microscope_state_dict["is_multiposition"])
+        self.is_multiposition_cache = self.is_multiposition
         self.toggle_multiposition()
 
         # validate
-        self.view.stack_timepoint_frame.stack_pause_spinbox.validate()
-        self.view.stack_timepoint_frame.exp_time_spinbox.validate()
+        self.view.stack_timepoint_frame.stack_pause_spinbox.trigger_focusout_validation()
+        self.view.stack_timepoint_frame.exp_time_spinbox.trigger_focusout_validation()
 
         if self.microscope_state_dict["stack_cycling_mode"] not in [
             "per_z",
@@ -308,13 +297,31 @@ class ChannelsTabController(GUIController):
         --------
         >>> self.set_mode(mode)
         """
+        image_mode = self.microscope_state_dict["image_mode"]
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
 
-        state = "normal" if mode == "stop" else "disabled"
-        for key, widget in self.stack_acq_widgets.items():
-            widget.widget["state"] = state
-        self.view.stack_timepoint_frame.save_check["state"] = state
+        state_readonly = "readonly" if mode == "stop" else "disabled"
+        if mode != "stop":
+            state = "disabled"
+        elif image_mode == "live" or image_mode == "single":
+            state = "disabled"
+        else:
+            state = "normal"
+        for widget_name in [
+            "start_position",
+            "start_focus",
+            "end_position",
+            "end_focus",
+            "step_size",
+        ]:
+            self.stack_acq_widgets[widget_name].widget["state"] = state
+        self.stack_acq_widgets["cycling"].widget["state"] = (
+            "readonly" if state == "normal" else "disabled"
+        )
+        self.view.stack_timepoint_frame.save_check["state"] = (
+            "normal" if image_mode == "single" and mode == "stop" else state
+        )
         self.view.stack_timepoint_frame.stack_pause_spinbox["state"] = state
         self.view.stack_timepoint_frame.exp_time_spinbox["state"] = state
 
@@ -327,6 +334,11 @@ class ChannelsTabController(GUIController):
             if mode == "customized":
                 self.is_multiposition_val.set(False)
                 self.toggle_multiposition()
+
+        if image_mode == "customized" or mode != "stop":
+            self.disable_multiposition_btn()
+        else:
+            self.enable_multiposition_btn()
 
         self.show_verbose_info("acquisition mode has been changed to", mode)
 
@@ -809,3 +821,30 @@ class ChannelsTabController(GUIController):
             )
 
         self.show_verbose_info("Received command from child", command, args)
+
+    def verify_experiment_values(self):
+        """Verify channel tab settings and return warning info
+
+        Returns
+        -------
+        string
+            Warning info
+        """
+        warning = self.channel_setting_controller.verify_experiment_values()
+        if warning:
+            return warning
+        if self.microscope_state_dict["image_mode"] not in ["live", "single"]:
+            if (
+                self.microscope_state_dict["number_z_steps"]
+                != self.stack_acq_vals["number_z_steps"].get()
+            ):
+                return "There is something wrong with the stack settings!"
+            if self.microscope_state_dict["number_z_steps"] < 1:
+                return "The number of Z steps should be at least 1!"
+            try:
+                float(self.microscope_state_dict["stack_pause"])
+            except:
+                return "Stack pause should be a valid number!"
+            if self.microscope_state_dict["timepoints"] < 1:
+                return "Timepoints should be at least 1!"
+        return None

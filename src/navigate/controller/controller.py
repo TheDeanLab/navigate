@@ -189,7 +189,7 @@ class Controller:
         # Sub Gui Controllers
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(
-            self.view.acqbar, self.view.settings.channels_tab, self
+            self.view.acqbar, self
         )
         #: ChannelsTabController: Channels Tab Sub-Controller.
         self.channels_tab_controller = ChannelsTabController(
@@ -417,14 +417,10 @@ class Controller:
 
         Returns
         -------
-        bool
-            True if all settings are valid, False otherwise.
+        string
+            Warning info if any
 
         """
-        # acquire_bar_controller - update image mode
-        self.configuration["experiment"]["MicroscopeState"][
-            "image_mode"
-        ] = self.acquire_bar_controller.get_mode()
         self.camera_setting_controller.update_experiment_values()
         # update multi-positions
         positions = self.multiposition_tab_controller.get_positions()
@@ -439,11 +435,13 @@ class Controller:
         ] = len(positions)
 
         # TODO: validate experiment dict
+
+        channel_warning = self.channels_tab_controller.verify_experiment_values()
+        if channel_warning:
+            return channel_warning
         if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
-            return False
-        if self.configuration["experiment"]["MicroscopeState"]["number_z_steps"] < 1:
-            return False
-        return True
+            return "Scan range shouldn't be 0!"
+        return ""
 
     def resize(self, event):
         """Resize the GUI.
@@ -481,11 +479,11 @@ class Controller:
         bool
             True if all settings are valid, False otherwise.
         """
-        if not self.update_experiment_setting():
+        warning_info = self.update_experiment_setting()
+        if warning_info:
             messagebox.showerror(
                 title="Warning",
-                message="There are some missing/wrong settings! "
-                "Cannot start acquisition!",
+                message=f"Cannot start acquisition!\n{warning_info}",
             )
             return False
 

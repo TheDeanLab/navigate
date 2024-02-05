@@ -33,7 +33,7 @@
 
 # Standard Library Imports
 import logging
-import tkinter as tk
+from tkinter import messagebox
 
 # Third Party Imports
 
@@ -87,6 +87,8 @@ class TilingWizardController(GUIController):
         self.variables = self.view.get_variables()
         #: int: Default percent overlap between tiles
         self._percent_overlap = 10.0  # default to 10% overlap
+        #: dict: flags indicating if all the value are correct to set the table
+        self.is_validated = {"x": True, "y": True, "z": True, "f": True}
 
         # Init widgets to zero
         #: list: List of axes to iterate over
@@ -251,6 +253,12 @@ class TilingWizardController(GUIController):
         --------
         >>> self.set_table()
         """
+        if False in self.is_validated.values():
+            messagebox.showwarning(
+                title="Navigate",
+                message="Can't calculate positions, please make sure all FOV Dists are correct!",
+            )
+            return
 
         x_start = float(self.variables["x_start"].get())
         x_stop = float(self.variables["x_end"].get())
@@ -397,6 +405,11 @@ class TilingWizardController(GUIController):
         overlay = float(self._percent_overlap) / 100
 
         for ax in axis:
+            self.is_validated[ax] = True
+            fov_value = self.variables[f"{ax}_fov"].get()
+            if not fov_value or "inf" in fov_value:
+                self.is_validated[ax] = False
+                return
             try:
                 dist = abs(float(self.variables[f"{ax}_dist"].get()))  # um
                 fov = abs(float(self.variables[f"{ax}_fov"].get()))  # um
@@ -411,6 +424,7 @@ class TilingWizardController(GUIController):
 
                 self.variables[f"{ax}_tiles"].set(num_tiles)
             except ValueError as e:
+                self.is_validated[ax] = False
                 logger.warning(f"Controller - Tiling Wizard - {e}")
 
     def calculate_distance(self, axis):
@@ -546,8 +560,10 @@ class TilingWizardController(GUIController):
 
                 self.calculate_tiles(ax)
             except ValueError as e:
-                logger.debug(f"Controller - Tiling Wizard - Caught ValueError: {e}. "\
-                             "Declining to update FOV.")
+                logger.debug(
+                    f"Controller - Tiling Wizard - Caught ValueError: {e}. "
+                    "Declining to update FOV."
+                )
                 pass
 
     def showup(self):

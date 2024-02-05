@@ -742,6 +742,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
                 self.add_history(event)
             else:
                if self.undo_history:
+                   self.is_fake_focusout = True
                    self.set(self.undo_history[-1])
                    self.undo_history.pop()
                    self._toggle_error(False)

@@ -537,6 +537,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         # Allow deletion
         if action == "0":
             if proposed == "":
+                self.is_fake_focusout = False
                 return True
             self._is_valid_proposed_value(proposed)
             return True

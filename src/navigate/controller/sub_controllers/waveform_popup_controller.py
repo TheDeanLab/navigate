@@ -207,7 +207,7 @@ class WaveformPopupController(GUIController):
         self.laser_min = self.configuration_controller.remote_focus_dict["hardware"]["min"]
         self.laser_max = self.configuration_controller.remote_focus_dict["hardware"]["max"]
         
-        precision = int(self.configuration_controller.remote_focus_dict["hardware"].get("precisition", 0))
+        precision = int(self.configuration_controller.remote_focus_dict["hardware"].get("precision", 0))
         increment = int(self.configuration_controller.remote_focus_dict["hardware"].get("step", 0))
         if precision == 0:
             precision = -4 if self.laser_max < 1 else -3

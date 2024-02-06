@@ -43,10 +43,11 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class HamamatsuOrca(CameraBase):
+class HamamatsuBase(CameraBase):
     """HamamatsuOrca camera class.
 
-    This is by default for an Orca Flash 4.0, Fusion, and Lightning cameras.
+    This is the default parent class for Hamamatsu Cameras.
+    This includes the ORCA Flash 4.0, Fusion, Lightning, and Fire.
 
     **Configuration**::
 
@@ -92,7 +93,7 @@ class HamamatsuOrca(CameraBase):
             Name of microscope in configuration
         device_connection : object
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : multiprocessing.managers.DictProxy
             Global configuration of the microscope
         """
         super().__init__(microscope_name, device_connection, configuration)
@@ -104,7 +105,7 @@ class HamamatsuOrca(CameraBase):
         self.camera_parameters["y_pixels_min"] = self.min_image_height
         self.camera_parameters["x_pixels_step"] = self.step_image_width
         self.camera_parameters["y_pixels_step"] = self.step_image_height
-        self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom", "Bottom-to-Top"]
+
         #: object: Camera controller
         if self.camera_controller.get_property_value("readout_speed"):
             _, speed_max, _ = self.camera_controller.get_property_range("readout_speed")
@@ -610,7 +611,7 @@ class HamamatsuOrca(CameraBase):
         return trigger_blank
 
 
-class HamamatsuOrcaLightning(HamamatsuOrca):
+class HamamatsuOrcaLightning(HamamatsuBase):
     """HamamatsuOrcaLightning camera class."""
 
     def __init__(self, microscope_name, device_connection, configuration):
@@ -622,11 +623,14 @@ class HamamatsuOrcaLightning(HamamatsuOrca):
             Name of microscope in configuration
         device_connection : object
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : multiprocessing.managers.DictProxy
             Global configuration of the microscope
         """
-        HamamatsuOrca.__init__(self, microscope_name, device_connection, configuration)
+        HamamatsuBase.__init__(self, microscope_name, device_connection, configuration)
+
         self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom"]
+
+        self.camera_parameters["minimum_exposure_time"] = 6.304 * 10 ** -6
 
         logger.info("HamamatsuOrcaLightning Initialized")
 
@@ -653,14 +657,12 @@ class HamamatsuOrcaLightning(HamamatsuOrca):
         camera_line_interval = (full_chip_exposure_time / 1000) / (
             (shutter_width + self.y_pixels - 1) / 4
         )
-
         self.camera_parameters["line_interval"] = camera_line_interval
-
         exposure_time = camera_line_interval * (shutter_width / 4) * 1000
         return exposure_time, camera_line_interval
 
 
-class HamamatsuOrcaFire(HamamatsuOrca):
+class HamamatsuOrcaFire(HamamatsuBase):
     def __init__(self, microscope_name, device_connection, configuration):
         """Initialize HamamatsuOrcaFire class.
 
@@ -670,15 +672,20 @@ class HamamatsuOrcaFire(HamamatsuOrca):
             Name of microscope in configuration
         device_connection : object
             Hardware device to connect to
-        configuration : multiprocesing.managers.DictProxy
+        configuration : multiprocessing.managers.DictProxy
             Global configuration of the microscope
         """
-        HamamatsuOrca.__init__(self, microscope_name, device_connection, configuration)
-        self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom", "Bottom-to-Top", "Bidirectional", "Rev. Bidirectional"]
-        # get the max image width and height from the camera
-        # it seems the camera will reset to its default value when close the connection with the camera.
-        self.camera_parameters["x_pixels"] = self.camera_controller.get_property_value("image_width")
-        self.camera_parameters["y_pixels"] = self.camera_controller.get_property_value("image_height")
+        HamamatsuBase.__init__(self, microscope_name, device_connection, configuration)
+        self.camera_parameters["supported_readout_directions"] = [
+            "Top-to-Bottom", "Bottom-to-Top", "Bidirectional", "Rev. Bidirectional"]
+
+        self.camera_parameters["minimum_exposure_time"] = 7.309 * 10 ** -6  # 7.309 us
+
+        self.camera_parameters["x_pixels"] = self.camera_controller.get_property_value(
+            "image_width")
+
+        self.camera_parameters["y_pixels"] = self.camera_controller.get_property_value(
+            "image_height")
 
         logger.info("HamamatsuOrcaFire Initialized")
 
@@ -749,3 +756,34 @@ class HamamatsuOrcaFire(HamamatsuOrca):
 
         exposure_time = ((camera_line_interval * shutter_width) // 0.000007309) * 0.007309
         return exposure_time, camera_line_interval
+
+
+class HamamatsuOrca(HamamatsuBase):
+    def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize HamamatsuOrca class.
+
+        This is for controlling the Orca Flash 4.0.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+        """
+        HamamatsuBase.__init__(self, microscope_name, device_connection, configuration)
+
+        self.camera_parameters["supported_readout_directions"] = [
+            "Top-to-Bottom", "Bottom-to-Top"]
+
+        self.camera_parameters["minimum_exposure_time"] = 9.74436 * 10 ** -6
+
+        self.camera_parameters["x_pixels"] = self.camera_controller.get_property_value(
+            "image_width")
+
+        self.camera_parameters["y_pixels"] = self.camera_controller.get_property_value(
+            "image_height")
+
+        logger.info("HamamatsuOrca Initialized")

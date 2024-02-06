@@ -10,10 +10,10 @@ confirm it is working, and save an image to disk.
 Installation
 ------------
 
-1. Install Miniconda
+1. *Install Miniconda.*
    Download and install Miniconda from the `official website <https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links>`_.
 
-2. Create and Activate a Conda Environment.
+2. *Create and Activate a Conda Environment.*
    Launch a Miniconda Prompt (or a Terminal on MacOS) and enter the following.
 
    .. code-block:: console
@@ -21,13 +21,13 @@ Installation
       (base) conda create -n navigate python=3.9.7
       (base) conda activate navigate
 
-3. Install **navigate**
+3. *Install* **navigate**.
 
    .. code-block:: console
 
       (navigate) pip install navigate-micro
 
-4. Launch **navigate** in synthetic hardware mode. This will allow you to test its functionality without actual hardware.
+4. *Launch* **navigate** *in synthetic hardware mode.* This will allow you to test its functionality without actual hardware.
 
     .. code-block:: console
 

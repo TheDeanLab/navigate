@@ -37,6 +37,7 @@ navigate.controller.configuration\_controller.ConfigurationController
       ~ConfigurationController.daq_sample_rate
       ~ConfigurationController.filter_wheel_setting_dict
       ~ConfigurationController.galvo_parameter_dict
+      ~ConfigurationController.gui_setting
       ~ConfigurationController.lasers_info
       ~ConfigurationController.microscope_list
       ~ConfigurationController.number_of_channels

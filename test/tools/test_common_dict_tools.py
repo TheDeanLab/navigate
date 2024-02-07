@@ -41,6 +41,18 @@ import unittest
 from unittest.mock import MagicMock
 
 
+def test_update_nested_dict():
+    from navigate.tools.common_dict_tools import update_nested_dict
+
+    test_dict = {"one": 2, "three": {4: {"metastasis": False}}}
+
+    test_dict_updated = update_nested_dict(
+        test_dict, lambda k, v: k == "metastasis", lambda x: True
+    )
+
+    assert test_dict_updated == {"one": 2, "three": {4: {"metastasis": True}}}
+
+
 def create_mock_target():
     """Create a mock target object (Model or Controller) for testing."""
     target = MagicMock()

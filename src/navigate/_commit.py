@@ -46,20 +46,26 @@ def get_git_revision_hash() -> str:
     associated commit, but won't be an active git repo. The hash should be
     stored in a file like in __version__ and bumped with each commit.
     """
-    # print("before subprocess")
     # we don't want to move the user, so we'll return to the directory
     working_directory = os.getcwd()
     # we need to check for the git commit inside of the cloned git folder,
     # should this have been derived from a git commit
     file_directory = os.path.abspath(os.path.dirname(__file__))
     os.chdir(file_directory)
-    # call the hash
-    hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
-    os.chdir(working_directory)  # restore directory
-    return hash
+
+    try:
+        is_git_repo = subprocess.check_output(["git", "rev-parse", "--is-inside-work-tree"]).decode("ascii").strip()
+        if is_git_repo:
+            commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+        else:
+            # avoids "fatal: not a git repository (or any of the parent directories): .git" error.
+            commit_hash = "unknown"
+    except subprocess.CalledProcessError:
+        commit_hash = "unknown"
+
+    os.chdir(working_directory)
+    return commit_hash
 
 
-try:
-    __commit__ = get_git_revision_hash()
-except Exception:  # noqa
-    __commit__ = "unknown"
+__commit__ = get_git_revision_hash()
+

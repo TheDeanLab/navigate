@@ -428,9 +428,9 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         #: tk.StringVar: The variable to store the value of the entry in
         self.variable = kwargs.get("textvariable") or tk.StringVar()
         #: str: The minimum value of the entry
-        self.min = min
+        self.min = float(min)
         #: str: The maximum value of the entry
-        self.max = max
+        self.max = float(max)
         #: bool: Whether the entry requires a value
         self.required = required
         self.is_fake_focusout = False
@@ -515,24 +515,6 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         >>> widget = ValidatedEntry(parent)
         """
         self.is_fake_focusout = True
-        min_val = self.min
-        max_val = self.max
-
-        if (
-            min_val == "-Infinity"
-            or min_val == float("-inf")
-            or max_val == "Infinity"
-            or max_val == float("inf")
-        ):
-            if "inf" in current:
-                self.set("")
-            return char in ("-1234567890.")
-        
-        if char not in ("-1234567890."):
-            return False
-
-        no_negative = min_val >= 0
-        no_decimal = self.precision >= 0
 
         # Allow deletion
         if action == "0":
@@ -541,17 +523,6 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
                 return True
             self._is_valid_proposed_value(proposed)
             return True
-
-        # Testing keystroke for validity
-        # Filter out obviously bad keystrokes
-        if any(
-            [
-                (char not in ("-1234567890.")),
-                (char == "-" and (no_negative or index != "0")),
-                (char == "." and (no_decimal or "." in current)),
-            ]
-        ):
-            return False
 
         return self._is_valid_proposed_value(proposed)
     
@@ -563,15 +534,26 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         bool
             True if the proposed is valid, False if not
         """
-        if proposed == "-" or proposed == ".":
+        min_val = float(self.min)
+        max_val = float(self.max)
+
+        if proposed == '-':
             self._toggle_error(True)
+            self.is_fake_focusout = False
+            return min_val < 0
+        
+        if proposed == '.':
+            self._toggle_error(True)
+            self.is_fake_focusout = False
             return True
 
         # Proposed value is a Decimal, so convert and check further
-        proposed = Decimal(proposed)
+        try:
+            proposed = Decimal(proposed)
+        except InvalidOperation:
+            self.is_fake_focusout = False
+            return False
         proposed_precision = proposed.as_tuple().exponent
-        min_val = self.min
-        max_val = self.max
         if any([(proposed > max_val), (proposed_precision < self.precision)]):
             return False
         
@@ -625,12 +607,12 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             return True
 
         # Checking if greater than minimum
-        if value < int(min_val):
+        if value < float(min_val):
             self.error.set("Value is too low (min {})".format(min_val))
             valid = False
 
         # Checking if less than max
-        if value > int(max_val):
+        if value > float(max_val):
             self.error.set("Value is too high (max {})".format(max_val))
 
         # If input is valid on focusout add to history of widget
@@ -663,7 +645,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         current = self.get()
         try:
             new_min = self.min_var.get()
-            self.min = new_min
+            self.min = float(new_min)
         except (tk.TclError, ValueError):
             pass
         if not current:
@@ -683,7 +665,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         current = self.get()
         try:
             new_max = self.max_var.get()
-            self.max = new_max
+            self.max = float(new_max)
         except (tk.TclError, ValueError):
             pass
         if not current:
@@ -771,8 +753,8 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         """
         value = self.get()
         if value != "":
-            min_val = self.min
-            max_val = self.max
+            min_val = float(self.min)
+            max_val = float(self.max)
             # Don't add duplicates
             if self.undo_history and self.undo_history[-1] == value:
                 pass
@@ -1031,42 +1013,12 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         --------
         >>> spinbox._key_validate('1', 0, '0', '1', 'insert')
         """
-        min_val = self.cget("from")
-        max_val = self.cget("to")
-
-        if (
-            min_val == "-Infinity"
-            or min_val == float("-inf")
-            or max_val == "Infinity"
-            or max_val == float("inf")
-        ):
-            if "inf" in current:
-                self.set("")
-            return char in ("-1234567890.")
-        
-        if char not in ("-1234567890."):
-            return False
-
-        no_negative = min_val >= 0
-        no_decimal = self.precision >= 0
-
         # Allow deletion
         if action == "0":
             if proposed == "":
                 return True
             self._is_valid_proposed_value(proposed)
             return True
-
-        # Testing keystroke for validity
-        # Filter out obviously bad keystrokes
-        if any(
-            [
-                (char not in ("-1234567890.")),
-                (char == "-" and (no_negative or index != "0")),
-                (char == "." and (no_decimal or "." in current)),
-            ]
-        ):
-            return False
 
         return self._is_valid_proposed_value(proposed)
     
@@ -1078,15 +1030,20 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         bool
             True if the proposed is valid, False if not
         """
+        min_val = self.cget("from")
+        max_val = self.cget("to")
+
         if proposed == "-" or proposed == ".":
             self._toggle_error(True)
             return True
 
         # Proposed value is a Decimal, so convert and check further
-        proposed = Decimal(proposed)
+        try:
+            proposed = Decimal(proposed)
+        except InvalidOperation:
+            return False
         proposed_precision = proposed.as_tuple().exponent
-        min_val = self.cget("from")
-        max_val = self.cget("to")
+
         if any([(proposed > max_val), (proposed_precision < self.precision)]):
             return False
         
@@ -1134,10 +1091,6 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             return False
         else:
             self.error.set("")
-
-        # check if there are range limits
-        if min_val == "-Infinity" or max_val == "Infinity":
-            return True
 
         try:
             value = Decimal(str(value))

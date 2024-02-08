@@ -100,5 +100,3 @@ def get_version_from_file(file_name='VERSION'):
 __commit__ = get_git_revision_hash()
 if __commit__ is None:
     __commit__ = get_version_from_file()
-
-print(f"Commit: {__commit__}")

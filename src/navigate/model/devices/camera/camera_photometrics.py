@@ -86,13 +86,9 @@ class PhotometricsKinetix(CameraBase):
         self._unitforlinedelay = 0.00375  # 3.75  us for dynamic mode kinetix
         #: list: Frame IDs
         self._frame_ids = []
-        #: int: Max image width
-        self.max_image_width = self.camera_controller.sensor_size[0]
-        #: int: Max image height
-        self.max_image_height = self.camera_controller.sensor_size[1]
         #: dict: Camera parameters
-        self.camera_parameters["x_pixels"] = self.max_image_width
-        self.camera_parameters["y_pixels"] = self.max_image_height
+        self.camera_parameters["x_pixels"] = self.camera_controller.sensor_size[0]
+        self.camera_parameters["y_pixels"] = self.camera_controller.sensor_size[1]
 
         # todo: complete first init of parameters to default values
 

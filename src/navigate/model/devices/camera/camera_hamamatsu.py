@@ -99,12 +99,13 @@ class HamamatsuBase(CameraBase):
         super().__init__(microscope_name, device_connection, configuration)
 
         #: dict: Camera parameters
-        self.camera_parameters["x_pixels"] = self.max_image_width
-        self.camera_parameters["y_pixels"] = self.max_image_height
-        self.camera_parameters["x_pixels_min"] = self.min_image_width
-        self.camera_parameters["y_pixels_min"] = self.min_image_height
-        self.camera_parameters["x_pixels_step"] = self.step_image_width
-        self.camera_parameters["y_pixels_step"] = self.step_image_height
+        self.camera_parameters["x_pixels"] = self.camera_controller.max_image_width
+        self.camera_parameters["y_pixels"] = self.camera_controller.max_image_height
+        self.camera_parameters["x_pixels_min"] = self.camera_controller.min_image_width
+        self.camera_parameters["y_pixels_min"] = self.camera_controller.min_image_height
+        self.camera_parameters["x_pixels_step"] = self.camera_controller.step_image_width
+        self.camera_parameters["y_pixels_step"] = self.camera_controller.step_image_height
+        self.minimum_exposure_time = 0.001
 
         #: object: Camera controller
         if self.camera_controller.get_property_value("readout_speed"):
@@ -155,128 +156,6 @@ class HamamatsuBase(CameraBase):
             Serial number for the camera.
         """
         return self.camera_controller._serial_number
-
-    # The pass statements get around camera base calls
-    @property
-    def max_image_width(self):
-        """Get maximum image width.
-
-        Returns
-        -------
-        max_image_width : int
-            Maximum image width.
-        """
-        return self.camera_controller.max_image_width
-
-    @max_image_width.setter
-    def max_image_width(self, value):
-        """Set maximum image width."""
-        pass
-
-    @property
-    def min_image_width(self):
-        """Get minimum image width.
-
-        Returns
-        -------
-        min_image_width : int
-            Minimum image width.
-        """
-        return self.camera_controller.min_image_width
-
-    @min_image_width.setter
-    def min_image_width(self, value):
-        """Set minimum image width.
-
-        Parameters
-        ----------
-        value : int
-            Minimum image width.
-        """
-        pass
-
-    @property
-    def max_image_height(self):
-        """Get maximum image height.
-
-        Returns
-        -------
-        max_image_height : int
-            Maximum image height.
-        """
-        return self.camera_controller.max_image_height
-
-    @max_image_height.setter
-    def max_image_height(self, value):
-        """Set maximum image height.
-
-        Parameters
-        ----------
-        value : int
-            Maximum image height.
-        """
-        pass
-
-    @property
-    def min_image_height(self):
-        """Get minimum image height.
-
-        Returns
-        -------
-        min_image_height : int
-            Minimum image height.
-        """
-        return self.camera_controller.min_image_height
-
-    @min_image_height.setter
-    def min_image_height(self, value):
-        """Set minimum image height.
-
-        Parameters
-        ----------
-        value : int
-            Minimum image height.
-        """
-        pass
-
-    @property
-    def step_image_width(self):
-        """Get step image width.
-
-        Returns
-        -------
-        step_image_width : int
-            Step image width.
-        """
-        return self.camera_controller.step_image_width
-
-    @step_image_width.setter
-    def step_image_width(self, value):
-        """Set step image width.
-
-        Parameters
-        ----------
-        value : int
-            Step image width.
-        """
-        pass
-
-    @property
-    def step_image_height(self):
-        """Get step image height.
-
-        Returns
-        -------
-        step_image_height : int
-            Step image height.
-        """
-        return self.camera_controller.step_image_height
-
-    @step_image_height.setter
-    def step_image_height(self, value):
-        """Step image height."""
-
-        pass
 
     def report_settings(self):
         """Print Camera Settings.
@@ -329,6 +208,11 @@ class HamamatsuBase(CameraBase):
                 _,
                 self.camera_controller.step_image_height,
             ) = self.camera_controller.get_property_range("subarray_vsize")
+            # update configuration dict
+            self.camera_parameters["x_pixels_min"] = self.camera_controller.min_image_width
+            self.camera_parameters["y_pixels_min"] = self.camera_controller.min_image_height
+            self.camera_parameters["x_pixels_step"] = self.camera_controller.step_image_width
+            self.camera_parameters["y_pixels_step"] = self.camera_controller.step_image_height
         else:
             print("Camera mode not supported")
             logger.info("Camera mode not supported")
@@ -429,7 +313,7 @@ class HamamatsuBase(CameraBase):
         exposure_time : float
             Exposure time in milliseconds.
         """
-        exposure_time = exposure_time / 1000
+        exposure_time = ((exposure_time / 1000) // self.minimum_exposure_time) * self.minimum_exposure_time
         return self.camera_controller.set_property_value("exposure_time", exposure_time)
 
     def set_line_interval(self, line_interval_time):
@@ -486,15 +370,6 @@ class HamamatsuBase(CameraBase):
         self.camera_controller.set_property_value(
             "binning", binning_dict[binning_string]
         )
-        # idx = binning_string.index("x")
-        # x_binning = int(binning_string[:idx])
-        # y_binning = int(binning_string[idx + 1 :])
-        # self.x_pixels = int(self.x_pixels / x_binning)
-        # self.y_pixels = int(self.y_pixels / y_binning)
-
-        # should update experiment in controller side
-        # self.configuration['experiment']['CameraParameters']['camera_binning'] =
-        #   str(self.x_binning) + 'x' + str(self.y_binning)
         return True
 
     def set_ROI(self, roi_height=2048, roi_width=2048):
@@ -513,8 +388,8 @@ class HamamatsuBase(CameraBase):
             True if successful, False otherwise.
         """
         # Get the Maximum Number of Pixels from the Configuration File
-        camera_height = self.max_image_height
-        camera_width = self.max_image_width
+        camera_height = self.camera_parameters["y_pixels"]
+        camera_width = self.camera_parameters["x_pixels"]
 
         if (
             roi_height > camera_height
@@ -532,7 +407,7 @@ class HamamatsuBase(CameraBase):
         roi_right = roi_left + roi_width
 
         # Set ROI
-        self.x_pixels, self.y_pixels = self.camera_controller.set_ROI(
+        x_pixels, y_pixels = self.camera_controller.set_ROI(
             roi_left, roi_top, roi_right, roi_bottom
         )
 
@@ -553,7 +428,7 @@ class HamamatsuBase(CameraBase):
             f"{self.camera_controller.get_property_value('subarray_vsize')}"
         )
 
-        return self.x_pixels == roi_width and self.y_pixels == roi_height
+        return x_pixels == roi_width and y_pixels == roi_height
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
         """Initialize HamamatsuOrca image series.
@@ -630,7 +505,7 @@ class HamamatsuOrcaLightning(HamamatsuBase):
 
         self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom"]
 
-        self.camera_parameters["minimum_exposure_time"] = 6.304 * 10 ** -6
+        self.minimum_exposure_time = 6.304 * 10 ** -6
 
         logger.info("HamamatsuOrcaLightning Initialized")
 
@@ -679,7 +554,7 @@ class HamamatsuOrcaFire(HamamatsuBase):
         self.camera_parameters["supported_readout_directions"] = [
             "Top-to-Bottom", "Bottom-to-Top", "Bidirectional", "Rev. Bidirectional"]
 
-        self.camera_parameters["minimum_exposure_time"] = 7.309 * 10 ** -6  # 7.309 us
+        self.minimum_exposure_time = 7.309 * 10 ** -6  # 7.309 us
 
         self.camera_parameters["x_pixels"] = self.camera_controller.get_property_value(
             "image_width")
@@ -688,74 +563,6 @@ class HamamatsuOrcaFire(HamamatsuBase):
             "image_height")
 
         logger.info("HamamatsuOrcaFire Initialized")
-
-    @property
-    def max_image_width(self):
-        """Get maximum image width.
-
-        Returns
-        -------
-        max_image_width : int
-            Maximum image width.
-        """
-        return self.camera_parameters["x_pixels"]
-
-    @max_image_width.setter
-    def max_image_width(self, value):
-        """Set maximum image width."""
-        pass
-
-    @property
-    def max_image_height(self):
-        """Get maximum image height.
-
-        Returns
-        -------
-        max_image_height : int
-            Maximum image height.
-        """
-        return self.camera_parameters["y_pixels"]
-
-    @max_image_height.setter
-    def max_image_height(self, value):
-        """Set maximum image height.
-
-        Parameters
-        ----------
-        value : int
-            Maximum image height.
-        """
-        pass
-
-    def calculate_light_sheet_exposure_time(
-        self, full_chip_exposure_time, shutter_width
-    ):
-        """Convert normal mode exposure time to light-sheet mode exposure time.
-        Calculate the parameters for an acquisition
-
-        Parameters
-        ----------
-        full_chip_exposure_time : float
-            Normal mode exposure time.
-        shutter_width : int
-            Width of light-sheet rolling shutter.
-
-        Returns
-        -------
-        exposure_time : float
-            Light-sheet mode exposure time (ms).
-        camera_line_interval : float
-            HamamatsuOrca line interval duration (s).
-        """
-
-        camera_line_interval = (full_chip_exposure_time / 1000) / (
-            shutter_width + self.y_pixels - 1
-        )
-
-        self.camera_parameters["line_interval"] = camera_line_interval
-
-        exposure_time = ((camera_line_interval * shutter_width) // 0.000007309) * 0.007309
-        return exposure_time, camera_line_interval
 
 
 class HamamatsuOrca(HamamatsuBase):
@@ -778,12 +585,6 @@ class HamamatsuOrca(HamamatsuBase):
         self.camera_parameters["supported_readout_directions"] = [
             "Top-to-Bottom", "Bottom-to-Top"]
 
-        self.camera_parameters["minimum_exposure_time"] = 9.74436 * 10 ** -6
-
-        self.camera_parameters["x_pixels"] = self.camera_controller.get_property_value(
-            "image_width")
-
-        self.camera_parameters["y_pixels"] = self.camera_controller.get_property_value(
-            "image_height")
+        self.minimum_exposure_time = 9.74436 * 10 ** -6
 
         logger.info("HamamatsuOrca Initialized")

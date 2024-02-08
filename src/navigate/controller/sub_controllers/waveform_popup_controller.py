@@ -107,6 +107,14 @@ class WaveformPopupController(GUIController):
         self.waveforms_enabled = True
         #: dict: Dictionary of amplitude values.
         self.amplitude_dict = None
+        #: float: the minimum value of remote focus device
+        self.laser_min = 0
+        #: float: the maximum value of remote focus device
+        self.laser_max = 1.0
+        #: dict: Dictionary of galvo minimum values
+        self.galvo_min = {}
+        #: dict: Dictionary of galvo maximum values
+        self.galvo_max = {}
 
         # event id list
         #: int: The event id.
@@ -183,8 +191,6 @@ class WaveformPopupController(GUIController):
     def configure_widget_range(self):
         """Update widget ranges and precisions based on the current resolution mode.
 
-        TODO: Hard-coded values for increment and precision.
-
         TODO: Other parameters we wish to enable/disable based on configuration?
 
         TODO: Should we instead change galvo amp/offset behavior based on a waveform
@@ -198,33 +204,32 @@ class WaveformPopupController(GUIController):
         0.01 for low mode.
 
         """
-        if (
-            self.resolution == "high"
-            or self.resolution == "Nanoscale"
-            or self.resolution == "CTASLMv1"
-        ):
-            precision = -4
-            increment = 0.0001
-        else:
-            # resolution is low
-            precision = -3
-            increment = 0.001
-
-        laser_min = self.configuration_controller.remote_focus_dict["hardware"]["min"]
-        laser_max = self.configuration_controller.remote_focus_dict["hardware"]["max"]
+        self.laser_min = self.configuration_controller.remote_focus_dict["hardware"]["min"]
+        self.laser_max = self.configuration_controller.remote_focus_dict["hardware"]["max"]
+        
+        precision = int(self.configuration_controller.remote_focus_dict["hardware"].get("precision", 0))
+        increment = int(self.configuration_controller.remote_focus_dict["hardware"].get("step", 0))
+        if precision == 0:
+            precision = -4 if self.laser_max < 1 else -3
+        elif precision > 0:
+            precision = - precision
+        if increment == 0:
+            increment = 0.0001 if self.laser_max < 1 else 0.001
+        elif increment < 0:
+            increment = - increment
 
         # set ranges of value for those lasers
         for laser in self.lasers:
-            self.widgets[laser + " Amp"].widget.configure(from_=laser_min)
-            self.widgets[laser + " Amp"].widget.configure(to=laser_max)
+            self.widgets[laser + " Amp"].widget.configure(from_=self.laser_min)
+            self.widgets[laser + " Amp"].widget.configure(to=self.laser_max)
             self.widgets[laser + " Amp"].widget.configure(increment=increment)
             self.widgets[laser + " Amp"].widget.set_precision(precision)
             self.widgets[laser + " Amp"].widget.trigger_focusout_validation()
             # TODO: The offset bounds should adjust based on the amplitude bounds,
             #       so that amp + offset does not exceed the bounds. Can be done
             #       in update_remote_focus_settings()
-            self.widgets[laser + " Off"].widget.configure(from_=laser_min)
-            self.widgets[laser + " Off"].widget.configure(to=laser_max)
+            self.widgets[laser + " Off"].widget.configure(from_=self.laser_min)
+            self.widgets[laser + " Off"].widget.configure(to=self.laser_max)
             self.widgets[laser + " Off"].widget.configure(increment=increment)
             self.widgets[laser + " Off"].widget.set_precision(precision)
             self.widgets[laser + " Off"].widget.trigger_focusout_validation()
@@ -253,6 +258,9 @@ class WaveformPopupController(GUIController):
             self.widgets[galvo + " Freq"].widget.set_precision(precision)
             self.widgets[galvo + " Freq"].widget["state"] = "normal"
             self.widgets[galvo + " Freq"].widget.trigger_focusout_validation()
+
+            self.galvo_min[galvo] = galvo_min
+            self.galvo_max[galvo] = galvo_max
 
         for i in range(len(self.galvos), self.configuration_controller.galvo_num):
             galvo_name = f"Galvo {i}"
@@ -424,15 +432,22 @@ class WaveformPopupController(GUIController):
                 f"{variable_value}"
             )
             if value != variable_value and variable_value != "":
+                # tell parent controller (the device)
+                if self.event_id:
+                    self.view.popup.after_cancel(self.event_id)
+                
+                try:
+                    value = float(variable_value)
+                except ValueError:
+                    return
+                if value < self.laser_min or value > self.laser_max:
+                    return
                 self.resolution_info["remote_focus_constants"][self.resolution][
                     self.mag
                 ][laser][remote_focus_name] = variable_value
                 logger.debug(
                     f"Remote Focus Amplitude/Offset Changed:, {variable_value}"
                 )
-                # tell parent controller (the device)
-                if self.event_id:
-                    self.view.popup.after_cancel(self.event_id)
 
                 # Delay feature.
                 self.event_id = self.view.popup.after(
@@ -458,6 +473,9 @@ class WaveformPopupController(GUIController):
         """
         if not self.update_waveform_parameters_flag:
             return
+        
+        if self.event_id:
+            self.view.popup.after_cancel(self.event_id)
         # Get the values from the widgets.
         try:
             delay = float(self.widgets["Delay"].widget.get())
@@ -480,11 +498,6 @@ class WaveformPopupController(GUIController):
         ] = duty_cycle
 
         # Pass the values to the parent controller.
-        try:
-            if self.event_id:
-                self.view.popup.after_cancel(self.event_id)
-        except KeyError:
-            pass
         self.event_id = self.view.popup.after(
             500,
             lambda: self.parent_controller.execute(
@@ -579,17 +592,21 @@ class WaveformPopupController(GUIController):
                 f"{variable_value} pre if statement"
             )
             if value != variable_value and variable_value != "":
+                # change any galvo parameters as one event
+                if self.event_id:
+                    self.view.popup.after_cancel(self.event_id)
+                
+                try:
+                    value = float(variable_value)
+                except ValueError:
+                    return
+                if value < self.galvo_min[galvo_name] or value > self.galvo_max[galvo_name]:
+                    return
                 self.galvo_setting[galvo_name][self.resolution][self.mag][
                     parameter
                 ] = variable_value
                 logger.debug(f"Galvo parameter {parameter} changed: {variable_value}")
-                # change any galvo parameters as one event
-                try:
-                    if self.event_id:
-                        self.view.popup.after_cancel(self.event_id)
-                except KeyError:
-                    pass
-
+                
                 self.event_id = self.view.popup.after(
                     500,
                     lambda: self.parent_controller.execute("update_setting", "galvo"),

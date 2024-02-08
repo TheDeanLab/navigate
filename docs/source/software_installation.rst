@@ -5,8 +5,7 @@ Software Installation
 Computer Specifications
 ==================================================
 
-**navigate** requires a robust computing environment for optimal performance.
-Below are the recommended specifications:
+Below are the recommended specifications for **navigate**.
 
 Operating System Compatibility
 ------------------------------
@@ -17,30 +16,34 @@ Operating System Compatibility
    cameras, stages, and data acquisition cards, which are predominantly designed for the
    Windows environment.
 
-   While it is possible to launch the software on a Mac using a synthetic hardware mode,
-   users should be aware of known issues with the Tkinter user interface. These issues
+   While it is possible to launch the software on a Mac using synthetic hardware mode,
+   users should be aware of known issues with the Tkinter interface. These issues
    include improper positioning of widgets and problems with resizing the GUI window.
-   As such, the use of **navigate** on macOS is not recommended.
+   As such, the use of **navigate** on MacOS is not recommended.
 
-   The software remains untested on Linux systems. Therefore, we cannot guarantee its
-   functionality or performance on Linux platforms at this time. Users considering the
-   use of **navigate** software on Linux should proceed with caution and be prepared for
-   potential compatibility issues, especially with respect to device drivers.
+   The software is untested on Linux systems.Users considering the use of **navigate** 
+   software on Linux should proceed with caution and be prepared for potential 
+   compatibility issues, especially with respect to device drivers.
 
 .. note::
    For optimal performance and compatibility, it is strongly recommended to run
-   **navigate** on a Windows machine, adhering to the specified system specifications.
+   **navigate** on a Windows machine.
 
 Hardware Considerations
 -----------------------
 
+**navigate** will run on a mid-range laptop with at least 8 GB of RAM and a processor
+with two cores. Most of its operations are undemanding. Saving data at a reasonable 
+rate, however, will require an SSD. The hardware configuration for an example 
+microscope control machine is shown below.
+
 .. important::
    Scientific cameras are capable of rapidly generating large amounts of high-resolution data.
-   As such, the read/write speed of the data storage device is a critical for smooth operation of the software.
-   For example, for a standard Hamamatsu camera with a 2048 x 2048 sensor,
-   operating at 16-bit depth and 20 frames per second, the data save rate is approximately ~170 MB/s.
-   While such capabilities are well within the capabilities of modern SSDs, they are beyond the capabilities of most HDDs.
-   Therefore, it is recommended to use a fast SSD data saving operations.
+   As such, the read/write speed of the data storage device is a critical for smooth operation 
+   of the software. For example, for a standard Hamamatsu camera with a 2048 x 2048 sensor,
+   operating at 16-bit depth and 20 frames per second, the data save rate is approximately ~167 MB/s.
+   While such capabilities are well within the capabilities of modern SSDs, they are beyond the 
+   capabilities of most HDDs. Therefore, it is recommended to use a fast SSD data saving operations.
 
 
 .. collapse:: Example Hardware Configuration
@@ -94,7 +97,8 @@ Hardware Considerations
         - **Interface**: PCI-E x 8
 
     .. note::
-       The specifications listed are based on an example system configuration and can be adjusted based on specific needs and availability.
+       The specifications listed are based on an example system configuration and can 
+       be adjusted based on specific needs and availability.
 
 ---------------------
 
@@ -139,7 +143,7 @@ To install the latest stable release of **navigate**, run the following command:
 
     (navigate) MyComputer ~ $ pip install navigate-micro
 
-To install the developmental version of **navigate**, run the following command:
+To install the bleeding edge version of **navigate**, run the following command:
 
 .. code-block:: console
 
@@ -149,20 +153,22 @@ To install the developmental version of **navigate**, run the following command:
 
 .. code-block:: console
 
-    (navigate) MyComputer Navigate $ navigate
+    (navigate) MyComputer ~ $ navigate
 
 .. note::
 
-    If you are running the software on a computer that does not have the appropriate
-    hardware you will need to add  the flag ``-sh`` (``--synthetic-hardware``) after
-    **navigate**.
+    If you are running the software on a computer that is not connected to microscope 
+    hardware, you can add the flag ``-sh`` (``--synthetic-hardware``) to launch the
+    program:
 
     .. code-block:: console
 
         navigate -sh
 
-After completing these steps you will only need to do the below to start the software
-upon opening a new Anaconda prompt:
+Launching **navigate**
+======================
+
+Open an ``Anaconda Prompt (Miniconda3)`` and enter the following.
 
 .. code-block:: console
 
@@ -224,13 +230,13 @@ an editable package locally on your machine.
 
 .. note::
 
-  If working in a ``zsh`` shell, e.g. on a modern macOS, add single quotes around the
+  If working in a ``zsh`` shell, e.g. on a modern MacOS, add single quotes around the
   call: ``pip install -e '.[dev]'``.
 
 Troubleshooting
 ===============
 
-If running the software at an institution with a proxy, you may need to update your proxy
+If the software is run at an institution with a proxy, you may need to update your proxy
 settings to allow ``pip`` and ``conda`` to install the proper packages.
 
 * This can be done by going to Environment Variables for Windows, or another OS

@@ -150,9 +150,9 @@ class AcquirePopUp:
                 self.inputs[entry_names[i]] = LabelInput(
                     parent=content_frame,
                     label=entry_labels[i],
-                    input_class=ValidatedEntry,
+                    input_class=ttk.Entry,
                     input_var=tk.StringVar(),
-                    input_args={"required": True, "width": 50},
+                    input_args={"width": 50},
                 )
             self.inputs[entry_names[i]].grid(
                 row=i + 1, column=0, columnspan=2, sticky=tk.NSEW, padx=5

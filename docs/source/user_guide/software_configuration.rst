@@ -19,11 +19,11 @@ Mac/Linux. **navigate** uses these local copies of the configuration files to st
 information specific to the setup attached to the computer it is installed on.
 
 To avoid confusion, we recommend launching the software in the synthetic hardware
-mode initially. Within your Terminal, or Anaconda Prompt, activate your **navigate** Python
-environment and launch the software by typing: ``navigate -sh``. Thereafter, you should
-only modify the ``configuration.yaml`` file in your local ``.navigate`` directory. The
-local copy avoids conflicts between different microscopes after pulling new
-changes on GitHub.
+mode initially. Within your Terminal, or Anaconda Prompt, activate your **navigate** 
+Python environment and launch the software by typing: ``navigate -sh``. Thereafter, you
+should only modify the ``configuration.yaml`` file in your local ``.navigate\config`` 
+directory. The local copy avoids conflicts between different microscopes after pulling 
+new changes from GitHub.
 
 .. tip::
 
@@ -122,8 +122,8 @@ types of a single hardware.
     with the device.
 
 Running the software with our current microscope setup would fail. It turns out our
-ASI stage only moves in the ``X``, ``Y``, ``Z`` and ``F`` axes. Later, you will see we need a way to
-handle ``Theta`` axis. To address this, we will change our ``stage`` block of the YAML to
+ASI stage only moves in the ``X``, ``Y``, ``Z`` and ``F`` axes. We need a way to handle
+the ``Theta`` axis. To address this, we will change our ``stage`` block of the YAML to 
 also load a ``SyntheticStage``:
 
 .. code-block:: yaml
@@ -139,7 +139,7 @@ also load a ``SyntheticStage``:
             serial_number: 987654321
 
 If your microscope system does not have a device listed in the hardware section using
-the Synthetic typing will allow the software to run without it. Another example would
+the synthetic typing will allow the software to run without it. Another example would
 be replacing the zoom type with ``SyntheticZoom`` in the instance your microscope does
 not use that hardware. Your system will still run as you expect.
 
@@ -226,7 +226,7 @@ specifies joystick-controlled axes.
             theta_offset: 0
             f_offset: 0
 
-First we set the axes controlled by each piece of hardware and a mapping from the
+First, we set the axes controlled by each piece of hardware and a mapping from the
 hardware's API axes to our software's axes. For example, the ASI ``M`` axis is mapped
 onto our software's ``X`` axis below.
 
@@ -235,8 +235,8 @@ add the ``SyntheticStage`` to control ``Theta``. We now specify in the microscop
 ``Theta`` is controlled by the synthetic stage in the ``hardware`` section of
 ``microscope1``.
 
-Below this, we specify that only ``X``, ``Y`` and ``Z`` axes may be controlled by a joystick and
-we set the stage bounds for each of the axes.
+Below this, we specify that only ``X``, ``Y`` and ``Z`` axes may be controlled by a 
+joystick and we set the stage bounds for each of the axes.
 
 Finally, we set the offset for each stage axis. This is an offset relative to other
 microscopes (e.g. ``microscope2``) specified in ``configuration.yaml``. In this case,
@@ -251,11 +251,11 @@ Stage Axes Definition
 
 Many times, the coordinate system of the stage hardware do not agree with the optical
 definition of each axes identity. For example, many stages define their vertical
-dimension as ``Z``, whereas optically, we often define this axis as ``X``. Thus, there is
-often a need to map the mechanical axes to the optical axes, and this is done with
-the ``axes_mapping`` dictionary entry in the stage hardware section. By default, stage axes
-are read in as ``X``, ``Y``, ``Z``, ``Theta``, ``F``, where ``Theta`` is rotation and ``F``
-is focus, but this can be changed by changing axes mapping.
+dimension as ``Z``, whereas optically, we often define this axis as ``X``. Thus, there 
+is often a need to map the mechanical axes to the optical axes, and this is done with
+the ``axes_mapping`` dictionary entry in the stage hardware section. By default, stage 
+axes are read in as ``X``, ``Y``, ``Z``, ``Theta``, ``F``, where ``Theta`` is rotation 
+and ``F`` is focus, but this can be changed by changing axes mapping.
 
 .. code-block:: yaml
 
@@ -286,9 +286,10 @@ appear in the stage field as following:
 .. Note::
 
     These axes should agree with the optical axes. If, on the same microscope
-    as mentioned in the Stage Axes Definition section, the joystick were to control
-    the optical y-axis corresponding to the stage z axis, you would have to put ``Y`` in
-    the joystick axes brackets as following:
+    as mentioned in the :ref:`Stage Axes Definition <user_guide/software_configuration:stage axes definition>` 
+    section, the joystick were to control the optical y-axis corresponding to
+    the stage z axis, you would have to put ``Y`` in the joystick axes brackets 
+    as following:
 
 .. code-block:: yaml
 
@@ -417,22 +418,25 @@ The values in each field relate to GUI widgets.
 
 - The ``channels`` section indicates GUI settings for the channel settings under
   :guilabel:`Channels`, :guilabel:`Channel Settings`.
-    - `count` specifies how many channels should be displayed.
-    - `laser_power`, `exposure_time` and `interval_time` are used to set
-      the minimum, maximum and step size values for :guilabel:`Power`,
-      :guilabel:`Exp. Time (ms)` and :guilabel:`Interval`, respectively.
+
+  - `count` specifies how many channels should be displayed.
+  - `laser_power`, `exposure_time` and `interval_time` are used to set
+    the minimum, maximum and step size values for :guilabel:`Power`,
+    :guilabel:`Exp. Time (ms)` and :guilabel:`Interval`, respectively.
 
 - The ``stack_acquisition`` section indicates GUI settings for the stack acquisition
   settings under :guilabel:`Channels`, :guilabel:`Stack Acquisition Settings (um)`.
-    - `step_size`, `start_pos` and `end_pos` are used to set the minimum, maximum and step
-      size values for :guilabel:`Step Size`, :guilabel:`Start` and :guilabel:`End`,
-      respectively.
+
+  - `step_size`, `start_pos` and `end_pos` are used to set the minimum, maximum and step
+    size values for :guilabel:`Step Size`, :guilabel:`Start` and :guilabel:`End`,
+    respectively.
 
 - The ``timepoint`` section indicates GUI settings for the timepoint
   settings under :guilabel:`Channels`, :guilabel:`Timepoint Settings`.
-    - `timepoints` and `stack_pause` are used to set the minimum, maximum and step
-      size values for :guilabel:`Timepoints` and :guilabel:`Stack Pause (s)`,
-      respectively.
+  
+  - `timepoints` and `stack_pause` are used to set the minimum, maximum and step
+    size values for :guilabel:`Timepoints` and :guilabel:`Stack Pause (s)`,
+    respectively.
 
 .. note::
 

@@ -153,6 +153,7 @@ class ValidatedMixin:
         )
         #: Hover: The hover bubble for the widget
         self.hover = Hover(self, text=None, type="free")
+        self.hover_flag = kwargs.get("hover_flag", False)
 
     def _toggle_error(self, on=False):
         """Toggle the error message
@@ -199,10 +200,11 @@ class ValidatedMixin:
             if valid:
                 self.add_history(event)
             else:
-                if self.undo_history:
-                    # Only keep the most recent value in forced undo
-                    self.undo_history = [self.undo_history[-1]]
-                valid = self.undo(event)
+               if self.undo_history:
+                   self.set(self.undo_history[-1])
+                   self.undo_history.pop()
+                   self._toggle_error(False)
+                   valid = True
         elif event == "key":  # Keystroke into widget
             valid = self._key_validate(
                 proposed=proposed,
@@ -212,6 +214,8 @@ class ValidatedMixin:
                 index=index,
                 action=action,
             )
+            if valid:
+                self.add_history(event)
         return valid
 
     def _focusout_validate(self, **kwargs):
@@ -323,6 +327,7 @@ class ValidatedMixin:
                 pass
             else:
                 self.undo_history.append(value)
+                self.redo_history = []
             if len(self.undo_history) > 3:
                 self.undo_history.pop(0)
 
@@ -337,24 +342,14 @@ class ValidatedMixin:
         if self.undo_history:
             # Get the redo value
             value = self.undo_history.pop()
-            if self.redo_history and self.redo_history[-1] == value:
+            if self.redo_history and self.redo_history[-1] == self.get():
                 pass
             else:
-                self.redo_history.append(value)
+                self.redo_history.append(self.get())
             if len(self.redo_history) > 3:
                 self.redo_history.pop(0)
 
-            # Restore the undo value
-            if self.undo_history:
-                value = self.undo_history.pop()
-                self.set(value)
-            else:
-                # Don't let the undo history drop to zero.
-                # This lets us restore values.
-                # We have to set the value first to replace the invalid entry.
-                self.set(value)
-                self.redo_history.pop()
-                self.add_history(event)
+            self.set(value)
             return True
         return False
 
@@ -369,10 +364,12 @@ class ValidatedMixin:
         """
         if self.redo_history:
             value = self.get()
-            self.add_history(event)
+            # add back to undo_history
+            self.undo_history.append(value)
+            if len(self.undo_history) > 3:
+                self.undo_history.pop(0)
             value = self.redo_history.pop()
             self.set(value)
-            self.add_history(event)
             return True
         return False
 
@@ -431,11 +428,12 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         #: tk.StringVar: The variable to store the value of the entry in
         self.variable = kwargs.get("textvariable") or tk.StringVar()
         #: str: The minimum value of the entry
-        self.min = min
+        self.min = float(min)
         #: str: The maximum value of the entry
-        self.max = max
+        self.max = float(max)
         #: bool: Whether the entry requires a value
         self.required = required
+        self.is_fake_focusout = False
 
     def set(self, value):
         """Set the value of the entry to the given value.
@@ -516,51 +514,61 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         --------
         >>> widget = ValidatedEntry(parent)
         """
-        valid = True
-        min_val = self.min
-        max_val = self.max
-
-        # check if there are range limits
-        if min_val == "-Infinity" or max_val == "Infinity":
-            return True
-
-        no_negative = int(min_val) >= 0
-        no_decimal = self.precision >= 0
+        self.is_fake_focusout = True
 
         # Allow deletion
         if action == "0":
+            if proposed == "":
+                self.is_fake_focusout = False
+                return True
+            self._is_valid_proposed_value(proposed)
             return True
 
-        # Testing keystroke for validity
-        # Filter out obviously bad keystrokes
-        if any(
-            [
-                (char not in ("-1234567890.")),
-                (char == "-" and (no_negative or index != "0")),
-                (char == "." and (no_decimal or "." in current)),
-            ]
-        ):
-            return False
+        return self._is_valid_proposed_value(proposed)
+    
+    def _is_valid_proposed_value(self, proposed):
+        """Validate a proposed value
+        
+        Returns
+        -------
+        bool
+            True if the proposed is valid, False if not
+        """
+        min_val = float(self.min)
+        max_val = float(self.max)
 
-        # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-'
-        # and '.'
-        if proposed in "-.":
+        if proposed == '-':
+            self._toggle_error(True)
+            self.is_fake_focusout = False
+            return min_val < 0
+        
+        if proposed == '.':
+            self._toggle_error(True)
+            self.is_fake_focusout = False
             return True
 
         # Proposed value is a Decimal, so convert and check further
-        proposed = Decimal(proposed)
-        proposed_precision = proposed.as_tuple().exponent
-        if any([(proposed > int(max_val)), (proposed_precision < self.precision)]):
+        try:
+            proposed = Decimal(proposed)
+        except InvalidOperation:
+            self.is_fake_focusout = False
             return False
+        proposed_precision = proposed.as_tuple().exponent
+        if any([(proposed > max_val), (proposed_precision < self.precision)]):
+            return False
+        
+        if proposed < min_val:
+            self._toggle_error(True)
+            return True
 
-        return valid
+        self._toggle_error(False)
+
+        return True
 
     def _focusout_validate(self, event):
         """Validate the input of the entry when focus is lost.
 
         If entry widget is empty set the error string and return False
-
-        TODO add hover bubble with error message
 
         Parameters
         ----------
@@ -599,12 +607,12 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             return True
 
         # Checking if greater than minimum
-        if value < int(min_val):
+        if value < float(min_val):
             self.error.set("Value is too low (min {})".format(min_val))
             valid = False
 
         # Checking if less than max
-        if value > int(max_val):
+        if value > float(max_val):
             self.error.set("Value is too high (max {})".format(max_val))
 
         # If input is valid on focusout add to history of widget
@@ -637,7 +645,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         current = self.get()
         try:
             new_min = self.min_var.get()
-            self.min = new_min
+            self.min = float(new_min)
         except (tk.TclError, ValueError):
             pass
         if not current:
@@ -657,7 +665,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         current = self.get()
         try:
             new_max = self.max_var.get()
-            self.max = new_max
+            self.max = float(new_max)
         except (tk.TclError, ValueError):
             pass
         if not current:
@@ -677,10 +685,128 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
 
         """
         super()._toggle_error(on)
-        if on:
+        if on and self.hover_flag:
             self.hover.seterror(self.error.get())
         else:
             self.hover.hidetip()
+
+    def _validate(self, proposed, current, char, event, index, action):
+        """Validate the input of the widget
+
+        Parameters
+        ----------
+        proposed : str
+            The proposed value of the widget
+        current : str
+            The current value of the widget
+        char : str
+            The character being inserted or deleted
+        event : str
+            The event that triggered the validation
+        index : str
+            The index of the character being inserted or deleted
+        action : str
+            The action being performed. 0 for delete, 1 for insert, -1 for other
+
+        Returns
+        -------
+        bool
+            True if the input is valid, False if it is not
+        """
+        self._toggle_error(False)  # Error is off
+        self.error.set("")  # No error to start
+        valid = True  # Again true means no error
+        if event == "focusout":  # Leaving widget
+            valid = self._focusout_validate(event=event)
+            if self.is_fake_focusout:
+                self.is_fake_focusout = False
+                return valid
+            if valid:
+                self.add_history(event)
+            else:
+               if self.undo_history:
+                   self.is_fake_focusout = True
+                   self.set(self.undo_history[-1])
+                   self.undo_history.pop()
+                   self._toggle_error(False)
+                   valid = True
+        elif event == "key":  # Keystroke into widget
+            valid = self._key_validate(
+                proposed=proposed,
+                current=current,
+                char=char,
+                event=event,
+                index=index,
+                action=action,
+            )
+            if valid:
+                self.add_history(event)
+        return valid
+
+    def add_history(self, event):
+        """Add the current value to the history of the widget.
+
+        Parameters
+        ----------
+        event : tk.Event
+            The event that triggered the history addition
+        """
+        value = self.get()
+        if value != "":
+            min_val = float(self.min)
+            max_val = float(self.max)
+            # Don't add duplicates
+            if self.undo_history and self.undo_history[-1] == value:
+                pass
+            elif value != "-" and value != "." and Decimal(value) >= min_val and Decimal(value) <= max_val:
+                self.undo_history.append(value)
+            if len(self.undo_history) > 3:
+                self.undo_history.pop(0)
+
+    def undo(self, event):
+        """Undo the last change to the widget.
+
+        Parameters
+        ----------
+        event : tk.Event
+            The event that triggered the undo
+        """
+        if self.undo_history:
+            # Get the redo value
+            value = self.undo_history.pop()
+            if self.redo_history and self.redo_history[-1] == self.get():
+                pass
+            else:
+                self.redo_history.append(self.get())
+            if len(self.redo_history) > 3:
+                self.redo_history.pop(0)
+            # self.set() will trigger one focusout event
+            self.is_fake_focusout = True
+            self.set(value)
+            return True
+        return False
+
+    def redo(self, event):
+        """Redo the last change that was undone.
+
+        Parameters
+        ----------
+        event : tk.Event
+            The event that triggered the redo
+
+        """
+        if self.redo_history:
+            value = self.get()
+            # add back to undo_history
+            self.undo_history.append(value)
+            if len(self.undo_history) > 3:
+                self.undo_history.pop(0)
+            value = self.redo_history.pop()
+            # self.set() will trigger one focusout event
+            self.is_fake_focusout = True
+            self.set(value)
+            return True
+        return False
 
 
 class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
@@ -887,49 +1013,47 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         --------
         >>> spinbox._key_validate('1', 0, '0', '1', 'insert')
         """
+        # Allow deletion
+        if action == "0":
+            if proposed == "":
+                return True
+            self._is_valid_proposed_value(proposed)
+            return True
 
-        valid = True
+        return self._is_valid_proposed_value(proposed)
+    
+    def _is_valid_proposed_value(self, proposed):
+        """Validate a proposed value
+        
+        Returns
+        -------
+        bool
+            True if the proposed is valid, False if not
+        """
         min_val = self.cget("from")
         max_val = self.cget("to")
 
-        if (
-            min_val == "-Infinity"
-            or min_val == float("-inf")
-            or max_val == "Infinity"
-            or max_val == float("inf")
-        ):
-            return True
-
-        no_negative = min_val >= 0
-        no_decimal = self.precision >= 0
-
-        # Allow deletion
-        if action == "0":
-            return True
-
-        # Testing keystroke for validity
-        # Filter out obviously bad keystrokes
-        if any(
-            [
-                (char not in ("-1234567890.")),
-                (char == "-" and (no_negative or index != "0")),
-                (char == "." and (no_decimal or "." in current)),
-            ]
-        ):
-            return False
-
-        # Proposed is either a Decimal, '-', '.', or '-.' need one final check for '-'
-        # and '.'
         if proposed == "-" or proposed == ".":
+            self._toggle_error(True)
             return True
 
         # Proposed value is a Decimal, so convert and check further
-        proposed = Decimal(proposed)
+        try:
+            proposed = Decimal(proposed)
+        except InvalidOperation:
+            return False
         proposed_precision = proposed.as_tuple().exponent
+
         if any([(proposed > max_val), (proposed_precision < self.precision)]):
             return False
+        
+        if proposed < min_val:
+            self._toggle_error(True)
+            return True
 
-        return valid
+        self._toggle_error(False)
+
+        return True
 
     def _focusout_validate(self, event):
         """Validate the spinbox when it loses focus and set the error message.
@@ -967,10 +1091,6 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             return False
         else:
             self.error.set("")
-
-        # check if there are range limits
-        if min_val == "-Infinity" or max_val == "Infinity":
-            return True
 
         try:
             value = Decimal(str(value))
@@ -1069,7 +1189,28 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         >>> spinbox._toggle_error()
         """
         super()._toggle_error(on)
-        if on:
+        if on and self.hover_flag:
             self.hover.seterror(self.error.get())
         else:
             self.hover.hidetip()
+
+    def add_history(self, event):
+        """Add the current value to the history of the widget.
+
+        Parameters
+        ----------
+        event : tk.Event
+            The event that triggered the history addition
+        """
+        value = self.get()
+        if value != "":
+            min_val = self.cget("from")
+            max_val = self.cget("to")
+            # Don't add duplicates
+            if self.undo_history and self.undo_history[-1] == value:
+                pass
+            elif value != "-" and value != "." and Decimal(value) >= min_val and Decimal(value) <= max_val:
+                self.undo_history.append(value)
+                self.redo_history = []
+            if len(self.undo_history) > 3:
+                self.undo_history.pop(0)

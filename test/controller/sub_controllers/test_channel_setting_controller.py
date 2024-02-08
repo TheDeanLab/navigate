@@ -64,7 +64,8 @@ class TestChannelSettingController:
 
         for i in range(5):
             assert str(self.channel_setting.view.channel_checks[i]["state"]) == state
-            assert str(self.channel_setting.view.interval_spins[i]["state"]) == state
+            # interval widget is disabled now
+            assert str(self.channel_setting.view.interval_spins[i]["state"]) == "disabled"
             assert (
                 str(self.channel_setting.view.laser_pulldowns[i]["state"])
                 == state_readonly

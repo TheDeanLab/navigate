@@ -404,3 +404,7 @@ class ConfigurationController:
         return self.configuration["waveform_constants"]["remote_focus_constants"][
             microscope_name
         ].keys()
+    
+    @property
+    def gui_setting(self):
+        return self.configuration["configuration"]["gui"]

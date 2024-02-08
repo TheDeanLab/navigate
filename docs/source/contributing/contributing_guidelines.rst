@@ -9,8 +9,8 @@ to the ``develop`` branch for code review. Some best practices for new code are
 outlined below.
 
 If you are considering refactoring part of the code, please reach out to us prior to
-starting this process. We are happy to invite you to our
-regular software development meeting.
+starting this process. We are happy to invite you to our regular software development 
+meeting.
 
 -------------------
 
@@ -19,6 +19,7 @@ General Principles
 
 - We use a `model-view-controller architecture <https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller>`_.
   New functionality should keep this strong separation.
+
     - The model operates in its own subprocess and is responsible for
       communicating with hardware and performing image handling and processing tasks.
     - The view is responsible for displaying the user interface and
@@ -54,7 +55,7 @@ Documentation
 
 We use `Sphinx <https://www.sphinx-doc.org/en/master/>`_ to generate
 documentation from documented methods, attributes, and classes. Please document
-all new methods, attributes, and classes using Sphinx compatible version of
+all new methods, attributes, and classes using a Sphinx compatible version of
 `Numpydoc <https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html>`_.
 
 -------------------
@@ -76,17 +77,22 @@ different unit to a piece of hardware.
 Pre-Commit Hooks
 ================
 
-We leverage pre-commit workflows to enforce consistent code formatting and automate
-some of the code review process. In some rare cases, the linter may complain about a
-line of code that is actually fine. For example, in the example code below, Ruff
-linter complains that the start_stage class is imported but not used. However, it is
-actually used in as part of an ``exec`` statement::
+We use `pre-commit hooks <https://pre-commit.com/>`_ to enforce consistent code 
+formatting and automate some of the code review process. In some rare cases, the 
+linter may complain about a line of code that is actually fine. For example, in 
+the example code below, Ruff linter complains that the start_stage class is 
+imported but not used. However, it is actually used in as part of an 
+``exec`` statement.
+
+.. code-block:: python
 
         from navigate.model.device_startup_functions import start_stage
         device_name = stage
         exec(f"self.{device_name} = start_{device_name}(name, device_connection, configuration, i, is_synthetic)")
 
-To avoid this error, you can add a ``# noqa`` comment to the end of the line to tell Ruff to ignore the error::
+To avoid this error, add a ``# noqa`` comment to the end of the line to tell Ruff to ignore the error.
+
+.. code-block:: python
 
         from navigate.model.device_startup_functions import start_stage  # noqa
 
@@ -95,11 +101,14 @@ To avoid this error, you can add a ``# noqa`` comment to the end of the line to 
 Dictionary Parsing
 ==================
 
-The configuration file is loaded a large dictionary object, and it is easy to have
-small errors in it that can crash the program. To avoid this, when getting
-properties from the configuration dictionary, it is best to use the ``.get()`` command,
-which provides you with the opportunity to also have a default value should the key
-provided not be found.  For example::
+The :doc:`configuration file </user_guide/software_configuration>` is loaded as a 
+large dictionary object, and it is easy to create small errors in the dictionary that 
+can crash the program. To avoid this, when getting properties from the configuration 
+dictionary, it is best to use the ``.get()`` command, which provides you with the 
+opportunity to also have a default value should the key provided not be found. For 
+example,
+
+.. code-block:: python
 
         # Galvo Waveform Information
         self.galvo_waveform = self.device_config.get("waveform", "sawtooth")
@@ -118,7 +127,7 @@ Each line of code is unit tested to ensure it behaves appropriately
 and alert future coders to modifications that break expected functionality.
 Guidelines for writing good unit tests can be found `here <https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test>`_
 and `over here <https://medium.com/chris-nielsen/so-whats-a-good-unit-test-look-like-71f750333ac0>`_,
-or see examples of other unit tests in this repository's :any:`test` folder. We
+or in examples of unit tests in this repository's ``test`` folder. We
 use the `pytest library <https://docs.pytest.org/en/7.2.x/>`_ to evaluate unit
 tests. Please check that unit tests pass on your machine before making a pull request.
 

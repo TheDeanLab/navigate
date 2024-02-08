@@ -1,6 +1,6 @@
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
+import platform
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
 # (subject to the limitations in the disclaimer below)
@@ -189,7 +189,7 @@ class Controller:
         # Sub Gui Controllers
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(
-            self.view.acqbar, self.view.settings.channels_tab, self
+            self.view.acqbar, self
         )
         #: ChannelsTabController: Channels Tab Sub-Controller.
         self.channels_tab_controller = ChannelsTabController(
@@ -269,9 +269,11 @@ class Controller:
         # destroy splash screen and show main screen
         splash_screen.destroy()
         root.deiconify()
-        #: event: Event for resizing the GUI.
-        self.resizie_event_id = None
-        self.view.root.bind("<Configure>", self.resize)
+
+        #: event: Event for resizing the GUI. Only works on Windows OS.
+        self.resize_event_id = None
+        if platform.system() == "Windows":
+            self.view.root.bind("<Configure>", self.resize)
 
     def update_buffer(self):
         """Update the buffer size according to the camera
@@ -417,14 +419,10 @@ class Controller:
 
         Returns
         -------
-        bool
-            True if all settings are valid, False otherwise.
+        string
+            Warning info if any
 
         """
-        # acquire_bar_controller - update image mode
-        self.configuration["experiment"]["MicroscopeState"][
-            "image_mode"
-        ] = self.acquire_bar_controller.get_mode()
         self.camera_setting_controller.update_experiment_values()
         # update multi-positions
         positions = self.multiposition_tab_controller.get_positions()
@@ -439,11 +437,13 @@ class Controller:
         ] = len(positions)
 
         # TODO: validate experiment dict
+
+        channel_warning = self.channels_tab_controller.verify_experiment_values()
+        if channel_warning:
+            return channel_warning
         if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
-            return False
-        if self.configuration["experiment"]["MicroscopeState"]["number_z_steps"] < 1:
-            return False
-        return True
+            return "Scan range shouldn't be 0!"
+        return ""
 
     def resize(self, event):
         """Resize the GUI.
@@ -455,6 +455,15 @@ class Controller:
         """
 
         def refresh(width, height):
+            """ Refresh the GUI.
+
+            Parameters
+            __________
+            width : int
+                Width of the GUI.
+            height : int
+                Height of the GUI.
+            """
             if width < 1200 or height < 600:
                 return
             self.view.camera_waveform["width"] = (
@@ -464,9 +473,9 @@ class Controller:
 
         if event.widget != self.view.scroll_frame:
             return
-        if self.resizie_event_id:
-            self.view.after_cancel(self.resizie_event_id)
-        self.resizie_event_id = self.view.after(
+        if self.resize_event_id:
+            self.view.after_cancel(self.resize_event_id)
+        self.resize_event_id = self.view.after(
             1000, lambda: refresh(event.width, event.height)
         )
 
@@ -481,11 +490,11 @@ class Controller:
         bool
             True if all settings are valid, False otherwise.
         """
-        if not self.update_experiment_setting():
+        warning_info = self.update_experiment_setting()
+        if warning_info:
             messagebox.showerror(
                 title="Warning",
-                message="There are some missing/wrong settings! "
-                "Cannot start acquisition!",
+                message=f"Cannot start acquisition!\n{warning_info}",
             )
             return False
 
@@ -753,6 +762,9 @@ class Controller:
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
+            
+            # set the display segmentation flag to False
+            self.camera_view_controller.display_mask_flag = False
 
             # ask user to verify feature list parameters if in "customized" mode
             if self.acquire_bar_controller.mode == "customized":
@@ -776,14 +788,12 @@ class Controller:
                         self.set_mode_of_sub("stop")
                         return
 
-            # if select 'ilastik segmentation',
-            # 'show segmentation',
-            # and in 'single acquisition'
-            self.camera_view_controller.display_mask_flag = (
-                self.acquire_bar_controller.mode == "single"
-                and self.menu_controller.feature_id_val.get() == 4
-                and self.ilastik_controller.show_segmentation_flag
-            )
+                    # if select 'ilastik segmentation' and 'show segmentation',
+                    # TODO: update id if the feature id is changed
+                    self.camera_view_controller.display_mask_flag = (
+                        self.menu_controller.feature_id_val.get() == 4
+                        and self.ilastik_controller.show_segmentation_flag
+                    )
 
             self.stop_acquisition_flag = False
             self.launch_additional_microscopes()
@@ -1188,6 +1198,10 @@ class Controller:
                 if hasattr(self, "ao_popup_controller"):
                     self.ao_popup_controller.set_widgets_from_coef(value["coefs"])
                     self.ao_popup_controller.plot_mirror(value)
+            elif event == "ao_save_report":
+                if hasattr(self, "ao_popup_controller"):
+                    self.ao_popup_controller.save_report_to_file(value)
+
             elif event == "stop":
                 # Stop the software
                 break

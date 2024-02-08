@@ -37,7 +37,6 @@ import tkinter as tk
 # Third party imports
 
 # Local application imports
-from navigate.controller.sub_controllers.widget_functions import validate_wrapper
 from navigate.controller.sub_controllers.gui_controller import GUIController
 
 
@@ -82,12 +81,6 @@ class ChannelSettingController(GUIController):
         #: dict: The channel setting dictionary.
         self.channel_setting_dict = None
 
-        # add validation functions to spinbox
-        for i in range(self.num):
-            validate_wrapper(self.view.exptime_pulldowns[i])
-            validate_wrapper(self.view.interval_spins[i])
-            validate_wrapper(self.view.laserpower_pulldowns[i])
-
         # widget command binds
         for i in range(self.num):
             channel_vals = self.get_vals_by_channel(i)
@@ -113,7 +106,7 @@ class ChannelSettingController(GUIController):
         for i in range(self.num):
             # State set regardless of operating mode.
             self.view.channel_checks[i].config(state=state)
-            self.view.interval_spins[i].config(state=state)
+            self.view.interval_spins[i].config(state="disabled")
             self.view.laser_pulldowns[i]["state"] = state_readonly
 
             if self.mode != "live" or (
@@ -162,7 +155,7 @@ class ChannelSettingController(GUIController):
         self.channel_setting_dict = setting_dict
         prefix = "channel_"
         for channel in setting_dict.keys():
-            channel_id = int(channel[len(prefix):]) - 1
+            channel_id = int(channel[len(prefix) :]) - 1
             channel_vals = self.get_vals_by_channel(channel_id)
             if not channel_vals:
                 return
@@ -171,9 +164,9 @@ class ChannelSettingController(GUIController):
                 channel_vals[name].set(channel_value[name])
 
             # validate exposure_time, interval, laser_power
-            self.view.exptime_pulldowns[channel_id].validate()
-            self.view.interval_spins[channel_id].validate()
-            self.view.laserpower_pulldowns[channel_id].validate()
+            self.view.exptime_pulldowns[channel_id].trigger_focusout_validation()
+            self.view.interval_spins[channel_id].trigger_focusout_validation()
+            self.view.laserpower_pulldowns[channel_id].trigger_focusout_validation()
 
         self.show_verbose_info("channel has been set new value")
 
@@ -293,6 +286,19 @@ class ChannelSettingController(GUIController):
                 except Exception:
                     setting_dict[widget_name] = 0
                     return False
+                ref_name = (
+                    "exposure_time"
+                    if widget_name == "camera_exposure_time"
+                    else widget_name
+                )
+                setting_range = self.parent_controller.parent_controller.configuration[
+                    "configuration"
+                ]["gui"]["channels"][ref_name]
+                if (
+                    setting_dict[widget_name] < setting_range["min"]
+                    or setting_dict[widget_name] > setting_range["max"]
+                ):
+                    return False
             else:
                 setting_dict[widget_name] = channel_vals[widget_name].get()
 
@@ -320,7 +326,8 @@ class ChannelSettingController(GUIController):
                 if channel_vals[widget_name].get() is None:
                     return
             except tk._tkinter.TclError as e:
-                logger.error(f"Tcl Error caught: trying to set position and {e}")
+                channel_vals[widget_name].set(0)
+                # logger.error(f"Tcl Error caught: trying to set position and {e}")
                 return
 
             channel_key = prefix + str(channel_id + 1)
@@ -413,3 +420,32 @@ class ChannelSettingController(GUIController):
         elif dropdown_name == "filter":
             return self.view.filterwheel_pulldowns[0]["values"].index(value)
         return -1
+
+    def verify_experiment_values(self):
+        """Verify channel settings and return warning info
+
+        Returns
+        -------
+        string
+            Warning info
+        """
+        selected_channel_num = 0
+        setting_range = self.configuration_controller.gui_setting["channels"]
+        for channel_key in self.channel_setting_dict.keys():
+            setting_dict = self.channel_setting_dict[channel_key]
+            if setting_dict["is_selected"]:
+                selected_channel_num += 1
+                # laser power
+                if setting_dict["laser_power"] < setting_range["laser_power"]["min"]:
+                    return f"Laser power below configured threshold. Please adjust to meet or exceed the specified minimum in the configuration.yaml({setting_range['laser_power']['min']})."
+                elif setting_dict["laser_power"] > setting_range["laser_power"]["max"]:
+                    return f"Laser power exceeds configured maximum. Please adjust to meet or be below the specified maximum in the configuration.yaml({setting_range['laser_power']['max']})."
+                # exposure time
+                if setting_dict["camera_exposure_time"] < setting_range["exposure_time"]["min"]:
+                    return f"Exposure time below configured threshold.Please adjust to meet or exceed the specified minimum in the configuration.yaml({setting_range['exposure_time']['min']})."
+                elif setting_dict["camera_exposure_time"] > setting_range["exposure_time"]["max"]:
+                    return f"Exposure time exceeds configured maximum. Please adjust to meet or be below the specified maximum in the configuration.yaml({setting_range['exposure_time']['max']})"
+
+        if selected_channel_num == 0:
+            return "No selected channel!"
+        return None

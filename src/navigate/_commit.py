@@ -41,31 +41,64 @@ import subprocess
 
 
 def get_git_revision_hash() -> str:
+    """ Get the git commit hash of the current repository.
+
+    This function will return the git commit hash of the current repository, or None if
+    the current directory is not a git repository.
+
+    Returns:
+    --------
+    commit_hash : str
+        The git commit hash of the current repository, or None if the current directory
+        is not a git repository
     """
-    TODO: This should not be dynamic. A packaged version will still have an
-    associated commit, but won't be an active git repo. The hash should be
-    stored in a file like in __version__ and bumped with each commit.
-    """
-    # we don't want to move the user, so we'll return to the directory
     working_directory = os.getcwd()
-    # we need to check for the git commit inside of the cloned git folder,
-    # should this have been derived from a git commit
     file_directory = os.path.abspath(os.path.dirname(__file__))
     os.chdir(file_directory)
 
     try:
-        is_git_repo = subprocess.check_output(["git", "rev-parse", "--is-inside-work-tree"]).decode("ascii").strip()
+        is_git_repo = subprocess.check_output(
+            ["git", "rev-parse", "--is-inside-work-tree"],
+            stderr=subprocess.DEVNULL).decode("ascii").strip()
         if is_git_repo:
-            commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+            commit_hash = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"]).decode("ascii").strip()
         else:
-            # avoids "fatal: not a git repository (or any of the parent directories): .git" error.
-            commit_hash = "unknown"
+            commit_hash = None
     except subprocess.CalledProcessError:
-        commit_hash = "unknown"
+        commit_hash = None
 
     os.chdir(working_directory)
     return commit_hash
 
+def get_version_from_file(file_name='VERSION'):
+    """ Retrieve the version from a file in the same directory as this file.
+
+    The VERSION file located in src/navigate/VERSION contains the version of the
+    package when deployed to PyPI.
+
+    Parameters
+    ----------
+    file_name : str
+        The name of the file to read the version from. Default is 'VERSION'
+
+    Returns
+    -------
+    version : str
+        The version of the package
+    """
+    absolute_path = os.path.abspath(__file__)
+    file_path = os.path.join(os.path.dirname(absolute_path), file_name)
+
+    try:
+        with open(file_path, 'r') as file:
+            version = file.read().strip()
+        return version
+    except FileNotFoundError:
+        return "unknown"
 
 __commit__ = get_git_revision_hash()
+if __commit__ is None:
+    __commit__ = get_version_from_file()
 
+print(f"Commit: {__commit__}")

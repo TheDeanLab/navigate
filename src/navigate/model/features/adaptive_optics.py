@@ -244,7 +244,7 @@ class TonyWilson:
 
         self.best_coefs_overall = deepcopy(self.best_coefs)
         self.best_metric = 0.0
-        self.coef_sweep = None
+        # self.coef_sweep = None
         self.best_peaks = []
 
         # Queue
@@ -361,15 +361,21 @@ class TonyWilson:
 
         self.coef_amp_list = [self.coef_amp] * self.n_coefs
 
-        self.coef_sweep = np.linspace(
-            -self.coef_amp, self.coef_amp, self.n_steps
-        ).astype(np.float32)
+        # self.coef_sweep = np.linspace(
+        #     -self.coef_amp, self.coef_amp, self.n_steps
+        # ).astype(np.float32)
 
         self.signal_id = 0
         self.target_signal_id = 0
         self.total_frame_num = self.get_tw_frame_num()
 
         print(f"Total frame num: {self.total_frame_num}")
+
+    def coef_sweep(self, coef=0):
+        coef_amp = self.coef_amp_list[coef]
+        return np.linspace(
+                -coef_amp, coef_amp, self.n_steps
+            ).astype(np.float32)
 
     def in_func_signal(self):
         """Run the signal.
@@ -395,7 +401,7 @@ class TonyWilson:
 
         coef_arr = np.zeros(self.n_modes, dtype=np.float32)
         c = self.change_coef[coef]
-        coef_arr[c] = self.coef_sweep[step]
+        coef_arr[c] = self.coef_sweep(coef)[step]
 
         applied_coefs = coef_arr + self.best_coefs
 
@@ -475,9 +481,9 @@ class TonyWilson:
         self.plot_data = []
         self.trace_list = {}
         self.total_frame_num = self.get_tw_frame_num()
-        self.x = self.coef_sweep
+        self.x = []
         self.y = []
-        self.x_fit = np.linspace(-self.coef_amp, self.coef_amp, 1024)
+        self.x_fit = []
         self.y_fit = []
         self.mirror_img = None
 
@@ -493,8 +499,10 @@ class TonyWilson:
         mode : str, optional
             Fitting mode, by default "poly"
         """
+        self.x = self.coef_sweep(coef)
         self.y = self.plot_data
-
+        self.x_fit = np.linspace(self.x[0], self.x[-1], 1024)
+        
         best_fit_coef = 0
 
         if mode == "poly":
@@ -535,10 +543,12 @@ class TonyWilson:
         # if not using fit params...
         best_fit_coef = self.x_fit[self.y_fit.argmax()]
 
+        # self.coef_amp_list[coef] = best_fit_coef / 2.0
+
         if weight_by_r2:
             best_fit_coef *= r_2
 
-        self.coef_amp_list[coef] = np.abs(best_fit_coef - self.x[np.argmax(self.y)])
+        self.coef_amp_list[coef] = 2.0 * np.abs(best_fit_coef - self.x[np.argmax(self.y)])
 
         self.best_coefs[self.change_coef[coef]] += best_fit_coef
         print(self.best_coefs)
@@ -634,7 +644,7 @@ class TonyWilson:
             if coef == self.n_coefs - 1:
                 if step == self.n_steps - 1:
 
-                    self.coef_sweep *= 0.95
+                    # self.coef_sweep *= 0.95
                     self.done_itr = True
                     out_str += f"\tDone iteration {itr}!\n"
 

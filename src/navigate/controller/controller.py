@@ -1,6 +1,6 @@
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
+import platform
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
 # (subject to the limitations in the disclaimer below)
@@ -269,9 +269,11 @@ class Controller:
         # destroy splash screen and show main screen
         splash_screen.destroy()
         root.deiconify()
-        #: event: Event for resizing the GUI.
-        self.resizie_event_id = None
-        self.view.root.bind("<Configure>", self.resize)
+
+        #: event: Event for resizing the GUI. Only works on Windows OS.
+        self.resize_event_id = None
+        if platform.system() == "Windows":
+            self.view.root.bind("<Configure>", self.resize)
 
     def update_buffer(self):
         """Update the buffer size according to the camera
@@ -453,6 +455,15 @@ class Controller:
         """
 
         def refresh(width, height):
+            """ Refresh the GUI.
+
+            Parameters
+            __________
+            width : int
+                Width of the GUI.
+            height : int
+                Height of the GUI.
+            """
             if width < 1200 or height < 600:
                 return
             self.view.camera_waveform["width"] = (
@@ -462,9 +473,9 @@ class Controller:
 
         if event.widget != self.view.scroll_frame:
             return
-        if self.resizie_event_id:
-            self.view.after_cancel(self.resizie_event_id)
-        self.resizie_event_id = self.view.after(
+        if self.resize_event_id:
+            self.view.after_cancel(self.resize_event_id)
+        self.resize_event_id = self.view.after(
             1000, lambda: refresh(event.width, event.height)
         )
 

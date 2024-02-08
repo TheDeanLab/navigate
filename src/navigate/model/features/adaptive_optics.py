@@ -176,6 +176,8 @@ class TonyWilson:
         #: float: Coefficient amplitude
         self.coef_amp = None
 
+        self.coef_amp_list = []
+
         #: bool: True if all iterations are done, False otherwise
         self.done_all = False
 
@@ -216,6 +218,8 @@ class TonyWilson:
             if modes_armed_dict[k]:
                 self.change_coef += [i]
         self.n_coefs = len(self.change_coef)
+
+        print("Change_coef:\t", self.change_coef)
 
         start_from = self.model.configuration["experiment"]["AdaptiveOpticsParameters"][
             "TonyWilson"
@@ -355,6 +359,8 @@ class TonyWilson:
         self.n_steps = tw_settings["steps"]
         self.coef_amp = tw_settings["amplitude"]
 
+        self.coef_amp_list = [self.coef_amp] * self.n_coefs
+
         self.coef_sweep = np.linspace(
             -self.coef_amp, self.coef_amp, self.n_steps
         ).astype(np.float32)
@@ -384,6 +390,8 @@ class TonyWilson:
         out_str += f"\tStep:\t{step}\n"
         out_str += f"\tC_n:\t{coef}\n"
         out_str += f"\tItr:\t{itr}\n"
+
+        out_str += f"\tCoef_amp_list:\t{self.coef_amp_list}\n"
 
         coef_arr = np.zeros(self.n_modes, dtype=np.float32)
         c = self.change_coef[coef]
@@ -475,7 +483,7 @@ class TonyWilson:
 
         self.frames_done = 0
 
-    def process_data(self, coef, mode="poly"):
+    def process_data(self, coef, mode="poly", weight_by_r2=True):
         """Process the data
 
         Parameters
@@ -486,6 +494,8 @@ class TonyWilson:
             Fitting mode, by default "poly"
         """
         self.y = self.plot_data
+
+        best_fit_coef = 0
 
         if mode == "poly":
             c = np.min(self.y)  # offset guess
@@ -501,6 +511,8 @@ class TonyWilson:
             )
             self.y_fit = poly2(self.x_fit, p[0], p[1], p[2])
             r_2 = r_squared(self.y, poly2(self.x, p[0], p[1], p[2]))
+
+            best_fit_coef = -p[1] / (2*p[0])
 
         elif mode == "gauss":
             d = np.min(self.y)
@@ -518,9 +530,18 @@ class TonyWilson:
             self.y_fit = gauss(self.x_fit, p[0], p[1], p[2], p[3])
             r_2 = r_squared(self.y, gauss(self.x, p[0], p[1], p[2], p[3]))
 
-        self.best_coefs[self.change_coef[coef - 1]] += (
-            self.x_fit[self.y_fit.argmax()] * r_2
-        )  # weight by R^2 goodness of fit
+            best_fit_coef = p[1]
+
+        # if not using fit params...
+        best_fit_coef = self.x_fit[self.y_fit.argmax()]
+
+        if weight_by_r2:
+            best_fit_coef *= r_2
+
+        self.coef_amp_list[coef] = np.abs(best_fit_coef - self.x[np.argmax(self.y)])
+
+        self.best_coefs[self.change_coef[coef]] += best_fit_coef
+        print(self.best_coefs)
         self.mirror_img = self.mirror_controller.get_wavefront_pix()
 
         new_metric = self.plot_data[int(self.n_steps / 2)]
@@ -530,6 +551,8 @@ class TonyWilson:
             self.best_coefs_overall = deepcopy(self.best_coefs)
 
         self.plot_data = []
+
+        return best_fit_coef
 
     def in_func_data(self, frame_ids=[]):
         """Run the data
@@ -582,18 +605,17 @@ class TonyWilson:
             elif self.metric == "DCT Shannon Entropy":
                 new_data = img_contrast.fast_normalized_dct_shannon_entropy(img, 3)[0]
 
+            self.plot_data.append(new_data)
+            out_str += f"\tTrace:\t{np.flip(self.plot_data)}\n"
+
             if len(self.plot_data) == self.n_steps:
-                self.process_data(coef, mode=self.fit_func)
+                out_str += f"\tFITTING DATA... Best fit coef: {self.process_data(coef, mode=self.fit_func)}\n"
                 self.trace_list[self.mode_names[self.change_coef[coef]]] = {
                     "x": self.x,
                     "y": self.y,
                     "x_fit": self.x_fit[::32],
                     "y_fit": self.y_fit[::32],
                 }
-                out_str += "\tFITTING DATA...\n"
-
-            self.plot_data.append(new_data)
-            out_str += f"\tTrace:\t{np.flip(self.plot_data)}\n"
 
             self.frames_done += 1
             out_str += f"\tDone:\t{self.frames_done}\n"

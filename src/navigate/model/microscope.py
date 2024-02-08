@@ -431,6 +431,7 @@ class Microscope:
         if self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "confocal-projection":
             for stage, _ in self.stages_list:
                 if type(stage) == GalvoNIStage:
+                    # stage.switch_mode("close")
                     stage.switch_mode("normal")
         self.stop_stage()
         if self.central_focus is not None:

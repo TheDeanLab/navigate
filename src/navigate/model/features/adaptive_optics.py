@@ -548,7 +548,8 @@ class TonyWilson:
         if weight_by_r2:
             best_fit_coef *= r_2
 
-        self.coef_amp_list[coef] = 2.0 * np.abs(best_fit_coef - self.x[np.argmax(self.y)])
+        new_coef_amp = 2.0 * np.abs(best_fit_coef - self.x[np.argmax(self.y)])
+        self.coef_amp_list[coef] = new_coef_amp if new_coef_amp > 0.05 else 0.05        
 
         self.best_coefs[self.change_coef[coef]] += best_fit_coef
         print(self.best_coefs)

@@ -41,7 +41,7 @@ import subprocess
 
 
 def get_git_revision_hash() -> str:
-    """ Get the git commit hash of the current repository.
+    """Get the git commit hash of the current repository.
 
     This function will return the git commit hash of the current repository, or None if
     the current directory is not a git repository.
@@ -57,12 +57,19 @@ def get_git_revision_hash() -> str:
     os.chdir(file_directory)
 
     try:
-        is_git_repo = subprocess.check_output(
-            ["git", "rev-parse", "--is-inside-work-tree"],
-            stderr=subprocess.DEVNULL).decode("ascii").strip()
+        is_git_repo = (
+            subprocess.check_output(
+                ["git", "rev-parse", "--is-inside-work-tree"], stderr=subprocess.DEVNULL
+            )
+            .decode("ascii")
+            .strip()
+        )
         if is_git_repo:
-            commit_hash = subprocess.check_output(
-                ["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+            commit_hash = (
+                subprocess.check_output(["git", "rev-parse", "HEAD"])
+                .decode("ascii")
+                .strip()
+            )
         else:
             commit_hash = None
     except subprocess.CalledProcessError:
@@ -71,8 +78,9 @@ def get_git_revision_hash() -> str:
     os.chdir(working_directory)
     return commit_hash
 
-def get_version_from_file(file_name='VERSION'):
-    """ Retrieve the version from a file in the same directory as this file.
+
+def get_version_from_file(file_name="VERSION"):
+    """Retrieve the version from a file in the same directory as this file.
 
     The VERSION file located in src/navigate/VERSION contains the version of the
     package when deployed to PyPI.
@@ -91,11 +99,12 @@ def get_version_from_file(file_name='VERSION'):
     file_path = os.path.join(os.path.dirname(absolute_path), file_name)
 
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, "r") as file:
             version = file.read().strip()
         return version
     except FileNotFoundError:
         return "unknown"
+
 
 __commit__ = get_git_revision_hash()
 if __commit__ is None:

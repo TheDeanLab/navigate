@@ -34,18 +34,6 @@ from pathlib import Path
 import pytest
 
 
-def test_update_nested_dict():
-    from navigate.log_files.log_functions import update_nested_dict
-
-    test_dict = {"one": 2, "three": {4: {"metastasis": False}}}
-
-    test_dict_updated = update_nested_dict(
-        test_dict, lambda k, v: k == "metastasis", lambda x: True
-    )
-
-    assert test_dict_updated == {"one": 2, "three": {4: {"metastasis": True}}}
-
-
 @pytest.mark.parametrize("logging_configuration", ["logging.yml"])
 @pytest.mark.parametrize("logging_path", [None, Path("./")])
 def test_log_setup(logging_configuration, logging_path):

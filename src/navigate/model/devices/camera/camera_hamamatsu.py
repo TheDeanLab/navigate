@@ -407,7 +407,7 @@ class HamamatsuBase(CameraBase):
         roi_right = roi_left + roi_width
 
         # Set ROI
-        x_pixels, y_pixels = self.camera_controller.set_ROI(
+        self.x_pixels, self.y_pixels = self.camera_controller.set_ROI(
             roi_left, roi_top, roi_right, roi_bottom
         )
 
@@ -428,7 +428,7 @@ class HamamatsuBase(CameraBase):
             f"{self.camera_controller.get_property_value('subarray_vsize')}"
         )
 
-        return x_pixels == roi_width and y_pixels == roi_height
+        return self.x_pixels == roi_width and self.y_pixels == roi_height
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
         """Initialize HamamatsuOrca image series.

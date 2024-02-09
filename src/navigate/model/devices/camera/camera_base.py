@@ -91,8 +91,14 @@ class CameraBase:
         self.step_image_width = 4
         #: int: Minimum step size for image height.
         self.step_image_height = 4
+        #: int: Number of pixels in the x direction
+        self.x_pixels = 2048
+        #: int: Number of pixels in the y direction
+        self.y_pixels = 2048
         self.camera_parameters["x_pixels"] = 2048
         self.camera_parameters["y_pixels"] = 2048
+        # TODO: trigger_source, readout_speed, trigger_active, trigger_mode and trigger_polarity
+        # can be removed after updating how we get the readout time in model and controller
         self.camera_parameters["trigger_source"] = 2.0
         self.camera_parameters["readout_speed"] = 1.0
         self.camera_parameters["pixel_size_in_microns"] = 6.5

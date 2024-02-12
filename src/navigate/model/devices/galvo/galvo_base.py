@@ -188,7 +188,7 @@ class GalvoBase:
                 elif self.galvo_waveform == "halfsaw":
                     new_wave = sawtooth(
                         sample_rate=self.sample_rate,
-                        sweep_time=self.sweep_time,
+                        sweep_time= self.sweep_time,
                         frequency=galvo_frequency,
                         amplitude=galvo_amplitude,
                         offset=galvo_offset,

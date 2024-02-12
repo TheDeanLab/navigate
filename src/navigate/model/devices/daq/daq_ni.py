@@ -266,6 +266,9 @@ class NIDAQ(DAQBase):
         """
         self.n_sample = int(self.sample_rate * self.sweep_times[channel_key])
         max_sample = self.n_sample * self.waveform_expand_num
+        print("max_sample", max_sample)
+        print("repeat number", self.waveform_repeat_num)
+        print("expand number", self.waveform_expand_num)
         # TODO: GalvoStage and remote_focus waveform are not calculated based on a
         #  same sweep time. There needs some fix.
 

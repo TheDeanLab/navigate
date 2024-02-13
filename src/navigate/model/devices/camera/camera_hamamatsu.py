@@ -178,6 +178,7 @@ class HamamatsuBase(CameraBase):
             "image_height",
             "image_width",
             "exposure_time",
+            "readout_time"
         ]
         for param in params:
             print(param, self.camera_controller.get_property_value(param))

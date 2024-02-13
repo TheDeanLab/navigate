@@ -33,6 +33,8 @@
 # Standard Imports
 import logging
 
+import numpy as np
+
 # Third Party Imports
 
 # Local Imports
@@ -103,6 +105,9 @@ class DAQBase:
 
         #: int: Number of times to expand the waveform
         self.waveform_expand_num = 1
+
+        #: bool: Bidirectional ASLM mode enabled?
+        self.bidirectional = False
 
     def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in

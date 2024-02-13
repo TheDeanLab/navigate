@@ -417,8 +417,7 @@ class Microscope:
                     "readout_direction"
                 ]
             )
-            print('readout direction', self.configuration["experiment"]["CameraParameters"][
-                    "readout_direction"])
+
         # set binning
         self.camera.set_binning(
             self.configuration["experiment"]["CameraParameters"]["binning"]
@@ -429,9 +428,6 @@ class Microscope:
         # calculate all the waveform
         self.shutter.open_shutter()
 
-        # if bidirectional
-        # bidirectional specific calculate_all_waveforms()
-        # else
         return self.calculate_all_waveform()
 
     def end_acquisition(self):

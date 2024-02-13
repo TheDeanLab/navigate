@@ -1020,6 +1020,7 @@ def load_features(model, feature_list):
     for node in break_list:
         if node[0] == "child":
             node[1].child, node[2].child = create_node({"name": DummyFeature})
+
     return SignalContainer(signal_root, signal_cleanup_list), DataContainer(
         data_root, data_cleanup_list
     )

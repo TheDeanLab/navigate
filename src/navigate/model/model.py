@@ -503,6 +503,7 @@ class Model:
             return
 
         if command == "acquire":
+            """ Begin an acquisition."""
             self.is_acquiring = True
             self.imaging_mode = self.configuration["experiment"]["MicroscopeState"][
                 "image_mode"

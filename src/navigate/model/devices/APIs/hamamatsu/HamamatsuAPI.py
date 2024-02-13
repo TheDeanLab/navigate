@@ -1014,8 +1014,9 @@ class DCAM:
             return False
 
         # Cast value to a multiple of step size
-        if property_value_step > 0:
-            value = int(value // property_value_step) * property_value_step
+        # The cast will cause accuracy problems when setting exposure time
+        # if property_value_step > 0:
+        #     value = int(value // property_value_step) * property_value_step
 
         if value < property_value_min:
             print(

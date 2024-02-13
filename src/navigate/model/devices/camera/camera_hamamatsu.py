@@ -105,7 +105,7 @@ class HamamatsuBase(CameraBase):
         self.camera_parameters["y_pixels_min"] = self.camera_controller.min_image_height
         self.camera_parameters["x_pixels_step"] = self.camera_controller.step_image_width
         self.camera_parameters["y_pixels_step"] = self.camera_controller.step_image_height
-        self.minimum_exposure_time = 0.001
+        self.minimum_exposure_time, _, _ = self.camera_controller.get_property_range("exposure_time")
 
         #: object: Camera controller
         if self.camera_controller.get_property_value("readout_speed"):
@@ -166,6 +166,8 @@ class HamamatsuBase(CameraBase):
             "sensor_mode",
             "binning",
             "subarray_mode",
+            "subarray_vsize",
+            "subarray_hsize",
             "readout_speed",
             "trigger_active",
             "trigger_mode",
@@ -180,6 +182,8 @@ class HamamatsuBase(CameraBase):
         for param in params:
             print(param, self.camera_controller.get_property_value(param))
             logger.info(f"{param}, {self.camera_controller.get_property_value(param)}")
+
+        print("*** exposure time range:", self.camera_controller.get_property_range("exposure_time"))
 
     def close_camera(self):
         """Close HamamatsuOrca Camera"""
@@ -313,7 +317,7 @@ class HamamatsuBase(CameraBase):
         exposure_time : float
             Exposure time in milliseconds.
         """
-        exposure_time = ((exposure_time / 1000) // self.minimum_exposure_time) * self.minimum_exposure_time
+        exposure_time = exposure_time / 1000
         return self.camera_controller.set_property_value("exposure_time", exposure_time)
 
     def set_line_interval(self, line_interval_time):
@@ -505,7 +509,7 @@ class HamamatsuOrcaLightning(HamamatsuBase):
 
         self.camera_parameters["supported_readout_directions"] = ["Top-to-Bottom"]
 
-        self.minimum_exposure_time = 6.304 * 10 ** -6
+        # self.minimum_exposure_time = 6.304 * 10 ** -6
 
         logger.info("HamamatsuOrcaLightning Initialized")
 
@@ -533,7 +537,7 @@ class HamamatsuOrcaLightning(HamamatsuBase):
             (shutter_width + self.y_pixels - 1) / 4
         )
         self.camera_parameters["line_interval"] = camera_line_interval
-        exposure_time = camera_line_interval * (shutter_width / 4) * 1000
+        exposure_time = (camera_line_interval * (shutter_width / 4) // camera_line_interval) * camera_line_interval * 1000
         return exposure_time, camera_line_interval
 
 
@@ -554,7 +558,7 @@ class HamamatsuOrcaFire(HamamatsuBase):
         self.camera_parameters["supported_readout_directions"] = [
             "Top-to-Bottom", "Bottom-to-Top", "Bidirectional", "Rev. Bidirectional"]
 
-        self.minimum_exposure_time = 7.309 * 10 ** -6  # 7.309 us
+        # self.minimum_exposure_time = 7.309 * 10 ** -6  # 7.309 us
 
         self.camera_parameters["x_pixels"] = self.camera_controller.get_property_value(
             "image_width")
@@ -585,6 +589,6 @@ class HamamatsuOrca(HamamatsuBase):
         self.camera_parameters["supported_readout_directions"] = [
             "Top-to-Bottom", "Bottom-to-Top"]
 
-        self.minimum_exposure_time = 9.74436 * 10 ** -6
+        # self.minimum_exposure_time = 9.74436 * 10 ** -6
 
         logger.info("HamamatsuOrca Initialized")

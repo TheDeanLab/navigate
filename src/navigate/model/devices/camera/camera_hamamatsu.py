@@ -590,7 +590,7 @@ class HamamatsuOrcaFire(HamamatsuBase):
             HamamatsuOrca line interval duration (s).
         """
 
-        # TODO: should we set 7H flat as sweepting time outside exposure?
+        # TODO: should we set 7H flat as sweeping time outside exposure?
         # 4H delay, 7H flat, (Vn/2+5)H readout
         camera_line_interval = (full_chip_exposure_time / 1000) / (
             16 + (shutter_width + self.y_pixels) / 2

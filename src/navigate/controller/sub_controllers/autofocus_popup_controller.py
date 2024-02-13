@@ -35,6 +35,7 @@
 # Third Party Imports
 import numpy as np
 import matplotlib.ticker as tck
+from tkinter import messagebox
 
 # Local Imports
 from navigate.controller.sub_controllers.gui_controller import GUIController
@@ -130,6 +131,30 @@ class AutofocusPopupController(GUIController):
         """Starts the autofocus process."""
         device = self.widgets["device"].widget.get()
         device_ref = self.widgets["device_ref"].widget.get()
+        self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "autofocus_device"
+        ] = device
+        self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "autofocus_device_ref"
+        ] = device_ref
+        # verify autofocus parameters
+        setting_dict = self.setting_dict[self.microscope_name][device][device_ref]
+        warning_message = ""
+        for k in ["coarse", "fine"]:
+            if setting_dict[f"{k}_selected"]:
+                try:
+                    step = float(setting_dict[f"{k}_step_size"])
+                    value = float(setting_dict[f"{k}_range"])
+                    if step <= 0 or value < step:
+                        warning_message += f"{k} settings are not correct!\n"
+                except:
+                    warning_message += f"{k} settings are not correct!\n"
+        if warning_message:
+            messagebox.showerror(
+                title="Navigate",
+                message=warning_message,
+            )
+            return
         self.parent_controller.execute("autofocus", device, device_ref)
 
     def update_device_ref(self, *args):

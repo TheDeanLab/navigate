@@ -202,6 +202,7 @@ class Hover(object):
             text=self.text,
             justify=tk.LEFT,
             background=background,
+            foreground="black",
             relief=relief,
             borderwidth=1,
             font=font,

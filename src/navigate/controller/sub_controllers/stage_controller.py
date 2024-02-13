@@ -552,8 +552,8 @@ class StageController(GUIController):
                     widget.trigger_focusout_validation()
                     # if position is not inside limits do not move stage
                     if (
-                        position < self.position_min[axis]
-                        or position > self.position_max[axis]
+                        position < float(self.position_min[axis])
+                        or position > float(self.position_max[axis])
                     ):
                         return
             except tk._tkinter.TclError:
@@ -570,7 +570,7 @@ class StageController(GUIController):
             # clicks that a user provides. If 1000 ms, if user hits button 10x within
             # 1s, only moves to the final value.
             self.event_id[axis] = self.view.after(
-                250,
+                500,
                 lambda *args: self.parent_controller.execute("stage", position, axis),
             )
 

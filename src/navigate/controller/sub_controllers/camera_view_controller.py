@@ -67,21 +67,23 @@ class CameraViewController(GUIController):
             The parent controller of the camera view controller.
         """
         super().__init__(view, parent_controller)
+
         #: SharedNDArray: The shared array that contains the image data.
         self.data_buffer = None
+
         #: VariableWithLock: The variable that indicates if the image is being
         # displayed.
         self.is_displaying_image = VariableWithLock(bool)
 
-        # Logging
         #: logging.Logger: The logger for the camera view controller.
         self.logger = logging.getLogger(p)
 
-        # Getting Widgets/Buttons
         #: dict: The dictionary of image metrics widgets.
         self.image_metrics = view.image_metrics.get_widgets()
+
         #: dict: The dictionary of image palette widgets.
         self.image_palette = view.scale_palette.get_widgets()
+
         #: tkinter.Canvas: The tkinter canvas that displays the image.
         self.canvas = self.view.canvas
 
@@ -103,9 +105,12 @@ class CameraViewController(GUIController):
         self.view.live_frame.live.bind(
             "<<ComboboxSelected>>", self.update_display_state
         )
+
         #: event: The resize event id.
-        self.resizie_event_id = None
-        self.view.bind("<Configure>", self.resize)
+        self.resize_event_id = None
+        if platform.system() == "Windows":
+            self.resize_event_id = self.view.bind("<Configure>", self.resize)
+
         #: int: The width of the canvas.
         #: int: The height of the canvas.
         self.width, self.height = 663, 597
@@ -115,19 +120,6 @@ class CameraViewController(GUIController):
         )
         self.canvas_width, self.canvas_height = 512, 512
 
-        # Left Click Binding
-        # self.canvas.bind("<Button-1>", self.left_click)
-
-        # Slider Binding
-        # self.view.slider.slider_widget.bind("<Button-1>", self.slider_update)
-
-        # Mouse Wheel Binding
-        # if platform.system() == 'Windows':
-        #     self.canvas.bind("<MouseWheel>", self.mouse_wheel)
-        # elif platform.system() == 'Linux':
-        #     self.canvas.bind("<Button-4>", self.mouse_wheel)
-        #     self.canvas.bind("<Button-5>", self.mouse_wheel)
-
         # Right-Click Binding
         #: tkinter.Menu: The tkinter menu that pops up on right click.
         self.menu = tk.Menu(self.canvas, tearoff=0)
@@ -135,110 +127,143 @@ class CameraViewController(GUIController):
         self.menu.add_command(label="Reset Display", command=self.reset_display)
         self.menu.add_command(label="Mark Position", command=self.mark_position)
 
-        # self.canvas.bind("<Button-3>", self.popup_menu)
         #: int: The x position of the mouse.
         self.move_to_x = None
+
         #: int: The y position of the mouse.
         self.move_to_y = None
 
-        #  Stored Images
         #: numpy.ndarray: The image data.
         self.tk_image = None
+
         #: numpy.ndarray: The image data.
         self.image = None
+
         #: numpy.ndarray: The image data.
         self.cross_hair_image = None
+
         #: numpy.ndarray: The image data.
         self.saturated_pixels = None
+
         #: numpy.ndarray: The image data.
         self.down_sampled_image = None
+
         #: numpy.ndarray: The image data.
         self.zoom_image = None
 
-        # Widget Defaults
         #: bool: The autoscale flag.
         self.autoscale = True
+
         #: int: The maximum image counts.
         self.max_counts = None
+
         #: int: The minimum image counts.
         self.min_counts = None
+
         #: bool: The crosshair flag.
         self.apply_cross_hair = True
+
         #: str: The mode of the camera view controller.
         self.mode = "stop"
+
         #: bool: The transpose flag.
         self.transpose = False
+
         #: str: The display state.
         self.display_state = "Live"
 
         # Colormap Information
         #: matplotlib.colors.LinearSegmentedColormap: The colormap.
         self.colormap = plt.get_cmap("gist_gray")
-        # self.gray_lut = plt.get_cmap('gist_gray')
-        # self.gradient_lut = plt.get_cmap('plasma')
-        # self.rainbow_lut = plt.get_cmap('afmhot')
-        # self.rdbu_r_lut = plt.get_cmap('RdBu_r')
 
         #: int: The number of images displayed.
         self.image_count = 0
+
         #: ndarray: A temporary array for image processing.
         self.temp_array = None
+
         #: int: The number of frames to average.
         self.rolling_frames = 1
+
         #: list: The list of maximum intensity values.
         self.max_intensity_history = []
+
         #: int: The bit-depth for PIL presentation.
         self.bit_depth = 8
+
         #: float: The zoom value for image display.
         self.zoom_value = 1
+
         #: float: The zoom scale for image display.
         self.zoom_scale = 1
+
         #: numpy.ndarray: The zoom rectangle.
         self.zoom_rect = np.array([[0, self.canvas_width], [0, self.canvas_height]])
+
         #: numpy.ndarray: The zoom offset.
         self.zoom_offset = np.array([[0], [0]])
+
         #: int: The zoom width.
         self.zoom_width = self.canvas_width
+
         #: int: The zoom height.
         self.zoom_height = self.canvas_height
+
         #: int: The canvas width scaling factor.
         self.canvas_width_scale = 4
+
         #: int: The canvas height scaling factor.
         self.canvas_height_scale = 4
+
         #: int: The original image height.
         self.original_image_height = 2014
+
         #: int: The original image width.
         self.original_image_width = 2014
+
         #: int: The number of slices.
         self.number_of_slices = 0
+
         #: numpy.ndarray: The image volume.
         self.image_volume = None
+
         #: int: The total number of images per volume.
         self.total_images_per_volume = 0
+
         #: int: The number of channels.
         self.number_of_channels = 0
+
         #: int: The image counter.
         self.image_counter = 0
+
         #: int: The slice index.
         self.slice_index = 0
+
         #: int: The channel index.
         self.channel_index = 0
+
         #: int: The crosshair x position.
         self.crosshair_x = None
+
         #: int: The crosshair y position.
         self.crosshair_y = None
+
         #: bool: The display mask flag.
         self.mask_color_table = None
+
         #: bool: Whether or not to flip the image.
         self.flip_flags = None
+
         #: bool: Image catche flag
         self.image_catche_flag = True
 
         # ilastik mask
         #: bool: The display mask flag for ilastik.
         self.display_mask_flag = False
+
         #: threading.Lock: The lock for the ilastik mask.
         self.ilastik_mask_ready_lock = threading.Lock()
+
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
 
@@ -1143,9 +1168,9 @@ class CameraViewController(GUIController):
             return
         if self.view.is_popup is True and event.widget.widgetName != "toplevel":
             return
-        if self.resizie_event_id:
-            self.view.after_cancel(self.resizie_event_id)
-        self.resizie_event_id = self.view.after(
+        if self.resize_event_id:
+            self.view.after_cancel(self.resize_event_id)
+        self.resize_event_id = self.view.after(
             1000, lambda: self.refresh(event.width, event.height)
         )
 

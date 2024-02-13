@@ -38,6 +38,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
+from navigate.view.custom_widgets.hover import Hover
 from navigate.view.custom_widgets.hovermixin import HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -255,7 +256,7 @@ class ChannelCreator(ttk.Labelframe):
             #  Laser Power Spinbox
             self.laserpower_variables.append(tk.StringVar())
             self.laserpower_pulldowns.append(
-                ttk.Spinbox(
+                ValidatedSpinbox(
                     self.frame_columns[2],
                     from_=0,
                     to=100.0,
@@ -286,7 +287,7 @@ class ChannelCreator(ttk.Labelframe):
             #  Exposure Time Spin boxes
             self.exptime_variables.append(tk.StringVar())
             self.exptime_pulldowns.append(
-                ttk.Spinbox(
+                ValidatedSpinbox(
                     self.frame_columns[4],
                     from_=0,
                     to=5000.0,
@@ -303,7 +304,7 @@ class ChannelCreator(ttk.Labelframe):
             #  Time Interval Spin boxes
             self.interval_variables.append(tk.StringVar())
             self.interval_spins.append(
-                ttk.Spinbox(
+                ValidatedSpinbox(
                     self.frame_columns[5],
                     from_=0,
                     to=5000.0,
@@ -316,6 +317,8 @@ class ChannelCreator(ttk.Labelframe):
             self.interval_spins[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            hover = Hover(self.interval_spins[num], text="Not Implemented", type="free")
+            hover.setdescription(text="Not Implemented")
 
             # Defocus Spinbox
             self.defocus_variables.append(tk.DoubleVar())
@@ -576,7 +579,7 @@ class StackTimePointFrame(ttk.Labelframe):
         #: tk.StringVar: The variable for the timepoints spinbox
         self.exp_time_spinval = tk.StringVar()
         #: ttk.Spinbox: The timepoints spinbox
-        self.exp_time_spinbox = ttk.Spinbox(
+        self.exp_time_spinbox = ValidatedSpinbox(
             self,
             from_=0,
             to=5000,
@@ -616,7 +619,7 @@ class StackTimePointFrame(ttk.Labelframe):
         #: tk.StringVar: The variable for the stack pause spinbox
         self.stack_pause_spinval = tk.StringVar()
         #: ttk.Spinbox: The stack pause spinbox
-        self.stack_pause_spinbox = ttk.Spinbox(
+        self.stack_pause_spinbox = ValidatedSpinbox(
             self,
             from_=0,
             to=5000.0,

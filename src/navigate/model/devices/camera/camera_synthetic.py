@@ -120,6 +120,10 @@ class SyntheticCamera(CameraBase):
         self.serial_number = "synthetic"
         #: float: exposure time
         self.camera_exposure_time = 0.2
+        #: int: width
+        self.x_pixels = self.camera_parameters["x_pixels"]
+        #: int: height
+        self.y_pixels = self.camera_parameters["y_pixels"]
 
         logger.info("SyntheticCamera Class Initialized")
 
@@ -225,7 +229,10 @@ class SyntheticCamera(CameraBase):
             for image_file in filenames:
                 try:
                     tif = TiffFile(image_file)
-                    self.tif_images.append(tif.asarray())
+                    if len(tif.pages) == 1:
+                        self.tif_images.append([tif.asarray()])
+                    else: 
+                        self.tif_images.append(tif.asarray())
                     idx += len(tif.pages)
                     if idx >= self.num_of_frame:
                         return

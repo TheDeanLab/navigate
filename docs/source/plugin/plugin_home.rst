@@ -119,7 +119,7 @@ Plugin Structure:
 Plugin Configuration
 --------------------
 
-There should always have a **plugin_config.yml** file under the plugin folder, which tells **navigate**
+There should always have a ``plugin_config.yml`` file under the plugin folder, which tells **navigate**
 the plugin name, the GUI as a Tab or Popup and custom acquisition mode name. A typical plugin config
 is:
 
@@ -136,28 +136,29 @@ is:
 Plugin GUI Elements
 --------------------
 
-**navigate** supports a plugin with its own GUI. The custom plugin GUI can be integrated as a tab or a popup.
-Users should specify the view option in `plugin_config.yml`. The name in the plugin_config.yml will be used
-as a menu name if the plugin GUI as a popup. Users could find the menu under `Plugins` in **navigate** window.
+**navigate** supports plugins with their own GUIs. A custom plugin GUI can be integrated as a tab or a popup.
+Users should specify a view option in ``plugin_config.yml``. If it is a popup, users can find the plugin under 
+the :guilabel:`Plugins` menu in the **navigate** window. If it is a tab, it will appear next to the 
+:ref:`Settings Notebooks <user_guide/gui_walkthrough:settings notebooks>`.
 
 
-When creating a new plugin with GUI, ensure that the plugin name is consistent with the naming
-conventions for the associated Python files (`plugin_name_controller.py` and `plugin_name_frame.py`).
+When creating a new plugin with a GUI, ensure that the plugin name is consistent with the naming
+conventions for the associated Python files (``plugin_name_controller.py`` and ``plugin_name_frame.py``).
 Both Python filenames should be in lowercase.
 
 
-For example, if your plugin is named `My Plugin` (there is a space in between), the associated Python files
-should be named: "my_plugin_frame.py" and "my_plugin_controller.py"
+For example, if your plugin is named "My Plugin" (there is a space in between), the associated Python files
+should be named: ``my_plugin_frame.py`` and ``my_plugin_controller.py``.
 
 -------------------------------------
 
 Plugin Devices
 ------------------
 
-The **navigate** Software allows you to integrate a new device. There could be more than one device inside a plugin,
-if they are different kinds of device, put them into different folders. For a kind of device, there should be
-a `device_startup_functions.py` tells **navigate** how to start the device and the reference name of the device in
-system `configuration.yaml`.
+The **navigate** plugin architecture allows you to integrate new hardware device. There can be more than one 
+device inside a plugin. If they are different kinds of device, please put them into different folders. For each
+kind of device, there should be a ``device_startup_functions.py`` telling **navigate** how to start the device
+and indicating the reference name of the device to be used in ``configuration.yaml``.
 
 Device type name and reference name are given as following:
 
@@ -185,13 +186,13 @@ A function to start the device should be given,
         return device_object
 
 
-The template of `device_startup_functions.py` could be find in the `template <https://github.com/TheDeanLab/navigate-plugin-template/blob/main/src/plugins-template/model/devices/plugin_device/device_startup_functions.py>`_.
+The template for ``device_startup_functions.py`` can be found in the `plugin template <https://github.com/TheDeanLab/navigate-plugin-template/blob/main/src/plugins-template/model/devices/plugin_device/device_startup_functions.py>`_.
 
 -------------------------------------
 
 Plugin Features
 -------------------------
-**navigate** allows users to add new features. New feature objects and feature lists can be a plugin or a component
+**navigate** allows users to add new features. New feature objects and feature lists can each be a plugin or components
 of a plugin. Features and feature lists are automatically loaded into **navigate**.
 
 Please visit `here <https://thedeanlab.github.io/**navigate**/feature_container/feature_container_home.html>`_ for details about how to build a new feature object and feature list.
@@ -202,7 +203,7 @@ Custom Acquisition Modes
 ------------------------
 Navigate offers seamless support for custom acquisition modes, and registering a new mode is straightforward.
 
-1. Download the template `plugin_acquisition_mode.py
+1. Download the template for `plugin_acquisition_mode.py
 <https://github.com/TheDeanLab/navigate-plugin-template/blob/main/plugins-template/plugin_acquisition_mode.py>`_
 
 2. Update the ``feature_list``.
@@ -218,9 +219,9 @@ Navigate offers seamless support for custom acquisition modes, and registering a
                 # update here
             ]
 
-3. Update functions.
+3. Update the functions.
 
-Users should tell **navigate** what **navigate** should do before and after acquisition.
+Users should tell **navigate** what to do before and after acquisition using the following functions.
 
 .. code-block:: python
 
@@ -236,7 +237,7 @@ Users should tell **navigate** what **navigate** should do before and after acqu
     def end_acquisition_model(self, model):
         # update here
 
-4. Register the acquisition mode in `plugin_config.yml`.
+4. Register the acquisition mode in ``plugin_config.yml``.
 
 .. code-block:: none
 
@@ -247,4 +248,4 @@ Users should tell **navigate** what **navigate** should do before and after acqu
 
 -----------
 
-There are more plugin examples, please visit `navigate <https://github.com/TheDeanLab/navigate/tree/develop/src/navigate/plugins>`_ and `Navigate Plugins <https://github.com/TheDeanLab/navigate-plugins>`_.
+For more plugin examples, please visit `navigate <https://github.com/TheDeanLab/navigate/tree/develop/src/navigate/plugins>`_ and `Navigate Plugins <https://github.com/TheDeanLab/navigate-plugins>`_.

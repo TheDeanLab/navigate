@@ -225,9 +225,26 @@ class AdaptiveOpticsPopup:
         tw_metric_combo.current(0)
         self.inputs["metric"] = {"button": tw_metric_combo, "variable": tw_metric_var}
 
+        tw_fitfunc_var = tk.StringVar()
+        ttk.Label(tw_widget_frame, text="Fit func:").grid(row=7, column=1)
+        tw_fitfunc_combo = ttk.Combobox(
+            tw_widget_frame, textvariable=tw_fitfunc_var, width=20
+        )
+        tw_fitfunc_combo["values"] = (
+            "poly",
+            "gauss",
+        )
+        tw_fitfunc_combo.state(["readonly"])
+        tw_fitfunc_combo.grid(row=8, column=1, pady=5)
+        tw_fitfunc_combo.current(0)
+        self.inputs["fitfunc"] = {
+            "button": tw_fitfunc_combo,
+            "variable": tw_fitfunc_var,
+        }
+
         #: ttk.Button: Tony Wilson Button
         self.tony_wilson_button = ttk.Button(tw_widget_frame, text="RUN", width=15)
-        self.tony_wilson_button.grid(row=7, column=1, pady=5)
+        self.tony_wilson_button.grid(row=9, column=1, pady=5)
 
         control_frame = ttk.Frame(content_frame)
         control_frame.grid(row=0, column=0)
@@ -294,6 +311,19 @@ class AdaptiveOpticsPopup:
             self.inputs[mode_name].grid(row=i, column=2)
 
         scroll.grid(row=1, column=0)
+
+        save_frame = ttk.Frame(control_frame)
+        save_frame.grid(row=2, column=0)
+
+        # ttk.Checkbutton: save detailed report at the end
+        save_report_var = tk.BooleanVar()
+        save_report_check = ttk.Checkbutton(save_frame, variable=save_report_var)
+        save_report_check.grid(row=0, column=0)
+        self.inputs["save_report"] = {
+            "button": save_report_check,
+            "variable": save_report_var,
+        }
+        ttk.Label(save_frame, text="Save detailed report?").grid(row=0, column=1)
 
         #: ttk.Frame: Plot Frame
         self.plot_frame = ttk.Frame(master=content_frame)

@@ -268,9 +268,21 @@ class UninstallPluginController(GUIController):
 
     def uninstall_plugins(self, *args):
         """Uninstall plugins"""
+        feature_lists_path = get_navigate_path() + "/feature_lists"
+        features = os.listdir(feature_lists_path)
+        feature_config = {}
+        for feature_name in features:
+            if feature_name.endswith(".yml") and feature_name != "__sequence.yml":
+                feature_content = load_yaml_file(os.path.join(feature_lists_path, feature_name))
+                if feature_content and feature_content.get("filename", None):
+                    feature_config[feature_name] = feature_content["filename"]
         flag = False
         for var in self.popup.variables:
             if var.get():
+                # remove the feature list if a deleted plugin has any.
+                for feature_name in feature_config:
+                    if feature_config[feature_name].startswith(self.plugin_config[var.get()]):
+                        os.remove(f"{feature_lists_path}/{feature_name}")
                 self.plugin_config.pop(var.get())
                 flag = True
         if flag:

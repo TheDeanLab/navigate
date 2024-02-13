@@ -569,6 +569,38 @@ class HamamatsuOrcaFire(HamamatsuBase):
 
         logger.info("HamamatsuOrcaFire Initialized")
 
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time, shutter_width
+    ):
+        """Convert normal mode exposure time to light-sheet mode exposure time.
+        Calculate the parameters for an acquisition
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Normal mode exposure time.
+        shutter_width : int
+            Width of light-sheet rolling shutter.
+
+        Returns
+        -------
+        exposure_time : float
+            Light-sheet mode exposure time (ms).
+        camera_line_interval : float
+            HamamatsuOrca line interval duration (s).
+        """
+
+        # TODO: should we set 7H flat as sweepting time outside exposure?
+        # 4H delay, 7H flat, (Vn/2+5)H readout
+        camera_line_interval = (full_chip_exposure_time / 1000) / (
+            16 + (shutter_width + self.y_pixels) / 2
+        )
+
+        self.camera_parameters["line_interval"] = camera_line_interval
+
+        exposure_time = camera_line_interval * shutter_width / 2 * 1000
+        return exposure_time, camera_line_interval
+
 
 class HamamatsuOrca(HamamatsuBase):
     def __init__(self, microscope_name, device_connection, configuration):

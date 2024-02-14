@@ -293,7 +293,7 @@ class ASIStage(StageBase):
         res_dict = {}
         for axis, val in move_dictionary.items():
             curr_pos = getattr(self, f"{axis}_pos", None)
-            if curr_pos != val:
+            if val < curr_pos - 0.01 or val > curr_pos + 0.01 :
                 res_dict[axis] = val
         return res_dict
 

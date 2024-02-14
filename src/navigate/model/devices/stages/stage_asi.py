@@ -32,6 +32,7 @@
 # Standard Imports
 import logging
 import time
+import math
 
 # Third Party Imports
 
@@ -247,12 +248,24 @@ class ASIStage(StageBase):
         abs_pos_dict = self.verify_move({axis: axis_abs})
         if len(abs_pos_dict) == 0:
             return
+        
+        self.prepare_move_large_step(axis, axis_abs)
 
+        self._move_axis_absolute(axis, axis_abs)
+        
+
+        if wait_until_done:
+            self.tiger_controller.wait_for_device()
+
+        setattr(self, f"{axis}_pos", axis_abs)
+        return True
+    
+    def _move_axis_absolute(self, axis, axis_pos):
         # Move stage
         try:
             if axis == "theta":
                 self.tiger_controller.move_axis(
-                    self.axes_mapping[axis], axis_abs * 1000
+                    self.axes_mapping[axis], axis_pos * 1000
                 )
             else:
                 # The 10 is to account for the ASI units, 1/10 of a micron
@@ -265,12 +278,6 @@ class ASIStage(StageBase):
             )
             logger.exception("ASI Stage Exception", e)
             return False
-
-        if wait_until_done:
-            self.tiger_controller.wait_for_device()
-
-        setattr(self, f"{axis}_pos", axis_abs)
-        return True
 
     def verify_move(self, move_dictionary):
         """Don't submit a move command for axes that aren't moving.
@@ -322,6 +329,9 @@ class ASIStage(StageBase):
         abs_pos_dict = self.verify_move(abs_pos_dict)
         if len(abs_pos_dict) == 0:
             return
+        
+        for axis, pos in abs_pos_dict.items():
+            self.prepare_move_large_step(axis, pos)
 
         # This is to account for the asi 1/10 of a micron units
         pos_dict = {
@@ -344,6 +354,21 @@ class ASIStage(StageBase):
             setattr(self, f"{axis}_pos", pos)
 
         return True
+    
+    def prepare_move_large_step(self, axis, end_pos):
+        # TODO: the maximum step
+        maximum_step = 100.0
+        start_pos = getattr(self, f"{axis}_pos", None)
+        if not start_pos:
+            return
+        num_steps = math.ceil(abs(end_pos - start_pos) / maximum_step)
+        if end_pos < start_pos:
+            maximum_step = - maximum_step
+        if end_pos == start_pos + num_steps * maximum_step:
+            num_steps -= 1
+        for _ in range(num_steps):
+            self._move_axis_absolute(axis, start_pos)
+            start_pos += maximum_step
 
     def stop(self):
         """Stop all stage movement abruptly."""

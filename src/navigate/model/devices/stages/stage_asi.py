@@ -243,6 +243,10 @@ class ASIStage(StageBase):
         if axis_abs == -1e50:
             print("axis abs false")
             return False
+        
+        abs_pos_dict = self.verify_move({axis: axis_abs})
+        if len(abs_pos_dict) == 0:
+            return
 
         # Move stage
         try:
@@ -264,6 +268,8 @@ class ASIStage(StageBase):
 
         if wait_until_done:
             self.tiger_controller.wait_for_device()
+
+        setattr(self, f"{axis}_pos", axis_abs)
         return True
 
     def verify_move(self, move_dictionary):
@@ -333,6 +339,9 @@ class ASIStage(StageBase):
             return False
         if wait_until_done:
             self.tiger_controller.wait_for_device()
+
+        for axis, pos in abs_pos_dict.items():
+            setattr(self, f"{axis}_pos", pos)
 
         return True
 

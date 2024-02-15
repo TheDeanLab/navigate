@@ -138,6 +138,39 @@ def test_live_acquisition(model):
     model.release_pipe("show_img_pipe")
 
 
+def test_autofocus_live_acquisition(model):
+    state = model.configuration["experiment"]["MicroscopeState"]
+    state["image_mode"] = "live"
+
+    n_images = 0
+    pre_channel = 0
+    autofocus = False
+
+    show_img_pipe = model.create_pipe("show_img_pipe")
+
+    model.run_command("acquire")
+
+    while True:
+        image_id = show_img_pipe.recv()
+        if image_id == "stop":
+            break
+        channel_id = model.active_microscope.current_channel
+        if not autofocus:
+            assert channel_id != pre_channel
+        pre_channel = channel_id
+        n_images += 1
+        if n_images >= 100:
+            model.run_command("stop")
+        elif n_images >= 70:
+            autofocus = False
+        elif n_images == 30:
+            autofocus = True
+            model.run_command("autofocus")
+        
+    model.data_thread.join()
+    model.release_pipe("show_img_pipe")
+
+
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test hangs entire workflow on GitHub.")
 def test_multiposition_acquisition(model):
     """Test that the multiposition acquisition works as expected.

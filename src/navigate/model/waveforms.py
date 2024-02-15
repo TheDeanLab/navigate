@@ -263,46 +263,55 @@ def remote_focus_ramp_triangular(
         camera_delay, fall, amplitude, offset)
 
     """
-    print('ramp_sweep_time = ', sweep_time)
     # create an array just containing the negative amplitude voltage:
+    # In theory, delay here should be 4H.
     delay_samples = int(remote_focus_delay * exposure_time * sample_rate / 100)
-    delay_array = np.zeros(delay_samples)
+    delay_array = np.zeros(delay_samples) + offset
 
     # 10-7.5 -> 1.025 * .2
     #
-    ramp_samples = int(
+    rise_ramp_samples = int(
+        (exposure_time + exposure_time * (0 - remote_focus_delay) / 100)
+        * sample_rate
+    )
+    fall_ramp_samples = int(
         (exposure_time + exposure_time * (camera_delay - remote_focus_delay) / 100)
         * sample_rate
     )
-    rise_ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
-    fall_ramp_array = np.linspace(- offset + amplitude, - offset - amplitude, ramp_samples)
+    rise_ramp_array = np.linspace(offset - amplitude, offset + amplitude, rise_ramp_samples)
+    fall_ramp_array = np.linspace(offset + amplitude, offset - amplitude, fall_ramp_samples)
 
     # fall_samples = .025 * .2 * 100000 = 500
     settle_samples = int(fall * exposure_time * sample_rate / 100)
-    settle_array = np.zeros(settle_samples)
+    settle_array = np.zeros(settle_samples) + offset
 
     extra_samples = int(
         int(np.multiply(sample_rate, sweep_time))
-        - (delay_samples + ramp_samples + settle_samples)
+        - (delay_samples + rise_ramp_samples + settle_samples)
     )
 
     if extra_samples > 0:
-        extra_array = np.zeros(extra_samples)
+        print("extra samples:", extra_samples)
+        extra_array = np.zeros(extra_samples) + offset
         if ramp_type == 'Rising':
             waveform = np.hstack(
-                [delay_array + offset - amplitude, rise_ramp_array, settle_array + offset + amplitude, extra_array + offset + amplitude,
-                 delay_array - offset + amplitude, fall_ramp_array, settle_array - offset - amplitude, extra_array - offset - amplitude, ])
+                [delay_array - amplitude, rise_ramp_array, settle_array + amplitude,
+                 delay_array + amplitude, fall_ramp_array, settle_array - amplitude, extra_array - amplitude, extra_array - amplitude]
+            )
         elif ramp_type == 'Falling':
             waveform = np.hstack(
                 [delay_array + amplitude, fall_ramp_array, settle_array - amplitude, extra_array - amplitude,
-                 delay_array - amplitude, rise_ramp_array, settle_array + amplitude, extra_array + amplitude])
+                 delay_array - amplitude, rise_ramp_array, settle_array + amplitude, extra_array + amplitude]
+            )
     else:
         if ramp_type == 'Rising':
             waveform = np.hstack([delay_array - amplitude, rise_ramp_array, settle_array + amplitude,
-                                  delay_array - amplitude, rise_ramp_array, settle_array + amplitude])
+                                  delay_array + amplitude, fall_ramp_array, settle_array - amplitude]
+                                 )
         elif ramp_type == 'Falling':
             waveform = np.hstack([delay_array + amplitude, fall_ramp_array, settle_array - amplitude,
-                                  delay_array - amplitude, rise_ramp_array, settle_array + amplitude])
+                                  delay_array - amplitude, rise_ramp_array, settle_array + amplitude]
+                                 )
 
     return waveform
 

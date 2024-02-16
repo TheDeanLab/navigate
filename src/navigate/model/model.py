@@ -72,7 +72,7 @@ from navigate.model.features.feature_related_functions import (
 )
 from navigate.log_files.log_functions import log_setup
 from navigate.tools.common_dict_tools import update_stage_dict
-from navigate.tools.common_functions import load_module_from_file
+from navigate.tools.common_functions import load_module_from_file, VariableWithLock
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.model.device_startup_functions import load_devices
 from navigate.model.microscope import Microscope
@@ -207,8 +207,8 @@ class Model:
         self.frame_id = 0
 
         # flags
-        #: bool: Autofocus on?
-        self.autofocus_on = False  # autofocus
+        #: bool: Inject a feature list?
+        self.injected_flag = VariableWithLock(bool)  # autofocus
         #: bool: Is the model live?
         self.is_live = False  # need to clear up data buffer after acquisition
         #: bool: Is the model saving the data?
@@ -644,16 +644,20 @@ class Model:
             Args[1]: device reference
             """
             if self.is_acquiring and self.imaging_mode == "live":
-                if hasattr(self, "signal_container"):
-                    self.signal_container.cleanup()
-                if hasattr(self, "data_container"):
-                    self.data_container.cleanup()
-                self.signal_container, self.data_container = load_features(
-                    self,
-                    [{"name": Autofocus}],
-                )
+                with self.injected_flag as injected_flag:
+                    if hasattr(self, "signal_container"):
+                        self.signal_container.cleanup()
+                    if hasattr(self, "data_container"):
+                        self.data_container.cleanup()
+                    self.signal_container, self.data_container = load_features(
+                        self,
+                        [{"name": Autofocus}],
+                    )
+                    injected_flag.value = True
+
             elif not self.is_acquiring:
                 self.is_acquiring = True
+                self.imaging_mode = "autofocus"
                 autofocus = Autofocus(self, *args)
                 autofocus.run()
 
@@ -1014,7 +1018,7 @@ class Model:
         if turn_off_flags:
             self.stop_acquisition = False
             self.stop_send_signal = False
-            self.autofocus_on = False
+            self.injected_flag.value = False
             self.is_live = False
 
         plugin_obj = self.plugin_acquisition_modes.get(self.imaging_mode, None)
@@ -1090,13 +1094,17 @@ class Model:
         self.stop_acquisition = False
         while self.stop_acquisition is False and self.stop_send_signal is False:
             self.run_acquisition()
+            if not self.injected_flag.value:
+                self.signal_container.reset()
+            else:
+                self.reset_feature_list()
         # Update the stage position.
         # Allows the user to externally move the stage in the continuous mode.
         self.get_stage_position()
 
     def run_acquisition(self):
         """Run acquisition along with a feature list one time."""
-        if not hasattr(self, "signal_container") or self.signal_container.end_flag:
+        if not hasattr(self, "signal_container"):
             self.snap_image()
             return
 
@@ -1114,6 +1122,39 @@ class Model:
                 return
         if self.imaging_mode != "live":
             self.stop_acquisition = True
+
+    def reset_feature_list(self):
+        """Reset live mode feature list."""
+        with self.injected_flag as injected_flag:
+            # wait for datathread ends
+            waiting_num = 30
+            while (
+                hasattr(self, "data_container")
+                and not self.data_container.end_flag
+                and waiting_num > 0
+            ):
+                if self.stop_acquisition:
+                    return
+                time.sleep(0.01)
+                waiting_num -= 1
+            if hasattr(self, "signal_container"):
+                self.signal_container.cleanup()
+            if hasattr(self, "data_container"):
+                self.data_container.cleanup()
+            self.signal_container, self.data_container = load_features(
+                self,
+                [
+                    (
+                        {"name": PrepareNextChannel},
+                        {
+                            "name": LoopByCount,
+                            "args": ("experiment.MicroscopeState.selected_channels",),
+                        },
+                    )
+                ],
+            )
+            injected_flag.value = False
+
 
     def change_resolution(self, resolution_value):
         """Switch resolution mode of the microscope.

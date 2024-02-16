@@ -512,12 +512,12 @@ class Microscope:
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         zoom = microscope_state["zoom"]
         waveform_constants = self.configuration["waveform_constants"]
-        camera_delay_percent = self.configuration["configuration"]["microscopes"][
+        camera_delay = self.configuration["configuration"]["microscopes"][
             self.microscope_name
-        ]["camera"]["delay_percent"]
+        ]["camera"]["delay"]
         remote_focus_ramp_falling = self.configuration["configuration"]["microscopes"][
             self.microscope_name
-        ]["remote_focus_device"]["ramp_falling_percent"]
+        ]["remote_focus_device"]["ramp_falling"]
 
         duty_cycle_wait_duration = (
             float(
@@ -534,19 +534,12 @@ class Microscope:
 
                 sweep_time = (
                     exposure_time
-                    + exposure_time
-                    * (camera_delay_percent + remote_focus_ramp_falling)
-                    / 100
-                )
-                if readout_time > 0:
-                    # This addresses the dovetail nature of the camera readout in normal
-                    # mode. The camera reads middle out, and the delay in start of the
-                    # last lines compared to the first lines causes the exposure to be
-                    # net longer than exposure_time. This helps the galvo keep sweeping
-                    # for the full camera exposure time.
-                    sweep_time += readout_time  # we could set it to 0.14 instead of
-                    # 0.16384 according to the test
+                    + readout_time
+                    + camera_delay
+                    + remote_focus_ramp_falling
+                )        
 
+                # TODO: should we keep the percent_smoothing?
                 ps = float(
                     waveform_constants["remote_focus_constants"][self.microscope_name][
                         zoom
@@ -557,8 +550,10 @@ class Microscope:
 
                 sweep_time += duty_cycle_wait_duration
 
-                exposure_times[channel_key] = exposure_time
+                exposure_times[channel_key] = exposure_time + readout_time
                 sweep_times[channel_key] = sweep_time
+
+                print("*** exposure time:", channel_key, exposure_times[channel_key], sweep_time)
 
         self.exposure_times = exposure_times
         self.sweep_times = sweep_times

@@ -214,6 +214,8 @@ class WaveformTabController(GUIController):
         # two pass
         for k in self.waveform_dict["camera_waveform"].keys():
             remote_focus_waveform = self.waveform_dict["remote_focus_waveform"][k]
+            if remote_focus_waveform is None:
+                continue
             max_remote_focus_waveform = np.maximum(max_remote_focus_waveform, np.max(remote_focus_waveform))
             min_remote_focus_waveform = np.minimum(min_remote_focus_waveform, np.min(remote_focus_waveform))
             camera_waveform = self.waveform_dict["camera_waveform"][k]

@@ -223,7 +223,7 @@ class NIDAQ(DAQBase):
         exposure_time = self.exposure_times[channel_key]
         sweep_time = self.sweep_times[channel_key]
         camera_low_time = sweep_time - camera_high_time
-        camera_delay = (self.camera_delay_percent / 100) * (exposure_time / 1000)
+        camera_delay = self.camera_delay
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
             camera_trigger_out_line,
@@ -430,9 +430,9 @@ class NIDAQ(DAQBase):
             self.analog_outputs = {}
             self.analog_output_tasks = {}
         
-        self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
+        self.camera_delay = self.configuration["configuration"]["microscopes"][
             microscope_name
-        ]["camera"]["delay_percent"]
+        ]["camera"]["delay"]
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]

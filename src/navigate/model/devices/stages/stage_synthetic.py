@@ -76,7 +76,7 @@ class SyntheticStage(StageBase):
         self.sample_rate = 10000
         self.volts_per_micron = "0.1 * x"
         self.remote_focus_delay = 0.05
-        self.camera_delay_percent = 0.01
+        self.camera_delay = 0.01
         self.remote_focus_ramp_falling = 0.1
 
     def report_position(self):

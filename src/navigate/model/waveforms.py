@@ -81,7 +81,7 @@ def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_del
     array = np.zeros(samples)
 
     # convert pulse width and delay in % into number of samples
-    pulse_delay_samples = int((exposure * camera_delay / 100) * sample_rate)
+    pulse_delay_samples = int(camera_delay * sample_rate)
     pulse_samples = int(exposure * sample_rate)
 
     # modify the array
@@ -185,19 +185,21 @@ def remote_focus_ramp(
     """
 
     # create an array just containing the negative amplitude voltage:
-    delay_samples = int(remote_focus_delay * exposure_time * sample_rate / 100)
+    remote_focus_delay = remote_focus_delay * exposure_time / 100
+    print("*** remote_focus_delay is:", remote_focus_delay)
+    delay_samples = int(remote_focus_delay * sample_rate)
     delay_array = np.zeros(delay_samples) + offset - amplitude
 
     # 10-7.5 -> 1.025 * .2
     #
     ramp_samples = int(
-        (exposure_time + exposure_time * (camera_delay - remote_focus_delay) / 100)
+        (exposure_time + camera_delay - remote_focus_delay)
         * sample_rate
     )
     ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
 
     # fall_samples = .025 * .2 * 100000 = 500
-    fall_samples = int(fall * exposure_time * sample_rate / 100)
+    fall_samples = int(fall * sample_rate)
     fall_array = np.linspace(offset + amplitude, offset - amplitude, fall_samples)
 
     extra_samples = int(
@@ -209,6 +211,8 @@ def remote_focus_ramp(
         waveform = np.hstack([delay_array, ramp_array, fall_array, extra_array])
     else:
         waveform = np.hstack([delay_array, ramp_array, fall_array])
+
+    print("*** waveform length:", delay_samples / sample_rate, ramp_samples / sample_rate, fall_samples / sample_rate, extra_samples / sample_rate)
 
     return waveform
 

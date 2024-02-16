@@ -197,16 +197,16 @@ class MenuController(GUIController):
                 "Save Waveform Constants": [
                     "standard",
                     self.save_waveform_constants,
-                    "Ctrl+Shift+S",
-                    "<Control-S>",
-                    "<Control_L-S>",
+                    None,
+                    None,
+                    None,
                 ],
                 "Load Waveform Constants": [
                     "standard",
                     self.load_waveform_constants,
-                    "Ctrl+Shift+S",
-                    "<Control-S>",
-                    "<Control_L-S>",
+                    None,
+                    None,
+                    None,
                 ],
                 "add_separator": [None],
                 "Toggle Save Data": [
@@ -740,9 +740,9 @@ class MenuController(GUIController):
         )
         verify_waveform_constants(self.parent_controller.manager, self.parent_controller.configuration)
 
-        if self.parent_controller.waveform_popup_controller:
-            self.parent_controller.waveform_popup_controller.resolution_info = self.parent_controller.configuration["waveform_constants"]
-            self.parent_controller.waveform_popup_controller.populate_experiment_values()
+        if hasattr(self, "waveform_popup_controller"):
+            self.waveform_popup_controller.resolution_info = self.parent_controller.configuration["waveform_constants"]
+            self.waveform_popup_controller.populate_experiment_values()
             self.parent_controller.populate_waveform_settings(filename)
 
 

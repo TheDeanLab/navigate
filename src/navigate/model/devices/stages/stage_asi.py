@@ -251,7 +251,9 @@ class ASIStage(StageBase):
         
         self.prepare_move_large_step(axis, axis_abs)
 
-        self._move_axis_absolute(axis, axis_abs)
+        r = self._move_axis_absolute(axis, axis_abs)
+        if not r:
+            return False
         
 
         if wait_until_done:
@@ -269,7 +271,7 @@ class ASIStage(StageBase):
                 )
             else:
                 # The 10 is to account for the ASI units, 1/10 of a micron
-                self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
+                self.tiger_controller.move_axis(self.axes_mapping[axis], axis_pos * 10)
 
         except TigerException as e:
             print(
@@ -278,6 +280,7 @@ class ASIStage(StageBase):
             )
             logger.exception("ASI Stage Exception", e)
             return False
+        return True
 
     def verify_move(self, move_dictionary):
         """Don't submit a move command for axes that aren't moving.
@@ -357,7 +360,7 @@ class ASIStage(StageBase):
     
     def prepare_move_large_step(self, axis, end_pos):
         # TODO: the maximum step
-        maximum_step = 100.0
+        maximum_step = 50.0
         start_pos = getattr(self, f"{axis}_pos", None)
         if not start_pos:
             return

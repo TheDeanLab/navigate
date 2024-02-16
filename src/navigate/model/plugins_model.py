@@ -30,10 +30,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Standard library imports
 import os
 from pathlib import Path
 import inspect
 
+# Third-party imports
+
+# Local application imports
 from navigate.tools.common_functions import load_module_from_file
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.tools.decorators import FeatureList, AcquisitionMode
@@ -42,7 +46,7 @@ from navigate.config.config import get_navigate_path
 
 
 class PluginsModel:
-    """Plugins manaager in the model side"""
+    """Plugins manager in the model side"""
 
     def __init__(self):
         """Initialize plugins manager class"""
@@ -58,12 +62,6 @@ class PluginsModel:
         feature_lists_path = os.path.join(get_navigate_path(), "feature_lists")
         if not os.path.exists(feature_lists_path):
             os.makedirs(feature_lists_path)
-        feature_list_files = [
-            temp
-            for temp in os.listdir(feature_lists_path)
-            if (temp.endswith(".yml") or temp.endswith(".yaml"))
-            and os.path.isfile(os.path.join(feature_lists_path, temp))
-        ]
         plugins = os.listdir(self.plugins_path)
         plugins_dict = {}
         # load plugins form plugins folder
@@ -93,19 +91,22 @@ class PluginsModel:
             for plugin_name, plugin_path in plugins_config.items():
                 if not plugin_path:
                     print(
-                        f"Plugin '{plugin_name}' is not installed correctly. Please reinstall it if necessary."
+                        f"Plugin '{plugin_name}' is not installed correctly. "
+                        f"Please reinstall it if necessary."
                     )
                     continue
                 if os.path.exists(plugin_path):
                     if plugin_name in plugins_dict:
                         print(
-                            f"There are two plugins named '{plugin_name}'. Please rename Plugin '{plugin_name}' in plugins folder!"
+                            f"There are two plugins named '{plugin_name}'. Please "
+                            f"rename Plugin '{plugin_name}' in plugins folder!"
                         )
                     plugins_dict[plugin_name] = plugin_path
                     verified_plugins_config[plugin_name] = plugin_path
                 else:
                     print(
-                        f"Couldn't load plugin '{plugin_name}', please make sure it exits!"
+                        f"Couldn't load plugin '{plugin_name}' please make sure "
+                        f"it exists!"
                     )
             save_yaml_file(
                 os.path.join(get_navigate_path(), "config"),

@@ -38,7 +38,6 @@ from navigate.model.device_startup_functions import (
     start_stage,
 )
 from navigate.tools.common_functions import build_ref_name
-from navigate.model.devices.stages.stage_galvo import GalvoNIStage
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -436,7 +435,7 @@ class Microscope:
         # set NI Galvo stage to normal stage mode
         if self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "confocal-projection":
             for stage, _ in self.stages_list:
-                if type(stage) == GalvoNIStage:
+                if type(stage).__name__ == "GalvoNIStage":
                     stage.switch_mode("normal")
         self.stop_stage()
         if self.central_focus is not None:
@@ -479,7 +478,7 @@ class Microscope:
 
         # calculate waveform for galvo stage
         for stage, _ in self.stages_list:
-            if type(stage) == GalvoNIStage:
+            if type(stage).__name__ == "GalvoNIStage":
                 stage.switch_mode("normal", exposure_times, sweep_times)
         waveform_dict = {
             "camera_waveform": camera_waveform,

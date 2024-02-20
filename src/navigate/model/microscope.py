@@ -514,10 +514,10 @@ class Microscope:
         waveform_constants = self.configuration["waveform_constants"]
         camera_delay = self.configuration["configuration"]["microscopes"][
             self.microscope_name
-        ]["camera"]["delay"]
+        ]["camera"]["delay"] / 1000
         remote_focus_ramp_falling = self.configuration["configuration"]["microscopes"][
             self.microscope_name
-        ]["remote_focus_device"]["ramp_falling"]
+        ]["remote_focus_device"]["ramp_falling"] / 1000
 
         duty_cycle_wait_duration = (
             float(

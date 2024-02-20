@@ -163,11 +163,11 @@ def remote_focus_ramp(
     sweep_time : Float
         Unit - Seconds
     remote_focus_delay : Float
-        Unit - Percent
+        Unit - seconds
     camera_delay : Float
-        Unit - Percent
+        Unit - seconds
     fall : Float
-        Unit - Percent
+        Unit - seconds
     amplitude : Float
         Unit - Volts
     offset : Float
@@ -185,8 +185,6 @@ def remote_focus_ramp(
     """
 
     # create an array just containing the negative amplitude voltage:
-    remote_focus_delay = remote_focus_delay * exposure_time / 100
-    print("*** remote_focus_delay is:", remote_focus_delay)
     delay_samples = int(remote_focus_delay * sample_rate)
     delay_array = np.zeros(delay_samples) + offset - amplitude
 
@@ -212,7 +210,6 @@ def remote_focus_ramp(
     else:
         waveform = np.hstack([delay_array, ramp_array, fall_array])
 
-    print("*** waveform length:", delay_samples / sample_rate, ramp_samples / sample_rate, fall_samples / sample_rate, extra_samples / sample_rate)
 
     return waveform
 

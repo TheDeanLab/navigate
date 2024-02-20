@@ -130,17 +130,12 @@ class GalvoNIStage(StageBase):
         #: float: Percent of the camera delay.
         self.camera_delay = configuration["configuration"]["microscopes"][
             microscope_name
-        ]["camera"]["delay"]
+        ]["camera"]["delay"] / 1000
 
         #: float: Percent of the remote focus delay.
         self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
-        ]["remote_focus_device"]["ramp_falling"]
-
-        #: float: Percent of the remote focus delay.
-        self.remote_focus_delay = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["remote_focus_device"]["delay"]
+        ]["remote_focus_device"]["ramp_falling"] / 1000
 
         #: float: Sample rate of the DAQ.
         self.sample_rate = self.configuration["configuration"]["microscopes"][

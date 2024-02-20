@@ -83,17 +83,17 @@ class RemoteFocusBase:
         #: float: Camera delay percent.
         self.camera_delay = configuration["configuration"]["microscopes"][
             microscope_name
-        ]["camera"]["delay"]
+        ]["camera"]["delay"] / 1000
 
         # Waveform Parameters
         #: float: Remote focus delay.
-        self.remote_focus_delay = self.device_config.get("delay", 7.5)
+        self.remote_focus_delay = self.device_config.get("delay", 7.5) / 1000
 
         #: float: Percent smoothing.
         self.percent_smoothing = self.device_config.get("smoothing", 0)
 
         #: float: Remote focus ramp falling.
-        self.remote_focus_ramp_falling = self.device_config["ramp_falling"]
+        self.remote_focus_ramp_falling = self.device_config["ramp_falling"] / 1000
 
         #: float: Remote focus max voltage.
         self.remote_focus_max_voltage = self.device_config["hardware"]["max"]
@@ -186,7 +186,7 @@ class RemoteFocusBase:
                 self.remote_focus_delay = float(
                     waveform_constants["remote_focus_constants"][imaging_mode][zoom][
                         laser
-                    ]["percent_delay"]
+                    ]["delay"] / 1000
                 )
                 self.percent_smoothing = float(
                     waveform_constants["remote_focus_constants"][imaging_mode][zoom][

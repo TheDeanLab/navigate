@@ -377,7 +377,7 @@ class WaveformPopupController(GUIController):
             waveform_configuration.get("percent_smoothing", 0)
         )
         self.widgets["Smoothing"].widget.trigger_focusout_validation()
-        self.widgets["Delay"].set(waveform_configuration.get("percent_delay", 7.5))
+        self.widgets["Delay"].set(waveform_configuration.get("delay", 7.5))
         self.widgets["Delay"].widget.trigger_focusout_validation()
         if "other_constants" not in self.resolution_info:
             update_config_dict(
@@ -489,7 +489,7 @@ class WaveformPopupController(GUIController):
         for laser in self.lasers:
             self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
                 laser
-            ]["percent_delay"] = delay
+            ]["delay"] = delay
             self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
                 laser
             ]["percent_smoothing"] = smoothing

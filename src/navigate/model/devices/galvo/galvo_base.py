@@ -88,7 +88,7 @@ class GalvoBase:
         #: float: Camera delay
         self.camera_delay = configuration["configuration"]["microscopes"][
             microscope_name
-        ]["camera"]["delay"]
+        ]["camera"]["delay"] / 1000
 
         #: float: Galvo max voltage.
         self.galvo_max_voltage = self.device_config["hardware"]["max"]
@@ -99,7 +99,7 @@ class GalvoBase:
         #: float: Percent galvo ramp rising percent.
         self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
             microscope_name
-        ]["remote_focus_device"]["ramp_falling"]
+        ]["remote_focus_device"]["ramp_falling"] / 1000
 
         # Galvo Waveform Information
         #: str: Galvo waveform. Waveform or Sawtooth.

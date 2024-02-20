@@ -432,7 +432,7 @@ class NIDAQ(DAQBase):
         
         self.camera_delay = self.configuration["configuration"]["microscopes"][
             microscope_name
-        ]["camera"]["delay"]
+        ]["camera"]["delay"] / 1000
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]

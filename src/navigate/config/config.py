@@ -769,8 +769,8 @@ def verify_waveform_constants(manager, configuration):
                             ],
                             "offset": config_dict["remote_focus_device"]["offset"],
                             "percent_smoothing": "0",
-                            "percent_delay": config_dict["remote_focus_device"][
-                                "delay_percent"
+                            "delay": config_dict["remote_focus_device"][
+                                "delay"
                             ],
                         },
                     )
@@ -779,7 +779,7 @@ def verify_waveform_constants(manager, configuration):
                         "amplitude",
                         "offset",
                         "percent_smoothing",
-                        "percent_delay",
+                        "delay",
                     ]:
                         if k not in waveform_dict[microscope_name][zoom][laser].keys():
                             waveform_dict[microscope_name][zoom][laser][

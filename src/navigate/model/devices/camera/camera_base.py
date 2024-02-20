@@ -95,6 +95,8 @@ class CameraBase:
         self.x_pixels = 2048
         #: int: Number of pixels in the y direction
         self.y_pixels = 2048
+        #: float: minimum exposure time
+        self.minimum_exposure_time = 0.001
         self.camera_parameters["x_pixels"] = 2048
         self.camera_parameters["y_pixels"] = 2048
         # TODO: trigger_source, readout_speed, trigger_active, trigger_mode and trigger_polarity

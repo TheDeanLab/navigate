@@ -459,8 +459,7 @@ class Microscope:
         waveform : dict
             Dictionary of all the waveforms.
         """
-        readout_time = self.get_readout_time()
-        exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
+        exposure_times, sweep_times = self.calculate_exposure_sweep_times()
         camera_waveform = self.daq.calculate_all_waveforms(
             self.microscope_name, exposure_times, sweep_times
         )
@@ -482,7 +481,7 @@ class Microscope:
         }
         return waveform_dict
 
-    def calculate_exposure_sweep_times(self, readout_time):
+    def calculate_exposure_sweep_times(self):
         """Calculate the exposure and sweep times for all channels.
 
         The `calculate_exposure_sweep_times` function calculates and returns exposure
@@ -492,12 +491,6 @@ class Microscope:
         times. The function iterates through the channels, performs calculations, and
         returns the results as dictionaries containing exposure times and sweep times
         for each channel.
-
-        Parameters
-        ----------
-        readout_time : float
-            Readout time of the camera (seconds) if we are operating the camera in
-            Normal mode, otherwise -1.
 
         Returns
         -------
@@ -515,6 +508,9 @@ class Microscope:
         camera_delay = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["camera"]["delay"] / 1000
+        camera_settle_duration = self.configuration["configuration"]["microscopes"][
+            self.microscope_name
+        ]["camera"].get("settle_duration", 0) / 1000
         remote_focus_ramp_falling = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["remote_focus_device"]["ramp_falling"] / 1000
@@ -527,6 +523,16 @@ class Microscope:
             )
             / 1000
         )
+
+        readout_time = 0
+        if (
+            self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
+            == "Normal"
+        ):
+            readout_time = self.camera.calculate_readout_time()
+        # set readout out time
+        self.configuration["experiment"]["CameraParameters"]["readout_time"] = readout_time * 1000
+
         for channel_key in microscope_state["channels"].keys():
             channel = microscope_state["channels"][channel_key]
             if channel["is_selected"] is True:
@@ -536,7 +542,7 @@ class Microscope:
                     exposure_time
                     + readout_time
                     + camera_delay
-                    + remote_focus_ramp_falling
+                    + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration - camera_delay)
                 )        
 
                 # TODO: should we keep the percent_smoothing?
@@ -548,12 +554,8 @@ class Microscope:
                 if ps > 0:
                     sweep_time = (1 + ps / 100) * sweep_time
 
-                sweep_time += duty_cycle_wait_duration
-
                 exposure_times[channel_key] = exposure_time + readout_time
                 sweep_times[channel_key] = sweep_time
-
-                print("*** exposure time:", channel_key, exposure_times[channel_key], sweep_time)
 
         self.exposure_times = exposure_times
         self.sweep_times = sweep_times
@@ -658,28 +660,6 @@ class Microscope:
                 update_focus=False,
             )
 
-    def get_readout_time(self):
-        """Get readout time from camera.
-
-        Get the camera readout time if we are in normal mode.
-        Return a -1 to indicate when we are not in normal mode.
-        This is needed in daq.calculate_all_waveforms()
-
-        Returns
-        -------
-        readout_time : float
-            Camera readout time in seconds or -1 if not in Normal mode.
-        """
-        readout_time = 0
-        if (
-            self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
-            == "Normal"
-        ):
-            readout_time, _ = self.camera.calculate_readout_time()
-        # set readout out time
-        self.configuration["experiment"]["CameraParameters"]["readout_time"] = readout_time * 1000
-        return readout_time
-
     def move_stage(self, pos_dict, wait_until_done=False, update_focus=True):
         """Move stage to a position.
 
@@ -757,8 +737,7 @@ class Microscope:
         offset : float, optional
             Offset, by default None
         """
-        readout_time = self.get_readout_time()
-        exposure_times, sweep_times = self.calculate_exposure_sweep_times(readout_time)
+        exposure_times, sweep_times = self.calculate_exposure_sweep_times()
         self.remote_focus_device.move(exposure_times, sweep_times, offset)
 
     def update_stage_limits(self, limits_flag=True):

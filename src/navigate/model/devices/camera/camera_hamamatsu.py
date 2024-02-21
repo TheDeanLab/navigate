@@ -257,22 +257,14 @@ class HamamatsuBase(CameraBase):
         -------
         readout_time : float
             Duration of time needed to readout an image.
-        max_frame_rate : float
-            Maximum framerate for a given camera acquisition mode.
 
         TODO: I think self.camera_controller.get_property_value("readout_time") pulls
               out the actual readout_time
               calculated here (i.e. we don't need to do the calculations).
         """
-        h = self.camera_controller.get_property_value("readout_time")
-        vn = self.camera_controller.get_property_value("subarray_vsize")
-        sensor_mode = self.camera_controller.get_property_value("sensor_mode")
-        exposure_time = self.camera_controller.get_property_value("exposure_time")
+        readout_time = self.camera_controller.get_property_value("readout_time")
 
-        readout_time = h
-        max_frame_rate = 1.0 / (exposure_time + readout_time)
-
-        return readout_time, max_frame_rate
+        return readout_time
 
     def set_exposure_time(self, exposure_time):
         """Set HamamatsuOrca exposure time.

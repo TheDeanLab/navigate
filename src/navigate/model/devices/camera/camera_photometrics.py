@@ -224,8 +224,6 @@ class PhotometricsKinetix(CameraBase):
         -------
         readout_time : float
             Duration of time needed to readout an image.
-        max_frame_rate : float
-            Maximum framerate for a given camera acquisition mode.
         """
 
         # todo
@@ -237,11 +235,9 @@ class PhotometricsKinetix(CameraBase):
         # trigger_active = self.camera_controller.get_property_value('trigger_active')
         #
         if self._scanmode == 0:  # normal/static light-sheet
-            max_frame_rate = 1 / ((vn + 10) * h + exposure_time)
             readout_time = exposure_time - ((vn + 10) * h + exposure_time)
         else:
             # todo: not sure if these equations are correct
-            max_frame_rate = 1 / ((vn + 10) * h * self._scandelay + exposure_time)
             readout_time = exposure_time - (
                 (vn + 10) * h * self._scandelay + exposure_time
             )
@@ -270,7 +266,7 @@ class PhotometricsKinetix(CameraBase):
         #     max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
         #     readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
         #
-        return readout_time, max_frame_rate
+        return readout_time
 
     def set_exposure_time(self, exposure_time):
         """Set Photometrics exposure time.

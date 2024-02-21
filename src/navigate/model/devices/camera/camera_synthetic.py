@@ -325,11 +325,8 @@ class SyntheticCamera(CameraBase):
         -------
         readout_time : float
             Duration of time needed to readout an image.
-        max_frame_rate : float
-            Maximum framerate for a given camera acquisition mode.
 
         """
         exposure_time = self.camera_controller.get_property_value("exposure_time")
         readout_time = 0.01  # 10 milliseconds.
-        max_frame_rate = 1 / (exposure_time + readout_time)
-        return readout_time, max_frame_rate
+        return readout_time

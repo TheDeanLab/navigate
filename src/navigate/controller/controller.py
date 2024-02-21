@@ -943,7 +943,7 @@ class Controller:
 
         self.stop_acquisition_flag = False
         start_time = time.time()
-        self.camera_setting_controller.calculate_readout_time()
+        self.camera_setting_controller.update_readout_time()
 
         while True:
             if self.stop_acquisition_flag:

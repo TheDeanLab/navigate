@@ -113,6 +113,7 @@ def test_single_acquisition(model):
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
 
+
 def test_live_acquisition(model):
     state = model.configuration["experiment"]["MicroscopeState"]
     state["image_mode"] = "live"
@@ -166,7 +167,7 @@ def test_autofocus_live_acquisition(model):
         elif n_images == 30:
             autofocus = True
             model.run_command("autofocus")
-        
+
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
 
@@ -327,7 +328,7 @@ def test_get_feature_list(model):
     assert model.get_feature_list(len(feature_lists) + 1) == ""
 
     from navigate.model.features.feature_related_functions import (
-        convert_feature_list_to_str
+        convert_feature_list_to_str,
     )
 
     for i in range(len(feature_lists)):
@@ -359,9 +360,10 @@ def test_load_feature_list_from_str(model):
     del feature_lists[-1]
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test hangs entire workflow on GitHub.")
 def test_load_feature_records(model):
     feature_lists = model.feature_list
-    l = len(feature_lists)
+    l = len(feature_lists)  # noqa
 
     from navigate.config.config import get_navigate_path
     from navigate.tools.file_functions import save_yaml_file, load_yaml_file
@@ -373,11 +375,11 @@ def test_load_feature_records(model):
 
     if not os.path.exists(feature_lists_path):
         os.makedirs(feature_lists_path)
-    
+
     feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
     if not feature_records:
         feature_records = []
-            
+
     save_yaml_file(
         feature_lists_path,
         {

@@ -38,8 +38,6 @@ from multiprocessing import Manager
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
-manager = Manager()
-
 
 @pytest.fixture(scope="module")
 def model():
@@ -54,40 +52,44 @@ def model():
         verify_waveform_constants,
     )
 
-    # Use configuration files that ship with the code base
-    configuration_directory = Path.joinpath(
-        Path(__file__).resolve().parent.parent.parent, "src", "navigate", "config"
-    )
-    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
-    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
-    waveform_constants_path = Path.joinpath(
-        configuration_directory, "waveform_constants.yml"
-    )
-    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
+    with Manager() as manager:
 
-    event_queue = Queue()
+        # Use configuration files that ship with the code base
+        configuration_directory = Path.joinpath(
+            Path(__file__).resolve().parent.parent.parent, "src", "navigate", "config"
+        )
+        configuration_path = Path.joinpath(
+            configuration_directory, "configuration.yaml"
+        )
+        experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
+        waveform_constants_path = Path.joinpath(
+            configuration_directory, "waveform_constants.yml"
+        )
+        rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
-    configuration = load_configs(
-        manager,
-        configuration=configuration_path,
-        experiment=experiment_path,
-        waveform_constants=waveform_constants_path,
-        rest_api_config=rest_api_path,
-    )
-    verify_experiment_config(manager, configuration)
-    verify_waveform_constants(manager, configuration)
+        event_queue = Queue()
 
-    model = Model(
-        args=SimpleNamespace(synthetic_hardware=True),
-        configuration=configuration,
-        event_queue=event_queue,
-    )
+        configuration = load_configs(
+            manager,
+            configuration=configuration_path,
+            experiment=experiment_path,
+            waveform_constants=waveform_constants_path,
+            rest_api_config=rest_api_path,
+        )
+        verify_experiment_config(manager, configuration)
+        verify_waveform_constants(manager, configuration)
 
-    yield model
-    while not event_queue.empty():
-        event_queue.get()
-    event_queue.close()
-    event_queue.join_thread()
+        model = Model(
+            args=SimpleNamespace(synthetic_hardware=True),
+            configuration=configuration,
+            event_queue=event_queue,
+        )
+
+        yield model
+        while not event_queue.empty():
+            event_queue.get()
+        event_queue.close()
+        event_queue.join_thread()
 
 
 def test_single_acquisition(model):
@@ -209,7 +211,7 @@ def test_multiposition_acquisition(model):
     # Multiposition is selected and actually is True
     model.configuration["experiment"]["MicroscopeState"]["is_multiposition"] = True
     update_config_dict(
-        manager,
+        manager,  # noqa
         model.configuration["experiment"],
         "MultiPositions",
         [{"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}],
@@ -227,7 +229,9 @@ def test_multiposition_acquisition(model):
     model.data_thread.join()
 
     # Multiposition is selected but not actually  True
-    update_config_dict(manager, model.configuration["experiment"], "MultiPositions", [])
+    update_config_dict(
+        manager, model.configuration["experiment"], "MultiPositions", []  # noqa
+    )
 
     model.run_command("acquire")
     # sleep(1)
@@ -360,7 +364,6 @@ def test_load_feature_list_from_str(model):
     del feature_lists[-1]
 
 
-@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test hangs entire workflow on GitHub.")
 def test_load_feature_records(model):
     feature_lists = model.feature_list
     l = len(feature_lists)  # noqa

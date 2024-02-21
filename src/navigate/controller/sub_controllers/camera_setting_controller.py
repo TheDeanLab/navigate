@@ -483,24 +483,11 @@ class CameraSettingController(GUIController):
         exposure_time = float(self.framerate_widgets["exposure_time"].get())
 
         if sensor_mode == "Normal":
-            #  Area sensor mode operation
-            if self.trigger_source == 1:
-                # Internal Trigger Source
-                readout_time = exposure_time - ((vn / 2) * h)
-
-            if self.trigger_active in [1, 2]:
-                #  External Trigger Source
-                #  Edge == 1, Level == 2
-                readout_time = exposure_time - ((vn / 2) * h + 10 * h)
-
-            elif self.trigger_active == 3:
-                #  External Trigger Source
-                #  Synchronous Readout == 3
-                readout_time = exposure_time - ((vn / 2) * h + 5 * h)
+            readout_time = self.camera_setting_dict["readout_time"]
 
         elif sensor_mode == "Light-Sheet":
             #  Progressive sensor mode operation
-            readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
+            readout_time = 0
 
         # return readout_time
         self.framerate_widgets["readout_time"].set(readout_time)

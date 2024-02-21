@@ -676,6 +676,8 @@ class Microscope:
             == "Normal"
         ):
             readout_time, _ = self.camera.calculate_readout_time()
+        # set readout out time
+        self.configuration["experiment"]["CameraParameters"]["readout_time"] = readout_time * 1000
         return readout_time
 
     def move_stage(self, pos_dict, wait_until_done=False, update_focus=True):

@@ -278,7 +278,7 @@ class SyntheticCamera(CameraBase):
     def get_new_frame(self):
         """Get frame from SyntheticCamera camera."""
 
-        time.sleep(self.camera_exposure_time / 1000)
+        time.sleep(self.camera_exposure_time)
         timeout = 500
         while self.pre_frame_idx == self.current_frame_idx and timeout:
             time.sleep(0.001)

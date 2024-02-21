@@ -942,6 +942,8 @@ class Controller:
         )
 
         self.stop_acquisition_flag = False
+        start_time = time.time()
+        self.camera_setting_controller.calculate_readout_time()
 
         while True:
             if self.stop_acquisition_flag:
@@ -959,6 +961,7 @@ class Controller:
                 )
                 self.execute("stop_acquire")
 
+
             # Display the Image in the View
             self.camera_view_controller.try_to_display_image(image_id=image_id)
             images_received += 1
@@ -970,6 +973,17 @@ class Controller:
                 mode=mode,
                 stop=False,
             )
+            # update framerate
+            stop_time = time.time()
+            frames_per_second = images_received / (stop_time - start_time)
+            # Update the Framerate in the Camera Settings Tab
+            self.camera_setting_controller.framerate_widgets["max_framerate"].set(
+                frames_per_second
+            )
+
+            # Update the Framerate in the Acquire Bar to provide an estimate of
+            # the duration of time remaining.
+            self.acquire_bar_controller.framerate = frames_per_second
 
         logger.info(
             f"Navigate Controller - Captured {images_received}, " f"{mode} Images"
@@ -1215,16 +1229,6 @@ class Controller:
                     except RuntimeError:
                         time.sleep(0.001)
                         pass
-
-            elif event == "framerate":
-                # Update the Framerate in the Camera Settings Tab
-                self.camera_setting_controller.framerate_widgets["max_framerate"].set(
-                    value
-                )
-
-                # Update the Framerate in the Acquire Bar to provide an estimate of
-                # the duration of time remaining.
-                self.acquire_bar_controller.framerate = value
             elif event == "remove_positions":
                 self.multiposition_tab_controller.remove_positions(value)
 

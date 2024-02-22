@@ -530,6 +530,25 @@ class HamamatsuOrcaFire(HamamatsuBase):
 
         logger.info("HamamatsuOrcaFire Initialized")
 
+    def calculate_readout_time(self):
+        """Calculate duration of time needed to readout an image.
+
+        Calculates the readout time according to the camera
+        configuration settings.
+        Assumes model C13440 with Camera Link communication from Hamamatsu.
+        Currently pulling values directly from the camera.
+
+        Returns
+        -------
+        readout_time : float
+            Duration of time needed to readout an image.
+
+        """
+        readout_time = self.camera_controller.get_property_value("readout_time")
+
+        # with internal delay and jitter (4h + 1h)
+        return readout_time + 5 * self.minimum_exposure_time
+
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
     ):
@@ -550,16 +569,15 @@ class HamamatsuOrcaFire(HamamatsuBase):
         camera_line_interval : float
             HamamatsuOrca line interval duration (s).
         """
-
-        # TODO: should we set 7H flat as sweeping time outside exposure?
-        # 4H delay, 7H flat, (Vn/2+5)H readout
+        # 4H delay, (Vn/2+5)H readout
         camera_line_interval = (full_chip_exposure_time / 1000) / (
-            16 + (shutter_width + self.y_pixels) / 2
+            9 + (shutter_width / 2 + self.y_pixels) / 2
         )
 
         self.camera_parameters["line_interval"] = camera_line_interval
 
-        exposure_time = camera_line_interval * shutter_width / 2 * 1000
+        # round up exposure time
+        exposure_time = camera_line_interval * ((shutter_width+1) // 2) * 1000
         return exposure_time, camera_line_interval
 
 

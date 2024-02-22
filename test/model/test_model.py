@@ -33,6 +33,7 @@ import random
 import pytest
 import os
 from multiprocessing import Manager
+from unittest.mock import MagicMock
 
 # from time import sleep
 
@@ -67,7 +68,7 @@ def model():
         )
         rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
-        event_queue = Queue()
+        event_queue = MagicMock()
 
         configuration = load_configs(
             manager,
@@ -85,11 +86,13 @@ def model():
             event_queue=event_queue,
         )
 
+        model.__test_manager = manager
+
         yield model
-        while not event_queue.empty():
-            event_queue.get()
-        event_queue.close()
-        event_queue.join_thread()
+        # while not event_queue.empty():
+        #     event_queue.get()
+        # event_queue.close()
+        # event_queue.join_thread()
 
 
 def test_single_acquisition(model):
@@ -211,7 +214,7 @@ def test_multiposition_acquisition(model):
     # Multiposition is selected and actually is True
     model.configuration["experiment"]["MicroscopeState"]["is_multiposition"] = True
     update_config_dict(
-        manager,  # noqa
+        model.__test_manager,  # noqa
         model.configuration["experiment"],
         "MultiPositions",
         [{"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}],
@@ -230,7 +233,7 @@ def test_multiposition_acquisition(model):
 
     # Multiposition is selected but not actually  True
     update_config_dict(
-        manager, model.configuration["experiment"], "MultiPositions", []  # noqa
+        model.__test_manager, model.configuration["experiment"], "MultiPositions", []  # noqa
     )
 
     model.run_command("acquire")

@@ -33,12 +33,11 @@ import random
 import pytest
 import os
 from multiprocessing import Manager
+from unittest.mock import MagicMock
 
 # from time import sleep
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
-
-manager = Manager()
 
 
 @pytest.fixture(scope="module")
@@ -54,40 +53,46 @@ def model():
         verify_waveform_constants,
     )
 
-    # Use configuration files that ship with the code base
-    configuration_directory = Path.joinpath(
-        Path(__file__).resolve().parent.parent.parent, "src", "navigate", "config"
-    )
-    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
-    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
-    waveform_constants_path = Path.joinpath(
-        configuration_directory, "waveform_constants.yml"
-    )
-    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
+    with Manager() as manager:
 
-    event_queue = Queue()
+        # Use configuration files that ship with the code base
+        configuration_directory = Path.joinpath(
+            Path(__file__).resolve().parent.parent.parent, "src", "navigate", "config"
+        )
+        configuration_path = Path.joinpath(
+            configuration_directory, "configuration.yaml"
+        )
+        experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
+        waveform_constants_path = Path.joinpath(
+            configuration_directory, "waveform_constants.yml"
+        )
+        rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
 
-    configuration = load_configs(
-        manager,
-        configuration=configuration_path,
-        experiment=experiment_path,
-        waveform_constants=waveform_constants_path,
-        rest_api_config=rest_api_path,
-    )
-    verify_experiment_config(manager, configuration)
-    verify_waveform_constants(manager, configuration)
+        event_queue = MagicMock()
 
-    model = Model(
-        args=SimpleNamespace(synthetic_hardware=True),
-        configuration=configuration,
-        event_queue=event_queue,
-    )
+        configuration = load_configs(
+            manager,
+            configuration=configuration_path,
+            experiment=experiment_path,
+            waveform_constants=waveform_constants_path,
+            rest_api_config=rest_api_path,
+        )
+        verify_experiment_config(manager, configuration)
+        verify_waveform_constants(manager, configuration)
 
-    yield model
-    while not event_queue.empty():
-        event_queue.get()
-    event_queue.close()
-    event_queue.join_thread()
+        model = Model(
+            args=SimpleNamespace(synthetic_hardware=True),
+            configuration=configuration,
+            event_queue=event_queue,
+        )
+
+        model.__test_manager = manager
+
+        yield model
+        # while not event_queue.empty():
+        #     event_queue.get()
+        # event_queue.close()
+        # event_queue.join_thread()
 
 
 def test_single_acquisition(model):
@@ -112,6 +117,7 @@ def test_single_acquisition(model):
     assert n_images == n_frames
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
+
 
 def test_live_acquisition(model):
     state = model.configuration["experiment"]["MicroscopeState"]
@@ -166,7 +172,7 @@ def test_autofocus_live_acquisition(model):
         elif n_images == 30:
             autofocus = True
             model.run_command("autofocus")
-        
+
     model.data_thread.join()
     model.release_pipe("show_img_pipe")
 
@@ -208,7 +214,7 @@ def test_multiposition_acquisition(model):
     # Multiposition is selected and actually is True
     model.configuration["experiment"]["MicroscopeState"]["is_multiposition"] = True
     update_config_dict(
-        manager,
+        model.__test_manager,  # noqa
         model.configuration["experiment"],
         "MultiPositions",
         [{"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}],
@@ -226,7 +232,9 @@ def test_multiposition_acquisition(model):
     model.data_thread.join()
 
     # Multiposition is selected but not actually  True
-    update_config_dict(manager, model.configuration["experiment"], "MultiPositions", [])
+    update_config_dict(
+        model.__test_manager, model.configuration["experiment"], "MultiPositions", []  # noqa
+    )
 
     model.run_command("acquire")
     # sleep(1)
@@ -327,7 +335,7 @@ def test_get_feature_list(model):
     assert model.get_feature_list(len(feature_lists) + 1) == ""
 
     from navigate.model.features.feature_related_functions import (
-        convert_feature_list_to_str
+        convert_feature_list_to_str,
     )
 
     for i in range(len(feature_lists)):
@@ -361,7 +369,7 @@ def test_load_feature_list_from_str(model):
 
 def test_load_feature_records(model):
     feature_lists = model.feature_list
-    l = len(feature_lists)
+    l = len(feature_lists)  # noqa
 
     from navigate.config.config import get_navigate_path
     from navigate.tools.file_functions import save_yaml_file, load_yaml_file
@@ -373,11 +381,11 @@ def test_load_feature_records(model):
 
     if not os.path.exists(feature_lists_path):
         os.makedirs(feature_lists_path)
-    
+
     feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
     if not feature_records:
         feature_records = []
-            
+
     save_yaml_file(
         feature_lists_path,
         {

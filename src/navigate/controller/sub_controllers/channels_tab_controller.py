@@ -833,7 +833,7 @@ class ChannelsTabController(GUIController):
         warning = self.channel_setting_controller.verify_experiment_values()
         if warning:
             return warning
-        if self.microscope_state_dict["image_mode"] not in ["live", "single"]:
+        if self.microscope_state_dict["image_mode"] not in ["live", "single", "ConstantVelocityAcquisition"]:
             if (
                 self.microscope_state_dict["number_z_steps"]
                 != self.stack_acq_vals["number_z_steps"].get()

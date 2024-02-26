@@ -331,6 +331,16 @@ class ConstantVelocityAcquisition:
         print("original stage speed set")
         posw = self.asi_stage.get_axis_position(self.axis)
         print(f"current position = {posw}, start position = {self.start_position_um}")
+        
+        if abs(posw - self.start_position_um)>10:
+            print("in posw if statement") 
+            self.asi_stage.move_axis_absolute(self.axis,self.start_position * 1000.0, wait_until_done=True)
+        
+            self.asi_stage.wait_until_complete(self.axis)
+            print("Stage wait until complete completed")
+
+        print(f"current position v2 = {posw}, start position v2 = {self.start_position_um}")
+
         self.asi_stage.start_scan(self.axis)
         print("scan started")
 
@@ -395,6 +405,11 @@ class ConstantVelocityAcquisition:
         print("Stage speed set")
         self.asi_stage.wait_until_complete(self.axis)
         print("Stage wait until complete completed")
+
+        # self.asi_stage.move_axis_absolute(self.axis,self.start_position * 1000.0, wait_until_done=True)
+        
+        # self.asi_stage.wait_until_complete(self.axis)
+        # print("Stage wait until complete completed")
 
         if self.current_channel_in_list == 0:
             print("if current channel is zero statement")

@@ -108,7 +108,6 @@ class ChannelsTab(tk.Frame):
         )
 
 
-
 class ChannelCreator(ttk.Labelframe):
     """Channel Creator
 
@@ -248,7 +247,7 @@ class ChannelCreator(ttk.Labelframe):
                     width=6,
                 )
             )
-            self.laser_pulldowns[num].config(state = "readonly")
+            self.laser_pulldowns[num].config(state="readonly")
             self.laser_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
@@ -262,7 +261,7 @@ class ChannelCreator(ttk.Labelframe):
                     to=100.0,
                     textvariable=self.laserpower_variables[num],
                     increment=5,
-                    width=3,
+                    width=4,
                     font=tk.font.Font(size=11),
                 )
             )
@@ -279,7 +278,7 @@ class ChannelCreator(ttk.Labelframe):
                     width=10,
                 )
             )
-            self.filterwheel_pulldowns[num].config(state = "readonly")
+            self.filterwheel_pulldowns[num].config(state="readonly")
             self.filterwheel_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )

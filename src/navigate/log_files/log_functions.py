@@ -37,47 +37,15 @@ from pathlib import Path
 import os
 import sys
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
+import shutil
 
 # Third Party Imports
 import yaml
 
 # Local Imports
 from navigate.config.config import get_navigate_path
-
-
-def update_nested_dict(d, find_func, apply_func):
-    """Update a nested dictionary by applying a function to a value
-
-    Loops through a nested dictionary and if find_func() conditions are met,
-    run apply_func on that key.
-
-    TODO: This is highly general and doesn't belong here.
-    TODO: It might be nice to make this non-recursive.
-
-    Parameters
-    ----------
-    d : dict
-        Dictionary to be updated
-    find_func : func
-        Accepts key, value pair and matches a condition based on these. Returns bool.
-    apply_func : func
-        Accepts a value returns the new value.
-
-    Returns
-    -------
-    d2 : dict
-        An version of d, updated according to the passed functions.
-    """
-    d2 = {}
-    for k, v in d.items():
-        if find_func(k, v):
-            d2[k] = apply_func(v)
-        else:
-            d2[k] = v
-        if isinstance(v, dict):
-            d2[k] = update_nested_dict(v, find_func, apply_func)
-    return d2
+from navigate.tools.common_dict_tools import update_nested_dict
 
 
 def find_filename(k, v):
@@ -144,11 +112,16 @@ def log_setup(logging_configuration, logging_path=None):
 
     if logging_path is None:
         logging_path = Path.joinpath(Path(get_navigate_path()), "logs")
-    todays_path = Path.joinpath(logging_path, time_stamp)
+
     if not os.path.exists(logging_path):
         os.mkdir(logging_path)
+
+    todays_path = Path.joinpath(logging_path, time_stamp)
     if not os.path.exists(todays_path):
         os.mkdir(todays_path)
+
+    # Discard log files older than 30 days
+    eliminate_old_log_files(logging_path)
 
     def update_filename(v):
         """Function to map filename to base_directory/filename in the dictionary
@@ -179,6 +152,55 @@ def log_setup(logging_configuration, logging_path=None):
             # Configures our loggers from updated logging.yml
         except yaml.YAMLError as yaml_error:
             print(yaml_error)
+
+
+def eliminate_old_log_files(logging_path):
+    """Eliminate log files in the logging folder older than 30 days.
+
+    Parameters
+    ----------
+    logging_path : str
+        Path to logs files.
+    """
+
+    def get_folder_date(folder_name):
+        """Get the date from the folder name.
+
+        Parameters
+        ----------
+        folder_name : str
+            Folder name
+        """
+        try:
+            # Extract the year, month, day, hour, and minute from the folder name
+            year, month, day, hourminute = folder_name.split("-")
+            hour = hourminute[:2]
+            minute = hourminute[2:]
+            date = datetime(
+                year=int(year),
+                month=int(month),
+                day=int(day),
+                hour=int(hour),
+                minute=int(minute),
+            )
+            return date
+        except ValueError:
+            # Folder name is not in anticipated format
+            return False
+
+    today = datetime.now()
+    date_threshold = today - timedelta(days=30)
+
+    # Iterate through all folders in logging path and delete those older than 30 days
+    for folder in os.listdir(logging_path):
+        folder_date = get_folder_date(folder)
+        if folder_date is not False:
+            if folder_date < date_threshold:
+                old_path = Path.joinpath(logging_path, folder)
+                try:
+                    shutil.rmtree(old_path)
+                except OSError:
+                    continue
 
 
 def main_process_listener(queue):

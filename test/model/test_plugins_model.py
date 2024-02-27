@@ -2,9 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only
-# (subject to the limitations in the disclaimer below)
-# provided that the following conditions are met:
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below) provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
@@ -30,34 +29,29 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from pathlib import Path
-import pytest
+import unittest
+from unittest.mock import patch
+from navigate.model.plugins_model import PluginsModel
 
 
-@pytest.mark.parametrize("logging_configuration", ["logging.yml"])
-@pytest.mark.parametrize("logging_path", [None, Path("./")])
-def test_log_setup(logging_configuration, logging_path):
-    from datetime import datetime
+class TestPluginsModel(unittest.TestCase):
+    @patch("os.path.join")
+    @patch("pathlib.Path.resolve")
+    def test_initialization(self, mock_resolve, mock_join):
+        mock_resolve.return_value.parent.parent = "mocked_path"
+        mock_join.return_value = "mocked_path/plugins"
+        model = PluginsModel()
+        self.assertEqual(model.plugins_path, "mocked_path/plugins")
 
-    from navigate.log_files.log_functions import log_setup
-    from navigate.config.config import get_navigate_path
-
-    time = datetime.now()
-    time_stamp = Path(
-        "%s-%s-%s-%s%s"
-        % (
-            f"{time.year:04d}",
-            f"{time.month:02d}",
-            f"{time.day:02d}",
-            f"{time.hour:02d}",
-            f"{time.minute:02d}",
-        )
-    )
-
-    if logging_path is None:
-        logging_path = Path.joinpath(Path(get_navigate_path()), "logs")
-    todays_path = Path.joinpath(logging_path, time_stamp)
-
-    log_setup(logging_configuration, logging_path)
-
-    assert Path.joinpath(todays_path, "performance.log").is_file()
+    @patch("navigate.config.config.get_navigate_path")
+    @patch("os.makedirs")
+    def test_load_plugins(
+        self,
+        mock_get_nav_path,
+        mock_makedirs,
+    ):
+        mock_get_nav_path.return_value = "mocked_navigate_path"
+        model = PluginsModel()
+        devices_dict, plugin_acquisition_modes = model.load_plugins()
+        self.assertIsInstance(devices_dict, dict)
+        self.assertIsInstance(plugin_acquisition_modes, dict)

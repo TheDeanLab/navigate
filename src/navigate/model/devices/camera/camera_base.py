@@ -194,26 +194,28 @@ class CameraBase:
         Parameters
         ----------
         full_chip_exposure_time : float
-            Normal mode exposure time.
+            Normal mode exposure time in seconds.
         shutter_width : int
             Width of light-sheet rolling shutter.
 
         Returns
         -------
         exposure_time : float
-            Light-sheet mode exposure time (ms).
+            Light-sheet mode exposure time (s).
         camera_line_interval : float
             HamamatsuOrca line interval duration (s).
+        full_chip_exposure time : float
+            Full chip exposure time (s).
         """
 
-        camera_line_interval = (full_chip_exposure_time / 1000) / (
+        camera_line_interval = full_chip_exposure_time / (
             shutter_width + self.y_pixels - 1
         )
 
         self.camera_parameters["line_interval"] = camera_line_interval
 
-        exposure_time = ((camera_line_interval * shutter_width) // self.minimum_exposure_time) * self.minimum_exposure_time * 1000
-        return exposure_time, camera_line_interval
+        exposure_time = camera_line_interval * shutter_width
+        return exposure_time, camera_line_interval, full_chip_exposure_time
 
     def close_camera(self):
         """Close camera."""

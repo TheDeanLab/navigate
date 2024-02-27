@@ -277,9 +277,9 @@ class HamamatsuBase(CameraBase):
         Parameters
         ----------
         exposure_time : float
-            Exposure time in milliseconds.
+            Exposure time in seconds.
         """
-        exposure_time = exposure_time / 1000
+        exposure_time = exposure_time
         return self.camera_controller.set_property_value("exposure_time", exposure_time)
 
     def set_line_interval(self, line_interval_time):
@@ -483,24 +483,26 @@ class HamamatsuOrcaLightning(HamamatsuBase):
         Parameters
         ----------
         full_chip_exposure_time : float
-            Full chip exposure time.
+            Full chip exposure time in seconds.
         shutter_width : int
             Shutter width.
 
         Returns
         -------
         exposure_time : float
-            Exposure time.
+            Exposure time in seconds.
         camera_line_interval : float
-            Camera line interval.
+            Camera line interval in seconds.
+        full_chip_exposure_time : float
+            Full chip exposure time in seconds.
         """
 
-        camera_line_interval = (full_chip_exposure_time / 1000) / (
+        camera_line_interval = full_chip_exposure_time / (
             (shutter_width + self.y_pixels - 1) / 4
         )
         self.camera_parameters["line_interval"] = camera_line_interval
-        exposure_time = (camera_line_interval * (shutter_width / 4) // camera_line_interval) * camera_line_interval * 1000
-        return exposure_time, camera_line_interval
+        exposure_time = camera_line_interval * (shutter_width / 4)
+        return exposure_time, camera_line_interval, full_chip_exposure_time
 
 
 class HamamatsuOrcaFire(HamamatsuBase):
@@ -558,27 +560,34 @@ class HamamatsuOrcaFire(HamamatsuBase):
         Parameters
         ----------
         full_chip_exposure_time : float
-            Normal mode exposure time.
+            Normal mode exposure time in seconds.
         shutter_width : int
             Width of light-sheet rolling shutter.
 
         Returns
         -------
         exposure_time : float
-            Light-sheet mode exposure time (ms).
+            Light-sheet mode exposure time (s).
         camera_line_interval : float
             HamamatsuOrca line interval duration (s).
+        full_chip_exposure_time : float
+            Updated full chip exposure time (s).
         """
         # 4H delay, (Vn/2+5)H readout
-        camera_line_interval = (full_chip_exposure_time / 1000) / (
-            9 + (shutter_width / 2 + self.y_pixels) / 2
+        camera_line_interval = full_chip_exposure_time / (
+            9 + (shutter_width + self.y_pixels) / 2
         )
+        
+        maximum_internal_line_interval = 0.0002339 # 233.9 us
+        if camera_line_interval > maximum_internal_line_interval:
+            camera_line_interval = maximum_internal_line_interval
+            full_chip_exposure_time = camera_line_interval * (9 + (shutter_width + self.y_pixels) / 2)
 
         self.camera_parameters["line_interval"] = camera_line_interval
 
         # round up exposure time
-        exposure_time = camera_line_interval * ((shutter_width+1) // 2) * 1000
-        return exposure_time, camera_line_interval
+        exposure_time = camera_line_interval * ((shutter_width+1) // 2)
+        return exposure_time, camera_line_interval, full_chip_exposure_time
 
 
 class HamamatsuOrca(HamamatsuBase):

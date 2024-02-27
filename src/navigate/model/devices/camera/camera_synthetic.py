@@ -158,10 +158,10 @@ class SyntheticCamera(CameraBase):
         Parameters
         ----------
         exposure_time : float
-            Exposure time in milliseconds.
+            Exposure time in seconds.
 
         """
-        self.camera_exposure_time = exposure_time / 1000
+        self.camera_exposure_time = exposure_time
 
     def set_line_interval(self, line_interval_time):
         """Set SyntheticCamera line interval.

@@ -316,7 +316,11 @@ class PhotometricsKinetix(CameraBase):
             Light-sheet mode exposure time.
         camera_line_interval : float
             HamamatsuOrca line interval duration.
+        full_chip_exposure_time : float
+            Full chip exposure time (s)
         """
+        # TODO: what's the units of the input full_chip_exposure_time? miliseconds or seconds?
+
         linedelay = self._unitforlinedelay  # 10.16us
         nbrows = self.y_pixels
         ASLM_scanWidth = 70
@@ -352,7 +356,7 @@ class PhotometricsKinetix(CameraBase):
             )
         )
 
-        return ASLM_lineExposure, ASLM_line_delay
+        return ASLM_lineExposure, ASLM_line_delay, full_chip_exposure_time
 
     def _calculate_ASLMparameters(self, desired_exposuretime):
         """Calculate the parameters for an ASLM acquisition

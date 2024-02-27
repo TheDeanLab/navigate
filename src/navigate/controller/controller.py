@@ -1231,6 +1231,8 @@ class Controller:
                         pass
             elif event == "remove_positions":
                 self.multiposition_tab_controller.remove_positions(value)
+            elif event == "exposure_time":
+                self.channels_tab_controller.set_exposure_time(value[0], value[1])
 
     # def exit_program(self):
     #     """Exit the program.

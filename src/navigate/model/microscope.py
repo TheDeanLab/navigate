@@ -525,11 +525,13 @@ class Microscope:
         )
 
         readout_time = 0
-        if (
-            self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
-            == "Normal"
-        ):
+        readout_mode = self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
+        if readout_mode == "Normal":
             readout_time = self.camera.calculate_readout_time()
+        elif (
+            self.configuration["experiment"]["CameraParameters"]["readout_direction"] in ["Bidirectional", "Rev. Bidirectional"]
+        ):
+            remote_focus_ramp_falling = 0
         # set readout out time
         self.configuration["experiment"]["CameraParameters"]["readout_time"] = readout_time * 1000
 
@@ -538,11 +540,27 @@ class Microscope:
             if channel["is_selected"] is True:
                 exposure_time = float(channel["camera_exposure_time"]) / 1000
 
+                if readout_mode == "Light-Sheet":
+                    _, _, updated_exposure_time = self.camera.calculate_light_sheet_exposure_time(
+                        exposure_time,
+                        int(
+                            self.configuration["experiment"]["CameraParameters"][
+                                "number_of_pixels"
+                            ]
+                        )
+                    )
+                    if updated_exposure_time != exposure_time:
+                        print(f"*** Notice: The actual exposure time of the camera for {channel_key} is {updated_exposure_time*1000}ms, not {exposure_time*1000}ms!")
+                        exposure_time = updated_exposure_time
+                        # update the experiment file
+                        channel["camera_exposure_time"] = updated_exposure_time * 1000
+                        self.output_event_queue.put(("exposure_time", (channel_key, updated_exposure_time * 1000)))
+
                 sweep_time = (
                     exposure_time
                     + readout_time
                     + camera_delay
-                    + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration - camera_delay)
+                    + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration, camera_delay) - camera_delay
                 )        
 
                 # TODO: should we keep the percent_smoothing?
@@ -611,7 +629,7 @@ class Microscope:
         self.filter_wheel.set_filter(channel["filter"])
 
         # Camera Settings
-        self.current_exposure_time = float(channel["camera_exposure_time"])
+        self.current_exposure_time = float(channel["camera_exposure_time"]) / 1000
         if (
             self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
             == "Light-Sheet"
@@ -619,6 +637,7 @@ class Microscope:
             (
                 self.current_exposure_time,
                 camera_line_interval,
+                _
             ) = self.camera.calculate_light_sheet_exposure_time(
                 self.current_exposure_time,
                 int(

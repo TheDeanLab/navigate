@@ -229,7 +229,7 @@ class WaveformParameterPopupWindow:
             prev = prev + 2
 
         # High/Low Resolution
-        hi_lo_labels = ["Percent Delay", "Percent Smoothing", "Settle Duration (ms)"]
+        hi_lo_labels = ["Delay (ms)", "Percent Smoothing", "Settle Duration (ms)"]
         dict_labels = ["Delay", "Smoothing", "Duty"]
         for i in range(3):
             self.inputs[dict_labels[i]] = LabelInput(

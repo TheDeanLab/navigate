@@ -218,6 +218,8 @@ class HamamatsuBase(CameraBase):
             self.camera_parameters["y_pixels_min"] = self.camera_controller.min_image_height
             self.camera_parameters["x_pixels_step"] = self.camera_controller.step_image_width
             self.camera_parameters["y_pixels_step"] = self.camera_controller.step_image_height
+
+            self.camera_parameters["delay"] = self.delay_ratio * self.minimum_exposure_time * 1000
         else:
             print("Camera mode not supported")
             logger.info("Camera mode not supported")
@@ -584,6 +586,8 @@ class HamamatsuOrcaFire(HamamatsuBase):
             full_chip_exposure_time = camera_line_interval * (9 + (shutter_width + self.y_pixels) / 2)
 
         self.camera_parameters["line_interval"] = camera_line_interval
+        # 7h flat time
+        self.camera_parameters["delay"] = self.delay_ratio * camera_line_interval * 1000
 
         # round up exposure time
         exposure_time = camera_line_interval * ((shutter_width+1) // 2)

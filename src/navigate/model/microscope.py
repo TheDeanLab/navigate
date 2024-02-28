@@ -504,9 +504,6 @@ class Microscope:
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         zoom = microscope_state["zoom"]
         waveform_constants = self.configuration["waveform_constants"]
-        camera_delay = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["camera"]["delay"] / 1000
         camera_settle_duration = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["camera"].get("settle_duration", 0) / 1000
@@ -555,12 +552,16 @@ class Microscope:
                         channel["camera_exposure_time"] = updated_exposure_time * 1000
                         self.output_event_queue.put(("exposure_time", (channel_key, updated_exposure_time * 1000)))
 
+                channel["delay"] = self.configuration["configuration"]["microscopes"][
+                    self.microscope_name
+                ]["camera"]["delay"]
+                camera_delay = channel["delay"] / 1000
                 sweep_time = (
                     exposure_time
                     + readout_time
                     + camera_delay
                     + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration, camera_delay) - camera_delay
-                )        
+                )
 
                 # TODO: should we keep the percent_smoothing?
                 ps = float(

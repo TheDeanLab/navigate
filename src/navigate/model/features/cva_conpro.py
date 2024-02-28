@@ -317,13 +317,16 @@ class ConstantVelocityAcquisition:
             f"external trigger set to "
             f"{self.model.active_microscope.daq.external_trigger}"
         )
+
         self.model.active_microscope.prepare_next_channel()
 
-        posw = self.asi_stage.get_axis_position(self.axis)
-        print(f"current position = {posw}, start position = {self.start_position_um}")
+        # print(self.axis)
 
-        self.model.resume_data_thread()
-        print("DATA THREAD RESUMED")
+        # posw = self.asi_stage.get_axis_position(self.axis)
+        # print(f"current position = {posw}, start position = {self.start_position_um}")
+
+        # self.model.resume_data_thread()
+        # print("DATA THREAD RESUMED")
 
     def main_func_signal(self):
         print("main function started")
@@ -335,7 +338,8 @@ class ConstantVelocityAcquisition:
         if abs(posw - self.start_position_um)>10:
             print("in posw if statement") 
             self.asi_stage.move_axis_absolute(self.axis,self.start_position * 1000.0, wait_until_done=True)
-        
+            print("stage moved") 
+
             self.asi_stage.wait_until_complete(self.axis)
             print("Stage wait until complete completed")
 
@@ -433,10 +437,11 @@ class ConstantVelocityAcquisition:
         """
         # reset stage speed
         # 4.288497*2
+        print("Clean up called")
         pos = self.asi_stage.get_axis_position(self.axis)
         print(f"Current Position = {pos}")
         print(f"Stop position = {self.stop_position*1000}")
-        print("Clean up called")
+        
         # self.asi_stage.set_speed({self.axis: self.default_speed})
         self.asi_stage.set_speed(percent=0.5)
 

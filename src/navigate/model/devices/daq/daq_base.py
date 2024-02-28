@@ -85,7 +85,7 @@ class DAQBase:
         #: float: Camera delay percentage
         self.camera_delay = self.configuration["configuration"]["microscopes"][
             self.microscope_name
-        ]["camera"].get("delay", 2) / 1000
+        ]["camera"]["delay"] / 1000
 
         #: dict: Dictionary of waveforms.
         self.waveform_dict = {}
@@ -136,7 +136,7 @@ class DAQBase:
                     sample_rate=self.sample_rate,
                     sweep_time=sweep_time,
                     exposure=exposure_time,
-                    camera_delay=channel["delay"] / 1000,
+                    camera_delay=self.camera_delay,
                 )
 
         return self.waveform_dict
@@ -152,9 +152,9 @@ class DAQBase:
         if microscope_name != self.microscope_name:
             self.microscope_name = microscope_name
 
-        # self.camera_delay = self.configuration["configuration"]["microscopes"][
-        #     microscope_name
-        # ]["camera"]["delay"] / 1000
+        self.camera_delay = self.configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["camera"]["delay"] / 1000
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]

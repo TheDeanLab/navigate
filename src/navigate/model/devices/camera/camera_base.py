@@ -119,8 +119,6 @@ class CameraBase:
         #: np.ndarray: Variance map
         self._offset, self._variance = None, None
         self.get_offset_variance_maps()
-        #: int: camera delay ratio
-        self.delay_ratio = 7 # TODO: get from configuration.yaml?
 
     def get_offset_variance_maps(self):
         """Get offset and variance maps from file.
@@ -215,7 +213,6 @@ class CameraBase:
         )
 
         self.camera_parameters["line_interval"] = camera_line_interval
-        self.camera_parameters["delay"] = 7 * camera_line_interval * 1000
 
         exposure_time = camera_line_interval * shutter_width
         return exposure_time, camera_line_interval, full_chip_exposure_time

@@ -174,7 +174,7 @@ class GalvoBase:
                         frequency=galvo_frequency,
                         amplitude=galvo_amplitude,
                         offset=galvo_offset,
-                        phase=channel["delay"] / 1000, #self.camera_delay,
+                        phase=self.camera_delay,
                     )
                 elif self.galvo_waveform == "sine":
                     self.waveform_dict[channel_key] = sine_wave(
@@ -192,7 +192,7 @@ class GalvoBase:
                         frequency=galvo_frequency,
                         amplitude=galvo_amplitude,
                         offset=galvo_offset,
-                        phase=channel["delay"] / 1000, #self.camera_delay,
+                        phase=self.camera_delay,
                     )
                     half_samples = (
                         new_wave.argmax() if galvo_amplitude > 0 else new_wave.argmin()

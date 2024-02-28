@@ -217,7 +217,7 @@ class RemoteFocusBase:
                     exposure_time=exposure_time,
                     sweep_time=self.sweep_time,
                     remote_focus_delay=self.remote_focus_delay,
-                    camera_delay=channel["delay"] / 1000, #self.camera_delay,
+                    camera_delay=self.camera_delay,
                     fall=self.remote_focus_ramp_falling,
                     amplitude=remote_focus_amplitude,
                     offset=remote_focus_offset,

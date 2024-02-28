@@ -148,7 +148,6 @@ class SyntheticCamera(CameraBase):
         mode : str
             'Normal' or 'Light-Sheet'
         """
-        self.camera_parameters["delay"] = self.delay_ratio * self.minimum_exposure_time * 1000
         pass
 
     def set_exposure_time(self, exposure_time):

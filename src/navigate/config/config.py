@@ -910,3 +910,21 @@ def verify_waveform_constants(manager, configuration):
             float(waveform_dict["other_constants"]["remote_focus_settle_duration"])
         except ValueError:
             waveform_dict["other_constants"]["remote_focus_settle_duration"] = "0"
+
+def verify_configuration(manager, configuration):
+    """Verify configuration files.
+    
+    Supports old version of configurations.
+    """
+    device_config = configuration["configuration"]["microscopes"]
+    for microscope_name in device_config.keys():
+        # camera
+        # delay_percent -> delay
+        camera_config = device_config[microscope_name]["camera"]
+        if "delay" not in camera_config.keys():
+            camera_config["delay"] = camera_config.get("delay_percent", 2)
+        # remote focus
+        # ramp_falling_percent -> ramp_falling
+        remote_focus_config = device_config[microscope_name]["remote_focus_device"]
+        if "ramp_falling" not in camera_config.keys():
+            remote_focus_config["ramp_falling"] = remote_focus_config.get("ramp_falling_percent", 5)

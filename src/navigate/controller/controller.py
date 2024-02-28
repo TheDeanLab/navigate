@@ -78,6 +78,7 @@ from navigate.config.config import (
     update_config_dict,
     verify_experiment_config,
     verify_waveform_constants,
+    verify_configuration,
     get_navigate_path,
 )
 from navigate.tools.file_functions import create_save_path, save_yaml_file
@@ -154,6 +155,7 @@ class Controller:
 
         verify_experiment_config(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)
+        verify_configuration(self.manager, self.configuration)
 
         # Initialize the Model
         #: ObjectInSubprocess: Model object in MVC architecture.

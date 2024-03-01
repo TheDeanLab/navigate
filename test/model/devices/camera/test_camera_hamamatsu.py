@@ -222,7 +222,7 @@ class TestHamamatsuOrca:
             self.camera.set_sensor_mode(mode)
             for i in range(self.num_of_tests):
                 exposure_time = random.randint(1, modes_dict[mode])
-                self.camera.set_exposure_time(exposure_time)
+                self.camera.set_exposure_time(exposure_time / 1000)
                 value = self.camera.camera_controller.get_property_value(
                     "exposure_time"
                 )

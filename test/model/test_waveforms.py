@@ -195,10 +195,6 @@ class TestWaveforms(unittest.TestCase):
     def test_smoothing_length(self):
         """Test that the smoothed waveform is proportionally larger than the
         original waveform.
-
-
-
-
         """
         ps = 10
         waveform = waveforms.remote_focus_ramp()
@@ -223,16 +219,16 @@ class TestWaveforms(unittest.TestCase):
         np.testing.assert_array_equal(waveform, smoothed_waveform)
 
     def test_camera_exposure(self):
-        sr, st, ex, cd = 100000, 0.5, 0.4, 10
+        sr, st, ex, cd = 100000, 0.5, 0.4, 0.1
         v = waveforms.camera_exposure(
             sample_rate=sr, sweep_time=st, exposure=ex, camera_delay=cd
         )
-        assert np.sum(v > 0) == sr * ex
+        assert np.sum(v > 0) == int(sr * ex)
 
     def test_camera_exposure_short(self):
         """In the event the camera delay + exposure_time > sweep time..."""
-        sr, st, ex, cd = 100000, 0.4, 0.4, 10
+        sr, st, ex, cd = 100000, 0.4, 0.4, 0.1
         v = waveforms.camera_exposure(
             sample_rate=sr, sweep_time=st, exposure=ex, camera_delay=cd
         )
-        assert np.sum(v > 0) == (1 - cd / 100) * sr * ex
+        assert np.sum(v > 0) == int(sr * (ex - cd))

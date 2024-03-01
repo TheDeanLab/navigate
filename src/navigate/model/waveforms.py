@@ -44,7 +44,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_delay=10):
+def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_delay=0.001):
     """Calculates timing and duration of camera exposure.
     Not actually used to trigger the camera.  Only meant for visualization.
 
@@ -57,7 +57,7 @@ def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_del
     exposure : Float
         Unit - Seconds
     camera_delay : Float
-        Unit - Percent
+        Unit - Seconds
 
     Returns
     -------
@@ -139,9 +139,9 @@ def remote_focus_ramp(
     sample_rate=100000,
     exposure_time=0.2,
     sweep_time=0.24,
-    remote_focus_delay=7.5,
-    camera_delay=10,
-    fall=2.5,
+    remote_focus_delay=0.005,
+    camera_delay=0.001,
+    fall=0.05,
     amplitude=1,
     offset=0,
 ):

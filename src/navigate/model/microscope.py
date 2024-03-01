@@ -549,11 +549,11 @@ class Microscope:
                         )
                     )
                     if updated_exposure_time != exposure_time:
-                        print(f"*** Notice: The actual exposure time of the camera for {channel_key} is {updated_exposure_time*1000}ms, not {exposure_time*1000}ms!")
-                        exposure_time = updated_exposure_time
+                        print(f"*** Notice: The actual exposure time of the camera for {channel_key} is {round(updated_exposure_time*1000, 1)}ms, not {exposure_time*1000}ms!")
+                        exposure_time = round(updated_exposure_time, 4)
                         # update the experiment file
-                        channel["camera_exposure_time"] = updated_exposure_time * 1000
-                        self.output_event_queue.put(("exposure_time", (channel_key, updated_exposure_time * 1000)))
+                        channel["camera_exposure_time"] = round(updated_exposure_time * 1000, 1)
+                        self.output_event_queue.put(("exposure_time", (channel_key, channel["camera_exposure_time"])))
 
                 sweep_time = (
                     exposure_time

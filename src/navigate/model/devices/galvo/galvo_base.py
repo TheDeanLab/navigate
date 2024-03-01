@@ -96,11 +96,6 @@ class GalvoBase:
         #: float: Galvo min voltage.
         self.galvo_min_voltage = self.device_config["hardware"]["min"]
 
-        #: float: Percent galvo ramp rising percent.
-        self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["remote_focus_device"]["ramp_falling"] / 1000
-
         # Galvo Waveform Information
         #: str: Galvo waveform. Waveform or Sawtooth.
         self.galvo_waveform = self.device_config.get("waveform", "sawtooth")

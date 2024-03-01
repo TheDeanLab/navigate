@@ -161,6 +161,7 @@ class WaveformPopupController(GUIController):
         self.variables["Delay"].trace_add("write", self.update_waveform_parameters)
         self.variables["Duty"].trace_add("write", self.update_waveform_parameters)
         self.variables["Smoothing"].trace_add("write", self.update_waveform_parameters)
+        self.variables["Ramp_falling"].trace_add("write", self.update_waveform_parameters)
 
         # Save waveform constants
         self.view.get_buttons()["Save"].configure(command=self.save_waveform_constants)
@@ -370,26 +371,20 @@ class WaveformPopupController(GUIController):
         # Currently pulls from the original microscope configuration YAML file, not the
         # current microscope configuration according to the model
         self.update_waveform_parameters_flag = False
-        waveform_configuration = self.resolution_info["remote_focus_constants"][
-            self.resolution
-        ][self.mag][self.lasers[0]]
         self.widgets["Smoothing"].set(
-            waveform_configuration.get("percent_smoothing", 0)
+            self.resolution_info["other_constants"].get("percent_smoothing", 0)
         )
         self.widgets["Smoothing"].widget.trigger_focusout_validation()
-        self.widgets["Delay"].set(waveform_configuration.get("delay", 7.5))
+        self.widgets["Delay"].set(self.resolution_info["other_constants"].get("remote_focus_delay", 7.5))
         self.widgets["Delay"].widget.trigger_focusout_validation()
-        if "other_constants" not in self.resolution_info:
-            update_config_dict(
-                self.parent_controller.manager,
-                self.resolution_info,
-                "other_constants",
-                {"remote_focus_settle_duration": 0},
-            )
         self.widgets["Duty"].set(
             self.resolution_info["other_constants"]["remote_focus_settle_duration"]
         )
         self.widgets["Duty"].widget.trigger_focusout_validation()
+        self.widgets["Ramp_falling"].set(
+            self.resolution_info["other_constants"]["remote_focus_ramp_falling"]
+        )
+        self.widgets["Ramp_falling"].widget.trigger_focusout_validation()
         self.update_waveform_parameters_flag = True
 
         # update resolution value in central controller (menu)
@@ -481,21 +476,18 @@ class WaveformPopupController(GUIController):
             delay = float(self.widgets["Delay"].widget.get())
             duty_cycle = float(self.widgets["Duty"].widget.get())
             smoothing = float(self.widgets["Smoothing"].widget.get())
+            ramp_falling = float(self.widgets["Ramp_falling"].widget.get())
         except ValueError:
             return
 
         # Update the waveform parameters
         # all the lasers use the same delay, smoothing value
-        for laser in self.lasers:
-            self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
-                laser
-            ]["delay"] = delay
-            self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
-                laser
-            ]["percent_smoothing"] = smoothing
         self.resolution_info["other_constants"][
             "remote_focus_settle_duration"
         ] = duty_cycle
+        self.resolution_info["other_constants"]["remote_focus_ramp_falling"] = ramp_falling
+        self.resolution_info["other_constants"]["remote_focus_delay"] = delay
+        self.resolution_info["other_constants"]["percent_smoothing"] = smoothing
 
         # Pass the values to the parent controller.
         self.event_id = self.view.popup.after(

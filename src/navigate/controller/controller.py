@@ -153,9 +153,9 @@ class Controller:
             waveform_templates=waveform_templates_path,
         )
 
+        verify_configuration(self.manager, self.configuration)
         verify_experiment_config(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)
-        verify_configuration(self.manager, self.configuration)
 
         # Initialize the Model
         #: ObjectInSubprocess: Model object in MVC architecture.

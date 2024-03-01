@@ -510,17 +510,17 @@ class Microscope:
         camera_settle_duration = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["camera"].get("settle_duration", 0) / 1000
-        remote_focus_ramp_falling = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["remote_focus_device"]["ramp_falling"] / 1000
+        remote_focus_ramp_falling = float(
+                waveform_constants["other_constants"]["remote_focus_ramp_falling"]
+            ) / 1000
 
         duty_cycle_wait_duration = (
             float(
-                self.configuration["waveform_constants"]
-                .get("other_constants", {})
-                .get("remote_focus_settle_duration", 0)
-            )
-            / 1000
+                waveform_constants["other_constants"]["remote_focus_settle_duration"]
+            ) / 1000
+        )
+        ps = float(
+            waveform_constants["other_constants"].get("percent_smoothing", 0.0)
         )
 
         readout_time = 0
@@ -561,13 +561,7 @@ class Microscope:
                     + camera_delay
                     + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration, camera_delay) - camera_delay
                 )        
-
                 # TODO: should we keep the percent_smoothing?
-                ps = float(
-                    waveform_constants["remote_focus_constants"][self.microscope_name][
-                        zoom
-                    ][channel["laser"]].get("percent_smoothing", 0.0)
-                )
                 if ps > 0:
                     sweep_time = (1 + ps / 100) * sweep_time
 

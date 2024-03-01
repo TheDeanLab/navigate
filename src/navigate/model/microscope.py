@@ -641,7 +641,6 @@ class Microscope:
             )
             self.camera.set_line_interval(camera_line_interval)
         self.camera.set_exposure_time(self.current_exposure_time)
-        self.camera.report_settings()
 
         # Laser Settings
         self.current_laser_index = channel["laser_index"]

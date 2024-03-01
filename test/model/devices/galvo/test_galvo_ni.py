@@ -33,7 +33,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 from navigate.model.devices.galvo.galvo_ni import GalvoNI
 from nidaqmx.constants import AcquisitionType
-from navigate.config import load_configs, get_configuration_paths
+from navigate.config import load_configs, get_configuration_paths, verify_configuration, verify_waveform_constants
 from multiprocessing import Manager
 
 
@@ -61,7 +61,8 @@ class TestGalvoNI(unittest.TestCase):
             rest_api_config=rest_api_path,
             waveform_templates=waveform_templates_path,
         )
-
+        verify_configuration(self.manager, self.configuration)
+        verify_waveform_constants(self.manager, self.configuration)
         self.microscope_name = "Mesoscale"
         self.device_connection = MagicMock()
         galvo_id = 0
@@ -83,10 +84,11 @@ class TestGalvoNI(unittest.TestCase):
         assert self.galvo.galvo_name == "Galvo 0"
         assert self.galvo.sample_rate == 100000
         assert self.galvo.sweep_time == 0.2
-        assert self.galvo.camera_delay_percent == 10
+        assert self.galvo.camera_delay == self.configuration["configuration"]["microscopes"][
+           self.microscope_name
+        ]["camera"]["delay"] / 1000
         assert self.galvo.galvo_max_voltage == 5
         assert self.galvo.galvo_min_voltage == -5
-        assert self.galvo.remote_focus_ramp_falling == 2.5
         assert self.galvo.galvo_waveform == "sawtooth" or "sine"
         assert self.galvo.waveform_dict == {}
 

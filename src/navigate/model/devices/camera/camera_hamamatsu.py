@@ -258,13 +258,11 @@ class HamamatsuBase(CameraBase):
         readout_time : float
             Duration of time needed to readout an image.
 
-        TODO: I think self.camera_controller.get_property_value("readout_time") pulls
-              out the actual readout_time
-              calculated here (i.e. we don't need to do the calculations).
         """
         readout_time = self.camera_controller.get_property_value("readout_time")
 
-        return readout_time
+        # with camera internal delay
+        return readout_time + 4 * self.minimum_exposure_time
 
     def set_exposure_time(self, exposure_time):
         """Set HamamatsuOrca exposure time.
@@ -498,10 +496,16 @@ class HamamatsuOrcaLightning(HamamatsuBase):
         """
 
         camera_line_interval = full_chip_exposure_time / (
-            (shutter_width + self.y_pixels - 1) / 4
+            6 + (shutter_width + self.y_pixels) / 4
         )
         self.camera_parameters["line_interval"] = camera_line_interval
-        exposure_time = camera_line_interval * (shutter_width / 4)
+
+        maximum_internal_line_interval = 0.0002 # 200.0 us
+        if camera_line_interval > maximum_internal_line_interval:
+            camera_line_interval = maximum_internal_line_interval
+            full_chip_exposure_time = camera_line_interval * (6 + (shutter_width + self.y_pixels) / 4)
+        
+        exposure_time = camera_line_interval * ((shutter_width + 3) // 4)
         return exposure_time, camera_line_interval, full_chip_exposure_time
 
 
@@ -532,24 +536,6 @@ class HamamatsuOrcaFire(HamamatsuBase):
 
         logger.info("HamamatsuOrcaFire Initialized")
 
-    def calculate_readout_time(self):
-        """Calculate duration of time needed to readout an image.
-
-        Calculates the readout time according to the camera
-        configuration settings.
-        Assumes model C13440 with Camera Link communication from Hamamatsu.
-        Currently pulling values directly from the camera.
-
-        Returns
-        -------
-        readout_time : float
-            Duration of time needed to readout an image.
-
-        """
-        readout_time = self.camera_controller.get_property_value("readout_time")
-
-        # with internal delay and jitter (4h + 1h)
-        return readout_time + 5 * self.minimum_exposure_time
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
@@ -613,3 +599,38 @@ class HamamatsuOrca(HamamatsuBase):
         # self.minimum_exposure_time = 9.74436 * 10 ** -6
 
         logger.info("HamamatsuOrca Initialized")
+
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time, shutter_width
+    ):
+        """Convert normal mode exposure time to light-sheet mode exposure time.
+        Calculate the parameters for an acquisition
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Normal mode exposure time in seconds.
+        shutter_width : int
+            Width of light-sheet rolling shutter.
+
+        Returns
+        -------
+        exposure_time : float
+            Light-sheet mode exposure time (s).
+        camera_line_interval : float
+            HamamatsuOrca line interval duration (s).
+        full_chip_exposure_time : float
+            Updated full chip exposure time (s).
+        """
+        camera_line_interval = full_chip_exposure_time / (4 + shutter_width + self.y_pixels)
+        
+        maximum_internal_line_interval = 963.8e-6 # 963.8 us
+        if camera_line_interval > maximum_internal_line_interval:
+            camera_line_interval = maximum_internal_line_interval
+            full_chip_exposure_time = camera_line_interval * (4 + shutter_width + self.y_pixels)
+
+        self.camera_parameters["line_interval"] = camera_line_interval
+
+        # round up exposure time
+        exposure_time = camera_line_interval * shutter_width
+        return exposure_time, camera_line_interval, full_chip_exposure_time

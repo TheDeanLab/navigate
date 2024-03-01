@@ -128,6 +128,7 @@ class ValidatedMixin:
         # History for each widgets to undo and redo
         #: list: The undo history of the widget
         self.undo_history = []
+
         #: list: The redo history of the widget
         self.redo_history = []
 
@@ -200,11 +201,11 @@ class ValidatedMixin:
             if valid:
                 self.add_history(event)
             else:
-               if self.undo_history:
-                   self.set(self.undo_history[-1])
-                   self.undo_history.pop()
-                   self._toggle_error(False)
-                   valid = True
+                if self.undo_history:
+                    self.set(self.undo_history[-1])
+                    self.undo_history.pop()
+                    self._toggle_error(False)
+                    valid = True
         elif event == "key":  # Keystroke into widget
             valid = self._key_validate(
                 proposed=proposed,
@@ -525,10 +526,10 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             return True
 
         return self._is_valid_proposed_value(proposed)
-    
+
     def _is_valid_proposed_value(self, proposed):
         """Validate a proposed value
-        
+
         Returns
         -------
         bool
@@ -537,12 +538,12 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         min_val = float(self.min)
         max_val = float(self.max)
 
-        if proposed == '-':
+        if proposed == "-":
             self._toggle_error(True)
             self.is_fake_focusout = False
             return min_val < 0
-        
-        if proposed == '.':
+
+        if proposed == ".":
             self._toggle_error(True)
             self.is_fake_focusout = False
             return True
@@ -556,7 +557,7 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
         proposed_precision = proposed.as_tuple().exponent
         if any([(proposed > max_val), (proposed_precision < self.precision)]):
             return False
-        
+
         if proposed < min_val:
             self._toggle_error(True)
             return True
@@ -724,12 +725,12 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             if valid:
                 self.add_history(event)
             else:
-               if self.undo_history:
-                   self.is_fake_focusout = True
-                   self.set(self.undo_history[-1])
-                   self.undo_history.pop()
-                   self._toggle_error(False)
-                   valid = True
+                if self.undo_history:
+                    self.is_fake_focusout = True
+                    self.set(self.undo_history[-1])
+                    self.undo_history.pop()
+                    self._toggle_error(False)
+                    valid = True
         elif event == "key":  # Keystroke into widget
             valid = self._key_validate(
                 proposed=proposed,
@@ -758,7 +759,12 @@ class ValidatedEntry(ValidatedMixin, ttk.Entry):
             # Don't add duplicates
             if self.undo_history and self.undo_history[-1] == value:
                 pass
-            elif value != "-" and value != "." and Decimal(value) >= min_val and Decimal(value) <= max_val:
+            elif (
+                value != "-"
+                and value != "."
+                and Decimal(value) >= min_val
+                and Decimal(value) <= max_val
+            ):
                 self.undo_history.append(value)
             if len(self.undo_history) > 3:
                 self.undo_history.pop(0)
@@ -932,12 +938,16 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         """
         super().__init__(*args, **kwargs)
+
         #: Decimal: The resolution of the spinbox
         self.resolution = str(kwargs.get("increment", "1.0"))  # Number put into spinbox
+
         #: int: The precision of the spinbox
         self.precision = self._get_precision()
+
         #: tk.StringVar: The variable to store the value of the spinbox in
         self.variable = kwargs.get("textvariable") or tk.DoubleVar()
+
         #: bool: Whether the spinbox requires a value
         self.required = required
 
@@ -946,11 +956,15 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             #: str: The minimum value of the spinbox
             self.min_var = min_var
             self.min_var.trace_add("write", self._set_minimum)
+
         if max_var:
             #: str: The maximum value of the spinbox
             self.max_var = max_var
             self.max_var.trace_add("write", self._set_maximum)
+
+        #: tk.StringVar: The variable to update when the spinbox loses focus
         self.focus_update_var = focus_update_var
+
         self.bind("<FocusOut>", self._set_focus_update_var)
 
     def set_precision(self, prec):
@@ -1021,10 +1035,10 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             return True
 
         return self._is_valid_proposed_value(proposed)
-    
+
     def _is_valid_proposed_value(self, proposed):
         """Validate a proposed value
-        
+
         Returns
         -------
         bool
@@ -1046,7 +1060,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
         if any([(proposed > max_val), (proposed_precision < self.precision)]):
             return False
-        
+
         if proposed < min_val:
             self._toggle_error(True)
             return True
@@ -1209,7 +1223,12 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
             # Don't add duplicates
             if self.undo_history and self.undo_history[-1] == value:
                 pass
-            elif value != "-" and value != "." and Decimal(value) >= min_val and Decimal(value) <= max_val:
+            elif (
+                value != "-"
+                and value != "."
+                and Decimal(value) >= min_val
+                and Decimal(value) <= max_val
+            ):
                 self.undo_history.append(value)
                 self.redo_history = []
             if len(self.undo_history) > 3:

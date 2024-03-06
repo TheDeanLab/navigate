@@ -9,7 +9,7 @@ to the ``develop`` branch for code review. Some best practices for new code are
 outlined below.
 
 If you are considering refactoring part of the code, please reach out to us prior to
-starting this process. We are happy to invite you to our regular software development 
+starting this process. We are happy to invite you to our regular software development
 meeting.
 
 -------------------
@@ -50,6 +50,27 @@ variable names are ``lowercase_and_separated_by_underscores``.
 
 -------------------
 
+Communicating with Hardware
+===========================
+
+In handling hardware devices, such as Sutter's MP-285A stage, using threads can introduce
+complexities, especially when simultaneous read and write operations occur over a
+shared resource like a serial line. An encountered issue demonstrated the challenges
+when two different threads attempted to write to and read from the same serial port
+simultaneously. This action led to data corruption due to interleaving of
+read/write calls that require precise handshaking, characteristic of the MP-285A's
+communication protocol. The solution involved implementing a blocking mechanism using
+`threading.Event()` to ensure that operations on the serial port do not overlap,
+showcasing the difficulties of multithreading sequential processes. To mitigate such
+issues, a design where each hardware device operates within its own dedicated thread is
+advisable. This approach simplifies the management of device communications by enforcing
+sequential execution, eliminating the need to handle complex concurrency issues inherent
+in multithreading environments. This strategy ensures robust and error-free interaction
+with hardware devices.
+
+-------------------
+
+
 Documentation
 =============
 
@@ -77,11 +98,11 @@ different unit to a piece of hardware.
 Pre-Commit Hooks
 ================
 
-We use `pre-commit hooks <https://pre-commit.com/>`_ to enforce consistent code 
-formatting and automate some of the code review process. In some rare cases, the 
-linter may complain about a line of code that is actually fine. For example, in 
-the example code below, Ruff linter complains that the start_stage class is 
-imported but not used. However, it is actually used in as part of an 
+We use `pre-commit hooks <https://pre-commit.com/>`_ to enforce consistent code
+formatting and automate some of the code review process. In some rare cases, the
+linter may complain about a line of code that is actually fine. For example, in
+the example code below, Ruff linter complains that the start_stage class is
+imported but not used. However, it is actually used in as part of an
 ``exec`` statement.
 
 .. code-block:: python
@@ -101,11 +122,11 @@ To avoid this error, add a ``# noqa`` comment to the end of the line to tell Ruf
 Dictionary Parsing
 ==================
 
-The :doc:`configuration file </user_guide/software_configuration>` is loaded as a 
-large dictionary object, and it is easy to create small errors in the dictionary that 
-can crash the program. To avoid this, when getting properties from the configuration 
-dictionary, it is best to use the ``.get()`` command, which provides you with the 
-opportunity to also have a default value should the key provided not be found. For 
+The :doc:`configuration file </user_guide/software_configuration>` is loaded as a
+large dictionary object, and it is easy to create small errors in the dictionary that
+can crash the program. To avoid this, when getting properties from the configuration
+dictionary, it is best to use the ``.get()`` command, which provides you with the
+opportunity to also have a default value should the key provided not be found. For
 example,
 
 .. code-block:: python

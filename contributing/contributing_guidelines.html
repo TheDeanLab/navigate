@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contributing Guidelines &mdash; navigate 0.0.3 documentation</title>
+  <title>Contributing Guidelines &mdash; navigate 0.0.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -64,6 +64,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing Guidelines</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#general-principles">General Principles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#communicating-with-hardware">Communicating with Hardware</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scientific-units">Scientific Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pre-commit-hooks">Pre-Commit Hooks</a></li>
@@ -152,6 +153,24 @@ live system prior to merging into the <code class="docutils literal notranslate"
 <p>We follow the <a class="reference external" href="https://peps.python.org/pep-0008/">PEP8 code style guide</a>.
 All class names are written in <code class="docutils literal notranslate"><span class="pre">CamelCase</span></code> and all
 variable names are <code class="docutils literal notranslate"><span class="pre">lowercase_and_separated_by_underscores</span></code>.</p>
+</section>
+<hr class="docutils" />
+<section id="communicating-with-hardware">
+<h2>Communicating with Hardware<a class="headerlink" href="#communicating-with-hardware" title="Permalink to this heading"></a></h2>
+<p>In handling hardware devices, such as Sutter’s MP-285A stage, using threads can introduce
+complexities, especially when simultaneous read and write operations occur over a
+shared resource like a serial line. An encountered issue demonstrated the challenges
+when two different threads attempted to write to and read from the same serial port
+simultaneously. This action led to data corruption due to interleaving of
+read/write calls that require precise handshaking, characteristic of the MP-285A’s
+communication protocol. The solution involved implementing a blocking mechanism using
+<cite>threading.Event()</cite> to ensure that operations on the serial port do not overlap,
+showcasing the difficulties of multithreading sequential processes. To mitigate such
+issues, a design where each hardware device operates within its own dedicated thread is
+advisable. This approach simplifies the management of device communications by enforcing
+sequential execution, eliminating the need to handle complex concurrency issues inherent
+in multithreading environments. This strategy ensures robust and error-free interaction
+with hardware devices.</p>
 </section>
 <hr class="docutils" />
 <section id="documentation">

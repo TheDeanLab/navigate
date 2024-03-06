@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>navigate.log_files.log_functions &mdash; navigate 0.0.3 documentation</title>
+  <title>navigate.log_files.log_functions &mdash; navigate 0.0.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.log_files.log_functions.find_filename" href="navigate.log_files.log_functions.find_filename.html" />
+    <link rel="next" title="navigate.log_files.log_functions.eliminate_old_log_files" href="navigate.log_files.log_functions.eliminate_old_log_files.html" />
     <link rel="prev" title="navigate.log_files.filters.PerformanceFilter" href="navigate.log_files.filters.PerformanceFilter.html" /> 
 </head>
 
@@ -70,10 +70,10 @@
 <li class="toctree-l2 current"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="navigate.log_files.filters.html">navigate.log_files.filters</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">navigate.log_files.log_functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="navigate.log_files.log_functions.eliminate_old_log_files.html">navigate.log_files.log_functions.eliminate_old_log_files</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.log_files.log_functions.find_filename.html">navigate.log_files.log_functions.find_filename</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.log_files.log_functions.log_setup.html">navigate.log_files.log_functions.log_setup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.log_files.log_functions.main_process_listener.html">navigate.log_files.log_functions.main_process_listener</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.log_files.log_functions.update_nested_dict.html">navigate.log_files.log_functions.update_nested_dict</a></li>
 </ul>
 </li>
 </ul>
@@ -117,17 +117,17 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.log_files.log_functions.find_filename.html#navigate.log_files.log_functions.find_filename" title="navigate.log_files.log_functions.find_filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_filename</span></code></a>(k, v)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.log_files.log_functions.eliminate_old_log_files.html#navigate.log_files.log_functions.eliminate_old_log_files" title="navigate.log_files.log_functions.eliminate_old_log_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eliminate_old_log_files</span></code></a>(logging_path)</p></td>
+<td><p>Eliminate log files in the logging folder older than 30 days.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.log_files.log_functions.find_filename.html#navigate.log_files.log_functions.find_filename" title="navigate.log_files.log_functions.find_filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_filename</span></code></a>(k, v)</p></td>
 <td><p>Check that we've met the condition dictionary key == 'filename'</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.log_files.log_functions.log_setup.html#navigate.log_files.log_functions.log_setup" title="navigate.log_files.log_functions.log_setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_setup</span></code></a>(logging_configuration[, logging_path])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.log_files.log_functions.log_setup.html#navigate.log_files.log_functions.log_setup" title="navigate.log_files.log_functions.log_setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_setup</span></code></a>(logging_configuration[, logging_path])</p></td>
 <td><p>Setup logging configuration</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.log_files.log_functions.main_process_listener.html#navigate.log_files.log_functions.main_process_listener" title="navigate.log_files.log_functions.main_process_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_process_listener</span></code></a>(queue)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.log_files.log_functions.main_process_listener.html#navigate.log_files.log_functions.main_process_listener" title="navigate.log_files.log_functions.main_process_listener"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_process_listener</span></code></a>(queue)</p></td>
 <td><p>Listener function for the main process</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.log_files.log_functions.update_nested_dict.html#navigate.log_files.log_functions.update_nested_dict" title="navigate.log_files.log_functions.update_nested_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_nested_dict</span></code></a>(d, find_func, apply_func)</p></td>
-<td><p>Update a nested dictionary by applying a function to a value</p></td>
 </tr>
 </tbody>
 </table>
@@ -138,7 +138,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="navigate.log_files.filters.PerformanceFilter.html" class="btn btn-neutral float-left" title="navigate.log_files.filters.PerformanceFilter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.log_files.log_functions.find_filename.html" class="btn btn-neutral float-right" title="navigate.log_files.log_functions.find_filename" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.log_files.log_functions.eliminate_old_log_files.html" class="btn btn-neutral float-right" title="navigate.log_files.log_functions.eliminate_old_log_files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

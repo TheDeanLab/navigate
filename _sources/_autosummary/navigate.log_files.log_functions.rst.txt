@@ -14,10 +14,10 @@ navigate.log\_files.log\_functions
    .. autosummary::
       :toctree:
    
+      eliminate_old_log_files
       find_filename
       log_setup
       main_process_listener
-      update_nested_dict
    
    
 

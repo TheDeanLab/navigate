@@ -360,7 +360,7 @@ class ASIStage(StageBase):
     
     def prepare_move_large_step(self, axis, end_pos):
         # TODO: the maximum step
-        maximum_step = 50.0
+        maximum_step = 250.0
         start_pos = getattr(self, f"{axis}_pos", None)
         if not start_pos:
             return

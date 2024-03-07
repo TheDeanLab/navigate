@@ -204,19 +204,29 @@ class WaveformPopupController(GUIController):
         0.01 for low mode.
 
         """
-        self.laser_min = self.configuration_controller.remote_focus_dict["hardware"]["min"]
-        self.laser_max = self.configuration_controller.remote_focus_dict["hardware"]["max"]
-        
-        precision = int(self.configuration_controller.remote_focus_dict["hardware"].get("precision", 0))
-        increment = int(self.configuration_controller.remote_focus_dict["hardware"].get("step", 0))
+        self.laser_min = self.configuration_controller.remote_focus_dict["hardware"][
+            "min"
+        ]
+        self.laser_max = self.configuration_controller.remote_focus_dict["hardware"][
+            "max"
+        ]
+
+        precision = int(
+            self.configuration_controller.remote_focus_dict["hardware"].get(
+                "precision", 0
+            )
+        )
+        increment = int(
+            self.configuration_controller.remote_focus_dict["hardware"].get("step", 0)
+        )
         if precision == 0:
             precision = -4 if self.laser_max < 1 else -3
         elif precision > 0:
-            precision = - precision
+            precision = -precision
         if increment == 0:
             increment = 0.0001 if self.laser_max < 1 else 0.001
         elif increment < 0:
-            increment = - increment
+            increment = -increment
 
         # set ranges of value for those lasers
         for laser in self.lasers:
@@ -435,7 +445,7 @@ class WaveformPopupController(GUIController):
                 # tell parent controller (the device)
                 if self.event_id:
                     self.view.popup.after_cancel(self.event_id)
-                
+
                 try:
                     value = float(variable_value)
                 except ValueError:
@@ -473,7 +483,7 @@ class WaveformPopupController(GUIController):
         """
         if not self.update_waveform_parameters_flag:
             return
-        
+
         if self.event_id:
             self.view.popup.after_cancel(self.event_id)
         # Get the values from the widgets.
@@ -595,18 +605,21 @@ class WaveformPopupController(GUIController):
                 # change any galvo parameters as one event
                 if self.event_id:
                     self.view.popup.after_cancel(self.event_id)
-                
+
                 try:
                     value = float(variable_value)
                 except ValueError:
                     return
-                if value < self.galvo_min[galvo_name] or value > self.galvo_max[galvo_name]:
+                if "Freq" not in widget_name and (
+                    value < self.galvo_min[galvo_name]
+                    or value > self.galvo_max[galvo_name]
+                ):
                     return
                 self.galvo_setting[galvo_name][self.resolution][self.mag][
                     parameter
                 ] = variable_value
                 logger.debug(f"Galvo parameter {parameter} changed: {variable_value}")
-                
+
                 self.event_id = self.view.popup.after(
                     500,
                     lambda: self.parent_controller.execute("update_setting", "galvo"),

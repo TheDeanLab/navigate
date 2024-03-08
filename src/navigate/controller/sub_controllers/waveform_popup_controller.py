@@ -161,6 +161,9 @@ class WaveformPopupController(GUIController):
         self.variables["Delay"].trace_add("write", self.update_waveform_parameters)
         self.variables["Duty"].trace_add("write", self.update_waveform_parameters)
         self.variables["Smoothing"].trace_add("write", self.update_waveform_parameters)
+        self.variables["Ramp_falling"].trace_add(
+            "write", self.update_waveform_parameters
+        )
 
         # Save waveform constants
         self.view.get_buttons()["Save"].configure(command=self.save_waveform_constants)
@@ -204,19 +207,29 @@ class WaveformPopupController(GUIController):
         0.01 for low mode.
 
         """
-        self.laser_min = self.configuration_controller.remote_focus_dict["hardware"]["min"]
-        self.laser_max = self.configuration_controller.remote_focus_dict["hardware"]["max"]
-        
-        precision = int(self.configuration_controller.remote_focus_dict["hardware"].get("precision", 0))
-        increment = int(self.configuration_controller.remote_focus_dict["hardware"].get("step", 0))
+        self.laser_min = self.configuration_controller.remote_focus_dict["hardware"][
+            "min"
+        ]
+        self.laser_max = self.configuration_controller.remote_focus_dict["hardware"][
+            "max"
+        ]
+
+        precision = int(
+            self.configuration_controller.remote_focus_dict["hardware"].get(
+                "precision", 0
+            )
+        )
+        increment = int(
+            self.configuration_controller.remote_focus_dict["hardware"].get("step", 0)
+        )
         if precision == 0:
             precision = -4 if self.laser_max < 1 else -3
         elif precision > 0:
-            precision = - precision
+            precision = -precision
         if increment == 0:
             increment = 0.0001 if self.laser_max < 1 else 0.001
         elif increment < 0:
-            increment = - increment
+            increment = -increment
 
         # set ranges of value for those lasers
         for laser in self.lasers:
@@ -370,26 +383,22 @@ class WaveformPopupController(GUIController):
         # Currently pulls from the original microscope configuration YAML file, not the
         # current microscope configuration according to the model
         self.update_waveform_parameters_flag = False
-        waveform_configuration = self.resolution_info["remote_focus_constants"][
-            self.resolution
-        ][self.mag][self.lasers[0]]
         self.widgets["Smoothing"].set(
-            waveform_configuration.get("percent_smoothing", 0)
+            self.resolution_info["other_constants"].get("percent_smoothing", 0)
         )
         self.widgets["Smoothing"].widget.trigger_focusout_validation()
-        self.widgets["Delay"].set(waveform_configuration.get("percent_delay", 7.5))
+        self.widgets["Delay"].set(
+            self.resolution_info["other_constants"].get("remote_focus_delay", 7.5)
+        )
         self.widgets["Delay"].widget.trigger_focusout_validation()
-        if "other_constants" not in self.resolution_info:
-            update_config_dict(
-                self.parent_controller.manager,
-                self.resolution_info,
-                "other_constants",
-                {"remote_focus_settle_duration": 0},
-            )
         self.widgets["Duty"].set(
             self.resolution_info["other_constants"]["remote_focus_settle_duration"]
         )
         self.widgets["Duty"].widget.trigger_focusout_validation()
+        self.widgets["Ramp_falling"].set(
+            self.resolution_info["other_constants"]["remote_focus_ramp_falling"]
+        )
+        self.widgets["Ramp_falling"].widget.trigger_focusout_validation()
         self.update_waveform_parameters_flag = True
 
         # update resolution value in central controller (menu)
@@ -435,7 +444,7 @@ class WaveformPopupController(GUIController):
                 # tell parent controller (the device)
                 if self.event_id:
                     self.view.popup.after_cancel(self.event_id)
-                
+
                 try:
                     value = float(variable_value)
                 except ValueError:
@@ -473,7 +482,7 @@ class WaveformPopupController(GUIController):
         """
         if not self.update_waveform_parameters_flag:
             return
-        
+
         if self.event_id:
             self.view.popup.after_cancel(self.event_id)
         # Get the values from the widgets.
@@ -481,21 +490,20 @@ class WaveformPopupController(GUIController):
             delay = float(self.widgets["Delay"].widget.get())
             duty_cycle = float(self.widgets["Duty"].widget.get())
             smoothing = float(self.widgets["Smoothing"].widget.get())
+            ramp_falling = float(self.widgets["Ramp_falling"].widget.get())
         except ValueError:
             return
 
         # Update the waveform parameters
         # all the lasers use the same delay, smoothing value
-        for laser in self.lasers:
-            self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
-                laser
-            ]["percent_delay"] = delay
-            self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
-                laser
-            ]["percent_smoothing"] = smoothing
         self.resolution_info["other_constants"][
             "remote_focus_settle_duration"
         ] = duty_cycle
+        self.resolution_info["other_constants"][
+            "remote_focus_ramp_falling"
+        ] = ramp_falling
+        self.resolution_info["other_constants"]["remote_focus_delay"] = delay
+        self.resolution_info["other_constants"]["percent_smoothing"] = smoothing
 
         # Pass the values to the parent controller.
         self.event_id = self.view.popup.after(
@@ -595,18 +603,21 @@ class WaveformPopupController(GUIController):
                 # change any galvo parameters as one event
                 if self.event_id:
                     self.view.popup.after_cancel(self.event_id)
-                
+
                 try:
                     value = float(variable_value)
                 except ValueError:
                     return
-                if value < self.galvo_min[galvo_name] or value > self.galvo_max[galvo_name]:
+                if "Freq" not in widget_name and (
+                    value < self.galvo_min[galvo_name]
+                    or value > self.galvo_max[galvo_name]
+                ):
                     return
                 self.galvo_setting[galvo_name][self.resolution][self.mag][
                     parameter
                 ] = variable_value
                 logger.debug(f"Galvo parameter {parameter} changed: {variable_value}")
-                
+
                 self.event_id = self.view.popup.after(
                     500,
                     lambda: self.parent_controller.execute("update_setting", "galvo"),

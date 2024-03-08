@@ -108,7 +108,6 @@ class ChannelsTab(tk.Frame):
         )
 
 
-
 class ChannelCreator(ttk.Labelframe):
     """Channel Creator
 
@@ -135,10 +134,10 @@ class ChannelCreator(ttk.Labelframe):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        #: list: List of the variables for the channel checkbuttons
+        #: list: List of the variables for the channel check buttons
         self.channel_variables = []
 
-        #: list: List of the channel checkbuttons
+        #: list: List of the channel check buttons
         self.channel_checks = []
 
         #: list: List of the variables for the laser dropdowns
@@ -153,7 +152,7 @@ class ChannelCreator(ttk.Labelframe):
         #: list: List of the laser power dropdowns
         self.laserpower_pulldowns = []
 
-        #: list: List of the variables for the filterwheel dropdowns
+        #: list: List of the variables for the filter  wheel dropdowns
         self.filterwheel_variables = []
 
         #: list: List of the filterwheel dropdowns
@@ -165,16 +164,16 @@ class ChannelCreator(ttk.Labelframe):
         #: list: List of the exposure time dropdowns
         self.exptime_pulldowns = []
 
-        #: list: List of the variables for the time interval spinboxes
+        #: list: List of the variables for the time interval spin boxes
         self.interval_variables = []
 
-        #: list: List of the time interval spinboxes
+        #: list: List of the time interval spin boxes
         self.interval_spins = []
 
-        #: list: List of the variables for the defocus spinboxes
+        #: list: List of the variables for the defocus spin boxes
         self.defocus_variables = []
 
-        #: list: List of the defocus spinboxes
+        #: list: List of the defocus spin boxes
         self.defocus_spins = []
 
         #: list: List of the labels for the columns
@@ -248,7 +247,7 @@ class ChannelCreator(ttk.Labelframe):
                     width=6,
                 )
             )
-            self.laser_pulldowns[num].config(state = "readonly")
+            self.laser_pulldowns[num].config(state="readonly")
             self.laser_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
@@ -262,7 +261,7 @@ class ChannelCreator(ttk.Labelframe):
                     to=100.0,
                     textvariable=self.laserpower_variables[num],
                     increment=5,
-                    width=3,
+                    width=5,
                     font=tk.font.Font(size=11),
                 )
             )
@@ -279,7 +278,7 @@ class ChannelCreator(ttk.Labelframe):
                     width=10,
                 )
             )
-            self.filterwheel_pulldowns[num].config(state = "readonly")
+            self.filterwheel_pulldowns[num].config(state="readonly")
             self.filterwheel_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )

@@ -236,7 +236,7 @@ class CameraSettingController(GUIController):
         # Physical Dimensions
         self.calculate_physical_dimensions()
         # readout time
-        self.calculate_readout_time()
+        self.update_readout_time()
 
         # after initialization
         self.in_initialization = False
@@ -349,7 +349,7 @@ class CameraSettingController(GUIController):
             self.show_verbose_info("Light Sheet Camera Readout Mode")
 
         # calculate readout time
-        self.calculate_readout_time()
+        self.update_readout_time()
 
     def update_exposure_time(self, exposure_time):
         """When camera exposure time is changed, recalculate readout time
@@ -360,7 +360,6 @@ class CameraSettingController(GUIController):
             exposure time in seconds
         """
         self.framerate_widgets["exposure_time"].set(exposure_time)
-        self.calculate_readout_time()
 
     def update_roi(self, btn_name):
         """Update ROI width and height.
@@ -464,8 +463,8 @@ class CameraSettingController(GUIController):
         self.roi_widgets["FOV_X"].set(physical_dimensions_x)
         self.roi_widgets["FOV_Y"].set(physical_dimensions_y)
 
-    def calculate_readout_time(self):
-        """Calculate camera readout time.
+    def update_readout_time(self):
+        """Update camera readout time.
 
 
         TODO: Highly specific to Hamamatsu Orca Flash 4.0.
@@ -473,34 +472,14 @@ class CameraSettingController(GUIController):
         This should be moved to the camera device/API,
         ideally by calling a command from the camera.
         """
-
-        h = 9.74436e-6  # Readout timing constant
         sensor_mode = self.mode_widgets["Sensor"].get()
-        if (self.readout_speed == 1) and (sensor_mode == "Normal"):
-            h = 32.4812e-6
-        # the ROI height 'subarray_vsize'
-        vn = float(self.roi_widgets["Height"].get())
-        exposure_time = float(self.framerate_widgets["exposure_time"].get())
 
         if sensor_mode == "Normal":
-            #  Area sensor mode operation
-            if self.trigger_source == 1:
-                # Internal Trigger Source
-                readout_time = exposure_time - ((vn / 2) * h)
-
-            if self.trigger_active in [1, 2]:
-                #  External Trigger Source
-                #  Edge == 1, Level == 2
-                readout_time = exposure_time - ((vn / 2) * h + 10 * h)
-
-            elif self.trigger_active == 3:
-                #  External Trigger Source
-                #  Synchronous Readout == 3
-                readout_time = exposure_time - ((vn / 2) * h + 5 * h)
+            readout_time = self.camera_setting_dict["readout_time"]
 
         elif sensor_mode == "Light-Sheet":
             #  Progressive sensor mode operation
-            readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
+            readout_time = 0
 
         # return readout_time
         self.framerate_widgets["readout_time"].set(readout_time)

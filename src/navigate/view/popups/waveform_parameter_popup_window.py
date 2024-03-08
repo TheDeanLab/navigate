@@ -229,9 +229,9 @@ class WaveformParameterPopupWindow:
             prev = prev + 2
 
         # High/Low Resolution
-        hi_lo_labels = ["Percent Delay", "Percent Smoothing", "Settle Duration (ms)"]
-        dict_labels = ["Delay", "Smoothing", "Duty"]
-        for i in range(3):
+        hi_lo_labels = ["Delay (ms)", "Fly Back Time (ms)", "Settle Duration (ms)", "Percent Smoothing"]
+        dict_labels = ["Delay", "Ramp_falling" , "Duty", "Smoothing"]
+        for i in range(len(dict_labels)):
             self.inputs[dict_labels[i]] = LabelInput(
                 parent=self.high_low_frame,
                 input_class=ValidatedSpinbox,
@@ -245,7 +245,8 @@ class WaveformParameterPopupWindow:
             )
 
         # Padding Entry Widgets
-        self.inputs["Delay"].pad_input(60, 0, 0, 0)
+        self.inputs["Delay"].pad_input(75, 0, 0, 0)
+        self.inputs["Ramp_falling"].pad_input(30, 0, 0, 0)
         self.inputs["Smoothing"].pad_input(30, 0, 0, 0)
         self.inputs["Duty"].pad_input(25, 0, 0, 0)
 

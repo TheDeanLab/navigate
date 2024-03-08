@@ -114,13 +114,10 @@ class ConstantVelocityAcquisition:
         self.end_signal_temp = 0
 
         # get the current exposure time for channel channel.
-        readout_time = self.model.active_microscope.get_readout_time()
-        print("readout time calculated")
-        print(f"*** readout time = {readout_time} s")
         (
             exposure_times,
             sweep_times,
-        ) = self.model.active_microscope.calculate_exposure_sweep_times(readout_time)
+        ) = self.model.active_microscope.calculate_exposure_sweep_times()
         print("sweep times and exposure times calculated")
         print(f"exposure time = {exposure_times}")
         print(f"sweep time = {sweep_times}")
@@ -137,7 +134,6 @@ class ConstantVelocityAcquisition:
         ]
         self.current_sweep_time = current_sweep_time
         self.current_exposure_time = current_expsure_time
-        self.readout_time = readout_time
         print("sweep time calculated")
         scaling_factor = 1
         print("*** current sweep time before scaling:", current_sweep_time)

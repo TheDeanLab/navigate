@@ -848,3 +848,18 @@ class ChannelsTabController(GUIController):
             if self.microscope_state_dict["timepoints"] < 1:
                 return "Timepoints should be at least 1!"
         return None
+    
+    def set_exposure_time(self, channel, exposure_time):
+        """Set exposure time for a specified channel
+        
+        Parameters
+        ----------
+        channel : str
+            Channel name, such as "channel_1", "channel_2",...
+        exposure_time : float
+            Exposure time in miliseconds.
+        """
+        idx = int(channel[channel.index('_')+1:]) - 1
+        self.channel_setting_controller.in_initialization = True
+        self.channel_setting_controller.view.exptime_variables[idx].set(exposure_time)
+        self.channel_setting_controller.in_initialization = False

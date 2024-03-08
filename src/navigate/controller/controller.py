@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-import platform
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
 # (subject to the limitations in the disclaimer below)
@@ -40,6 +39,7 @@ import threading
 import sys
 import os
 import time
+import platform
 
 # Third Party Imports
 
@@ -78,6 +78,7 @@ from navigate.config.config import (
     update_config_dict,
     verify_experiment_config,
     verify_waveform_constants,
+    verify_configuration,
     get_navigate_path,
 )
 from navigate.tools.file_functions import create_save_path, save_yaml_file
@@ -142,6 +143,7 @@ class Controller:
 
         #: Manager: A shared memory manager
         self.manager = Manager()
+
         #: dict: Configuration dictionary
         self.configuration = load_configs(
             self.manager,
@@ -152,6 +154,7 @@ class Controller:
             waveform_templates=waveform_templates_path,
         )
 
+        verify_configuration(self.manager, self.configuration)
         verify_experiment_config(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)
 
@@ -188,9 +191,7 @@ class Controller:
 
         # Sub Gui Controllers
         #: AcquireBarController: Acquire Bar Sub-Controller.
-        self.acquire_bar_controller = AcquireBarController(
-            self.view.acqbar, self
-        )
+        self.acquire_bar_controller = AcquireBarController(self.view.acqbar, self)
         #: ChannelsTabController: Channels Tab Sub-Controller.
         self.channels_tab_controller = ChannelsTabController(
             self.view.settings.channels_tab, self
@@ -239,24 +240,33 @@ class Controller:
         #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
+
         #: dict: acquisition modes from plugins
         self.plugin_acquisition_modes = {}
+
         # add plugin menus
         #: PluginsController: Plugin Sub-Controller
-        self.plugin_controller = PluginsController(view=self.view, parent_controller=self)
+        self.plugin_controller = PluginsController(
+            view=self.view, parent_controller=self
+        )
         self.plugin_controller.load_plugins()
 
         # Create default data buffer
         #: int: Number of x_pixels from microscope configuration file.
         self.img_width = 0
+
         #: int: Number of y_pixels from microscope configuration file.
         self.img_height = 0
+
         #: SharedNDArray: Pre-allocated shared memory array.
         self.data_buffer = None
+
         #: dict: Additional microscopes.
         self.additional_microscopes = {}
+
         #: dict: Additional microscope configurations.
         self.additional_microscopes_configs = {}
+
         #: bool: Flag for stopping acquisition.
         self.stop_acquisition_flag = False
 
@@ -270,7 +280,7 @@ class Controller:
         splash_screen.destroy()
         root.deiconify()
 
-        #: event: Event for resizing the GUI. Only works on Windows OS.
+        #: int: ID for the resize event.Only works on Windows OS.
         self.resize_event_id = None
         if platform.system() == "Windows":
             self.view.root.bind("<Configure>", self.resize)
@@ -455,7 +465,7 @@ class Controller:
         """
 
         def refresh(width, height):
-            """ Refresh the GUI.
+            """Refresh the GUI.
 
             Parameters
             __________
@@ -679,8 +689,7 @@ class Controller:
                 )
             elif self.acquire_bar_controller.mode == "live":
                 self.threads_pool.createThread(
-                    "model",
-                    lambda: self.model.run_command("autofocus", *args)
+                    "model", lambda: self.model.run_command("autofocus", *args)
                 )
 
         elif command == "eliminate_tiles":
@@ -695,9 +704,9 @@ class Controller:
                 self.menu_controller.feature_id_val.set(feature_id)
             except ValueError:
                 logger.debug("No feature named 'Remove Empty Tiles' found.")
-                messagebox.showwarning(title="Navigate",
-                                       message="Feature 'Remove Empty Tiles' not found."
-                                       )
+                messagebox.showwarning(
+                    title="Navigate", message="Feature 'Remove Empty Tiles' not found."
+                )
                 return
             self.execute("acquire")
 
@@ -753,7 +762,8 @@ class Controller:
             """
             # acquisition mode from plugin
             plugin_obj = self.plugin_acquisition_modes.get(
-                self.acquire_bar_controller.mode, None)
+                self.acquire_bar_controller.mode, None
+            )
 
             if plugin_obj and hasattr(plugin_obj, "prepare_acquisition_controller"):
                 getattr(plugin_obj, "prepare_acquisition_controller")(self)
@@ -762,7 +772,7 @@ class Controller:
             if not self.prepare_acquire_data():
                 self.acquire_bar_controller.stop_acquire()
                 return
-            
+
             # set the display segmentation flag to False
             self.camera_view_controller.display_mask_flag = False
 
@@ -942,6 +952,8 @@ class Controller:
         )
 
         self.stop_acquisition_flag = False
+        start_time = time.time()
+        self.camera_setting_controller.update_readout_time()
 
         while True:
             if self.stop_acquisition_flag:
@@ -959,6 +971,7 @@ class Controller:
                 )
                 self.execute("stop_acquire")
 
+
             # Display the Image in the View
             self.camera_view_controller.try_to_display_image(image_id=image_id)
             images_received += 1
@@ -970,6 +983,17 @@ class Controller:
                 mode=mode,
                 stop=False,
             )
+            # update framerate
+            stop_time = time.time()
+            frames_per_second = images_received / (stop_time - start_time)
+            # Update the Framerate in the Camera Settings Tab
+            self.camera_setting_controller.framerate_widgets["max_framerate"].set(
+                frames_per_second
+            )
+
+            # Update the Framerate in the Acquire Bar to provide an estimate of
+            # the duration of time remaining.
+            self.acquire_bar_controller.framerate = frames_per_second
 
         logger.info(
             f"Navigate Controller - Captured {images_received}, " f"{mode} Images"
@@ -1215,18 +1239,10 @@ class Controller:
                     except RuntimeError:
                         time.sleep(0.001)
                         pass
-
-            elif event == "framerate":
-                # Update the Framerate in the Camera Settings Tab
-                self.camera_setting_controller.framerate_widgets["max_framerate"].set(
-                    value
-                )
-
-                # Update the Framerate in the Acquire Bar to provide an estimate of
-                # the duration of time remaining.
-                self.acquire_bar_controller.framerate = value
             elif event == "remove_positions":
                 self.multiposition_tab_controller.remove_positions(value)
+            elif event == "exposure_time":
+                self.channels_tab_controller.set_exposure_time(value[0], value[1])
 
     # def exit_program(self):
     #     """Exit the program.

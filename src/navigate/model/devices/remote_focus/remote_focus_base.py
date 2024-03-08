@@ -36,7 +36,11 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from navigate.model.waveforms import remote_focus_ramp, smooth_waveform, remote_focus_ramp_triangular
+from navigate.model.waveforms import (
+    remote_focus_ramp,
+    smooth_waveform,
+    remote_focus_ramp_triangular,
+)
 
 # # Logger Setup
 p = __name__.split(".")[1]
@@ -124,8 +128,12 @@ class RemoteFocusBase:
             Waveform for the remote focus device.
         """
         # to determine if the waveform has to be triangular
-        sensor_mode = self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
-        readout_direction = self.configuration["experiment"]["CameraParameters"]["readout_direction"]
+        sensor_mode = self.configuration["experiment"]["CameraParameters"][
+            "sensor_mode"
+        ]
+        readout_direction = self.configuration["experiment"]["CameraParameters"][
+            "readout_direction"
+        ]
 
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
@@ -217,7 +225,10 @@ class RemoteFocusBase:
                     remote_focus_offset += offset
 
                 # Calculate the Waveforms
-                if sensor_mode == "Light-Sheet" and (readout_direction == "Bidirectional" or readout_direction == "Rev. Bidirectional"):
+                if sensor_mode == "Light-Sheet" and (
+                    readout_direction == "Bidirectional"
+                    or readout_direction == "Rev. Bidirectional"
+                ):
                     self.waveform_dict[channel_key] = remote_focus_ramp_triangular(
                         sample_rate=self.sample_rate,
                         exposure_time=exposure_time,
@@ -250,23 +261,24 @@ class RemoteFocusBase:
                         amplitude=remote_focus_amplitude,
                         offset=remote_focus_offset,
                     )
-                    print("Remote focus normal")
 
                 # Smooth the Waveform if specified
                 if self.percent_smoothing > 0:
 
                     if sensor_mode == "Light-Sheet" and (
-                    readout_direction == "Bidirectional" or readout_direction == "Rev. Bidirectional"):
+                        readout_direction == "Bidirectional"
+                        or readout_direction == "Rev. Bidirectional"
+                    ):
                         self.waveform_dict[channel_key] = smooth_waveform(
                             waveform=self.waveform_dict[channel_key],
                             percent_smoothing=self.percent_smoothing,
-                        )[: 2* samples]
+                        )[: 2 * samples]
 
                     else:
                         self.waveform_dict[channel_key] = smooth_waveform(
                             waveform=self.waveform_dict[channel_key],
                             percent_smoothing=self.percent_smoothing,
-                        )[: samples]
+                        )[:samples]
 
                 # Clip any values outside of the hardware limits
                 self.waveform_dict[channel_key][
@@ -277,4 +289,3 @@ class RemoteFocusBase:
                 ] = self.remote_focus_min_voltage
 
         return self.waveform_dict
-

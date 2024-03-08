@@ -33,8 +33,6 @@
 # Standard Imports
 import logging
 
-import numpy as np
-
 # Third Party Imports
 
 # Local Imports
@@ -79,7 +77,7 @@ class DAQBase:
 
         #: dict: Sweep times for different channels
         self.sweep_times = None
-        
+
         #: dict: exposure times for different channels
         self.exposure_times = None
 
@@ -134,8 +132,10 @@ class DAQBase:
         self.enable_microscope(microscope_name)
 
         # # to determine if the waveform has to be triangular
-        # sensor_mode = self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
-        # readout_direction = self.configuration["experiment"]["CameraParameters"]["readout_direction"]
+        # sensor_mode = self.configuration["experiment"][
+        # "CameraParameters"]["sensor_mode"]
+        # readout_direction = self.configuration["experiment"][
+        # "CameraParameters"]["readout_direction"]
 
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
 
@@ -148,7 +148,6 @@ class DAQBase:
             if channel["is_selected"] is True:
                 exposure_time = exposure_times[channel_key]
                 sweep_time = sweep_times[channel_key]
-                print('camera_sweep_time = ', sweep_time)
 
                 # Create 5V TTL for 1 camera exposure.
                 self.waveform_dict[channel_key] = camera_exposure(

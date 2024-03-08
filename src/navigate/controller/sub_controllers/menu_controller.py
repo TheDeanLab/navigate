@@ -94,8 +94,10 @@ class FakeEvent:
         """
         #: str: The character that was pressed.
         self.char = char
+
         #: str: The key that was pressed.
         self.keysym = keysym
+
         #: int: The state of the keyboard.
         self.state = 0
 
@@ -114,26 +116,37 @@ class MenuController(GUIController):
             The parent controller.
         """
         super().__init__(view, parent_controller)
+
         #: Controller: The parent controller.
         self.parent_controller = parent_controller
+
         #: tk.canvas: The view class.
         self.view = view
+
         #: tkinter.StringVar: Resolution value.
         self.resolution_value = tk.StringVar()
+
         #: tkinter.IntVar: Feature id value.
         self.feature_id_val = tk.IntVar()
+
         #: tkinter.IntVar: Disable stage limits.
         self.disable_stage_limits = tk.IntVar()
+
         #: FakeEvent: Fake event.
         self.fake_event = None
+
         #: list: List of feature list names.
         self.feature_list_names = []
+
         #: int: System feature list count.
         self.system_feature_list_count = 0
+
         #: int: Feature list count.
         self.feature_list_count = 0
+
         #: str: Feature list file name.
         self.feature_list_file_name = "feature_lists.yaml"
+
         #: waveform_popup_controller: Waveform Popup Controller.
         # self.parent_controller.waveform_popup_controller = None
 
@@ -723,7 +736,9 @@ class MenuController(GUIController):
         )
         if not filename:
             return
-        save_yaml_file("", self.parent_controller.configuration["waveform_constants"], filename)
+        save_yaml_file(
+            "", self.parent_controller.configuration["waveform_constants"], filename
+        )
 
     def load_waveform_constants(self):
         """Load a waveform constants file"""
@@ -734,17 +749,30 @@ class MenuController(GUIController):
         if not filename:
             return
 
-
         update_config_dict(
-            self.parent_controller.manager, self.parent_controller.configuration, "waveform_constants", filename
+            self.parent_controller.manager,
+            self.parent_controller.configuration,
+            "waveform_constants",
+            filename,
         )
-        verify_waveform_constants(self.parent_controller.manager, self.parent_controller.configuration)
+        verify_waveform_constants(
+            self.parent_controller.manager, self.parent_controller.configuration
+        )
 
-        if hasattr(self, "waveform_popup_controller"):
-            self.waveform_popup_controller.resolution_info = self.parent_controller.configuration["waveform_constants"]
-            self.waveform_popup_controller.populate_experiment_values()
-            self.parent_controller.populate_waveform_settings(filename)
+        if hasattr(self.parent_controller, "waveform_popup_controller"):
+            popup = self.parent_controller.waveform_popup_controller.view.popup
+            # Get the size and position of the waveform popup window.
+            geometry = popup.geometry()  # Example format: '200x100+300+250'
 
+            # Close the existing waveform popup window and its controller.
+            popup.destroy()
+            delattr(self.parent_controller, "waveform_popup_controller")
+
+            # Open a new waveform popup window and configure it with the same geometry.
+            self.popup_waveform_setting()
+            self.parent_controller.waveform_popup_controller.view.popup.geometry(
+                geometry
+            )
 
     def load_images(self):
         """Load images from a file."""
@@ -818,9 +846,13 @@ class MenuController(GUIController):
         )
 
     def popup_waveform_setting(self):
+        """Pop up the Waveform setting window.
+
+        If the window is already open, show it. Otherwise, create a new one."""
         if hasattr(self.parent_controller, "waveform_popup_controller"):
             self.parent_controller.waveform_popup_controller.showup()
             return
+
         waveform_constants_popup = WaveformParameterPopupWindow(
             self.view, self.parent_controller.configuration_controller
         )

@@ -183,7 +183,6 @@ def remote_focus_ramp(
         camera_delay, fall, amplitude, offset)
 
     """
-
     # create an array just containing the negative amplitude voltage:
     delay_samples = int(remote_focus_delay * exposure_time * sample_rate / 100)
     delay_array = np.zeros(delay_samples) + offset - amplitude
@@ -212,6 +211,109 @@ def remote_focus_ramp(
 
     return waveform
 
+
+def remote_focus_ramp_triangular(
+        sample_rate=100000,
+        exposure_time=0.2,
+        sweep_time=0.24,
+        remote_focus_delay=7.5,
+        camera_delay=10,
+        fall=2.5,
+        amplitude=1,
+        offset=0,
+        ramp_type='Rising'
+):
+    """Returns a numpy array with a triangular ramp typically used for remote focusing
+
+    The waveform starts at offset and stays there for the delay period, then
+    rises linearly to 2x amplitude (amplitude here refers to 1/2 peak-to-peak)
+    and drops back down to the offset voltage during the fall period.
+
+    Switching from a left to right remote focus ramp is possible by exchanging the
+    rise and fall periods.
+
+    Parameters
+    ----------
+    sample_rate : Integer
+        Unit - Hz
+    exposure_time : Float
+        Unit - Seconds
+    sweep_time : Float
+        Unit - Seconds
+    remote_focus_delay : Float
+        Unit - Percent
+    camera_delay : Float
+        Unit - Percent
+    fall : Float
+        Unit - Percent
+    amplitude : Float
+        Unit - Volts
+    offset : Float
+        Unit - Volts
+    ramp_type : String
+
+
+    Returns
+    -------
+    waveform : np.array
+
+    Examples
+    --------
+    >>> etl_ramp = tunable_lens_ramp(sample_rate, exposure_time, sweep_time, etl_delay,
+        camera_delay, fall, amplitude, offset)
+
+    """
+    # create an array just containing the negative amplitude voltage:
+    # In theory, delay here should be 4H.
+    delay_samples = int(remote_focus_delay * exposure_time * sample_rate / 100)
+    delay_array = np.zeros(delay_samples) + offset
+
+    # 10-7.5 -> 1.025 * .2
+    #
+    rise_ramp_samples = int(
+        (exposure_time + exposure_time * (0 - remote_focus_delay) / 100)
+        * sample_rate
+    )
+    fall_ramp_samples = int(
+        (exposure_time + exposure_time * (camera_delay - remote_focus_delay) / 100)
+        * sample_rate
+    )
+    rise_ramp_array = np.linspace(offset - amplitude, offset + amplitude, rise_ramp_samples)
+    fall_ramp_array = np.linspace(offset + amplitude, offset - amplitude, fall_ramp_samples)
+
+    # fall_samples = .025 * .2 * 100000 = 500
+    settle_samples = int(fall * exposure_time * sample_rate / 100)
+    settle_array = np.zeros(settle_samples) + offset
+
+    extra_samples = int(
+        int(np.multiply(sample_rate, sweep_time))
+        - (delay_samples + rise_ramp_samples + settle_samples)
+    )
+
+    if extra_samples > 0:
+        print("extra samples:", extra_samples)
+        extra_array = np.zeros(extra_samples) + offset
+        if ramp_type == 'Rising':
+            waveform = np.hstack(
+                [delay_array - amplitude, rise_ramp_array, settle_array + amplitude,
+                 delay_array + amplitude, fall_ramp_array, settle_array - amplitude, extra_array - amplitude, extra_array - amplitude]
+            )
+        elif ramp_type == 'Falling':
+            waveform = np.hstack(
+                [delay_array + amplitude, fall_ramp_array, settle_array - amplitude, extra_array - amplitude,
+                 delay_array - amplitude, rise_ramp_array, settle_array + amplitude, extra_array + amplitude]
+            )
+    else:
+        if ramp_type == 'Rising':
+            waveform = np.hstack([delay_array - amplitude, rise_ramp_array, settle_array + amplitude,
+                                  delay_array + amplitude, fall_ramp_array, settle_array - amplitude]
+                                 )
+        elif ramp_type == 'Falling':
+            waveform = np.hstack([delay_array + amplitude, fall_ramp_array, settle_array - amplitude,
+                                  delay_array - amplitude, rise_ramp_array, settle_array + amplitude]
+                                 )
+
+    return waveform
 
 def sawtooth(
     sample_rate=100000,

@@ -33,6 +33,8 @@
 # Standard Imports
 import logging
 
+import numpy as np
+
 # Third Party Imports
 
 # Local Imports
@@ -104,6 +106,9 @@ class DAQBase:
         #: int: Number of times to expand the waveform
         self.waveform_expand_num = 1
 
+        #: bool: Bidirectional ASLM mode enabled?
+        self.bidirectional = False
+
     def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in
         a dictionary format.
@@ -128,6 +133,10 @@ class DAQBase:
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         self.enable_microscope(microscope_name)
 
+        # # to determine if the waveform has to be triangular
+        # sensor_mode = self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
+        # readout_direction = self.configuration["experiment"]["CameraParameters"]["readout_direction"]
+
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
 
         # Iterate through the dictionary.
@@ -139,7 +148,9 @@ class DAQBase:
             if channel["is_selected"] is True:
                 exposure_time = exposure_times[channel_key]
                 sweep_time = sweep_times[channel_key]
+                print('camera_sweep_time = ', sweep_time)
 
+                # Create 5V TTL for 1 camera exposure.
                 self.waveform_dict[channel_key] = camera_exposure(
                     sample_rate=self.sample_rate,
                     sweep_time=sweep_time,

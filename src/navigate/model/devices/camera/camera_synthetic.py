@@ -120,6 +120,10 @@ class SyntheticCamera(CameraBase):
         self.serial_number = "synthetic"
         #: float: exposure time
         self.camera_exposure_time = 0.2
+        #: int: width
+        self.x_pixels = self.camera_parameters["x_pixels"]
+        #: int: height
+        self.y_pixels = self.camera_parameters["y_pixels"]
 
         logger.info("SyntheticCamera Class Initialized")
 

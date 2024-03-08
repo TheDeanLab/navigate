@@ -405,6 +405,10 @@ class Microscope:
         sensor_mode = self.configuration["experiment"]["CameraParameters"][
             "sensor_mode"
         ]
+
+        print('sensor_mode', sensor_mode)
+
+
         self.camera.set_sensor_mode(sensor_mode)
         if sensor_mode == "Light-Sheet":
             self.camera.set_readout_direction(
@@ -412,6 +416,7 @@ class Microscope:
                     "readout_direction"
                 ]
             )
+
         # set binning
         self.camera.set_binning(
             self.configuration["experiment"]["CameraParameters"]["binning"]
@@ -421,6 +426,7 @@ class Microscope:
 
         # calculate all the waveform
         self.shutter.open_shutter()
+
         return self.calculate_all_waveform()
 
     def end_acquisition(self):
@@ -618,6 +624,7 @@ class Microscope:
             self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
             == "Light-Sheet"
         ):
+
             (
                 self.current_exposure_time,
                 camera_line_interval,
@@ -631,6 +638,7 @@ class Microscope:
             )
             self.camera.set_line_interval(camera_line_interval)
         self.camera.set_exposure_time(self.current_exposure_time)
+        self.camera.report_settings()
 
         # Laser Settings
         self.current_laser_index = channel["laser_index"]
@@ -646,6 +654,8 @@ class Microscope:
         # choose to not update the waveform is very useful when running ZStack
         # if there is a NI Galvo stage in the system.
         if update_daq_task_flag:
+
+
             self.daq.stop_acquisition()
             self.daq.prepare_acquisition(channel_key)
 

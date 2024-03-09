@@ -1008,8 +1008,14 @@ class ZStackAcquisition:
                 self.model.pause_data_thread()
                 data_thread_is_paused = True
 
+            pos_dict22 = self.model.get_stage_position()
+            self.model.logger.debug(f"**** ZStack get stage position before move: {pos_dict22}")
+
             self.model.move_stage(pos_dict, wait_until_done=True)
             self.model.logger.debug(f"*** ZStack move stage: {pos_dict}")
+
+            pos_dict222 = self.model.get_stage_position()
+            self.model.logger.debug(f"**** ZStack get stage position after move: {pos_dict222}")
 
         if self.need_to_move_z_position:
             # move z, f
@@ -1023,6 +1029,9 @@ class ZStackAcquisition:
             if self.should_pause_data_thread and not data_thread_is_paused:
                 self.model.pause_data_thread()
 
+            pos_dict223 = self.model.get_stage_position()
+            self.model.logger.debug(f"**** ZStack get stage position before move: {pos_dict223}")
+
             self.model.move_stage(
                 {
                     "z_abs": self.current_z_position,
@@ -1030,6 +1039,9 @@ class ZStackAcquisition:
                 },
                 wait_until_done=True,
             )
+
+            pos_dict2233 = self.model.get_stage_position()
+            self.model.logger.debug(f"**** ZStack get stage position before move: {pos_dict2233}")
 
         if self.should_pause_data_thread:
             self.model.resume_data_thread()
@@ -1103,11 +1115,22 @@ class ZStackAcquisition:
         if self.current_position_idx >= len(self.positions):
             self.current_position_idx = 0
             # restore z
+
+            pos_dict2234 = self.model.get_stage_position()
+            self.model.logger.debug(f"**** ZStack get stage position before move: {pos_dict2234}")
+
             self.model.move_stage(
                 {"z_abs": self.restore_z, "f_abs": self.restore_f},
                 wait_until_done=False,
             )  # Update position
             return True
+        
+            pos_dict22345 = self.model.get_stage_position()
+            self.model.logger.debug(f"**** ZStack get stage position before move: {pos_dict22345}")
+        
+               
+            # pos_dict22344 = self.model.get_stage_position()
+            # self.model.logger.debug(f"**** ZStack get stage position before move: {pos_dict22344}")
 
         return False
 

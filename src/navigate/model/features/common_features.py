@@ -1041,7 +1041,7 @@ class ZStackAcquisition:
             )
 
             pos_dict2233 = self.model.get_stage_position()
-            self.model.logger.debug(f"**** ZStack get stage position before move: {pos_dict2233}")
+            self.model.logger.debug(f"**** ZStack get stage position after move: {pos_dict2233}")
 
         if self.should_pause_data_thread:
             self.model.resume_data_thread()
@@ -1123,14 +1123,10 @@ class ZStackAcquisition:
                 {"z_abs": self.restore_z, "f_abs": self.restore_f},
                 wait_until_done=False,
             )  # Update position
+
+            pos_dict22334 = self.model.get_stage_position()
+            self.model.logger.debug(f"**** ZStack get stage position after move: {pos_dict22334}")
             return True
-        
-            pos_dict22345 = self.model.get_stage_position()
-            self.model.logger.debug(f"**** ZStack get stage position before move: {pos_dict22345}")
-        
-               
-            # pos_dict22344 = self.model.get_stage_position()
-            # self.model.logger.debug(f"**** ZStack get stage position before move: {pos_dict22344}")
 
         return False
 

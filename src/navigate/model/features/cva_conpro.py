@@ -331,19 +331,19 @@ class ConstantVelocityAcquisition:
         posw = self.asi_stage.get_axis_position(self.axis)
         print(f"current position = {posw}, start position = {self.start_position_um}")
         
-        if abs(posw - self.start_position_um)>=2:
-            print("in posw while statement") 
-            while abs(posw - self.start_position_um)>=2:
-                print("in posw while statement") 
-                self.asi_stage.move_axis_absolute(self.axis,self.start_position_um, wait_until_done=True)
-                print("stage moved") 
-                self.asi_stage.wait_until_complete(self.axis)
-                print("Stage wait until complete completed")
-                posw = self.asi_stage.get_axis_position(self.axis)
-                print(f"current position = {posw}, start position = {self.start_position_um}")
+        # if abs(posw - self.start_position_um)>=10:
+        #     print("in posw if statement") 
+        #     while abs(posw - self.start_position_um)>=10:
+        #         print("in posw while statement") 
+        #         self.asi_stage.move_axis_absolute(self.axis,self.start_position_um, wait_until_done=True)
+        #         print("stage moved") 
+        #         self.asi_stage.wait_until_complete(self.axis)
+        #         print("Stage wait until complete completed")
+        #         posw = self.asi_stage.get_axis_position(self.axis)
+        #         print(f"current position = {posw}, start position = {self.start_position_um}")
 
 
-        print(f"current position v2 = {posw}, start position v2 = {self.start_position_um}")
+        # print(f"current position v2 = {posw}, start position v2 = {self.start_position_um}")
 
         self.asi_stage.start_scan(self.axis)
         print("scan started")

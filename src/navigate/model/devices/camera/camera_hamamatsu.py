@@ -258,53 +258,12 @@ class HamamatsuBase(CameraBase):
         -------
         readout_time : float
             Duration of time needed to readout an image.
-        max_frame_rate : float
-            Maximum framerate for a given camera acquisition mode.
 
-        TODO: I think self.camera_controller.get_property_value("readout_time") pulls
-              out the actual readout_time
-              calculated here (i.e. we don't need to do the calculations).
         """
-        h = self.camera_controller.get_property_value("readout_time")
-        vn = self.camera_controller.get_property_value("subarray_vsize")
-        sensor_mode = self.camera_controller.get_property_value("sensor_mode")
-        exposure_time = self.camera_controller.get_property_value("exposure_time")
-        trigger_source = self.camera_controller.get_property_value("trigger_source")
-        trigger_active = self.camera_controller.get_property_value("trigger_active")
+        readout_time = self.camera_controller.get_property_value("readout_time")
 
-        if sensor_mode == 1:
-            #  Area sensor mode operation
-            if trigger_source == 1:
-                # Internal Trigger Source
-                max_frame_rate = 1 / ((vn / 2) * h)
-                readout_time = exposure_time - ((vn / 2) * h)
-
-            if trigger_active == 1 or 2:
-                #  External Trigger Source
-                #  Edge == 1, Level == 2
-                max_frame_rate = 1 / ((vn / 2) * h + exposure_time + 10 * h)
-                readout_time = exposure_time - ((vn / 2) * h + exposure_time + 10 * h)
-
-            if trigger_active == 3:
-                #  External Trigger Source
-                #  Synchronous Readout == 3
-                max_frame_rate = 1 / ((vn / 2) * h + 5 * h)
-                readout_time = exposure_time - ((vn / 2) * h + 5 * h)
-
-            readout_time = h
-            max_frame_rate = 1.0 / (exposure_time + readout_time)
-
-        elif sensor_mode == 12:
-            #  Progressive sensor mode operation
-            max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
-            readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
-
-        else:
-            print(f"Hamamatsu Camera. Sensor mode {sensor_mode} not supported")
-            logger.error(f"Hamamatsu Camera. Sensor mode {sensor_mode} not supported")
-            max_frame_rate = 0
-            readout_time = 0
-        return readout_time, max_frame_rate
+        # with camera internal delay
+        return readout_time + 4 * self.minimum_exposure_time
 
     def set_exposure_time(self, exposure_time):
         """Set HamamatsuOrca exposure time.
@@ -317,9 +276,9 @@ class HamamatsuBase(CameraBase):
         Parameters
         ----------
         exposure_time : float
-            Exposure time in milliseconds.
+            Exposure time in seconds.
         """
-        exposure_time = exposure_time / 1000
+        exposure_time = exposure_time
         return self.camera_controller.set_property_value("exposure_time", exposure_time)
 
     def set_line_interval(self, line_interval_time):
@@ -523,24 +482,32 @@ class HamamatsuOrcaLightning(HamamatsuBase):
         Parameters
         ----------
         full_chip_exposure_time : float
-            Full chip exposure time.
+            Full chip exposure time in seconds.
         shutter_width : int
             Shutter width.
 
         Returns
         -------
         exposure_time : float
-            Exposure time.
+            Exposure time in seconds.
         camera_line_interval : float
-            Camera line interval.
+            Camera line interval in seconds.
+        full_chip_exposure_time : float
+            Full chip exposure time in seconds.
         """
 
-        camera_line_interval = (full_chip_exposure_time / 1000) / (
-            (shutter_width + self.y_pixels - 1) / 4
+        camera_line_interval = full_chip_exposure_time / (
+            6 + (shutter_width + self.y_pixels) / 4
         )
         self.camera_parameters["line_interval"] = camera_line_interval
-        exposure_time = (camera_line_interval * (shutter_width / 4) // camera_line_interval) * camera_line_interval * 1000
-        return exposure_time, camera_line_interval
+
+        maximum_internal_line_interval = 0.0002 # 200.0 us
+        if camera_line_interval > maximum_internal_line_interval:
+            camera_line_interval = maximum_internal_line_interval
+            full_chip_exposure_time = camera_line_interval * (6 + (shutter_width + self.y_pixels) / 4)
+        
+        exposure_time = camera_line_interval * ((shutter_width + 3) // 4)
+        return exposure_time, camera_line_interval, full_chip_exposure_time
 
 
 class HamamatsuOrcaFire(HamamatsuBase):
@@ -570,6 +537,7 @@ class HamamatsuOrcaFire(HamamatsuBase):
 
         logger.info("HamamatsuOrcaFire Initialized")
 
+
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
     ):
@@ -579,28 +547,34 @@ class HamamatsuOrcaFire(HamamatsuBase):
         Parameters
         ----------
         full_chip_exposure_time : float
-            Normal mode exposure time.
+            Normal mode exposure time in seconds.
         shutter_width : int
             Width of light-sheet rolling shutter.
 
         Returns
         -------
         exposure_time : float
-            Light-sheet mode exposure time (ms).
+            Light-sheet mode exposure time (s).
         camera_line_interval : float
             HamamatsuOrca line interval duration (s).
+        full_chip_exposure_time : float
+            Updated full chip exposure time (s).
         """
-
-        # TODO: should we set 7H flat as sweeping time outside exposure?
-        # 4H delay, 7H flat, (Vn/2+5)H readout
-        camera_line_interval = (full_chip_exposure_time / 1000) / (
-            16 + (shutter_width + self.y_pixels) / 2
+        # 4H delay, (Vn/2+5)H readout
+        camera_line_interval = full_chip_exposure_time / (
+            9 + (shutter_width + self.y_pixels) / 2
         )
+        
+        maximum_internal_line_interval = 0.0002339 # 233.9 us
+        if camera_line_interval > maximum_internal_line_interval:
+            camera_line_interval = maximum_internal_line_interval
+            full_chip_exposure_time = camera_line_interval * (9 + (shutter_width + self.y_pixels) / 2)
 
         self.camera_parameters["line_interval"] = camera_line_interval
 
-        exposure_time = camera_line_interval * shutter_width / 2 * 1000
-        return exposure_time, camera_line_interval
+        # round up exposure time
+        exposure_time = camera_line_interval * ((shutter_width+1) // 2)
+        return exposure_time, camera_line_interval, full_chip_exposure_time
 
 
 class HamamatsuOrca(HamamatsuBase):
@@ -626,3 +600,38 @@ class HamamatsuOrca(HamamatsuBase):
         # self.minimum_exposure_time = 9.74436 * 10 ** -6
 
         logger.info("HamamatsuOrca Initialized")
+
+    def calculate_light_sheet_exposure_time(
+        self, full_chip_exposure_time, shutter_width
+    ):
+        """Convert normal mode exposure time to light-sheet mode exposure time.
+        Calculate the parameters for an acquisition
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Normal mode exposure time in seconds.
+        shutter_width : int
+            Width of light-sheet rolling shutter.
+
+        Returns
+        -------
+        exposure_time : float
+            Light-sheet mode exposure time (s).
+        camera_line_interval : float
+            HamamatsuOrca line interval duration (s).
+        full_chip_exposure_time : float
+            Updated full chip exposure time (s).
+        """
+        camera_line_interval = full_chip_exposure_time / (4 + shutter_width + self.y_pixels)
+        
+        maximum_internal_line_interval = 963.8e-6 # 963.8 us
+        if camera_line_interval > maximum_internal_line_interval:
+            camera_line_interval = maximum_internal_line_interval
+            full_chip_exposure_time = camera_line_interval * (4 + shutter_width + self.y_pixels)
+
+        self.camera_parameters["line_interval"] = camera_line_interval
+
+        # round up exposure time
+        exposure_time = camera_line_interval * shutter_width
+        return exposure_time, camera_line_interval, full_chip_exposure_time

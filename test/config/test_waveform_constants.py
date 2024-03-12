@@ -53,7 +53,7 @@ class TestWaveformConstants(unittest.TestCase):
         with open(yaml_path) as file:
             data = yaml.safe_load(file)
 
-        expected_keys = ["amplitude", "offset", "percent_smoothing", "percent_delay"]
+        expected_keys = ["amplitude", "offset"]
 
         microscope_names = data["remote_focus_constants"].keys()
         for microscope_name in microscope_names:
@@ -102,6 +102,8 @@ class TestWaveformConstants(unittest.TestCase):
 
         other_constants = data["other_constants"].keys()
         assert "remote_focus_settle_duration" in other_constants
+        # assert "percent_smoothing" in other_constants
+        # assert "remote_focus_delay" in other_constants
 
 if __name__ == "__main__":
     unittest.main()

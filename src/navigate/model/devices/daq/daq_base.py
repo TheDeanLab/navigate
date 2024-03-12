@@ -81,19 +81,11 @@ class DAQBase:
         #: dict: exposure times for different channels
         self.exposure_times = None
 
-        # Remote Focus Parameters
-        #: dict: Dictionary of remote focus ramp falling percentages
-        self.remote_focus_ramp_falling = {}
-        for m in self.configuration["configuration"]["microscopes"].keys():
-            self.remote_focus_ramp_falling[m] = self.configuration["configuration"][
-                "microscopes"
-            ][m]["remote_focus_device"]["ramp_falling_percent"]
-
         # Camera Parameters
         #: float: Camera delay percentage
-        self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
+        self.camera_delay = self.configuration["configuration"]["microscopes"][
             self.microscope_name
-        ]["camera"]["delay_percent"]
+        ]["camera"]["delay"] / 1000
 
         #: dict: Dictionary of waveforms.
         self.waveform_dict = {}
@@ -154,7 +146,7 @@ class DAQBase:
                     sample_rate=self.sample_rate,
                     sweep_time=sweep_time,
                     exposure=exposure_time,
-                    camera_delay=self.camera_delay_percent,
+                    camera_delay=self.camera_delay,
                 )
 
         return self.waveform_dict
@@ -170,9 +162,9 @@ class DAQBase:
         if microscope_name != self.microscope_name:
             self.microscope_name = microscope_name
 
-        self.camera_delay_percent = self.configuration["configuration"]["microscopes"][
+        self.camera_delay = self.configuration["configuration"]["microscopes"][
             microscope_name
-        ]["camera"]["delay_percent"]
+        ]["camera"]["delay"] / 1000
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]

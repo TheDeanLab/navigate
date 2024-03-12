@@ -118,3 +118,19 @@ def test_prepare_next_channel(dummy_microscope):
     assert dummy_microscope.get_stage_position()["f_pos"] == (
         dummy_microscope.central_focus + channel_dict["defocus"]
     )
+
+def test_calculate_all_waveform(dummy_microscope):
+    # set waveform template to default
+    dummy_microscope.configuration["experiment"]["MicroscopeState"]["waveform_template"] = "Default"
+    waveform_dict = dummy_microscope.calculate_all_waveform()
+    # verify the waveform lengths
+    sweep_times = dummy_microscope.sweep_times
+    sample_rate = dummy_microscope.configuration["configuration"]["microscopes"][
+            dummy_microscope.microscope_name
+        ]["daq"]["sample_rate"]
+    for channel_key in sweep_times:
+        waveform_length = int(sweep_times[channel_key] * sample_rate)
+        assert waveform_dict["camera_waveform"][channel_key].shape == (waveform_length,)
+        assert waveform_dict["remote_focus_waveform"][channel_key].shape == (waveform_length,)
+        for i in range(len(waveform_dict["galvo_waveform"])):
+            assert waveform_dict["galvo_waveform"][i][channel_key].shape == (waveform_length,)

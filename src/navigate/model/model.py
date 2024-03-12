@@ -869,7 +869,6 @@ class Model:
 
         # whether acquire specific number of frames.
         count_frame = num_of_frames > 0
-        start_time = time.time()
 
         while not self.stop_acquisition:
             if self.ask_to_pause_data_thread:
@@ -890,9 +889,6 @@ class Model:
                 continue
 
             acquired_frame_num += len(frame_ids)
-            stop_time = time.time()
-            frames_per_second = acquired_frame_num / (stop_time - start_time)
-            self.event_queue.put(("framerate", frames_per_second))
 
             wait_num = self.camera_wait_iterations
 

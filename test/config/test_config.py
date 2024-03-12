@@ -76,6 +76,7 @@ def test_config_methods():
         "update_config_dict",
         "verify_experiment_config",
         "verify_waveform_constants",
+        "verify_configuration",
         "yaml",
     ]
     for method in methods:

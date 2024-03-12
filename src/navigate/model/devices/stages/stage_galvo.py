@@ -41,7 +41,6 @@ import nidaqmx
 
 # Local Imports
 from navigate.model.devices.stages.stage_base import StageBase
-from navigate.model.waveforms import dc_value, remote_focus_ramp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -128,19 +127,9 @@ class GalvoNIStage(StageBase):
         ]["daq"]["trigger_source"]
 
         #: float: Percent of the camera delay.
-        self.camera_delay_percent = configuration["configuration"]["microscopes"][
+        self.camera_delay = configuration["configuration"]["microscopes"][
             microscope_name
-        ]["camera"]["delay_percent"]
-
-        #: float: Percent of the remote focus delay.
-        self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["remote_focus_device"]["ramp_falling_percent"]
-
-        #: float: Percent of the remote focus delay.
-        self.remote_focus_delay = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["remote_focus_device"]["delay_percent"]
+        ]["camera"]["delay"] / 1000
 
         #: float: Sample rate of the DAQ.
         self.sample_rate = self.configuration["configuration"]["microscopes"][

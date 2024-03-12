@@ -51,7 +51,7 @@ class TestWaveformTemplates(unittest.TestCase):
         with open(yaml_path) as file:
             data = yaml.safe_load(file)
 
-        expected_keys = ["Default", "Confocal-Projection"]
+        expected_keys = ["Default", "Confocal-Projection", "Bidirectional"]
 
         waveform_keys = data.keys()
         for key in waveform_keys:

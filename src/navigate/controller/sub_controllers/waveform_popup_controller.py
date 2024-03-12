@@ -302,7 +302,7 @@ class WaveformPopupController(GUIController):
         # amplitude.
         #
 
-    def populate_experiment_values(self):
+    def populate_experiment_values(self, force_update=False):
         """Set experiment values."""
         self.remote_focus_experiment_dict = self.parent_controller.configuration[
             "experiment"
@@ -310,13 +310,17 @@ class WaveformPopupController(GUIController):
         resolution_value = self.remote_focus_experiment_dict["microscope_name"]
         zoom_value = self.remote_focus_experiment_dict["zoom"]
         mag = zoom_value
-        if (
-            self.widgets["Mode"].get() == resolution_value
+        if (not force_update
+            and self.widgets["Mode"].get() == resolution_value
             and self.widgets["Mag"].get() == mag
         ):
-            print("Returning from if statement")
             return
 
+        # Microscope information
+        self.resolution_info = self.parent_controller.configuration[
+            "waveform_constants"
+        ]
+        self.galvo_setting = self.resolution_info["galvo_constants"]
         self.widgets["Mode"].set(resolution_value)
         self.show_magnification(mag)
 

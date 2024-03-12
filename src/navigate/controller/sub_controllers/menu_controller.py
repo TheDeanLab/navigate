@@ -147,9 +147,6 @@ class MenuController(GUIController):
         #: str: Feature list file name.
         self.feature_list_file_name = "feature_lists.yaml"
 
-        #: waveform_popup_controller: Waveform Popup Controller.
-        # self.parent_controller.waveform_popup_controller = None
-
     def initialize_menus(self):
         """Initialize menus
         This function defines all the menus in the menubar
@@ -207,16 +204,16 @@ class MenuController(GUIController):
                     "<Control-S>",
                     "<Control_L-S>",
                 ],
-                "Save Waveform Constants": [
+                "Load Waveform Constants": [
                     "standard",
-                    self.save_waveform_constants,
+                    self.load_waveform_constants,
                     None,
                     None,
                     None,
                 ],
-                "Load Waveform Constants": [
+                "Save Waveform Constants": [
                     "standard",
-                    self.load_waveform_constants,
+                    self.save_waveform_constants,
                     None,
                     None,
                     None,
@@ -760,18 +757,8 @@ class MenuController(GUIController):
         )
 
         if hasattr(self.parent_controller, "waveform_popup_controller"):
-            popup = self.parent_controller.waveform_popup_controller.view.popup
-            # Get the size and position of the waveform popup window.
-            geometry = popup.geometry()  # Example format: '200x100+300+250'
-
-            # Close the existing waveform popup window and its controller.
-            popup.destroy()
-            delattr(self.parent_controller, "waveform_popup_controller")
-
-            # Open a new waveform popup window and configure it with the same geometry.
-            self.popup_waveform_setting()
-            self.parent_controller.waveform_popup_controller.view.popup.geometry(
-                geometry
+            self.parent_controller.waveform_popup_controller.populate_experiment_values(
+                force_update=True
             )
 
     def load_images(self):

@@ -241,7 +241,6 @@ class HamamatsuBase(CameraBase):
 
         if mode in readout_direction_dict:
             self.camera_controller.set_property_value("readout_direction", readout_direction_dict[mode])
-            print('readout direction: ', mode + ' ', readout_direction_dict[mode])
         else:
             print("Camera readout direction not supported")
             logger.info("Camera readout direction not supported")

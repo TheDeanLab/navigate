@@ -96,9 +96,6 @@ class DAQBase:
         #: int: Number of times to expand the waveform
         self.waveform_expand_num = 1
 
-        #: bool: Bidirectional ASLM mode enabled?
-        self.bidirectional = False
-
     def calculate_all_waveforms(self, microscope_name, exposure_times, sweep_times):
         """Pre-calculates all waveforms necessary for the acquisition and organizes in
         a dictionary format.
@@ -122,12 +119,6 @@ class DAQBase:
         self.sweep_times = sweep_times
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         self.enable_microscope(microscope_name)
-
-        # # to determine if the waveform has to be triangular
-        # sensor_mode = self.configuration["experiment"][
-        # "CameraParameters"]["sensor_mode"]
-        # readout_direction = self.configuration["experiment"][
-        # "CameraParameters"]["readout_direction"]
 
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
 

@@ -232,9 +232,6 @@ class NIDAQ(DAQBase):
             initial_delay=camera_delay,
         )
 
-        # apply waveform templates.
-        # waveform_repeat_num = ...
-        # waveform_expand_num
         camera_waveform_repeat_num = self.waveform_repeat_num * self.waveform_expand_num
         self.camera_trigger_task.timing.cfg_implicit_timing(
             sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
@@ -266,9 +263,6 @@ class NIDAQ(DAQBase):
         """
         self.n_sample = int(self.sample_rate * self.sweep_times[channel_key])
         max_sample = self.n_sample * self.waveform_expand_num
-        print("max_sample", max_sample)
-        print("repeat number", self.waveform_repeat_num)
-        print("expand number", self.waveform_expand_num)
         # TODO: GalvoStage and remote_focus waveform are not calculated based on a
         #  same sweep time. There needs some fix.
 

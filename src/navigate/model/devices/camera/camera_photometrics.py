@@ -86,13 +86,9 @@ class PhotometricsKinetix(CameraBase):
         self._unitforlinedelay = 0.00375  # 3.75  us for dynamic mode kinetix
         #: list: Frame IDs
         self._frame_ids = []
-        #: int: Max image width
-        self.max_image_width = self.camera_controller.sensor_size[0]
-        #: int: Max image height
-        self.max_image_height = self.camera_controller.sensor_size[1]
         #: dict: Camera parameters
-        self.camera_parameters["x_pixels"] = self.max_image_width
-        self.camera_parameters["y_pixels"] = self.max_image_height
+        self.camera_parameters["x_pixels"] = self.camera_controller.sensor_size[0]
+        self.camera_parameters["y_pixels"] = self.camera_controller.sensor_size[1]
 
         # todo: complete first init of parameters to default values
 
@@ -228,8 +224,6 @@ class PhotometricsKinetix(CameraBase):
         -------
         readout_time : float
             Duration of time needed to readout an image.
-        max_frame_rate : float
-            Maximum framerate for a given camera acquisition mode.
         """
 
         # todo
@@ -241,11 +235,9 @@ class PhotometricsKinetix(CameraBase):
         # trigger_active = self.camera_controller.get_property_value('trigger_active')
         #
         if self._scanmode == 0:  # normal/static light-sheet
-            max_frame_rate = 1 / ((vn + 10) * h + exposure_time)
             readout_time = exposure_time - ((vn + 10) * h + exposure_time)
         else:
             # todo: not sure if these equations are correct
-            max_frame_rate = 1 / ((vn + 10) * h * self._scandelay + exposure_time)
             readout_time = exposure_time - (
                 (vn + 10) * h * self._scandelay + exposure_time
             )
@@ -274,7 +266,7 @@ class PhotometricsKinetix(CameraBase):
         #     max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
         #     readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
         #
-        return readout_time, max_frame_rate
+        return readout_time
 
     def set_exposure_time(self, exposure_time):
         """Set Photometrics exposure time.
@@ -324,7 +316,11 @@ class PhotometricsKinetix(CameraBase):
             Light-sheet mode exposure time.
         camera_line_interval : float
             HamamatsuOrca line interval duration.
+        full_chip_exposure_time : float
+            Full chip exposure time (s)
         """
+        # TODO: what's the units of the input full_chip_exposure_time? miliseconds or seconds?
+
         linedelay = self._unitforlinedelay  # 10.16us
         nbrows = self.y_pixels
         ASLM_scanWidth = 70
@@ -360,7 +356,7 @@ class PhotometricsKinetix(CameraBase):
             )
         )
 
-        return ASLM_lineExposure, ASLM_line_delay
+        return ASLM_lineExposure, ASLM_line_delay, full_chip_exposure_time
 
     def _calculate_ASLMparameters(self, desired_exposuretime):
         """Calculate the parameters for an ASLM acquisition

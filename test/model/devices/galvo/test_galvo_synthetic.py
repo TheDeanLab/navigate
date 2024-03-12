@@ -32,7 +32,7 @@
 import unittest
 from unittest.mock import MagicMock
 from navigate.model.devices.galvo.galvo_synthetic import SyntheticGalvo
-from navigate.config import load_configs, get_configuration_paths
+from navigate.config import load_configs, get_configuration_paths, verify_configuration, verify_waveform_constants
 from multiprocessing import Manager
 
 
@@ -57,7 +57,8 @@ class TestGalvoSynthetic(unittest.TestCase):
             rest_api_config=rest_api_path,
             waveform_templates=waveform_templates_path,
         )
-
+        verify_configuration(self.manager, self.configuration)
+        verify_waveform_constants(self.manager, self.configuration)
         self.microscope_name = "Mesoscale"
         self.device_connection = MagicMock()
         galvo_id = 0

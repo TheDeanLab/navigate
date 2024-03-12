@@ -1240,7 +1240,11 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
                 )
                 # if the serial number is with leading zeros, the yaml reader will convert it to a octal number
                 if camera_serial_number.startswith("0"):
-                    devices["camera"][build_ref_name("_", device["type"], int(camera_serial_number, 8))] = camera
+                    try:
+                        oct_num = int(camera_serial_number, 8)
+                        devices["camera"][build_ref_name("_", device["type"], oct_num)] = camera
+                    except ValueError:
+                        pass
             else:
                 device_ref_name = build_ref_name(
                     "_", device["type"], device["serial_number"]

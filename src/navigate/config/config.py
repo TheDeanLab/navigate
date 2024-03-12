@@ -768,18 +768,18 @@ def verify_waveform_constants(manager, configuration):
                                 "amplitude"
                             ],
                             "offset": config_dict["remote_focus_device"]["offset"],
-                            "percent_smoothing": "0",
-                            "percent_delay": config_dict["remote_focus_device"][
-                                "delay_percent"
-                            ],
+                            # "percent_smoothing": "0",
+                            # "delay": config_dict["remote_focus_device"][
+                            #     "delay"
+                            # ],
                         },
                     )
                 else:
                     for k in [
                         "amplitude",
                         "offset",
-                        "percent_smoothing",
-                        "percent_delay",
+                        # "percent_smoothing",
+                        # "delay",
                     ]:
                         if k not in waveform_dict[microscope_name][zoom][laser].keys():
                             waveform_dict[microscope_name][zoom][laser][
@@ -893,6 +893,16 @@ def verify_waveform_constants(manager, configuration):
 
     # other_constants
     waveform_dict = configuration["waveform_constants"]
+    other_constants_dict = {
+        "remote_focus_settle_duration": "0",
+        "percent_smoothing": "0",
+        "remote_focus_delay": config_dict["remote_focus_device"][
+            "delay"
+        ],
+        "remote_focus_ramp_falling": config_dict["remote_focus_device"][
+            "ramp_falling"
+        ]
+    }
     if (
         "other_constants" not in waveform_dict.keys()
         or type(waveform_dict["other_constants"]) is not DictProxy
@@ -901,12 +911,30 @@ def verify_waveform_constants(manager, configuration):
             manager,
             waveform_dict,
             "other_constants",
-            {"remote_focus_settle_duration": "0"},
+            other_constants_dict,
         )
-    if "remote_focus_settle_duration" not in waveform_dict["other_constants"].keys():
-        waveform_dict["other_constants"]["remote_focus_settle_duration"] = "0"
-    else:
+    for k in other_constants_dict.keys():
         try:
-            float(waveform_dict["other_constants"]["remote_focus_settle_duration"])
-        except ValueError:
-            waveform_dict["other_constants"]["remote_focus_settle_duration"] = "0"
+            float(waveform_dict["other_constants"][k])
+        except (ValueError, KeyError):
+            waveform_dict["other_constants"][k] = "0"
+
+def verify_configuration(manager, configuration):
+    """Verify configuration files.
+    
+    Supports old version of configurations.
+    """
+    device_config = configuration["configuration"]["microscopes"]
+    for microscope_name in device_config.keys():
+        # camera
+        # delay_percent -> delay
+        camera_config = device_config[microscope_name]["camera"]
+        if "delay" not in camera_config.keys():
+            camera_config["delay"] = camera_config.get("delay_percent", 2)
+        # remote focus
+        # ramp_falling_percent -> ramp_falling
+        remote_focus_config = device_config[microscope_name]["remote_focus_device"]
+        if "ramp_falling" not in remote_focus_config.keys():
+            remote_focus_config["ramp_falling"] = remote_focus_config.get("ramp_falling_percent", 5)
+        if "delay" not in remote_focus_config.keys():
+            remote_focus_config["delay"] = remote_focus_config.get("delay_percent", 0)

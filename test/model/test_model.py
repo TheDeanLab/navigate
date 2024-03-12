@@ -51,6 +51,7 @@ def model():
         load_configs,
         verify_experiment_config,
         verify_waveform_constants,
+        verify_configuration,
     )
 
     with Manager() as manager:
@@ -77,6 +78,7 @@ def model():
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
         )
+        verify_configuration(manager, configuration)
         verify_experiment_config(manager, configuration)
         verify_waveform_constants(manager, configuration)
 

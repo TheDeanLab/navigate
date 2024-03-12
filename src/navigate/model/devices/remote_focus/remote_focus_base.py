@@ -205,21 +205,10 @@ class RemoteFocusBase:
                         sweep_time=self.sweep_time,
                         remote_focus_delay=remote_focus_delay,
                         camera_delay=self.camera_delay,
-                        fall=remote_focus_ramp_falling,
                         amplitude=remote_focus_amplitude,
                         offset=remote_focus_offset,
                     )
                     samples *= 2
-
-                    # print("Remote focus ramp triangular")
-                    # print('sample_rate=', self.sample_rate)
-                    # print('exposure_time=' , exposure_time)
-                    # print('sweep_time=', self.sweep_time)
-                    # print('remote_focus_delay=', self.remote_focus_delay)
-                    # print('camera_delay_percent=',  self.camera_delay_percent)
-                    # print('fall=', self.remote_focus_ramp_falling)
-                    # print('amplitude=', remote_focus_amplitude)
-                    # print('offset=', remote_focus_offset)
 
                 else:
                     self.waveform_dict[channel_key] = remote_focus_ramp(

@@ -406,9 +406,6 @@ class Microscope:
             "sensor_mode"
         ]
 
-        print('sensor_mode', sensor_mode)
-
-
         self.camera.set_sensor_mode(sensor_mode)
         if sensor_mode == "Light-Sheet":
             self.camera.set_readout_direction(
@@ -633,7 +630,6 @@ class Microscope:
             self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
             == "Light-Sheet"
         ):
-
             (
                 self.current_exposure_time,
                 camera_line_interval,
@@ -663,8 +659,6 @@ class Microscope:
         # choose to not update the waveform is very useful when running ZStack
         # if there is a NI Galvo stage in the system.
         if update_daq_task_flag:
-
-
             self.daq.stop_acquisition()
             self.daq.prepare_acquisition(channel_key)
 

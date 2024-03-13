@@ -737,11 +737,19 @@ class Controller:
                 return
             saving_settings = self.configuration["experiment"]["Saving"]
             file_directory = create_save_path(saving_settings)
+
+            # Save the experiment.yaml file.
             save_yaml_file(
-                file_directory,
-                self.configuration["experiment"],
+                file_directory=file_directory,
+                content_dict=self.configuration["experiment"],
                 filename="experiment.yml",
             )
+
+            # Save the waveform_constants.yaml file.
+            save_yaml_file(file_directory=file_directory,
+                           content_dict=self.configuration['waveform_constants'],
+                           filename="waveform_constants.yml")
+
             self.camera_setting_controller.solvent = self.configuration["experiment"][
                 "Saving"
             ]["solvent"]

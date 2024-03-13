@@ -77,7 +77,7 @@ class DAQBase:
 
         #: dict: Sweep times for different channels
         self.sweep_times = None
-        
+
         #: dict: exposure times for different channels
         self.exposure_times = None
 
@@ -132,6 +132,7 @@ class DAQBase:
                 exposure_time = exposure_times[channel_key]
                 sweep_time = sweep_times[channel_key]
 
+                # Create 5V TTL for 1 camera exposure.
                 self.waveform_dict[channel_key] = camera_exposure(
                     sample_rate=self.sample_rate,
                     sweep_time=sweep_time,

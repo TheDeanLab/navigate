@@ -36,7 +36,11 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from navigate.model.waveforms import remote_focus_ramp, smooth_waveform
+from navigate.model.waveforms import (
+    remote_focus_ramp,
+    smooth_waveform,
+    remote_focus_ramp_triangular,
+)
 
 # # Logger Setup
 p = __name__.split(".")[1]
@@ -114,12 +118,21 @@ class RemoteFocusBase:
         waveform : numpy.ndarray
             Waveform for the remote focus device.
         """
+        # to determine if the waveform has to be triangular
+        sensor_mode = self.configuration["experiment"]["CameraParameters"][
+            "sensor_mode"
+        ]
+        readout_direction = self.configuration["experiment"]["CameraParameters"][
+            "readout_direction"
+        ]
 
         self.waveform_dict = dict.fromkeys(self.waveform_dict, None)
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
         waveform_constants = self.configuration["waveform_constants"]
         imaging_mode = microscope_state["microscope_name"]
         zoom = microscope_state["zoom"]
+        # ramp_type = self.configuration["configuration"]["microscopes"][
+        #     self.microscope_name]['remote focus device']['ramp_type']
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["sample_rate"]
@@ -182,16 +195,32 @@ class RemoteFocusBase:
                     remote_focus_offset += offset
 
                 # Calculate the Waveforms
-                self.waveform_dict[channel_key] = remote_focus_ramp(
-                    sample_rate=self.sample_rate,
-                    exposure_time=exposure_time,
-                    sweep_time=self.sweep_time,
-                    remote_focus_delay=remote_focus_delay,
-                    camera_delay=self.camera_delay,
-                    fall=remote_focus_ramp_falling,
-                    amplitude=remote_focus_amplitude,
-                    offset=remote_focus_offset,
-                )
+                if sensor_mode == "Light-Sheet" and (
+                    readout_direction == "Bidirectional"
+                    or readout_direction == "Rev. Bidirectional"
+                ):
+                    self.waveform_dict[channel_key] = remote_focus_ramp_triangular(
+                        sample_rate=self.sample_rate,
+                        exposure_time=exposure_time,
+                        sweep_time=self.sweep_time,
+                        remote_focus_delay=remote_focus_delay,
+                        camera_delay=self.camera_delay,
+                        amplitude=remote_focus_amplitude,
+                        offset=remote_focus_offset,
+                    )
+                    samples *= 2
+
+                else:
+                    self.waveform_dict[channel_key] = remote_focus_ramp(
+                        sample_rate=self.sample_rate,
+                        exposure_time=exposure_time,
+                        sweep_time=self.sweep_time,
+                        remote_focus_delay=remote_focus_delay,
+                        camera_delay=self.camera_delay,
+                        fall=remote_focus_ramp_falling,
+                        amplitude=remote_focus_amplitude,
+                        offset=remote_focus_offset,
+                    )
 
                 # Smooth the Waveform if specified
                 if percent_smoothing > 0:
@@ -209,4 +238,3 @@ class RemoteFocusBase:
                 ] = self.remote_focus_min_voltage
 
         return self.waveform_dict
-

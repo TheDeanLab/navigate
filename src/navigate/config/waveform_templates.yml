@@ -6,5 +6,9 @@
   "Confocal-Projection": {
     "repeat": timepoints,
     "expand": n_plane,
-  }
+  },
+    "Bidirectional": {
+      "repeat": 1,
+      "expand": 2,
+    }
 }

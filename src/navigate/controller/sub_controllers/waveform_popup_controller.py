@@ -75,14 +75,17 @@ class WaveformPopupController(GUIController):
         ]
         #: dict: Galvo constants for the microscope.
         self.galvo_setting = self.resolution_info["galvo_constants"]
+
         #: ConfigurationController: The configuration controller.
         self.configuration_controller = self.parent_controller.configuration_controller
+
         #: str: The path to the waveform constants file.
         self.waveform_constants_path = waveform_constants_path
 
         # Get mode and mag widgets
         #: dict: The widgets for the mode and magnification.
         self.widgets = self.view.get_widgets()
+
         #: dict: The variables for the mode and magnification.
         self.variables = self.view.get_variables()
 
@@ -90,29 +93,39 @@ class WaveformPopupController(GUIController):
         #: list: The lasers.
         self.lasers = self.configuration_controller.lasers_info
 
-        # Initialize
         #: str: The current resolution.
         self.resolution = None
+
         #: str: The current magnification.
         self.mag = None
+
         #: str: The current microscope operation mode.
         self.mode = "stop"
+
         #: dict: Remote focus experiment dictionary.
         self.remote_focus_experiment_dict = None
+
         #: bool: Flag to update galvo device.
         self.update_galvo_device_flag = None
+
         #: bool: Flag to update waveform parameters.
         self.update_waveform_parameters_flag = False
+
         #: bool: Flag to enable/disable waveforms.
         self.waveforms_enabled = True
+
         #: dict: Dictionary of amplitude values.
         self.amplitude_dict = None
+
         #: float: the minimum value of remote focus device
         self.laser_min = 0
+
         #: float: the maximum value of remote focus device
         self.laser_max = 1.0
+
         #: dict: Dictionary of galvo minimum values
         self.galvo_min = {}
+
         #: dict: Dictionary of galvo maximum values
         self.galvo_max = {}
 
@@ -289,7 +302,7 @@ class WaveformPopupController(GUIController):
         # amplitude.
         #
 
-    def populate_experiment_values(self):
+    def populate_experiment_values(self, force_update=False):
         """Set experiment values."""
         self.remote_focus_experiment_dict = self.parent_controller.configuration[
             "experiment"
@@ -297,11 +310,17 @@ class WaveformPopupController(GUIController):
         resolution_value = self.remote_focus_experiment_dict["microscope_name"]
         zoom_value = self.remote_focus_experiment_dict["zoom"]
         mag = zoom_value
-        if (
-            self.widgets["Mode"].get() == resolution_value
+        if (not force_update
+            and self.widgets["Mode"].get() == resolution_value
             and self.widgets["Mag"].get() == mag
         ):
             return
+
+        # Microscope information
+        self.resolution_info = self.parent_controller.configuration[
+            "waveform_constants"
+        ]
+        self.galvo_setting = self.resolution_info["galvo_constants"]
         self.widgets["Mode"].set(resolution_value)
         self.show_magnification(mag)
 

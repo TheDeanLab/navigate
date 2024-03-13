@@ -405,6 +405,7 @@ class Microscope:
         sensor_mode = self.configuration["experiment"]["CameraParameters"][
             "sensor_mode"
         ]
+
         self.camera.set_sensor_mode(sensor_mode)
         if sensor_mode == "Light-Sheet":
             self.camera.set_readout_direction(
@@ -412,6 +413,7 @@ class Microscope:
                     "readout_direction"
                 ]
             )
+
         # set binning
         self.camera.set_binning(
             self.configuration["experiment"]["CameraParameters"]["binning"]
@@ -421,6 +423,7 @@ class Microscope:
 
         # calculate all the waveform
         self.shutter.open_shutter()
+
         return self.calculate_all_waveform()
 
     def end_acquisition(self):

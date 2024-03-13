@@ -53,8 +53,7 @@ navigate.model.devices.daq.daq\_synthetic.SyntheticDAQ
       ~SyntheticDAQ.sample_rate
       ~SyntheticDAQ.sweep_times
       ~SyntheticDAQ.exposure_times
-      ~SyntheticDAQ.remote_focus_ramp_falling
-      ~SyntheticDAQ.camera_delay_percent
+      ~SyntheticDAQ.camera_delay
       ~SyntheticDAQ.waveform_dict
       ~SyntheticDAQ.waveform_repeat_num
       ~SyntheticDAQ.waveform_expand_num

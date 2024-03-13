@@ -37,13 +37,12 @@ navigate.model.devices.camera.camera\_base.CameraBase
       ~CameraBase.camera_controller
       ~CameraBase.camera_parameters
       ~CameraBase.is_acquiring
-      ~CameraBase.max_image_width
-      ~CameraBase.max_image_height
       ~CameraBase.min_image_width
       ~CameraBase.min_image_height
       ~CameraBase.step_image_width
       ~CameraBase.step_image_height
       ~CameraBase.x_pixels
       ~CameraBase.y_pixels
+      ~CameraBase.minimum_exposure_time
    
    

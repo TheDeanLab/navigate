@@ -42,20 +42,19 @@ navigate.model.devices.camera.camera\_hamamatsu.HamamatsuOrca
 
    .. autosummary::
    
-      ~HamamatsuOrca.max_image_height
-      ~HamamatsuOrca.max_image_width
-      ~HamamatsuOrca.min_image_height
-      ~HamamatsuOrca.min_image_width
       ~HamamatsuOrca.offset
       ~HamamatsuOrca.serial_number
-      ~HamamatsuOrca.step_image_height
-      ~HamamatsuOrca.step_image_width
       ~HamamatsuOrca.variance
       ~HamamatsuOrca.configuration
       ~HamamatsuOrca.camera_controller
       ~HamamatsuOrca.camera_parameters
       ~HamamatsuOrca.is_acquiring
+      ~HamamatsuOrca.min_image_width
+      ~HamamatsuOrca.min_image_height
+      ~HamamatsuOrca.step_image_width
+      ~HamamatsuOrca.step_image_height
       ~HamamatsuOrca.x_pixels
       ~HamamatsuOrca.y_pixels
+      ~HamamatsuOrca.minimum_exposure_time
    
    

@@ -42,20 +42,19 @@ navigate.model.devices.camera.camera\_hamamatsu.HamamatsuOrcaFire
 
    .. autosummary::
    
-      ~HamamatsuOrcaFire.max_image_height
-      ~HamamatsuOrcaFire.max_image_width
-      ~HamamatsuOrcaFire.min_image_height
-      ~HamamatsuOrcaFire.min_image_width
       ~HamamatsuOrcaFire.offset
       ~HamamatsuOrcaFire.serial_number
-      ~HamamatsuOrcaFire.step_image_height
-      ~HamamatsuOrcaFire.step_image_width
       ~HamamatsuOrcaFire.variance
       ~HamamatsuOrcaFire.configuration
       ~HamamatsuOrcaFire.camera_controller
       ~HamamatsuOrcaFire.camera_parameters
       ~HamamatsuOrcaFire.is_acquiring
+      ~HamamatsuOrcaFire.min_image_width
+      ~HamamatsuOrcaFire.min_image_height
+      ~HamamatsuOrcaFire.step_image_width
+      ~HamamatsuOrcaFire.step_image_height
       ~HamamatsuOrcaFire.x_pixels
       ~HamamatsuOrcaFire.y_pixels
+      ~HamamatsuOrcaFire.minimum_exposure_time
    
    

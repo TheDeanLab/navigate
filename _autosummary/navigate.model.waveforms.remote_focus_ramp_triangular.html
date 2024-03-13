@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>navigate.model.waveforms.camera_exposure &mdash; navigate 0.0.4 documentation</title>
+  <title>navigate.model.waveforms.remote_focus_ramp_triangular &mdash; navigate 0.0.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.model.waveforms.dc_value" href="navigate.model.waveforms.dc_value.html" />
-    <link rel="prev" title="navigate.model.waveforms" href="navigate.model.waveforms.html" /> 
+    <link rel="next" title="navigate.model.waveforms.sawtooth" href="navigate.model.waveforms.sawtooth.html" />
+    <link rel="prev" title="navigate.model.waveforms.remote_focus_ramp" href="navigate.model.waveforms.remote_focus_ramp.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -80,10 +80,10 @@
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">navigate.model.waveforms.camera_exposure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.camera_exposure.html">navigate.model.waveforms.camera_exposure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.dc_value.html">navigate.model.waveforms.dc_value</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.remote_focus_ramp.html">navigate.model.waveforms.remote_focus_ramp</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.remote_focus_ramp_triangular.html">navigate.model.waveforms.remote_focus_ramp_triangular</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">navigate.model.waveforms.remote_focus_ramp_triangular</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.sawtooth.html">navigate.model.waveforms.sawtooth</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.sine_wave.html">navigate.model.waveforms.sine_wave</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.single_pulse.html">navigate.model.waveforms.single_pulse</a></li>
@@ -117,9 +117,9 @@
           <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
           <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
           <li class="breadcrumb-item"><a href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
-      <li class="breadcrumb-item active">navigate.model.waveforms.camera_exposure</li>
+      <li class="breadcrumb-item active">navigate.model.waveforms.remote_focus_ramp_triangular</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/navigate.model.waveforms.camera_exposure.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/navigate.model.waveforms.remote_focus_ramp_triangular.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -127,33 +127,39 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="navigate-model-waveforms-camera-exposure">
-<h1>navigate.model.waveforms.camera_exposure<a class="headerlink" href="#navigate-model-waveforms-camera-exposure" title="Permalink to this heading"></a></h1>
+  <section id="navigate-model-waveforms-remote-focus-ramp-triangular">
+<h1>navigate.model.waveforms.remote_focus_ramp_triangular<a class="headerlink" href="#navigate-model-waveforms-remote-focus-ramp-triangular" title="Permalink to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="navigate.model.waveforms.camera_exposure">
-<span class="sig-prename descclassname"><span class="pre">navigate.model.waveforms.</span></span><span class="sig-name descname"><span class="pre">camera_exposure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sweep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.waveforms.camera_exposure" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates timing and duration of camera exposure.
-Not actually used to trigger the camera.  Only meant for visualization.</p>
+<dt class="sig sig-object py" id="navigate.model.waveforms.remote_focus_ramp_triangular">
+<span class="sig-prename descclassname"><span class="pre">navigate.model.waveforms.</span></span><span class="sig-name descname"><span class="pre">remote_focus_ramp_triangular</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sweep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote_focus_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ramp_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Rising'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.waveforms.remote_focus_ramp_triangular" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a numpy array with a triangular ramp typically used for remote focusing</p>
+<p>The waveform starts at offset and stays there for the delay period, then
+rises linearly to 2x amplitude (amplitude here refers to 1/2 peak-to-peak).</p>
+<p>Switching from a left to right remote focus ramp is possible by exchanging the
+rise and fall periods.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sample_rate</strong> (<em>Integer</em>) – Unit - Hz</p></li>
+<li><p><strong>exposure_time</strong> (<em>Float</em>) – Unit - Seconds</p></li>
 <li><p><strong>sweep_time</strong> (<em>Float</em>) – Unit - Seconds</p></li>
-<li><p><strong>exposure</strong> (<em>Float</em>) – Unit - Seconds</p></li>
+<li><p><strong>remote_focus_delay</strong> (<em>Float</em>) – Unit - Seconds</p></li>
 <li><p><strong>camera_delay</strong> (<em>Float</em>) – Unit - Seconds</p></li>
+<li><p><strong>amplitude</strong> (<em>Float</em>) – Unit - Volts</p></li>
+<li><p><strong>offset</strong> (<em>Float</em>) – Unit - Volts</p></li>
+<li><p><strong>ramp_type</strong> (<em>String</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>exposure_start</strong> (<em>Float</em>) – Unit - Seconds</p></li>
-<li><p><strong>exposure_end</strong> (<em>Float</em>) – Unit - Seconds</p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>waveform</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">exposure_start</span><span class="p">,</span> <span class="n">exposure_end</span> <span class="o">=</span> <span class="n">camera_exposure</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">sweep_time</span><span class="p">,</span>
-<span class="go">exposure, camera_delay)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">etl_ramp</span> <span class="o">=</span> <span class="n">tunable_lens_ramp</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">exposure_time</span><span class="p">,</span> <span class="n">sweep_time</span><span class="p">,</span> <span class="n">etl_delay</span><span class="p">,</span>
+<span class="go">    camera_delay, fall, amplitude, offset)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -164,8 +170,8 @@ Not actually used to trigger the camera.  Only meant for visualization.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="navigate.model.waveforms.html" class="btn btn-neutral float-left" title="navigate.model.waveforms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.model.waveforms.dc_value.html" class="btn btn-neutral float-right" title="navigate.model.waveforms.dc_value" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.model.waveforms.remote_focus_ramp.html" class="btn btn-neutral float-left" title="navigate.model.waveforms.remote_focus_ramp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.waveforms.sawtooth.html" class="btn btn-neutral float-right" title="navigate.model.waveforms.sawtooth" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

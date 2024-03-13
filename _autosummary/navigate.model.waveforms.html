@@ -83,6 +83,7 @@
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.camera_exposure.html">navigate.model.waveforms.camera_exposure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.dc_value.html">navigate.model.waveforms.dc_value</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.remote_focus_ramp.html">navigate.model.waveforms.remote_focus_ramp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.remote_focus_ramp_triangular.html">navigate.model.waveforms.remote_focus_ramp_triangular</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.sawtooth.html">navigate.model.waveforms.sawtooth</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.sine_wave.html">navigate.model.waveforms.sine_wave</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.single_pulse.html">navigate.model.waveforms.single_pulse</a></li>
@@ -139,19 +140,22 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.waveforms.remote_focus_ramp.html#navigate.model.waveforms.remote_focus_ramp" title="navigate.model.waveforms.remote_focus_ramp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_ramp</span></code></a>([sample_rate, ...])</p></td>
 <td><p>Returns a numpy array with a sawtooth ramp - typically used for remote focusing.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.waveforms.sawtooth.html#navigate.model.waveforms.sawtooth" title="navigate.model.waveforms.sawtooth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sawtooth</span></code></a>([sample_rate, sweep_time, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.waveforms.remote_focus_ramp_triangular.html#navigate.model.waveforms.remote_focus_ramp_triangular" title="navigate.model.waveforms.remote_focus_ramp_triangular"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_focus_ramp_triangular</span></code></a>([sample_rate, ...])</p></td>
+<td><p>Returns a numpy array with a triangular ramp typically used for remote focusing</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.waveforms.sawtooth.html#navigate.model.waveforms.sawtooth" title="navigate.model.waveforms.sawtooth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sawtooth</span></code></a>([sample_rate, sweep_time, ...])</p></td>
 <td><p>Returns a numpy array with a sawtooth function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.waveforms.sine_wave.html#navigate.model.waveforms.sine_wave" title="navigate.model.waveforms.sine_wave"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sine_wave</span></code></a>([sample_rate, sweep_time, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.waveforms.sine_wave.html#navigate.model.waveforms.sine_wave" title="navigate.model.waveforms.sine_wave"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sine_wave</span></code></a>([sample_rate, sweep_time, ...])</p></td>
 <td><p>Returns a numpy array with a sine waveform</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.waveforms.single_pulse.html#navigate.model.waveforms.single_pulse" title="navigate.model.waveforms.single_pulse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">single_pulse</span></code></a>([sample_rate, sweep_time, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.waveforms.single_pulse.html#navigate.model.waveforms.single_pulse" title="navigate.model.waveforms.single_pulse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">single_pulse</span></code></a>([sample_rate, sweep_time, ...])</p></td>
 <td><p>Returns a numpy array with a single pulse Used for creating TTL pulses out of analog outputs and laser intensity pulses.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.waveforms.smooth_waveform.html#navigate.model.waveforms.smooth_waveform" title="navigate.model.waveforms.smooth_waveform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smooth_waveform</span></code></a>(waveform[, percent_smoothing])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.waveforms.smooth_waveform.html#navigate.model.waveforms.smooth_waveform" title="navigate.model.waveforms.smooth_waveform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smooth_waveform</span></code></a>(waveform[, percent_smoothing])</p></td>
 <td><p>Smooths a numpy array via convolution</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.waveforms.square.html#navigate.model.waveforms.square" title="navigate.model.waveforms.square"><code class="xref py py-obj docutils literal notranslate"><span class="pre">square</span></code></a>([sample_rate, sweep_time, frequency, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.waveforms.square.html#navigate.model.waveforms.square" title="navigate.model.waveforms.square"><code class="xref py py-obj docutils literal notranslate"><span class="pre">square</span></code></a>([sample_rate, sweep_time, frequency, ...])</p></td>
 <td><p>Returns a numpy array with a square function.</p></td>
 </tr>
 </tbody>

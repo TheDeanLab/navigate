@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.model.waveforms.sawtooth" href="navigate.model.waveforms.sawtooth.html" />
+    <link rel="next" title="navigate.model.waveforms.remote_focus_ramp_triangular" href="navigate.model.waveforms.remote_focus_ramp_triangular.html" />
     <link rel="prev" title="navigate.model.waveforms.dc_value" href="navigate.model.waveforms.dc_value.html" /> 
 </head>
 
@@ -83,6 +83,7 @@
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.camera_exposure.html">navigate.model.waveforms.camera_exposure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.dc_value.html">navigate.model.waveforms.dc_value</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">navigate.model.waveforms.remote_focus_ramp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.remote_focus_ramp_triangular.html">navigate.model.waveforms.remote_focus_ramp_triangular</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.sawtooth.html">navigate.model.waveforms.sawtooth</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.sine_wave.html">navigate.model.waveforms.sine_wave</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.waveforms.single_pulse.html">navigate.model.waveforms.single_pulse</a></li>
@@ -130,7 +131,7 @@
 <h1>navigate.model.waveforms.remote_focus_ramp<a class="headerlink" href="#navigate-model-waveforms-remote-focus-ramp" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="navigate.model.waveforms.remote_focus_ramp">
-<span class="sig-prename descclassname"><span class="pre">navigate.model.waveforms.</span></span><span class="sig-name descname"><span class="pre">remote_focus_ramp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sweep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote_focus_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fall</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.waveforms.remote_focus_ramp" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">navigate.model.waveforms.</span></span><span class="sig-name descname"><span class="pre">remote_focus_ramp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sweep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote_focus_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fall</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.waveforms.remote_focus_ramp" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a numpy array with a sawtooth ramp - typically used for remote focusing.</p>
 <p>The waveform starts at offset and stays there for the delay period, then
 rises linearly to 2x amplitude (amplitude here refers to 1/2 peak-to-peak)
@@ -143,9 +144,9 @@ rise and fall periods.</p>
 <li><p><strong>sample_rate</strong> (<em>Integer</em>) – Unit - Hz</p></li>
 <li><p><strong>exposure_time</strong> (<em>Float</em>) – Unit - Seconds</p></li>
 <li><p><strong>sweep_time</strong> (<em>Float</em>) – Unit - Seconds</p></li>
-<li><p><strong>remote_focus_delay</strong> (<em>Float</em>) – Unit - Percent</p></li>
-<li><p><strong>camera_delay</strong> (<em>Float</em>) – Unit - Percent</p></li>
-<li><p><strong>fall</strong> (<em>Float</em>) – Unit - Percent</p></li>
+<li><p><strong>remote_focus_delay</strong> (<em>Float</em>) – Unit - seconds</p></li>
+<li><p><strong>camera_delay</strong> (<em>Float</em>) – Unit - seconds</p></li>
+<li><p><strong>fall</strong> (<em>Float</em>) – Unit - seconds</p></li>
 <li><p><strong>amplitude</strong> (<em>Float</em>) – Unit - Volts</p></li>
 <li><p><strong>offset</strong> (<em>Float</em>) – Unit - Volts</p></li>
 </ul>
@@ -171,7 +172,7 @@ rise and fall periods.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="navigate.model.waveforms.dc_value.html" class="btn btn-neutral float-left" title="navigate.model.waveforms.dc_value" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.model.waveforms.sawtooth.html" class="btn btn-neutral float-right" title="navigate.model.waveforms.sawtooth" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.model.waveforms.remote_focus_ramp_triangular.html" class="btn btn-neutral float-right" title="navigate.model.waveforms.remote_focus_ramp_triangular" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

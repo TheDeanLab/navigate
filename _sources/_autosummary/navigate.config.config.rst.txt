@@ -19,6 +19,7 @@ navigate.config.config
       get_navigate_path
       load_configs
       update_config_dict
+      verify_configuration
       verify_experiment_config
       verify_waveform_constants
    

@@ -137,7 +137,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.devices.camera.camera_hamamatsu.</span></span><span class="sig-name descname"><span class="pre">HamamatsuOrcaLightning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrca.html#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrca" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrca"><code class="xref py py-class docutils literal notranslate"><span class="pre">HamamatsuOrca</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.html#navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">HamamatsuBase</span></code></a></p>
 <p>HamamatsuOrcaLightning camera class.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.__init__">
@@ -148,7 +148,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope in configuration</p></li>
 <li><p><strong>device_connection</strong> (<em>object</em>) – Hardware device to connect to</p></li>
-<li><p><strong>configuration</strong> (<em>multiprocesing.managers.DictProxy</em>) – Global configuration of the microscope</p></li>
+<li><p><strong>configuration</strong> (<em>multiprocessing.managers.DictProxy</em>) – Global configuration of the microscope</p></li>
 </ul>
 </dd>
 </dl>
@@ -213,29 +213,11 @@
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.max_image_height" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.max_image_height"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_image_height</span></code></a></p></td>
-<td><p>Get maximum image height.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.max_image_width" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.max_image_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_image_width</span></code></a></p></td>
-<td><p>Get maximum image width.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.min_image_height" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.min_image_height"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_image_height</span></code></a></p></td>
-<td><p>Get minimum image height.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.min_image_width" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.min_image_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_image_width</span></code></a></p></td>
-<td><p>Get minimum image width.</p></td>
-</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.offset" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">offset</span></code></a></p></td>
 <td><p>Return offset map.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.serial_number" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.serial_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serial_number</span></code></a></p></td>
 <td><p>Get Camera Serial Number</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.step_image_height" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.step_image_height"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step_image_height</span></code></a></p></td>
-<td><p>Get step image height.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.step_image_width" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.step_image_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step_image_width</span></code></a></p></td>
-<td><p>Get step image width.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.variance" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">variance</span></code></a></p></td>
 <td><p>Return variance map.</p></td>
@@ -249,14 +231,15 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>full_chip_exposure_time</strong> (<em>float</em>) – Full chip exposure time.</p></li>
+<li><p><strong>full_chip_exposure_time</strong> (<em>float</em>) – Full chip exposure time in seconds.</p></li>
 <li><p><strong>shutter_width</strong> (<em>int</em>) – Shutter width.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>exposure_time</strong> (<em>float</em>) – Exposure time.</p></li>
-<li><p><strong>camera_line_interval</strong> (<em>float</em>) – Camera line interval.</p></li>
+<li><p><strong>exposure_time</strong> (<em>float</em>) – Exposure time in seconds.</p></li>
+<li><p><strong>camera_line_interval</strong> (<em>float</em>) – Camera line interval in seconds.</p></li>
+<li><p><strong>full_chip_exposure_time</strong> (<em>float</em>) – Full chip exposure time in seconds.</p></li>
 </ul>
 </p>
 </dd>
@@ -273,13 +256,10 @@ Assumes model C13440 with Camera Link communication from Hamamatsu.
 Currently pulling values directly from the camera.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><ul class="simple">
-<li><p><strong>readout_time</strong> (<em>float</em>) – Duration of time needed to readout an image.</p></li>
-<li><p><strong>max_frame_rate</strong> (<em>float</em>) – Maximum framerate for a given camera acquisition mode.</p></li>
-<li><p><strong>TODO</strong> (<em>I think self.camera_controller.get_property_value(“readout_time”) pulls</em>) – out the actual readout_time
-calculated here (i.e. we don’t need to do the calculations).</p></li>
-</ul>
-</p>
+<dd class="field-odd"><p><strong>readout_time</strong> – Duration of time needed to readout an image.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -432,7 +412,7 @@ Units for the software are in milliseconds. Conversion is done here.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>exposure_time</strong> (<em>float</em>) – Exposure time in milliseconds.</p>
+<dd class="field-odd"><p><strong>exposure_time</strong> (<em>float</em>) – Exposure time in seconds.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -514,58 +494,35 @@ Units for the software are in milliseconds. Conversion is done here.</p>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.max_image_height">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_image_height</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.max_image_height" title="Permalink to this definition"></a></dt>
-<dd><p>Get maximum image height.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>max_image_height</strong> – Maximum image height.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.max_image_width">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_image_width</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.max_image_width" title="Permalink to this definition"></a></dt>
-<dd><p>Get maximum image width.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>max_image_width</strong> – Maximum image width.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
+<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.min_image_height">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_image_height</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.min_image_height" title="Permalink to this definition"></a></dt>
-<dd><p>Get minimum image height.</p>
+<span class="sig-name descname"><span class="pre">min_image_height</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.min_image_height" title="Permalink to this definition"></a></dt>
+<dd><p>Minimum image height</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>min_image_height</strong> – Minimum image height.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py property">
+<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.min_image_width">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_image_width</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.min_image_width" title="Permalink to this definition"></a></dt>
-<dd><p>Get minimum image width.</p>
+<span class="sig-name descname"><span class="pre">min_image_width</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.min_image_width" title="Permalink to this definition"></a></dt>
+<dd><p>Minimum image width</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>min_image_width</strong> – Minimum image width.</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.minimum_exposure_time">
+<span class="sig-name descname"><span class="pre">minimum_exposure_time</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.minimum_exposure_time" title="Permalink to this definition"></a></dt>
+<dd><p>minimum exposure time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -598,30 +555,24 @@ Units for the software are in milliseconds. Conversion is done here.</p>
 </dl>
 </dd></dl>
 
-<dl class="py property">
+<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.step_image_height">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">step_image_height</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.step_image_height" title="Permalink to this definition"></a></dt>
-<dd><p>Get step image height.</p>
+<span class="sig-name descname"><span class="pre">step_image_height</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.step_image_height" title="Permalink to this definition"></a></dt>
+<dd><p>Minimum step size for image height.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>step_image_height</strong> – Step image height.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py property">
+<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.step_image_width">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">step_image_width</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.step_image_width" title="Permalink to this definition"></a></dt>
-<dd><p>Get step image width.</p>
+<span class="sig-name descname"><span class="pre">step_image_width</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.step_image_width" title="Permalink to this definition"></a></dt>
+<dd><p>Minimum step size for image width.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>step_image_width</strong> – Step image width.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

@@ -35,8 +35,7 @@ navigate.model.devices.daq.daq\_base.DAQBase
       ~DAQBase.sample_rate
       ~DAQBase.sweep_times
       ~DAQBase.exposure_times
-      ~DAQBase.remote_focus_ramp_falling
-      ~DAQBase.camera_delay_percent
+      ~DAQBase.camera_delay
       ~DAQBase.waveform_dict
       ~DAQBase.waveform_repeat_num
       ~DAQBase.waveform_expand_num

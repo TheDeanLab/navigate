@@ -19,6 +19,7 @@ navigate.model.devices.camera.camera\_hamamatsu
       :toctree:
       :template: custom_class.rst
    
+      HamamatsuBase
       HamamatsuOrca
       HamamatsuOrcaFire
       HamamatsuOrcaLightning

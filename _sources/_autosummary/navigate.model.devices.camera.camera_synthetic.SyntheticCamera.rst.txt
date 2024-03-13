@@ -54,16 +54,15 @@ navigate.model.devices.camera.camera\_synthetic.SyntheticCamera
       ~SyntheticCamera.random_image
       ~SyntheticCamera.serial_number
       ~SyntheticCamera.camera_exposure_time
+      ~SyntheticCamera.x_pixels
+      ~SyntheticCamera.y_pixels
       ~SyntheticCamera.configuration
       ~SyntheticCamera.camera_controller
       ~SyntheticCamera.camera_parameters
-      ~SyntheticCamera.max_image_width
-      ~SyntheticCamera.max_image_height
       ~SyntheticCamera.min_image_width
       ~SyntheticCamera.min_image_height
       ~SyntheticCamera.step_image_width
       ~SyntheticCamera.step_image_height
-      ~SyntheticCamera.x_pixels
-      ~SyntheticCamera.y_pixels
+      ~SyntheticCamera.minimum_exposure_time
    
    

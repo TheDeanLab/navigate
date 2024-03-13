@@ -34,10 +34,9 @@ navigate.model.devices.galvo.galvo\_synthetic.SyntheticGalvo
       ~SyntheticGalvo.device_config
       ~SyntheticGalvo.sample_rate
       ~SyntheticGalvo.sweep_time
-      ~SyntheticGalvo.camera_delay_percent
+      ~SyntheticGalvo.camera_delay
       ~SyntheticGalvo.galvo_max_voltage
       ~SyntheticGalvo.galvo_min_voltage
-      ~SyntheticGalvo.remote_focus_ramp_falling
       ~SyntheticGalvo.galvo_waveform
       ~SyntheticGalvo.waveform_dict
    

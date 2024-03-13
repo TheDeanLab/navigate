@@ -249,6 +249,12 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.camera_exposure_time" title="navigate.model.devices.camera.camera_synthetic.SyntheticCamera.camera_exposure_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera_exposure_time</span></code></a></p></td>
 <td><p>exposure time</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.x_pixels" title="navigate.model.devices.camera.camera_synthetic.SyntheticCamera.x_pixels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_pixels</span></code></a></p></td>
+<td><p>width</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.y_pixels" title="navigate.model.devices.camera.camera_synthetic.SyntheticCamera.y_pixels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_pixels</span></code></a></p></td>
+<td><p>height</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -259,14 +265,15 @@ Calculate the parameters for an acquisition</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>full_chip_exposure_time</strong> (<em>float</em>) – Normal mode exposure time.</p></li>
+<li><p><strong>full_chip_exposure_time</strong> (<em>float</em>) – Normal mode exposure time in seconds.</p></li>
 <li><p><strong>shutter_width</strong> (<em>int</em>) – Width of light-sheet rolling shutter.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>exposure_time</strong> (<em>float</em>) – Light-sheet mode exposure time (ms).</p></li>
+<li><p><strong>exposure_time</strong> (<em>float</em>) – Light-sheet mode exposure time (s).</p></li>
 <li><p><strong>camera_line_interval</strong> (<em>float</em>) – HamamatsuOrca line interval duration (s).</p></li>
+<li><p><strong>full_chip_exposure time</strong> (<em>float</em>) – Full chip exposure time (s).</p></li>
 </ul>
 </p>
 </dd>
@@ -280,11 +287,10 @@ Calculate the parameters for an acquisition</p>
 time and maximum frame rate according to the camera configuration settings.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><ul class="simple">
-<li><p><strong>readout_time</strong> (<em>float</em>) – Duration of time needed to readout an image.</p></li>
-<li><p><strong>max_frame_rate</strong> (<em>float</em>) – Maximum framerate for a given camera acquisition mode.</p></li>
-</ul>
-</p>
+<dd class="field-odd"><p><strong>readout_time</strong> – Duration of time needed to readout an image.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -419,7 +425,7 @@ Numpy stacks.</p>
 <p>All of our units are in milliseconds. Function converts to seconds.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>exposure_time</strong> (<em>float</em>) – Exposure time in milliseconds.</p>
+<dd class="field-odd"><p><strong>exposure_time</strong> (<em>float</em>) – Exposure time in seconds.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -535,28 +541,6 @@ Numpy stacks.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.devices.camera.camera_synthetic.SyntheticCamera.max_image_height">
-<span class="sig-name descname"><span class="pre">max_image_height</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.max_image_height" title="Permalink to this definition"></a></dt>
-<dd><p>Maximum image height</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.devices.camera.camera_synthetic.SyntheticCamera.max_image_width">
-<span class="sig-name descname"><span class="pre">max_image_width</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.max_image_width" title="Permalink to this definition"></a></dt>
-<dd><p>Maximum image width</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.camera_synthetic.SyntheticCamera.min_image_height">
 <span class="sig-name descname"><span class="pre">min_image_height</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.min_image_height" title="Permalink to this definition"></a></dt>
 <dd><p>Minimum image height</p>
@@ -574,6 +558,17 @@ Numpy stacks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.camera.camera_synthetic.SyntheticCamera.minimum_exposure_time">
+<span class="sig-name descname"><span class="pre">minimum_exposure_time</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.minimum_exposure_time" title="Permalink to this definition"></a></dt>
+<dd><p>minimum exposure time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -675,7 +670,7 @@ Numpy stacks.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.camera_synthetic.SyntheticCamera.x_pixels">
 <span class="sig-name descname"><span class="pre">x_pixels</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.x_pixels" title="Permalink to this definition"></a></dt>
-<dd><p>Number of pixels in the x direction</p>
+<dd><p>width</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
@@ -686,7 +681,7 @@ Numpy stacks.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.camera_synthetic.SyntheticCamera.y_pixels">
 <span class="sig-name descname"><span class="pre">y_pixels</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.y_pixels" title="Permalink to this definition"></a></dt>
-<dd><p>Number of pixels in the y direction</p>
+<dd><p>height</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>

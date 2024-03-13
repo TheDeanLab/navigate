@@ -32,10 +32,7 @@ navigate.model.devices.remote\_focus.remote\_focus\_base.RemoteFocusBase
       ~RemoteFocusBase.device_config
       ~RemoteFocusBase.sample_rate
       ~RemoteFocusBase.sweep_time
-      ~RemoteFocusBase.camera_delay_percent
-      ~RemoteFocusBase.remote_focus_delay
-      ~RemoteFocusBase.percent_smoothing
-      ~RemoteFocusBase.remote_focus_ramp_falling
+      ~RemoteFocusBase.camera_delay
       ~RemoteFocusBase.remote_focus_max_voltage
       ~RemoteFocusBase.remote_focus_min_voltage
       ~RemoteFocusBase.waveform_dict

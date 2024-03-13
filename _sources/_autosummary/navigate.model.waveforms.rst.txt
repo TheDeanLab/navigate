@@ -17,6 +17,7 @@ navigate.model.waveforms
       camera_exposure
       dc_value
       remote_focus_ramp
+      remote_focus_ramp_triangular
       sawtooth
       sine_wave
       single_pulse

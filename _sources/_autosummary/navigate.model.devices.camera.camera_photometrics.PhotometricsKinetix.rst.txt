@@ -45,8 +45,6 @@ navigate.model.devices.camera.camera\_photometrics.PhotometricsKinetix
       ~PhotometricsKinetix.offset
       ~PhotometricsKinetix.serial_number
       ~PhotometricsKinetix.variance
-      ~PhotometricsKinetix.max_image_width
-      ~PhotometricsKinetix.max_image_height
       ~PhotometricsKinetix.configuration
       ~PhotometricsKinetix.camera_controller
       ~PhotometricsKinetix.camera_parameters
@@ -57,5 +55,6 @@ navigate.model.devices.camera.camera\_photometrics.PhotometricsKinetix
       ~PhotometricsKinetix.step_image_height
       ~PhotometricsKinetix.x_pixels
       ~PhotometricsKinetix.y_pixels
+      ~PhotometricsKinetix.minimum_exposure_time
    
    

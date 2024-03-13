@@ -1,0 +1,60 @@
+navigate.model.devices.camera.camera\_hamamatsu.HamamatsuBase
+=============================================================
+
+.. currentmodule:: navigate.model.devices.camera.camera_hamamatsu
+
+.. autoclass:: HamamatsuBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~HamamatsuBase.__init__
+      ~HamamatsuBase.calculate_light_sheet_exposure_time
+      ~HamamatsuBase.calculate_readout_time
+      ~HamamatsuBase.close_camera
+      ~HamamatsuBase.close_image_series
+      ~HamamatsuBase.get_line_interval
+      ~HamamatsuBase.get_minimum_waiting_time
+      ~HamamatsuBase.get_new_frame
+      ~HamamatsuBase.get_offset_variance_maps
+      ~HamamatsuBase.initialize_image_series
+      ~HamamatsuBase.report_settings
+      ~HamamatsuBase.set_ROI
+      ~HamamatsuBase.set_binning
+      ~HamamatsuBase.set_exposure_time
+      ~HamamatsuBase.set_line_interval
+      ~HamamatsuBase.set_readout_direction
+      ~HamamatsuBase.set_sensor_mode
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~HamamatsuBase.offset
+      ~HamamatsuBase.serial_number
+      ~HamamatsuBase.variance
+      ~HamamatsuBase.configuration
+      ~HamamatsuBase.camera_controller
+      ~HamamatsuBase.camera_parameters
+      ~HamamatsuBase.is_acquiring
+      ~HamamatsuBase.min_image_width
+      ~HamamatsuBase.min_image_height
+      ~HamamatsuBase.step_image_width
+      ~HamamatsuBase.step_image_height
+      ~HamamatsuBase.x_pixels
+      ~HamamatsuBase.y_pixels
+      ~HamamatsuBase.minimum_exposure_time
+   
+   

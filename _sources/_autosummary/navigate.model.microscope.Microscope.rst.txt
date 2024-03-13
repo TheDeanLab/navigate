@@ -22,7 +22,6 @@ navigate.model.microscope.Microscope
       ~Microscope.calculate_exposure_sweep_times
       ~Microscope.end_acquisition
       ~Microscope.get_exposure_sweep_times
-      ~Microscope.get_readout_time
       ~Microscope.get_stage_position
       ~Microscope.load_and_start_devices
       ~Microscope.move_remote_focus

@@ -42,20 +42,19 @@ navigate.model.devices.camera.camera\_hamamatsu.HamamatsuOrcaLightning
 
    .. autosummary::
    
-      ~HamamatsuOrcaLightning.max_image_height
-      ~HamamatsuOrcaLightning.max_image_width
-      ~HamamatsuOrcaLightning.min_image_height
-      ~HamamatsuOrcaLightning.min_image_width
       ~HamamatsuOrcaLightning.offset
       ~HamamatsuOrcaLightning.serial_number
-      ~HamamatsuOrcaLightning.step_image_height
-      ~HamamatsuOrcaLightning.step_image_width
       ~HamamatsuOrcaLightning.variance
       ~HamamatsuOrcaLightning.configuration
       ~HamamatsuOrcaLightning.camera_controller
       ~HamamatsuOrcaLightning.camera_parameters
       ~HamamatsuOrcaLightning.is_acquiring
+      ~HamamatsuOrcaLightning.min_image_width
+      ~HamamatsuOrcaLightning.min_image_height
+      ~HamamatsuOrcaLightning.step_image_width
+      ~HamamatsuOrcaLightning.step_image_height
       ~HamamatsuOrcaLightning.x_pixels
       ~HamamatsuOrcaLightning.y_pixels
+      ~HamamatsuOrcaLightning.minimum_exposure_time
    
    

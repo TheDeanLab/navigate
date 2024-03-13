@@ -225,12 +225,6 @@ Photometrics API.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.variance" title="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">variance</span></code></a></p></td>
 <td><p>Return variance map.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.max_image_width" title="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.max_image_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_image_width</span></code></a></p></td>
-<td><p>Max image width</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.max_image_height" title="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.max_image_height"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_image_height</span></code></a></p></td>
-<td><p>Max image height</p></td>
-</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -249,6 +243,7 @@ Calculate the parameters for an ASLM acquisition</p>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>exposure_time</strong> (<em>float</em>) – Light-sheet mode exposure time.</p></li>
 <li><p><strong>camera_line_interval</strong> (<em>float</em>) – HamamatsuOrca line interval duration.</p></li>
+<li><p><strong>full_chip_exposure_time</strong> (<em>float</em>) – Full chip exposure time (s)</p></li>
 </ul>
 </p>
 </dd>
@@ -266,11 +261,10 @@ configuration settings.</p>
 <dd class="field-odd"><p><strong>Not implemented. Currently hard-coded for Hamamatsu Orca Flash 4.0.</strong></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>readout_time</strong> (<em>float</em>) – Duration of time needed to readout an image.</p></li>
-<li><p><strong>max_frame_rate</strong> (<em>float</em>) – Maximum framerate for a given camera acquisition mode.</p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>readout_time</strong> – Duration of time needed to readout an image.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -487,28 +481,6 @@ Scan direction options: {‘Down’: 0, ‘Up’: 1, ‘Down/Up Alternate’: 2}
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.max_image_height">
-<span class="sig-name descname"><span class="pre">max_image_height</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.max_image_height" title="Permalink to this definition"></a></dt>
-<dd><p>Max image height</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.max_image_width">
-<span class="sig-name descname"><span class="pre">max_image_width</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.max_image_width" title="Permalink to this definition"></a></dt>
-<dd><p>Max image width</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.min_image_height">
 <span class="sig-name descname"><span class="pre">min_image_height</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.min_image_height" title="Permalink to this definition"></a></dt>
 <dd><p>Minimum image height</p>
@@ -526,6 +498,17 @@ Scan direction options: {‘Down’: 0, ‘Up’: 1, ‘Down/Up Alternate’: 2}
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.minimum_exposure_time">
+<span class="sig-name descname"><span class="pre">minimum_exposure_time</span></span><a class="headerlink" href="#navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.minimum_exposure_time" title="Permalink to this definition"></a></dt>
+<dd><p>minimum exposure time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>

@@ -34,10 +34,9 @@ navigate.model.devices.galvo.galvo\_base.GalvoBase
       ~GalvoBase.device_config
       ~GalvoBase.sample_rate
       ~GalvoBase.sweep_time
-      ~GalvoBase.camera_delay_percent
+      ~GalvoBase.camera_delay
       ~GalvoBase.galvo_max_voltage
       ~GalvoBase.galvo_min_voltage
-      ~GalvoBase.remote_focus_ramp_falling
       ~GalvoBase.galvo_waveform
       ~GalvoBase.waveform_dict
    

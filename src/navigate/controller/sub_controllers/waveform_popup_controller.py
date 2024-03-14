@@ -533,11 +533,18 @@ class WaveformPopupController(GUIController):
         )
 
     def estimate_galvo_setting(self, *args, **kwargs):
-        """Estimate galvo settings according to the acquisition parameters.
+        """Digitally scanned light-sheet frequency estimation.
 
-        Will only work if all channels have the same exposure duration.
-        Gets the line interval from the camera, number of pixels from the light-sheet
-        mode, and estimates the frequency as 1 / (line interval * number of pixels).
+        When imaging in a digitally scanned light-sheet mode, the galvo must
+        operate at a specific frequency, otherwise periodic lines will appear in
+        the image. This function estimates the frequency of the galvo based on the
+        line interval and the number of pixels in the light-sheet mode.
+
+        Note
+        ----
+            Will only work if all channels have the same exposure duration.
+            The framerate widget doesn't update unless you change the
+            exposure time in the channel settings. Default is 100ms.
 
         Parameters
         ----------
@@ -547,37 +554,36 @@ class WaveformPopupController(GUIController):
             The key is the name of the galvo and the value is the galvo setting.
         """
 
+        # Get the name of the galvo.
         galvo_name = args[0]
 
+        # Get the number of pixels in the light-sheet mode.
         number_of_pixels = (
             self.parent_controller.camera_setting_controller.mode_widgets[
                 "Pixels"
             ].get()
         )
+
+        # If not in the light-sheet mode, widget returns an empty string.
         if number_of_pixels == "":
-            # If we are not in the light-sheet mode, widget returns an empty string.
             return
 
-        # TODO: Worth noting that this doesn't matter because it cancels out in the
-        # frequency bit, but this is often not the right value. The framerate widget
-        # doesn't update unless you change the exposure time in the channel settings.
-        # It launches as a default of 100 ms every time.
+        # Get the exposure time. Convert to seconds.
         exposure_time = (
             self.parent_controller.camera_setting_controller.framerate_widgets[
                 "exposure_time"
             ].get()
         )
+        exposure_time = exposure_time / 1000
 
-        # The camera line interval won't be set until starting acquisition,
-        # we need to calculate it directly
-        # exposure_time and light_sheet_exposure_time are both ms
+        # Get the light sheet exposure time.
         (
-            light_sheet_exposure_time,
-            _,
+            light_sheet_exposure_time, _, _,
         ) = self.parent_controller.model.get_camera_line_interval_and_exposure_time(
             exposure_time, int(number_of_pixels) + 1
-        )  # TODO: Unclear why we need the +1. Figure out the reason.
+        )
 
+        # Calculate the frequency of the galvo.
         frequency = 2 / light_sheet_exposure_time * exposure_time
 
         # Update the GUI

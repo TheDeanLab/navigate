@@ -266,10 +266,13 @@ def remote_focus_ramp_triangular(
     delay_array = np.zeros(delay_samples) + offset
 
     # ramp samples
+    # TODO: is 10ms too long?
     ramp_samples = int(
-        (exposure_time + camera_delay - remote_focus_delay)
+        (exposure_time + camera_delay - remote_focus_delay - 0.01)
         * sample_rate
     )
+    if ramp_samples < 0:
+        ramp_samples = 0
     rise_ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
     fall_ramp_array = np.linspace(offset + amplitude, offset - amplitude, ramp_samples)
 

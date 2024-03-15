@@ -222,7 +222,7 @@ class NIDAQ(DAQBase):
         camera_high_time = 0.004
         exposure_time = self.exposure_times[channel_key]
         sweep_time = self.sweep_times[channel_key]
-        camera_low_time = sweep_time - camera_high_time
+        camera_low_time = sweep_time - camera_high_time - self.camera_delay
         camera_delay = self.camera_delay
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(

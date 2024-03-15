@@ -202,7 +202,7 @@ def remote_focus_ramp(
     # fall_samples = int(fall * sample_rate)
     fall_samples = int(
         int(np.multiply(sample_rate, sweep_time))
-        - (delay_samples + ramp_samples + fall_samples)
+        - (delay_samples + ramp_samples + settle_samples)
     ) // 2
     fall_array = np.linspace(offset, amplitude, fall_samples)
 

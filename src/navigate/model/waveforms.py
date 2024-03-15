@@ -185,29 +185,36 @@ def remote_focus_ramp(
     """
     # create an array just containing the negative amplitude voltage:
     delay_samples = int(remote_focus_delay * sample_rate)
-    delay_array = np.zeros(delay_samples) + offset - amplitude
+    delay_array = np.zeros(delay_samples) + amplitude
 
     # 10-7.5 -> 1.025 * .2
     #
     ramp_samples = int(
-        (exposure_time + camera_delay - remote_focus_delay)
+        (exposure_time + camera_delay - remote_focus_delay - fall)
         * sample_rate
     )
-    ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
+    ramp_array = np.linspace(amplitude, offset, ramp_samples)
+
+    settle_samples = int(fall * sample_rate)
+    settle_array = np.zeros(settle_samples) + offset
 
     # fall_samples = .025 * .2 * 100000 = 500
-    fall_samples = int(fall * sample_rate)
-    fall_array = np.linspace(offset + amplitude, offset - amplitude, fall_samples)
+    # fall_samples = int(fall * sample_rate)
+    fall_samples = int(
+        int(np.multiply(sample_rate, sweep_time))
+        - (delay_samples + ramp_samples + fall_samples)
+    ) // 2
+    fall_array = np.linspace(offset, amplitude, fall_samples)
 
     extra_samples = int(
         int(np.multiply(sample_rate, sweep_time))
-        - (delay_samples + ramp_samples + fall_samples)
+        - (delay_samples + ramp_samples + settle_samples + fall_samples)
     )
     if extra_samples > 0:
-        extra_array = np.zeros(extra_samples) + offset - amplitude
-        waveform = np.hstack([delay_array, ramp_array, fall_array, extra_array])
+        extra_array = np.zeros(extra_samples) + amplitude
+        waveform = np.hstack([delay_array, ramp_array, settle_array, fall_array, extra_array])
     else:
-        waveform = np.hstack([delay_array, ramp_array, fall_array])
+        waveform = np.hstack([delay_array, ramp_array, settle_array, fall_array])
 
 
     return waveform
@@ -267,6 +274,7 @@ def remote_focus_ramp_triangular(
 
     # ramp samples
     # TODO: is 10ms too long?
+    # 10 ms for 200ms exposure; 5ms for 100ms exposure
     ramp_samples = int(
         (exposure_time + camera_delay - remote_focus_delay - 0.01)
         * sample_rate

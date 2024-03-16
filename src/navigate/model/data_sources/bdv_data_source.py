@@ -70,18 +70,25 @@ class BigDataViewerDataSource(DataSource):
         )
         #: np.array: The number of subdivisions in each dimension.
         self._subdivisions = None
+
         #: np.array: The shape of the image.
         self._shapes = None
+
         #: np.array: The image.
         self.image = None
+
         #: list: The views.
         self._views = []
+
         #: zarr.N5Store: The N5 store.
         self.__store = None
+
         #: str: The file type.
         self.__file_type = os.path.splitext(os.path.basename(file_name))[-1][1:].lower()
+
         if self.__file_type not in ["h5", "n5"]:
             raise ValueError(f"Unknown file type {self.__file_type}.")
+
         if self.__file_type == "h5":
             self.setup = self._setup_h5
             self.ds_name = self._h5_ds_name
@@ -90,6 +97,7 @@ class BigDataViewerDataSource(DataSource):
             self.ds_name = self._n5_ds_name
 
         # self._current_frame = 0
+
         #: BigDataViewerMetadata: The metadata.
         self.metadata = BigDataViewerMetadata()
 
@@ -120,6 +128,7 @@ class BigDataViewerDataSource(DataSource):
             length = 1
         else:
             length = len(keys)
+
         if length < 1:
             raise IndexError(
                 "Too few indices. Indices may be (x, y, c, z, t, p, subdiv)."

@@ -85,9 +85,12 @@ class RemoteFocusBase:
         ]["daq"]["sweep_time"]
 
         #: float: Camera delay percent.
-        self.camera_delay = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["camera"]["delay"] / 1000
+        self.camera_delay = (
+            configuration["configuration"]["microscopes"][microscope_name]["camera"][
+                "delay"
+            ]
+            / 1000
+        )
 
         # Waveform Parameters
         #: float: Remote focus max voltage.
@@ -137,12 +140,13 @@ class RemoteFocusBase:
             self.microscope_name
         ]["daq"]["sample_rate"]
 
-        remote_focus_ramp_falling = float(
-            waveform_constants["other_constants"]["remote_focus_ramp_falling"]
-        ) / 1000
-        remote_focus_delay = float(
-            waveform_constants["other_constants"]["remote_focus_delay"]
-        ) / 1000
+        remote_focus_ramp_falling = (
+            float(waveform_constants["other_constants"]["remote_focus_ramp_falling"])
+            / 1000
+        )
+        remote_focus_delay = (
+            float(waveform_constants["other_constants"]["remote_focus_delay"]) / 1000
+        )
         percent_smoothing = float(
             waveform_constants["other_constants"]["percent_smoothing"]
         )
@@ -227,9 +231,9 @@ class RemoteFocusBase:
                     self.waveform_dict[channel_key] = smooth_waveform(
                         waveform=self.waveform_dict[channel_key],
                         percent_smoothing=percent_smoothing,
-                    )[: samples]
+                    )[:samples]
 
-                # Clip any values outside of the hardware limits
+                # Clip any values outside the hardware limits
                 self.waveform_dict[channel_key][
                     self.waveform_dict[channel_key] > self.remote_focus_max_voltage
                 ] = self.remote_focus_max_voltage

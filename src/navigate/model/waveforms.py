@@ -32,6 +32,7 @@
 
 # Standard Library Imports
 import logging
+from functools import cache
 
 # Third Party Imports
 import numpy as np
@@ -44,7 +45,10 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_delay=0.001):
+@cache
+def camera_exposure(
+    sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_delay=0.001
+):
     """Calculates timing and duration of camera exposure.
     Not actually used to trigger the camera.  Only meant for visualization.
 
@@ -89,6 +93,7 @@ def camera_exposure(sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_del
     return np.array(array)
 
 
+@cache
 def single_pulse(
     sample_rate=100000, sweep_time=0.4, delay=10, pulse_width=1, amplitude=1, offset=0
 ):
@@ -135,6 +140,7 @@ def single_pulse(
     return np.array(array)
 
 
+@cache
 def remote_focus_ramp(
     sample_rate=100000,
     exposure_time=0.2,
@@ -190,8 +196,7 @@ def remote_focus_ramp(
     # 10-7.5 -> 1.025 * .2
     #
     ramp_samples = int(
-        (exposure_time + camera_delay - remote_focus_delay)
-        * sample_rate
+        (exposure_time + camera_delay - remote_focus_delay) * sample_rate
     )
     ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
 
@@ -209,19 +214,19 @@ def remote_focus_ramp(
     else:
         waveform = np.hstack([delay_array, ramp_array, fall_array])
 
-
     return waveform
 
 
+@cache
 def remote_focus_ramp_triangular(
-        sample_rate=100000,
-        exposure_time=0.2,
-        sweep_time=0.24,
-        remote_focus_delay=0.005,
-        camera_delay=0.001,
-        amplitude=1,
-        offset=0,
-        ramp_type='Rising'
+    sample_rate=100000,
+    exposure_time=0.2,
+    sweep_time=0.24,
+    remote_focus_delay=0.005,
+    camera_delay=0.001,
+    amplitude=1,
+    offset=0,
+    ramp_type="Rising",
 ):
     """Returns a numpy array with a triangular ramp typically used for remote focusing
 
@@ -262,31 +267,46 @@ def remote_focus_ramp_triangular(
     """
     # create an array just containing the negative amplitude voltage:
     # In theory, delay here should be 4H.
-    delay_samples = int(remote_focus_delay  * sample_rate)
+    delay_samples = int(remote_focus_delay * sample_rate)
     delay_array = np.zeros(delay_samples) + offset
 
     # ramp samples
     ramp_samples = int(
-        (exposure_time + camera_delay - remote_focus_delay)
-        * sample_rate
+        (exposure_time + camera_delay - remote_focus_delay) * sample_rate
     )
     rise_ramp_array = np.linspace(offset - amplitude, offset + amplitude, ramp_samples)
     fall_ramp_array = np.linspace(offset + amplitude, offset - amplitude, ramp_samples)
 
     settle_samples = int(
-        int(np.multiply(sample_rate, sweep_time))
-        - (delay_samples + ramp_samples)
+        int(np.multiply(sample_rate, sweep_time)) - (delay_samples + ramp_samples)
     )
     settle_array = np.zeros(settle_samples) + offset
 
-    if ramp_type == 'Rising':
-        waveform = np.hstack([delay_array - amplitude, rise_ramp_array, settle_array + amplitude,
-                                delay_array + amplitude, fall_ramp_array, settle_array - amplitude])
-    elif ramp_type == 'Falling':
-        waveform = np.hstack([delay_array + amplitude, fall_ramp_array, settle_array - amplitude,
-                                delay_array - amplitude, rise_ramp_array, settle_array + amplitude])
+    if ramp_type == "Rising":
+        waveform = np.hstack(
+            [
+                delay_array - amplitude,
+                rise_ramp_array,
+                settle_array + amplitude,
+                delay_array + amplitude,
+                fall_ramp_array,
+                settle_array - amplitude,
+            ]
+        )
+    elif ramp_type == "Falling":
+        waveform = np.hstack(
+            [
+                delay_array + amplitude,
+                fall_ramp_array,
+                settle_array - amplitude,
+                delay_array - amplitude,
+                rise_ramp_array,
+                settle_array + amplitude,
+            ]
+        )
 
     return waveform
+
 
 def sawtooth(
     sample_rate=100000,
@@ -326,7 +346,6 @@ def sawtooth(
     --------
     >>> typical_galvo = sawtooth(sample_rate, sweep_time, 10, 1, 0, 50, np.pi/2)
     """
-
     samples = int(np.multiply(sample_rate, sweep_time))
     duty_cycle = duty_cycle / 100
     t = np.linspace(0, sweep_time, samples)
@@ -336,6 +355,7 @@ def sawtooth(
     return waveform
 
 
+@cache
 def dc_value(sample_rate=100000, sweep_time=0.4, amplitude=1):
     """
     Returns a numpy array with a DC value
@@ -365,6 +385,7 @@ def dc_value(sample_rate=100000, sweep_time=0.4, amplitude=1):
     return waveform
 
 
+@cache
 def square(
     sample_rate=100000,
     sweep_time=0.4,
@@ -410,6 +431,7 @@ def square(
     return waveform
 
 
+@cache
 def sine_wave(
     sample_rate=100000, sweep_time=0.4, frequency=10, amplitude=1, offset=0, phase=0
 ):

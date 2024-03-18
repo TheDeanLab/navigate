@@ -30,11 +30,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
+from time import sleep
 
 # Third Party Imports
 
 # Local Imports
-from navigate.view.configurator_application_window import ConfiguratorApp
+from navigate.view.configurator_application_window import ConfigurationAssistant
 
 # Logger Setup
 import logging
@@ -47,8 +48,41 @@ class Configurator:
     """Navigate Configurator"""
 
     def __init__(self, root, splash_screen):
-        # destroy splash screen and show main screen
-        splash_screen.destroy()
-        root.deiconify()
+        """Initiates the configurator application window.
 
-        self.view = ConfiguratorApp(root)
+        Parameters
+        ----------
+        root : tk.Tk
+            The main window of the application
+        splash_screen : SplashScreen
+            The splash screen of the application
+        """
+        self.root = root
+
+        # Show the splash screen for 1 second and then destroy it.
+        sleep(1)
+        splash_screen.destroy()
+        self.root.deiconify()
+        self.view = ConfigurationAssistant(root)
+
+        self.view.initial_window.continue_button.config(command=self.on_continue)
+        self.view.initial_window.cancel_button.config(command=self.on_cancel)
+
+    def on_cancel(self):
+        """Closes the window and exits the program"""
+        self.root.destroy()
+        exit()
+
+    def on_continue(self):
+        """Evaluate the number of configurations and create the configuration window"""
+        try:
+            num_configs = int(self.view.initial_window.num_configs_entry.get())
+            self.create_config_window(num_configs)
+        except ValueError:
+            print("Please enter a valid number")
+
+    def create_config_window(self, num_configs):
+
+        # self.view = ConfigurationAssistant(self.root)
+
+        print("Initial Window Destroyed")

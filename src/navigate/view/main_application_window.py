@@ -59,7 +59,7 @@ class MainApp(ttk.Frame):
     Adds the options for each file menu. It then sets up the frames, then grids the
     frames.
 
-    Finally it uses the notebook classes to put them into the respective frames on the
+    Finally, it uses the notebook classes to put them into the respective frames on the
     tk.Grid. Each of the notebook classes includes tab classes and inits those etc.
 
     The second parameter in each classes __init__ function is the parent.
@@ -108,12 +108,9 @@ class MainApp(ttk.Frame):
 
         ttk.Frame.__init__(self, self.scroll_frame.interior, *args, **kwargs)
 
-        # Initialize Logger
         #: logging.Logger: The logger for this class
         self.logger = logging.getLogger(p)
 
-        # This starts the main window config, and makes sure that any child
-        # widgets can be resized with the window
         #: tk.Tk: The main window of the application
         self.root = root
         self.root.title("navigate")
@@ -125,8 +122,10 @@ class MainApp(ttk.Frame):
             self.root.iconphoto(True, tk.PhotoImage(file=photo_image))
         except tk.TclError:
             pass
+
         self.root.resizable(True, True)
         self.root.geometry("")
+
         tk.Grid.columnconfigure(root, "all", weight=1)
         tk.Grid.rowconfigure(root, "all", weight=1)
 
@@ -159,11 +158,11 @@ class MainApp(ttk.Frame):
         self.frame_top_right.grid(row=1, column=1, sticky=tk.NSEW, padx=3, pady=3)
         self.frame_bottom_right.grid(row=2, column=1, sticky=tk.NSEW, padx=3, pady=3)
 
-        # Putting Notebooks into frames, tabs are held within the class of each
-        # notebook
         #: SettingsNotebook: The settings notebook for the application
         self.settings = SettingsNotebook(self.frame_left, self.root)
+
         #: CameraNotebook: The camera notebook for the application
         self.camera_waveform = CameraNotebook(self.frame_top_right, self.root)
+
         #: AcquireBar: The acquire bar for the application
         self.acqbar = AcquireBar(self.top_frame, self.root)

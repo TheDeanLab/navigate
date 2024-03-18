@@ -38,12 +38,13 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
+from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 
 # Logger Setup
 p = __name__.split(".")[1]
 
 
-class ConfigurationAssistant(ttk.Frame):
+class ConfigurationAssistantWindow(ttk.Frame):
     def __init__(self, root, *args, **kwargs):
         """Initiates the main application window
 
@@ -56,13 +57,14 @@ class ConfigurationAssistant(ttk.Frame):
         **kwargs
             Arbitrary keyword arguments
         """
+        #: tk.Tk: The main window of the application
+        self.root = root
+        self.root.title("Configuration Assistant")
+
+        ttk.Frame.__init__(self, self.root, *args, **kwargs)
 
         #: logging.Logger: The logger for this class
         self.logger = logging.getLogger(p)
-
-        #: tk.Tk: The main window of the application
-        self.root = root
-        self.root.title("navigate Configuration Assistant")
 
         view_directory = Path(__file__).resolve().parent
         try:
@@ -72,28 +74,28 @@ class ConfigurationAssistant(ttk.Frame):
             pass
 
         self.root.resizable(True, True)
-        self.root.geometry("512x512")
+        self.root.geometry("")
         self.root.rowconfigure(0, weight=1)
         self.root.columnconfigure(0, weight=1)
 
         #: ttk.Frame: The top frame of the application
         self.top_frame = ttk.Frame(self.root)
-        self.top_frame.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW)
 
         #: ttk.Frame: The main frame of the application
-        self.main_frame = ttk.Frame(self.root)
-        self.main_frame.grid(row=1, column=0, sticky=tk.NSEW)
+        self.microscope_frame = ttk.Frame(self.root)
+
+        self.grid(column=0, row=0, sticky=tk.NSEW)
+        self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
+        self.microscope_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=3, pady=3)
 
         #: ttk.Frame: The top frame of the application
-        self.initial_window = TopFrame(self.top_frame, self.root)
+        self.top_window = TopWindow(self.top_frame, self.root)
 
         #: ttk.Frame: The main frame of the application
-        self.microscope_window = MicroscopeConfiguratorWindow(
-            self.main_frame, self.root
-        )
+        self.microscope_window = MicroscopeWindow(self.microscope_frame, self.root)
 
 
-class TopFrame(ttk.Frame):
+class TopWindow(ttk.Frame):
     """Top Frame for Configuration Assistant.
 
     This class is the initial window for the configurator application.
@@ -119,8 +121,8 @@ class TopFrame(ttk.Frame):
         """
 
         #: ttk.Frame: The main frame of the application
-        self.main_frame = main_frame
-        ttk.Frame.__init__(self, self.main_frame, *args, **kwargs)
+        self.microscope_frame = main_frame
+        ttk.Frame.__init__(self, self.microscope_frame, *args, **kwargs)
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
@@ -142,8 +144,8 @@ class TopFrame(ttk.Frame):
         self.cancel_button.grid(row=0, column=3)
 
 
-class MicroscopeConfiguratorWindow(ttk.Frame):
-    def __init__(self, main_frame, root, *args, **kwargs):
+class MicroscopeWindow(DockableNotebook):
+    def __init__(self, microscope_frame, root, *args, **kwargs):
         """Initialize Acquire Bar.
 
         Parameters
@@ -157,7 +159,53 @@ class MicroscopeConfiguratorWindow(ttk.Frame):
         **kwargs
             Arbitrary keyword arguments.
         """
-        # ttk.Frame.__init__(self, self.main_frame, *args, **kwargs)
+        DockableNotebook.__init__(self, microscope_frame, root, *args, **kwargs)
+        self.grid(row=2, column=0)
 
-        # Entry for number of configurations
-        tk.Label(root, text="Microscope Configurator").grid(row=1, column=0)
+        # self.microscope_tab_1 = MicroscopeTab(self, name="Microscope 1", index=0)
+        # self.microscope_tab_2 = MicroscopeTab(self, name="Microscope 2", index=1)
+        #
+        # tab_list = [self.microscope_tab_1, self.microscope_tab_2]
+        # self.set_tablist(tab_list)
+        #
+        # # Adding tabs to self notebook
+        # self.add(self.microscope_tab_1, text="Microscope 1", sticky=tk.NSEW)
+        # self.add(self.microscope_tab_2, text="Microscope 2", sticky=tk.NSEW)
+
+        # hardware = [
+        #     "camera",
+        #     "daq",
+        #     "filer_wheel",
+        #     "galvo",
+        #     "lasers",
+        #     "mirrors",
+        #     "remote_focus",
+        #     "shutter",
+        #     "stages",
+        #     "zoom",
+        # ]
+        # index = 0
+        #
+        # for device in hardware:
+        #     print(device)
+        #     setattr(self, device, GenericConfiguratorTab(self,
+        #                                                  name=device,
+        #                                                  index=index)
+        #             )
+        #     index += 1
+
+
+class MicroscopeTab(ttk.Frame):
+    def __init__(self, parent, name, index, *args, **kwargs):
+
+        # Init Frame
+        tk.Frame.__init__(self, *args, **kwargs)
+
+        #: int: The index of the tab
+        self.index = index
+
+        # Formatting
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
+
+        print("Name: ", name)

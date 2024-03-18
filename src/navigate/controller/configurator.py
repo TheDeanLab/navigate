@@ -30,12 +30,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Standard Library Imports
-from time import sleep
+import tkinter as tk
 
 # Third Party Imports
 
 # Local Imports
-from navigate.view.configurator_application_window import ConfigurationAssistant
+from navigate.view.configurator_application_window import ConfigurationAssistantWindow
+from navigate.view.configurator_application_window import MicroscopeTab
 
 # Logger Setup
 import logging
@@ -60,13 +61,13 @@ class Configurator:
         self.root = root
 
         # Show the splash screen for 1 second and then destroy it.
-        sleep(1)
+        # sleep(1)
         splash_screen.destroy()
         self.root.deiconify()
-        self.view = ConfigurationAssistant(root)
+        self.view = ConfigurationAssistantWindow(root)
 
-        self.view.initial_window.continue_button.config(command=self.on_continue)
-        self.view.initial_window.cancel_button.config(command=self.on_cancel)
+        self.view.top_window.continue_button.config(command=self.on_continue)
+        self.view.top_window.cancel_button.config(command=self.on_cancel)
 
     def on_cancel(self):
         """Closes the window and exits the program"""
@@ -76,13 +77,32 @@ class Configurator:
     def on_continue(self):
         """Evaluate the number of configurations and create the configuration window"""
         try:
-            num_configs = int(self.view.initial_window.num_configs_entry.get())
+            num_configs = int(self.view.top_window.num_configs_entry.get())
             self.create_config_window(num_configs)
         except ValueError:
             print("Please enter a valid number")
 
     def create_config_window(self, num_configs):
+        """Creates the configuration window"""
 
-        # self.view = ConfigurationAssistant(self.root)
+        tab_list = []
+        self.view.microscope_window.set_tablist(tab_list)
 
-        print("Initial Window Destroyed")
+        for i in range(num_configs):
+            tab_name = f"Microscope {i}"
+            setattr(
+                self.view.microscope_window,
+                f"microscope_tab_{i}",
+                MicroscopeTab(self.view.microscope_window, name=tab_name, index=i),
+            )
+            tab_list.append(getattr(self.view.microscope_window, f"microscope_tab_{i}"))
+
+        self.view.microscope_window.set_tablist(tab_list)
+
+        # Adding tabs to self notebook
+        for i in range(num_configs):
+            self.view.microscope_window.add(
+                getattr(self.view.microscope_window, f"microscope_tab_{i}"),
+                text=f"Microscope {i}",
+                sticky=tk.NSEW,
+            )

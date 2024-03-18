@@ -39,6 +39,7 @@ import os
 
 # Local Imports
 from navigate.controller.controller import Controller
+from navigate.controller.configurator import Configurator
 from navigate.log_files.log_functions import log_setup
 from navigate.view.splash_screen import SplashScreen
 from navigate.tools.main_functions import (
@@ -113,7 +114,7 @@ def main():
     log_setup("logging.yml", logging_path)
 
     if args.configurator:
-        print("Configurator")
+        Configurator(root, splash_screen)
     else:
         Controller(
             root,

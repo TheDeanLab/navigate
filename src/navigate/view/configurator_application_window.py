@@ -145,22 +145,23 @@ class TopWindow(ttk.Frame):
 
 
 class MicroscopeWindow(DockableNotebook):
-    def __init__(self, microscope_frame, root, *args, **kwargs):
-        """Initialize Acquire Bar.
+    def __init__(self, frame, root, *args, **kwargs):
+        DockableNotebook.__init__(self, frame, root, *args, **kwargs)
+        self.grid(row=0, column=0, sticky=tk.NSEW)
 
-        Parameters
-        ----------
-        main_frame : ttk.Frame
-            Window to place widgets in.
-        root : tk.Tk
-            Root window of the application.
-        *args
-            Variable length argument list.
-        **kwargs
-            Arbitrary keyword arguments.
-        """
-        DockableNotebook.__init__(self, microscope_frame, root, *args, **kwargs)
-        self.grid(row=2, column=0)
+
+class MicroscopeTab(DockableNotebook):
+    def __init__(self, parent, name, index, root, *args, **kwargs):
+
+        # Init Frame
+        DockableNotebook.__init__(self, parent, root, *args, **kwargs)
+
+        #: int: The index of the tab
+        self.index = index
+
+        # Formatting
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
 
         tab_list = []
         hardware = {
@@ -173,7 +174,7 @@ class MicroscopeWindow(DockableNotebook):
             "remote_focus": "Remote Focus Devices",
             "shutter": "Shutters",
             "stages": "Stages",
-            "zoom": "Zoom Devices",
+            "zoom": "Zoom Device",
         }
 
         tab_names = list(hardware.values())
@@ -183,45 +184,15 @@ class MicroscopeWindow(DockableNotebook):
             setattr(
                 self,
                 f"{key}_tab",
-                MicroscopeTab(
-                    self, name=hardware[key], index=tab_names.index(hardware[key])
-                ),
+                HardwareTab(index=tab_names.index(hardware[key])),
             )
             tab_list.append(getattr(self, f"{key}_tab"))
             self.add(getattr(self, f"{key}_tab"), text=hardware[key], sticky=tk.NSEW)
         self.set_tablist(tab_list)
 
-        #
-        # # Adding tabs to self notebook
-        # self.add(self.microscope_tab_1, text="Microscope 1", sticky=tk.NSEW)
-        # self.add(self.microscope_tab_2, text="Microscope 2", sticky=tk.NSEW)
 
-        # hardware = [
-        #     "camera",
-        #     "daq",
-        #     "filer_wheel",
-        #     "galvo",
-        #     "lasers",
-        #     "mirrors",
-        #     "remote_focus",
-        #     "shutter",
-        #     "stages",
-        #     "zoom",
-        # ]
-        # index = 0
-        #
-        # for device in hardware:
-        #     print(device)
-        #     setattr(self, device, GenericConfiguratorTab(self,
-        #                                                  name=device,
-        #                                                  index=index)
-        #             )
-        #     index += 1
-
-
-class MicroscopeTab(ttk.Frame):
-    def __init__(self, parent, name, index, *args, **kwargs):
-
+class HardwareTab(ttk.Frame):
+    def __init__(self, index, *args, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, *args, **kwargs)
 

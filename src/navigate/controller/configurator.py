@@ -92,10 +92,6 @@ class Configurator:
             self.view.microscope_frame, self.view.root
         )
 
-        # Initialize and set the tab list
-        tab_list = []
-        self.view.microscope_window.set_tablist(tab_list)
-
         for attr in dir(self.view.microscope_window):
             if attr.startswith("microscope_tab_"):
                 # Delete the tab.
@@ -105,12 +101,18 @@ class Configurator:
                 delattr(self.view.microscope_window, attr)
 
         # Create the tabs
+        tab_list = []
         for i in range(num_configs):
             tab_name = f"Microscope {i}"
             setattr(
                 self.view.microscope_window,
                 f"microscope_tab_{i}",
-                MicroscopeTab(self.view.microscope_window, name=tab_name, index=i),
+                MicroscopeTab(
+                    self.view.microscope_window,
+                    name=tab_name,
+                    index=i,
+                    root=self.view.root,
+                ),
             )
             tab_list.append(getattr(self.view.microscope_window, f"microscope_tab_{i}"))
 

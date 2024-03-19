@@ -31,6 +31,7 @@
 
 # Standard Library Imports
 import tkinter as tk
+from time import sleep
 
 # Third Party Imports
 
@@ -64,13 +65,18 @@ class Configurator:
         self.root = root
 
         # Show the splash screen for 1 second and then destroy it.
-        # sleep(1)
+        sleep(1)
         splash_screen.destroy()
         self.root.deiconify()
         self.view = ConfigurationAssistantWindow(root)
 
         self.view.top_window.continue_button.config(command=self.on_continue)
         self.view.top_window.cancel_button.config(command=self.on_cancel)
+
+        print(
+            "WARNING: The Configuration Assistant is not fully implemented. "
+            "Users are still required to manually configure their system."
+        )
 
     def on_cancel(self):
         """Closes the window and exits the program"""

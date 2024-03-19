@@ -36,7 +36,10 @@ import tkinter as tk
 
 # Local Imports
 from navigate.view.configurator_application_window import ConfigurationAssistantWindow
-from navigate.view.configurator_application_window import MicroscopeTab
+from navigate.view.configurator_application_window import (
+    MicroscopeTab,
+    MicroscopeWindow,
+)
 
 # Logger Setup
 import logging
@@ -85,15 +88,17 @@ class Configurator:
     def create_config_window(self, num_configs):
         """Creates the configuration window tabs."""
 
+        self.view.microscope_window = MicroscopeWindow(
+            self.view.microscope_frame, self.view.root
+        )
+
         # Initialize and set the tab list
         tab_list = []
         self.view.microscope_window.set_tablist(tab_list)
 
-        # Check to see if the microscope_window has a pre-existing attribute
         for attr in dir(self.view.microscope_window):
             if attr.startswith("microscope_tab_"):
-                print(attr)
-                print(attr[-1])
+                # Delete the tab.
                 self.view.microscope_window.forget(
                     getattr(self.view.microscope_window, attr)
                 )

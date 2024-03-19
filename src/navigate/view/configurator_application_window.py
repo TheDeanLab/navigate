@@ -92,7 +92,7 @@ class ConfigurationAssistantWindow(ttk.Frame):
         self.top_window = TopWindow(self.top_frame, self.root)
 
         #: ttk.Frame: The main frame of the application
-        self.microscope_window = MicroscopeWindow(self.microscope_frame, self.root)
+        # self.microscope_window = MicroscopeWindow(self.microscope_frame, self.root)
 
 
 class TopWindow(ttk.Frame):
@@ -162,11 +162,35 @@ class MicroscopeWindow(DockableNotebook):
         DockableNotebook.__init__(self, microscope_frame, root, *args, **kwargs)
         self.grid(row=2, column=0)
 
-        # self.microscope_tab_1 = MicroscopeTab(self, name="Microscope 1", index=0)
-        # self.microscope_tab_2 = MicroscopeTab(self, name="Microscope 2", index=1)
-        #
-        # tab_list = [self.microscope_tab_1, self.microscope_tab_2]
-        # self.set_tablist(tab_list)
+        tab_list = []
+        hardware = {
+            "camera": "Camera",
+            "daq": "Data Acquisition Card",
+            "filer_wheel": "Filter Wheel",
+            "galvo": "Galvo",
+            "lasers": "Lasers",
+            "mirrors": "Adaptive Optics",
+            "remote_focus": "Remote Focus Devices",
+            "shutter": "Shutters",
+            "stages": "Stages",
+            "zoom": "Zoom Devices",
+        }
+
+        tab_names = list(hardware.values())
+        self.set_tablist(tab_list)
+
+        for key in hardware:
+            setattr(
+                self,
+                f"{key}_tab",
+                MicroscopeTab(
+                    self, name=hardware[key], index=tab_names.index(hardware[key])
+                ),
+            )
+            tab_list.append(getattr(self, f"{key}_tab"))
+            self.add(getattr(self, f"{key}_tab"), text=hardware[key], sticky=tk.NSEW)
+        self.set_tablist(tab_list)
+
         #
         # # Adding tabs to self notebook
         # self.add(self.microscope_tab_1, text="Microscope 1", sticky=tk.NSEW)
@@ -207,5 +231,3 @@ class MicroscopeTab(ttk.Frame):
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
-
-        print("Name: ", name)

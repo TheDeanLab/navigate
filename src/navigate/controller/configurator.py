@@ -83,11 +83,23 @@ class Configurator:
             print("Please enter a valid number")
 
     def create_config_window(self, num_configs):
-        """Creates the configuration window"""
+        """Creates the configuration window tabs."""
 
+        # Initialize and set the tab list
         tab_list = []
         self.view.microscope_window.set_tablist(tab_list)
 
+        # Check to see if the microscope_window has a pre-existing attribute
+        for attr in dir(self.view.microscope_window):
+            if attr.startswith("microscope_tab_"):
+                print(attr)
+                print(attr[-1])
+                self.view.microscope_window.forget(
+                    getattr(self.view.microscope_window, attr)
+                )
+                delattr(self.view.microscope_window, attr)
+
+        # Create the tabs
         for i in range(num_configs):
             tab_name = f"Microscope {i}"
             setattr(

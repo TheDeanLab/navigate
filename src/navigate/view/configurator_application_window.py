@@ -1,6 +1,5 @@
 # Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
 # All rights reserved.
-
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
 # limitations in the disclaimer below) provided that the following conditions are met:
@@ -34,6 +33,7 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from pathlib import Path
+import importlib
 
 # Third Party Imports
 
@@ -86,13 +86,12 @@ class ConfigurationAssistantWindow(ttk.Frame):
 
         self.grid(column=0, row=0, sticky=tk.NSEW)
         self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
-        self.microscope_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=3, pady=3)
+        self.microscope_frame.grid(
+            row=1, column=0, columnspan=4, sticky=tk.NSEW, padx=3, pady=3
+        )
 
         #: ttk.Frame: The top frame of the application
         self.top_window = TopWindow(self.top_frame, self.root)
-
-        #: ttk.Frame: The main frame of the application
-        # self.microscope_window = MicroscopeWindow(self.microscope_frame, self.root)
 
 
 class TopWindow(ttk.Frame):
@@ -167,7 +166,7 @@ class MicroscopeTab(DockableNotebook):
         hardware = {
             "camera": "Camera",
             "daq": "Data Acquisition Card",
-            "filer_wheel": "Filter Wheel",
+            "filter_wheel": "Filter Wheel",
             "galvo": "Galvo",
             "lasers": "Lasers",
             "mirrors": "Adaptive Optics",
@@ -181,18 +180,15 @@ class MicroscopeTab(DockableNotebook):
         self.set_tablist(tab_list)
 
         for key in hardware:
-            setattr(
-                self,
-                f"{key}_tab",
-                HardwareTab(index=tab_names.index(hardware[key])),
-            )
+            index = tab_names.index(hardware[key])
+            setattr(self, f"{key}_tab", HardwareTab(hardware_type=key, index=index))
             tab_list.append(getattr(self, f"{key}_tab"))
             self.add(getattr(self, f"{key}_tab"), text=hardware[key], sticky=tk.NSEW)
         self.set_tablist(tab_list)
 
 
 class HardwareTab(ttk.Frame):
-    def __init__(self, index, *args, **kwargs):
+    def __init__(self, hardware_type, index, *args, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, *args, **kwargs)
 
@@ -202,3 +198,17 @@ class HardwareTab(ttk.Frame):
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
+
+        # Import __init__ file for hardware type
+        base_module_path = "navigate.model.devices"
+        full_module_path = f"{base_module_path}.{hardware_type}"
+        module = importlib.import_module(full_module_path)
+        device_types = getattr(module, "device_types")
+
+        label = ttk.Label(self, text="Select a device:")
+        label.pack(pady=5, side=tk.LEFT)
+        device_var = tk.StringVar()
+        dropdown = ttk.Combobox(self, textvariable=device_var, state="readonly")
+        dropdown["values"] = list(device_types.values())
+        dropdown.pack(pady=5)
+        # dropdown.bind("<<ComboboxSelected>>", on_device_selected)

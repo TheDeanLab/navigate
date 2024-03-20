@@ -74,6 +74,7 @@
 <li class="toctree-l3"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../multiple_cameras.html">Multiple Cameras</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../acquiring_home.html">Acquiring Data</a></li>
@@ -255,11 +256,11 @@ data acquisition card.</p>
 </details><div class="line-block">
 <div class="line"><br /></div>
 </div>
-</section>
-</section>
 <hr class="docutils" />
+</section>
+</section>
 <section id="cameras">
-<h2>Cameras<a class="headerlink" href="#cameras" title="Permalink to this heading"></a></h2>
+<span id="camera-configuration"></span><h2>Cameras<a class="headerlink" href="#cameras" title="Permalink to this heading"></a></h2>
 <p>The software supports camera-based acquisition. It can run both normal and rolling
 shutter modes of contemporary scientific CMOS cameras.</p>
 <section id="hamamatsu-orca-flash4-0-v3-fusion">
@@ -278,7 +279,7 @@ download DCAM-API. The software can be found <a class="reference external" href=
 <li><p>Shutdown the computer and install the Hamamatsu frame grabber into an appropriate
 PCIe-x16 slot on the motherboard.</p></li>
 <li><p>Turn on the computer and the camera, and confirm that it is functioning properly in
-HCImageLive or Excap (one of the DCAM tools installed)</p></li>
+HCImageLive or Excap (one of the DCAM tools installed).</p></li>
 <li><p>Connect the <cite>camera_trigger_out_line</cite> to the External Trigger of the Hamamatsu
 Camera. Commonly, this is done with a counter port, e.g., <code class="docutils literal notranslate"><span class="pre">/PXI6259/ctr0</span></code></p></li>
 </ul>

@@ -7,3 +7,4 @@ Setting Up A Microscope
 
    software_configuration
    hardware/hardware_home
+   multiple_cameras

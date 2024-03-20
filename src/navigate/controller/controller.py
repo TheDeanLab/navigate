@@ -313,6 +313,12 @@ class Controller:
         self.img_width = img_width
         self.img_height = img_height
 
+        # virtual microscopes
+        for microscope_name in self.additional_microscopes:
+            self.model.destroy_virtual_microscope(microscope_name)
+            # TODO: destroy the popup window
+            self.additional_microscopes.pop(microscope_name)
+
     def update_acquire_control(self):
         """Update the acquire control based on the current experiment parameters."""
         self.view.acqbar.stop_stage.config(

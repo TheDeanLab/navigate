@@ -165,6 +165,7 @@ data acquisition card.
 
 ---------
 
+.. _camera_configuration:
 Cameras
 =======
 
@@ -184,7 +185,7 @@ Hamamatsu ORCA-Flash4.0 V3/Fusion
 * Shutdown the computer and install the Hamamatsu frame grabber into an appropriate
   PCIe-x16 slot on the motherboard.
 * Turn on the computer and the camera, and confirm that it is functioning properly in
-  HCImageLive or Excap (one of the DCAM tools installed)
+  HCImageLive or Excap (one of the DCAM tools installed).
 * Connect the `camera_trigger_out_line` to the External Trigger of the Hamamatsu
   Camera. Commonly, this is done with a counter port, e.g., ``/PXI6259/ctr0``
 

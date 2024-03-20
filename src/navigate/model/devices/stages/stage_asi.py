@@ -65,7 +65,7 @@ def build_ASI_Stage_connection(com_port, baud_rate=115200):
     """
 
     # wait until ASI device is ready
-    asi_stage = TigerController(com_port, baud_rate)
+    asi_stage = TigerController(com_port, baud_rate,verbose=True)
     asi_stage.connect_to_serial()
     if not asi_stage.is_open():
         raise Exception("ASI stage connection failed.")
@@ -137,18 +137,19 @@ class ASIStage(StageBase):
             # Set finishing accuracy to half of the minimum pixel size we will use
             # pixel size is in microns, finishing accuracy is in mm
             # TODO: check this over all microscopes sharing this stage,
-            #       not just the current one
-            finishing_accuracy = (
-                0.001
-                * min(
-                    list(
-                        configuration["configuration"]["microscopes"][microscope_name][
-                            "zoom"
-                        ]["pixel_size"].values()
-                    )
-                )
-                / 2
-            )
+            finishing_accuracy = 0.0001
+            # #       not just the current one
+            # finishing_accuracy = (
+            #     0.001
+            #     * min(
+            #         list(
+            #             configuration["configuration"]["microscopes"][microscope_name][
+            #                 "zoom"
+            #             ]["pixel_size"].values()
+            #         )
+            #     )
+            #     / 2
+            # )
             # If this is changing, the stage must be power cycled for these changes to
             # take effect.
             for ax in self.asi_axes.keys():
@@ -157,7 +158,8 @@ class ASIStage(StageBase):
                     self.tiger_controller.set_error(ax, 0.1)
                 else:
                     self.tiger_controller.set_finishing_accuracy(ax, finishing_accuracy)
-                    self.tiger_controller.set_error(ax, 1.2 * finishing_accuracy)
+                    self.tiger_controller.set_error(ax, 0.0002)
+                    # self.tiger_controller.set_error(ax, 1.2 * finishing_accuracy)
 
             # Set backlash to 0 (less accurate)
             for ax in self.asi_axes.keys():

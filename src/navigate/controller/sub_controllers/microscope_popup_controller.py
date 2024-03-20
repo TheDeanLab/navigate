@@ -195,7 +195,7 @@ class MicroscopePopupController(GUIController):
             self.parent_controller.configuration["experiment"]["MicroscopeState"][
                 "zoom"
             ] = zoom
-            self.parent_controller.resolution_value.set(
+            self.parent_controller.menu_controller.resolution_value.set(
                 f"{self.primary_microscope} {zoom}"
             )
 

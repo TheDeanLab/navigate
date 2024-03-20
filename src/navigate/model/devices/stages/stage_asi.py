@@ -362,7 +362,7 @@ class ASIStage(StageBase):
     
     def prepare_move_large_step(self, axis, end_pos):
         # TODO: the maximum step
-        maximum_step = 250.0
+        maximum_step = 40.0
         start_pos = getattr(self, f"{axis}_pos", None)
         if not start_pos:
             return
@@ -374,6 +374,13 @@ class ASIStage(StageBase):
         for _ in range(num_steps):
             self._move_axis_absolute(axis, start_pos)
             start_pos += maximum_step
+
+    # def prepare_move_large_step_v2(self, axis, end_pos):
+    #     maximum_step = 40.0
+    #     start_pos = getattr(self, f"{axis}_pos", None)
+    #     if abs(end_pos - start_pos) >= maximum_step:
+
+
 
     def stop(self):
         """Stop all stage movement abruptly."""

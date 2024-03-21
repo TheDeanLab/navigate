@@ -244,6 +244,12 @@ class ASIStage(StageBase):
         if axis_abs == -1e50:
             print("axis abs false")
             return False
+        
+        large_step_size = 50
+
+        pos_dict_temp = self.report_position()
+        print(f"*** pos_dict_temp from report_position = {pos_dict_temp}")
+        # print(f"")
 
         # Move stage
         try:
@@ -253,6 +259,20 @@ class ASIStage(StageBase):
                 )
             else:
                 # The 10 is to account for the ASI units, 1/10 of a micron
+
+                
+                # for ax in pos_dict.keys():
+                    # axis = self.asi_axes[ax]
+                temppos = getattr(self, f"{axis}_pos")*1000
+                print(f"axis_abs*10 = {axis_abs * 10}")
+                print(f"axis_abs*1000 = {axis_abs * 1000}")
+                print(f"getattr(self, axis_pos)*1000 = {temppos}")
+                diffpos = abs(axis_abs * 10 - getattr(self, f"{axis}_pos")*10)
+                print(f"diffpos = {diffpos}")
+                if abs(axis_abs * 10 - getattr(self, f"{axis}_pos")*10) >= large_step_size:
+                    print("in update backlash move")
+                    self.tiger_controller.set_backlash(self.axes_mapping[axis], 0.04)
+                        # temp.append(ax)
                 self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
 
         except TigerException as e:
@@ -261,11 +281,18 @@ class ASIStage(StageBase):
                 f"range: {e}"
             )
             logger.exception("ASI Stage Exception", e)
+            self.tiger_controller.set_backlash(self.axes_mapping[axis], 0)
             return False
 
         if wait_until_done:
             self.tiger_controller.wait_for_device()
+        
+        
+        self.tiger_controller.set_backlash(self.axes_mapping[axis], 0)
         return True
+    
+        
+
 
     def verify_move(self, move_dictionary):
         """Don't submit a move command for axes that aren't moving.
@@ -312,6 +339,10 @@ class ASIStage(StageBase):
             Was the move successful?
         """
         abs_pos_dict = self.verify_abs_position(move_dictionary)
+
+        pos_dict_temp = self.report_position()
+        print(f"*** pos_dict_temp from report_position = {pos_dict_temp}")
+
         if not abs_pos_dict:
             return False
         abs_pos_dict = self.verify_move(abs_pos_dict)
@@ -323,6 +354,21 @@ class ASIStage(StageBase):
             self.axes_mapping[axis]: pos * 1000 if axis == "theta" else pos * 10
             for axis, pos in abs_pos_dict.items()
         }
+        large_step_size = 50
+        # set backlash if step size is larger than 50 um
+        temp = []
+        
+        # print("pos_dict[ax] - getattr(self, {axis}_pos)*1000 = {pos_dict[ax] - getattr(self, f"{axis}_pos")*1000}")
+        for ax in pos_dict.keys():
+            axis = self.asi_axes[ax]
+            print(f"pos_dict[ax] = {pos_dict[ax]}")
+            temppos2 = getattr(self, f"{axis}_pos")*1000
+            print(f"getattr(self, axis_pos)*1000 = {temppos2}")
+            if self.asi_axes[ax] != "theta" and abs(pos_dict[ax] - getattr(self, f"{axis}_pos")*10) >= large_step_size:
+                print(f"in large step size move set backlash to 0.04 for each ax = {ax}")
+                self.tiger_controller.set_backlash(ax, 0.04)
+                temp.append(ax)
+
         try:
             self.tiger_controller.move(pos_dict)
         except TigerException as e:
@@ -331,9 +377,13 @@ class ASIStage(StageBase):
                 f"range: {e}"
             )
             logger.exception("ASI Stage Exception", e)
+            for ax in temp:
+                self.tiger_controller.set_backlash(ax, 0)
             return False
         if wait_until_done:
             self.tiger_controller.wait_for_device()
+        for ax in temp:
+            self.tiger_controller.set_backlash(ax, 0)
 
         return True
 

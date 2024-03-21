@@ -270,6 +270,7 @@ class TigerController:
         """
         # useful if we want to output data to something other than the console
         # (ui element etc)
+        print("*** ASI:", message)
         if self.verbose:
             print(message)
 

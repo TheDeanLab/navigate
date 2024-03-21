@@ -68,6 +68,8 @@ def evaluate_parser_input_arguments(args):
         Path to waveform templates file
     logging_path
         Path to non-default logging location
+    configurator
+        Boolean, True if configurator is enabled
     """
     # Retrieve the Default Configuration paths
     (
@@ -79,6 +81,11 @@ def evaluate_parser_input_arguments(args):
     ) = get_configuration_paths()
 
     # Evaluate Input Arguments
+    if args.configurator:
+        configurator = True
+    else:
+        configurator = False
+
     if args.config_file:
         assert args.config_file.exists(), "Configuration file Path {} not valid".format(
             args.config_file
@@ -127,6 +134,7 @@ def evaluate_parser_input_arguments(args):
         rest_api_path,
         waveform_templates_path,
         logging_path,
+        configurator,
     )
 
 
@@ -145,6 +153,15 @@ def create_parser():
     parser = argparse.ArgumentParser(description="navigate Command Line Arguments")
 
     input_args = parser.add_argument_group("Input Arguments")
+
+    input_args.add_argument(
+        "-c",
+        "--configurator",
+        required=False,
+        default=False,
+        action="store_true",
+        help="Configurator - " "GUI for preparing a configuration.yaml file..",
+    )
 
     input_args.add_argument(
         "-sh",

@@ -168,7 +168,7 @@ class ASIStage(StageBase):
                 self.tiger_controller.set_backlash(ax, 0.0)
 
             # Speed optimizations - Set speed to 90% of maximum on each axis
-            self.set_speed(percent=0.9)
+            self.set_speed(percent=0.7)
 
     def __del__(self):
         """Delete the ASI Stage connection."""

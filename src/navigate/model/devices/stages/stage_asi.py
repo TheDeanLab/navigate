@@ -245,7 +245,7 @@ class ASIStage(StageBase):
             print("axis abs false")
             return False
         
-        large_step_size = 50
+        large_step_size = 10 # um
 
         pos_dict_temp = self.report_position()
         print(f"*** pos_dict_temp from report_position = {pos_dict_temp}")
@@ -263,13 +263,15 @@ class ASIStage(StageBase):
                 
                 # for ax in pos_dict.keys():
                     # axis = self.asi_axes[ax]
-                temppos = getattr(self, f"{axis}_pos")*1000
+                temppos = getattr(self, f"{axis}_pos")*10
+                temppos2 = getattr(self, f"{axis}_pos")*1
                 print(f"axis_abs*10 = {axis_abs * 10}")
-                print(f"axis_abs*1000 = {axis_abs * 1000}")
-                print(f"getattr(self, axis_pos)*1000 = {temppos}")
+                # print(f"axis_abs*1000 = {axis_abs * 1000}")
+                print(f"getattr(self, axis_pos)*10 = {temppos}")
+                print(f"getattr(self, axis_pos)*1 = {temppos2}")
                 diffpos = abs(axis_abs * 10 - getattr(self, f"{axis}_pos")*10)
                 print(f"diffpos = {diffpos}")
-                if abs(axis_abs * 10 - getattr(self, f"{axis}_pos")*10) >= large_step_size:
+                if abs(axis_abs * 10 - getattr(self, f"{axis}_pos")*10) >= large_step_size*10:
                     print("in update backlash move")
                     self.tiger_controller.set_backlash(self.axes_mapping[axis], 0.04)
                         # temp.append(ax)
@@ -354,7 +356,7 @@ class ASIStage(StageBase):
             self.axes_mapping[axis]: pos * 1000 if axis == "theta" else pos * 10
             for axis, pos in abs_pos_dict.items()
         }
-        large_step_size = 50
+        large_step_size = 10
         # set backlash if step size is larger than 50 um
         temp = []
         
@@ -362,9 +364,11 @@ class ASIStage(StageBase):
         for ax in pos_dict.keys():
             axis = self.asi_axes[ax]
             print(f"pos_dict[ax] = {pos_dict[ax]}")
-            temppos2 = getattr(self, f"{axis}_pos")*1000
-            print(f"getattr(self, axis_pos)*1000 = {temppos2}")
-            if self.asi_axes[ax] != "theta" and abs(pos_dict[ax] - getattr(self, f"{axis}_pos")*10) >= large_step_size:
+            temppos2 = getattr(self, f"{axis}_pos")*10
+            print(f"getattr(self, axis_pos)*10 = {temppos2}")
+            diffpostemp = abs(pos_dict[ax] - getattr(self, f"{axis}_pos")*10)
+            print(f"diffpos = {diffpostemp}")
+            if self.asi_axes[ax] != "theta" and abs(pos_dict[ax] - getattr(self, f"{axis}_pos")*10) >= large_step_size*10:
                 print(f"in large step size move set backlash to 0.04 for each ax = {ax}")
                 self.tiger_controller.set_backlash(ax, 0.04)
                 temp.append(ax)

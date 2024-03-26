@@ -32,7 +32,7 @@
 
 # Standard Library Imports
 import logging
-from functools import cache
+from functools import lru_cache
 
 # Third Party Imports
 import numpy as np
@@ -45,7 +45,7 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-@cache
+@lru_cache(maxsize=16)
 def camera_exposure(
     sample_rate=100000, sweep_time=0.4, exposure=0.4, camera_delay=0.001
 ):
@@ -93,7 +93,7 @@ def camera_exposure(
     return np.array(array)
 
 
-@cache
+@lru_cache(maxsize=16)
 def single_pulse(
     sample_rate=100000, sweep_time=0.4, delay=10, pulse_width=1, amplitude=1, offset=0
 ):
@@ -140,7 +140,7 @@ def single_pulse(
     return np.array(array)
 
 
-@cache
+@lru_cache(maxsize=16)
 def remote_focus_ramp(
     sample_rate=100000,
     exposure_time=0.2,
@@ -217,7 +217,7 @@ def remote_focus_ramp(
     return waveform
 
 
-@cache
+@lru_cache(maxsize=16)
 def remote_focus_ramp_triangular(
     sample_rate=100000,
     exposure_time=0.2,
@@ -308,6 +308,7 @@ def remote_focus_ramp_triangular(
     return waveform
 
 
+@lru_cache(maxsize=16)
 def sawtooth(
     sample_rate=100000,
     sweep_time=0.4,
@@ -355,7 +356,7 @@ def sawtooth(
     return waveform
 
 
-@cache
+@lru_cache(maxsize=16)
 def dc_value(sample_rate=100000, sweep_time=0.4, amplitude=1):
     """
     Returns a numpy array with a DC value
@@ -385,7 +386,7 @@ def dc_value(sample_rate=100000, sweep_time=0.4, amplitude=1):
     return waveform
 
 
-@cache
+@lru_cache(maxsize=16)
 def square(
     sample_rate=100000,
     sweep_time=0.4,
@@ -431,7 +432,7 @@ def square(
     return waveform
 
 
-@cache
+@lru_cache(maxsize=16)
 def sine_wave(
     sample_rate=100000, sweep_time=0.4, frequency=10, amplitude=1, offset=0, phase=0
 ):

@@ -273,7 +273,7 @@ class ASIStage(StageBase):
                 print(f"diffpos = {diffpos}")
                 if abs(axis_abs * 10 - getattr(self, f"{axis}_pos")*10) >= large_step_size*10:
                     print("in update backlash move")
-                    self.tiger_controller.set_backlash(self.axes_mapping[axis], 0.04)
+                    self.tiger_controller.set_backlash(self.axes_mapping[axis], 0.05)
                         # temp.append(ax)
                 self.tiger_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
 
@@ -370,7 +370,7 @@ class ASIStage(StageBase):
             print(f"diffpos = {diffpostemp}")
             if self.asi_axes[ax] != "theta" and abs(pos_dict[ax] - getattr(self, f"{axis}_pos")*10) >= large_step_size*10:
                 print(f"in large step size move set backlash to 0.04 for each ax = {ax}")
-                self.tiger_controller.set_backlash(ax, 0.04)
+                self.tiger_controller.set_backlash(ax, 0.05)
                 temp.append(ax)
 
         try:

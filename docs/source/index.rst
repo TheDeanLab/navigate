@@ -61,6 +61,7 @@ technology developers.
    :caption: Development
    :maxdepth: 2
 
+   contributing/software_architecture
    contributing/contributing_guidelines
    contributing/feature_container
    plugin/plugin_home

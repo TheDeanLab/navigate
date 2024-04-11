@@ -7,7 +7,7 @@ Supported Hardware
 
 
 **navigate** provides access to a growing list of hardware devices. Information on how to
-configure each of these devices is provided :doc:`here <hardware/supported_hardware>` section.
+configure each of these devices is provided :doc:`here <hardware/supported_hardware>`.
 
 
 .. list-table::
@@ -17,36 +17,41 @@ configure each of these devices is provided :doc:`here <hardware/supported_hardw
    * - **Equipment**
      - **Devices**
    * - *Cameras*
-     - Hamamatsu Flash 4.0, Fusion, Fire, and Lightning Devices.
-   * -
-     - Photometrics
+     -
+        * Hamamatsu Orca Flash 4.0.
+        * Hamamatsu Orca Fusion.
+        * Hamamatsu Orca Fire.
+        * Hamamatsu Orca Lightning.
+        * Photometrics Iris15
    * - Deformable Mirrors
-     - Imagine Optics
+     -
+        * Imagine Optics
    * - *Filter Wheel*
-     - Applied Scientific Instrumentation
-   * -
-     - Sutter Lambda Series
+     -
+        * Applied Scientific Instrumentation
+        * Sutter Lambda 10-3
+        * Sutter Lambda LS
    * - *Galvanometers*
-     - Analog controlled devices.
+     -
+        * Analog controlled devices.
    * - *Lasers*
-     - Analog, Digital, and Mixed Modulation.
+     -
+        * Analog, Digital, and Mixed Modulation modes.
    * - *Remote Focusing Devices*
-     - Analog controlled voice coils, electro-tunable lens, etc.
-   * -
-     - Equipment Solutions LFA2004 with hybrid RS232 and analog control.
+     -
+        * Analog controlled voice coils, electro-tunable lens, etc.
+        * Equipment Solutions LFA2004 with hybrid RS232 and analog control.
    * - *Stages*
-     - Analog controlled galvanometers and piezoelectric stages.
-   * -
-     - Applied Scientific Instrumentation with Tiger Controller
-   * -
-     - Mad City Labs
-   * -
-     - Physik Instrumente
-   * -
-     - Sutter MP285
-   * -
-     - Thorlabs KCube
+     -
+        * Analog controlled galvanometers and piezoelectric stages.
+        * Applied Scientific Instrumentation with Tiger Controller
+        * Mad City Labs Nano-Drive
+        * Physik Instrumente
+        * Sutter MP285
+        * Thorlabs KST101
    * - *Shutters*
-     - Digitally controlled shutters.
+     -
+        * Digitally controlled shutters.
    * - *Zoom*
-     - Dynamixel MX-28R
+     -
+        * Dynamixel MX-28R

@@ -136,7 +136,11 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
             "type"
         ]
 
-    if cam_type in ["HamamatsuOrca", "HamamatsuOrcaLightning", "HamamatsuOrcaFire"]:
+    if cam_type in ["HamamatsuOrca",
+                    "HamamatsuOrcaLightning",
+                    "HamamatsuOrcaFire",
+                    "HamamatsuOrcaFusion"
+                    ]:
         # Locally Import Hamamatsu API and Initialize Camera Controller
         HamamatsuController = importlib.import_module(
             "navigate.model.devices.APIs.hamamatsu.HamamatsuAPI"
@@ -252,7 +256,14 @@ def start_camera(
         )
 
         return HamamatsuOrcaFire(microscope_name, device_connection, configuration)
-    
+
+    elif cam_type == "HamamatsuOrcaFusion":
+        from navigate.model.devices.camera.camera_hamamatsu import (
+            HamamatsuOrcaFusion,
+        )
+
+        return HamamatsuOrcaFusion(microscope_name, device_connection, configuration)
+
     elif cam_type == "Photometrics":
         from navigate.model.devices.camera.camera_photometrics import (
             PhotometricsKinetix,

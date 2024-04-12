@@ -48,40 +48,6 @@ class HamamatsuBase(CameraBase):
 
     This is the default parent class for Hamamatsu Cameras.
     This includes the ORCA Flash 4.0, Fusion, Lightning, and Fire.
-
-    **Configuration**::
-
-        hardware:
-          camera:
-            -
-                type: HamamatsuOrca
-                serial_number: 302158
-            -
-                type: HamamatsuOrca
-                serial_number: 302159
-        ...
-
-        microscopes:
-          microscope_name:
-            camera:
-              hardware:
-                name: camera
-                type: HamamatsuOrca
-                serial_number: 302352
-              lightsheet_rolling_shutter_width: 608
-              defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
-              delay_percent: 10
-              pulse_percent: 1
-              x_pixels_step: 4
-              y_pixels_step: 4
-              x_pixels_min: 4
-              y_pixels_min: 4
-              exposure_time_range:
-                min: 1
-                max: 1000
-                step: 1
-              flip_x: False
-              flip_y: False
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
@@ -262,7 +228,7 @@ class HamamatsuBase(CameraBase):
         readout_time = self.camera_controller.get_property_value("readout_time")
 
         # with camera internal delay
-        return readout_time + 4 * self.minimum_exposure_time
+        return readout_time # + 4 * self.minimum_exposure_time
 
     def set_exposure_time(self, exposure_time):
         """Set HamamatsuOrca exposure time.
@@ -633,4 +599,66 @@ class HamamatsuOrca(HamamatsuBase):
 
         # round up exposure time
         exposure_time = camera_line_interval * shutter_width
+        return exposure_time, camera_line_interval, full_chip_exposure_time
+
+
+class HamamatsuOrcaFusion(HamamatsuBase):
+    """HamamatsuOrcaFusion camera class."""
+
+    def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize HamamatsuOrcaFusion class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of microscope in configuration
+        device_connection : object
+            Hardware device to connect to
+        configuration : multiprocessing.managers.DictProxy
+            Global configuration of the microscope
+        """
+        HamamatsuBase.__init__(self, microscope_name, device_connection, configuration)
+
+        self.camera_parameters["supported_readout_directions"] = [
+            "Top-to-Bottom",
+            "Bottom-to-Top"
+        ]
+
+        logger.info("HamamatsuOrcaFusion Initialized")
+
+    def calculate_light_sheet_exposure_time(
+            self, full_chip_exposure_time, shutter_width
+    ):
+        """Calculate light sheet exposure time.
+
+        TODO: This is not calculated correctly. Ran out of time. Will need some help Annie.
+
+        Parameters
+        ----------
+        full_chip_exposure_time : float
+            Full chip exposure time in seconds.
+        shutter_width : int
+            Shutter width.
+
+        Returns
+        -------
+        exposure_time : float
+            Exposure time in seconds.
+        camera_line_interval : float
+            Camera line interval in seconds.
+        full_chip_exposure_time : float
+            Full chip exposure time in seconds.
+        """
+
+        camera_line_interval = full_chip_exposure_time / (
+                6 + (shutter_width + self.y_pixels) / 4
+        )
+        self.camera_parameters["line_interval"] = camera_line_interval
+        exposure_offset = 0.000003029411  # 3.029411 us
+        maximum_internal_line_interval = 0.0009638  # 963.8 us
+        if camera_line_interval > maximum_internal_line_interval:
+            camera_line_interval = maximum_internal_line_interval
+            full_chip_exposure_time = camera_line_interval * (6 + (shutter_width + self.y_pixels) / 4)
+
+        exposure_time = camera_line_interval * ((shutter_width + 3) // 4)
         return exposure_time, camera_line_interval, full_chip_exposure_time

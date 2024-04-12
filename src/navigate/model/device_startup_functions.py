@@ -488,6 +488,34 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                         exception=TigerException,
                     )
                 )
+        elif stage_type == "MFC2000" and platform.system() == "Windows":
+            """ Filter wheel can be controlled from the same Tiger Controller. If
+            so, then we will load this as a shared device. If not, we will create the
+            connection to the Tiger Controller.
+            """
+            filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"][
+                "type"
+            ]
+            if filter_wheel == "MFC2000":
+                stage_devices.append("shared device")
+            else:
+                from navigate.model.devices.stages.stage_asi_MFCTwoThousand import (
+                    build_ASI_Stage_connection,
+                )
+                from navigate.model.devices.APIs.asi.asi_tiger_controller import (
+                    TigerException,
+                )
+
+                stage_devices.append(
+                    auto_redial(
+                        build_ASI_Stage_connection,
+                        (
+                            stage_config["port"],
+                            stage_config["baudrate"],
+                        ),
+                        exception=TigerException,
+                    )
+                )
 
         elif stage_type == "GalvoNIStage" and platform.system() == "Windows":
             stage_devices.append(DummyDeviceConnection())
@@ -583,7 +611,7 @@ def start_stage(
         return ASIStage(microscope_name, device_connection, configuration, id)
     
     elif device_type == "MFC2000":
-        from navigate.model.devices.stages.stage_asi_MFCTwoThousand import ASIStage
+        from navigate.model.devices.stages.stage_asi import ASIStage
 
         return ASIStage(microscope_name, device_connection, configuration, id)
 

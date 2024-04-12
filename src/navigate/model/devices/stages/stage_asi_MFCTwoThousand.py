@@ -31,16 +31,11 @@
 
 # Standard Imports
 import logging
-import time
 
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.stages.stage_base import StageBase
-from navigate.model.devices.APIs.asi.asi_MFC_controller import (
-    TigerException,
-    MFCTwoThousand
-)
+from navigate.model.devices.APIs.asi.asi_MFC_controller import MFCTwoThousand
 
 # Logger Setup
 p = __name__.split(".")[1]

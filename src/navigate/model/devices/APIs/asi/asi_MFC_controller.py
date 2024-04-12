@@ -1,64 +1,17 @@
-# serialport.py
-from serial import Serial
-from serial import SerialException
-from serial import SerialTimeoutException
-from serial import EIGHTBITS
-from serial import PARITY_NONE
-from serial import STOPBITS_ONE
-from serial.tools import list_ports
-import threading
+# Standard Imports
 
-import time
+# Third Party Imports
+
+# Local Imports
 from navigate.model.devices.APIs.asi.asi_tiger_controller import (
-    TigerController
+    TigerController,
+    TigerException,
 )
 
-class TigerException(Exception):
-    """
-    Exception raised when error code from Tiger Console is received.
-
-    Attributes:
-        - command: error code received from Tiger Console
-    """
-
-    def __init__(self, code: str):
-        """Initialize the TigerException class
-        Parameters
-        ----------
-        code : str
-            Error code received from Tiger Console
-        """
-
-        #: dict: Dictionary of error codes and their corresponding error messages
-        self.error_codes = {
-            ":N-1": "Unknown Command (Not Issued in TG-1000)",
-            ":N-2": "Unrecognized Axis Parameter (valid axes are dependent on the "
-            "controller)",
-            ":N-3": "Missing parameters (command received requires an axis parameter "
-            "such as x=1234)",
-            ":N-4": "Parameter Out of Range",
-            ":N-5": "Operation failed",
-            ":N-6": "Undefined Error (command is incorrect, but the controller does "
-            "not know exactly why.",
-            ":N-7": "Invalid Card Address",
-            ":N-21": "Serial Command halted by the HALT command",
-        }
-        #: str: Error code received from Tiger Console
-        self.code = code
-
-        #: str: Error message
-        self.message = self.error_codes[code]
-
-        # Gets the proper message based on error code received.
-        super().__init__(self.message)
-        # Sends message to base exception constructor for python purposes
-
-    def __str__(self):
-        """Overrides base Exception string to be displayed
-        in traceback"""
-        return f"{self.code} -> {self.message}"
 
 class MFCTwoThousand(TigerController):
+    """ASI MFC2000 Controller Class"""
+
     def set_speed_as_percent_max(self, pct):
         """Set speed as a percentage of the maximum speed
 

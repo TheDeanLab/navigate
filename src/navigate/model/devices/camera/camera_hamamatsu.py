@@ -588,14 +588,14 @@ class HamamatsuOrca(HamamatsuBase):
         full_chip_exposure_time : float
             Updated full chip exposure time (s).
         """
-        camera_line_interval = full_chip_exposure_time / (4 + shutter_width + self.y_pixels)
+        camera_line_interval = full_chip_exposure_time / (10 + shutter_width + self.y_pixels)
         
-        maximum_internal_line_interval = 963.8e-6 # 963.8 us
+        maximum_internal_line_interval = 0.1 # 100ms
         if camera_line_interval > maximum_internal_line_interval:
             camera_line_interval = maximum_internal_line_interval
-            full_chip_exposure_time = camera_line_interval * (4 + shutter_width + self.y_pixels)
+            full_chip_exposure_time = camera_line_interval * (10 + shutter_width + self.y_pixels)
 
-        self.camera_parameters["line_interval"] = camera_line_interval
+        self.camera_parameters["line_interval"] = camera_line_interval * shutter_width
 
         # round up exposure time
         exposure_time = camera_line_interval * shutter_width
@@ -631,8 +631,6 @@ class HamamatsuOrcaFusion(HamamatsuBase):
     ):
         """Calculate light sheet exposure time.
 
-        TODO: This is not calculated correctly. Ran out of time. Will need some help Annie.
-
         Parameters
         ----------
         full_chip_exposure_time : float
@@ -650,15 +648,15 @@ class HamamatsuOrcaFusion(HamamatsuBase):
             Full chip exposure time in seconds.
         """
 
-        camera_line_interval = full_chip_exposure_time / (
-                6 + (shutter_width + self.y_pixels) / 4
-        )
-        self.camera_parameters["line_interval"] = camera_line_interval
-        exposure_offset = 0.000003029411  # 3.029411 us
-        maximum_internal_line_interval = 0.0009638  # 963.8 us
+        camera_line_interval = full_chip_exposure_time / (4 + shutter_width + self.y_pixels)
+        
+        maximum_internal_line_interval = 963.8e-6 # 963.8 us
         if camera_line_interval > maximum_internal_line_interval:
             camera_line_interval = maximum_internal_line_interval
-            full_chip_exposure_time = camera_line_interval * (6 + (shutter_width + self.y_pixels) / 4)
+            full_chip_exposure_time = camera_line_interval * (4 + shutter_width + self.y_pixels)
 
-        exposure_time = camera_line_interval * ((shutter_width + 3) // 4)
+        self.camera_parameters["line_interval"] = camera_line_interval * shutter_width
+
+        # round up exposure time
+        exposure_time = camera_line_interval * shutter_width
         return exposure_time, camera_line_interval, full_chip_exposure_time

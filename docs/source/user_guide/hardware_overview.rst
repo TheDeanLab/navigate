@@ -23,12 +23,12 @@ configure each of these devices is provided :doc:`here <hardware/supported_hardw
         * Hamamatsu Orca Fire.
         * Hamamatsu Orca Lightning.
         * Photometrics Iris15
-   * - Deformable Mirrors
+   * - *Deformable Mirrors*
      -
         * Imagine Optics
    * - *Filter Wheel*
      -
-        * Applied Scientific Instrumentation
+        * Applied Scientific Instrumentation with Tiger Controller
         * Sutter Lambda 10-3
         * Sutter Lambda LS
    * - *Galvanometers*
@@ -45,6 +45,7 @@ configure each of these devices is provided :doc:`here <hardware/supported_hardw
      -
         * Analog controlled galvanometers and piezoelectric stages.
         * Applied Scientific Instrumentation with Tiger Controller
+        * Applied Scientific Instrumentation with MFC2000 Controller
         * Mad City Labs Nano-Drive
         * Physik Instrumente
         * Sutter MP285

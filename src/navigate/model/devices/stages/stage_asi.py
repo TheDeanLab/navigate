@@ -248,7 +248,7 @@ class ASIStage(StageBase):
         large_step_size = 10 # um
 
         pos_dict_temp = self.report_position()
-        print(f"*** pos_dict_temp from report_position = {pos_dict_temp}")
+        #print(f"*** pos_dict_temp from report_position = {pos_dict_temp}")
         # print(f"")
 
         # Move stage

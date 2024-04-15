@@ -55,14 +55,14 @@ Data Acquisition and Processing
   **navigate** during run-time. Image analysis is performed on images in memory that are
   stored as numpy arrays, ensuring rapid processing.
 
-Acquisition Recipes
+Feature Lists
 -------------------
 
-These recipes are highly versatile, capable of:
+Feature lists are highly versatile, capable of:
 
-- **Sequential Execution**: Recipes can be executed in a predefined order, ensuring
+- **Sequential Execution**: Acquisition routes can be executed in a predefined order, ensuring
   systematic data collection.
 - **Logic Gates Integration**: Incorporates conditional logic (e.g., if/then, try/except)
   and loop structures (while, for-loops), providing flexibility in data acquisition and processing.
 - **Non-Imaging Processes**: Supports the inclusion of non-imaging-based processes,
-  such as solvent exchange, within cyclic labeling workflows, broadening the application scope of the system.
+  such as solvent exchange, broadening the application scope of the system.

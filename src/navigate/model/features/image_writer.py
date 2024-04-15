@@ -39,6 +39,7 @@ import shutil
 # Third Party Imports
 import numpy as np
 from tifffile import imsave
+import time
 
 # Local imports
 from navigate.model import data_sources
@@ -233,6 +234,8 @@ class ImageWriter:
                 image = self.data_buffer[idx]
             # Save data to disk
             try:
+                t0 = time.time()
+                
                 self.data_source.write(
                     image,
                     x=self.model.data_buffer_positions[idx][0],
@@ -241,6 +244,10 @@ class ImageWriter:
                     theta=self.model.data_buffer_positions[idx][3],
                     f=self.model.data_buffer_positions[idx][4],
                 )
+
+                t1 = time.time()
+                total_time = t1-t0
+                print(f"total_time = {total_time}")
 
                 # Update MIP
                 self.mip[c_idx, :, :] = np.maximum(self.mip[c_idx, :, :], image)

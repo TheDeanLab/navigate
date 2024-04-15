@@ -293,6 +293,7 @@ def verify_experiment_config(manager, configuration):
             if type(stages) != ListProxy:
                 stages = [stages]
             for stage in stages:
+                print(f"***stage = {stage}")
                 if not stage["type"].lower().startswith("synthetic"):
                     for axis in stage["axes"]:
                         device_dict[microscope_name]["stage"][axis] = True

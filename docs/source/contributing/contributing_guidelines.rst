@@ -18,16 +18,8 @@ General Principles
 ==================
 
 - We use a `model-view-controller architecture <https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller>`_.
-  New functionality should keep this strong separation.
-
-    - The model operates in its own subprocess and is responsible for
-      communicating with hardware and performing image handling and processing tasks.
-    - The view is responsible for displaying the user interface and
-      communicating with the controller.
-    - The controller is responsible for managing the user interface and
-      communicating with the model. It relays user input in the form of
-      traces and commands to the model and relays model output in the form of
-      images and data to the view.
+  New functionality should keep this strong separation. More information can be found
+  in the :doc:`software architecture <software_architecture>` section.
 - Please do not create new configuration variables unless absolutely
   necessary, especially in the ``configuration.yaml`` and ``experiment.yaml``
   files. A new variable is necessary only if no variable stores similar

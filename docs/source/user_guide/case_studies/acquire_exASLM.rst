@@ -46,7 +46,7 @@ Imaging a Z-Stack using Constant Velocity Acquisition Mode
 
    .. z_stack:
 
-Imaging a Z-Stack using Mechanical Shearing
+Imaging a Z-Stack using two-axis scanning
 ============================================
 #. In the configuration file ``configuration.yaml``, set the x-axis as z-axis and the z-axis as the the focus axis. Refer to the example :ref:`upright configuration file <user_guide/hardware/configurations:configuration_upright.yaml>` and :ref:`configuration overview <user_guide:software_configuration.rst>` for more information.
 

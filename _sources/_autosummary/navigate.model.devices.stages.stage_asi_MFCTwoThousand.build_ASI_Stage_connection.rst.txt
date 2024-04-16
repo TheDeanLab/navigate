@@ -1,0 +1,6 @@
+navigate.model.devices.stages.stage\_asi\_MFCTwoThousand.build\_ASI\_Stage\_connection
+======================================================================================
+
+.. currentmodule:: navigate.model.devices.stages.stage_asi_MFCTwoThousand
+
+.. autofunction:: build_ASI_Stage_connection

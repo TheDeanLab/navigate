@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Software Architecture &mdash; navigate 0.0.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contributing Guidelines" href="contributing_guidelines.html" />
+    <link rel="prev" title="Imaging on an Upright ASLM" href="../user_guide/case_studies/acquire_exASLM.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware_overview.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Software Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#model-view-controller-mvc">Model View Controller (MVC)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#communication-enhancements">Communication Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-acquisition-and-processing">Data Acquisition and Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#feature-lists">Feature Lists</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Software Architecture</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/contributing/software_architecture.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="software-architecture">
+<h1>Software Architecture<a class="headerlink" href="#software-architecture" title="Permalink to this heading"></a></h1>
+<img alt="Software Architecture" class="align-center" src="../_images/architecture.png" />
+<section id="model-view-controller-mvc">
+<span id="software-architecture-section"></span><h2>Model View Controller (MVC)<a class="headerlink" href="#model-view-controller-mvc" title="Permalink to this heading"></a></h2>
+<p>The architecture of <strong>navigate</strong> is designed following the industry-standard Model-View-Controller (MVC) pattern. In this structure:</p>
+<ul class="simple">
+<li><p><strong>Model</strong>: The model operates in its own subprocess and is responsible for communicating
+with hardware and performing image handling and processing tasks.
+Communication with the controller is managed through event queues, ensuring efficient data handling.</p></li>
+<li><p><strong>View</strong>: The view is responsible for displaying the user interface and communicating
+with the controller. Each graphical user interface (GUI) window, such as the camera
+display and autofocusing module, is controlled by a dedicated sub-controller.
+These sub-controllers are responsible for relaying information back to the main controller,
+maintaining a clear separation of functionality.</p></li>
+<li><p><strong>Controller</strong>: Acts as the central unit that manages the flow of data between the model
+and the view components, coordinating the application’s overall functionality.
+It relays user input in the form of traces and commands to the model and relays model
+output in the form of images and data to the view.</p></li>
+</ul>
+<section id="communication-enhancements">
+<h3>Communication Enhancements<a class="headerlink" href="#communication-enhancements" title="Permalink to this heading"></a></h3>
+<p>To maximize the extendability of <strong>navigate</strong>, it incorporates:</p>
+<ul class="simple">
+<li><p><strong>REST-API Level</strong>: A RESTful API layer is included to facilitate communication with external
+libraries, ensuring compatibility and extendability. Data is exchanged to the external
+environment through a http server, allowing for rapid and seamless integration with other systems.
+Data does not need to be saved locally to be loaded by the external system.</p></li>
+<li><p><strong>Plugin Layer</strong>: Offers the flexibility to integrate non-supported devices through
+plugins, enhancing the system’s adaptability to various hardware.</p></li>
+</ul>
+</section>
+<section id="data-acquisition-and-processing">
+<h3>Data Acquisition and Processing<a class="headerlink" href="#data-acquisition-and-processing" title="Permalink to this heading"></a></h3>
+<p><strong>navigate</strong> employs a feature container for running acquisition routines, characterized by:</p>
+<ul class="simple">
+<li><p><strong>Reconfigurable Workflows</strong>: Supports custom data acquisition workflows, which are
+adaptable and can integrate computer vision feedback mechanisms for enhanced functionality.</p></li>
+<li><p><strong>Threading and Parallelization</strong>: To optimize performance, threading and parallelization
+techniques are extensively utilized, allowing for efficient handling of large objects and data processing.</p></li>
+<li><p><strong>Tree Data Structure</strong>: The system’s backbone for alignment, imaging, and image
+analysis is a reconfigurable tree data structure. This enables the creation of
+customizable acquisition “recipes” tailored to specific specimens.</p></li>
+<li><p><strong>Image Analysis Routines</strong>: Custom routines for image analysis can also be loaded into
+<strong>navigate</strong> during run-time. Image analysis is performed on images in memory that are
+stored as numpy arrays, ensuring rapid processing.</p></li>
+</ul>
+</section>
+<section id="feature-lists">
+<h3>Feature Lists<a class="headerlink" href="#feature-lists" title="Permalink to this heading"></a></h3>
+<p>Feature lists are highly versatile, capable of:</p>
+<ul class="simple">
+<li><p><strong>Sequential Execution</strong>: Acquisition routes can be executed in a predefined order, ensuring
+systematic data collection.</p></li>
+<li><p><strong>Logic Gates Integration</strong>: Incorporates conditional logic (e.g., if/then, try/except)
+and loop structures (while, for-loops), providing flexibility in data acquisition and processing.</p></li>
+<li><p><strong>Non-Imaging Processes</strong>: Supports the inclusion of non-imaging-based processes,
+such as solvent exchange, broadening the application scope of the system.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../user_guide/case_studies/acquire_exASLM.html" class="btn btn-neutral float-left" title="Imaging on an Upright ASLM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="contributing_guidelines.html" class="btn btn-neutral float-right" title="Contributing Guidelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

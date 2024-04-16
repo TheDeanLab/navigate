@@ -1,0 +1,75 @@
+navigate.model.devices.APIs.asi.asi\_MFC\_controller.MFCTwoThousand
+===================================================================
+
+.. currentmodule:: navigate.model.devices.APIs.asi.asi_MFC_controller
+
+.. autoclass:: MFCTwoThousand
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MFCTwoThousand.__init__
+      ~MFCTwoThousand.change_filter_wheel_speed
+      ~MFCTwoThousand.connect_to_serial
+      ~MFCTwoThousand.disconnect_from_serial
+      ~MFCTwoThousand.get_axis_position
+      ~MFCTwoThousand.get_axis_position_um
+      ~MFCTwoThousand.get_default_motor_axis_sequence
+      ~MFCTwoThousand.get_encoder_counts_per_mm
+      ~MFCTwoThousand.get_position
+      ~MFCTwoThousand.get_speed
+      ~MFCTwoThousand.halt_filter_wheel
+      ~MFCTwoThousand.is_axis_busy
+      ~MFCTwoThousand.is_device_busy
+      ~MFCTwoThousand.is_moving
+      ~MFCTwoThousand.is_open
+      ~MFCTwoThousand.move
+      ~MFCTwoThousand.move_axis
+      ~MFCTwoThousand.move_filter_wheel
+      ~MFCTwoThousand.move_filter_wheel_to_home
+      ~MFCTwoThousand.moverel
+      ~MFCTwoThousand.moverel_axis
+      ~MFCTwoThousand.read_response
+      ~MFCTwoThousand.report_to_console
+      ~MFCTwoThousand.scan_ports
+      ~MFCTwoThousand.scanr
+      ~MFCTwoThousand.scanv
+      ~MFCTwoThousand.select_filter_wheel
+      ~MFCTwoThousand.send_command
+      ~MFCTwoThousand.send_filter_wheel_command
+      ~MFCTwoThousand.set_backlash
+      ~MFCTwoThousand.set_error
+      ~MFCTwoThousand.set_feedback_alignment
+      ~MFCTwoThousand.set_finishing_accuracy
+      ~MFCTwoThousand.set_max_speed
+      ~MFCTwoThousand.set_speed
+      ~MFCTwoThousand.set_speed_as_percent_max
+      ~MFCTwoThousand.start_scan
+      ~MFCTwoThousand.stop
+      ~MFCTwoThousand.stop_scan
+      ~MFCTwoThousand.wait_for_device
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MFCTwoThousand.serial_port
+      ~MFCTwoThousand.com_port
+      ~MFCTwoThousand.baud_rate
+      ~MFCTwoThousand.verbose
+      ~MFCTwoThousand.default_axes_sequence
+      ~MFCTwoThousand.safe_to_write
+   
+   

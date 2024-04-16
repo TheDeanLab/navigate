@@ -28,5 +28,6 @@ navigate.model.devices.APIs.asi
    :template: custom_module.rst
    :recursive:
 
+   navigate.model.devices.APIs.asi.asi_MFC_controller
    navigate.model.devices.APIs.asi.asi_tiger_controller
 

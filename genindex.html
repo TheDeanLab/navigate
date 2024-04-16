@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; navigate 0.0.4 documentation</title>
+  <title>Index &mdash; navigate 0.0.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
@@ -51,6 +51,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/hardware_overview.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/acquiring_home.html">Acquiring Data</a></li>
@@ -58,6 +59,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing/software_architecture.html">Software Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin Architecture</a></li>
@@ -151,6 +153,8 @@
         <li><a href="_autosummary/navigate.model.data_sources.tiff_data_source.TiffDataSource.html#navigate.model.data_sources.tiff_data_source.TiffDataSource.__init__">(navigate.model.data_sources.tiff_data_source.TiffDataSource method)</a>
 </li>
         <li><a href="_autosummary/navigate.model.device_startup_functions.DummyDeviceConnection.html#navigate.model.device_startup_functions.DummyDeviceConnection.__init__">(navigate.model.device_startup_functions.DummyDeviceConnection method)</a>
+</li>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.__init__">(navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.__init__">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
@@ -461,8 +465,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/navigate.model.concurrency.concurrency_tools.SharedNDArray.html#navigate.model.concurrency.concurrency_tools.SharedNDArray.base">base (navigate.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.baud_rate">baud_rate (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.baud_rate">baud_rate (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.baud_rate">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.filter_wheel.filter_wheel_sutter.build_filter_wheel_connection.html#navigate.model.devices.filter_wheel.filter_wheel_sutter.baudrate">baudrate (in module navigate.model.devices.filter_wheel.filter_wheel_sutter)</a>
 
       <ul>
@@ -500,7 +508,11 @@
       <li><a href="_autosummary/navigate.tools.sdf.box.html#navigate.tools.sdf.box">box() (in module navigate.tools.sdf)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.build_ASI_Stage_connection.html#navigate.model.devices.stages.stage_asi.build_ASI_Stage_connection">build_ASI_Stage_connection() (in module navigate.model.devices.stages.stage_asi)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.stages.stage_asi_MFCTwoThousand.build_ASI_Stage_connection.html#navigate.model.devices.stages.stage_asi_MFCTwoThousand.build_ASI_Stage_connection">(in module navigate.model.devices.stages.stage_asi_MFCTwoThousand)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.zoom.zoom_dynamixel.build_dynamixel_zoom_connection.html#navigate.model.devices.zoom.zoom_dynamixel.build_dynamixel_zoom_connection">build_dynamixel_zoom_connection() (in module navigate.model.devices.zoom.zoom_dynamixel)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.filter_wheel.filter_wheel_asi.build_filter_wheel_connection.html#navigate.model.devices.filter_wheel.filter_wheel_asi.build_filter_wheel_connection">build_filter_wheel_connection() (in module navigate.model.devices.filter_wheel.filter_wheel_asi)</a>
@@ -655,8 +667,12 @@
 </li>
       <li><a href="_autosummary/navigate.model.features.adaptive_optics.TonyWilson.html#navigate.model.features.adaptive_optics.TonyWilson.change_coef">change_coef (navigate.model.features.adaptive_optics.TonyWilson attribute)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.change_filter_wheel_speed">change_filter_wheel_speed() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.change_filter_wheel_speed">change_filter_wheel_speed() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.change_filter_wheel_speed">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.controller.configuration_controller.ConfigurationController.html#navigate.controller.configuration_controller.ConfigurationController.change_microscope">change_microscope() (navigate.controller.configuration_controller.ConfigurationController method)</a>
 </li>
       <li><a href="_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.change_resolution">change_resolution() (navigate.model.model.Model method)</a>
@@ -769,8 +785,6 @@
         <li><a href="_autosummary/navigate.model.devices.camera.camera_synthetic.SyntheticCamera.html#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.close_camera">(navigate.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.html#navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.close_image_series">close_image_series() (navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase method)</a>
 
       <ul>
@@ -785,6 +799,8 @@
         <li><a href="_autosummary/navigate.model.devices.camera.camera_synthetic.SyntheticCamera.html#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.close_image_series">(navigate.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/navigate.model.devices.shutter.laser_shutter_base.ShutterBase.html#navigate.model.devices.shutter.laser_shutter_base.ShutterBase.close_shutter">close_shutter() (navigate.model.devices.shutter.laser_shutter_base.ShutterBase method)</a>
 
       <ul>
@@ -799,8 +815,12 @@
 </li>
       <li><a href="_autosummary/navigate.model.features.adaptive_optics.TonyWilson.html#navigate.model.features.adaptive_optics.TonyWilson.coef_amp">coef_amp (navigate.model.features.adaptive_optics.TonyWilson attribute)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.com_port">com_port (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.com_port">com_port (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.com_port">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.tools.common_functions.combine_funcs.html#navigate.tools.common_functions.combine_funcs">combine_funcs() (in module navigate.tools.common_functions)</a>
 </li>
       <li><a href="_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.commands">commands (navigate.model.microscope.Microscope attribute)</a>
@@ -917,8 +937,12 @@
 </li>
       <li><a href="_autosummary/navigate.model.concurrency.concurrency_tools.SharedNDArray.html#navigate.model.concurrency.concurrency_tools.SharedNDArray.conjugate">conjugate() (navigate.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.connect_to_serial">connect_to_serial() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.connect_to_serial">connect_to_serial() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.connect_to_serial">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.features.cva_conpro.ConstantVelocityAcquisition.html#navigate.model.features.cva_conpro.ConstantVelocityAcquisition">ConstantVelocityAcquisition (class in navigate.model.features.cva_conpro)</a>
 </li>
       <li><a href="_autosummary/navigate.model.features.feature_container.Container.html#navigate.model.features.feature_container.Container">Container (class in navigate.model.features.feature_container)</a>
@@ -1091,8 +1115,12 @@
 </li>
       <li><a href="_autosummary/navigate.model.features.volume_search.VolumeSearch.html#navigate.model.features.volume_search.VolumeSearch.debug">debug (navigate.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.default_axes_sequence">default_axes_sequence (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.default_axes_sequence">default_axes_sequence (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.default_axes_sequence">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.stages.stage_synthetic.SyntheticStage.html#navigate.model.devices.stages.stage_synthetic.SyntheticStage.default_speed">default_speed (navigate.model.devices.stages.stage_synthetic.SyntheticStage attribute)</a>
 </li>
       <li><a href="_autosummary/navigate.model.features.common_features.ZStackAcquisition.html#navigate.model.features.common_features.ZStackAcquisition.defocus">defocus (navigate.model.features.common_features.ZStackAcquisition attribute)</a>
@@ -1163,8 +1191,12 @@
 </li>
       <li><a href="_autosummary/navigate.model.features.volume_search.VolumeSearch.html#navigate.model.features.volume_search.VolumeSearch.direction">direction (navigate.model.features.volume_search.VolumeSearch attribute)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.disconnect_from_serial">disconnect_from_serial() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.disconnect_from_serial">disconnect_from_serial() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.disconnect_from_serial">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.mirrors.mirror_imop.ImagineOpticsMirror.html#navigate.model.devices.mirrors.mirror_imop.ImagineOpticsMirror.display_modes">display_modes() (navigate.model.devices.mirrors.mirror_imop.ImagineOpticsMirror method)</a>
 </li>
       <li><a href="_autosummary/navigate.model.features.adaptive_optics.TonyWilson.html#navigate.model.features.adaptive_optics.TonyWilson.done_all">done_all (navigate.model.features.adaptive_optics.TonyWilson attribute)</a>
@@ -1539,16 +1571,22 @@
 </li>
       <li><a href="_autosummary/navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.html#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_autostart">get_autostart() (navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_axis_position">get_axis_position() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.get_axis_position">get_axis_position() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
 
       <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_axis_position">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+</li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.get_axis_position">(navigate.model.devices.stages.stage_asi.ASIStage method)</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_synthetic.SyntheticStage.html#navigate.model.devices.stages.stage_synthetic.SyntheticStage.get_axis_position">(navigate.model.devices.stages.stage_synthetic.SyntheticStage method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_axis_position_um">get_axis_position_um() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.get_axis_position_um">get_axis_position_um() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_axis_position_um">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.get_camera_line_interval_and_exposure_time">get_camera_line_interval_and_exposure_time() (navigate.model.model.Model method)</a>
 </li>
       <li><a href="_autosummary/navigate.config.config.get_configuration_paths.html#navigate.config.config.get_configuration_paths">get_configuration_paths() (in module navigate.config.config)</a>
@@ -1561,10 +1599,18 @@
 </li>
       <li><a href="_autosummary/navigate.model.data_sources.get_data_source.html#navigate.model.data_sources.get_data_source">get_data_source() (in module navigate.model.data_sources)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_default_motor_axis_sequence">get_default_motor_axis_sequence() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.get_default_motor_axis_sequence">get_default_motor_axis_sequence() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_default_motor_axis_sequence">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_encoder_counts_per_mm">get_encoder_counts_per_mm() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      </ul></li>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.get_encoder_counts_per_mm">get_encoder_counts_per_mm() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_encoder_counts_per_mm">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.html#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_errors">get_errors() (navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser method)</a>
 </li>
       <li><a href="_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.get_exposure_sweep_times">get_exposure_sweep_times() (navigate.model.microscope.Microscope method)</a>
@@ -1607,10 +1653,10 @@
 </li>
       <li><a href="_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.get_microscope_info">get_microscope_info() (navigate.model.model.Model method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser.html#navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser.get_minimum_laser_power">get_minimum_laser_power() (navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser.html#navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser.get_minimum_laser_power">get_minimum_laser_power() (navigate.model.devices.APIs.coherent.ObisLaser.ObisLaser method)</a>
+</li>
       <li><a href="_autosummary/navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.html#navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.get_minimum_waiting_time">get_minimum_waiting_time() (navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase method)</a>
 
       <ul>
@@ -1667,8 +1713,12 @@
 </li>
       <li><a href="_autosummary/navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.html#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.get_parameters">get_parameters() (navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_position">get_position() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.get_position">get_position() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_position">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.get_position_dict">get_position_dict() (navigate.model.devices.stages.stage_asi.ASIStage method)</a>
 
       <ul>
@@ -1707,9 +1757,11 @@
       </ul></li>
       <li><a href="_autosummary/navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource.get_slice">get_slice() (navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_speed">get_speed() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.get_speed">get_speed() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
 
       <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.get_speed">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+</li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.get_speed">(navigate.model.devices.stages.stage_asi.ASIStage method)</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_synthetic.SyntheticStage.html#navigate.model.devices.stages.stage_synthetic.SyntheticStage.get_speed">(navigate.model.devices.stages.stage_synthetic.SyntheticStage method)</a>
@@ -1757,8 +1809,12 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.halt_filter_wheel">halt_filter_wheel() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.halt_filter_wheel">halt_filter_wheel() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.halt_filter_wheel">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.html#navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase">HamamatsuBase (class in navigate.model.devices.camera.camera_hamamatsu)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrca.html#navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrca">HamamatsuOrca (class in navigate.model.devices.camera.camera_hamamatsu)</a>
@@ -1921,8 +1977,12 @@
         <li><a href="_autosummary/navigate.model.concurrency.concurrency_tools.ResultThread.html#navigate.model.concurrency.concurrency_tools.ResultThread.is_alive">(navigate.model.concurrency.concurrency_tools.ResultThread method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.is_axis_busy">is_axis_busy() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.is_axis_busy">is_axis_busy() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.is_axis_busy">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.data_sources.tiff_data_source.TiffDataSource.html#navigate.model.data_sources.tiff_data_source.TiffDataSource.is_bigtiff">is_bigtiff (navigate.model.data_sources.tiff_data_source.TiffDataSource property)</a>
 </li>
       <li><a href="_autosummary/navigate.model.features.feature_container.Container.html#navigate.model.features.feature_container.Container.is_closed">is_closed (navigate.model.features.feature_container.Container attribute)</a>
@@ -1933,8 +1993,12 @@
         <li><a href="_autosummary/navigate.model.features.feature_container.SignalContainer.html#navigate.model.features.feature_container.SignalContainer.is_closed">(navigate.model.features.feature_container.SignalContainer attribute)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.is_device_busy">is_device_busy() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.is_device_busy">is_device_busy() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.is_device_busy">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.features.feature_container.DataNode.html#navigate.model.features.feature_container.DataNode.is_initialized">is_initialized (navigate.model.features.feature_container.DataNode attribute)</a>
 
       <ul>
@@ -1947,12 +2011,20 @@
 </li>
       <li><a href="_autosummary/navigate.model.features.feature_container.DataNode.html#navigate.model.features.feature_container.DataNode.is_marked">is_marked (navigate.model.features.feature_container.DataNode attribute)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.is_moving">is_moving() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.is_moving">is_moving() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.is_moving">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.data_sources.tiff_data_source.TiffDataSource.html#navigate.model.data_sources.tiff_data_source.TiffDataSource.is_ome">is_ome (navigate.model.data_sources.tiff_data_source.TiffDataSource property)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.is_open">is_open() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.is_open">is_open() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.is_open">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.model.Model.html#navigate.model.model.Model.is_save">is_save (navigate.model.model.Model attribute)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.mirrors.mirror_base.MirrorBase.html#navigate.model.devices.mirrors.mirror_base.MirrorBase.is_synthetic">is_synthetic (navigate.model.devices.mirrors.mirror_base.MirrorBase attribute)</a>
@@ -2125,6 +2197,8 @@
         <li><a href="_autosummary/navigate.model.data_sources.tiff_data_source.TiffDataSource.html#navigate.model.data_sources.tiff_data_source.TiffDataSource.metadata">(navigate.model.data_sources.tiff_data_source.TiffDataSource attribute)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand">MFCTwoThousand (class in navigate.model.devices.APIs.asi.asi_MFC_controller)</a>
+</li>
       <li><a href="_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope">Microscope (class in navigate.model.microscope)</a>
 </li>
       <li><a href="_autosummary/navigate.controller.configuration_controller.ConfigurationController.html#navigate.controller.configuration_controller.ConfigurationController.microscope_config">microscope_config (navigate.controller.configuration_controller.ConfigurationController attribute)</a>
@@ -2335,6 +2409,8 @@
 </li>
         <li><a href="_autosummary/navigate.model.devices.APIs.asi.html#module-navigate.model.devices.APIs.asi">navigate.model.devices.APIs.asi</a>
 </li>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.html#module-navigate.model.devices.APIs.asi.asi_MFC_controller">navigate.model.devices.APIs.asi.asi_MFC_controller</a>
+</li>
         <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.html#module-navigate.model.devices.APIs.asi.asi_tiger_controller">navigate.model.devices.APIs.asi.asi_tiger_controller</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.APIs.coherent.html#module-navigate.model.devices.APIs.coherent">navigate.model.devices.APIs.coherent</a>
@@ -2428,6 +2504,8 @@
         <li><a href="_autosummary/navigate.model.devices.stages.html#module-navigate.model.devices.stages">navigate.model.devices.stages</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.html#module-navigate.model.devices.stages.stage_asi">navigate.model.devices.stages.stage_asi</a>
+</li>
+        <li><a href="_autosummary/navigate.model.devices.stages.stage_asi_MFCTwoThousand.html#module-navigate.model.devices.stages.stage_asi_MFCTwoThousand">navigate.model.devices.stages.stage_asi_MFCTwoThousand</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_base.html#module-navigate.model.devices.stages.stage_base">navigate.model.devices.stages.stage_base</a>
 </li>
@@ -2524,9 +2602,11 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.move">move() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move">move() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
 
       <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.move">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+</li>
         <li><a href="_autosummary/navigate.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.html#navigate.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus.move">(navigate.model.devices.remote_focus.remote_focus_synthetic.SyntheticRemoteFocus method)</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.zoom.zoom_base.ZoomBase.html#navigate.model.devices.zoom.zoom_base.ZoomBase.move">(navigate.model.devices.zoom.zoom_base.ZoomBase method)</a>
@@ -2550,8 +2630,12 @@
         <li><a href="_autosummary/navigate.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.html#navigate.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_absolute">(navigate.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.move_axis">move_axis() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_axis">move_axis() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.move_axis">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.move_axis_absolute">move_axis_absolute() (navigate.model.devices.stages.stage_asi.ASIStage method)</a>
 
       <ul>
@@ -2566,10 +2650,18 @@
         <li><a href="_autosummary/navigate.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.html#navigate.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.move_axis_absolute">(navigate.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.move_filter_wheel">move_filter_wheel() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel">move_filter_wheel() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.move_filter_wheel">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.move_filter_wheel_to_home">move_filter_wheel_to_home() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      </ul></li>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel_to_home">move_filter_wheel_to_home() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.move_filter_wheel_to_home">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_remote_focus">move_remote_focus() (navigate.model.microscope.Microscope method)</a>
 </li>
       <li><a href="_autosummary/navigate.model.microscope.Microscope.html#navigate.model.microscope.Microscope.move_stage">move_stage() (navigate.model.microscope.Microscope method)</a>
@@ -2582,10 +2674,18 @@
 </li>
       <li><a href="_autosummary/navigate.model.devices.APIs.sutter.MP285.MP285.html#navigate.model.devices.APIs.sutter.MP285.MP285.move_to_specified_position">move_to_specified_position() (navigate.model.devices.APIs.sutter.MP285.MP285 method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.moverel">moverel() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.moverel">moverel() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.moverel">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.moverel_axis">moverel_axis() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      </ul></li>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.moverel_axis">moverel_axis() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.moverel_axis">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.controller.thread_pool.SynchronizedThreadPool.html#navigate.controller.thread_pool.SynchronizedThreadPool.moveToDelete">moveToDelete() (navigate.controller.thread_pool.SynchronizedThreadPool method)</a>
 </li>
       <li><a href="_autosummary/navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.html#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable">MoveToNextPositionInMultiPositionTable (class in navigate.model.features.common_features)</a>
@@ -2781,6 +2881,13 @@
 
       <ul>
         <li><a href="_autosummary/navigate.model.devices.APIs.asi.html#module-navigate.model.devices.APIs.asi">module</a>
+</li>
+      </ul></li>
+      <li>
+    navigate.model.devices.APIs.asi.asi_MFC_controller
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.html#module-navigate.model.devices.APIs.asi.asi_MFC_controller">module</a>
 </li>
       </ul></li>
       <li>
@@ -3112,6 +3219,13 @@
 
       <ul>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.html#module-navigate.model.devices.stages.stage_asi">module</a>
+</li>
+      </ul></li>
+      <li>
+    navigate.model.devices.stages.stage_asi_MFCTwoThousand
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.stages.stage_asi_MFCTwoThousand.html#module-navigate.model.devices.stages.stage_asi_MFCTwoThousand">module</a>
 </li>
       </ul></li>
       <li>
@@ -3784,8 +3898,12 @@
         <li><a href="_autosummary/navigate.model.devices.zoom.zoom_synthetic.SyntheticZoom.html#navigate.model.devices.zoom.zoom_synthetic.SyntheticZoom.read_position">(navigate.model.devices.zoom.zoom_synthetic.SyntheticZoom method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.read_response">read_response() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.read_response">read_response() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.read_response">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.concurrency.concurrency_tools.SharedNDArray.html#navigate.model.concurrency.concurrency_tools.SharedNDArray.real">real (navigate.model.concurrency.concurrency_tools.SharedNDArray attribute)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.APIs.sutter.MP285.MP285.html#navigate.model.devices.APIs.sutter.MP285.MP285.refresh_display">refresh_display() (navigate.model.devices.APIs.sutter.MP285.MP285 method)</a>
@@ -3856,8 +3974,12 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.report_to_console">report_to_console() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.report_to_console">report_to_console() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.report_to_console">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.features.feature_container.Container.html#navigate.model.features.feature_container.Container.reset">reset() (navigate.model.features.feature_container.Container method)</a>
 
       <ul>
@@ -3954,8 +4076,12 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.safe_to_write">safe_to_write (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.safe_to_write">safe_to_write (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.safe_to_write">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.daq.daq_base.DAQBase.html#navigate.model.devices.daq.daq_base.DAQBase.sample_rate">sample_rate (navigate.model.devices.daq.daq_base.DAQBase attribute)</a>
 
       <ul>
@@ -3988,34 +4114,54 @@
 </li>
       <li><a href="_autosummary/navigate.model.waveforms.sawtooth.html#navigate.model.waveforms.sawtooth">sawtooth() (in module navigate.model.waveforms)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.scan_ports">scan_ports() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController static method)</a>
-</li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.scanr">scanr() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scan_ports">scan_ports() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand static method)</a>
 
       <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.scan_ports">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController static method)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scanr">scanr() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.scanr">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+</li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.scanr">(navigate.model.devices.stages.stage_asi.ASIStage method)</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_synthetic.SyntheticStage.html#navigate.model.devices.stages.stage_synthetic.SyntheticStage.scanr">(navigate.model.devices.stages.stage_synthetic.SyntheticStage method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.scanv">scanv() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scanv">scanv() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
 
       <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.scanv">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+</li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.scanv">(navigate.model.devices.stages.stage_asi.ASIStage method)</a>
 </li>
       </ul></li>
       <li><a href="_autosummary/navigate.model.concurrency.concurrency_tools.SharedNDArray.html#navigate.model.concurrency.concurrency_tools.SharedNDArray.searchsorted">searchsorted() (navigate.model.concurrency.concurrency_tools.SharedNDArray method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.select_filter_wheel">select_filter_wheel() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.select_filter_wheel">select_filter_wheel() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.select_filter_wheel">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.controller.thread_pool.SelfLockThread.html#navigate.controller.thread_pool.SelfLockThread.selfLock">selfLock (navigate.controller.thread_pool.SelfLockThread attribute)</a>
 </li>
       <li><a href="_autosummary/navigate.controller.thread_pool.SelfLockThread.html#navigate.controller.thread_pool.SelfLockThread">SelfLockThread (class in navigate.controller.thread_pool)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.send_command">send_command() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.send_command">send_command() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.send_command">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.send_filter_wheel_command">send_filter_wheel_command() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      </ul></li>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.send_filter_wheel_command">send_filter_wheel_command() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.send_filter_wheel_command">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.html#navigate.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel.serial">serial (navigate.model.devices.filter_wheel.filter_wheel_sutter.SutterFilterWheel attribute)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.html#navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.serial_number">serial_number (navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase property)</a>
@@ -4034,16 +4180,24 @@
         <li><a href="_autosummary/navigate.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.html#navigate.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage.serial_number">(navigate.model.devices.stages.stage_tl_kcube_inertial.TLKIMStage attribute)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.serial_port">serial_port (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.serial_port">serial_port (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.serial_port">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.features.restful_features.IlastikSegmentation.html#navigate.model.features.restful_features.IlastikSegmentation.service_url">service_url (navigate.model.features.restful_features.IlastikSegmentation attribute)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.APIs.sutter.MP285.MP285.html#navigate.model.devices.APIs.sutter.MP285.MP285.set_absolute_mode">set_absolute_mode() (navigate.model.devices.APIs.sutter.MP285.MP285 method)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.html#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.set_autostart">set_autostart() (navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_backlash">set_backlash() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_backlash">set_backlash() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_backlash">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.data_sources.tiff_data_source.TiffDataSource.html#navigate.model.data_sources.tiff_data_source.TiffDataSource.set_bigtiff">set_bigtiff() (navigate.model.data_sources.tiff_data_source.TiffDataSource method)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.html#navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.set_binning">set_binning() (navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase method)</a>
@@ -4060,8 +4214,12 @@
         <li><a href="_autosummary/navigate.model.devices.camera.camera_synthetic.SyntheticCamera.html#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.set_binning">(navigate.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_error">set_error() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_error">set_error() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_error">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.html#navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase.set_exposure_time">set_exposure_time() (navigate.model.devices.camera.camera_hamamatsu.HamamatsuBase method)</a>
 
       <ul>
@@ -4078,8 +4236,12 @@
       </ul></li>
       <li><a href="_autosummary/navigate.model.devices.daq.daq_synthetic.SyntheticDAQ.html#navigate.model.devices.daq.daq_synthetic.SyntheticDAQ.set_external_trigger">set_external_trigger() (navigate.model.devices.daq.daq_synthetic.SyntheticDAQ method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_feedback_alignment">set_feedback_alignment() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_feedback_alignment">set_feedback_alignment() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_feedback_alignment">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.filter_wheel.filter_wheel_asi.ASIFilterWheel.html#navigate.model.devices.filter_wheel.filter_wheel_asi.ASIFilterWheel.set_filter">set_filter() (navigate.model.devices.filter_wheel.filter_wheel_asi.ASIFilterWheel method)</a>
 
       <ul>
@@ -4088,8 +4250,12 @@
         <li><a href="_autosummary/navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.html#navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel.set_filter">(navigate.model.devices.filter_wheel.filter_wheel_synthetic.SyntheticFilterWheel method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_finishing_accuracy">set_finishing_accuracy() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_finishing_accuracy">set_finishing_accuracy() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_finishing_accuracy">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_from_configuration_experiment">set_from_configuration_experiment() (navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata method)</a>
 
       <ul>
@@ -4128,8 +4294,12 @@
         <li><a href="_autosummary/navigate.model.devices.camera.camera_synthetic.SyntheticCamera.html#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.set_line_interval">(navigate.model.devices.camera.camera_synthetic.SyntheticCamera method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_max_speed">set_max_speed() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_max_speed">set_max_speed() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_max_speed">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource.set_metadata">set_metadata() (navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource method)</a>
 
       <ul>
@@ -4226,16 +4396,22 @@
         <li><a href="_autosummary/navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.set_shape_from_configuration_experiment">(navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_speed">set_speed() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_speed">set_speed() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
 
       <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_speed">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+</li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.set_speed">(navigate.model.devices.stages.stage_asi.ASIStage method)</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_synthetic.SyntheticStage.html#navigate.model.devices.stages.stage_synthetic.SyntheticStage.set_speed">(navigate.model.devices.stages.stage_synthetic.SyntheticStage method)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_speed_as_percent_max">set_speed_as_percent_max() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_speed_as_percent_max">set_speed_as_percent_max() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.set_speed_as_percent_max">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.html#navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata.set_stack_order_from_configuration_experiment">set_stack_order_from_configuration_experiment() (navigate.model.metadata_sources.bdv_metadata.BigDataViewerMetadata method)</a>
 
       <ul>
@@ -4340,6 +4516,8 @@
         <li><a href="_autosummary/navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.shape_x">(navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource.shape_y">shape_y (navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
 
       <ul>
@@ -4356,8 +4534,6 @@
         <li><a href="_autosummary/navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html#navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.shape_y">(navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource.html#navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource.shape_z">shape_z (navigate.model.data_sources.bdv_data_source.BigDataViewerDataSource attribute)</a>
 
       <ul>
@@ -4570,9 +4746,11 @@
 </li>
       <li><a href="_autosummary/navigate.model.device_startup_functions.start_remote_focus_device.html#navigate.model.device_startup_functions.start_remote_focus_device">start_remote_focus_device() (in module navigate.model.device_startup_functions)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.start_scan">start_scan() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.start_scan">start_scan() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
 
       <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.start_scan">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+</li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.start_scan">(navigate.model.devices.stages.stage_asi.ASIStage method)</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_synthetic.SyntheticStage.html#navigate.model.devices.stages.stage_synthetic.SyntheticStage.start_scan">(navigate.model.devices.stages.stage_synthetic.SyntheticStage method)</a>
@@ -4634,9 +4812,11 @@
       </ul></li>
       <li><a href="_autosummary/navigate.model.features.common_features.LoopByCount.html#navigate.model.features.common_features.LoopByCount.steps">steps (navigate.model.features.common_features.LoopByCount attribute)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.stop">stop() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.stop">stop() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
 
       <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.stop">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+</li>
         <li><a href="_autosummary/navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.html#navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser.stop">(navigate.model.devices.APIs.omicron.LuxxLaser.LuxxLaser method)</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.stop">(navigate.model.devices.stages.stage_asi.ASIStage method)</a>
@@ -4658,9 +4838,11 @@
 </li>
       <li><a href="_autosummary/navigate.model.devices.daq.daq_synthetic.SyntheticDAQ.html#navigate.model.devices.daq.daq_synthetic.SyntheticDAQ.stop_acquisition">stop_acquisition() (navigate.model.devices.daq.daq_synthetic.SyntheticDAQ method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.stop_scan">stop_scan() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.stop_scan">stop_scan() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
 
       <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.stop_scan">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+</li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.stop_scan">(navigate.model.devices.stages.stage_asi.ASIStage method)</a>
 </li>
         <li><a href="_autosummary/navigate.model.devices.stages.stage_synthetic.SyntheticStage.html#navigate.model.devices.stages.stage_synthetic.SyntheticStage.stop_scan">(navigate.model.devices.stages.stage_synthetic.SyntheticStage method)</a>
@@ -4920,8 +5102,12 @@
         <li><a href="_autosummary/navigate.model.devices.camera.camera_synthetic.SyntheticCamera.html#navigate.model.devices.camera.camera_synthetic.SyntheticCamera.variance">(navigate.model.devices.camera.camera_synthetic.SyntheticCamera property)</a>
 </li>
       </ul></li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.verbose">verbose (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.verbose">verbose (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand attribute)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.verbose">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController attribute)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.stages.stage_asi.ASIStage.html#navigate.model.devices.stages.stage_asi.ASIStage.verify_abs_position">verify_abs_position() (navigate.model.devices.stages.stage_asi.ASIStage method)</a>
 
       <ul>
@@ -4982,8 +5168,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/navigate.controller.thread_pool.SelfLockThread.html#navigate.controller.thread_pool.SelfLockThread.wait">wait() (navigate.controller.thread_pool.SelfLockThread method)</a>
 </li>
-      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.wait_for_device">wait_for_device() (navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
+      <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.html#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.wait_for_device">wait_for_device() (navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand method)</a>
+
+      <ul>
+        <li><a href="_autosummary/navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.html#navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController.wait_for_device">(navigate.model.devices.APIs.asi.asi_tiger_controller.TigerController method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/navigate.model.devices.stages.stage_pi.PIStage.html#navigate.model.devices.stages.stage_pi.PIStage.wait_on_target">wait_on_target() (navigate.model.devices.stages.stage_pi.PIStage method)</a>
 </li>
       <li><a href="_autosummary/navigate.model.devices.daq.daq_synthetic.SyntheticDAQ.html#navigate.model.devices.daq.daq_synthetic.SyntheticDAQ.wait_to_run_lock">wait_to_run_lock (navigate.model.devices.daq.daq_synthetic.SyntheticDAQ attribute)</a>

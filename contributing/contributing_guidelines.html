@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contributing Guidelines &mdash; navigate 0.0.4 documentation</title>
+  <title>Contributing Guidelines &mdash; navigate 0.0.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Feature Container" href="feature_container.html" />
-    <link rel="prev" title="Imaging on an Upright ASLM" href="../user_guide/case_studies/acquire_exASLM.html" /> 
+    <link rel="prev" title="Software Architecture" href="software_architecture.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -54,6 +54,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware_overview.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
@@ -61,6 +62,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="software_architecture.html">Software Architecture</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing Guidelines</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#general-principles">General Principles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding Style</a></li>
@@ -119,22 +121,10 @@ meeting.</p>
 <hr class="docutils" />
 <section id="general-principles">
 <h2>General Principles<a class="headerlink" href="#general-principles" title="Permalink to this heading"></a></h2>
-<ul>
+<ul class="simple">
 <li><p>We use a <a class="reference external" href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">model-view-controller architecture</a>.
-New functionality should keep this strong separation.</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>The model operates in its own subprocess and is responsible for
-communicating with hardware and performing image handling and processing tasks.</p></li>
-<li><p>The view is responsible for displaying the user interface and
-communicating with the controller.</p></li>
-<li><p>The controller is responsible for managing the user interface and
-communicating with the model. It relays user input in the form of
-traces and commands to the model and relays model output in the form of
-images and data to the view.</p></li>
-</ul>
-</div></blockquote>
-</li>
+New functionality should keep this strong separation. More information can be found
+in the <a class="reference internal" href="software_architecture.html"><span class="doc">software architecture</span></a> section.</p></li>
 <li><p>Please do not create new configuration variables unless absolutely
 necessary, especially in the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">experiment.yaml</span></code>
 files. A new variable is necessary only if no variable stores similar
@@ -273,7 +263,7 @@ typically works:</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../user_guide/case_studies/acquire_exASLM.html" class="btn btn-neutral float-left" title="Imaging on an Upright ASLM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="software_architecture.html" class="btn btn-neutral float-left" title="Software Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="feature_container.html" class="btn btn-neutral float-right" title="Feature Container" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

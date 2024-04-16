@@ -52,6 +52,7 @@ technology developers.
    :caption: User Guide
    :maxdepth: 2
 
+   user_guide/hardware_overview
    user_guide/gui_walkthrough
    user_guide/setup_microscope
    user_guide/acquiring_home
@@ -61,6 +62,7 @@ technology developers.
    :caption: Development
    :maxdepth: 2
 
+   contributing/software_architecture
    contributing/contributing_guidelines
    contributing/feature_container
    plugin/plugin_home

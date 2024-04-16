@@ -1,15 +1,19 @@
-====================
-REST-APIs
-====================
+=============================
+Analyzing Images via REST-API
+=============================
 
 **navigate** has the ability to communicate with other image analysis software through REST-API interfaces.
 In general, the REST-API is used to communicate with software that has different or conflicting
 dependencies with the **navigate** codebase. Data is transferred via HTTP requests and responses,
 which is faster and more efficient than locally saving the data and then loading it into another
 piece of software, but slower than direct access of an address in memory.
-Here is an example using ilastik to segment
+
+Here is an example using `ilastik <https://www.nature.com/articles/s41592-019-0582-9>`_ to segment
 images and mark positions for higher resolution in a multiscale
-microscope.
+microscope. ilastik is a powerful image analysis software that enables users to train
+a support vector machine learning classifier to segment images using a combination of
+intensity, texture, and shape features. More information about ilastik can be found
+`here <https://www.ilastik.org/>`_.
 
 Install navigate-ilastik server
 ###########################################

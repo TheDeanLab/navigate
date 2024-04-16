@@ -6,7 +6,7 @@ Analyzing Images via REST-API
 In general, the REST-API is used to communicate with software that has different or conflicting
 dependencies with the **navigate** codebase. Data is transferred via HTTP requests and responses,
 which is faster and more efficient than locally saving the data and then loading it into another
-piece of software, but slower than direct access of an address in memory.
+piece of software, but slower than direct access of the data in memory.
 
 Here is an example using `ilastik <https://www.nature.com/articles/s41592-019-0582-9>`_ to segment
 images and mark positions for higher resolution in a multiscale

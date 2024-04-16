@@ -1,6 +1,6 @@
-==========================
-Microscope Implementations
-==========================
+===========================================
+Existing Microscopes
+===========================================
 
 For reference, we describe several microscope implementations that are currently in
 use with the **navigate** software. Each of these implementations is described in

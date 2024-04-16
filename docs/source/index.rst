@@ -45,6 +45,7 @@ technology developers.
    :maxdepth: 2
 
    quick_start
+   implementations/implementations
    software_installation
    i_want_to
 
@@ -67,8 +68,14 @@ technology developers.
    contributing/contributing_guidelines
    contributing/feature_container
    plugin/plugin_home
+
+.. toctree::
+   :caption: Reference
+   :maxdepth: 2
+
    api
-   genindex
+   .. _genindex
+
 
 **Authors**
 ============

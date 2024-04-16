@@ -2,18 +2,32 @@
 Imaging on an Upright ASLM
 ==========================
 
-This is a case study in using the software to image with an upright ASLM microscope.
-The upright ASLM equipped with an ASI FTP2000 and an ASLM microscope in an upright configuration.
-This microscope configuration allows for imaging across long scan ranges and imaging during single axis stage scanning which we term constant velocity acquisition.
-Acquiring images as the stage moves at a constant velocity enables fast isotropic volumetric imaging of samples. We provide a tutorial of how to implement constant velocity acquisition using Navigate.
-Furthermore, since imaging is done at a 45 degree angle, deskewing large volumes of data is computationally demanding. We also provide a guide how to implement two axis stage scanning to remove the need for computational deskewing termed mechanical shearing. More information about this microscope and mechanical shearing can be found `here <https://www.biorxiv.org/content/10.1101/2024.04.10.588892v1>`_
+This case study outlines how to use **navigate** for imaging on an upright ASLM microscope.
+Here, the specimen is positioned with an Applied Scientific Instrumentation FTP-2000 stage, which
+permits imaging samples with large lateral extents. Moreover, the stage can be moved at a constant
+velocity during imaging, which allows for acquisition of data without delays introduced by stage communication protocols and
+settling times.
+
+To achieve this, **navigate** receives a `trigger signal <http://www.asiimaging.com/docs/scan_module>`_
+from the stage controller to start image acquisition once
+the stage has reached the desired position and velocity. Thereafter, **navigate** acquires images
+at a constant rate until the stage has reached the end position. This mode of acquisition is termed
+"Constant Velocity Acquisition", and is implemented as a feature in **navigate**.
+
+Furthermore, since the stage moves at a 45 degree angle relative to the microscope detection axis,
+computational shearing of the data is necessary. For large data sets, this can become computationally challenging and
+unnecessarily results in greater data overhead owing to empty space introduced in the data.
+To avoid this, we also provide a guide on how to perform two axis stage
+scanning which removes the need for computational shearing.
+More information about this microscope and this method, which we refer to as mechanical shearing, can be found
+`here <https://www.biorxiv.org/content/10.1101/2024.04.10.588892v1>`_.
 
 .. Constant Velocity Acquisition:
 
 Imaging a Z-Stack using Constant Velocity Acquisition Mode
 ==========================================================
 
-#. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
+#. Select :guilabel:`Continuous Scan` from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Using the :guilabel:`Stage Control`, go to a shallow Z-position in the sample. Under
    the :guilabel:`Channels` tab, in :guilabel:`Stack Acquisition Settings (um)` press
@@ -30,7 +44,7 @@ Imaging a Z-Stack using Constant Velocity Acquisition Mode
    each channel. For the ORCA Lightning camera using ASLM mode, the minimum frame rate
    is 75 ms and the maximum is 100 ms.
 #. Set :guilabel:`Interval` to be ``1.0`` for each channel.
-#. Set :guilabel:`Defocus` to be `0` for each channel.
+#. Set :guilabel:`Defocus` to be ``0`` for each channel.
 #. Select "Constant Velocity Acquisition" from the dropdown next to the
    :guilabel:`Acquire` button. Press :guilabel:`Acquire`.
 #. Enter the sample parameters in the :guilabel:`File Saving Dialog` that pops up. Make

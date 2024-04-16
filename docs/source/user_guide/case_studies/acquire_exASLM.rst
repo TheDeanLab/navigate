@@ -13,6 +13,7 @@ Furthermore, since imaging is done at a 45 degree angle, deskewing large volumes
 Imaging a Z-Stack using Constant Velocity Acquisition Mode
 ==========================================================
 
+#. In the configuration file ``configuration.yaml``. set the x-axis as the z-axis in the navigate software. Refer to the example :ref:`upright configuration file <user_guide/hardware/configurations:configuration_upright.yaml>` and :ref:`configuration overview <user_guide:software_configuration.rst>`  for more information
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Using the :guilabel:`Stage Control`, go to a shallow Z-position in the sample. Under
@@ -47,6 +48,7 @@ Imaging a Z-Stack using Constant Velocity Acquisition Mode
 
 Imaging a Z-Stack using Mechanical Shearing
 ============================================
+#. In the configuration file ``configuration.yaml``, set the x-axis as z-axis and the z-axis as the the focus axis. Refer to the example :ref:`upright configuration file <user_guide/hardware/configurations:configuration_upright.yaml>` and :ref:`configuration overview <user_guide:software_configuration.rst>` for more information.
 
 #. Select :guilabel:`Continuous Scan` from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
@@ -59,8 +61,7 @@ Imaging a Z-Stack using Mechanical Shearing
 #. Make sure :guilabel:`Set Foc` is the same range as :guilabel:`Set Start Pos` and
    :guilabel:`End Pos`.
 #. Type the desired step size (units um) in the :guilabel:`Step Size` dialog box in
-   :guilabel:`Stack Acquisition Settings (um)`. Step size can only be in increments of
-   0.1 and the minimum is 0.2.
+   :guilabel:`Stack Acquisition Settings (um)`.
 #. Select the number of color channels needed imaging in the :guilabel:`Channel tab`
    under :guilabel:`Channel Settings`. Select the correct filter for each channel by
    using the dropdown menu after each channel under the :guilabel:`Filter`.
@@ -72,4 +73,4 @@ Imaging a Z-Stack using Mechanical Shearing
 #. Select "Z-Stack" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`.
 #. Enter the sample parameters in the :guilabel:`File Saving Dialog` that pops up.
-   Press :guilabel:`Acquire Data`.
+   Press :guilabel:`Acquire Data`. This will move the stage in the z-axis and the x-axis before imaging a plane during the z-stack. Move the stage at the same angle as the shearing angle removes the need for computational shearing which can be computationally cumbersome.

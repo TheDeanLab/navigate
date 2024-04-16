@@ -75,7 +75,7 @@ class IlastikSegmentation:
     Uses Ilastik REST API to perform segmentation in a separate process.
     """
 
-    def __init__(self, model):
+    def __init__(self, model, microscope_name="Nanoscale", zoom_value="N/A"):
         """Initialize Ilastik segmentation class.
 
         Parameters
@@ -104,6 +104,12 @@ class IlastikSegmentation:
 
         #: int: size of pieces
         self.pieces_size = 1
+
+        #: str: high resolution microscope name
+        self.high_res_microscope_name = microscope_name
+
+        #: str: zoom value
+        self.high_res_zoom_value = zoom_value
 
         #: dict: configuration table
         self.config_table = {"data": {"init": self.init_func, "main": self.data_func}}
@@ -164,6 +170,15 @@ class IlastikSegmentation:
 
     def update_setting(self):
         """Update Ilastik segmentation settings."""
+        try:
+            pixel_size = float(
+                self.model.configuration["configuration"]["microscopes"][
+                    self.high_res_microscope_name
+                ]["zoom"]["pixel_size"][self.high_res_zoom_value]
+            )
+        except (KeyError, AttributeError):
+            return
+        
         self.resolution = self.model.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]
@@ -174,14 +189,6 @@ class IlastikSegmentation:
             self.model.configuration["configuration"]["microscopes"][
                 current_microscope_name
             ]["zoom"]["pixel_size"][self.zoom]
-        )
-        # target resolution is 'high'
-        # TODO:
-        high_res_microscope_name = "Nanoscale"
-        pixel_size = float(
-            self.model.configuration["configuration"]["microscopes"][
-                high_res_microscope_name
-            ]["zoom"]["pixel_size"]["N/A"]
         )
         # calculate pieces
         self.pieces_num = int(curr_pixel_size / pixel_size)

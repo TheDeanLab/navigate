@@ -56,6 +56,7 @@ technology developers.
    user_guide/gui_walkthrough
    user_guide/setup_microscope
    user_guide/acquiring_home
+   user_guide/REST-apis/ilastik_segmentation
    user_guide/case_studies/case_studies_home
 
 .. toctree::

@@ -37,6 +37,8 @@ navigate.model.features.restful\_features.IlastikSegmentation
       ~IlastikSegmentation.zoom
       ~IlastikSegmentation.pieces_num
       ~IlastikSegmentation.pieces_size
+      ~IlastikSegmentation.high_res_microscope_name
+      ~IlastikSegmentation.high_res_zoom_value
       ~IlastikSegmentation.config_table
    
    

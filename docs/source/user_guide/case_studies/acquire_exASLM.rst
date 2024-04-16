@@ -13,7 +13,6 @@ Furthermore, since imaging is done at a 45 degree angle, deskewing large volumes
 Imaging a Z-Stack using Constant Velocity Acquisition Mode
 ==========================================================
 
-#. In the configuration file ``configuration.yaml``. set the x-axis as the z-axis in the navigate software. Refer to the example :ref:`upright configuration file <user_guide/hardware/configurations:configuration_upright.yaml>` and :ref:`configuration overview <user_guide:software_configuration.rst>`  for more information
 #. Select "Continuous Scan" from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.
 #. Using the :guilabel:`Stage Control`, go to a shallow Z-position in the sample. Under
@@ -48,7 +47,6 @@ Imaging a Z-Stack using Constant Velocity Acquisition Mode
 
 Imaging a Z-Stack using two-axis scanning
 ============================================
-#. In the configuration file ``configuration.yaml``, set the x-axis as z-axis and the z-axis as the the focus axis. Refer to the example :ref:`upright configuration file <user_guide/hardware/configurations:configuration_upright.yaml>` and :ref:`configuration overview <user_guide:software_configuration.rst>` for more information.
 
 #. Select :guilabel:`Continuous Scan` from the dropdown next to the :guilabel:`Acquire` button.
    Press :guilabel:`Acquire`. This will launch a live acquisition mode.

@@ -488,6 +488,37 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                         exception=TigerException,
                     )
                 )
+        
+        elif stage_type == "MS2000" and platform.system() == "Windows":
+            """ Filter wheel can be controlled from the same Tiger Controller. If
+            so, then we will load this as a shared device. If not, we will create the
+            connection to the Tiger Controller.
+            """
+            filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"][
+                "type"
+            ]
+            #FIXME: Will the filter wheel can be share between MS2000 and Tiger ?
+            if filter_wheel == "MS2000":
+                stage_devices.append("shared device")
+            else:
+                from navigate.model.devices.stages.stage_asi_MSTwoThousand import (
+                    build_ASI_Stage_connection,
+                )
+                from navigate.model.devices.APIs.asi.asi_MS2000_controller import (
+                    MS2000Exception,
+                )
+
+                stage_devices.append(
+                    auto_redial(
+                        build_ASI_Stage_connection,
+                        (
+                            stage_config["port"],
+                            stage_config["baudrate"],
+                        ),
+                        exception=MS2000Exception,
+                    )
+                )
+        
         elif stage_type == "MFC2000" and platform.system() == "Windows":
             """ Filter wheel can be controlled from the same Tiger Controller. If
             so, then we will load this as a shared device. If not, we will create the
@@ -609,6 +640,11 @@ def start_stage(
         from navigate.model.devices.stages.stage_asi import ASIStage
 
         return ASIStage(microscope_name, device_connection, configuration, id)
+    
+    elif device_type == "MS2000": 
+        from navigate.model.devices.stages.stage_asi_MSTwoThousand import ASIStage
+        
+        return ASIStage(microscope_name, device_connection, configuration, id) 
     
     elif device_type == "MFC2000":
         from navigate.model.devices.stages.stage_asi import ASIStage

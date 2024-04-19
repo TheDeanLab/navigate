@@ -19,10 +19,10 @@ Mac/Linux. **navigate** uses these local copies of the configuration files to st
 information specific to the setup attached to the computer it is installed on.
 
 To avoid confusion, we recommend launching the software in the synthetic hardware
-mode initially. Within your Terminal, or Anaconda Prompt, activate your **navigate** 
+mode initially. Within your Terminal, or Anaconda Prompt, activate your **navigate**
 Python environment and launch the software by typing: ``navigate -sh``. Thereafter, you
-should only modify the ``configuration.yaml`` file in your local ``.navigate\config`` 
-directory. The local copy avoids conflicts between different microscopes after pulling 
+should only modify the ``configuration.yaml`` file in your local ``.navigate\config``
+directory. The local copy avoids conflicts between different microscopes after pulling
 new changes from GitHub.
 
 .. tip::
@@ -123,7 +123,7 @@ types of a single hardware.
 
 Running the software with our current microscope setup would fail. It turns out our
 ASI stage only moves in the ``X``, ``Y``, ``Z`` and ``F`` axes. We need a way to handle
-the ``Theta`` axis. To address this, we will change our ``stage`` block of the YAML to 
+the ``Theta`` axis. To address this, we will change our ``stage`` block of the YAML to
 also load a ``SyntheticStage``:
 
 .. code-block:: yaml
@@ -235,7 +235,7 @@ add the ``SyntheticStage`` to control ``Theta``. We now specify in the microscop
 ``Theta`` is controlled by the synthetic stage in the ``hardware`` section of
 ``microscope1``.
 
-Below this, we specify that only ``X``, ``Y`` and ``Z`` axes may be controlled by a 
+Below this, we specify that only ``X``, ``Y`` and ``Z`` axes may be controlled by a
 joystick and we set the stage bounds for each of the axes.
 
 Finally, we set the offset for each stage axis. This is an offset relative to other
@@ -251,10 +251,10 @@ Stage Axes Definition
 
 Many times, the coordinate system of the stage hardware do not agree with the optical
 definition of each axes identity. For example, many stages define their vertical
-dimension as ``Z``, whereas optically, we often define this axis as ``X``. Thus, there 
+dimension as ``Z``, whereas optically, we often define this axis as ``X``. Thus, there
 is often a need to map the mechanical axes to the optical axes, and this is done with
-the ``axes_mapping`` dictionary entry in the stage hardware section. By default, stage 
-axes are read in as ``X``, ``Y``, ``Z``, ``Theta``, ``F``, where ``Theta`` is rotation 
+the ``axes_mapping`` dictionary entry in the stage hardware section. By default, stage
+axes are read in as ``X``, ``Y``, ``Z``, ``Theta``, ``F``, where ``Theta`` is rotation
 and ``F`` is focus, but this can be changed by changing axes mapping.
 
 .. code-block:: yaml
@@ -286,9 +286,9 @@ appear in the stage field as following:
 .. Note::
 
     These axes should agree with the optical axes. If, on the same microscope
-    as mentioned in the :ref:`Stage Axes Definition <user_guide/software_configuration:stage axes definition>` 
+    as mentioned in the :ref:`Stage Axes Definition <user_guide/software_configuration:stage axes definition>`
     section, the joystick were to control the optical y-axis corresponding to
-    the stage z axis, you would have to put ``Y`` in the joystick axes brackets 
+    the stage z axis, you would have to put ``Y`` in the joystick axes brackets
     as following:
 
 .. code-block:: yaml
@@ -433,7 +433,7 @@ The values in each field relate to GUI widgets.
 
 - The ``timepoint`` section indicates GUI settings for the timepoint
   settings under :guilabel:`Channels`, :guilabel:`Timepoint Settings`.
-  
+
   - `timepoints` and `stack_pause` are used to set the minimum, maximum and step
     size values for :guilabel:`Timepoints` and :guilabel:`Stack Pause (s)`,
     respectively.
@@ -479,4 +479,6 @@ Rest API Configuration File
 
 The REST API configuration file specifies where the REST API should look to get
 and post data. This is only needed if you are using a plugin that requires the
-REST API, such as our communication with `ilastik <https://www.ilastik.org>`_.
+REST API, such as our communication with `ilastik <https://www.ilastik.org>`_. More
+information on how to setup the REST API for communication with ilastik can be found
+:doc:`here <REST-apis/ilastik_segmentation>`.

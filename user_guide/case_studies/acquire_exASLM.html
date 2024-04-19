@@ -22,7 +22,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Software Architecture" href="../../contributing/software_architecture.html" />
+    <link rel="next" title="Analyzing Images via REST-API" href="ilastik_segmentation.html" />
     <link rel="prev" title="Imaging on the CT-ASLM-V1 and CT-ASLM-V2" href="acquire_CT-ASLM-V1_and_CT-ASLM-V2.html" /> 
 </head>
 
@@ -49,6 +49,7 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../implementations/implementations.html">Example Microscopes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../i_want_to.html">I Want To…</a></li>
 </ul>
@@ -58,17 +59,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../setup_microscope.html">Setting Up A Microscope</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../acquiring_home.html">Acquiring Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../REST-apis/ilastik_segmentation.html">Analyzing Images via REST-API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="case_studies_home.html">Case Studies</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="setup_voodoo.html">Setting up an Axially Swept Light-Sheet Microscope</a></li>
 <li class="toctree-l2"><a class="reference internal" href="acquire_mesospimbt.html">Imaging on a mesoSPIM BT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="acquire_CT-ASLM-V1_and_CT-ASLM-V2.html">Imaging on the CT-ASLM-V1 and CT-ASLM-V2</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Imaging on an Upright ASLM</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#loading-and-finding-the-sample">Loading and finding the sample</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#imaging-a-z-stack-using-stop-and-settle-mode">Imaging a Z-Stack using Stop and Settle Mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#imaging-a-z-stack-using-constant-velocity-acquisition-mode">Imaging a Z-Stack using Constant Velocity Acquisition Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imaging-a-z-stack-using-two-axis-scanning">Imaging a Z-Stack using two-axis scanning</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="ilastik_segmentation.html">Analyzing Images via REST-API</a></li>
 </ul>
 </li>
 </ul>
@@ -77,9 +77,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/software_architecture.html">Software Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../restapi.html">REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plugin/plugin_home.html">Plugin Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -109,33 +112,88 @@
              
   <section id="imaging-on-an-upright-aslm">
 <h1>Imaging on an Upright ASLM<a class="headerlink" href="#imaging-on-an-upright-aslm" title="Permalink to this heading"></a></h1>
-<p>This is a case study in using the software to image with an upright ASLM microscope. The upright ASLM equipped with an ASI FTP2000 and an ASLM microscope in an upright configuration. This microscope configuration allows for imaging across large scan ranges and imaging during scanning which we term constant velocity acquisition. This tutorial aims to show how it is possible to image the sample while imaging in both ASLM mode and normal lightsheet mode.</p>
-<section id="loading-and-finding-the-sample">
-<h2>Loading and finding the sample<a class="headerlink" href="#loading-and-finding-the-sample" title="Permalink to this heading"></a></h2>
+<p>This case study outlines how to use <strong>navigate</strong> for imaging on an upright ASLM microscope.
+Here, the specimen is positioned with an Applied Scientific Instrumentation FTP-2000 stage, which
+permits imaging samples with large lateral extents. Moreover, the stage can be moved at a constant
+velocity during imaging, which allows for acquisition of data without delays introduced by stage communication protocols and
+settling times.</p>
+<p>To achieve this, <strong>navigate</strong> receives a <a class="reference external" href="http://www.asiimaging.com/docs/scan_module">trigger signal</a>
+from the stage controller to start image acquisition once
+the stage has reached the desired position and velocity. Thereafter, <strong>navigate</strong> acquires images
+at a constant rate until the stage has reached the end position. This mode of acquisition is termed
+“Constant Velocity Acquisition”, and is implemented as a feature in <strong>navigate</strong>.</p>
+<p>Furthermore, since the stage moves at a 45 degree angle relative to the microscope detection axis,
+computational shearing of the data is necessary. For large data sets, this can become computationally challenging and
+unnecessarily results in greater data overhead owing to empty space introduced in the data.
+To avoid this, we also provide a guide on how to perform two axis stage
+scanning which removes the need for computational shearing.
+More information about this microscope and this method, which we refer to as mechanical shearing, can be found
+<a class="reference external" href="https://www.biorxiv.org/content/10.1101/2024.04.10.588892v1">here</a>.</p>
+<section id="imaging-a-z-stack-using-constant-velocity-acquisition-mode">
+<h2>Imaging a Z-Stack using Constant Velocity Acquisition Mode<a class="headerlink" href="#imaging-a-z-stack-using-constant-velocity-acquisition-mode" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
-<li><p>Load the sample on the microscope.</p></li>
-<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button.
+<li><p>Select <cite>Continuous Scan</cite> from the dropdown next to the <span class="guilabel">Acquire</span> button.
 Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
-<li><p>Scroll around with the stage either via joystick or using the controls in the
-<span class="guilabel">Stage Control</span> tab until the sample comes into view.</p></li>
-<li><p>Set the resonant galvo <span class="guilabel">Galvo 0</span> to 0.3 to mitigate any striping artifacts
-during imaging.</p></li>
-</ol>
-</section>
-<section id="imaging-a-z-stack-using-stop-and-settle-mode">
-<h2>Imaging a Z-Stack using Stop and Settle Mode<a class="headerlink" href="#imaging-a-z-stack-using-stop-and-settle-mode" title="Permalink to this heading"></a></h2>
-<ol class="arabic simple">
-<li><p>Select <span class="guilabel">Continuous Scan</span> from the dropdown next to the <span class="guilabel">Acquire</span> button.
-Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
-<li><p>Using the <span class="guilabel">Stage Control</span>, go to a shallow z-position in the sample.
-Under the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquisition Settings (um)</span>
-press <span class="guilabel">Set Start Pos</span>.</p></li>
-<li><p>Go to a deep z-position in the sample. Press <span class="guilabel">Set End Pos</span>.</p></li>
+<li><p>Using the <span class="guilabel">Stage Control</span>, go to a shallow Z-position in the sample. Under
+the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquisition Settings (um)</span> press
+<span class="guilabel">Set Start Pos</span>.</p></li>
+<li><p>Go to a deep Z-position in the sample. Press <span class="guilabel">Set End Pos</span>.</p></li>
 <li><p>Make sure <span class="guilabel">Set Foc</span> is <code class="docutils literal notranslate"><span class="pre">0</span></code> for both the <span class="guilabel">Set Start Pos</span> and
 <span class="guilabel">End Pos</span>.</p></li>
 <li><p>Type the desired step size (units um) in the <span class="guilabel">Step Size</span> dialog box in
-<span class="guilabel">Stack Acquisition Settings (um)</span>. Step size can only be in increments of
-0.1 and the minimum is 0.2.</p></li>
+<span class="guilabel">Stack Acquisition Settings (um)</span>. Note: The step size represents the
+optical step size. The velocity at which the stage moves during imaging accounts for the shear angle.</p></li>
+<li><p>Select the number of color channels needed imaging in the <span class="guilabel">Channel tab</span>
+under <span class="guilabel">Channel Settings</span>. Select the correct filter for each channel by
+using the dropdown menu after each channel under the <span class="guilabel">Filter</span>.</p></li>
+<li><p>Change the exposure time by changing number in the <span class="guilabel">Exp. Time (ms)</span> for
+each channel. For the ORCA Lightning camera using ASLM mode, the maximum exposure time is 100 ms.</p></li>
+<li><p>Set <span class="guilabel">Interval</span> to be <code class="docutils literal notranslate"><span class="pre">1.0</span></code> for each channel.</p></li>
+<li><p>Set <span class="guilabel">Defocus</span> to be <code class="docutils literal notranslate"><span class="pre">0</span></code> for each channel.</p></li>
+<li><p>Select “Constant Velocity Acquisition” from the dropdown next to the
+<span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>.</p></li>
+<li><p>Enter the sample parameters in the <span class="guilabel">File Saving Dialog</span> that pops up. Make
+sure to save to SSD drive or change buffer size in configuration file to prevent any
+overwriting of images. Then Press <span class="guilabel">Acquire Data</span>. The stage will move from its current position to beyond the start position.
+The stage then ramps up to the desired stage velocity as the stage reaches the start position.
+Once the stage is at the start position, the stage will send an external trigger which
+is received by the DAQ to begin image acquisition. The number of frames required for
+each channel scan is precalculated from the stage velocity, scan distance, and single
+frame acquisition time. Acquisition will automatically stop when the desired number of
+frames are acquired which also corresponds to when the stage reaches its end position.
+For multichannel scans, the stage returns to the start position and the process repeats until all channels are acquired.</p></li>
+<li><p>To change frame buffer size, in the <span class="guilabel">CameraParameters</span> section in the
+<span class="guilabel">experiment.yaml</span> file in your local navigate directory in the
+<span class="guilabel">config</span> folder, change <span class="guilabel">databuffer_size</span> to desired number of
+frames. Make sure the size of the desired number of frames isn’t above the available
+RAM in the computer.</p>
+</li>
+</ol>
+</section>
+<section id="imaging-a-z-stack-using-two-axis-scanning">
+<h2>Imaging a Z-Stack using two-axis scanning<a class="headerlink" href="#imaging-a-z-stack-using-two-axis-scanning" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Select <cite>Continuous Scan</cite> from the dropdown next to the <span class="guilabel">Acquire</span> button.
+Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
+<li><p>Using the <span class="guilabel">Stage Control</span> tab, go to a shallow z-position in the sample.
+Under the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquisition Settings (um)</span>
+press <span class="guilabel">Set Start Pos</span>.</p></li>
+<li><p>Using the <span class="guilabel">Stage Control</span> tab, Go to a deep z-position in the sample.</p></li>
+<li><p>Using the <span class="guilabel">Stage Control</span> tab, move the <span class="guilabel">Focus</span> button to match
+the z-axis scan distance. Make sure that the focus moves in the same direction as the z-scan.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>One should pay attention to both the magnitude and the direction of the scan in both <code class="docutils literal notranslate"><span class="pre">Z</span></code> and <code class="docutils literal notranslate"><span class="pre">F</span></code>.
+Scanning in <code class="docutils literal notranslate"><span class="pre">F</span></code> is accompanied with risk of crashing the stage into the objective. Importantly, the
+direction of travel varies depending upon the manufacturer.</p>
+</div>
+<ol class="arabic simple">
+<li><p>Move Press <span class="guilabel">Set End Pos</span>.</p></li>
+<li><p>Make sure <span class="guilabel">Set Foc</span> is the same range as <span class="guilabel">Set Start Pos</span> and
+<span class="guilabel">End Pos</span>.</p></li>
+<li><p>Type the desired step size (units um) in the <span class="guilabel">Step Size</span> dialog box in
+<span class="guilabel">Stack Acquisition Settings (um)</span>.</p></li>
 <li><p>Select the number of color channels needed imaging in the <span class="guilabel">Channel tab</span>
 under <span class="guilabel">Channel Settings</span>. Select the correct filter for each channel by
 using the dropdown menu after each channel under the <span class="guilabel">Filter</span>.</p></li>
@@ -147,41 +205,9 @@ is 75 ms and the maximum is 100 ms.</p></li>
 <li><p>Select “Z-Stack” from the dropdown next to the <span class="guilabel">Acquire</span> button.
 Press <span class="guilabel">Acquire</span>.</p></li>
 <li><p>Enter the sample parameters in the <span class="guilabel">File Saving Dialog</span> that pops up.
-Press <span class="guilabel">Acquire Data</span>.</p></li>
-</ol>
-</section>
-<section id="imaging-a-z-stack-using-constant-velocity-acquisition-mode">
-<h2>Imaging a Z-Stack using Constant Velocity Acquisition Mode<a class="headerlink" href="#imaging-a-z-stack-using-constant-velocity-acquisition-mode" title="Permalink to this heading"></a></h2>
-<ol class="arabic simple">
-<li><p>Select “Continuous Scan” from the dropdown next to the <span class="guilabel">Acquire</span> button.
-Press <span class="guilabel">Acquire</span>. This will launch a live acquisition mode.</p></li>
-<li><p>Using the <span class="guilabel">Stage Control</span>, go to a shallow Z-position in the sample. Under
-the <span class="guilabel">Channels</span> tab, in <span class="guilabel">Stack Acquisition Settings (um)</span> press
-<span class="guilabel">Set Start Pos</span>.</p></li>
-<li><p>Go to a deep Z-position in the sample. Press <span class="guilabel">Set End Pos</span>.</p></li>
-<li><p>Make sure <span class="guilabel">Set Foc</span> is <code class="docutils literal notranslate"><span class="pre">0</span></code> for both the <span class="guilabel">Set Start Pos</span> and
-<span class="guilabel">End Pos</span>.</p></li>
-<li><p>Type the desired step size (units um) in the <span class="guilabel">Step Size</span> dialog box in
-<span class="guilabel">Stack Acquisition Settings (um)</span>. Step size can only be increments of
-0.1 and the minimum is 0.2.</p></li>
-<li><p>Select the number of color channels needed imaging in the <span class="guilabel">Channel tab</span>
-under <span class="guilabel">Channel Settings</span>. Select the correct filter for each channel by
-using the dropdown menu after each channel under the <span class="guilabel">Filter</span>.</p></li>
-<li><p>Change the exposure time by changing number in the <span class="guilabel">Exp. Time (ms)</span> for
-each channel. For the ORCA Lightning camera using ASLM mode, the minimum frame rate
-is 75 ms and the maximum is 100 ms.</p></li>
-<li><p>Set <span class="guilabel">Interval</span> to be <code class="docutils literal notranslate"><span class="pre">1.0</span></code> for each channel.</p></li>
-<li><p>Set <span class="guilabel">Defocus</span> to be <cite>0</cite> for each channel.</p></li>
-<li><p>Select “Constant Velocity Acquisition” from the dropdown next to the
-<span class="guilabel">Acquire</span> button. Press <span class="guilabel">Acquire</span>.</p></li>
-<li><p>Enter the sample parameters in the <span class="guilabel">File Saving Dialog</span> that pops up. Make
-sure to save to SSD drive or change buffer size in configuration file to prevent any
-overwriting of images. Then Press <span class="guilabel">Acquire Data</span>.</p></li>
-<li><p>To change frame buffer size, in the <span class="guilabel">CameraParameters</span> section in the
-<span class="guilabel">experiment.yaml</span> file in your local navigate directory in the
-<span class="guilabel">config</span> folder, change <span class="guilabel">databuffer_size</span> to desired number of
-frames. Make sure the size of the desired number of frames isn’t above the available
-RAM in the computer.</p></li>
+Press <span class="guilabel">Acquire Data</span>. This will move the stage in the z-axis and the x-axis
+before imaging a plane during the z-stack. Move the stage at the same angle as the
+shearing angle removes the need for computational shearing which can be computationally cumbersome.</p></li>
 </ol>
 </section>
 </section>
@@ -191,7 +217,7 @@ RAM in the computer.</p></li>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="acquire_CT-ASLM-V1_and_CT-ASLM-V2.html" class="btn btn-neutral float-left" title="Imaging on the CT-ASLM-V1 and CT-ASLM-V2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../contributing/software_architecture.html" class="btn btn-neutral float-right" title="Software Architecture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ilastik_segmentation.html" class="btn btn-neutral float-right" title="Analyzing Images via REST-API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

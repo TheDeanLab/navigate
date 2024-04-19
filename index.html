@@ -48,6 +48,7 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="implementations/implementations.html">Example Microscopes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="i_want_to.html">I Want To…</a></li>
 </ul>
@@ -57,7 +58,6 @@
 <li class="toctree-l1"><a class="reference internal" href="user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/acquiring_home.html">Acquiring Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="user_guide/REST-apis/ilastik_segmentation.html">Analyzing Images via REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -65,9 +65,12 @@
 <li class="toctree-l1"><a class="reference internal" href="contributing/software_architecture.html">Software Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/restapi.html">REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 
         </div>
@@ -135,6 +138,19 @@ Users should be aware of these risks and agree to utilize <strong>navigate</stro
 <li class="toctree-l2"><a class="reference internal" href="quick_start.html#saving-a-z-stack-to-disk">Saving a Z-Stack to Disk</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="implementations/implementations.html">Example Microscopes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#aslm">ASLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#optical-tiling-opm">Optical Tiling OPM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#ao-opm">AO OPM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#ct-aslm-v1">CT ASLM - v1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#ct-aslm-v2">CT ASLM - v2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#expansion-aslm">Expansion ASLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#mct-aslm">MCT ASLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#spectral-tirf">Spectral TIRF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#robotic-mesospim">Robotic MesoSPIM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#biofrontiers-opm">BioFrontiers OPM</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="software_installation.html#computer-specifications">Computer Specifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="software_installation.html#quick-install">Quick install</a></li>
@@ -171,16 +187,7 @@ Users should be aware of these risks and agree to utilize <strong>navigate</stro
 </li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/acquiring_home.html">Acquiring Data</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/acquiring_guide.html">Acquiring Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/REST-apis/ilastik_segmentation.html">Analyzing Images via REST-API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/features.html">Reconfigurable Acquisitions Using Features</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="user_guide/REST-apis/ilastik_segmentation.html">Analyzing Images via REST-API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/REST-apis/ilastik_segmentation.html#install-navigate-ilastik-server">Install navigate-ilastik server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/REST-apis/ilastik_segmentation.html#run-navigate-ilastik-server">Run navigate-ilastik-server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/REST-apis/ilastik_segmentation.html#set-rest-api-configuration">Set REST-API configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/REST-apis/ilastik_segmentation.html#load-and-set-ilastik-project">Load and set ilastik project</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/REST-apis/ilastik_segmentation.html#use-ilastik-feature">Use ilastik feature</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/case_studies/case_studies_home.html">Case Studies</a><ul>
@@ -188,6 +195,7 @@ Users should be aware of these risks and agree to utilize <strong>navigate</stro
 <li class="toctree-l2"><a class="reference internal" href="user_guide/case_studies/acquire_mesospimbt.html">Imaging on a mesoSPIM BT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/case_studies/acquire_CT-ASLM-V1_and_CT-ASLM-V2.html">Imaging on the CT-ASLM-V1 and CT-ASLM-V2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/case_studies/acquire_exASLM.html">Imaging on an Upright ASLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/case_studies/ilastik_segmentation.html">Analyzing Images via REST-API</a></li>
 </ul>
 </li>
 </ul>
@@ -217,6 +225,7 @@ Users should be aware of these risks and agree to utilize <strong>navigate</stro
 <li class="toctree-l2"><a class="reference internal" href="contributing/feature_container.html#custom-feature-lists">Custom Feature Lists</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/restapi.html">REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin Architecture</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#introduction-to-plugins">Introduction to Plugins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#installing-a-plugin">Installing a Plugin</a></li>
@@ -224,7 +233,12 @@ Users should be aware of these risks and agree to utilize <strong>navigate</stro
 <li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#designing-a-plugin">Designing a Plugin</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.config.html">navigate.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.controller.html">navigate.controller</a></li>
 <li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.log_files.html">navigate.log_files</a></li>
@@ -233,7 +247,6 @@ Users should be aware of these risks and agree to utilize <strong>navigate</stro
 <li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.view.html">navigate.view</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
 </ul>
 </div>
 </section>

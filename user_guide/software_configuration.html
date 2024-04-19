@@ -49,6 +49,7 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Example Microscopes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
 </ul>
@@ -75,7 +76,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="acquiring_home.html">Acquiring Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="REST-apis/ilastik_segmentation.html">Analyzing Images via REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="case_studies/case_studies_home.html">Case Studies</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -83,9 +83,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restapi.html">REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API</a></li>
 </ul>
 
         </div>
@@ -145,7 +148,7 @@ new changes from GitHub.</p>
 along in this file when reading the next sections.</p>
 <p>See the <a class="reference internal" href="case_studies/setup_voodoo.html#setup-aslm"><span class="std std-ref">Setting up an Axially Swept Light-Sheet Microscope</span></a> case
 study for a general walkthrough of how to build your own configuration file and see
-<a class="reference internal" href="hardware/implementations.html"><span class="doc">Implementations</span></a> for examples of configuration files.</p>
+<span class="xref std std-doc">Implementations</span> for examples of configuration files.</p>
 <hr class="docutils" />
 <section id="hardware-section">
 <span id="id1"></span><h3>Hardware Section<a class="headerlink" href="#hardware-section" title="Permalink to this heading"></a></h3>
@@ -539,7 +542,9 @@ a new waveform behavior to the application.</p>
 <h2>Rest API Configuration File<a class="headerlink" href="#rest-api-configuration-file" title="Permalink to this heading"></a></h2>
 <p>The REST API configuration file specifies where the REST API should look to get
 and post data. This is only needed if you are using a plugin that requires the
-REST API, such as our communication with <a class="reference external" href="https://www.ilastik.org">ilastik</a>.</p>
+REST API, such as our communication with <a class="reference external" href="https://www.ilastik.org">ilastik</a>. More
+information on how to setup the REST API for communication with ilastik can be found
+<span class="xref std std-doc">here</span>.</p>
 </section>
 </section>
 

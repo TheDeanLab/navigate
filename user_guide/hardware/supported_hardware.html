@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Supported Hardware &mdash; navigate 0.0.5 documentation</title>
+  <title>Configuring Hardware Devices &mdash; navigate 0.0.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
 
@@ -22,7 +22,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Microscope Implementations" href="implementations.html" />
+    <link rel="next" title="Multiple Cameras" href="../multiple_cameras.html" />
     <link rel="prev" title="Hardware" href="hardware_home.html" /> 
 </head>
 
@@ -49,6 +49,7 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../implementations/implementations.html">Example Microscopes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../i_want_to.html">I Want To…</a></li>
 </ul>
@@ -59,7 +60,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../setup_microscope.html">Setting Up A Microscope</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hardware_home.html">Hardware</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Supported Hardware</a><ul>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Configuring Hardware Devices</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#data-acquisition-card">Data Acquisition Card</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cameras">Cameras</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#remote-focusing-devices">Remote Focusing Devices</a></li>
@@ -72,14 +73,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#deformable-mirrors">Deformable Mirrors</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="implementations.html">Microscope Implementations</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../multiple_cameras.html">Multiple Cameras</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../acquiring_home.html">Acquiring Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../REST-apis/ilastik_segmentation.html">Analyzing Images via REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -87,9 +86,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/software_architecture.html">Software Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../restapi.html">REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plugin/plugin_home.html">Plugin Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Index</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
 </ul>
 
         </div>
@@ -108,7 +110,7 @@
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../setup_microscope.html">Setting Up A Microscope</a></li>
           <li class="breadcrumb-item"><a href="hardware_home.html">Hardware</a></li>
-      <li class="breadcrumb-item active">Supported Hardware</li>
+      <li class="breadcrumb-item active">Configuring Hardware Devices</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/user_guide/hardware/supported_hardware.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -118,8 +120,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="supported-hardware">
-<h1>Supported Hardware<a class="headerlink" href="#supported-hardware" title="Permalink to this heading"></a></h1>
+  <section id="configuring-hardware-devices">
+<h1>Configuring Hardware Devices<a class="headerlink" href="#configuring-hardware-devices" title="Permalink to this heading"></a></h1>
+<p>The following section aims to provide users with the requisite information for configuring
+hardware devices. A high-level overview of the supported devices can be found <a class="reference internal" href="../hardware_overview.html"><span class="doc">here</span></a>.</p>
 <section id="data-acquisition-card">
 <h2>Data Acquisition Card<a class="headerlink" href="#data-acquisition-card" title="Permalink to this heading"></a></h2>
 <p>Data acquisition cards deliver and receive analog and digital signals.
@@ -1391,7 +1395,7 @@ one must configure the software to use a synthetic deformable mirror.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="hardware_home.html" class="btn btn-neutral float-left" title="Hardware" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="implementations.html" class="btn btn-neutral float-right" title="Microscope Implementations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../multiple_cameras.html" class="btn btn-neutral float-right" title="Multiple Cameras" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

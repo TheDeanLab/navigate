@@ -1,6 +1,10 @@
-==================
-Supported Hardware
-==================
+============================
+Configuring Hardware Devices
+============================
+
+The following section aims to provide users with the requisite information for configuring
+hardware devices. A high-level overview of the supported devices can be found :doc:`here <../hardware_overview>`.
+
 
 Data Acquisition Card
 =====================

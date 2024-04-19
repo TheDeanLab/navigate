@@ -57,7 +57,6 @@ technology developers.
    user_guide/gui_walkthrough
    user_guide/setup_microscope
    user_guide/acquiring_home
-   user_guide/REST-apis/ilastik_segmentation
    user_guide/case_studies/case_studies_home
 
 .. toctree::
@@ -67,6 +66,7 @@ technology developers.
    contributing/software_architecture
    contributing/contributing_guidelines
    contributing/feature_container
+   user_guide/restapi
    plugin/plugin_home
 
 .. toctree::
@@ -74,7 +74,6 @@ technology developers.
    :maxdepth: 2
 
    api
-   .. _genindex
 
 
 **Authors**

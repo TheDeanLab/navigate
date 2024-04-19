@@ -20,7 +20,7 @@ please refer to the publications listed in the relevant sections.
 ASLM
 ****
 
-.. image:: ASLM.pdf
+.. image:: ASLM.png
    :width: 100%
    :align: center
 
@@ -103,7 +103,7 @@ Optical Tiling OPM
 ******************
 
 
-.. image:: tiling_opm.pdf
+.. image:: tiling_opm.png
    :width: 100%
    :align: center
 
@@ -178,7 +178,7 @@ is available through mechanical sample scanning.
 AO OPM
 *******
 
-.. image:: ao_opm.pdf
+.. image:: ao_opm.png
    :width: 100%
    :align: center
 
@@ -249,7 +249,7 @@ finally captured on a Hamamatsu Flash 4.0 sCMOS camera.
 CT ASLM - v1
 ************
 
-.. image:: ctaslmv1.pdf
+.. image:: ctaslmv1.png
    :width: 100%
    :align: center
 
@@ -314,7 +314,7 @@ For acquisition of Z-stacks, the microscope uses a piezo stage from Mad City Lab
 CT ASLM - v2
 ************
 
-.. image:: ctaslmv2.pdf
+.. image:: ctaslmv2.png
    :width: 100%
    :align: center
 
@@ -328,7 +328,7 @@ Imaging is performed with a Hamamatsu ORCA Flash 4.0 sCMOS camera and a fast fil
 from Sutter Instruments. The microscope is equipped with 2x NA 0.7 multi-immersion objectives
 from Applied Scientific Instrumentation. Sample positioning is handled by a Sutter
 Instruments 3D motorized stage, which supports the tiling of large volumes. Z-stacks
-are acquired with a 200-micron piezo-jena stage.
+are acquired with a 200-micron Piezosystem Jena stage.
 
 **Relevant Publications**:
 
@@ -376,7 +376,7 @@ are acquired with a 200-micron piezo-jena stage.
 Expansion ASLM
 **************
 
-.. image:: expansion_aslm.pdf
+.. image:: expansion_aslm.png
    :width: 100%
    :align: center
 
@@ -540,7 +540,7 @@ analysis with isotropic resolution up to 300 nm.
 Spectral TIRF
 *************
 
-.. image:: spectral_tirf.pdf
+.. image:: spectral_tirf.png
    :width: 100%
    :align: center
 

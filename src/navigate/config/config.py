@@ -391,10 +391,10 @@ def verify_experiment_config(manager, configuration):
 
     # camera parameters
     camera_parameters_dict_sample = {
-        "x_pixels": 2048,
-        "y_pixels": 2048,
-        "img_x_pixels": 2048,
-        "img_y_pixels": 2048,
+        "x_pixels": 4608,
+        "y_pixels": 2492,
+        "img_x_pixels": 4608,
+        "img_y_pixels": 2492,
         "sensor_mode": "Normal",
         "readout_direction": "Top-to-Bottom",
         "number_of_pixels": 10,

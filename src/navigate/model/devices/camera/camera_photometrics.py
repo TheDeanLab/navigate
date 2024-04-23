@@ -47,8 +47,8 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class PhotometricsKinetix(CameraBase):
-    """Photometrics Kinetix camera class.
+class PhotometricsBase(CameraBase):
+    """Photometrics Base camera class.
 
     This class is the interface between the rest of the microscope code and the
     Photometrics API.
@@ -75,8 +75,8 @@ class PhotometricsKinetix(CameraBase):
             camera:
               hardware:
                 name: camera
-                type: HamamatsuOrca
-                serial_number: 302352
+                type: PhotometricsIris15
+                serial_number: A19K631011
               lightsheet_rolling_shutter_width: 608
               defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
               delay_percent: 10
@@ -166,12 +166,12 @@ class PhotometricsKinetix(CameraBase):
         logger.info("Photometrics Initialized")
 
     def __del__(self):
-        """Delete PhotometricsKinetix object."""
+        """Delete PhotometricsBase object."""
         if hasattr(self, "camera_controller"):
             self.camera_controller.close()
             # pvc.uninit_pvcam()
             print("camera closed")
-        logger.info("PhotometricsKinetix Shutdown")
+        logger.info("PhotometricsBase Shutdown")
 
     @property
     def serial_number(self):

@@ -255,10 +255,10 @@ def start_camera(
     
     elif cam_type == "Photometrics":
         from navigate.model.devices.camera.camera_photometrics import (
-            PhotometricsKinetix,
+            PhotometricsBase,
         )
 
-        return PhotometricsKinetix(microscope_name, device_connection, configuration)
+        return PhotometricsBase(microscope_name, device_connection, configuration)
 
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
         from navigate.model.devices.camera.camera_synthetic import SyntheticCamera

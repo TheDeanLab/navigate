@@ -371,7 +371,7 @@ class MS2000Controller:
         )
         self.send_command(f"MOVE {pos_str}\r")
         self.read_response()
-
+        
     def move_axis(self, axis: str, distance: float) -> None:
         """Move the stage with an absolute move on one axis
 
@@ -808,4 +808,17 @@ class MS2000Controller:
         Halt filter wheel
         """
         self.send_filter_wheel_command("HA")
+        self.read_response()
+
+    def set_triggered_move(self, axis):
+        '''
+        Set ASI to repeat the latest relative movement  
+        upon receiving a TTL pulse
+
+        Parameters
+        ----------
+        axis : str
+            Stage axis
+        '''
+        self.send_command(f"TTL {axis}=2") 
         self.read_response()

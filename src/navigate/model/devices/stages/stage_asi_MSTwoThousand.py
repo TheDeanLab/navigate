@@ -457,6 +457,72 @@ class ASIStage(StageBase):
             logger.exception(f"ASI Stage - KeyError in scanr: {e}")
             return False
         return True
+    
+    def move_axis_relative(self, distance, axis, wait_until_done = False):
+        """Move Relative Method.
+        XYZ Values should remain in microns for the ASI API
+        Theta Values are not accepted.
+
+        Parameters
+        ----------
+        move_dictionary : dict
+            A dictionary of relative movement values for each axis.
+            Includes 'x_rel', 'y_rel', etc. for one or more axes.
+            Expect values in micrometers for XYZ, and degrees for Theta.
+        wait_until_done : bool
+            Block until stage has moved to its new spot.
+
+        Returns
+        -------
+        success : bool
+            Was the move successful?
+        """
+        if axis not in self.axes_mapping:
+            return False
+        
+        abs_pos = self.get_axis_position(axis) + distance
+
+        axis_abs = self.get_abs_position(axis, abs_pos)
+        if axis_abs == -1e50:
+            print("axis rel false")
+            return False
+
+        # Move stage
+        try:
+            # The 10 is to account for the ASI units, 1/10 of a micron
+            self.ms2000_controller.moverel_axis(axis, distance)
+
+        except MS2000Exception as e:
+            print(
+                f"ASI stage move axis absolute failed or is trying to move out of "
+                f"range: {e}"
+            )
+            logger.exception("ASI Stage Exception", e)
+            return False
+
+        if wait_until_done:
+            self.ms2000_controller.wait_for_device()
+        return True
+    
+    def scan_axis_triggered_move(self, start_position, end_position, axis, ttl_triggered = False): 
+        self.move_axis_absolute(axis, start_position, True)
+
+        distance = end_position - start_position
+        self.move_axis_relative(distance, axis, True)
+
+        try: 
+            self.ms2000_controller.set_backslash(axis)
+            if ttl_triggered: 
+                self.ms2000_controller.set_triggered_move(axis)
+        except MS2000Exception as e:
+            logger.exception(f"MS2000Exception: {e}")
+            print(logger.exception())
+            return False
+        except KeyError as e:
+            logger.exception(f"ASI Stage - KeyError in scan_axis_triggered_move: {e}")
+            return False
+
+        return True            
 
     def start_scan(self, axis):
         """Start scan state machine

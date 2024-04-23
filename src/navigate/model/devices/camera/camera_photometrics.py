@@ -52,6 +52,9 @@ class PhotometricsKinetix(CameraBase):
 
     This class is the interface between the rest of the microscope code and the
     Photometrics API.
+
+    Note: If you want to use a photometrics camera, please got to the PyVCAM-master folder and run:
+    python setup.py install
     """
 
     def __init__(self, microscope_name, device_connection, configuration):

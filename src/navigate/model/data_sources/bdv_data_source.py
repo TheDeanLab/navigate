@@ -31,6 +31,7 @@
 
 #  Standard Imports
 import os
+from multiprocessing.managers import DictProxy
 
 # Third Party Imports
 import h5py
@@ -41,17 +42,14 @@ import numpy.typing as npt
 # Local imports
 from .data_source import DataSource
 from ..metadata_sources.bdv_metadata import BigDataViewerMetadata
-from multiprocessing.managers import DictProxy
+from ...tools.slicing import ensure_slice, ensure_iter, slice_len
 
 
 class BigDataViewerDataSource(DataSource):
     """BigDataViewer data source.
 
     This class is used to write data to a BigDataViewer-compatible file. It
-    supports both HDF5 and N5 file formats. The file is written in a
-    multi-resolution pyramid format, with each resolution level subdivided into
-    32x32x1 blocks. The number of blocks in each dimension is determined by the
-    shape of the data and the resolution level.
+    supports both HDF5 and N5 file formats.
     """
 
     def __init__(self, file_name: str = None, mode: str = "w") -> None:
@@ -99,7 +97,7 @@ class BigDataViewerDataSource(DataSource):
         """Magic method to get slice requests passed by, e.g., ds[:,2:3,...].
         Allows arbitrary slicing of dataset via calls to get_slice().
 
-        Order is xycztps where x, y, z are Cartesian indices, c is channel,
+        Order is xycztps where x, y, z are array indices, c is channel,
         t is timepoints, p is positions and s is subdivisions to index along.
 
         TODO: Add subdivisions.
@@ -120,6 +118,7 @@ class BigDataViewerDataSource(DataSource):
             length = 1
         else:
             length = len(keys)
+        
         if length < 1:
             raise IndexError(
                 "Too few indices. Indices may be (x, y, c, z, t, p, subdiv)."
@@ -128,83 +127,18 @@ class BigDataViewerDataSource(DataSource):
             raise IndexError(
                 "Too many indices. Indices may be (x, y, c, z, t, p, subdiv)."
             )
+        
+        # Get indices as slices/ranges
+        xs = ensure_slice(keys, 0)
+        ys = ensure_slice(keys, 1)
+        cs = ensure_iter(keys, 2, self.shape[2])
+        zs = ensure_slice(keys, 3)
+        ts = ensure_iter(keys, 4, self.shape[4])
+        ps = ensure_iter(keys, 5, self.positions)
 
-        # Handle "slice the rest"
         if length > 1 and keys[-1] == Ellipsis:
-            keys = keys[:-2]
+            keys = keys[:-1]
             length -= 1
-
-        def ensure_iter(pos):
-            """Ensure the input is iterable.
-
-            Parameters
-            ----------
-            pos : int
-                The position.
-
-            Returns
-            -------
-            range
-                The range.
-            """
-            if length > pos:
-                try:
-                    val = keys[pos]
-                except TypeError:
-                    # Only one key
-                    val = keys
-                if isinstance(val, slice):
-                    if val.start is None and val.stop is None and val.step is None:
-                        return range(self.shape[pos])
-                    return range(10**10)[val]
-                elif isinstance(val, int):
-                    return range(val, val + 1)
-            else:
-                return range(self.shape[pos])
-
-        def ensure_slice(pos):
-            """Ensure the input is a slice or a single integer.
-
-            Parameters
-            ----------
-            pos : int
-                The position.
-
-            Returns
-            -------
-            slice
-                The slice.
-            """
-            # TODO: Handle list as input
-            if length > pos:
-                try:
-                    val = keys[pos]
-                except TypeError:
-                    # Only one key
-                    val = keys
-                assert isinstance(val, slice) or isinstance(val, int)
-                return val
-            else:
-                # Default to all values
-                return slice(None, None, None)
-
-        # Get legal indices
-        xs = ensure_slice(0)
-        ys = ensure_slice(1)
-        cs = ensure_iter(2)
-        zs = ensure_slice(3)
-        ts = ensure_iter(4)
-        if length > 5:
-            val = keys[5]
-            if isinstance(val, slice):
-                if val.start is None and val.stop is None and val.step is None:
-                    ps = range(self.positions)
-                else:
-                    ps = range(10**10)[val]
-            elif isinstance(val, int):
-                ps = range(val, val + 1)
-        else:
-            ps = range(self.positions)
 
         if length > 6 and isinstance(keys[6], int):
             subdiv = keys[6]
@@ -213,24 +147,6 @@ class BigDataViewerDataSource(DataSource):
 
         if len(cs) == 1 and len(ts) == 1 and len(ps) == 1:
             return self.get_slice(xs, ys, cs[0], zs, ts[0], ps[0], subdiv)
-
-        def slice_len(sl, n):
-            """Calculate the length of the slice over an array of size n.
-
-            Parameters
-            ----------
-            sl : slice
-                The slice.
-            n : int
-                The size of the array.
-
-            Returns
-            -------
-            int
-                The length of the slice.
-            """
-            sx = sl.indices(n)
-            return (sx[1] - sx[0]) // sx[2]
 
         sliced_ds = np.empty(
             (
@@ -254,7 +170,7 @@ class BigDataViewerDataSource(DataSource):
         return sliced_ds
 
     def get_slice(self, x, y, c, z=0, t=0, p=0, subdiv=0):
-        """Get a single slice of the dataset.
+        """Get a 3D slice of the dataset for a single c, t, p, subdiv.
 
         Parameters
         ----------
@@ -524,7 +440,7 @@ class BigDataViewerDataSource(DataSource):
         """Set up the N5 file.
 
         This function creates the file and the datasets to populate. By default,
-        it appears to implement blosc compression. Consequently, the anticipated file
+        it implements blosc compression. Consequently, the anticipated file
         size, and the actual file size, do not match. This is not the case for HDF5.
 
         Note

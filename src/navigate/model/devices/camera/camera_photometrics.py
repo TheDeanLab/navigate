@@ -72,25 +72,36 @@ class PhotometricsBase(CameraBase):
 
         microscopes:
           microscope_name:
-            camera:
-              hardware:
-                name: camera
-                type: PhotometricsIris15
-                serial_number: A19K631011
-              lightsheet_rolling_shutter_width: 608
-              defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
-              delay_percent: 10
-              pulse_percent: 1
-              x_pixels_step: 4
-              y_pixels_step: 4
-              x_pixels_min: 4
-              y_pixels_min: 4
-              exposure_time_range:
-                min: 1
-                max: 1000
-                step: 1
-              flip_x: False
-              flip_y: False
+                camera:
+                    hardware:
+                        name: camera
+                        type: Photometrics
+                        serial_number: 1
+                    x_pixels: 5056.0
+                    y_pixels: 2960.0
+                    pixel_size_in_microns: 4.25
+                    subsampling: [1, 2, 4]
+                    sensor_mode: Normal  # 0 for static, 1 for programmable scan mode (ASLM)
+                    readout_direction: Bottom-to-Top  # Top-to-Bottom', 'Bottom-to-Top'
+                    lightsheet_rolling_shutter_width: 608
+                    defect_correct_mode: 2.0
+                    binning: 1x1
+                    readout_speed: 0x7FFFFFFF
+                    trigger_active: 1.0
+                    trigger_mode: 1.0 # external light-sheet mode
+                    trigger_polarity: 2.0  # positive pulse
+                    trigger_source: 2.0  # 2 = external, 3 = software.
+                    exposure_time: 20 # Use milliseconds throughout.
+                    delay_percent: 0.0 #25 #8 #5.0
+                    pulse_percent: 1
+                    line_interval: 0.000075
+                    display_acquisition_subsampling: 4
+                    average_frame_rate: 4.969
+                    frames_to_average: 1
+                    exposure_time_range:
+                        min: 1
+                        max: 1000
+                        step: 1
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
@@ -214,7 +225,7 @@ class PhotometricsBase(CameraBase):
         Parameters
         ----------
         mode : str
-            'Normal (static)' or 'Light-Sheet (ASLM)'
+            'Normal' (static) or 'Light-Sheet' (ASLM)
         """
         modes_dict = {"Normal": 0, "Light-Sheet": 1}
         if mode in modes_dict:
@@ -416,7 +427,7 @@ class PhotometricsBase(CameraBase):
         """
 
     def set_binning(self, binning_string):
-        """Set HamamatsuOrca binning mode.
+        """Set Photometrics binning mode.
 
         Parameters
         ----------
@@ -434,6 +445,7 @@ class PhotometricsBase(CameraBase):
             "1x1": 1,
             "2x2": 2,
             "4x4": 4,
+            "8x8": 8,
         }
         if binning_string not in binning_dict.keys():
             logger.debug(f"can't set binning to {binning_string}")

@@ -270,14 +270,12 @@ class HamamatsuBase(CameraBase):
         Note
         ----
             Units of the Hamamatsu API are in seconds.
-            Units for the software are in milliseconds. Conversion is done here.
 
         Parameters
         ----------
         exposure_time : float
             Exposure time in seconds.
         """
-        exposure_time = exposure_time
         return self.camera_controller.set_property_value("exposure_time", exposure_time)
 
     def set_line_interval(self, line_interval_time):

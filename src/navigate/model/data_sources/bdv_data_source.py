@@ -48,10 +48,7 @@ class BigDataViewerDataSource(DataSource):
     """BigDataViewer data source.
 
     This class is used to write data to a BigDataViewer-compatible file. It
-    supports both HDF5 and N5 file formats. The file is written in a
-    multi-resolution pyramid format, with each resolution level subdivided into
-    32x32x1 blocks. The number of blocks in each dimension is determined by the
-    shape of the data and the resolution level.
+    supports both HDF5 and N5 file formats.
     """
 
     def __init__(self, file_name: str = None, mode: str = "w") -> None:
@@ -99,7 +96,7 @@ class BigDataViewerDataSource(DataSource):
         """Magic method to get slice requests passed by, e.g., ds[:,2:3,...].
         Allows arbitrary slicing of dataset via calls to get_slice().
 
-        Order is xycztps where x, y, z are Cartesian indices, c is channel,
+        Order is xycztps where x, y, z are array indices, c is channel,
         t is timepoints, p is positions and s is subdivisions to index along.
 
         TODO: Add subdivisions.
@@ -128,19 +125,19 @@ class BigDataViewerDataSource(DataSource):
             raise IndexError(
                 "Too many indices. Indices may be (x, y, c, z, t, p, subdiv)."
             )
-
+        
         # Handle "slice the rest"
         if length > 1 and keys[-1] == Ellipsis:
-            keys = keys[:-2]
+            keys = keys[:-1]
             length -= 1
-
+        
         def ensure_iter(pos):
-            """Ensure the input is iterable.
+            """Ensure the output is iterable.
 
             Parameters
             ----------
             pos : int
-                The position.
+                Index into keys.
 
             Returns
             -------
@@ -163,12 +160,12 @@ class BigDataViewerDataSource(DataSource):
                 return range(self.shape[pos])
 
         def ensure_slice(pos):
-            """Ensure the input is a slice or a single integer.
+            """Ensure the output is a slice.
 
             Parameters
             ----------
             pos : int
-                The position.
+                Index into keys.
 
             Returns
             -------
@@ -182,18 +179,21 @@ class BigDataViewerDataSource(DataSource):
                 except TypeError:
                     # Only one key
                     val = keys
-                assert isinstance(val, slice) or isinstance(val, int)
+                if isinstance(val, int):
+                    return slice(val, val+1, None)
+                assert isinstance(val, slice)
                 return val
             else:
                 # Default to all values
                 return slice(None, None, None)
 
-        # Get legal indices
+        # Get indices as slices/ranges
         xs = ensure_slice(0)
         ys = ensure_slice(1)
         cs = ensure_iter(2)
         zs = ensure_slice(3)
         ts = ensure_iter(4)
+
         if length > 5:
             val = keys[5]
             if isinstance(val, slice):
@@ -213,6 +213,17 @@ class BigDataViewerDataSource(DataSource):
 
         if len(cs) == 1 and len(ts) == 1 and len(ps) == 1:
             return self.get_slice(xs, ys, cs[0], zs, ts[0], ps[0], subdiv)
+        
+        # For c, t, p, we need to clip the iterables to the top of their range
+        def clip_iter(iter, n):
+            start, stop, step = iter.start, iter.stop, iter.step
+            if stop > n:
+                stop = n
+            return range(start, stop, step)
+        
+        cs = clip_iter(cs, self.shape_c)
+        ts = clip_iter(ts, self.shape_t)
+        ps = clip_iter(ps, self.positions)
 
         def slice_len(sl, n):
             """Calculate the length of the slice over an array of size n.
@@ -229,8 +240,7 @@ class BigDataViewerDataSource(DataSource):
             int
                 The length of the slice.
             """
-            sx = sl.indices(n)
-            return (sx[1] - sx[0]) // sx[2]
+            return len(range(n)[sl])
 
         sliced_ds = np.empty(
             (
@@ -254,7 +264,7 @@ class BigDataViewerDataSource(DataSource):
         return sliced_ds
 
     def get_slice(self, x, y, c, z=0, t=0, p=0, subdiv=0):
-        """Get a single slice of the dataset.
+        """Get a 3D slice of the dataset for a single c, t, p, subdiv.
 
         Parameters
         ----------
@@ -524,7 +534,7 @@ class BigDataViewerDataSource(DataSource):
         """Set up the N5 file.
 
         This function creates the file and the datasets to populate. By default,
-        it appears to implement blosc compression. Consequently, the anticipated file
+        it implements blosc compression. Consequently, the anticipated file
         size, and the actual file size, do not match. This is not the case for HDF5.
 
         Note

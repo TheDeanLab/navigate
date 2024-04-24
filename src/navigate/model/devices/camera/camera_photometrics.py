@@ -70,38 +70,39 @@ class PhotometricsBase(CameraBase):
 
         ...
 
-        microscopes:
-          microscope_name:
-                camera:
-                    hardware:
-                        name: camera
-                        type: Photometrics
-                        serial_number: 1
-                    x_pixels: 5056.0
-                    y_pixels: 2960.0
-                    pixel_size_in_microns: 4.25
-                    subsampling: [1, 2, 4]
-                    sensor_mode: Normal  # 0 for static, 1 for programmable scan mode (ASLM)
-                    readout_direction: Bottom-to-Top  # Top-to-Bottom', 'Bottom-to-Top'
-                    lightsheet_rolling_shutter_width: 608
-                    defect_correct_mode: 2.0
-                    binning: 1x1
-                    readout_speed: 0x7FFFFFFF
-                    trigger_active: 1.0
-                    trigger_mode: 1.0 # external light-sheet mode
-                    trigger_polarity: 2.0  # positive pulse
-                    trigger_source: 2.0  # 2 = external, 3 = software.
-                    exposure_time: 20 # Use milliseconds throughout.
-                    delay_percent: 0.0 #25 #8 #5.0
-                    pulse_percent: 1
-                    line_interval: 0.000075
-                    display_acquisition_subsampling: 4
-                    average_frame_rate: 4.969
-                    frames_to_average: 1
-                    exposure_time_range:
-                        min: 1
-                        max: 1000
-                        step: 1
+        camera:
+            hardware:
+                name: camera
+                type: Photometrics #SyntheticCamera
+                serial_number: 1
+            x_pixels: 5056.0
+            y_pixels: 2960.0
+            pixel_size_in_microns: 4.25
+            subsampling: [1, 2, 4]
+            sensor_mode: Normal  # 'Normal' or 'Light-Sheet'
+            readout_direction: Bottom-to-Top  # Top-to-Bottom', 'Bottom-to-Top'
+            lightsheet_rolling_shutter_width: 608
+            binning: 1x1
+            readout_speed: 0x7FFFFFFF
+            trigger_active: 1.0
+            readout_port: 0 #depending on Photometrics camera type it changes
+            speed_table_index: 0 #depending on Photometrics camera type it changes
+            gain: 1 #depending on Photometrics camera type it changes
+            unitforlinedelay: 10.26 #Prime BSI 11.2, Prime Kinetix 3.75, Prime Iris 10.26
+            trigger_mode: 1.0 # external light-sheet mode
+            trigger_polarity: 2.0  # positive pulse
+            trigger_source: 2.0  # 2 = external, 3 = software.
+            exposure_time: 20 # Use milliseconds throughout.
+            delay_percent: 0.0 #25 #8 #5.0
+            pulse_percent: 1
+            line_interval: 0.000075
+            display_acquisition_subsampling: 4
+            average_frame_rate: 4.969
+            frames_to_average: 1
+            exposure_time_range:
+                min: 1
+                max: 1000
+                step: 1
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
@@ -366,7 +367,7 @@ class PhotometricsBase(CameraBase):
         Parameters
         ----------
         full_chip_exposure_time : float
-            Normal mode exposure time.
+            Normal mode exposure time in seconds
         shutter_width : int
 
         Returns
@@ -378,25 +379,35 @@ class PhotometricsBase(CameraBase):
         full_chip_exposure_time : float
             Full chip exposure time (s)
         """
-        # TODO: what's the units of the input full_chip_exposure_time? miliseconds or seconds?
+
         print("full chip exposure time : {}".format(full_chip_exposure_time))
         print("shutter width : {}".format(shutter_width))
+        
+
+        """
+        linedelay = Camera_parameters.highres_line_digitization_time
+        nbrows = self.current_highresROI_height
+        self.ASLM_lineExposure = int(np.ceil(desired_exposuretime / (1 + (1+nbrows) / self.ASLM_scanWidth)))
+        self.ASLM_line_delay = int(np.ceil((desired_exposuretime - self.ASLM_lineExposure) / ((nbrows+1) * linedelay))) - 1
+        self.ASLM_acquisition_time = (self.ASLM_line_delay + 1) * nbrows * linedelay + self.ASLM_lineExposure + (
+                    self.ASLM_line_delay + 1) * linedelay
+
+        print(
+            "ASLM parameters are: {} exposure time, and {} line delay factor, {} total acquisition time for {} scan width".format(
+                self.ASLM_lineExposure, self.ASLM_line_delay, self.ASLM_acquisition_time, self.ASLM_scanWidth))
+
+        """
+
+        #transform exposure time to milliseconds for Photometrics API. 
+        full_chip_exposure_time = full_chip_exposure_time*1000
 
         linedelay = self._unitforlinedelay  # 10.16us
         nbrows = self.y_pixels
-        ASLM_scanWidth = 70
 
-        ASLM_lineExposure = int(
-            np.ceil(full_chip_exposure_time / (1 + nbrows / ASLM_scanWidth))
-        )
-        ASLM_line_delay = (
-            int(
-                np.ceil(
-                    (full_chip_exposure_time - ASLM_lineExposure) / (nbrows * linedelay)
-                )
-            )
-            - 1
-        )
+        linedelay = self.camera_parameters["unitforlinedelay"]/1000
+        ASLM_lineExposure = int(np.ceil(full_chip_exposure_time / (1 + (1+nbrows) / shutter_width)))
+        ASLM_line_delay = int(np.ceil((full_chip_exposure_time - ASLM_lineExposure) / ((nbrows+1) * linedelay)))- 1
+        
         ASLM_acquisition_time = (
             (ASLM_line_delay + 1) * nbrows * linedelay
             + ASLM_lineExposure
@@ -407,17 +418,19 @@ class PhotometricsBase(CameraBase):
 
         self._exposuretime = ASLM_lineExposure
         self._scandelay = ASLM_line_delay
+        
         print(
-            "ASLM parameters are: {} exposure time, and {} line delay factor, {} "
+            "ASLM parameters are for a {} pixel height: {} exposure time, and {} line delay factor, {} "
             "total acquisition time for {} scan width".format(
+                nbrows,
                 ASLM_lineExposure,
                 ASLM_line_delay,
                 ASLM_acquisition_time,
-                ASLM_scanWidth,
+                shutter_width,
             )
         )
 
-        return ASLM_lineExposure, ASLM_line_delay, full_chip_exposure_time
+        return ASLM_lineExposure, ASLM_line_delay, full_chip_exposure_time/1000
 
 
     def set_binning(self, binning_string):

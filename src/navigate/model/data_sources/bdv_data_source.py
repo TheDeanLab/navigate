@@ -63,8 +63,6 @@ class BigDataViewerDataSource(PyramidalDataSource):
         """
         #: np.array: The image.
         self.image = None
-        #: str : Image dtype
-        self.dtype = "int16"
         #: list: The views.
         self._views = []
         #: zarr.N5Store: The N5 store.
@@ -160,7 +158,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
                 # print(z, dz, dataset_name, self.image[dataset_name].shape,
                 #       data[::dx, ::dy].shape)
                 zs = min(z // dz, self.shapes[i, 0] - 1)  # TODO: Is this necessary?
-                self.image[dataset_name][zs, ...] = data[::dy, ::dx].astype(np.int16)
+                self.image[dataset_name][zs, ...] = data[::dy, ::dx].astype(np.uint16)
                 if is_kw and (i == 0):
                     self._views.append(kw)
         self._current_frame += 1
@@ -255,6 +253,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
                 data=self.subdivisions,
                 dtype="int32",
             )
+            self.image[setup_group_name].attrs["dataType"] = "uint16"
 
         # Create the datasets to populate
         for t in range(self.shape_t):
@@ -272,7 +271,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
                         dataset_name,
                         chunks=tuple(self.subdivisions[j, ...][::-1]),
                         shape=self.shapes[j, ...],
-                        dtype="int16",
+                        dtype="uint16",
                     )
 
     def _setup_n5(self, *args, create_flag=True):
@@ -300,7 +299,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
             setup_group_name = f"setup{i}"
             setup = self.image.create_group(setup_group_name)
             setup.attrs["downsamplingFactors"] = self.resolutions.tolist()
-            setup.attrs["dataType"] = "int16"
+            setup.attrs["dataType"] = "uint16"
             for t in range(self.shape_t):
                 time_group_name = f"timepoint{t}"
                 timepoint = setup.create_group(time_group_name)
@@ -311,7 +310,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
                     sx = timepoint.zeros(
                         s_group_name, shape=tuple(shape), chunks=(shape[0], shape[1], 1)
                     )
-                    sx.attrs["dataType"] = "int16"
+                    sx.attrs["dataType"] = "uint16"
                     sx.attrs["blockSize"] = [shape[0], shape[1], 1]
                     sx.attrs["dimensions"] = list(shape)
         # print(self.image.tree())

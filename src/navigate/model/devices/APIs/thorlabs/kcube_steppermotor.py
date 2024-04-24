@@ -13,7 +13,7 @@ Tested on Thorlabs KST101.
 import ctypes
 import ctypes.wintypes
 from enum import IntEnum
-from System import Decimal  # necessary for real world units
+# from System import Decimal  # necessary for real world units
 
 """
 NOTE:
@@ -330,7 +330,7 @@ def TLI_GetDeviceInfo(serial_no):
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
 
     Returns
     -------
@@ -359,7 +359,7 @@ def KST_Open(serial_no):
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
 
     Returns
     -------
@@ -371,8 +371,11 @@ def KST_Open(serial_no):
 
 
 __dll.SCC_Close.argtypes = [ctypes.c_char_p]
+__dll.SCC_Close.restype = ctypes.c_short
+__dll.SCC_Close.errcheck = errcheck
 
 
+# NOTE: Throws an error (-17792) after calling KST_Open() -> KST_Close()
 def KST_Close(serial_no):
     """
     Disconnect and close the device.
@@ -380,13 +383,12 @@ def KST_Close(serial_no):
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
 
     Returns
     -------
     None
     """
-
     __dll.SCC_Close(serial_no.encode(CODING))
 
 
@@ -401,7 +403,7 @@ def KST_StartPolling(serial_no, milliseconds):
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
     milliseconds : int
         The milliseconds polling rate.
 
@@ -414,7 +416,7 @@ def KST_StartPolling(serial_no, milliseconds):
 
 
 __dll.SCC_StopPolling.argtypes = [ctypes.c_char_p]
-
+__dll.SCC_StopPolling.restype = ctypes.c_short
 
 def KST_StopPolling(serial_no):
     """
@@ -423,7 +425,7 @@ def KST_StopPolling(serial_no):
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
 
     Returns
     -------
@@ -439,21 +441,19 @@ class SCC_Channels(IntEnum):  # unsigned short
     Channel4 = 4
 
 
-__dll.SCC_RequestCurrentPosition.argtypes = [ctypes.c_char_p, ctypes.c_ushort]
-__dll.SCC_RequestCurrentPosition.restype = ctypes.c_int
-__dll.SCC_RequestCurrentPosition.errcheck = errcheck
+__dll.SCC_RequestPosition.argtypes = [ctypes.c_char_p]
+__dll.SCC_RequestPosition.restype = ctypes.c_int
+__dll.SCC_RequestPosition.errcheck = errcheck
 
 
-def KST_RequestCurrentPosition(serial_no, channel):
+def KST_RequestPosition(serial_no):
     """
     Gets current position.
 
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
-    channel : int
-        The device channel. One of SCC_Channels.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
 
     Returns
     -------
@@ -461,52 +461,57 @@ def KST_RequestCurrentPosition(serial_no, channel):
         The error code or 0 if successful.
     """
 
-    return __dll.SCC_RequestPosition(serial_no.encode(CODING), channel)
+    return __dll.SCC_RequestPosition(serial_no.encode(CODING))
 
 
-__dll.SCC_GetCurrentPosition.argtypes = [ctypes.c_char_p, ctypes.c_ushort]
-__dll.SCC_GetCurrentPosition.restype = ctypes.c_int
+__dll.SCC_MoveToPosition.argtypes = [ctypes.c_char_p, ctypes.c_int]
+__dll.SCC_MoveToPosition.restype = ctypes.c_short
+__dll.SCC_MoveToPosition.errcheck = errcheck
 
 
-def KST_GetCurrentPosition(serial_no, channel):
+def KST_MoveToPosition(serial_no, position):
+    """Move to position
     """
-    Gets current position.
+    return __dll.SCC_MoveToPosition(serial_no.encode(CODING), int(position))
+    
+    
+__dll.SCC_GetPosition.argtypes = [ctypes.c_char_p]
+__dll.SCC_GetPosition.restype = ctypes.c_int
+
+
+def KST_GetCurrentPosition(serial_no):
+    """Get the current position      
 
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
-    channel : int
-        The device channel. One of SCC_Channels.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
 
     Returns
     -------
     int
         Current position.
     """
+     # check if polling is active, if not RequestPosition
+    if __dll.SCC_PollingDuration(serial_no.encode(CODING))==0:
+        KST_RequestPosition(serial_no)
+    
+    return __dll.SCC_GetPosition(serial_no.encode(CODING))
 
-    # return __dll.SCC_GetCurrentPosition(serial_no.encode(CODING), channel)
-    return __dll.SCC_GetPosition(serial_no.encode(CODING), channel)
 
-
-__dll.SCC_SetMoveAbsolutePosition.argtype = [ctypes.c_char_p, ctypes.c_int]
 __dll.SCC_MoveAbsolute.argtypes = [ctypes.c_char_p]
 __dll.SCC_MoveAbsolute.restype = ctypes.c_short
 __dll.SCC_MoveAbsolute.errcheck = errcheck
-
-
-def KST_MoveAbsolute(serial_no, channel, position):
+                        
+                                                
+def KST_MoveAbsolute(serial_no):
     """
-    Move absolute.
-
-    In the StepperMotor.dll there are multiple functions for initiating an absolute move.
+    Move absolute to set position.
 
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
-    channel : int
-        The device channel. One of SCC_Channels.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
     position : int
         The position to move to.
 
@@ -515,27 +520,23 @@ def KST_MoveAbsolute(serial_no, channel, position):
     int
         The error code or 0 if successful.
     """
-
-    # return __dll.SCC_MoveAbsolute(serial_no.encode(CODING), channel, position)
-    __dll.SCC_SetMoveAbsolutePosition(serial_no.encoding(CODING), position)
-
-    return __dll.SCC_MoveAbsolute(serial_no.encoding(CODING))
+    
+    return __dll.SCC_MoveAbsolute(serial_no.encode(CODING))
 
 
-__dll.SCC_SetPosition.argtypes = [ctypes.c_char_p, ctypes.c_ushort, ctypes.c_long]
-__dll.SCC_SetPosition.restype = ctypes.c_short
-__dll.SCC_SetPosition.errcheck = errcheck
+__dll.SCC_SetMoveAbsolutePosition.argtypes = [ctypes.c_char_p, ctypes.c_int]
+__dll.SCC_SetMoveAbsolutePosition.restype = ctypes.c_short
+__dll.SCC_SetMoveAbsolutePosition.errcheck = errcheck
 
 
-def KST_SetPosition(serial_no, channel, position):
-    """Set the current position to position.
+def KST_SetAbsolutePosition(serial_no, position):
+    """
+    Set the stage to the position of the stage,
 
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
-    channel : int
-        The device channel. One of SCC_Channels.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
     position : int
         The value the current position is mapped to.
 
@@ -544,10 +545,8 @@ def KST_SetPosition(serial_no, channel, position):
     int
         The error code or 0 if successful.
     """
-
-    # convert the position to the index for __dll
-    index = position
-    return __dll.SCC_MoveToPosition(serial_no.encode(CODING), index)
+    
+    return __dll.SCC_SetMoveAbsolutePosition(serial_no.encode(CODING), int(position))
 
 
 class MOT_TravelDirection(IntEnum):  # byte
@@ -555,7 +554,7 @@ class MOT_TravelDirection(IntEnum):  # byte
     Reverse = 2  # An enum constant representing the reverse option.
 
 
-__dll.SCC_MoveJog.argtypes = [ctypes.c_char_p, ctypes.c_ushort, ctypes.c_byte]
+__dll.SCC_MoveJog.argtypes = [ctypes.c_char_p, ctypes.c_ushort]
 __dll.SCC_MoveJog.restype = ctypes.c_short
 __dll.SCC_MoveJog.errcheck = errcheck
 
@@ -567,7 +566,7 @@ def KST_MoveJog(serial_no, jog_direction):
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
     channel : int
         The device channel. One of SCC_Channels.
     jog_direction : int
@@ -579,22 +578,21 @@ def KST_MoveJog(serial_no, jog_direction):
         The error code or 0 if successful.
     """
 
-    return __dll.SCC_MoveJog(serial_no.encode(CODING), MOT_TravelDirection, jog_direction)
+    return __dll.SCC_MoveJog(serial_no.encode(CODING), MOT_TravelDirection(jog_direction))
 
 
-__dll.SCC_MoveStop.argtypes = [ctypes.c_char_p, ctypes.c_ushort]
-__dll.SCC_MoveStop.restype = ctypes.c_short
-__dll.SCC_MoveAbsolute.errcheck = errcheck
+__dll.SCC_StopProfiled.argtypes = [ctypes.c_char_p]
+__dll.SCC_StopProfiled.restype = ctypes.c_short
+__dll.SCC_StopProfiled.errcheck = errcheck
 
-
-def KST_MoveStop(serial_no, channel):
+def KST_MoveStop(serial_no):
     """
     Halt motion
 
     Parmeters
     ---------
     serial_number : str
-        Serial number of Thorlabs Kinesis Inertial Motor (KIM) device.
+        Serial number of Thorlabs Kinesis Stepper Motor (KST) device.
     channel : int
         The device channel. One of SCC_Channels.
 
@@ -603,6 +601,29 @@ def KST_MoveStop(serial_no, channel):
     int
         The error code or 0 if successful.
     """
+    # NOTE: For a hard, immediate stop, risks losing position, use:
+    # SCC_StopImmediate(char const * serialNo)
+    # NOTE: for stopping using the current velocity params use:
+    # return __dll.SCC_StopProfiled(serial_no.encode(CODING))
+    
+    return __dll.SCC_StopProfiled(serial_no.encode(CODING))
 
-    # return __dll.SCC_MoveStop(serial_no.encode(CODING), channel)
-    return __dll.SCC_StopImmediate(serial_no.encode(CODING))
+
+__dll.SCC_Home.argtypes = [ctypes.c_char_p]
+__dll.SCC_Home.restype = ctypes.c_short
+__dll.SCC_Home.errcheck = errcheck
+
+
+def KST_HomeDevice(serial_no):
+    """Home Device
+    """
+    return __dll.SCC_Home(serial_no.encode(CODING))
+
+def KST_SetVelocityParams(serial_no, velocity):
+    """Set velocity profile required for move
+    """
+    current_velocity = 0
+    current_accel = 0
+    
+    __dll.SCC_GetVelParams(serial_no.encode(CODING), current_velocity, current_accel)
+    __dll.SCC_SetVelParams(serial_no.encode(CODING), current_accel, velocity)

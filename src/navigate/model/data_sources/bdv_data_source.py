@@ -40,12 +40,11 @@ import numpy as np
 import numpy.typing as npt
 
 # Local imports
-from .data_source import DataSource
+from .pyramidal_data_source import PyramidalDataSource
 from ..metadata_sources.bdv_metadata import BigDataViewerMetadata
-from ...tools.slicing import ensure_slice, ensure_iter, slice_len
 
 
-class BigDataViewerDataSource(DataSource):
+class BigDataViewerDataSource(PyramidalDataSource):
     """BigDataViewer data source.
 
     This class is used to write data to a BigDataViewer-compatible file. It
@@ -62,16 +61,10 @@ class BigDataViewerDataSource(DataSource):
         mode : str
             The mode to open the file in. Must be "w" for write or "r" for read.
         """
-        #: np.array: The resolution of each down-sampled pyramid level.
-        self._resolutions = np.array(
-            [[1, 1, 1], [2, 2, 1], [4, 4, 1], [8, 8, 1]], dtype=int
-        )
-        #: np.array: The number of subdivisions in each dimension.
-        self._subdivisions = None
-        #: np.array: The shape of the image.
-        self._shapes = None
         #: np.array: The image.
         self.image = None
+        #: str : Image dtype
+        self.dtype = "int16"
         #: list: The views.
         self._views = []
         #: zarr.N5Store: The N5 store.
@@ -93,83 +86,7 @@ class BigDataViewerDataSource(DataSource):
 
         super().__init__(file_name, mode)
 
-    def __getitem__(self, keys):
-        """Magic method to get slice requests passed by, e.g., ds[:,2:3,...].
-        Allows arbitrary slicing of dataset via calls to get_slice().
-
-        Order is xycztps where x, y, z are array indices, c is channel,
-        t is timepoints, p is positions and s is subdivisions to index along.
-
-        TODO: Add subdivisions.
-
-        Parameters
-        ----------
-        keys : tuple
-            Tuple of indices.
-
-        Returns
-        -------
-        npt.ArrayLike
-            Array of shape (p, t, z, c, y, x)
-        """
-
-        # Check lengths
-        if isinstance(keys, slice) or isinstance(keys, int):
-            length = 1
-        else:
-            length = len(keys)
-        
-        if length < 1:
-            raise IndexError(
-                "Too few indices. Indices may be (x, y, c, z, t, p, subdiv)."
-            )
-        elif length > 7:
-            raise IndexError(
-                "Too many indices. Indices may be (x, y, c, z, t, p, subdiv)."
-            )
-        
-        # Get indices as slices/ranges
-        xs = ensure_slice(keys, 0)
-        ys = ensure_slice(keys, 1)
-        cs = ensure_iter(keys, 2, self.shape[2])
-        zs = ensure_slice(keys, 3)
-        ts = ensure_iter(keys, 4, self.shape[4])
-        ps = ensure_iter(keys, 5, self.positions)
-
-        if length > 1 and keys[-1] == Ellipsis:
-            keys = keys[:-1]
-            length -= 1
-
-        if length > 6 and isinstance(keys[6], int):
-            subdiv = keys[6]
-        else:
-            subdiv = 0
-
-        if len(cs) == 1 and len(ts) == 1 and len(ps) == 1:
-            return self.get_slice(xs, ys, cs[0], zs, ts[0], ps[0], subdiv)
-
-        sliced_ds = np.empty(
-            (
-                len(ps),
-                len(ts),
-                slice_len(zs, self.shape_z) // self.resolutions[subdiv][2],
-                len(cs),
-                slice_len(ys, self.shape_y) // self.resolutions[subdiv][1],
-                slice_len(xs, self.shape_x) // self.resolutions[subdiv][0],
-            ),
-            dtype=np.uint16,
-        )
-
-        for c in cs:
-            for t in ts:
-                for p in ps:
-                    sliced_ds[p, t, :, c, :, :] = self.get_slice(
-                        xs, ys, c, zs, t, p, subdiv
-                    )
-
-        return sliced_ds
-
-    def get_slice(self, x, y, c, z=0, t=0, p=0, subdiv=0):
+    def get_slice(self, x, y, c, z=0, t=0, p=0, subdiv=0) -> npt.ArrayLike:
         """Get a 3D slice of the dataset for a single c, t, p, subdiv.
 
         Parameters
@@ -197,84 +114,6 @@ class BigDataViewerDataSource(DataSource):
         setup = self.ds_name(t, c, p).replace("???", str(subdiv))
         return self.image[setup][z, y, x]
 
-    @property
-    def resolutions(self) -> npt.ArrayLike:
-        """Getter for resolutions.
-
-        Store as XYZ per BDV spec.
-
-        Returns
-        -------
-        resolutions : npt.ArrayLike
-            The resolutions.
-        """
-        return self._resolutions
-
-    @property
-    def subdivisions(self) -> npt.ArrayLike:
-        """Getter for subdivisions.
-
-        Store as XYZ per BDV spec.
-
-        Returns
-        -------
-        subdivisions : npt.ArrayLike
-            The subdivisions.
-        """
-        if self._subdivisions is None:
-            self._subdivisions = np.zeros((4, 3), dtype=int)
-            self._subdivisions[:, 0] = np.gcd(32, self.shapes[:, 0])
-            self._subdivisions[:, 1] = np.gcd(32, self.shapes[:, 1])
-            self._subdivisions[:, 2] = np.gcd(32, self.shapes[:, 2])
-
-            # Safety
-            self._subdivisions = np.maximum(self._subdivisions, 1)
-
-            # Reverse to XYZ
-            self._subdivisions = self._subdivisions[:, ::-1]
-        return self._subdivisions
-
-    @property
-    def shapes(self) -> npt.ArrayLike:
-        """Getter for image shape.
-
-        Store as ZYX rather than XYZ, per BDV spec.
-
-        Returns
-        -------
-        shapes : npt.ArrayLike
-            The shapes.
-        """
-        if self._shapes is None:
-            self._shapes = np.maximum(
-                np.ceil(
-                    np.array([self.shape_z, self.shape_y, self.shape_x])[None, :]
-                    / self.resolutions[:, ::-1]
-                ).astype(int),
-                1,
-            )
-        return self._shapes
-
-    @property
-    def nbytes(self) -> int:
-        """Getter for image size.
-
-        Size in bytes. Overrides base class. Accounts for subdivisions.
-
-        Returns
-        -------
-        size : int
-            The size of the image in bytes.
-        """
-        return (
-            np.prod(self.shapes, axis=1)
-            * self.shape_t
-            * self.shape_c
-            * self.positions
-            * self.bits
-            // 8
-        ).sum()
-
     def set_metadata_from_configuration_experiment(
         self, configuration: DictProxy
     ) -> None:
@@ -293,7 +132,7 @@ class BigDataViewerDataSource(DataSource):
         return super().set_metadata_from_configuration_experiment(configuration)
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
-        """Writes data to the image file.
+        """Writes 2D image to the data source.
 
         Parameters
         ----------
@@ -476,18 +315,6 @@ class BigDataViewerDataSource(DataSource):
                     sx.attrs["blockSize"] = [shape[0], shape[1], 1]
                     sx.attrs["dimensions"] = list(shape)
         # print(self.image.tree())
-
-    def _mode_checks(self) -> None:
-        """Checks that the mode is valid."""
-        self._write_mode = self._mode == "w"
-        self.close()  # if anything was already open, close it
-        if self._write_mode:
-            self._current_frame = 0
-            self._views = []
-            self.setup()
-        else:
-            self.read()
-        self._closed = False
 
     def close(self) -> None:
         """Close the image file."""

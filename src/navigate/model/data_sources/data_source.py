@@ -74,6 +74,7 @@ class DataSource:
         self._closed = True
         #: int: Number of bits per pixel.
         self.bits = 16
+        self.dtype = "uint16"
 
         #: float: Pixel size in x dimension (microns).
         #: float: Pixel size in y dimension (microns).
@@ -198,6 +199,10 @@ class DataSource:
         """
         return (self.shape_x, self.shape_y, self.shape_c, self.shape_z, self.shape_t)
 
+    def setup(self):
+        """Additional steps for establishing the initial file setup."""
+        pass
+
     def set_metadata_from_configuration_experiment(
         self, configuration: DictProxy
     ) -> None:
@@ -214,7 +219,7 @@ class DataSource:
 
     def set_metadata(self, metadata_config: dict) -> None:
         """Sets the metadata
-        
+
         Parameters
         ----------
         metadata_config : dict
@@ -327,11 +332,19 @@ class DataSource:
         # )
 
     def _mode_checks(self) -> None:
-        """Run additional checks after setting the mode."""
-        pass
+        """Checks that the mode is valid."""
+        self._write_mode = self._mode == "w"
+        self.close()  # if anything was already open, close it
+        if self._write_mode:
+            self._current_frame = 0
+            self._views = []
+            self.setup()
+        else:
+            self.read()
+        self._closed = False
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
-        """Write data to file.
+        """Writes 2D image to the data source.
 
         Parameters
         ----------

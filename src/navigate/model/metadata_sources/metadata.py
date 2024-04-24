@@ -169,11 +169,12 @@ class Metadata:
         self.dz = float(abs(state["step_size"]))
         self.dt = float(state["timepoint_interval"])
 
+        # TODO: do we need to update the XML meta data accordingly?
         self.shape_x = int(
-            self.configuration["experiment"]["CameraParameters"]["x_pixels"]
+            self.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
         )
         self.shape_y = int(
-            self.configuration["experiment"]["CameraParameters"]["y_pixels"]
+            self.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
         )
         if (
             (state["image_mode"] == "z-stack")

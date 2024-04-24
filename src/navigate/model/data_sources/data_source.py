@@ -102,6 +102,9 @@ class DataSource:
         #: int: Number of positions in the data source.
         self.positions = 1
 
+        # Set the mode using the getters/setters below
+        self.mode = mode
+
         #: int: Current frame number.
         self._current_frame = 0
 

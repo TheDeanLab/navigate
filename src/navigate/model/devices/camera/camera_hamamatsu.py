@@ -420,7 +420,7 @@ class HamamatsuBase(CameraBase):
         Returns
         -------
         frame : numpy.ndarray
-            Frame from HamamatsuOrca camera.
+            Frame ids from HamamatsuOrca camera.
         """
         return self.camera_controller.get_frames()
 

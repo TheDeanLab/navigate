@@ -501,21 +501,20 @@ class PhotometricsBase(CameraBase):
         number_of_frames : int
             Number of frames.  Default is 100.
         """
-
+        print(self._exposuretime)
         # Photometrics camera settings from config file
         self.camera_controller.readout_port = self.camera_parameters["readout_port"]
         self.camera_controller.speed_table_index =  self.camera_parameters["speed_table_index"]
         self.camera_controller.gain = self.camera_parameters["gain"]
 
-        # set following parameters if in programmable scan mode (ASLM)
+        # set camera parameters depending on acquisition mode 
         self._scanmode = self.camera_controller.prog_scan_mode
-        if self._scanmode == 1:
+        if self._scanmode == 1: #programmable scan mode (ASLM)
             self.camera_controller.exp_mode = "Edge Trigger"
             self.camera_controller.prog_scan_line_delay = self._scandelay
             self.camera_controller.exp_out_mode = 4
             print("camera ready to acquire programmable scan mode")
-
-        else:
+        else: #normal mode
             self.camera_controller.exp_out_mode = "Any Row"
             self.camera_controller.exp_mode = "Edge Trigger"
             print("camera ready to acquire static light sheet mode")
@@ -525,14 +524,16 @@ class PhotometricsBase(CameraBase):
         self._data_buffer = data_buffer
         self._frames_received = 0
         self._frame_ids = []
-
+        
+        #set acquisition flag
         self.is_acquiring = True
 
+        #start camera
         self.camera_controller.start_live(exp_time=self._exposuretime)
 
     def _receive_images(self):
         """
-        Receive the images from the Photometrics camera
+        Update image in the data buffer if the Photometrics camera acquired a new image
         """
         #try to grap the next frame from camera
         try:
@@ -554,6 +555,16 @@ class PhotometricsBase(CameraBase):
       
         return []
 
+    def get_new_frame(self):
+        """
+        Call update function for data buffer and get frame ids from Photometrics camera.
+
+        Returns
+        -------
+        frame : numpy.ndarray
+            Frame ids from Photometrics camera that point to newly acquired data in data buffer
+        """
+        return self._receive_images()
 
     def close_image_series(self):
         """Close image series.
@@ -564,33 +575,4 @@ class PhotometricsBase(CameraBase):
         self.camera_controller.finish()
         self.is_acquiring = False
 
-    def get_new_frame(self):
-        """Get frame ids from Photometrics camera."""
-        # return self.camera_controller.get_frame(exp_time=self._exposuretime)
-        # self.camera_controller.start_live(exp_time=self._exposuretime)
-
-        # self._receive_images()
-        # return self._frame_ids[]
-
-        return self._receive_images()
-
-    def get_minimum_waiting_time(self):
-        """Get minimum waiting time for HamamatsuOrca.
-
-        This function get timing information from the camera device
-        cyclic_trigger_period, minimum_trigger_blank, minimum_trigger_interval
-        'cyclic_trigger_period' of current device is 0
-        according to the document, trigger_blank should be bigger than trigger_interval.
-        """
-        # # cyclic_trigger = self.camera_controller.get_property_value(
-        # 'cyclic_trigger_period')
-        # trigger_blank = self.camera_controller.get_property_value(
-        # 'minimum_trigger_blank')
-        # # trigger_interval = self.camera_controller.get_property_value(
-        # 'minimum_trigger_interval')
-        # return trigger_blank
-        # readout_time = (self.y_pixels + 1) * Camera_parameters.highres_
-        # line_digitization_time  # +1 for the reset time at the first row
-        # before the start
-        # minimal_trigger_timeinterval = self._exposuretime + readout_time
-        return 2
+    

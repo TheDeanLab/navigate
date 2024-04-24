@@ -338,6 +338,11 @@ class PhotometricsBase(CameraBase):
         """
         self._exposuretime = int(exposure_time*1000)
         print("set exposure time to : {}".format(self._exposuretime))
+        
+        self.camera_controller.exp_time = self._exposuretime
+        
+        #start camera
+        self.camera_controller.start_live(self._exposuretime)
 
         return exposure_time
 
@@ -374,6 +379,8 @@ class PhotometricsBase(CameraBase):
             Full chip exposure time (s)
         """
         # TODO: what's the units of the input full_chip_exposure_time? miliseconds or seconds?
+        print("full chip exposure time : {}".format(full_chip_exposure_time))
+        print("shutter width : {}".format(shutter_width))
 
         linedelay = self._unitforlinedelay  # 10.16us
         nbrows = self.y_pixels
@@ -457,7 +464,13 @@ class PhotometricsBase(CameraBase):
             Height of active camera region.
         roi_width : int
             Width of active camera region.
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
         """
+
         # Get the Maximum Number of Pixels from the Configuration File
         camera_height = self.camera_parameters["y_pixels"]
         camera_width = self.camera_parameters["x_pixels"]
@@ -484,13 +497,14 @@ class PhotometricsBase(CameraBase):
 
         # Set ROI
         self.camera_controller.set_roi(roi_left, roi_top, roi_width, roi_height)
-        # self.x_pixels, self.y_pixels = self.camera_controller.shape()
 
         logger.info(f"Photometrics ROI shape, {self.camera_controller.shape()}")
 
         return self.x_pixels == roi_width and self.y_pixels == roi_height
 
-    def initialize_image_series(self, data_buffer=None, number_of_frames=100):
+    def initialize_image_series(self,
+                                data_buffer=None,
+                                number_of_frames=100):
         """Initialize Photometrics image series. This is for starting stacks etc.
 
         Parameters
@@ -506,7 +520,7 @@ class PhotometricsBase(CameraBase):
         self.camera_controller.readout_port = self.camera_parameters["readout_port"]
         self.camera_controller.speed_table_index =  self.camera_parameters["speed_table_index"]
         self.camera_controller.gain = self.camera_parameters["gain"]
-
+        
         # set camera parameters depending on acquisition mode 
         self._scanmode = self.camera_controller.prog_scan_mode
         if self._scanmode == 1: #programmable scan mode (ASLM)
@@ -527,13 +541,21 @@ class PhotometricsBase(CameraBase):
         
         #set acquisition flag
         self.is_acquiring = True
+        
+        #start camera - call it here as there are some error messages showing up without a call to the camera here.
+        #start live will be called a second time from the exposure time function, with the current exposure time.
+        self.camera_controller.start_live()
+       
 
-        #start camera
-        self.camera_controller.start_live(exp_time=self._exposuretime)
 
     def _receive_images(self):
         """
-        Update image in the data buffer if the Photometrics camera acquired a new image
+        Update image in the data buffer if the Photometrics camera acquired a new image and return frame ids.
+        
+        Returns
+        -------
+        frame : numpy.ndarray
+            Frame ids from Photometrics camera that point to newly acquired data in data buffer
         """
         #try to grap the next frame from camera
         try:
@@ -567,7 +589,7 @@ class PhotometricsBase(CameraBase):
         return self._receive_images()
 
     def close_image_series(self):
-        """Close image series.
+        """Close Photometrics image series.
 
         Stops the acquisition and sets is_acquiring flag to False.
         """

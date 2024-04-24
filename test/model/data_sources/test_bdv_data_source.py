@@ -18,9 +18,10 @@ def recurse_dtype(group):
             elif key == "subdivisions":
                 assert subgroup.dtype == "int32"
             elif key == "cells":
-                assert subgroup.dtype == "int16"
+                assert subgroup.dtype == "uint16"
         else:
             print("Unknown how to handle:", key, subgroup_type)
+
 
 def bdv_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
     from test.model.dummy import DummyModel
@@ -88,8 +89,9 @@ def bdv_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
             break
 
     return ds
-    
-def close_bdv_ds(ds, file_name = None): 
+
+
+def close_bdv_ds(ds, file_name=None):
     ds.close()
 
     if file_name is None:
@@ -107,6 +109,7 @@ def close_bdv_ds(ds, file_name = None):
     except PermissionError:
         # Windows seems to think these files are still open
         pass
+
 
 @pytest.mark.parametrize("multiposition", [True, False])
 @pytest.mark.parametrize("per_stack", [True, False])
@@ -134,6 +137,7 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
 
     assert True
 
+
 @pytest.mark.parametrize("multiposition", [True, False])
 @pytest.mark.parametrize("per_stack", [True, False])
 @pytest.mark.parametrize("z_stack", [True, False])
@@ -142,22 +146,105 @@ def test_bdv_getitem(multiposition, per_stack, z_stack, size):
     ds = bdv_ds("test.h5", multiposition, per_stack, z_stack, False, size)
 
     # Check indexing
-    assert ds[0,...].shape == (ds.positions, ds.shape_t, ds.shape_z, ds.shape_c, ds.shape_y, 1)
-    assert ds[:,0,...].shape == (ds.positions, ds.shape_t, ds.shape_z, ds.shape_c, 1, ds.shape_x)
-    assert ds[:,:,0,...].shape == (ds.positions, ds.shape_t, ds.shape_z, 1, ds.shape_y, ds.shape_x)
-    assert ds[:,:,:,0,...].shape == (ds.positions, ds.shape_t, 1, ds.shape_c, ds.shape_y, ds.shape_x)
-    assert ds[:,:,:,:,0,...].shape == (ds.positions, 1, ds.shape_z, ds.shape_c, ds.shape_y, ds.shape_x)
-    assert ds[:,:,:,:,:,0].shape == (1, ds.shape_t, ds.shape_z, ds.shape_c, ds.shape_y, ds.shape_x)
-
+    assert ds[0, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        1,
+    )
+    assert ds[:, 0, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        1,
+        ds.shape_x,
+    )
+    assert ds[:, :, 0, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        1,
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, 0, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        1,
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, :, 0, ...].shape == (
+        ds.positions,
+        1,
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, :, :, 0].shape == (
+        1,
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
 
     # Check slicing
     sx = 5
-    assert ds[:sx,...].shape == (ds.positions, ds.shape_t, ds.shape_z, ds.shape_c, ds.shape_y, min(ds.shape_x, sx))
-    assert ds[:,:sx,...].shape == (ds.positions, ds.shape_t, ds.shape_z, ds.shape_c, min(ds.shape_y, sx), ds.shape_x)
-    assert ds[:,:,:sx,...].shape == (ds.positions, ds.shape_t, ds.shape_z, min(ds.shape_c, sx), ds.shape_y, ds.shape_x)
-    assert ds[:,:,:,:sx,...].shape == (ds.positions, ds.shape_t, min(ds.shape_z, sx), ds.shape_c, ds.shape_y, ds.shape_x)
-    assert ds[:,:,:,:,:sx,...].shape == (ds.positions, min(ds.shape_t,sx), ds.shape_z, ds.shape_c, ds.shape_y, ds.shape_x)
-    assert ds[:,:,:,:,:,:sx].shape == (min(ds.positions, sx), ds.shape_t, ds.shape_z, ds.shape_c, ds.shape_y, ds.shape_x)
+    assert ds[:sx, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        min(ds.shape_x, sx),
+    )
+    assert ds[:, :sx, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        min(ds.shape_y, sx),
+        ds.shape_x,
+    )
+    assert ds[:, :, :sx, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        min(ds.shape_c, sx),
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, :sx, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        min(ds.shape_z, sx),
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, :, :sx, ...].shape == (
+        ds.positions,
+        min(ds.shape_t, sx),
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, :, :, :sx].shape == (
+        min(ds.positions, sx),
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
 
     close_bdv_ds(ds)
 

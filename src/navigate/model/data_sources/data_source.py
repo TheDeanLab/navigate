@@ -102,9 +102,6 @@ class DataSource:
         #: int: Number of positions in the data source.
         self.positions = 1
 
-        #: str: Mode to open the file in. Can be 'r' or 'w'.
-        self.mode = mode
-
         #: int: Current frame number.
         self._current_frame = 0
 

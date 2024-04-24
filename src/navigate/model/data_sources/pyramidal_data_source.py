@@ -30,6 +30,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from multiprocessing.managers import DictProxy
+
 import numpy as np
 import numpy.typing as npt
 
@@ -142,6 +144,21 @@ class PyramidalDataSource(DataSource):
             * self.bits
             // 8
         ).sum()
+
+    def set_metadata_from_configuration_experiment(
+        self, configuration: DictProxy
+    ) -> None:
+        """Sets the metadata from according to the microscope configuration.
+
+        Parameters
+        ----------
+        configuration : DictProxy
+            The configuration experiment.
+        """
+        self._subdivisions = None
+        self._shapes = None
+
+        return super().set_metadata_from_configuration_experiment(configuration)
 
     def __getitem__(self, keys):
         """Magic method to get slice requests passed by, e.g., ds[:,2:3,...].

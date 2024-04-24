@@ -153,6 +153,9 @@ class PhotometricsBase(CameraBase):
         # self.camera_controller.speed_table_index = 1 # 1 for 100 MHz
         self.camera_controller.readout_port = 0
         self.camera_controller.gain = 1
+
+
+        
         #
         # self.camera_controller.set_property_value("trigger_active",
         #                                           self.camera_parameters[
@@ -321,20 +324,21 @@ class PhotometricsBase(CameraBase):
     def set_exposure_time(self, exposure_time):
         """Set Photometrics exposure time.
 
-        Units of the Photometrics API are in seconds.
-        All of our units are in milliseconds.
+        Note: Units of the Photometrics API are in milliseconds
 
         Parameters
         ----------
         exposure_time : float
-            Exposure time in milliseconds.
+            Exposure time in seconds.
 
         Returns
         -------
         exposure_time : float
-            Exposure time in seconds.
+            Exposure time in milliseconds.
         """
-        self._exposuretime = exposure_time
+        self._exposuretime = int(exposure_time*1000)
+        print("set exposure time to : {}".format(self._exposuretime))
+
         return exposure_time
 
     def set_line_interval(self, line_interval_time):
@@ -408,23 +412,6 @@ class PhotometricsBase(CameraBase):
 
         return ASLM_lineExposure, ASLM_line_delay, full_chip_exposure_time
 
-    def _calculate_ASLMparameters(self, desired_exposuretime):
-        """Calculate the parameters for an ASLM acquisition
-
-        Parameters
-        ----------
-        desired_exposuretime : float
-            Exposure time in milliseconds.
-
-        Returns
-        -------
-        exposure_time : float
-            Light-sheet mode exposure time.
-
-        Warn
-        ----
-            Not implemented. No code in this function.
-        """
 
     def set_binning(self, binning_string):
         """Set Photometrics binning mode.
@@ -459,9 +446,6 @@ class PhotometricsBase(CameraBase):
         self.y_binning = int(binning_string[idx + 1 :])
         self.x_pixels = int(self.x_pixels / self.x_binning)
         self.y_pixels = int(self.y_pixels / self.y_binning)
-        # should update experiment in controller side
-        # self.configuration['experiment']['CameraParameters']['camera_binning'] = str(
-        # self.x_binning) + 'x' + str(self.y_binning)
         return True
 
     def set_ROI(self, roi_height=3200, roi_width=3200):
@@ -481,6 +465,8 @@ class PhotometricsBase(CameraBase):
         if (
             roi_height > camera_height
             or roi_width > camera_width
+            or roi_height < 1
+            or roi_width < 1
             or roi_height % 2 == 1
             or roi_width % 2 == 1
         ):
@@ -509,16 +495,17 @@ class PhotometricsBase(CameraBase):
 
         Parameters
         ----------
-        data_buffer : int
-            Size of the data to buffer.  Default is None.
+        data_buffer :
+            List of SharedNDArrays of shape=(self.img_height, self.img_width) and dtype="uint16"
+            Default is None.
         number_of_frames : int
             Number of frames.  Default is 100.
         """
-        print(self._exposuretime)
-        self.camera_controller.readout_port = 0
-        self.camera_controller.speed_table_index = 0
-        self.camera_controller.gain = 1
-        self._exposuretime = 20
+
+        # Photometrics camera settings from config file
+        self.camera_controller.readout_port = self.camera_parameters["readout_port"]
+        self.camera_controller.speed_table_index =  self.camera_parameters["speed_table_index"]
+        self.camera_controller.gain = self.camera_parameters["gain"]
 
         # set following parameters if in programmable scan mode (ASLM)
         self._scanmode = self.camera_controller.prog_scan_mode
@@ -533,37 +520,29 @@ class PhotometricsBase(CameraBase):
             self.camera_controller.exp_mode = "Edge Trigger"
             print("camera ready to acquire static light sheet mode")
 
-        # prepare buffer pointer array
-        # ptr_array = c_void_p * number_of_frames
-        # data_ptr = ptr_array()
-        # for i in range(number_of_frames):
-        #     np_array = data_buffer[i]
-        #     data_ptr[i] = np_array.ctypes.data
-
+        #prepare for buffered acquisition
         self._numberofframes = number_of_frames
         self._data_buffer = data_buffer
         self._frames_received = 0
         self._frame_ids = []
 
         self.is_acquiring = True
+
         self.camera_controller.start_live(exp_time=self._exposuretime)
 
     def _receive_images(self):
-
-        # wait_for_camera = True
-
-        # while self.is_acquiring == True:
-
-        # time.sleep(0.002)
+        """
+        Receive the images from the Photometrics camera
+        """
+        #try to grap the next frame from camera
         try:
             frame, fps, frame_count = self.camera_controller.poll_frame(
                 timeout_ms=10000
             )
-            # self._frame_ids.append(self._frames_received)
-
             self._data_buffer[self._frames_received][:, :] = np.copy(
                 frame["pixel_data"][:]
             )
+            #delete copied frame for memory management
             frame = None
             del frame
             self._frames_received += 1
@@ -572,49 +551,9 @@ class PhotometricsBase(CameraBase):
             return [self._frames_received - 1]
         except Exception as e:
             print(str(e))
-        #     break
-
-        # print("excited loop")
-
+      
         return []
 
-    # def _receive_imagesV1(self):
-    #
-    #     frame_ids = []
-    #     wait_for_camera=True
-    #     print("wait to receive frames")
-    #
-    #
-    #     while wait_for_camera ==True:
-    #         time.sleep(0.002)
-    #         print(self.camera_controller.check_frame_status())
-    #         if self.camera_controller.check_frame_status()=='FRAME_AVAILABLE':
-    #             # framesReceived < number_of_frames:
-    #
-    #             if self.is_acquiring==False: #exit if acquisition is done
-    #                 break
-    #
-    #             print(self._frames_received)
-    #             try:
-    #                 frame, fps, frame_count = self.camera_controller.poll_frame(
-    #                 timeout_ms=10000)
-    #                 print("received frame")
-    #                 frame_ids.append(self._frames_received)
-    #                 self.data_buffer[self._frames_received][:,:] = np.copy(frame[
-    #                 'pixel_data'][:])
-    #                 frame = None
-    #                 del frame
-    #                 self._frames_received += 1
-    #                 if self._frames_received >= self._numberofframes:
-    #                     self._frames_received = 0
-    #
-    #
-    #
-    #
-    #             except Exception as e:
-    #                 print(str(e))
-    #                 break
-    #     return frame_ids
 
     def close_image_series(self):
         """Close image series.

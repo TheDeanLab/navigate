@@ -397,8 +397,9 @@ class HamamatsuBase(CameraBase):
 
         Parameters
         ----------
-        data_buffer : int
-            Size of the data to buffer.  Default is None.
+        data_buffer : 
+            List of SharedNDArrays of shape=(self.img_height, self.img_width) and dtype="uint16"
+            Default is None.
         number_of_frames : int
             Number of frames.  Default is 100.
         """

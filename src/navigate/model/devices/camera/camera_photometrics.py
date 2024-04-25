@@ -155,29 +155,6 @@ class PhotometricsBase(CameraBase):
         self.camera_controller.readout_port = 0
         self.camera_controller.gain = 1
 
-
-        
-        #
-        # self.camera_controller.set_property_value("trigger_active",
-        #                                           self.camera_parameters[
-        #                                           'trigger_active'])
-        # self.camera_controller.set_property_value("trigger_mode",
-        #                                           self.camera_parameters[
-        #                                           'trigger_mode'])
-        # self.camera_controller.set_property_value("trigger_polarity",
-        #                                           self.camera_parameters[
-        #                                           \'trigger_polarity'])
-        # self.camera_controller.set_property_value("trigger_source",
-        #                                           self.camera_parameters[
-        #                                           'trigger_source'])
-        # # DCAM_IDPROP_IMAGE_WIDTH/HEIGHT is readonly
-        # self.camera_controller.set_property_value("image_height",
-        #                                            self.camera_parameters[
-        #                                            'y_pixels'])
-        # self.camera_controller.set_property_value("image_width",
-        #                                            self.camera_parameters[
-        #                                            'x_pixels'])
-
         logger.info("Photometrics Initialized")
 
     def __del__(self):
@@ -272,55 +249,19 @@ class PhotometricsBase(CameraBase):
 
         Warn
         ----
-            Not implemented. Currently hard-coded for Hamamatsu Orca Flash 4.0.
+            Function only called for normal acquisition mode.
 
         Returns
         -------
         readout_time : float
-            Duration of time needed to readout an image.
+            Duration of time needed to readout an image in seconds.
         """
 
-        # todo
-        h = 3.75 * 10**-6  # Readout timing constant
-        # h = self.camera_controller.get_property_value("readout_time")
-        vn = self.y_pixels
-        exposure_time = self._exposuretime
-        # trigger_source = self.camera_controller.get_property_value('trigger_source')
-        # trigger_active = self.camera_controller.get_property_value('trigger_active')
-        #
-        if self._scanmode == 0:  # normal/static light-sheet
-            readout_time = exposure_time - ((vn + 10) * h + exposure_time)
-        else:
-            # todo: not sure if these equations are correct
-            readout_time = exposure_time - (
-                (vn + 10) * h * self._scandelay + exposure_time
-            )
-
-            #
-        #     #  Area sensor mode operation
-        #     if trigger_source == 1:
-        #         # Internal Trigger Source
-        #         max_frame_rate = 1 / ((vn / 2) * h)
-        #         readout_time = exposure_time - ((vn / 2) * h)
-        #
-        #     if trigger_active == 1 or 2:
-        #         #  External Trigger Source
-        #         #  Edge == 1, Level == 2
-        #         max_frame_rate = 1 / ((vn / 2) * h + exposure_time + 10 * h)
-        #         readout_time = exposure_time - ((vn / 2) * h + exposure_time + 10 * h)
-        #
-        #     if trigger_active == 3:
-        #         #  External Trigger Source
-        #         #  Synchronous Readout == 3
-        #         max_frame_rate = 1 / ((vn / 2) * h + 5 * h)
-        #         readout_time = exposure_time - ((vn / 2) * h + 5 * h)
-        #
-        # if sensor_mode == 12:
-        #     #  Progressive sensor mode operation
-        #     max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
-        #     readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
-        #
-        return readout_time
+        #get the readout time from the Photometrics camera in us
+        photometricsReadoutTime_ms = self.camera_controller.readout_time/1000
+        
+        return photometricsReadoutTime_ms/1000
+    
 
     def set_exposure_time(self, exposure_time):
         """Set Photometrics exposure time.
@@ -373,36 +314,20 @@ class PhotometricsBase(CameraBase):
         Returns
         -------
         exposure_time : float
-            Light-sheet mode exposure time.
+            Light-sheet mode exposure time in seconds
         camera_line_interval : float
             HamamatsuOrca line interval duration.
         full_chip_exposure_time : float
             Full chip exposure time (s)
         """
-
-        print("full chip exposure time : {}".format(full_chip_exposure_time))
-        print("shutter width : {}".format(shutter_width))
-        
-
-        """
-        linedelay = Camera_parameters.highres_line_digitization_time
-        nbrows = self.current_highresROI_height
-        self.ASLM_lineExposure = int(np.ceil(desired_exposuretime / (1 + (1+nbrows) / self.ASLM_scanWidth)))
-        self.ASLM_line_delay = int(np.ceil((desired_exposuretime - self.ASLM_lineExposure) / ((nbrows+1) * linedelay))) - 1
-        self.ASLM_acquisition_time = (self.ASLM_line_delay + 1) * nbrows * linedelay + self.ASLM_lineExposure + (
-                    self.ASLM_line_delay + 1) * linedelay
-
-        print(
-            "ASLM parameters are: {} exposure time, and {} line delay factor, {} total acquisition time for {} scan width".format(
-                self.ASLM_lineExposure, self.ASLM_line_delay, self.ASLM_acquisition_time, self.ASLM_scanWidth))
-
-        """
+       
+        #size of ROI
+        nbrows = self.y_pixels
 
         #transform exposure time to milliseconds for Photometrics API. 
         full_chip_exposure_time = full_chip_exposure_time*1000
 
-        linedelay = self._unitforlinedelay  # 10.16us
-        nbrows = self.y_pixels
+        #equations to calculate ASLM parameters
 
         linedelay = self.camera_parameters["unitforlinedelay"]/1000
         ASLM_lineExposure = int(np.ceil(full_chip_exposure_time / (1 + (1+nbrows) / shutter_width)))
@@ -414,11 +339,6 @@ class PhotometricsBase(CameraBase):
             + (ASLM_line_delay + 1) * linedelay
         )
 
-        self.camera_parameters["line_interval"] = ASLM_lineExposure
-
-        self._exposuretime = ASLM_lineExposure
-        self._scandelay = ASLM_line_delay
-        
         print(
             "ASLM parameters are for a {} pixel height: {} exposure time, and {} line delay factor, {} "
             "total acquisition time for {} scan width".format(
@@ -430,7 +350,14 @@ class PhotometricsBase(CameraBase):
             )
         )
 
-        return ASLM_lineExposure, ASLM_line_delay, full_chip_exposure_time/1000
+        self.camera_parameters["line_interval"] = ASLM_lineExposure
+
+        self._exposuretime = ASLM_lineExposure
+        self._scandelay = ASLM_line_delay
+        
+        
+
+        return ASLM_lineExposure/1000, ASLM_line_delay, ASLM_acquisition_time/1000
 
 
     def set_binning(self, binning_string):
@@ -540,7 +467,7 @@ class PhotometricsBase(CameraBase):
             self.camera_controller.exp_mode = "Edge Trigger"
             self.camera_controller.prog_scan_line_delay = self._scandelay
             self.camera_controller.exp_out_mode = 4
-            print("camera ready to acquire programmable scan mode")
+            print("camera ready to acquire programmable scan mode with scandelay {}".format(self._scandelay))
         else: #normal mode
             self.camera_controller.exp_out_mode = "Any Row"
             self.camera_controller.exp_mode = "Edge Trigger"

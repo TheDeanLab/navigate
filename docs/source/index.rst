@@ -54,6 +54,7 @@ technology developers.
    :maxdepth: 2
 
    user_guide/hardware_overview
+   user_guide/file_formats
    user_guide/gui_walkthrough
    user_guide/setup_microscope
    user_guide/acquiring_home

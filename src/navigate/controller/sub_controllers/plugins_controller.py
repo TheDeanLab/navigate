@@ -118,6 +118,10 @@ class PluginsController:
                     plugin_frame_module = load_module_from_file(
                         f"{plugin_class_name}Frame", view_file
                     )
+                    if plugin_frame_module is None:
+                        print("Make sure plugin frame name is correct! "
+                              f"Plugin {plugin_name} need to be reinstalled!")
+                        return
                     plugin_frame = getattr(
                         plugin_frame_module, f"{plugin_class_name}Frame"
                     )

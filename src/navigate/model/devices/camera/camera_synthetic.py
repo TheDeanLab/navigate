@@ -307,16 +307,6 @@ class SyntheticCamera(CameraBase):
         self.x_pixels = roi_width
         self.y_pixels = roi_height
 
-    def get_minimum_waiting_time(self):
-        """Get minimum waiting time for SyntheticCamera.
-
-        Returns
-        -------
-        float
-            Minimum waiting time.
-        """
-        return 0.01
-
     def calculate_readout_time(self):
         """Calculate duration of time needed to readout an image. Calculates the readout
         time and maximum frame rate according to the camera configuration settings.

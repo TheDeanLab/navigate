@@ -122,7 +122,6 @@ class TestHamamatsuOrca:
             "initialize_image_series",
             "close_image_series",
             "get_new_frame",
-            "get_minimum_waiting_time",
         ]
 
         for da in desired_attributes:

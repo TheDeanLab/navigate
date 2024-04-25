@@ -73,7 +73,7 @@ class PhotometricsBase(CameraBase):
         camera:
             hardware:
                 name: camera
-                type: Photometrics #SyntheticCamera
+                type: Photometrics
                 serial_number: 1
             x_pixels: 5056.0
             y_pixels: 2960.0
@@ -81,7 +81,6 @@ class PhotometricsBase(CameraBase):
             subsampling: [1, 2, 4]
             sensor_mode: Normal  # 'Normal' or 'Light-Sheet'
             readout_direction: Bottom-to-Top  # Top-to-Bottom', 'Bottom-to-Top'
-            lightsheet_rolling_shutter_width: 608
             binning: 1x1
             readout_speed: 0x7FFFFFFF
             trigger_active: 1.0
@@ -93,9 +92,6 @@ class PhotometricsBase(CameraBase):
             trigger_polarity: 2.0  # positive pulse
             trigger_source: 2.0  # 2 = external, 3 = software.
             exposure_time: 20 # Use milliseconds throughout.
-            delay_percent: 0.0 #25 #8 #5.0
-            pulse_percent: 1
-            line_interval: 0.000075
             display_acquisition_subsampling: 4
             average_frame_rate: 4.969
             frames_to_average: 1
@@ -133,27 +129,24 @@ class PhotometricsBase(CameraBase):
         self._databuffer = None
         #: int: Number of frames received
         self._frames_received = 0
-        #: float: Unit for line delay
-        self._unitforlinedelay = 0.00375  # 3.75  us for dynamic mode kinetix
         #: list: Frame IDs
         self._frame_ids = []
         #: dict: Camera parameters
         self.camera_parameters["x_pixels"] = self.camera_controller.sensor_size[0]
         self.camera_parameters["y_pixels"] = self.camera_controller.sensor_size[1]
 
-        # todo: complete first init of parameters to default values
-
         # Values are pulled from the CameraParameters section of the
         # configuration.yml file.
-        # Exposure time converted here from milliseconds to seconds.
         self.set_sensor_mode("Normal")
         self.camera_controller.binning = 1
         # not implemented: readout_speed, defect_correct_mode
         self.camera_controller.exp_mode = "Edge Trigger"
         self.camera_controller.prog_scan_dir = 0
-        # self.camera_controller.speed_table_index = 1 # 1 for 100 MHz
-        self.camera_controller.readout_port = 0
-        self.camera_controller.gain = 1
+       
+        # Photometrics camera settings from config file
+        self.camera_controller.readout_port = self.camera_parameters["readout_port"]
+        self.camera_controller.speed_table_index =  self.camera_parameters["speed_table_index"]
+        self.camera_controller.gain = self.camera_parameters["gain"]
 
         logger.info("Photometrics Initialized")
 
@@ -456,10 +449,6 @@ class PhotometricsBase(CameraBase):
             Number of frames.  Default is 100.
         """
         print(self._exposuretime)
-        # Photometrics camera settings from config file
-        self.camera_controller.readout_port = self.camera_parameters["readout_port"]
-        self.camera_controller.speed_table_index =  self.camera_parameters["speed_table_index"]
-        self.camera_controller.gain = self.camera_parameters["gain"]
         
         # set camera parameters depending on acquisition mode 
         self._scanmode = self.camera_controller.prog_scan_mode

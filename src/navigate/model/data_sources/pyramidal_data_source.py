@@ -30,11 +30,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard library imports
 from multiprocessing.managers import DictProxy
 
+# Third-party imports
 import numpy as np
 import numpy.typing as npt
 
+# Local application imports
 from .data_source import DataSource
 from ...tools.slicing import ensure_slice, ensure_iter, slice_len
 
@@ -43,7 +46,7 @@ class PyramidalDataSource(DataSource):
     """General class for data sources that store data in a pyramidal structure.
 
     Implements resolution/subdivision calculations and __getitem__ with
-    indexing by subivision.
+    indexing by subdivision.
     """
 
     def __init__(self, file_name: str = None, mode: str = "w") -> None:
@@ -260,5 +263,10 @@ class PyramidalDataSource(DataSource):
         -------
         npt.ArrayLike
             3D (z, y, x) slice of data set
+
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented in a derived class.
         """
         raise NotImplementedError("Implemented in a derived class.")

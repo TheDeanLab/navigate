@@ -143,6 +143,7 @@ class BigDataViewerMetadata(XMLMetadata):
                 "text": file_name,
             }
 
+        # TODO: Consider adding support for tiff/tif files. Needs evaluation.
         # elif ext == "tiff" or ext == "tif":
         #     """
         #     Need to iterate through the time points, etc.
@@ -321,6 +322,8 @@ class BigDataViewerMetadata(XMLMetadata):
             The z position of the stage.
         theta : float
             The theta position of the stage.
+        f : Optional[float], optional
+            The focus position of the stage, by default None
 
         Returns
         -------

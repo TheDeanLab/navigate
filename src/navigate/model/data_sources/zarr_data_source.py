@@ -30,10 +30,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard library imports
+
+# Third-party imports
 import zarr
 import numpy.typing as npt
 import zarr.storage
 
+# Local application imports
 from .pyramidal_data_source import PyramidalDataSource
 from ..metadata_sources.zarr_metadata import OMEZarrMetadata
 
@@ -48,6 +52,7 @@ class OMEZarrDataSource(PyramidalDataSource):
 
     def __init__(self, file_name: str = None, mode: str = "w") -> None:
 
+        #: OMEZarrMetadata: Metadata object for the OME-Zarr data source.
         self.metadata = OMEZarrMetadata()
         self.__store = None
         self._current_position = -1
@@ -86,11 +91,21 @@ class OMEZarrDataSource(PyramidalDataSource):
         """Set up the Zarr writer."""
         # Use FSStore as a universal backend
         self.__store = zarr.storage.FSStore(self.file_name, mode=self.mode)
+
+        #: zarr.group: Zarr group object for the image data source.
         self.image = zarr.group(store=self.__store, overwrite=True)
         self._current_position = -1
 
     def new_position(self, pos, view):
-        """Create new arrays on the fly for each position in self.positions."""
+        """Create new arrays on the fly for each position in self.positions.
+
+        Parameters
+        ----------
+        pos : int
+            Position index
+        view : str
+            View name
+        """
         name = f"{GROUP_PREFIX}{pos}"
         paths = []
         # Create the subdivisions...
@@ -115,7 +130,16 @@ class OMEZarrDataSource(PyramidalDataSource):
         self.image.attrs["multiscales"] = scales
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
-        """Writes 2D image to the data source."""
+        """Writes 2D image to the data source.
+
+        Parameters
+        ----------
+        data : npt.ArrayLike
+            2D image data
+        kw : dict
+            Keyword arguments
+        """
+        #: str: Mode of the data source.
         self.mode = "w"
 
         if self.__store is None:

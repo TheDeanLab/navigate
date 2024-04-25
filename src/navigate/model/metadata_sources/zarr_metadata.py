@@ -30,9 +30,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Standard library imports
 from typing import Optional, Union, List, Dict
+
+# Third-party imports
 import numpy.typing as npt
 
+# Local application imports
 from .metadata import Metadata
 
 NGFF_VERSION = "0.4"
@@ -44,6 +48,11 @@ class OMEZarrMetadata(Metadata):
         """Return tczyx axes in navigate units.
 
         https://ngff.openmicroscopy.org/0.4/#axes-md
+
+        Returns
+        -------
+        List
+            A list of dictionaries containing the axis name, type, and unit.
         """
         axes = [
             {"name": "t", "type": "time", "unit": "second"},
@@ -107,7 +116,18 @@ class OMEZarrMetadata(Metadata):
     def _scale_transform(
         self, subdiv: Union[npt.ArrayLike, List] = [1, 1, 1]
     ) -> List[float]:
-        """Calculate the image scale after subdivision."""
+        """Calculate the image scale after subdivision.
+
+        Parameters
+        ----------
+        subdiv : List
+            The subdivision of the dataset.
+
+        Returns
+        -------
+        List
+            The scale of the dataset.
+        """
         return [
             self.dt,
             self.dc,
@@ -119,7 +139,20 @@ class OMEZarrMetadata(Metadata):
     def _coordinate_transformations(
         self, scale: Optional[List] = None, translation: Optional[List] = None
     ) -> Dict:
-        """Package scale and translation in a dict."""
+        """Package scale and translation in a dict.
+
+        Parameters
+        ----------
+        scale : List
+            The scale of the dataset.
+        translation : List
+            The translation of the dataset.
+
+        Returns
+        -------
+        Dict
+            A dictionary containing the transformation.
+        """
         transformation = []
         if (
             scale is None
@@ -148,7 +181,26 @@ class OMEZarrMetadata(Metadata):
         resolutions: Union[npt.ArrayLike, List],
         view: Optional[Dict] = None,
     ) -> Dict:
-        """https://ngff.openmicroscopy.org/0.4/index.html#multiscale-md"""
+        """Create a multiscale dictionary for the OME-Zarr metadata.
+
+        https://ngff.openmicroscopy.org/0.4/index.html#multiscale-md
+
+        Parameters
+        ----------
+        name : str
+            The name of the dataset.
+        paths : list
+            The paths of the dataset.
+        resolutions : List
+            The resolutions of the dataset.
+        view : Dict
+            The view of the dataset.
+
+        Returns
+        -------
+        Dict
+            A dictionary containing the multiscale metadata.
+        """
         d = {"version": NGFF_VERSION, "name": name, "axes": self._axes}
 
         datasets = []

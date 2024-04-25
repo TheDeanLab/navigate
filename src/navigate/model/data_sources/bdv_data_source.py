@@ -226,6 +226,13 @@ class BigDataViewerDataSource(PyramidalDataSource):
         """Set up the HDF5 file.
 
         This function creates the file and the datasets to populate.
+
+        Parameters
+        ----------
+        args : tuple
+            The setup start and end.
+        create_flag : bool
+            Flag to create the file.
         """
         if create_flag:
             self.image = h5py.File(self.file_name, "a")
@@ -278,6 +285,13 @@ class BigDataViewerDataSource(PyramidalDataSource):
         This function creates the file and the datasets to populate. By default,
         it implements blosc compression. Consequently, the anticipated file
         size, and the actual file size, do not match. This is not the case for HDF5.
+
+        Parameters
+        ----------
+        args : tuple
+            The setup start and end.
+        create_flag : bool
+            Flag to create the file.
 
         Note
         ----

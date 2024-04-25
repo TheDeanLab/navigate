@@ -138,8 +138,6 @@ class BigDataViewerDataSource(PyramidalDataSource):
         """
         self.mode = "w"
 
-        is_kw = len(kw) > 0
-
         c, z, t, p = self._cztp_indices(
             self._current_frame, self.metadata.per_stack
         )  # find current channel
@@ -148,6 +146,7 @@ class BigDataViewerDataSource(PyramidalDataSource):
             self.setup()
 
         ds_name = self.ds_name(t, c, p)
+        is_kw = len(kw) > 0
         for i in range(self.subdivisions.shape[0]):
             dx, dy, dz = self.resolutions[i, ...]
             if z % dz == 0:

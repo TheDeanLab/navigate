@@ -74,7 +74,8 @@ class DataSource:
         self._closed = True
         #: int: Number of bits per pixel.
         self.bits = 16
-        self.dtype = "uint16"
+        if not hasattr(self, "dtype"):
+            self.dtype = "uint16"
 
         #: float: Pixel size in x dimension (microns).
         #: float: Pixel size in y dimension (microns).

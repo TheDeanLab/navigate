@@ -458,24 +458,24 @@ class ASIStage(StageBase):
             return False
         return True
     
-    def move_axis_relative(self, distance, axis, wait_until_done = False):
-        """Move Relative Method.
+    def move_axis_relative(self, axis, distance, wait_until_done = False):
+        """Move the stage relative to the current position along the specified axis.
         XYZ Values should remain in microns for the ASI API
         Theta Values are not accepted.
 
         Parameters
         ----------
-        move_dictionary : dict
-            A dictionary of relative movement values for each axis.
-            Includes 'x_rel', 'y_rel', etc. for one or more axes.
-            Expect values in micrometers for XYZ, and degrees for Theta.
-        wait_until_done : bool
-            Block until stage has moved to its new spot.
+        axis : str
+            The axis along which to move the stage (e.g., 'x', 'y', 'z').
+        distance : float
+            The distance to move relative to the current position, in micrometers for XYZ axes.
+        wait_until_done : bool, optional
+            Whether to wait until the stage has moved to its new position, by default False.
 
         Returns
         -------
         success : bool
-            Was the move successful?
+        Indicates whether the move was successful.
         """
         if axis not in self.axes_mapping:
             return False
@@ -490,7 +490,7 @@ class ASIStage(StageBase):
         # Move stage
         try:
             # The 10 is to account for the ASI units, 1/10 of a micron
-            self.ms2000_controller.moverel_axis(axis, distance)
+            self.ms2000_controller.moverel_axis(axis, distance*10)
 
         except MS2000Exception as e:
             print(
@@ -505,13 +505,33 @@ class ASIStage(StageBase):
         return True
     
     def scan_axis_triggered_move(self, start_position, end_position, axis, ttl_triggered = False): 
+        """Move the stage along the specified axis from start position to end position,
+        with optional TTL triggering.
+
+        Parameters
+        ----------
+        start_position : float
+            The starting position of the stage along the specified axis.
+        end_position : float
+            The desired end position of the stage along the specified axis.
+        axis : str
+            The axis along which the stage will be moved (e.g., 'x', 'y', 'z').
+        ttl_triggered : bool, optional
+            Whether to trigger the move using TTL signal, by default False.
+
+        Returns
+        -------
+        success : bool
+            Indicates whether the move was successful.
+        """
+
         self.move_axis_absolute(axis, start_position, True)
 
         distance = end_position - start_position
-        self.move_axis_relative(distance, axis, True)
+        self.move_axis_relative(axis, distance, True)
 
         try: 
-            self.ms2000_controller.set_backslash(axis)
+            self.ms2000_controller.set_backlash(axis, .05)
             if ttl_triggered: 
                 self.ms2000_controller.set_triggered_move(axis)
         except MS2000Exception as e:

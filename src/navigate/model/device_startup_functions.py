@@ -497,7 +497,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"][
                 "type"
             ]
-            #FIXME: Will the filter wheel can be share between MS2000 and Tiger ?
+            
             if filter_wheel == "MS2000":
                 stage_devices.append("shared device")
             else:

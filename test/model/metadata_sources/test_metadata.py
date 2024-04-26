@@ -41,8 +41,8 @@ def test_metadata_shape(dummy_model):
 
     md.configuration = dummy_model.configuration
 
-    txs = dummy_model.configuration["experiment"]["CameraParameters"]["x_pixels"]
-    tys = dummy_model.configuration["experiment"]["CameraParameters"]["y_pixels"]
+    txs = dummy_model.configuration["experiment"]["CameraParameters"]["img_x_pixels"]
+    tys = dummy_model.configuration["experiment"]["CameraParameters"]["img_y_pixels"]
     tzs = dummy_model.configuration["experiment"]["MicroscopeState"]["number_z_steps"]
     tts = dummy_model.configuration["experiment"]["MicroscopeState"]["timepoints"]
     tcs = sum(

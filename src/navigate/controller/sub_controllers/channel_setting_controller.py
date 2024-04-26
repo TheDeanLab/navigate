@@ -412,7 +412,6 @@ class ChannelSettingController(GUIController):
         --------
         >>> self.get_index("laser", "488")
         """
-        print("get index", dropdown_name, value)
         if not value:
             return -1
         if dropdown_name == "laser":

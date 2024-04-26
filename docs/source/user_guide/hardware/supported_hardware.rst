@@ -176,7 +176,7 @@ Cameras
 The software supports camera-based acquisition. It can run both normal and rolling
 shutter modes of contemporary scientific CMOS cameras.
 
-Hamamatsu ORCA-Flash4.0 V3/Fusion
+Hamamatsu ORCA-Flash4.0 V3
 ---------------------------------
 
 * Insert the USB that came with the camera into the computer and install HCImageLive. Alternatively,
@@ -244,6 +244,57 @@ More about the ORCA-Flash 4.0 v3 and ORCA-Fusion can be found `here <https://www
             y_pixels_step: 4
             x_pixels_min: 4
             y_pixels_min: 4
+
+|
+
+Hamamatsu ORCA-Fusion
+------------------------
+
+The ORCA-Fusion comes in a back-thinned and front-illuminated version. This code will work
+with both. Learn more about the ORCA-Fusion `here <https://www.hamamatsu.com/jp/en/product/cameras/cmos-cameras/C15440-20UP.html>`_.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      hardware:
+        camera:
+          -
+            type:  HamamatsuOrcaFusion
+            serial_number: 000035
+
+      microscopes:
+        microscope_name:
+          camera:
+            hardware:
+              name: camera
+              type: HamamatsuOrcaFusion
+              serial_number: 000035
+            x_pixels: 4608.0
+            y_pixels: 2592.0
+            pixel_size_in_microns: 5.5
+            subsampling: [1, 2, 4]
+            sensor_mode: Normal
+            readout_direction: Bottom-to-Top
+            lightsheet_rolling_shutter_width: 608
+            defect_correct_mode: 2.0
+            binning: 1x1
+            readout_speed: 0x7FFFFFFF
+            trigger_active: 1.0
+            trigger_mode: 1.0
+            trigger_polarity: 2.0
+            trigger_source: 2.0
+            exposure_time: 20
+            delay_percent: 8
+            pulse_percent: 1
+            line_interval: 0.000075
+            display_acquisition_subsampling: 4
+            average_frame_rate: 4.969
+            frames_to_average: 1
+            exposure_time_range:
+              min: 1
+              max: 1000
+              step: 1
 
 |
 
@@ -363,6 +414,13 @@ Photometrics Iris 15
   may need to install the `Broadcom PCI/PCIe Software Development Kit <https://www.broadcom.com/products/pcie-switches-bridges/software-dev-kits>`_
 * Upon successful installation, one should be able to acquire images with the
   manufacturer-provided PVCamTest software.
+
+.. Note::
+
+    A static version of the Photometrics API is provided with this software. It is located
+    in in srcs/model/devices/APIs/photo_metrics/PyVCAM-master. To install this API, go to this
+    folder in the command line and from within your **navigate** environment, run
+    ``python setup.py install``.
 
 
 .. collapse:: Configuration File

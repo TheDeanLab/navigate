@@ -105,7 +105,6 @@ class TestSyntheticCamera:
             "generate_new_frame",
             "get_new_frame",
             "set_ROI",
-            "get_minimum_waiting_time",
         ]
 
         for m in methods:
@@ -124,7 +123,6 @@ class TestSyntheticCamera:
         self.synthetic_camera.close_image_series()
         self.synthetic_camera.get_new_frame()
         self.synthetic_camera.set_ROI()
-        self.synthetic_camera.get_minimum_waiting_time()
 
     def test_synthetic_camera_exposure(self):
         exposure_time = 200
@@ -185,10 +183,6 @@ class TestSyntheticCamera:
         assert (
             self.synthetic_camera.is_acquiring is False
         ), "is_acquiring should be False"
-
-    def test_synthetic_get_camera_minimum_wating_time(self):
-        wait_time = self.synthetic_camera.get_minimum_waiting_time()
-        assert wait_time == 0.01
 
     def test_synthetic_camera_set_roi(self):
         self.synthetic_camera.set_ROI()

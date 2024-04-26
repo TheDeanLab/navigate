@@ -53,6 +53,7 @@ dev = [
     "pre-commit",
     "ipykernel",
     "jupyterlab",
+    "pydantic-ome-ngff"
     ]
 
 docs = [

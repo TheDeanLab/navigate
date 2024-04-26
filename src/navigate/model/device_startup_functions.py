@@ -154,36 +154,11 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
         )
 
         return SyntheticCameraController()
+
     elif cam_type == "Photometrics":
-
-        def import_photometrics(camera_connection):
-            """Import Photometrics API and Initialize Camera Controller.
-
-            Parameters
-            ----------
-            camera_connection : str
-                Camera connection string
-
-            Returns
-            -------
-            camera_toopen : object
-                Camera object.
-
-            Note
-            ----
-                To make this work, please install the SDK at
-                https://www.photometrics.com/support/download/pvcam-sdk
-                and go to APIs/photometrics/PyVCAM-master and run python setup.py
-                install
-            """
-            from pyvcam import pvc
-            from pyvcam.camera import Camera
-
-            pvc.init_pvcam()
-            # camera_names = Camera.get_available_camera_names()
-            camera_toopen = Camera.select_camera(camera_connection)
-            camera_toopen.open()
-            return camera_toopen
+        from navigate.model.devices.camera.camera_photometrics import (
+            build_photometrics_connection,
+        )
 
         camera_connection = configuration["configuration"]["hardware"]["camera"][
             camera_id
@@ -191,7 +166,7 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
 
         # return camera object in the auto_redial function.
         return auto_redial(
-            import_photometrics, (camera_connection,), exception=Exception
+            build_photometrics_connection, (camera_connection,), exception=Exception
         )
     else:
         device_not_found("camera", camera_id, cam_type)
@@ -267,10 +242,10 @@ def start_camera(
 
     elif cam_type == "Photometrics":
         from navigate.model.devices.camera.camera_photometrics import (
-            PhotometricsKinetix,
+            PhotometricsBase,
         )
 
-        return PhotometricsKinetix(microscope_name, device_connection, configuration)
+        return PhotometricsBase(microscope_name, device_connection, configuration)
 
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
         from navigate.model.devices.camera.camera_synthetic import SyntheticCamera

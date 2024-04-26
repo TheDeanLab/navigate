@@ -208,7 +208,7 @@ class OMEZarrMetadata(Metadata):
             scale = self._scale_transform(res)
             dd = {
                 "path": path,
-                "coordinateTransforms": self._coordinate_transformations(scale),
+                "coordinateTransformations": self._coordinate_transformations(scale),
             }
             datasets.append(dd)
         d["datasets"] = datasets

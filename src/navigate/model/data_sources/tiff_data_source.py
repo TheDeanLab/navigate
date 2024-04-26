@@ -154,7 +154,7 @@ class TiffDataSource(DataSource):
             setattr(self, f"shape_{ax.lower()}", self.data.shape[i])
 
     def write(self, data: npt.ArrayLike, **kw) -> None:
-        """Write data to a tiff file.
+        """Writes 2D image to the data source.
 
         One channel, all z-position, one timepoint = one stack.
         N channels are opened simultaneously for writing.
@@ -267,18 +267,6 @@ class TiffDataSource(DataSource):
             )
             self.file_name.append(file_name)
             self.uid.append(str(uuid.uuid4()))
-
-    def _mode_checks(self) -> None:
-        """Check that the mode is valid."""
-        self._write_mode = self._mode == "w"
-        self.close()  # if anything was already open, close it
-        if self._write_mode:
-            self._current_frame = 0
-            self._views = []
-            # self._setup_write_image()
-        else:
-            self.read()
-        self._closed = False
 
     def close(self, internal=False) -> None:
         """Close the file.

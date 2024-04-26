@@ -18,18 +18,12 @@ def recurse_dtype(group):
             elif key == "subdivisions":
                 assert subgroup.dtype == "int32"
             elif key == "cells":
-                assert subgroup.dtype == "int16"
+                assert subgroup.dtype == "uint16"
         else:
             print("Unknown how to handle:", key, subgroup_type)
 
 
-@pytest.mark.parametrize("multiposition", [True, False])
-@pytest.mark.parametrize("per_stack", [True, False])
-@pytest.mark.parametrize("z_stack", [True, False])
-@pytest.mark.parametrize("stop_early", [True, False])
-@pytest.mark.parametrize("size", [(1024, 2048), (2048, 1024), (2048, 2048)])
-@pytest.mark.parametrize("ext", ["h5", "n5"])
-def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
+def bdv_ds(fn, multiposition, per_stack, z_stack, stop_early, size):
     from test.model.dummy import DummyModel
     from navigate.model.data_sources.bdv_data_source import BigDataViewerDataSource
 
@@ -67,7 +61,7 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
         ] = "per_slice"
 
     # Establish a BDV data source
-    ds = BigDataViewerDataSource(f"test.{ext}")
+    ds = BigDataViewerDataSource(fn)
     ds.set_metadata_from_configuration_experiment(model.configuration)
 
     # Populate one image per channel per timepoint
@@ -76,11 +70,10 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
         f"x: {ds.shape_x} y: {ds.shape_y} z: {ds.shape_z} c: {ds.shape_c} "
         f"t: {ds.shape_t} positions: {ds.positions} per_stack: {ds.metadata.per_stack}"
     )
-    # TODO: Why does 2**16 make ImageJ crash??? But 2**8 works???
-    data = (np.random.rand(n_images, ds.shape_y, ds.shape_x) * 2**8).astype("uint16")
+    data = (np.random.rand(n_images, ds.shape_y, ds.shape_x) * 2**16).astype("uint16")
     dbytes = np.sum(
         ds.shapes.prod(1) * ds.shape_t * ds.shape_c * ds.positions * 2
-    )  # 16 bits, 8 bits per byte
+    )  # 2 bytes per pixel (16-bit)
     assert dbytes == ds.nbytes
     data_positions = (np.random.rand(n_images, 5) * 50e3).astype(float)
     for i in range(n_images):
@@ -94,17 +87,15 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
         )
         if stop_early and np.random.rand() > 0.5:
             break
+
+    return ds
+
+
+def close_bdv_ds(ds, file_name=None):
     ds.close()
 
-    file_name = ds.file_name
-
-    # check datatypes
-    # todo: extend to n5
-    if ext == "h5":
-        ds = h5py.File(f"test.{ext}", "r")
-        for key in ds.keys():
-            recurse_dtype(ds[key])
-    ds.close()
+    if file_name is None:
+        file_name = ds.file_name
 
     # Delete
     try:
@@ -118,5 +109,143 @@ def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
     except PermissionError:
         # Windows seems to think these files are still open
         pass
+
+
+@pytest.mark.parametrize("multiposition", [True, False])
+@pytest.mark.parametrize("per_stack", [True, False])
+@pytest.mark.parametrize("z_stack", [True, False])
+@pytest.mark.parametrize("stop_early", [True, False])
+@pytest.mark.parametrize("size", [(1024, 2048), (2048, 1024), (2048, 2048)])
+@pytest.mark.parametrize("ext", ["h5", "n5"])
+def test_bdv_write(multiposition, per_stack, z_stack, stop_early, size, ext):
+
+    fn = f"test.{ext}"
+
+    ds = bdv_ds(fn, multiposition, per_stack, z_stack, stop_early, size)
+
+    file_name = ds.file_name
+    ds.close()
+
+    # check datatypes
+    # todo: extend to n5
+    if ext == "h5":
+        ds = h5py.File(f"test.{ext}", "r")
+        for key in ds.keys():
+            recurse_dtype(ds[key])
+
+    close_bdv_ds(ds, file_name=file_name)
+
+    assert True
+
+
+@pytest.mark.parametrize("multiposition", [True, False])
+@pytest.mark.parametrize("per_stack", [True, False])
+@pytest.mark.parametrize("z_stack", [True, False])
+@pytest.mark.parametrize("size", [(1024, 2048), (2048, 1024), (2048, 2048)])
+def test_bdv_getitem(multiposition, per_stack, z_stack, size):
+    ds = bdv_ds("test.h5", multiposition, per_stack, z_stack, False, size)
+
+    # Check indexing
+    assert ds[0, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        1,
+    )
+    assert ds[:, 0, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        1,
+        ds.shape_x,
+    )
+    assert ds[:, :, 0, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        1,
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, 0, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        1,
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, :, 0, ...].shape == (
+        ds.positions,
+        1,
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, :, :, 0].shape == (
+        1,
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
+
+    # Check slicing
+    sx = 5
+    assert ds[:sx, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        min(ds.shape_x, sx),
+    )
+    assert ds[:, :sx, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        min(ds.shape_y, sx),
+        ds.shape_x,
+    )
+    assert ds[:, :, :sx, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        ds.shape_z,
+        min(ds.shape_c, sx),
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, :sx, ...].shape == (
+        ds.positions,
+        ds.shape_t,
+        min(ds.shape_z, sx),
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, :, :sx, ...].shape == (
+        ds.positions,
+        min(ds.shape_t, sx),
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
+    assert ds[:, :, :, :, :, :sx].shape == (
+        min(ds.positions, sx),
+        ds.shape_t,
+        ds.shape_z,
+        ds.shape_c,
+        ds.shape_y,
+        ds.shape_x,
+    )
+
+    close_bdv_ds(ds)
 
     assert True

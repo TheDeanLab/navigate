@@ -143,23 +143,24 @@ class BigDataViewerMetadata(XMLMetadata):
                 "text": file_name,
             }
 
-        elif ext == "tiff" or ext == "tif":
-            """
-            Need to iterate through the time points, etc.
-            <ImageLoader format="spimreconstruction.filelist">
-                <imglib2container>ArrayImgFactory</imglib2container>
-                <ZGrouped>false</ZGrouped>
-                <files>
-                    <FileMapping view_setup="0" timepoint="0" series="0" channel="0">
-                        <file type="relative">1_CH00_000000.tif</file>
-                    </FileMapping>
-                    <FileMapping view_setup="1" timepoint="0" series="0" channel="0">
-                        <file type="relative">1_CH01_000000.tif</file>
-                    </FileMapping>
-                </files>
-            </ImageLoader>
-            """
-            pass
+        # TODO: Consider adding support for tiff/tif files. Needs evaluation.
+        # elif ext == "tiff" or ext == "tif":
+        #     """
+        #     Need to iterate through the time points, etc.
+        #     <ImageLoader format="spimreconstruction.filelist">
+        #         <imglib2container>ArrayImgFactory</imglib2container>
+        #         <ZGrouped>false</ZGrouped>
+        #         <files>
+        #             <FileMapping view_setup="0" timepoint="0" series="0" channel="0">
+        #                 <file type="relative">1_CH00_000000.tif</file>
+        #             </FileMapping>
+        #             <FileMapping view_setup="1" timepoint="0" series="0" channel="0">
+        #                 <file type="relative">1_CH01_000000.tif</file>
+        #             </FileMapping>
+        #         </files>
+        #     </ImageLoader>
+        #     """
+        #     pass
 
         elif ext == "n5":
             """
@@ -321,6 +322,8 @@ class BigDataViewerMetadata(XMLMetadata):
             The z position of the stage.
         theta : float
             The theta position of the stage.
+        f : Optional[float], optional
+            The focus position of the stage, by default None
 
         Returns
         -------

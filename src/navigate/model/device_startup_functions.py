@@ -136,11 +136,12 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
             "type"
         ]
 
-    if cam_type in ["HamamatsuOrca",
-                    "HamamatsuOrcaLightning",
-                    "HamamatsuOrcaFire",
-                    "HamamatsuOrcaFusion"
-                    ]:
+    if cam_type in [
+        "HamamatsuOrca",
+        "HamamatsuOrcaLightning",
+        "HamamatsuOrcaFire",
+        "HamamatsuOrcaFusion",
+    ]:
         # Locally Import Hamamatsu API and Initialize Camera Controller
         HamamatsuController = importlib.import_module(
             "navigate.model.devices.APIs.hamamatsu.HamamatsuAPI"
@@ -472,7 +473,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             )
 
         elif stage_type == "ASI" and platform.system() == "Windows":
-            """ Filter wheel can be controlled from the same Tiger Controller. If
+            """Filter wheel can be controlled from the same Tiger Controller. If
             so, then we will load this as a shared device. If not, we will create the
             connection to the Tiger Controller.
             """
@@ -499,16 +500,18 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                         exception=TigerException,
                     )
                 )
-        
+
         elif stage_type == "MS2000" and platform.system() == "Windows":
-            """ Filter wheel can be controlled from the same Tiger Controller. If
+            """Filter wheel can be controlled from the same Controller. If
             so, then we will load this as a shared device. If not, we will create the
-            connection to the Tiger Controller.
+            connection to the Controller.
+
+            TODO: Evaluate whether MS2000 should be able to operate as a shared device.
             """
             filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"][
                 "type"
             ]
-            
+
             if filter_wheel == "MS2000":
                 stage_devices.append("shared device")
             else:
@@ -529,11 +532,13 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                         exception=MS2000Exception,
                     )
                 )
-        
+
         elif stage_type == "MFC2000" and platform.system() == "Windows":
-            """ Filter wheel can be controlled from the same Tiger Controller. If
+            """Filter wheel can be controlled from the same Tiger Controller. If
             so, then we will load this as a shared device. If not, we will create the
             connection to the Tiger Controller.
+
+            TODO: Evaluate whether MFC2000 should be able to operate as a shared device.
             """
             filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"][
                 "type"
@@ -651,12 +656,12 @@ def start_stage(
         from navigate.model.devices.stages.stage_asi import ASIStage
 
         return ASIStage(microscope_name, device_connection, configuration, id)
-    
-    elif device_type == "MS2000": 
+
+    elif device_type == "MS2000":
         from navigate.model.devices.stages.stage_asi_MSTwoThousand import ASIStage
-        
-        return ASIStage(microscope_name, device_connection, configuration, id) 
-    
+
+        return ASIStage(microscope_name, device_connection, configuration, id)
+
     elif device_type == "MFC2000":
         from navigate.model.devices.stages.stage_asi import ASIStage
 
@@ -1311,7 +1316,7 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
         ):
             try:
                 camera = load_camera_connection(configuration, id, is_synthetic)
-            except RuntimeError as e:
+            except RuntimeError as e:  # noqa
                 if "camera" in plugin_devices:
                     camera = plugin_devices["camera"]["load_device"](
                         configuration, id, is_synthetic
@@ -1327,11 +1332,9 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
                 if camera_serial_number.startswith("0"):
                     try:
                         oct_num = int(camera_serial_number, 8)
-                        devices["camera"][build_ref_name(
-                            "_",
-                            device["type"],
-                            oct_num
-                        )] = camera
+                        devices["camera"][
+                            build_ref_name("_", device["type"], oct_num)
+                        ] = camera
                     except ValueError:
                         pass
             else:

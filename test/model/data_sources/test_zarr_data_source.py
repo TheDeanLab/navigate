@@ -3,6 +3,14 @@ import os
 import pytest
 import numpy as np
 
+try:
+    from pydantic import ValidationError
+    from pydantic_ome_ngff.v04.multiscale import Group
+
+    pydantic = True
+except ImportError:
+    pydantic = False
+
 from navigate.tools.file_functions import delete_folder
 
 
@@ -102,6 +110,13 @@ def test_zarr_write(multiposition, per_stack, z_stack, stop_early, size):
     fn = "test.zarr"
 
     ds = zarr_ds(fn, multiposition, per_stack, z_stack, stop_early, size)
+
+    if pydantic:
+        try:
+            Group.from_zarr(ds.image)
+        except ValidationError as e:
+            print(e)
+            assert False
 
     file_name = ds.file_name
 

@@ -37,4 +37,5 @@ navigate.model.devices.stages
    navigate.model.devices.stages.stage_sutter
    navigate.model.devices.stages.stage_synthetic
    navigate.model.devices.stages.stage_tl_kcube_inertial
+   navigate.model.devices.stages.stage_tl_kcube_steppermotor
 

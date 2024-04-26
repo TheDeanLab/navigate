@@ -29,4 +29,5 @@ navigate.model.devices.APIs.thorlabs
    :recursive:
 
    navigate.model.devices.APIs.thorlabs.kcube_inertial
+   navigate.model.devices.APIs.thorlabs.kcube_steppermotor
 

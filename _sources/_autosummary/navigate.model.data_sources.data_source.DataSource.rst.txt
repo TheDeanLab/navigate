@@ -22,6 +22,7 @@ navigate.model.data\_sources.data\_source.DataSource
       ~DataSource.read
       ~DataSource.set_metadata
       ~DataSource.set_metadata_from_configuration_experiment
+      ~DataSource.setup
       ~DataSource.write
    
    

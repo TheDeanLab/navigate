@@ -23,6 +23,7 @@ navigate.model.data\_sources.bdv\_data\_source.BigDataViewerDataSource
       ~BigDataViewerDataSource.read
       ~BigDataViewerDataSource.set_metadata
       ~BigDataViewerDataSource.set_metadata_from_configuration_experiment
+      ~BigDataViewerDataSource.setup
       ~BigDataViewerDataSource.write
    
    

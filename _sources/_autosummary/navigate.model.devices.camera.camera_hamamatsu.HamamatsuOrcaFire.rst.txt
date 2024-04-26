@@ -22,7 +22,6 @@ navigate.model.devices.camera.camera\_hamamatsu.HamamatsuOrcaFire
       ~HamamatsuOrcaFire.close_camera
       ~HamamatsuOrcaFire.close_image_series
       ~HamamatsuOrcaFire.get_line_interval
-      ~HamamatsuOrcaFire.get_minimum_waiting_time
       ~HamamatsuOrcaFire.get_new_frame
       ~HamamatsuOrcaFire.get_offset_variance_maps
       ~HamamatsuOrcaFire.initialize_image_series

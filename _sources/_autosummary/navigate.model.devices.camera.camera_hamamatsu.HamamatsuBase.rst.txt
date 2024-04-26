@@ -22,7 +22,6 @@ navigate.model.devices.camera.camera\_hamamatsu.HamamatsuBase
       ~HamamatsuBase.close_camera
       ~HamamatsuBase.close_image_series
       ~HamamatsuBase.get_line_interval
-      ~HamamatsuBase.get_minimum_waiting_time
       ~HamamatsuBase.get_new_frame
       ~HamamatsuBase.get_offset_variance_maps
       ~HamamatsuBase.initialize_image_series

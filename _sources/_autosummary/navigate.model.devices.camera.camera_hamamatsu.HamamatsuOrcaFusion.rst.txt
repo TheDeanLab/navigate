@@ -1,0 +1,59 @@
+navigate.model.devices.camera.camera\_hamamatsu.HamamatsuOrcaFusion
+===================================================================
+
+.. currentmodule:: navigate.model.devices.camera.camera_hamamatsu
+
+.. autoclass:: HamamatsuOrcaFusion
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~HamamatsuOrcaFusion.__init__
+      ~HamamatsuOrcaFusion.calculate_light_sheet_exposure_time
+      ~HamamatsuOrcaFusion.calculate_readout_time
+      ~HamamatsuOrcaFusion.close_camera
+      ~HamamatsuOrcaFusion.close_image_series
+      ~HamamatsuOrcaFusion.get_line_interval
+      ~HamamatsuOrcaFusion.get_new_frame
+      ~HamamatsuOrcaFusion.get_offset_variance_maps
+      ~HamamatsuOrcaFusion.initialize_image_series
+      ~HamamatsuOrcaFusion.report_settings
+      ~HamamatsuOrcaFusion.set_ROI
+      ~HamamatsuOrcaFusion.set_binning
+      ~HamamatsuOrcaFusion.set_exposure_time
+      ~HamamatsuOrcaFusion.set_line_interval
+      ~HamamatsuOrcaFusion.set_readout_direction
+      ~HamamatsuOrcaFusion.set_sensor_mode
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~HamamatsuOrcaFusion.offset
+      ~HamamatsuOrcaFusion.serial_number
+      ~HamamatsuOrcaFusion.variance
+      ~HamamatsuOrcaFusion.configuration
+      ~HamamatsuOrcaFusion.camera_controller
+      ~HamamatsuOrcaFusion.camera_parameters
+      ~HamamatsuOrcaFusion.is_acquiring
+      ~HamamatsuOrcaFusion.min_image_width
+      ~HamamatsuOrcaFusion.min_image_height
+      ~HamamatsuOrcaFusion.step_image_width
+      ~HamamatsuOrcaFusion.step_image_height
+      ~HamamatsuOrcaFusion.x_pixels
+      ~HamamatsuOrcaFusion.y_pixels
+      ~HamamatsuOrcaFusion.minimum_exposure_time
+   
+   

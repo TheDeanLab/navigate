@@ -37,5 +37,7 @@ navigate.model.data\_sources
 
    navigate.model.data_sources.bdv_data_source
    navigate.model.data_sources.data_source
+   navigate.model.data_sources.pyramidal_data_source
    navigate.model.data_sources.tiff_data_source
+   navigate.model.data_sources.zarr_data_source
 

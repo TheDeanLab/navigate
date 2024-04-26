@@ -1,0 +1,61 @@
+navigate.model.data\_sources.pyramidal\_data\_source.PyramidalDataSource
+========================================================================
+
+.. currentmodule:: navigate.model.data_sources.pyramidal_data_source
+
+.. autoclass:: PyramidalDataSource
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PyramidalDataSource.__init__
+      ~PyramidalDataSource.close
+      ~PyramidalDataSource.get_shape_from_metadata
+      ~PyramidalDataSource.get_slice
+      ~PyramidalDataSource.read
+      ~PyramidalDataSource.set_metadata
+      ~PyramidalDataSource.set_metadata_from_configuration_experiment
+      ~PyramidalDataSource.setup
+      ~PyramidalDataSource.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PyramidalDataSource.data
+      ~PyramidalDataSource.mode
+      ~PyramidalDataSource.nbytes
+      ~PyramidalDataSource.resolutions
+      ~PyramidalDataSource.shape
+      ~PyramidalDataSource.shapes
+      ~PyramidalDataSource.subdivisions
+      ~PyramidalDataSource.voxel_size
+      ~PyramidalDataSource.logger
+      ~PyramidalDataSource.file_name
+      ~PyramidalDataSource.metadata
+      ~PyramidalDataSource.bits
+      ~PyramidalDataSource.dx
+      ~PyramidalDataSource.dy
+      ~PyramidalDataSource.dz
+      ~PyramidalDataSource.dt
+      ~PyramidalDataSource.dc
+      ~PyramidalDataSource.shape_x
+      ~PyramidalDataSource.shape_y
+      ~PyramidalDataSource.shape_z
+      ~PyramidalDataSource.shape_t
+      ~PyramidalDataSource.shape_c
+      ~PyramidalDataSource.positions
+   
+   

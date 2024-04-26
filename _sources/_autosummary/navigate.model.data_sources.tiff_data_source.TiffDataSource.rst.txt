@@ -24,6 +24,7 @@ navigate.model.data\_sources.tiff\_data\_source.TiffDataSource
       ~TiffDataSource.set_bigtiff
       ~TiffDataSource.set_metadata
       ~TiffDataSource.set_metadata_from_configuration_experiment
+      ~TiffDataSource.setup
       ~TiffDataSource.write
    
    

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>navigate.model.devices.camera.camera_photometrics &mdash; navigate 0.0.5 documentation</title>
+  <title>navigate.tools.slicing &mdash; navigate 0.0.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix" href="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.html" />
-    <link rel="prev" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning" href="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.html" /> 
+    <link rel="next" title="navigate.tools.slicing.ensure_iter" href="navigate.tools.slicing.ensure_iter.html" />
+    <link rel="prev" title="navigate.tools.sdf.volume_from_sdf" href="navigate.tools.sdf.volume_from_sdf.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -75,35 +75,28 @@
 <li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.APIs.html">navigate.model.devices.APIs</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="navigate.model.devices.camera.html">navigate.model.devices.camera</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.daq.html">navigate.model.devices.daq</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.filter_wheel.html">navigate.model.devices.filter_wheel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.galvo.html">navigate.model.devices.galvo</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.lasers.html">navigate.model.devices.lasers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.mirrors.html">navigate.model.devices.mirrors</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.objectives.html">navigate.model.devices.objectives</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.remote_focus.html">navigate.model.devices.remote_focus</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.shutter.html">navigate.model.devices.shutter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.stages.html">navigate.model.devices.stages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.zoom.html">navigate.model.devices.zoom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.model.html">navigate.model</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.tools.html">navigate.tools</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.common_dict_tools.html">navigate.tools.common_dict_tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.common_functions.html">navigate.tools.common_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.decorators.html">navigate.tools.decorators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.file_functions.html">navigate.tools.file_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.image.html">navigate.tools.image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.linear_algebra.html">navigate.tools.linear_algebra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.main_functions.html">navigate.tools.main_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.multipos_table_tools.html">navigate.tools.multipos_table_tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.sdf.html">navigate.tools.sdf</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">navigate.tools.slicing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="navigate.tools.slicing.ensure_iter.html">navigate.tools.slicing.ensure_iter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.tools.slicing.ensure_slice.html">navigate.tools.slicing.ensure_slice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.tools.slicing.key_len.html">navigate.tools.slicing.key_len</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.tools.slicing.slice_len.html">navigate.tools.slicing.slice_len</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.waveform_template_funcs.html">navigate.tools.waveform_template_funcs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.tools.xml_tools.html">navigate.tools.xml_tools</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
 </ul>
 </li>
@@ -124,12 +117,10 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../api.html">API</a></li>
-          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
-          <li class="breadcrumb-item"><a href="navigate.model.devices.html">navigate.model.devices</a></li>
-          <li class="breadcrumb-item"><a href="navigate.model.devices.camera.html">navigate.model.devices.camera</a></li>
-      <li class="breadcrumb-item active">navigate.model.devices.camera.camera_photometrics</li>
+          <li class="breadcrumb-item"><a href="navigate.tools.html">navigate.tools</a></li>
+      <li class="breadcrumb-item active">navigate.tools.slicing</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/navigate.model.devices.camera.camera_photometrics.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/navigate.tools.slicing.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -137,13 +128,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-navigate.model.devices.camera.camera_photometrics">
-<span id="navigate-model-devices-camera-camera-photometrics"></span><h1>navigate.model.devices.camera.camera_photometrics<a class="headerlink" href="#module-navigate.model.devices.camera.camera_photometrics" title="Permalink to this heading"></a></h1>
-<p class="rubric">Classes</p>
+  <section id="module-navigate.tools.slicing">
+<span id="navigate-tools-slicing"></span><h1>navigate.tools.slicing<a class="headerlink" href="#module-navigate.tools.slicing" title="Permalink to this heading"></a></h1>
+<p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.html#navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix" title="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PhotometricsKinetix</span></code></a>(microscope_name, ...)</p></td>
-<td><p>Photometrics Kinetix camera class.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.tools.slicing.ensure_iter.html#navigate.tools.slicing.ensure_iter" title="navigate.tools.slicing.ensure_iter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ensure_iter</span></code></a>(keys, pos, shape)</p></td>
+<td><p>Ensure the output is iterable.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.tools.slicing.ensure_slice.html#navigate.tools.slicing.ensure_slice" title="navigate.tools.slicing.ensure_slice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ensure_slice</span></code></a>(keys, pos)</p></td>
+<td><p>Ensure the output is a slice.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.tools.slicing.key_len.html#navigate.tools.slicing.key_len" title="navigate.tools.slicing.key_len"><code class="xref py py-obj docutils literal notranslate"><span class="pre">key_len</span></code></a>(keys)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.tools.slicing.slice_len.html#navigate.tools.slicing.slice_len" title="navigate.tools.slicing.slice_len"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice_len</span></code></a>(sl, n)</p></td>
+<td><p>Calculate the length of the slice over an array of size n.</p></td>
 </tr>
 </tbody>
 </table>
@@ -153,8 +153,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning.html" class="btn btn-neutral float-left" title="navigate.model.devices.camera.camera_hamamatsu.HamamatsuOrcaLightning" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix.html" class="btn btn-neutral float-right" title="navigate.model.devices.camera.camera_photometrics.PhotometricsKinetix" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.tools.sdf.volume_from_sdf.html" class="btn btn-neutral float-left" title="navigate.tools.sdf.volume_from_sdf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.tools.slicing.ensure_iter.html" class="btn btn-neutral float-right" title="navigate.tools.slicing.ensure_iter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

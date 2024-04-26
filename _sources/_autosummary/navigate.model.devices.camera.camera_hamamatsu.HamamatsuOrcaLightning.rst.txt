@@ -22,7 +22,6 @@ navigate.model.devices.camera.camera\_hamamatsu.HamamatsuOrcaLightning
       ~HamamatsuOrcaLightning.close_camera
       ~HamamatsuOrcaLightning.close_image_series
       ~HamamatsuOrcaLightning.get_line_interval
-      ~HamamatsuOrcaLightning.get_minimum_waiting_time
       ~HamamatsuOrcaLightning.get_new_frame
       ~HamamatsuOrcaLightning.get_offset_variance_maps
       ~HamamatsuOrcaLightning.initialize_image_series

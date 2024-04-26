@@ -1,0 +1,48 @@
+navigate.model.devices.stages.stage\_tl\_kcube\_steppermotor.TLKSTStage
+=======================================================================
+
+.. currentmodule:: navigate.model.devices.stages.stage_tl_kcube_steppermotor
+
+.. autoclass:: TLKSTStage
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~TLKSTStage.__init__
+      ~TLKSTStage.close
+      ~TLKSTStage.get_abs_position
+      ~TLKSTStage.get_position_dict
+      ~TLKSTStage.move_absolute
+      ~TLKSTStage.move_axis_absolute
+      ~TLKSTStage.move_to_position
+      ~TLKSTStage.report_position
+      ~TLKSTStage.run_homing
+      ~TLKSTStage.stop
+      ~TLKSTStage.verify_abs_position
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TLKSTStage.axes_mapping
+      ~TLKSTStage.KST_axes
+      ~TLKSTStage.serial_number
+      ~TLKSTStage.device_unit_scale
+      ~TLKSTStage.kst_controller
+      ~TLKSTStage.axes
+      ~TLKSTStage.stage_feedback
+      ~TLKSTStage.stage_limits
+   
+   

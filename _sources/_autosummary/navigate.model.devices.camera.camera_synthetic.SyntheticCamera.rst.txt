@@ -23,7 +23,6 @@ navigate.model.devices.camera.camera\_synthetic.SyntheticCamera
       ~SyntheticCamera.close_image_series
       ~SyntheticCamera.generate_new_frame
       ~SyntheticCamera.get_line_interval
-      ~SyntheticCamera.get_minimum_waiting_time
       ~SyntheticCamera.get_new_frame
       ~SyntheticCamera.get_offset_variance_maps
       ~SyntheticCamera.initialize_image_series

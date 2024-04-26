@@ -37,6 +37,7 @@
    navigate.tools.main_functions
    navigate.tools.multipos_table_tools
    navigate.tools.sdf
+   navigate.tools.slicing
    navigate.tools.waveform_template_funcs
    navigate.tools.xml_tools
 

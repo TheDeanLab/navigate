@@ -270,8 +270,8 @@ data acquisition card.</p>
 <span id="camera-configuration"></span><h2>Cameras<a class="headerlink" href="#cameras" title="Permalink to this heading"></a></h2>
 <p>The software supports camera-based acquisition. It can run both normal and rolling
 shutter modes of contemporary scientific CMOS cameras.</p>
-<section id="hamamatsu-orca-flash4-0-v3-fusion">
-<h3>Hamamatsu ORCA-Flash4.0 V3/Fusion<a class="headerlink" href="#hamamatsu-orca-flash4-0-v3-fusion" title="Permalink to this heading"></a></h3>
+<section id="hamamatsu-orca-flash4-0-v3">
+<h3>Hamamatsu ORCA-Flash4.0 V3<a class="headerlink" href="#hamamatsu-orca-flash4-0-v3" title="Permalink to this heading"></a></h3>
 <ul>
 <li><p>Insert the USB that came with the camera into the computer and install HCImageLive. Alternatively,
 download DCAM-API. The software can be found <a class="reference external" href="https://dcam-api.com">here</a>.</p></li>
@@ -337,6 +337,55 @@ Camera. Commonly, this is done with a counter port, e.g., <code class="docutils 
 <span class="w">      </span><span class="nt">y_pixels_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <span class="w">      </span><span class="nt">x_pixels_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <span class="w">      </span><span class="nt">y_pixels_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="hamamatsu-orca-fusion">
+<h3>Hamamatsu ORCA-Fusion<a class="headerlink" href="#hamamatsu-orca-fusion" title="Permalink to this heading"></a></h3>
+<p>The ORCA-Fusion comes in a back-thinned and front-illuminated version. This code will work
+with both. Learn more about the ORCA-Fusion <a class="reference external" href="https://www.hamamatsu.com/jp/en/product/cameras/cmos-cameras/C15440-20UP.html">here</a>.</p>
+<details class="summary-configuration-file">
+<summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrcaFusion</span>
+<span class="w">      </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">000035</span>
+
+<span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">camera</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrcaFusion</span>
+<span class="w">        </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">000035</span>
+<span class="w">      </span><span class="nt">x_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4608.0</span>
+<span class="w">      </span><span class="nt">y_pixels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2592.0</span>
+<span class="w">      </span><span class="nt">pixel_size_in_microns</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.5</span>
+<span class="w">      </span><span class="nt">subsampling</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">sensor_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Normal</span>
+<span class="w">      </span><span class="nt">readout_direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bottom-to-Top</span>
+<span class="w">      </span><span class="nt">lightsheet_rolling_shutter_width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">608</span>
+<span class="w">      </span><span class="nt">defect_correct_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">      </span><span class="nt">binning</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1x1</span>
+<span class="w">      </span><span class="nt">readout_speed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0x7FFFFFFF</span>
+<span class="w">      </span><span class="nt">trigger_active</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">trigger_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">trigger_polarity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">      </span><span class="nt">trigger_source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">      </span><span class="nt">exposure_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">      </span><span class="nt">delay_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="w">      </span><span class="nt">pulse_percent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">line_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.000075</span>
+<span class="w">      </span><span class="nt">display_acquisition_subsampling</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">      </span><span class="nt">average_frame_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.969</span>
+<span class="w">      </span><span class="nt">frames_to_average</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">exposure_time_range</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">        </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </pre></div>
 </div>
 </details><div class="line-block">
@@ -455,6 +504,13 @@ may need to install the <a class="reference external" href="https://www.broadcom
 <li><p>Upon successful installation, one should be able to acquire images with the
 manufacturer-provided PVCamTest software.</p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A static version of the Photometrics API is provided with this software. It is located
+in in srcs/model/devices/APIs/photo_metrics/PyVCAM-master. To install this API, go to this
+folder in the command line and from within your <strong>navigate</strong> environment, run
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></code>.</p>
+</div>
 <details class="summary-configuration-file">
 <summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">camera</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Photometrics</span>
@@ -1309,7 +1365,7 @@ the system at each zoom.</p>
 </div>
 </section>
 <section id="synthetic-zoom">
-<span id="id6"></span><h3>Synthetic Zoom<a class="headerlink" href="#synthetic-zoom" title="Permalink to this heading"></a></h3>
+<span id="id7"></span><h3>Synthetic Zoom<a class="headerlink" href="#synthetic-zoom" title="Permalink to this heading"></a></h3>
 <details class="summary-configuration-file">
 <summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">zoom</span><span class="p">:</span>

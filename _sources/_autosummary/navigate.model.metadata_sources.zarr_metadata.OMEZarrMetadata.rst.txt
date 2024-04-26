@@ -1,0 +1,51 @@
+navigate.model.metadata\_sources.zarr\_metadata.OMEZarrMetadata
+===============================================================
+
+.. currentmodule:: navigate.model.metadata_sources.zarr_metadata
+
+.. autoclass:: OMEZarrMetadata
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~OMEZarrMetadata.__init__
+      ~OMEZarrMetadata.multiscales_dict
+      ~OMEZarrMetadata.set_from_configuration_experiment
+      ~OMEZarrMetadata.set_from_dict
+      ~OMEZarrMetadata.set_shape_from_configuration_experiment
+      ~OMEZarrMetadata.set_stack_order_from_configuration_experiment
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~OMEZarrMetadata.configuration
+      ~OMEZarrMetadata.per_stack
+      ~OMEZarrMetadata.shape
+      ~OMEZarrMetadata.voxel_size
+      ~OMEZarrMetadata.dx
+      ~OMEZarrMetadata.dy
+      ~OMEZarrMetadata.dz
+      ~OMEZarrMetadata.dt
+      ~OMEZarrMetadata.dc
+      ~OMEZarrMetadata.shape_x
+      ~OMEZarrMetadata.shape_y
+      ~OMEZarrMetadata.shape_z
+      ~OMEZarrMetadata.shape_t
+      ~OMEZarrMetadata.shape_c
+      ~OMEZarrMetadata.positions
+      ~OMEZarrMetadata.active_microscope
+   
+   

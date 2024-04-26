@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata &mdash; navigate 0.0.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.microscope" href="navigate.model.microscope.html" />
+    <link rel="prev" title="navigate.model.metadata_sources.zarr_metadata" href="navigate.model.metadata_sources.zarr_metadata.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Example Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware_overview.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.metadata_sources.bdv_metadata.html">navigate.model.metadata_sources.bdv_metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.metadata_sources.metadata.html">navigate.model.metadata_sources.metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.metadata_sources.ome_tiff_metadata.html">navigate.model.metadata_sources.ome_tiff_metadata</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.model.metadata_sources.zarr_metadata.html">navigate.model.metadata_sources.zarr_metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.metadata_sources.zarr_metadata.html">navigate.model.metadata_sources.zarr_metadata</a></li>
+      <li class="breadcrumb-item active">navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-metadata-sources-zarr-metadata-omezarrmetadata">
+<h1>navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata<a class="headerlink" href="#navigate-model-metadata-sources-zarr-metadata-omezarrmetadata" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.metadata_sources.zarr_metadata.</span></span><span class="sig-name descname"><span class="pre">OMEZarrMetadata</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.model.metadata_sources.metadata.Metadata.html#navigate.model.metadata_sources.metadata.Metadata" title="navigate.model.metadata_sources.metadata.Metadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metadata</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Metadata class</p>
+<p>Store and convert internal representation of metadata (configuration,
+experiment, etc.) to alternative file types.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Concept and some of the code borrowed from python-microscopy
+(<a class="reference external" href="https://github.com/python-microscopy/python-microscopy/">https://github.com/python-microscopy/python-microscopy/</a>).</p>
+</div>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.__init__" title="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<td><p>Metadata class</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.multiscales_dict" title="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.multiscales_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiscales_dict</span></code></a>(name, paths, resolutions[, ...])</p></td>
+<td><p>Create a multiscale dictionary for the OME-Zarr metadata.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_from_configuration_experiment" title="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_from_configuration_experiment</span></code></a>()</p></td>
+<td><p>Set from configuration experiment</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_from_dict" title="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_from_dict</span></code></a>(metadata_config)</p></td>
+<td><p>Set from a dictionary</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_shape_from_configuration_experiment" title="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_shape_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_shape_from_configuration_experiment</span></code></a>()</p></td>
+<td><p>Set shape from configuration experiment</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_stack_order_from_configuration_experiment" title="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_stack_order_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_stack_order_from_configuration_experiment</span></code></a>()</p></td>
+<td><p>Set stack order from configuration experiment</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.configuration" title="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code></a></p></td>
+<td><p>Return configuration dictionary</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.per_stack" title="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.per_stack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">per_stack</span></code></a></p></td>
+<td><p>Return per stack</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape" title="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></p></td>
+<td><p>Return shape as XYCZT.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.voxel_size" title="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.voxel_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">voxel_size</span></code></a></p></td>
+<td><p>Return voxel size</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.multiscales_dict">
+<span class="sig-name descname"><span class="pre">multiscales_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolutions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.multiscales_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Create a multiscale dictionary for the OME-Zarr metadata.</p>
+<p><a class="reference external" href="https://ngff.openmicroscopy.org/0.4/index.html#multiscale-md">https://ngff.openmicroscopy.org/0.4/index.html#multiscale-md</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name of the dataset.</p></li>
+<li><p><strong>paths</strong> (<em>list</em>) – The paths of the dataset.</p></li>
+<li><p><strong>resolutions</strong> (<em>List</em>) – The resolutions of the dataset.</p></li>
+<li><p><strong>view</strong> (<em>Dict</em>) – The view of the dataset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the multiscale metadata.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_from_configuration_experiment">
+<span class="sig-name descname"><span class="pre">set_from_configuration_experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_from_configuration_experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Set from configuration experiment</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_from_dict">
+<span class="sig-name descname"><span class="pre">set_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_from_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Set from a dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>metadata_config</strong> (<em>dict</em>) – dictionary of metadata: “c”, “z”, “t”, “p”, “is_dynamic”, “per_stack”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_shape_from_configuration_experiment">
+<span class="sig-name descname"><span class="pre">set_shape_from_configuration_experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_shape_from_configuration_experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Set shape from configuration experiment</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_stack_order_from_configuration_experiment">
+<span class="sig-name descname"><span class="pre">set_stack_order_from_configuration_experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.set_stack_order_from_configuration_experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Set stack order from configuration experiment</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.active_microscope">
+<span class="sig-name descname"><span class="pre">active_microscope</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.active_microscope" title="Permalink to this definition"></a></dt>
+<dd><p>Active microscope</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.configuration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">configuration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">DictProxy</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Return configuration dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Configuration dictionary</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Optional[DictProxy]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.dc">
+<span class="sig-name descname"><span class="pre">dc</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.dc" title="Permalink to this definition"></a></dt>
+<dd><p>Step size between channels, should always be 1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.dt">
+<span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.dt" title="Permalink to this definition"></a></dt>
+<dd><p>Time displacement (s)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.dx">
+<span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.dx" title="Permalink to this definition"></a></dt>
+<dd><p>Pixel size in x (um)
+float: Pixel size in y (um)
+float: Pixel size in z (um)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.dy">
+<span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.dy" title="Permalink to this definition"></a></dt>
+<dd><p>Pixel size in x (um)
+float: Pixel size in y (um)
+float: Pixel size in z (um)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.dz">
+<span class="sig-name descname"><span class="pre">dz</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.dz" title="Permalink to this definition"></a></dt>
+<dd><p>Pixel size in x (um)
+float: Pixel size in y (um)
+float: Pixel size in z (um)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.per_stack">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">per_stack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.per_stack" title="Permalink to this definition"></a></dt>
+<dd><p>Return per stack</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if per stack, False otherwise</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.positions">
+<span class="sig-name descname"><span class="pre">positions</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.positions" title="Permalink to this definition"></a></dt>
+<dd><p>Number of positions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></em><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape" title="Permalink to this definition"></a></dt>
+<dd><p>Return shape as XYCZT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Shape as XYCZT</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape_c">
+<span class="sig-name descname"><span class="pre">shape_c</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape_c" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape_t">
+<span class="sig-name descname"><span class="pre">shape_t</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape_t" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape_x">
+<span class="sig-name descname"><span class="pre">shape_x</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape_x" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape_y">
+<span class="sig-name descname"><span class="pre">shape_y</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape_y" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape_z">
+<span class="sig-name descname"><span class="pre">shape_z</span></span><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.shape_z" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the data in x
+int: Shape of the data in y
+int: Shape of the data in z
+int: Shape of the data in t
+int: Shape of the data in c</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.voxel_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">voxel_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span></em><a class="headerlink" href="#navigate.model.metadata_sources.zarr_metadata.OMEZarrMetadata.voxel_size" title="Permalink to this definition"></a></dt>
+<dd><p>Return voxel size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Voxel size</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.metadata_sources.zarr_metadata.html" class="btn btn-neutral float-left" title="navigate.model.metadata_sources.zarr_metadata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.microscope.html" class="btn btn-neutral float-right" title="navigate.model.microscope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

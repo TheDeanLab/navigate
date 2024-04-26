@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.model.device_startup_functions" href="navigate.model.device_startup_functions.html" />
+    <link rel="next" title="navigate.model.data_sources.zarr_data_source" href="navigate.model.data_sources.zarr_data_source.html" />
     <link rel="prev" title="navigate.model.data_sources.tiff_data_source" href="navigate.model.data_sources.tiff_data_source.html" /> 
 </head>
 
@@ -82,7 +82,9 @@
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.data_sources.get_data_source.html">navigate.model.data_sources.get_data_source</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.data_sources.bdv_data_source.html">navigate.model.data_sources.bdv_data_source</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.data_sources.data_source.html">navigate.model.data_sources.data_source</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.data_sources.pyramidal_data_source.html">navigate.model.data_sources.pyramidal_data_source</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="navigate.model.data_sources.tiff_data_source.html">navigate.model.data_sources.tiff_data_source</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.data_sources.zarr_data_source.html">navigate.model.data_sources.zarr_data_source</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
@@ -178,8 +180,11 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.set_metadata_from_configuration_experiment" title="navigate.model.data_sources.tiff_data_source.TiffDataSource.set_metadata_from_configuration_experiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_metadata_from_configuration_experiment</span></code></a>(...)</p></td>
 <td><p>Sets the metadata from according to the microscope configuration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.write" title="navigate.model.data_sources.tiff_data_source.TiffDataSource.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(data, **kw)</p></td>
-<td><p>Write data to a tiff file.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.setup" title="navigate.model.data_sources.tiff_data_source.TiffDataSource.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup</span></code></a>()</p></td>
+<td><p>Additional steps for establishing the initial file setup.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.write" title="navigate.model.data_sources.tiff_data_source.TiffDataSource.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(data, **kw)</p></td>
+<td><p>Writes 2D image to the data source.</p></td>
 </tr>
 </tbody>
 </table>
@@ -295,9 +300,15 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.data_sources.tiff_data_source.TiffDataSource.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.setup" title="Permalink to this definition"></a></dt>
+<dd><p>Additional steps for establishing the initial file setup.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.data_sources.tiff_data_source.TiffDataSource.write">
 <span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.data_sources.tiff_data_source.TiffDataSource.write" title="Permalink to this definition"></a></dt>
-<dd><p>Write data to a tiff file.</p>
+<dd><p>Writes 2D image to the data source.</p>
 <p>One channel, all z-position, one timepoint = one stack.
 N channels are opened simultaneously for writing.
 At each time point, a new file is opened for each channel.</p>
@@ -633,7 +644,7 @@ int: Size of the data source in c dimension.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="navigate.model.data_sources.tiff_data_source.html" class="btn btn-neutral float-left" title="navigate.model.data_sources.tiff_data_source" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.model.device_startup_functions.html" class="btn btn-neutral float-right" title="navigate.model.device_startup_functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.model.data_sources.zarr_data_source.html" class="btn btn-neutral float-right" title="navigate.model.data_sources.zarr_data_source" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

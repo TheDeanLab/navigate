@@ -136,11 +136,12 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
             "type"
         ]
 
-    if cam_type in ["HamamatsuOrca",
-                    "HamamatsuOrcaLightning",
-                    "HamamatsuOrcaFire",
-                    "HamamatsuOrcaFusion"
-                    ]:
+    if cam_type in [
+        "HamamatsuOrca",
+        "HamamatsuOrcaLightning",
+        "HamamatsuOrcaFire",
+        "HamamatsuOrcaFusion",
+    ]:
         # Locally Import Hamamatsu API and Initialize Camera Controller
         HamamatsuController = importlib.import_module(
             "navigate.model.devices.APIs.hamamatsu.HamamatsuAPI"
@@ -153,36 +154,11 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
         )
 
         return SyntheticCameraController()
+
     elif cam_type == "Photometrics":
-
-        def import_photometrics(camera_connection):
-            """Import Photometrics API and Initialize Camera Controller.
-
-            Parameters
-            ----------
-            camera_connection : str
-                Camera connection string
-
-            Returns
-            -------
-            camera_toopen : object
-                Camera object.
-
-            Note
-            ----
-                To make this work, please install the SDK at
-                https://www.photometrics.com/support/download/pvcam-sdk
-                and go to APIs/photometrics/PyVCAM-master and run python setup.py
-                install
-            """
-            from pyvcam import pvc
-            from pyvcam.camera import Camera
-
-            pvc.init_pvcam()
-            # camera_names = Camera.get_available_camera_names()
-            camera_toopen = Camera.select_camera(camera_connection)
-            camera_toopen.open()
-            return camera_toopen
+        from navigate.model.devices.camera.camera_photometrics import (
+            build_photometrics_connection,
+        )
 
         camera_connection = configuration["configuration"]["hardware"]["camera"][
             camera_id
@@ -190,7 +166,7 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
 
         # return camera object in the auto_redial function.
         return auto_redial(
-            import_photometrics, (camera_connection,), exception=Exception
+            build_photometrics_connection, (camera_connection,), exception=Exception
         )
     else:
         device_not_found("camera", camera_id, cam_type)
@@ -266,10 +242,10 @@ def start_camera(
 
     elif cam_type == "Photometrics":
         from navigate.model.devices.camera.camera_photometrics import (
-            PhotometricsKinetix,
+            PhotometricsBase,
         )
 
-        return PhotometricsKinetix(microscope_name, device_connection, configuration)
+        return PhotometricsBase(microscope_name, device_connection, configuration)
 
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
         from navigate.model.devices.camera.camera_synthetic import SyntheticCamera
@@ -472,7 +448,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             )
 
         elif stage_type == "ASI" and platform.system() == "Windows":
-            """ Filter wheel can be controlled from the same Tiger Controller. If
+            """Filter wheel can be controlled from the same Tiger Controller. If
             so, then we will load this as a shared device. If not, we will create the
             connection to the Tiger Controller.
             """
@@ -500,7 +476,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                     )
                 )
         elif stage_type == "MFC2000" and platform.system() == "Windows":
-            """ Filter wheel can be controlled from the same Tiger Controller. If
+            """Filter wheel can be controlled from the same Tiger Controller. If
             so, then we will load this as a shared device. If not, we will create the
             connection to the Tiger Controller.
             """
@@ -620,7 +596,7 @@ def start_stage(
         from navigate.model.devices.stages.stage_asi import ASIStage
 
         return ASIStage(microscope_name, device_connection, configuration, id)
-    
+
     elif device_type == "MFC2000":
         from navigate.model.devices.stages.stage_asi import ASIStage
 
@@ -1275,7 +1251,7 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
         ):
             try:
                 camera = load_camera_connection(configuration, id, is_synthetic)
-            except RuntimeError as e:
+            except RuntimeError as e:  # noqa
                 if "camera" in plugin_devices:
                     camera = plugin_devices["camera"]["load_device"](
                         configuration, id, is_synthetic
@@ -1291,11 +1267,9 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
                 if camera_serial_number.startswith("0"):
                     try:
                         oct_num = int(camera_serial_number, 8)
-                        devices["camera"][build_ref_name(
-                            "_",
-                            device["type"],
-                            oct_num
-                        )] = camera
+                        devices["camera"][
+                            build_ref_name("_", device["type"], oct_num)
+                        ] = camera
                     except ValueError:
                         pass
             else:

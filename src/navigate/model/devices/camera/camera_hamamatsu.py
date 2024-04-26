@@ -69,15 +69,23 @@ class HamamatsuBase(CameraBase):
         self.camera_parameters["y_pixels"] = self.camera_controller.max_image_height
         self.camera_parameters["x_pixels_min"] = self.camera_controller.min_image_width
         self.camera_parameters["y_pixels_min"] = self.camera_controller.min_image_height
-        self.camera_parameters["x_pixels_step"] = self.camera_controller.step_image_width
-        self.camera_parameters["y_pixels_step"] = self.camera_controller.step_image_height
-        self.minimum_exposure_time, _, _ = self.camera_controller.get_property_range("exposure_time")
+        self.camera_parameters[
+            "x_pixels_step"
+        ] = self.camera_controller.step_image_width
+        self.camera_parameters[
+            "y_pixels_step"
+        ] = self.camera_controller.step_image_height
+        self.minimum_exposure_time, _, _ = self.camera_controller.get_property_range(
+            "exposure_time"
+        )
 
         #: object: Camera controller
         if self.camera_controller.get_property_value("readout_speed"):
             _, speed_max, _ = self.camera_controller.get_property_range("readout_speed")
             if speed_max is not None:
-                self.camera_controller.set_property_value("readout_speed", int(speed_max))
+                self.camera_controller.set_property_value(
+                    "readout_speed", int(speed_max)
+                )
                 self.camera_parameters["readout_speed"] = int(speed_max)
             else:
                 self.camera_controller.set_property_value("readout_speed", 1)
@@ -144,13 +152,16 @@ class HamamatsuBase(CameraBase):
             "image_height",
             "image_width",
             "exposure_time",
-            "readout_time"
+            "readout_time",
         ]
         for param in params:
             print(param, self.camera_controller.get_property_value(param))
             logger.info(f"{param}, {self.camera_controller.get_property_value(param)}")
 
-        print("*** exposure time range:", self.camera_controller.get_property_range("exposure_time"))
+        print(
+            "*** exposure time range:",
+            self.camera_controller.get_property_range("exposure_time"),
+        )
 
     def close_camera(self):
         """Close HamamatsuOrca Camera"""
@@ -180,10 +191,18 @@ class HamamatsuBase(CameraBase):
                 self.camera_controller.step_image_height,
             ) = self.camera_controller.get_property_range("subarray_vsize")
             # update configuration dict
-            self.camera_parameters["x_pixels_min"] = self.camera_controller.min_image_width
-            self.camera_parameters["y_pixels_min"] = self.camera_controller.min_image_height
-            self.camera_parameters["x_pixels_step"] = self.camera_controller.step_image_width
-            self.camera_parameters["y_pixels_step"] = self.camera_controller.step_image_height
+            self.camera_parameters[
+                "x_pixels_min"
+            ] = self.camera_controller.min_image_width
+            self.camera_parameters[
+                "y_pixels_min"
+            ] = self.camera_controller.min_image_height
+            self.camera_parameters[
+                "x_pixels_step"
+            ] = self.camera_controller.step_image_width
+            self.camera_parameters[
+                "y_pixels_step"
+            ] = self.camera_controller.step_image_height
         else:
             print("Camera mode not supported")
             logger.info("Camera mode not supported")
@@ -206,7 +225,9 @@ class HamamatsuBase(CameraBase):
         }
 
         if mode in readout_direction_dict:
-            self.camera_controller.set_property_value("readout_direction", readout_direction_dict[mode])
+            self.camera_controller.set_property_value(
+                "readout_direction", readout_direction_dict[mode]
+            )
         else:
             print("Camera readout direction not supported")
             logger.info("Camera readout direction not supported")
@@ -228,7 +249,7 @@ class HamamatsuBase(CameraBase):
         readout_time = self.camera_controller.get_property_value("readout_time")
 
         # with camera internal delay
-        return readout_time # + 4 * self.minimum_exposure_time
+        return readout_time  # + 4 * self.minimum_exposure_time
 
     def set_exposure_time(self, exposure_time):
         """Set HamamatsuOrca exposure time.
@@ -236,14 +257,12 @@ class HamamatsuBase(CameraBase):
         Note
         ----
             Units of the Hamamatsu API are in seconds.
-            Units for the software are in milliseconds. Conversion is done here.
 
         Parameters
         ----------
         exposure_time : float
             Exposure time in seconds.
         """
-        exposure_time = exposure_time
         return self.camera_controller.set_property_value("exposure_time", exposure_time)
 
     def set_line_interval(self, line_interval_time):
@@ -365,8 +384,9 @@ class HamamatsuBase(CameraBase):
 
         Parameters
         ----------
-        data_buffer : int
-            Size of the data to buffer.  Default is None.
+        data_buffer :
+            List of SharedNDArrays of shape=(self.img_height, self.img_width) and dtype="uint16" # noqa
+            Default is None.
         number_of_frames : int
             Number of frames.  Default is 100.
         """
@@ -387,7 +407,7 @@ class HamamatsuBase(CameraBase):
         Returns
         -------
         frame : numpy.ndarray
-            Frame from HamamatsuOrca camera.
+            Frame ids from HamamatsuOrca camera.
         """
         return self.camera_controller.get_frames()
 
@@ -442,11 +462,13 @@ class HamamatsuOrcaLightning(HamamatsuBase):
         )
         self.camera_parameters["line_interval"] = camera_line_interval
 
-        maximum_internal_line_interval = 0.0002 # 200.0 us
+        maximum_internal_line_interval = 0.0002  # 200.0 us
         if camera_line_interval > maximum_internal_line_interval:
             camera_line_interval = maximum_internal_line_interval
-            full_chip_exposure_time = camera_line_interval * (6 + (shutter_width + self.y_pixels) / 4)
-        
+            full_chip_exposure_time = camera_line_interval * (
+                6 + (shutter_width + self.y_pixels) / 4
+            )
+
         exposure_time = camera_line_interval * ((shutter_width + 3) // 4)
         return exposure_time, camera_line_interval, full_chip_exposure_time
 
@@ -466,18 +488,23 @@ class HamamatsuOrcaFire(HamamatsuBase):
         """
         HamamatsuBase.__init__(self, microscope_name, device_connection, configuration)
         self.camera_parameters["supported_readout_directions"] = [
-            "Top-to-Bottom", "Bottom-to-Top", "Bidirectional", "Rev. Bidirectional"]
+            "Top-to-Bottom",
+            "Bottom-to-Top",
+            "Bidirectional",
+            "Rev. Bidirectional",
+        ]
 
         # self.minimum_exposure_time = 7.309 * 10 ** -6  # 7.309 us
 
         self.camera_parameters["x_pixels"] = self.camera_controller.get_property_value(
-            "image_width")
+            "image_width"
+        )
 
         self.camera_parameters["y_pixels"] = self.camera_controller.get_property_value(
-            "image_height")
+            "image_height"
+        )
 
         logger.info("HamamatsuOrcaFire Initialized")
-
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
@@ -505,16 +532,18 @@ class HamamatsuOrcaFire(HamamatsuBase):
         camera_line_interval = full_chip_exposure_time / (
             9 + (shutter_width + self.y_pixels) / 2
         )
-        
-        maximum_internal_line_interval = 0.0002339 # 233.9 us
+
+        maximum_internal_line_interval = 0.0002339  # 233.9 us
         if camera_line_interval > maximum_internal_line_interval:
             camera_line_interval = maximum_internal_line_interval
-            full_chip_exposure_time = camera_line_interval * (9 + (shutter_width + self.y_pixels) / 2)
+            full_chip_exposure_time = camera_line_interval * (
+                9 + (shutter_width + self.y_pixels) / 2
+            )
 
         self.camera_parameters["line_interval"] = camera_line_interval
 
         # round up exposure time
-        exposure_time = camera_line_interval * ((shutter_width+1) // 2)
+        exposure_time = camera_line_interval * ((shutter_width + 1) // 2)
         return exposure_time, camera_line_interval, full_chip_exposure_time
 
 
@@ -536,7 +565,9 @@ class HamamatsuOrca(HamamatsuBase):
         HamamatsuBase.__init__(self, microscope_name, device_connection, configuration)
 
         self.camera_parameters["supported_readout_directions"] = [
-            "Top-to-Bottom", "Bottom-to-Top"]
+            "Top-to-Bottom",
+            "Bottom-to-Top",
+        ]
 
         # self.minimum_exposure_time = 9.74436 * 10 ** -6
 
@@ -564,12 +595,16 @@ class HamamatsuOrca(HamamatsuBase):
         full_chip_exposure_time : float
             Updated full chip exposure time (s).
         """
-        camera_line_interval = full_chip_exposure_time / (10 + shutter_width + self.y_pixels)
-        
-        maximum_internal_line_interval = 0.1 # 100ms
+        camera_line_interval = full_chip_exposure_time / (
+            10 + shutter_width + self.y_pixels
+        )
+
+        maximum_internal_line_interval = 0.1  # 100ms
         if camera_line_interval > maximum_internal_line_interval:
             camera_line_interval = maximum_internal_line_interval
-            full_chip_exposure_time = camera_line_interval * (10 + shutter_width + self.y_pixels)
+            full_chip_exposure_time = camera_line_interval * (
+                10 + shutter_width + self.y_pixels
+            )
 
         self.camera_parameters["line_interval"] = camera_line_interval * shutter_width
 
@@ -597,13 +632,13 @@ class HamamatsuOrcaFusion(HamamatsuBase):
 
         self.camera_parameters["supported_readout_directions"] = [
             "Top-to-Bottom",
-            "Bottom-to-Top"
+            "Bottom-to-Top",
         ]
 
         logger.info("HamamatsuOrcaFusion Initialized")
 
     def calculate_light_sheet_exposure_time(
-            self, full_chip_exposure_time, shutter_width
+        self, full_chip_exposure_time, shutter_width
     ):
         """Calculate light sheet exposure time.
 
@@ -624,12 +659,16 @@ class HamamatsuOrcaFusion(HamamatsuBase):
             Full chip exposure time in seconds.
         """
 
-        camera_line_interval = full_chip_exposure_time / (4 + shutter_width + self.y_pixels)
-        
-        maximum_internal_line_interval = 963.8e-6 # 963.8 us
+        camera_line_interval = full_chip_exposure_time / (
+            4 + shutter_width + self.y_pixels
+        )
+
+        maximum_internal_line_interval = 963.8e-6  # 963.8 us
         if camera_line_interval > maximum_internal_line_interval:
             camera_line_interval = maximum_internal_line_interval
-            full_chip_exposure_time = camera_line_interval * (4 + shutter_width + self.y_pixels)
+            full_chip_exposure_time = camera_line_interval * (
+                4 + shutter_width + self.y_pixels
+            )
 
         self.camera_parameters["line_interval"] = camera_line_interval * shutter_width
 

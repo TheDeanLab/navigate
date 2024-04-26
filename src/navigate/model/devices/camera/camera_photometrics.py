@@ -34,10 +34,10 @@
 import logging
 
 # Third Party Imports
-# you shouldn't need to call this as self.controller is the camera object
-# and should have everything needed
 from ctypes import *  # noqa
 import numpy as np
+from pyvcam import pvc
+from pyvcam.camera import Camera
 
 # Local Imports
 from navigate.model.devices.camera.camera_base import CameraBase
@@ -47,11 +47,46 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class PhotometricsKinetix(CameraBase):
-    """Photometrics Kinetix camera class.
+def build_photometrics_connection(camera_connection):
+    """Build Sutter Stage Serial Port connection
+
+    Import Photometrics API and Initialize Camera Controller.
+
+    Parameters
+    ----------
+    camera_connection : str
+        Camera connection string
+
+    Returns
+    -------
+    camera_to_open : object
+        Camera object.
+    """
+    try:
+        pvc.init_pvcam()
+        # camera_names = Camera.get_available_camera_names()
+        camera_to_open = Camera.select_camera(camera_connection)
+        camera_to_open.open()
+        return camera_to_open
+    except Exception as e:
+        logger.debug(f"Could not establish connection with camera: {e}")
+        raise UserWarning(
+            "Could not establish connection with camera", camera_connection
+        )
+
+
+class PhotometricsBase(CameraBase):
+    """Photometrics Base camera class.
 
     This class is the interface between the rest of the microscope code and the
-    Photometrics API.
+    Photometrics API. It has been tested with the Photometrics Iris 15
+
+
+    Note
+    ----
+        If you want to use a photometrics camera, please go first to the
+        PyVCAM-master folder in APIs and run:
+        python setup.py install
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
@@ -72,67 +107,49 @@ class PhotometricsKinetix(CameraBase):
 
         #: int: Exposure Time in milliseconds
         self._exposuretime = 20
+
         #: int: Scan Mode (0 = Normal, 1 = ASLM)
         self._scanmode = 0
+
         #: int: Scan Delay
         self._scandelay = 1
+
         #: int: Number of frames
         self._numberofframes = 100
+
         #: obj: Data Buffer
         self._databuffer = None
+
         #: int: Number of frames received
         self._frames_received = 0
-        #: float: Unit for line delay
-        self._unitforlinedelay = 0.00375  # 3.75  us for dynamic mode kinetix
+
         #: list: Frame IDs
         self._frame_ids = []
+
         #: dict: Camera parameters
         self.camera_parameters["x_pixels"] = self.camera_controller.sensor_size[0]
         self.camera_parameters["y_pixels"] = self.camera_controller.sensor_size[1]
 
-        # todo: complete first init of parameters to default values
-
-        # Values are pulled from the CameraParameters section of the
-        # configuration.yml file.
-        # Exposure time converted here from milliseconds to seconds.
         self.set_sensor_mode("Normal")
         self.camera_controller.binning = 1
-        # not implemented: readout_speed, defect_correct_mode
+        # TODO: Implement readout_speed, defect_correct_mode
         self.camera_controller.exp_mode = "Edge Trigger"
         self.camera_controller.prog_scan_dir = 0
-        # self.camera_controller.speed_table_index = 1 # 1 for 100 MHz
-        self.camera_controller.readout_port = 0
-        self.camera_controller.gain = 1
-        #
-        # self.camera_controller.set_property_value("trigger_active",
-        #                                           self.camera_parameters[
-        #                                           'trigger_active'])
-        # self.camera_controller.set_property_value("trigger_mode",
-        #                                           self.camera_parameters[
-        #                                           'trigger_mode'])
-        # self.camera_controller.set_property_value("trigger_polarity",
-        #                                           self.camera_parameters[
-        #                                           \'trigger_polarity'])
-        # self.camera_controller.set_property_value("trigger_source",
-        #                                           self.camera_parameters[
-        #                                           'trigger_source'])
-        # # DCAM_IDPROP_IMAGE_WIDTH/HEIGHT is readonly
-        # self.camera_controller.set_property_value("image_height",
-        #                                            self.camera_parameters[
-        #                                            'y_pixels'])
-        # self.camera_controller.set_property_value("image_width",
-        #                                            self.camera_parameters[
-        #                                            'x_pixels'])
+
+        # Photometrics camera settings from config file
+        self.camera_controller.readout_port = self.camera_parameters["readout_port"]
+        self.camera_controller.speed_table_index = self.camera_parameters[
+            "speed_table_index"
+        ]
+        self.camera_controller.gain = self.camera_parameters["gain"]
 
         logger.info("Photometrics Initialized")
 
     def __del__(self):
-        """Delete PhotometricsKinetix object."""
+        """Delete PhotometricsBase object."""
         if hasattr(self, "camera_controller"):
             self.camera_controller.close()
-            # pvc.uninit_pvcam()
-            print("camera closed")
-        logger.info("PhotometricsKinetix Shutdown")
+        logger.info("PhotometricsBase Shutdown")
 
     @property
     def serial_number(self):
@@ -143,13 +160,11 @@ class PhotometricsKinetix(CameraBase):
         serial_number : str
             Serial number for the camera.
         """
-        # return self.camera_controller._serial_number
-        ser_no = self.camera_controller.serial_no
-        return ser_no
+        return self.camera_controller.serial_no
 
     def report_settings(self):
         """Print Camera Settings."""
-        # todo: complete param recording
+        # TODO: complete param recording
         print("sensor_mode: " + str(self.camera_controller.prog_scan_mode))
         print("binning: " + str(self.camera_controller.binning))
         print("readout_speed" + str(self.camera_controller.readout_time))
@@ -160,11 +175,10 @@ class PhotometricsKinetix(CameraBase):
         print("internal_line_interval")
         print("sensor size" + str(self.camera_controller.sensor_size))
         print("image_height and width" + str(self.x_pixels) + ", " + str(self.y_pixels))
-
         print("exposure_time" + str(self._exposuretime))
 
     def close_camera(self):
-        """Close Photometrics Kinetix Camera"""
+        """Close Photometrics Camera"""
         self.camera_controller.close()
 
     def set_sensor_mode(self, mode):
@@ -175,7 +189,7 @@ class PhotometricsKinetix(CameraBase):
         Parameters
         ----------
         mode : str
-            'Normal (static)' or 'Light-Sheet (ASLM)'
+            'Normal' (static) or 'Light-Sheet' (ASLM)
         """
         modes_dict = {"Normal": 0, "Light-Sheet": 1}
         if mode in modes_dict:
@@ -195,8 +209,8 @@ class PhotometricsKinetix(CameraBase):
             Scan direction options: {'Down': 0, 'Up': 1, 'Down/Up Alternate': 2}
 
         """
-        print("available scan directions on camera are:")
-        print(str(self.camera_controller.prog_scan_dirs))
+        # print("available scan directions on camera are:")
+        # print(str(self.camera_controller.prog_scan_dirs))
 
         if mode == "Top-to-Bottom":
             #  'Down' readout direction
@@ -207,7 +221,6 @@ class PhotometricsKinetix(CameraBase):
         elif mode == "Alternate":
             self.camera_controller.prog_scan_dir = 2
         else:
-            print("Camera readout direction not supported")
             logger.info("Camera readout direction not supported")
 
     def calculate_readout_time(self):
@@ -216,75 +229,39 @@ class PhotometricsKinetix(CameraBase):
         Calculates the readout time and maximum frame rate according to the camera
         configuration settings.
 
-        Warn
+        Note
         ----
-            Not implemented. Currently hard-coded for Hamamatsu Orca Flash 4.0.
+            Function only called for normal acquisition mode.
 
         Returns
         -------
         readout_time : float
-            Duration of time needed to readout an image.
+            Duration of time needed to readout an image in seconds.
         """
 
-        # todo
-        h = 3.75 * 10**-6  # Readout timing constant
-        # h = self.camera_controller.get_property_value("readout_time")
-        vn = self.y_pixels
-        exposure_time = self._exposuretime
-        # trigger_source = self.camera_controller.get_property_value('trigger_source')
-        # trigger_active = self.camera_controller.get_property_value('trigger_active')
-        #
-        if self._scanmode == 0:  # normal/static light-sheet
-            readout_time = exposure_time - ((vn + 10) * h + exposure_time)
-        else:
-            # todo: not sure if these equations are correct
-            readout_time = exposure_time - (
-                (vn + 10) * h * self._scandelay + exposure_time
-            )
+        # get the readout time from the Photometrics camera in us
+        readout_time_ms = self.camera_controller.readout_time / 1000
 
-            #
-        #     #  Area sensor mode operation
-        #     if trigger_source == 1:
-        #         # Internal Trigger Source
-        #         max_frame_rate = 1 / ((vn / 2) * h)
-        #         readout_time = exposure_time - ((vn / 2) * h)
-        #
-        #     if trigger_active == 1 or 2:
-        #         #  External Trigger Source
-        #         #  Edge == 1, Level == 2
-        #         max_frame_rate = 1 / ((vn / 2) * h + exposure_time + 10 * h)
-        #         readout_time = exposure_time - ((vn / 2) * h + exposure_time + 10 * h)
-        #
-        #     if trigger_active == 3:
-        #         #  External Trigger Source
-        #         #  Synchronous Readout == 3
-        #         max_frame_rate = 1 / ((vn / 2) * h + 5 * h)
-        #         readout_time = exposure_time - ((vn / 2) * h + 5 * h)
-        #
-        # if sensor_mode == 12:
-        #     #  Progressive sensor mode operation
-        #     max_frame_rate = 1 / (exposure_time + (vn + 10) * h)
-        #     readout_time = exposure_time - 1 / (exposure_time + (vn + 10) * h)
-        #
-        return readout_time
+        return readout_time_ms / 1000
 
     def set_exposure_time(self, exposure_time):
         """Set Photometrics exposure time.
 
-        Units of the Photometrics API are in seconds.
-        All of our units are in milliseconds.
+        Note: Units of the Photometrics API are in milliseconds
 
         Parameters
         ----------
         exposure_time : float
-            Exposure time in milliseconds.
+            Exposure time in seconds.
 
         Returns
         -------
         exposure_time : float
-            Exposure time in seconds.
+            Exposure time in milliseconds.
         """
-        self._exposuretime = exposure_time
+        self._exposuretime = int(exposure_time * 1000)
+        self.camera_controller.exp_time = self._exposuretime
+        self.camera_controller.start_live(self._exposuretime)
         return exposure_time
 
     def set_line_interval(self, line_interval_time):
@@ -307,35 +284,41 @@ class PhotometricsKinetix(CameraBase):
         Parameters
         ----------
         full_chip_exposure_time : float
-            Normal mode exposure time.
+            Normal mode exposure time in seconds
         shutter_width : int
+            Shutter width in pixels
 
         Returns
         -------
         exposure_time : float
-            Light-sheet mode exposure time.
+            Light-sheet mode exposure time in seconds
         camera_line_interval : float
             HamamatsuOrca line interval duration.
         full_chip_exposure_time : float
             Full chip exposure time (s)
         """
-        # TODO: what's the units of the input full_chip_exposure_time? miliseconds or seconds?
 
-        linedelay = self._unitforlinedelay  # 10.16us
+        # size of ROI
         nbrows = self.y_pixels
-        ASLM_scanWidth = 70
 
+        # transform exposure time to milliseconds for Photometrics API.
+        full_chip_exposure_time = full_chip_exposure_time * 1000
+
+        # equations to calculate ASLM parameters
+        linedelay = self.camera_parameters["unitforlinedelay"] / 1000
         ASLM_lineExposure = int(
-            np.ceil(full_chip_exposure_time / (1 + nbrows / ASLM_scanWidth))
+            np.ceil(full_chip_exposure_time / (1 + (1 + nbrows) / shutter_width))
         )
         ASLM_line_delay = (
             int(
                 np.ceil(
-                    (full_chip_exposure_time - ASLM_lineExposure) / (nbrows * linedelay)
+                    (full_chip_exposure_time - ASLM_lineExposure)
+                    / ((nbrows + 1) * linedelay)
                 )
             )
             - 1
         )
+
         ASLM_acquisition_time = (
             (ASLM_line_delay + 1) * nbrows * linedelay
             + ASLM_lineExposure
@@ -343,41 +326,12 @@ class PhotometricsKinetix(CameraBase):
         )
 
         self.camera_parameters["line_interval"] = ASLM_lineExposure
-
         self._exposuretime = ASLM_lineExposure
         self._scandelay = ASLM_line_delay
-        print(
-            "ASLM parameters are: {} exposure time, and {} line delay factor, {} "
-            "total acquisition time for {} scan width".format(
-                ASLM_lineExposure,
-                ASLM_line_delay,
-                ASLM_acquisition_time,
-                ASLM_scanWidth,
-            )
-        )
-
-        return ASLM_lineExposure, ASLM_line_delay, full_chip_exposure_time
-
-    def _calculate_ASLMparameters(self, desired_exposuretime):
-        """Calculate the parameters for an ASLM acquisition
-
-        Parameters
-        ----------
-        desired_exposuretime : float
-            Exposure time in milliseconds.
-
-        Returns
-        -------
-        exposure_time : float
-            Light-sheet mode exposure time.
-
-        Warn
-        ----
-            Not implemented. No code in this function.
-        """
+        return ASLM_lineExposure / 1000, ASLM_line_delay, ASLM_acquisition_time / 1000
 
     def set_binning(self, binning_string):
-        """Set HamamatsuOrca binning mode.
+        """Set Photometrics binning mode.
 
         Parameters
         ----------
@@ -395,22 +349,26 @@ class PhotometricsKinetix(CameraBase):
             "1x1": 1,
             "2x2": 2,
             "4x4": 4,
+            "8x8": 8,
         }
         if binning_string not in binning_dict.keys():
             logger.debug(f"can't set binning to {binning_string}")
-            print(f"can't set binning to {binning_string}")
+            print(f"Can't set binning to {binning_string}")
             return False
         self.camera_controller.binning = binning_dict[binning_string]
         idx = binning_string.index("x")
+
         #: int: Binning in x direction
         self.x_binning = int(binning_string[:idx])
+
         #: int: Binning in y direction
         self.y_binning = int(binning_string[idx + 1 :])
+
+        #: int: Number of pixels in x direction
         self.x_pixels = int(self.x_pixels / self.x_binning)
+
+        #: int: Number of pixels in y direction
         self.y_pixels = int(self.y_pixels / self.y_binning)
-        # should update experiment in controller side
-        # self.configuration['experiment']['CameraParameters']['camera_binning'] = str(
-        # self.x_binning) + 'x' + str(self.y_binning)
         return True
 
     def set_ROI(self, roi_height=3200, roi_width=3200):
@@ -419,10 +377,16 @@ class PhotometricsKinetix(CameraBase):
         Parameters
         ----------
         roi_height : int
-            Height of active camera region.
+            Height of active camera region. Default is 3200.
         roi_width : int
-            Width of active camera region.
+            Width of active camera region. Default is 3200.
+
+        Returns
+        -------
+        result: bool
+            True if successful, False otherwise.
         """
+
         # Get the Maximum Number of Pixels from the Configuration File
         camera_height = self.camera_parameters["y_pixels"]
         camera_width = self.camera_parameters["x_pixels"]
@@ -430,6 +394,8 @@ class PhotometricsKinetix(CameraBase):
         if (
             roi_height > camera_height
             or roi_width > camera_width
+            or roi_height < 1
+            or roi_width < 1
             or roi_height % 2 == 1
             or roi_width % 2 == 1
         ):
@@ -447,10 +413,7 @@ class PhotometricsKinetix(CameraBase):
 
         # Set ROI
         self.camera_controller.set_roi(roi_left, roi_top, roi_width, roi_height)
-        # self.x_pixels, self.y_pixels = self.camera_controller.shape()
-
         logger.info(f"Photometrics ROI shape, {self.camera_controller.shape()}")
-
         return self.x_pixels == roi_width and self.y_pixels == roi_height
 
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
@@ -458,61 +421,73 @@ class PhotometricsKinetix(CameraBase):
 
         Parameters
         ----------
-        data_buffer : int
-            Size of the data to buffer.  Default is None.
+        data_buffer :
+            List of SharedNDArrays of shape=(self.img_height,
+            self.img_width) and dtype="uint16"
+            Default is None.
         number_of_frames : int
             Number of frames.  Default is 100.
         """
-        print(self._exposuretime)
-        self.camera_controller.readout_port = 0
-        self.camera_controller.speed_table_index = 0
-        self.camera_controller.gain = 1
-        self._exposuretime = 20
 
-        # set following parameters if in programmable scan mode (ASLM)
+        # set camera parameters depending on acquisition mode
         self._scanmode = self.camera_controller.prog_scan_mode
         if self._scanmode == 1:
+            # Programmable scan mode (ASLM)
             self.camera_controller.exp_mode = "Edge Trigger"
             self.camera_controller.prog_scan_line_delay = self._scandelay
             self.camera_controller.exp_out_mode = 4
-            print("camera ready to acquire programmable scan mode")
-
+            print(
+                "camera ready to acquire programmable scan mode "
+                "with scandelay {}".format(self._scandelay)
+            )
         else:
+            # Normal mode
             self.camera_controller.exp_out_mode = "Any Row"
             self.camera_controller.exp_mode = "Edge Trigger"
             print("camera ready to acquire static light sheet mode")
 
-        # prepare buffer pointer array
-        # ptr_array = c_void_p * number_of_frames
-        # data_ptr = ptr_array()
-        # for i in range(number_of_frames):
-        #     np_array = data_buffer[i]
-        #     data_ptr[i] = np_array.ctypes.data
-
+        # Prepare for buffered acquisition
+        #: int: Number of frames
         self._numberofframes = number_of_frames
+
+        #: obj: Data Buffer
         self._data_buffer = data_buffer
+
+        #: int: Number of frames received
         self._frames_received = 0
+
+        #: list: Frame IDs
         self._frame_ids = []
 
+        #: bool: Acquisition flag
         self.is_acquiring = True
-        self.camera_controller.start_live(exp_time=self._exposuretime)
+
+        # Start camera - call it here as there are some error messages showing up
+        # a call to the camera here.
+        # Start live will be called a second time from the exposure time function,
+        # with the current exposure time.
+        self.camera_controller.start_live()
 
     def _receive_images(self):
+        """
+        Update image in the data buffer if the Photometrics camera acquired a new
+        image and return frame ids.
 
-        # wait_for_camera = True
-
-        # while self.is_acquiring == True:
-
-        # time.sleep(0.002)
+        Returns
+        -------
+        frame : numpy.ndarray
+            Frame ids from Photometrics camera that point to newly acquired data in
+            data buffer
+        """
+        # Try to grap the next frame from camera
         try:
             frame, fps, frame_count = self.camera_controller.poll_frame(
                 timeout_ms=10000
             )
-            # self._frame_ids.append(self._frames_received)
-
             self._data_buffer[self._frames_received][:, :] = np.copy(
                 frame["pixel_data"][:]
             )
+            # Delete copied frame for memory management
             frame = None
             del frame
             self._frames_received += 1
@@ -521,66 +496,25 @@ class PhotometricsKinetix(CameraBase):
             return [self._frames_received - 1]
         except Exception as e:
             print(str(e))
-        #     break
-
-        # print("excited loop")
 
         return []
 
-    # def _receive_imagesV1(self):
-    #
-    #     frame_ids = []
-    #     wait_for_camera=True
-    #     print("wait to receive frames")
-    #
-    #
-    #     while wait_for_camera ==True:
-    #         time.sleep(0.002)
-    #         print(self.camera_controller.check_frame_status())
-    #         if self.camera_controller.check_frame_status()=='FRAME_AVAILABLE':
-    #             # framesReceived < number_of_frames:
-    #
-    #             if self.is_acquiring==False: #exit if acquisition is done
-    #                 break
-    #
-    #             print(self._frames_received)
-    #             try:
-    #                 frame, fps, frame_count = self.camera_controller.poll_frame(
-    #                 timeout_ms=10000)
-    #                 print("received frame")
-    #                 frame_ids.append(self._frames_received)
-    #                 self.data_buffer[self._frames_received][:,:] = np.copy(frame[
-    #                 'pixel_data'][:])
-    #                 frame = None
-    #                 del frame
-    #                 self._frames_received += 1
-    #                 if self._frames_received >= self._numberofframes:
-    #                     self._frames_received = 0
-    #
-    #
-    #
-    #
-    #             except Exception as e:
-    #                 print(str(e))
-    #                 break
-    #     return frame_ids
+    def get_new_frame(self):
+        """
+        Call update function for data buffer and get frame ids from Photometrics camera.
+
+        Returns
+        -------
+        frame : numpy.ndarray
+            Frame ids from Photometrics camera that point to newly acquired
+            data in data buffer
+        """
+        return self._receive_images()
 
     def close_image_series(self):
-        """Close image series.
+        """Close Photometrics image series.
 
         Stops the acquisition and sets is_acquiring flag to False.
         """
-        print("Calling finish")
         self.camera_controller.finish()
         self.is_acquiring = False
-
-    def get_new_frame(self):
-        """Get frame ids from Photometrics camera."""
-        # return self.camera_controller.get_frame(exp_time=self._exposuretime)
-        # self.camera_controller.start_live(exp_time=self._exposuretime)
-
-        # self._receive_images()
-        # return self._frame_ids[]
-
-        return self._receive_images()
-

@@ -95,7 +95,7 @@ class PyramidalDataSource(DataSource):
             The subdivisions.
         """
         if self._subdivisions is None:
-            self._subdivisions = np.zeros((4, 3), dtype=int)
+            self._subdivisions = np.zeros((self.resolutions.shape[0], 3), dtype=int)
             self._subdivisions[:, 0] = np.gcd(32, self.shapes[:, 0])
             self._subdivisions[:, 1] = np.gcd(32, self.shapes[:, 1])
             self._subdivisions[:, 2] = np.gcd(32, self.shapes[:, 2])

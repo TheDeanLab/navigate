@@ -30,11 +30,15 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Standard library imports
 from pathlib import Path
 import os
 import inspect
 import tkinter as tk
 
+# Third-party imports
+
+# Local application imports
 from navigate.config.config import get_navigate_path
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
@@ -46,18 +50,29 @@ from navigate.view.popups.plugins_popup import PluginsPopup
 
 
 class PluginsController:
-    """Plugins manaager in the controller side"""
+    """Plugins manager in the controller side"""
 
     def __init__(self, view, parent_controller):
-        """Initialize plugins manager class"""
+        """Initialize plugins manager class.
+
+        Parameters
+        ----------
+        view: object
+            tkinter frame object.
+        parent_controller: object
+            navigate controller.
+        """
         #: object: tkinter frame object.
         self.view = view
+
         #: object: navigate controller.
         self.parent_controller = parent_controller
+
         #: str: plugins default path.
         self.plugins_path = os.path.join(
             Path(__file__).resolve().parent.parent.parent, "plugins"
         )
+
         #: dict: installed plugins with GUI
         self.plugins_dict = {}
 
@@ -66,7 +81,7 @@ class PluginsController:
         for plugin_name in self.plugins_dict:
             try:
                 self.plugins_dict[plugin_name].populate_experiment_setting()
-            except:
+            except Exception:
                 pass
 
     def load_plugins(self):
@@ -119,8 +134,10 @@ class PluginsController:
                         f"{plugin_class_name}Frame", view_file
                     )
                     if plugin_frame_module is None:
-                        print("Make sure plugin frame name is correct! "
-                              f"Plugin {plugin_name} need to be reinstalled!")
+                        print(
+                            "Make sure that the plug in frame name is correct! "
+                            f"Plug in {plugin_name} needs to be reinstalled!"
+                        )
                         return
                     plugin_frame = getattr(
                         plugin_frame_module, f"{plugin_class_name}Frame"
@@ -200,7 +217,7 @@ class PluginsController:
         self.plugins_dict[controller_name] = plugin_controller
 
     def build_popup_window(self, plugin_name, frame, controller):
-        """Build popup window for plugins
+        """Build popup window for a plugin
 
         Parameters
         ----------
@@ -216,6 +233,15 @@ class PluginsController:
         )
 
         def func(*args, **kwargs):
+            """Function to build popup window for a plugin
+
+            Parameters
+            ----------
+            args: list
+                arguments.
+            kwargs: dict
+                keyword arguments.
+            """
             if controller_name in self.plugins_dict:
                 self.plugins_dict[controller_name].popup.deiconify()
                 return
@@ -242,11 +268,24 @@ class PluginsController:
 
 
 class UninstallPluginController(GUIController):
+    """Uninstall plugin controller"""
+
     def __init__(self, view, parent_controller):
+        """Initialize uninstall plugin controller class.
+
+        Parameters
+        ----------
+        view: object
+            tkinter frame object.
+        parent_controller: object
+            navigate controller.
+        """
         super().__init__(view, parent_controller)
 
+        #: str: plugin config path.
         self.plugin_config_path = os.path.join(get_navigate_path(), "config")
 
+        #: PluginsPopup: popup window object.
         self.popup = PluginsPopup(view)
         self.popup.uninstall_btn.config(command=self.uninstall_plugins)
         self.popup.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
@@ -271,13 +310,21 @@ class UninstallPluginController(GUIController):
         self.popup.build_widgets(self.plugin_config)
 
     def uninstall_plugins(self, *args):
-        """Uninstall plugins"""
+        """Uninstall plugins.
+
+        Parameters
+        ----------
+        args: list
+            arguments.
+        """
         feature_lists_path = get_navigate_path() + "/feature_lists"
         features = os.listdir(feature_lists_path)
         feature_config = {}
         for feature_name in features:
             if feature_name.endswith(".yml") and feature_name != "__sequence.yml":
-                feature_content = load_yaml_file(os.path.join(feature_lists_path, feature_name))
+                feature_content = load_yaml_file(
+                    os.path.join(feature_lists_path, feature_name)
+                )
                 if feature_content and feature_content.get("filename", None):
                     feature_config[feature_name] = feature_content["filename"]
         flag = False
@@ -285,7 +332,9 @@ class UninstallPluginController(GUIController):
             if var.get():
                 # remove the feature list if a deleted plugin has any.
                 for feature_name in feature_config:
-                    if feature_config[feature_name].startswith(self.plugin_config[var.get()]):
+                    if feature_config[feature_name].startswith(
+                        self.plugin_config[var.get()]
+                    ):
                         os.remove(f"{feature_lists_path}/{feature_name}")
                 self.plugin_config.pop(var.get())
                 flag = True

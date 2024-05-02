@@ -633,7 +633,12 @@ def start_stage(
         from navigate.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
 
         return TLKIMStage(microscope_name, device_connection, configuration, id)
+    
+    elif device_type == "KST101":
+        from navigate.model.devices.stages.stage_tl_kcube_steppermotor import TLKSTStage
 
+        return TLKSTStage(microscope_name, device_connection, configuration, id)
+    
     elif device_type == "MCL":
         from navigate.model.devices.stages.stage_mcl import MCLStage
 

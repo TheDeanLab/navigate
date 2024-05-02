@@ -1,0 +1,6 @@
+navigate.model.devices.APIs.asi.asi\_MS2000\_controller.MS2000Exception
+=======================================================================
+
+.. currentmodule:: navigate.model.devices.APIs.asi.asi_MS2000_controller
+
+.. autoexception:: MS2000Exception

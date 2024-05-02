@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller &mdash; navigate 0.0.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Exception" href="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Exception.html" />
+    <link rel="prev" title="navigate.model.devices.APIs.asi.asi_MS2000_controller" href="navigate.model.devices.APIs.asi.asi_MS2000_controller.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Example Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware_overview.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.model.devices.APIs.html">navigate.model.devices.APIs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.camera.html">navigate.model.devices.camera</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.daq.html">navigate.model.devices.daq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.filter_wheel.html">navigate.model.devices.filter_wheel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.galvo.html">navigate.model.devices.galvo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.lasers.html">navigate.model.devices.lasers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.mirrors.html">navigate.model.devices.mirrors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.objectives.html">navigate.model.devices.objectives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.remote_focus.html">navigate.model.devices.remote_focus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.shutter.html">navigate.model.devices.shutter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.stages.html">navigate.model.devices.stages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.zoom.html">navigate.model.devices.zoom</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.html">navigate.model.devices</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.APIs.html">navigate.model.devices.APIs</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.APIs.asi.html">navigate.model.devices.APIs.asi</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.APIs.asi.asi_MS2000_controller.html">navigate.model.devices.APIs.asi.asi_MS2000_controller</a></li>
+      <li class="breadcrumb-item active">navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-devices-apis-asi-asi-ms2000-controller-ms2000controller">
+<h1>navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller<a class="headerlink" href="#navigate-model-devices-apis-asi-asi-ms2000-controller-ms2000controller" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.devices.APIs.asi.asi_MS2000_controller.</span></span><span class="sig-name descname"><span class="pre">MS2000Controller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">com_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baud_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>MS2000 Controller class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">com_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baud_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the MS2000 Controller class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>com_port</strong> (<em>str</em>) – COM port of the MS2000 Controller</p></li>
+<li><p><strong>baud_rate</strong> (<em>int</em>) – Baud rate of the MS2000 Controller</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – If True, will print out messages to the console</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.__init__" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(com_port, baud_rate[, verbose])</p></td>
+<td><p>Initialize the MS2000 Controller class</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.connect_to_serial" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.connect_to_serial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_to_serial</span></code></a>([rx_size, tx_size, ...])</p></td>
+<td><p>Connect to the serial port.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.disconnect_from_serial" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.disconnect_from_serial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disconnect_from_serial</span></code></a>()</p></td>
+<td><p>Disconnect from the serial port if it's open.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_axis_position" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_axis_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_axis_position</span></code></a>(axis)</p></td>
+<td><p>Return the position of the stage in ASI units (tenths of microns).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_axis_position_um" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_axis_position_um"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_axis_position_um</span></code></a>(axis)</p></td>
+<td><p>Return the position of the stage in microns.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_default_motor_axis_sequence" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_default_motor_axis_sequence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_default_motor_axis_sequence</span></code></a>()</p></td>
+<td><p>Get the default motor axis sequence from the ASI device</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_encoder_counts_per_mm" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_encoder_counts_per_mm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_encoder_counts_per_mm</span></code></a>(axis)</p></td>
+<td><p>Get encoder counts pre mm of axis</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_position" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_position</span></code></a>(axes)</p></td>
+<td><p>Return current stage position in ASI units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_speed" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_speed</span></code></a>(axis)</p></td>
+<td><p>Get speed</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_axis_busy" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_axis_busy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_axis_busy</span></code></a>(axis)</p></td>
+<td><p>Returns True if the axis is busy.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_device_busy" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_device_busy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_device_busy</span></code></a>()</p></td>
+<td><p>Returns True if any axis is busy.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_moving" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_moving"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_moving</span></code></a>()</p></td>
+<td><p>Check to see if the stage is moving.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_open" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_open"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_open</span></code></a>()</p></td>
+<td><p>Returns True if the serial port exists and is open.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.move" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code></a>(pos_dict)</p></td>
+<td><p>Move the stage with an absolute move on multiple axes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.move_axis" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.move_axis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis</span></code></a>(axis, distance)</p></td>
+<td><p>Move the stage with an absolute move on one axis</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.moverel" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.moverel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">moverel</span></code></a>([x, y, z])</p></td>
+<td><p>Move the stage with a relative move on multiple axes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.moverel_axis" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.moverel_axis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">moverel_axis</span></code></a>(axis, distance)</p></td>
+<td><p>Move the stage with a relative move on one axis</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.read_response" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.read_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_response</span></code></a>()</p></td>
+<td><p>Read a line from the serial response.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.report_to_console" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.report_to_console"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_to_console</span></code></a>(message)</p></td>
+<td><p>Print message to the output device, usually the console.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scan_ports" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scan_ports"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scan_ports</span></code></a>()</p></td>
+<td><p>Scans for available COM ports</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scanr" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scanr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanr</span></code></a>(start_position_mm, end_position_mm[, ...])</p></td>
+<td><p>Set scanr operation mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scanv" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scanv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanv</span></code></a>(start_position_mm, end_position_mm, ...)</p></td>
+<td><p>Set scanv operation mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.send_command" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.send_command"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_command</span></code></a>(cmd)</p></td>
+<td><p>Send a serial command to the device.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_backlash" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_backlash"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_backlash</span></code></a>(axis, val)</p></td>
+<td><p>Enable/disable stage backlash correction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_error" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error</span></code></a>(axis, ac)</p></td>
+<td><p>Set the stage drift error</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_feedback_alignment" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_feedback_alignment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_feedback_alignment</span></code></a>(axis, aa)</p></td>
+<td><p>Set the stage feedback alignment.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_finishing_accuracy" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_finishing_accuracy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_finishing_accuracy</span></code></a>(axis, ac)</p></td>
+<td><p>Set the stage finishing accuracy.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_max_speed" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_max_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_max_speed</span></code></a>(axis, speed)</p></td>
+<td><p>Set the speed on a specific axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_speed" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_speed</span></code></a>(speed_dict)</p></td>
+<td><p>Set speed</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_speed_as_percent_max" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_speed_as_percent_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_speed_as_percent_max</span></code></a>(pct)</p></td>
+<td><p>Set speed as a percentage of the maximum speed</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_triggered_move" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_triggered_move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_triggered_move</span></code></a>(axis)</p></td>
+<td><p>Set ASI to repeat the latest relative movement upon receiving a TTL pulse</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.start_scan" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.start_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_scan</span></code></a>(axis[, is_single_axis_scan])</p></td>
+<td><p>Start scan</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.stop" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<td><p>Stop all stage movement immediately</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.stop_scan" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.stop_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_scan</span></code></a>()</p></td>
+<td><p>Stop scan.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.wait_for_device" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.wait_for_device"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_for_device</span></code></a>([timeout])</p></td>
+<td><p>Waits for the all motors to stop moving.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.serial_port" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.serial_port"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serial_port</span></code></a></p></td>
+<td><p>Serial port object</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.com_port" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.com_port"><code class="xref py py-obj docutils literal notranslate"><span class="pre">com_port</span></code></a></p></td>
+<td><p>COM port of the MS2000 Controller</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.baud_rate" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.baud_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">baud_rate</span></code></a></p></td>
+<td><p>Baud rate of the MS2000 Controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.verbose" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.verbose"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verbose</span></code></a></p></td>
+<td><p>If True, will print out messages to the console</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.default_axes_sequence" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.default_axes_sequence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_axes_sequence</span></code></a></p></td>
+<td><p>Default axes sequence of the MS2000 Controller</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.safe_to_write" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.safe_to_write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">safe_to_write</span></code></a></p></td>
+<td><p>Event to indicate if it is safe to write to the serial port</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.connect_to_serial">
+<span class="sig-name descname"><span class="pre">connect_to_serial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rx_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12800</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tx_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12800</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.connect_to_serial" title="Permalink to this definition"></a></dt>
+<dd><p>Connect to the serial port.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rx_size</strong> (<em>int</em>) – Size of the rx buffer</p></li>
+<li><p><strong>tx_size</strong> (<em>int</em>) – Size of the tx buffer</p></li>
+<li><p><strong>read_timeout</strong> (<em>int</em>) – Read timeout in seconds</p></li>
+<li><p><strong>write_timeout</strong> (<em>int</em>) – Write timeout in seconds</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.disconnect_from_serial">
+<span class="sig-name descname"><span class="pre">disconnect_from_serial</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.disconnect_from_serial" title="Permalink to this definition"></a></dt>
+<dd><p>Disconnect from the serial port if it’s open.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_axis_position">
+<span class="sig-name descname"><span class="pre">get_axis_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_axis_position" title="Permalink to this definition"></a></dt>
+<dd><p>Return the position of the stage in ASI units (tenths of microns).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – Stage axis</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Position of the stage in ASI units</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_axis_position_um">
+<span class="sig-name descname"><span class="pre">get_axis_position_um</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_axis_position_um" title="Permalink to this definition"></a></dt>
+<dd><p>Return the position of the stage in microns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – Stage axis</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Position of the stage in microns</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_default_motor_axis_sequence">
+<span class="sig-name descname"><span class="pre">get_default_motor_axis_sequence</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_default_motor_axis_sequence" title="Permalink to this definition"></a></dt>
+<dd><p>Get the default motor axis sequence from the ASI device</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Default motor axis sequence</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_encoder_counts_per_mm">
+<span class="sig-name descname"><span class="pre">get_encoder_counts_per_mm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_encoder_counts_per_mm" title="Permalink to this definition"></a></dt>
+<dd><p>Get encoder counts pre mm of axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – Stage axis</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Encoder counts per mm of axis</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_position">
+<span class="sig-name descname"><span class="pre">get_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_position" title="Permalink to this definition"></a></dt>
+<dd><p>Return current stage position in ASI units.</p>
+<p>If default axes sequence has gotten from the ASI device,
+then it will ask the device all the position in one command,
+else it will ask each axis position one by one.</p>
+<p>WATCH OUT! This will return the positions in the order
+of the underlying hardware no matter what order the axes
+are passed in.</p>
+<p>See <a class="reference external" href="https://asiimaging.com/docs/products/serial_commands#commandwhere_w">https://asiimaging.com/docs/products/serial_commands#commandwhere_w</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axes</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of axes to query</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>{axis: position}</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_speed">
+<span class="sig-name descname"><span class="pre">get_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.get_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Get speed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – Stage axis</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_axis_busy">
+<span class="sig-name descname"><span class="pre">is_axis_busy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_axis_busy" title="Permalink to this definition"></a></dt>
+<dd><p>Returns True if the axis is busy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – Stage axis</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the axis is busy</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_device_busy">
+<span class="sig-name descname"><span class="pre">is_device_busy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_device_busy" title="Permalink to this definition"></a></dt>
+<dd><p>Returns True if any axis is busy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if any axis is busy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_moving">
+<span class="sig-name descname"><span class="pre">is_moving</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_moving" title="Permalink to this definition"></a></dt>
+<dd><p>Check to see if the stage is moving.</p>
+<p>Sends the command / which is equivalent to STATUS</p>
+<p>Gets response:
+N - there are no motors running from a serial command
+B - there is a motor running from a serial command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>response</strong> – True if any axis is moving. False if not.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_open">
+<span class="sig-name descname"><span class="pre">is_open</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.is_open" title="Permalink to this definition"></a></dt>
+<dd><p>Returns True if the serial port exists and is open.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the serial port exists and is open</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos_dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.move" title="Permalink to this definition"></a></dt>
+<dd><p>Move the stage with an absolute move on multiple axes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pos_dict</strong> (<em>dict</em>) – Dictionary of the form {axis: position}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.move_axis">
+<span class="sig-name descname"><span class="pre">move_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.move_axis" title="Permalink to this definition"></a></dt>
+<dd><p>Move the stage with an absolute move on one axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – Stage axis</p></li>
+<li><p><strong>distance</strong> (<em>float</em>) – Absolute move distance</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.moverel">
+<span class="sig-name descname"><span class="pre">moverel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.moverel" title="Permalink to this definition"></a></dt>
+<dd><p>Move the stage with a relative move on multiple axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>int</em>) – Relative move on the x-axis</p></li>
+<li><p><strong>y</strong> (<em>int</em>) – Relative move on the y-axis</p></li>
+<li><p><strong>z</strong> (<em>int</em>) – Relative move on the z-axis</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.moverel_axis">
+<span class="sig-name descname"><span class="pre">moverel_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.moverel_axis" title="Permalink to this definition"></a></dt>
+<dd><p>Move the stage with a relative move on one axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – Stage axis</p></li>
+<li><p><strong>distance</strong> (<em>float</em>) – Relative move distance</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.read_response">
+<span class="sig-name descname"><span class="pre">read_response</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.read_response" title="Permalink to this definition"></a></dt>
+<dd><p>Read a line from the serial response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Response from the serial port</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.report_to_console">
+<span class="sig-name descname"><span class="pre">report_to_console</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.report_to_console" title="Permalink to this definition"></a></dt>
+<dd><p>Print message to the output device, usually the console.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – Message to print to the output device</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scan_ports">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scan_ports</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scan_ports" title="Permalink to this definition"></a></dt>
+<dd><p>Scans for available COM ports</p>
+<p>Returns a sorted list of COM ports.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sorted list of COM ports</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scanr">
+<span class="sig-name descname"><span class="pre">scanr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_position_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_position_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enc_divide</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'X'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scanr" title="Permalink to this definition"></a></dt>
+<dd><p>Set scanr operation mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_position_mm</strong> (<em>float</em>) – Start position in mm</p></li>
+<li><p><strong>end_position_mm</strong> (<em>float</em>) – End position in mm</p></li>
+<li><p><strong>enc_divide</strong> (<em>float</em>) – Encoder divide</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – Stage axis</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scanv">
+<span class="sig-name descname"><span class="pre">scanv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_position_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_position_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overshoot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'X'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.scanv" title="Permalink to this definition"></a></dt>
+<dd><p>Set scanv operation mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_position_mm</strong> (<em>float</em>) – Start position in mm</p></li>
+<li><p><strong>end_position_mm</strong> (<em>float</em>) – End position in mm</p></li>
+<li><p><strong>number_of_lines</strong> (<em>float</em>) – Number of lines</p></li>
+<li><p><strong>overshoot</strong> (<em>float</em>) – Overshoot</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – Stage axis</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.send_command">
+<span class="sig-name descname"><span class="pre">send_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.send_command" title="Permalink to this definition"></a></dt>
+<dd><p>Send a serial command to the device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cmd</strong> (<em>bytes</em>) – Serial command to send to the device</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_backlash">
+<span class="sig-name descname"><span class="pre">set_backlash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_backlash" title="Permalink to this definition"></a></dt>
+<dd><p>Enable/disable stage backlash correction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – Stage axis</p></li>
+<li><p><strong>val</strong> (<em>float</em>) – Distance of anti-backlash motion [mm]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_error">
+<span class="sig-name descname"><span class="pre">set_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ac</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_error" title="Permalink to this definition"></a></dt>
+<dd><p>Set the stage drift error</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – Stage axis</p></li>
+<li><p><strong>ac</strong> (<em>float</em>) – Position error [mm]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_feedback_alignment">
+<span class="sig-name descname"><span class="pre">set_feedback_alignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aa</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_feedback_alignment" title="Permalink to this definition"></a></dt>
+<dd><p>Set the stage feedback alignment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – Stage axis</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_finishing_accuracy">
+<span class="sig-name descname"><span class="pre">set_finishing_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ac</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_finishing_accuracy" title="Permalink to this definition"></a></dt>
+<dd><p>Set the stage finishing accuracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – Stage axis</p></li>
+<li><p><strong>ac</strong> (<em>float</em>) – Position error [mm]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_max_speed">
+<span class="sig-name descname"><span class="pre">set_max_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_max_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Set the speed on a specific axis. Speed is in mm/s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – Stage axis</p></li>
+<li><p><strong>speed</strong> (<em>float</em>) – Speed in mm/s</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_speed">
+<span class="sig-name descname"><span class="pre">set_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Set speed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>speed_dict</strong> (<em>dict</em>) – Dictionary of the form {axis: speed}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_speed_as_percent_max">
+<span class="sig-name descname"><span class="pre">set_speed_as_percent_max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_speed_as_percent_max" title="Permalink to this definition"></a></dt>
+<dd><p>Set speed as a percentage of the maximum speed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pct</strong> (<em>float</em>) – Percentage of the maximum speed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_triggered_move">
+<span class="sig-name descname"><span class="pre">set_triggered_move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.set_triggered_move" title="Permalink to this definition"></a></dt>
+<dd><p>Set ASI to repeat the latest relative movement
+upon receiving a TTL pulse</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – Stage axis</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.start_scan">
+<span class="sig-name descname"><span class="pre">start_scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_single_axis_scan</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.start_scan" title="Permalink to this definition"></a></dt>
+<dd><p>Start scan</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – Stage axis</p></li>
+<li><p><strong>is_single_axis_scan</strong> (<em>bool</em>) – If True, will only scan on one axis</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.stop" title="Permalink to this definition"></a></dt>
+<dd><p>Stop all stage movement immediately</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.stop_scan">
+<span class="sig-name descname"><span class="pre">stop_scan</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.stop_scan" title="Permalink to this definition"></a></dt>
+<dd><p>Stop scan.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.wait_for_device">
+<span class="sig-name descname"><span class="pre">wait_for_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.75</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.wait_for_device" title="Permalink to this definition"></a></dt>
+<dd><p>Waits for the all motors to stop moving.</p>
+<dl class="simple">
+<dt>timeout<span class="classifier">float</span></dt><dd><p>Timeout in seconds. Default is 1.75 seconds.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.baud_rate">
+<span class="sig-name descname"><span class="pre">baud_rate</span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.baud_rate" title="Permalink to this definition"></a></dt>
+<dd><p>Baud rate of the MS2000 Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.com_port">
+<span class="sig-name descname"><span class="pre">com_port</span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.com_port" title="Permalink to this definition"></a></dt>
+<dd><p>COM port of the MS2000 Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.default_axes_sequence">
+<span class="sig-name descname"><span class="pre">default_axes_sequence</span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.default_axes_sequence" title="Permalink to this definition"></a></dt>
+<dd><p>Default axes sequence of the MS2000 Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.safe_to_write">
+<span class="sig-name descname"><span class="pre">safe_to_write</span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.safe_to_write" title="Permalink to this definition"></a></dt>
+<dd><p>Event to indicate if it is safe to write to the serial port</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>threading.Event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.serial_port">
+<span class="sig-name descname"><span class="pre">serial_port</span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.serial_port" title="Permalink to this definition"></a></dt>
+<dd><p>Serial port object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Serial</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.verbose">
+<span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Controller.verbose" title="Permalink to this definition"></a></dt>
+<dd><p>If True, will print out messages to the console</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.devices.APIs.asi.asi_MS2000_controller.html" class="btn btn-neutral float-left" title="navigate.model.devices.APIs.asi.asi_MS2000_controller" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Exception.html" class="btn btn-neutral float-right" title="navigate.model.devices.APIs.asi.asi_MS2000_controller.MS2000Exception" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

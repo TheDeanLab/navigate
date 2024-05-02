@@ -1,0 +1,38 @@
+navigate.model.devices.APIs.asi.asi\_MS2000\_controller
+=======================================================
+
+.. automodule:: navigate.model.devices.APIs.asi.asi_MS2000_controller
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      MS2000Controller
+   
+   
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+      :toctree:
+   
+      MS2000Exception
+   
+   
+
+
+

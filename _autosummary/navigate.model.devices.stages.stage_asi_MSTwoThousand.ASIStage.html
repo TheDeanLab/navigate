@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage &mdash; navigate 0.0.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="navigate.model.devices.stages.stage_base" href="navigate.model.devices.stages.stage_base.html" />
+    <link rel="prev" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.build_ASI_Stage_connection" href="navigate.model.devices.stages.stage_asi_MSTwoThousand.build_ASI_Stage_connection.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Example Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware_overview.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="navigate.config.html">navigate.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.log_files.html">navigate.log_files</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="navigate.model.html">navigate.model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.analysis.html">navigate.model.analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.concurrency.html">navigate.model.concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.data_sources.html">navigate.model.data_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.device_startup_functions.html">navigate.model.device_startup_functions</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.APIs.html">navigate.model.devices.APIs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.camera.html">navigate.model.devices.camera</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.daq.html">navigate.model.devices.daq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.filter_wheel.html">navigate.model.devices.filter_wheel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.galvo.html">navigate.model.devices.galvo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.lasers.html">navigate.model.devices.lasers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.mirrors.html">navigate.model.devices.mirrors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.objectives.html">navigate.model.devices.objectives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.remote_focus.html">navigate.model.devices.remote_focus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.shutter.html">navigate.model.devices.shutter</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="navigate.model.devices.stages.html">navigate.model.devices.stages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.devices.zoom.html">navigate.model.devices.zoom</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.features.html">navigate.model.features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.metadata_sources.html">navigate.model.metadata_sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.microscope.html">navigate.model.microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.model.html">navigate.model.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.plugins_model.html">navigate.model.plugins_model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.model.waveforms.html">navigate.model.waveforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.tools.html">navigate.tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigate.view.html">navigate.view</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.html">navigate.model</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.html">navigate.model.devices</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.stages.html">navigate.model.devices.stages</a></li>
+          <li class="breadcrumb-item"><a href="navigate.model.devices.stages.stage_asi_MSTwoThousand.html">navigate.model.devices.stages.stage_asi_MSTwoThousand</a></li>
+      <li class="breadcrumb-item active">navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigate-model-devices-stages-stage-asi-mstwothousand-asistage">
+<h1>navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage<a class="headerlink" href="#navigate-model-devices-stages-stage-asi-mstwothousand-asistage" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.devices.stages.stage_asi_MSTwoThousand.</span></span><span class="sig-name descname"><span class="pre">ASIStage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="navigate.model.devices.stages.stage_base.StageBase.html#navigate.model.devices.stages.stage_base.StageBase" title="navigate.model.devices.stages.stage_base.StageBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">StageBase</span></code></a></p>
+<p>Applied Scientific Instrumentation (ASI) Stage Class</p>
+<p>ASI Documentation: <a class="reference external" href="http://asiimaging.com/docs/products/serial_commands">http://asiimaging.com/docs/products/serial_commands</a></p>
+<p>ASI Quick Start Guide: <a class="reference external" href="http://asiimaging.com/docs/command_quick_start">http://asiimaging.com/docs/command_quick_start</a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>ASI firmware requires all distances to be in a 10th of a micron.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the ASI Stage connection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope in configuration</p></li>
+<li><p><strong>device_connection</strong> (<em>object</em>) – Hardware device to connect to</p></li>
+<li><p><strong>configuration</strong> (<em>multiprocessing.managers.DictProxy</em>) – Global configuration of the microscope</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.__init__" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
+<td><p>Initialize the ASI Stage connection.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.close" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a>()</p></td>
+<td><p>Close the stage.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_abs_position" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_abs_position</span></code></a>(axis, axis_abs)</p></td>
+<td><p>Ensure the requested position is within axis bounds and return it.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_axis_position" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_axis_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_axis_position</span></code></a>(axis)</p></td>
+<td><p>Get position of specific axis</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_position_dict" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_position_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_position_dict</span></code></a>()</p></td>
+<td><p>Return a dictionary with the saved stage positions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_speed" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_speed</span></code></a>(axis)</p></td>
+<td><p>Get scan velocity of the axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_absolute" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_absolute</span></code></a>(move_dictionary[, wait_until_done])</p></td>
+<td><p>Move Absolute Method.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_axis_absolute" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_axis_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis_absolute</span></code></a>(axis, abs_pos[, ...])</p></td>
+<td><p>Move stage along a single axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_axis_relative" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_axis_relative"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis_relative</span></code></a>(axis, distance[, ...])</p></td>
+<td><p>Move the stage relative to the current position along the specified axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.report_position" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.report_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_position</span></code></a>()</p></td>
+<td><p>Reports the position for all axes in microns, and create position dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scan_axis_triggered_move" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scan_axis_triggered_move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scan_axis_triggered_move</span></code></a>(start_position, ...)</p></td>
+<td><p>Move the stage along the specified axis from start position to end position, with optional TTL triggering.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scanr" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scanr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanr</span></code></a>(start_position_mm, end_position_mm, ...)</p></td>
+<td><p>Set scan range</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scanv" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scanv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanv</span></code></a>(start_position_mm, end_position_mm, ...)</p></td>
+<td><p>Set scan range</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.set_speed" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.set_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_speed</span></code></a>([velocity_dict, percent])</p></td>
+<td><p>Set scan velocity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.start_scan" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.start_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_scan</span></code></a>(axis)</p></td>
+<td><p>Start scan state machine</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stop" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<td><p>Stop all stage movement abruptly.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stop_scan" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stop_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_scan</span></code></a>()</p></td>
+<td><p>Stop scan</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.verify_abs_position" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.verify_abs_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_abs_position</span></code></a>(move_dictionary[, is_strict])</p></td>
+<td><p>Ensure the requested moving positions are within axes bounds</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.verify_move" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.verify_move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify_move</span></code></a>(move_dictionary)</p></td>
+<td><p>Don't submit a move command for axes that aren't moving.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_until_complete</span></code>(axis)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.axes_mapping" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.axes_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes_mapping</span></code></a></p></td>
+<td><p>Mapping of software axes to ASI hardware axes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.asi_axes" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.asi_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">asi_axes</span></code></a></p></td>
+<td><p>Dictionary of ASI axes to software axes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.ms2000_controller" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.ms2000_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ms2000_controller</span></code></a></p></td>
+<td><p>ASI MS2000 Controller</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.close" title="Permalink to this definition"></a></dt>
+<dd><p>Close the stage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_abs_position">
+<span class="sig-name descname"><span class="pre">get_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_abs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_abs_position" title="Permalink to this definition"></a></dt>
+<dd><p>Ensure the requested position is within axis bounds and return it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – An axis: x, y, z, f, theta</p></li>
+<li><p><strong>axis_abs</strong> (<em>float</em>) – Absolute position value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Position to move the stage to for this axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_axis_position">
+<span class="sig-name descname"><span class="pre">get_axis_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_axis_position" title="Permalink to this definition"></a></dt>
+<dd><p>Get position of specific axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – Axis to get position of</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>position</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_position_dict">
+<span class="sig-name descname"><span class="pre">get_position_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_position_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Return a dictionary with the saved stage positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of stage positions.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_speed">
+<span class="sig-name descname"><span class="pre">get_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.get_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Get scan velocity of the axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – axis name, such as ‘x’, ‘y’, ‘z’</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>velocity</strong> – Velocity</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_absolute">
+<span class="sig-name descname"><span class="pre">move_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_absolute" title="Permalink to this definition"></a></dt>
+<dd><p>Move Absolute Method.</p>
+<p>XYZ Values should remain in microns for the ASI API
+Theta Values are not accepted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement. Includes ‘x_abs’, etc. for
+one or more axes. Expect values in micrometers, except for theta, which is
+in degrees.</p></li>
+<li><p><strong>wait_until_done</strong> (<em>bool</em>) – Block until stage has moved to its new spot.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Was the move successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_axis_absolute">
+<span class="sig-name descname"><span class="pre">move_axis_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abs_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_axis_absolute" title="Permalink to this definition"></a></dt>
+<dd><p>Move stage along a single axis.</p>
+<p>Move absolute command for ASI is MOVE [Axis]=[units 1/10 microns]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – An axis prefix in move_dictionary. For example, axis=’x’ corresponds to
+‘x_abs’, ‘x_min’, etc.</p></li>
+<li><p><strong>abs_pos</strong> (<em>float</em>) – Absolute position value</p></li>
+<li><p><strong>wait_until_done</strong> (<em>bool</em>) – Block until stage has moved to its new spot.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Was the move successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_axis_relative">
+<span class="sig-name descname"><span class="pre">move_axis_relative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_until_done</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.move_axis_relative" title="Permalink to this definition"></a></dt>
+<dd><p>Move the stage relative to the current position along the specified axis.
+XYZ Values should remain in microns for the ASI API
+Theta Values are not accepted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – The axis along which to move the stage (e.g., ‘x’, ‘y’, ‘z’).</p></li>
+<li><p><strong>distance</strong> (<em>float</em>) – The distance to move relative to the current position,
+in micrometers for XYZ axes.</p></li>
+<li><p><strong>wait_until_done</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to wait until the stage has moved to its new position,
+by default False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Indicates whether the move was successful.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.report_position">
+<span class="sig-name descname"><span class="pre">report_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.report_position" title="Permalink to this definition"></a></dt>
+<dd><p>Reports the position for all axes in microns, and create
+position dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of positions for each axis in microns.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scan_axis_triggered_move">
+<span class="sig-name descname"><span class="pre">scan_axis_triggered_move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl_triggered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scan_axis_triggered_move" title="Permalink to this definition"></a></dt>
+<dd><p>Move the stage along the specified axis from start position to end position,
+with optional TTL triggering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_position</strong> (<em>float</em>) – The starting position of the stage along the specified axis.</p></li>
+<li><p><strong>end_position</strong> (<em>float</em>) – The desired end position of the stage along the specified axis.</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – The axis along which the stage will be moved (e.g., ‘x’, ‘y’, ‘z’).</p></li>
+<li><p><strong>ttl_triggered</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to trigger the move using TTL signal, by default False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Indicates whether the move was successful.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scanr">
+<span class="sig-name descname"><span class="pre">scanr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_position_mm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_position_mm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enc_divide</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'z'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scanr" title="Permalink to this definition"></a></dt>
+<dd><p>Set scan range</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_position_mm</strong> (<em>float</em>) – scan start position</p></li>
+<li><p><strong>end_position_mm</strong> (<em>float</em>) – scan end position</p></li>
+<li><p><strong>enc_divide</strong> (<em>float</em>) – Step size desired.</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – fast axis name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Was the setting successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scanv">
+<span class="sig-name descname"><span class="pre">scanv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_position_mm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_position_mm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overshoot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'z'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.scanv" title="Permalink to this definition"></a></dt>
+<dd><p>Set scan range</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_position_mm</strong> (<em>float</em>) – scan start position</p></li>
+<li><p><strong>end_position_mm</strong> (<em>float</em>) – scan end position</p></li>
+<li><p><strong>lines</strong> (<em>number of</em>) – number of steps.</p></li>
+<li><p><strong>overshoot</strong> (<em>float</em>) – overshoot_time ms</p></li>
+<li><p><strong>axis</strong> (<em>str</em>) – fast axis name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Was the setting successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.set_speed">
+<span class="sig-name descname"><span class="pre">set_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.set_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Set scan velocity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>velocity_dict</strong> (<em>dict</em>) – velocity for specific axis
+{‘x’: float, ‘y’: float, ‘z’: float}</p></li>
+<li><p><strong>percent</strong> (<em>float</em>) – Percent of maximum speed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Was the setting successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.start_scan">
+<span class="sig-name descname"><span class="pre">start_scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.start_scan" title="Permalink to this definition"></a></dt>
+<dd><p>Start scan state machine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – fast axis name, such as ‘x’, ‘y’, and ‘z’</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Was it successful?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stop" title="Permalink to this definition"></a></dt>
+<dd><p>Stop all stage movement abruptly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stop_scan">
+<span class="sig-name descname"><span class="pre">stop_scan</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stop_scan" title="Permalink to this definition"></a></dt>
+<dd><p>Stop scan</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.verify_abs_position">
+<span class="sig-name descname"><span class="pre">verify_abs_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.verify_abs_position" title="Permalink to this definition"></a></dt>
+<dd><p>Ensure the requested moving positions are within axes bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement.
+Includes ‘x_abs’, ‘y_abs’, etc. for one or more axes.
+Expect values in micrometers, except for theta, which is in degrees.</p></li>
+<li><p><strong>is_strict</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, return an empty dict if any axis is out of bounds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a verified moving dict {axis: abs_position}</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.verify_move">
+<span class="sig-name descname"><span class="pre">verify_move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">move_dictionary</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.verify_move" title="Permalink to this definition"></a></dt>
+<dd><p>Don’t submit a move command for axes that aren’t moving.
+The MS2000 controller wait time for each axis is additive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>move_dictionary</strong> (<em>dict</em>) – A dictionary of values required for movement. Includes ‘x_abs’, etc. for
+one or more axes. Expect values in micrometers, except for theta, which is
+in degrees.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>res_dict</strong> – A dictionary of values required for movement. Includes ‘x_abs’, etc. for
+one or more axes. Expect values in micrometers, except for theta, which is
+in degrees.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.asi_axes">
+<span class="sig-name descname"><span class="pre">asi_axes</span></span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.asi_axes" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of ASI axes to software axes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.axes">
+<span class="sig-name descname"><span class="pre">axes</span></span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.axes" title="Permalink to this definition"></a></dt>
+<dd><p>List of stage axes available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.axes_mapping">
+<span class="sig-name descname"><span class="pre">axes_mapping</span></span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.axes_mapping" title="Permalink to this definition"></a></dt>
+<dd><p>Mapping of software axes to ASI hardware axes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.ms2000_controller">
+<span class="sig-name descname"><span class="pre">ms2000_controller</span></span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.ms2000_controller" title="Permalink to this definition"></a></dt>
+<dd><p>ASI MS2000 Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stage_feedback">
+<span class="sig-name descname"><span class="pre">stage_feedback</span></span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stage_feedback" title="Permalink to this definition"></a></dt>
+<dd><p>Feedback alignment value for the stage. Default is None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stage_limits">
+<span class="sig-name descname"><span class="pre">stage_limits</span></span><a class="headerlink" href="#navigate.model.devices.stages.stage_asi_MSTwoThousand.ASIStage.stage_limits" title="Permalink to this definition"></a></dt>
+<dd><p>Whether the stage has limits enabled or not. Default is True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="navigate.model.devices.stages.stage_asi_MSTwoThousand.build_ASI_Stage_connection.html" class="btn btn-neutral float-left" title="navigate.model.devices.stages.stage_asi_MSTwoThousand.build_ASI_Stage_connection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.model.devices.stages.stage_base.html" class="btn btn-neutral float-right" title="navigate.model.devices.stages.stage_base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

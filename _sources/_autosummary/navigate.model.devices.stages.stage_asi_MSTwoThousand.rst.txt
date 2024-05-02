@@ -1,0 +1,38 @@
+navigate.model.devices.stages.stage\_asi\_MSTwoThousand
+=======================================================
+
+.. automodule:: navigate.model.devices.stages.stage_asi_MSTwoThousand
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      build_ASI_Stage_connection
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      ASIStage
+   
+   
+
+   
+   
+   
+
+
+

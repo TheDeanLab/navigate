@@ -56,6 +56,7 @@
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="hardware_overview.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_formats.html">Supported File Formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup_microscope.html">Setting Up A Microscope</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="acquiring_home.html">Acquiring Data</a><ul class="current">
@@ -67,12 +68,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#customized">Customized</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#saving-formats">Saving Formats</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#tiff-ome-tiff">TIFF/OME-TIFF</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#bigdataviewer-h5-n5">BigDataViewer H5/N5</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#image-pipeline">Image Pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis-pipeline">Analysis Pipeline</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="features.html">Reconfigurable Acquisitions Using Features</a></li>
@@ -127,8 +123,8 @@ saving capabilities. For a how to on acquiring data, please see
 <section id="standard-acquisition-modes">
 <h2>Standard Acquisition Modes<a class="headerlink" href="#standard-acquisition-modes" title="Permalink to this heading"></a></h2>
 <p><strong>navigate</strong> features standard acquisition modes including Continuous/Live, Single Frame
-and Z-Stack, which can be saved to TIFF, H5 and N5 data formats. Saving is toggled under
-the GUI’s <a class="reference internal" href="gui_walkthrough.html#timepoint-settings"><span class="std std-ref">timepoint settings</span></a>.</p>
+and Z-Stack, which can be saved to TIFF, OME-TIFF, HDF5, N5, and OME-Zarr data formats.
+Saving is toggled under the GUI’s <a class="reference internal" href="gui_walkthrough.html#timepoint-settings"><span class="std std-ref">timepoint settings</span></a>.</p>
 <p>These modes (and other custom modes) can be selected in the program’s
 <a class="reference internal" href="gui_walkthrough.html#acquisition-bar"><span class="std std-ref">acquisition bar</span></a> dropdown list.</p>
 <p>Each acquisition mode is implemented as a <a class="reference internal" href="features.html"><span class="doc">feature list</span></a> and can be used
@@ -212,34 +208,8 @@ combined into a acquisition feature list before writing a new acquisition featur
 </section>
 </section>
 <hr class="docutils" />
-<section id="saving-formats">
-<h2>Saving Formats<a class="headerlink" href="#saving-formats" title="Permalink to this heading"></a></h2>
-<p><strong>navigate</strong> comes pre-packaged with TIFF, OME-TIFF, and H5/N5
-(<a class="reference external" href="https://imagej.net/plugins/bdv/">BigDataViewer</a>) file saving formats. The
-performance of these saving data sources is limited by write speed to disk. To
-achieve maximal saving speed, we recommend saving all data to a local SSD. See
-<a class="reference internal" href="../software_installation.html#hardware-considerations"><span class="std std-ref">Hardware Considerations</span></a> for more
-information.</p>
-<hr class="docutils" />
-<section id="tiff-ome-tiff">
-<h3>TIFF/OME-TIFF<a class="headerlink" href="#tiff-ome-tiff" title="Permalink to this heading"></a></h3>
-<p><strong>navigate</strong> uses the <a class="reference external" href="https://pypi.org/project/tifffile/">tifffile</a> package to write
-TIFF, BigTIFF, and OME-TIFF data to file. The <strong>navigate</strong> package creates a custom
-<a class="reference internal" href="../_autosummary/navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html"><span class="doc">OME-TIFF XML</span></a>
-to store metadata.</p>
-</section>
-<hr class="docutils" />
-<section id="bigdataviewer-h5-n5">
-<h3>BigDataViewer H5/N5<a class="headerlink" href="#bigdataviewer-h5-n5" title="Permalink to this heading"></a></h3>
-<p><strong>navigate</strong> uses <a class="reference external" href="https://docs.h5py.org/en/stable/index.html">h5py</a> (H5) and
-<a class="reference external" href="https://zarr.readthedocs.io/en/stable/">zarr</a> (N5) to store data in a BigDataViewer
-file format. This is a pyramidal format, necessitating the saving of both the original
-data and down sampled versions of this data. The additional data slows down the write
-speed. The N5 format is faster than H5 because it allows multithreaded writes.</p>
-</section>
-</section>
-<section id="image-pipeline">
-<h2>Image Pipeline<a class="headerlink" href="#image-pipeline" title="Permalink to this heading"></a></h2>
+<section id="analysis-pipeline">
+<h2>Analysis Pipeline<a class="headerlink" href="#analysis-pipeline" title="Permalink to this heading"></a></h2>
 <p>Images are stored from the camera onto a circular buffer of size <code class="docutils literal notranslate"><span class="pre">databuffer_size</span></code>, a
 setting under <code class="docutils literal notranslate"><span class="pre">experiment.CameraParameters</span></code> in the
 <a class="reference internal" href="software_configuration.html"><span class="doc">software configuration</span></a>. By default, this

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supported File Formats &mdash; navigate 0.0.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="User Interface Walkthrough" href="gui_walkthrough.html" />
+    <link rel="prev" title="Supported Hardware" href="hardware_overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            navigate
+              <img src="../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Example Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hardware_overview.html">Supported Hardware</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Supported File Formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tiff-ome-tiff">TIFF/OME-TIFF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bigdataviewer-h5-n5-ome-zarr">BigDataViewer H5/N5/OME-Zarr</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Supported File Formats</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user_guide/file_formats.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="supported-file-formats">
+<h1>Supported File Formats<a class="headerlink" href="#supported-file-formats" title="Permalink to this heading"></a></h1>
+<p>The choice of file format for saving imaging data in microscopy is crucial
+because it affects data integrity, accessibility, and analysis efficiency.
+Formats like TIFF and its derivative OME-TIFF are widely used due to their ability
+to store metadata and support multiple imaging channels. However, modern formats such
+as Zarr, N5, and HDF5, including OME-ZARR, cater to the needs of large-scale,
+multi-dimensional datasets by enabling efficient data storage, access, and processing at
+cloud-compute scales.</p>
+<p>To enable ambitious imaging projects, <strong>navigate</strong> <strong>navigate</strong> comes pre-packaged with TIFF, OME-TIFF, OME-Zarr, HDF5/N5
+(<a class="reference external" href="https://imagej.net/plugins/bdv/">BigDataViewer</a>) file saving formats.
+OME, or Open Microscopy Environment, is a standardized metadata model that ensures
+that imaging data can be accurately understood, shared, and analyzed across different software
+platforms and research groups.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The performance of saving to these data sources is limited by write speed to disk. To
+achieve maximal saving speed, we recommend saving all data to a local solid state drive. See
+<a class="reference internal" href="../software_installation.html#hardware-considerations"><span class="std std-ref">Hardware Considerations</span></a> for more
+information.</p>
+</div>
+<hr class="docutils" />
+<section id="tiff-ome-tiff">
+<h2>TIFF/OME-TIFF<a class="headerlink" href="#tiff-ome-tiff" title="Permalink to this heading"></a></h2>
+<p><strong>navigate</strong> uses the <a class="reference external" href="https://pypi.org/project/tifffile/">tifffile</a> package to write
+TIFF, BigTIFF, and OME-TIFF data to file. The <strong>navigate</strong> package creates a custom
+<a class="reference internal" href="../_autosummary/navigate.model.metadata_sources.ome_tiff_metadata.OMETIFFMetadata.html"><span class="doc">OME-TIFF XML</span></a>
+to store metadata.</p>
+</section>
+<hr class="docutils" />
+<section id="bigdataviewer-h5-n5-ome-zarr">
+<h2>BigDataViewer H5/N5/OME-Zarr<a class="headerlink" href="#bigdataviewer-h5-n5-ome-zarr" title="Permalink to this heading"></a></h2>
+<p><strong>navigate</strong> uses <a class="reference external" href="https://docs.h5py.org/en/stable/index.html">h5py</a> (H5) and
+<a class="reference external" href="https://zarr.readthedocs.io/en/stable/">zarr</a> (N5) to store data in a BigDataViewer
+file format. This is a pyramidal format, necessitating the saving of both the original
+data and down sampled versions of this data. The additional data slows down the write
+speed. The N5 format is faster than H5 because it allows multithreaded writes.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hardware_overview.html" class="btn btn-neutral float-left" title="Supported Hardware" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gui_walkthrough.html" class="btn btn-neutral float-right" title="User Interface Walkthrough" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

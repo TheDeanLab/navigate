@@ -1,0 +1,70 @@
+navigate.model.devices.APIs.asi.asi\_MS2000\_controller.MS2000Controller
+========================================================================
+
+.. currentmodule:: navigate.model.devices.APIs.asi.asi_MS2000_controller
+
+.. autoclass:: MS2000Controller
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MS2000Controller.__init__
+      ~MS2000Controller.connect_to_serial
+      ~MS2000Controller.disconnect_from_serial
+      ~MS2000Controller.get_axis_position
+      ~MS2000Controller.get_axis_position_um
+      ~MS2000Controller.get_default_motor_axis_sequence
+      ~MS2000Controller.get_encoder_counts_per_mm
+      ~MS2000Controller.get_position
+      ~MS2000Controller.get_speed
+      ~MS2000Controller.is_axis_busy
+      ~MS2000Controller.is_device_busy
+      ~MS2000Controller.is_moving
+      ~MS2000Controller.is_open
+      ~MS2000Controller.move
+      ~MS2000Controller.move_axis
+      ~MS2000Controller.moverel
+      ~MS2000Controller.moverel_axis
+      ~MS2000Controller.read_response
+      ~MS2000Controller.report_to_console
+      ~MS2000Controller.scan_ports
+      ~MS2000Controller.scanr
+      ~MS2000Controller.scanv
+      ~MS2000Controller.send_command
+      ~MS2000Controller.set_backlash
+      ~MS2000Controller.set_error
+      ~MS2000Controller.set_feedback_alignment
+      ~MS2000Controller.set_finishing_accuracy
+      ~MS2000Controller.set_max_speed
+      ~MS2000Controller.set_speed
+      ~MS2000Controller.set_speed_as_percent_max
+      ~MS2000Controller.set_triggered_move
+      ~MS2000Controller.start_scan
+      ~MS2000Controller.stop
+      ~MS2000Controller.stop_scan
+      ~MS2000Controller.wait_for_device
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MS2000Controller.serial_port
+      ~MS2000Controller.com_port
+      ~MS2000Controller.baud_rate
+      ~MS2000Controller.verbose
+      ~MS2000Controller.default_axes_sequence
+      ~MS2000Controller.safe_to_write
+   
+   

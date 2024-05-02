@@ -30,6 +30,7 @@ navigate.model.devices.stages
 
    navigate.model.devices.stages.stage_asi
    navigate.model.devices.stages.stage_asi_MFCTwoThousand
+   navigate.model.devices.stages.stage_asi_MSTwoThousand
    navigate.model.devices.stages.stage_base
    navigate.model.devices.stages.stage_galvo
    navigate.model.devices.stages.stage_mcl

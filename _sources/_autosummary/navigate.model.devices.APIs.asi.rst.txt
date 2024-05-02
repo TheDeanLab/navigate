@@ -29,5 +29,6 @@ navigate.model.devices.APIs.asi
    :recursive:
 
    navigate.model.devices.APIs.asi.asi_MFC_controller
+   navigate.model.devices.APIs.asi.asi_MS2000_controller
    navigate.model.devices.APIs.asi.asi_tiger_controller
 

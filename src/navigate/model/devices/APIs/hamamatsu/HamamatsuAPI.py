@@ -650,7 +650,7 @@ property_dict = {
     "trigger_polarity": 1049120,  # 0x00100220, R/W, mode, "TRIGGER POLARITY"
     "trigger_source": 1048848,  # 0x00100110, R/W, mode,   "TRIGGER SOURCE"
     "trigger_delay": 1049184,  # 0x00100260,	/* R/W, sec,	"TRIGGER DELAY"
-    "internal_line_interval": 4208720,  # 0x00403850, R/W, sec,    "INTERNAL LINE INTERVAL"
+    "internal_line_interval": 4208720,  # 0x00403850, R/W, sec, "INTERNAL LINE INTERVAL"
     "internal_line_speed": 4208704,  # 0x00403840, R/W, m/sec,    "INTERNAL LINE SPEED"
     "image_width": 4325904,  # 0x00420210, R/O, long, "IMAGE WIDTH"
     "image_height": 4325920,  # 0x00420220, R/O, long,    "IMAGE HEIGHT"
@@ -660,7 +660,6 @@ property_dict = {
     "subarray_hsize": 4202784,  # 0x00402120, R/W, long,   "SUBARRAY HSIZE"
     "subarray_vpos": 4202800,  # 0x00402130, R/W, long,    "SUBARRAY VPOS"
     "subarray_vsize": 4202816,  # 0x00402140, R/W, long,   "SUBARRAY VSIZE"
-    "subarray_mode": 4202832,  # 0x00402150, R/W, mode,    "SUBARRAY MODE"
     "cyclic_trigger_period": 4206624,  # 0x00403020, R/O, sec,
     # "TIMING CYCLIC TRIGGER PERIOD"
     "minimum_trigger_blank": 4206640,  # 0x00403030, R/O, sec,
@@ -1212,6 +1211,7 @@ class DCAM:
                     # Update the frame count to grab the last N usable frames
                     frame_count = self.number_of_frames
 
+                logger.debug("Just before frame_idx_list")
                 frame_idx_list = list(
                     range(
                         self.number_of_frames
@@ -1225,9 +1225,12 @@ class DCAM:
             # check if backlog happens
             # if (self.pre_index+1) % self.number_of_frames != frame_idx_list[0]:
             #    print('backlog happens!')
+            logger.debug("self.pre_index")
             self.pre_index = cap_info.nNewestFrameIndex
+            logger.debug("pre_frame_count")
             self.pre_frame_count = cap_info.nFrameCount
 
+        print("frame_idx_list", frame_idx_list)
         return frame_idx_list
 
     def get_camera_handler(self):

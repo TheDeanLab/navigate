@@ -45,6 +45,7 @@ technology developers.
    :maxdepth: 2
 
    quick_start
+   implementations/implementations
    software_installation
    i_want_to
 
@@ -52,6 +53,8 @@ technology developers.
    :caption: User Guide
    :maxdepth: 2
 
+   user_guide/hardware_overview
+   user_guide/file_formats
    user_guide/gui_walkthrough
    user_guide/setup_microscope
    user_guide/acquiring_home
@@ -61,11 +64,18 @@ technology developers.
    :caption: Development
    :maxdepth: 2
 
+   contributing/software_architecture
    contributing/contributing_guidelines
    contributing/feature_container
+   user_guide/restapi
    plugin/plugin_home
+
+.. toctree::
+   :caption: Reference
+   :maxdepth: 2
+
    api
-   genindex
+
 
 **Authors**
 ============

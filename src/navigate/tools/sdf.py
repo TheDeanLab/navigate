@@ -108,3 +108,19 @@ def box(p, w):
     return np.linalg.norm(np.maximum(q, 0.0), axis=0) + np.minimum(
         np.maximum(q[0, :], np.maximum(q[1, :], q[2, :])), 0.0
     )
+
+def ellipsoid(p, r):
+    """Signed distance function for an ellipsoid.
+    
+    p : npt.ArrayLike
+        (3, N) array of points on which to evaluate the sdf.
+    w : tuple
+        (3,) tuple of ellipsoid radii
+    """
+
+    r = np.array(r)
+
+    k0 = np.linalg.norm(p/(r[:,None]), axis=0)
+    k1 = np.linalg.norm(p/((r*r)[:,None]), axis=0)
+
+    return k0*(k0-1.0)/k1

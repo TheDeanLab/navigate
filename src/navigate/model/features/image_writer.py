@@ -51,7 +51,15 @@ logger = logging.getLogger(p)
 class ImageWriter:
     """Class for saving acquired data to disk."""
 
-    def __init__(self, model, data_buffer=None, sub_dir="", image_name=None, saving_flags=None, saving_config={}):
+    def __init__(
+        self,
+        model,
+        data_buffer=None,
+        sub_dir="",
+        image_name=None,
+        saving_flags=None,
+        saving_config={},
+    ):
         """Class for saving acquired data to disk.
 
         Parameters
@@ -265,10 +273,14 @@ class ImageWriter:
                             self.mip[c_save_idx, :, :],
                         )
             except Exception as e:
+                from traceback import format_exc
+
                 # Close the image, stop the acquisition, log error, and notify user.
                 self.close()
                 self.model.stop_acquisition = True
-                self.model.event_queue.put(("warning", "Insufficient Disk Space. "))
+                self.model.event_queue.put(
+                    ("warning", f"Error - ImageWriter: {format_exc()}")
+                )
                 logger.debug(f"Error - ImageWriter: {e}")
                 return
 

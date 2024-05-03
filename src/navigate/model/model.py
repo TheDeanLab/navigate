@@ -758,7 +758,7 @@ class Model:
             for camera in self.active_microscope.cameras.values():
                 camera.camera_controller.dev_close()
         else:
-            self.active_microscope.run_command(command, args)
+            self.active_microscope.run_command(command, *args)
 
     # main function to update mirror/set experiment mode values
     def update_mirror(self, coef=[], flatten=False):

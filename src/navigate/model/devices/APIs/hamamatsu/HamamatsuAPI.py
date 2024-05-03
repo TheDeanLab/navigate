@@ -25,6 +25,8 @@ from ctypes import (
 from enum import IntEnum
 import logging
 
+from time import perf_counter_ns
+
 # Third Party Imports
 
 # Local Imports
@@ -1175,6 +1177,7 @@ class DCAM:
         wait_param.timeout = 500  # 500ms
         #  Timeout Duration - Will throw an error if the timeout is too small.
         #  Currently set to a value > maximum typical integration time.
+        start_time = perf_counter_ns()
 
         if self.__result(dcamwait_start(self.__hdcamwait, byref(wait_param))):
             cap_info = DCAMCAP_TRANSFERINFO()
@@ -1211,7 +1214,6 @@ class DCAM:
                     # Update the frame count to grab the last N usable frames
                     frame_count = self.number_of_frames
 
-                logger.debug("Just before frame_idx_list")
                 frame_idx_list = list(
                     range(
                         self.number_of_frames
@@ -1225,13 +1227,11 @@ class DCAM:
             # check if backlog happens
             # if (self.pre_index+1) % self.number_of_frames != frame_idx_list[0]:
             #    print('backlog happens!')
-            logger.debug("self.pre_index")
+
             self.pre_index = cap_info.nNewestFrameIndex
-            logger.debug("pre_frame_count")
             self.pre_frame_count = cap_info.nFrameCount
 
-        print("frame_idx_list", frame_idx_list)
-        return frame_idx_list
+        return frame_idx_list, start_time
 
     def get_camera_handler(self):
         return self.__hdcam

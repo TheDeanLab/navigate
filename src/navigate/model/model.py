@@ -36,6 +36,7 @@ import logging
 import multiprocessing as mp
 import time
 import os
+from time import perf_counter_ns
 
 # Third Party Imports
 
@@ -875,7 +876,7 @@ class Model:
                 self.pause_data_ready_lock.release()
                 self.pause_data_event.clear()
                 self.pause_data_event.wait()
-            frame_ids = self.active_microscope.camera.get_new_frame()
+            frame_ids, time = self.active_microscope.camera.get_new_frame()
             self.logger.info(
                 f"Navigate Model - Running data process, get frames {frame_ids}"
             )
@@ -889,6 +890,8 @@ class Model:
                 continue
 
             acquired_frame_num += len(frame_ids)
+            total_time = perf_counter_ns() - time
+            print("Frame Acquired", str(total_time))
 
             wait_num = self.camera_wait_iterations
 

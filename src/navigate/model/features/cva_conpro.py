@@ -37,11 +37,6 @@ import logging
 import numpy as np
 from navigate.model.features.image_writer import ImageWriter
 
-# from navigate.model import data_sources
-# from navigate.model.data_sources import data_source
-# # from navigate.model.data_sources import D
-# import os
-
 
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -205,12 +200,9 @@ class ConstantVelocityAcquisition:
 
         self.asi_stage.wait_until_complete(self.axis)
 
-        # TODO set max speed in configuration file
-        # max_speed = 4.288497*2
         self.asi_stage.set_speed(percent=1)
         max_speed = self.asi_stage.get_speed(axis=self.axis)
         logger.debug(f"Axis {self.axis} Maximum Speed (mm/s): {max_speed}")
-
         self.asi_stage.set_speed(percent=0.0001 / max_speed)
 
         expected_speed = step_size_mm / current_sweep_time
@@ -249,10 +241,12 @@ class ConstantVelocityAcquisition:
         self.expand_waveform = self.model.configuration["waveform_templates"][
             "CVACONPRO"
         ]["expand"]
+
         expand_frames = float(
             self.model.configuration["waveform_templates"]["CVACONPRO"]["expand"]
         )
         self.expected_frames = expected_frames
+
         logger.info(f"Self Expected Frames test = {self.expected_frames}")
         logger.info(f"Expand Frames = {expand_frames}")
         self.model.configuration["experiment"]["MicroscopeState"][
@@ -307,9 +301,7 @@ class ConstantVelocityAcquisition:
             return True
 
         self.asi_stage.set_speed(percent=self.percent_speed)
-
         self.model.active_microscope.prepare_next_channel()
-
         self.model.resume_data_thread()
 
     def cleanup(self):
@@ -318,9 +310,8 @@ class ConstantVelocityAcquisition:
         Need to reset the trigger source to the default.
 
         """
-        # reset stage speed
-        self.asi_stage.set_speed(percent=0.5)
 
+        self.asi_stage.set_speed(percent=0.5)
         self.asi_stage.stop()
 
         self.asi_stage.wait_until_complete(self.axis)
@@ -339,8 +330,6 @@ class ConstantVelocityAcquisition:
         """
         self.received_frames_v2 = self.received_frames
         self.total_frames = self.expected_frames * self.channels
-        print(f"total channels = {self.channels}")
-        print(f"total frames = {self.total_frames}")
 
     def in_data_func(self, frame_ids):
         """

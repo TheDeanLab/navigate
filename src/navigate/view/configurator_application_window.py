@@ -30,7 +30,7 @@
 
 # Standard Library Imports
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, simpledialog
 import logging
 from pathlib import Path
 import importlib
@@ -39,11 +39,25 @@ import importlib
 
 # Local Imports
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
+from navigate.view.custom_widgets.CollapsibleFrame import CollapsibleFrame
 
 # Logger Setup
 p = __name__.split(".")[1]
 
+widget_types = {
+    "Combobox": ttk.Combobox,
+    "Input": ttk.Entry,
+    "Spinbox": ttk.Spinbox,
+    "Checkbutton": ttk.Checkbutton,
+    "Button": ttk.Button
+}
 
+variable_types = {
+    "string": tk.StringVar,
+    "float": tk.DoubleVar,
+    "bool": tk.BooleanVar,
+    "int": tk.IntVar
+}
 class ConfigurationAssistantWindow(ttk.Frame):
     def __init__(self, root, *args, **kwargs):
         """Initiates the main application window
@@ -127,26 +141,48 @@ class TopWindow(ttk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Entry for number of configurations
-        tk.Label(root, text="Number of Microscopes:").grid(row=0, column=0)
+        self.add_button = tk.Button(root, text="Add A Microscope")
+        self.add_button.grid(row=0, column=0, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.add_button.config(width=15)
 
-        #: tk.Entry: The entry for the number of configurations to create.
-        self.num_configs_entry = tk.Entry(root)
-        self.num_configs_entry.grid(row=0, column=1)
-
-        #: tk.Button: The button to continue to the next window.
-        self.continue_button = tk.Button(root, text="Continue")
-        self.continue_button.grid(row=0, column=2)
+        self.save_button = tk.Button(root, text="Save")
+        self.save_button.grid(row=0, column=1, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.save_button.config(width=15)
 
         #: tk.Button: The button to cancel the application.
         self.cancel_button = tk.Button(root, text="Cancel")
-        self.cancel_button.grid(row=0, column=3)
+        self.cancel_button.grid(row=0, column=3, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.cancel_button.config(width=15)
 
 
 class MicroscopeWindow(DockableNotebook):
     def __init__(self, frame, root, *args, **kwargs):
         DockableNotebook.__init__(self, frame, root, *args, **kwargs)
         self.grid(row=0, column=0, sticky=tk.NSEW)
+
+        self.menu.delete("Popout Tab")
+        self.menu.add_command(label="Rename", command=self.rename_microscope)
+        self.menu.add_command(label="Delete", command=self.delete_microscope)
+
+    def rename_microscope(self):
+        """Rename microscope"""
+
+        result = simpledialog.askstring("Input", "Enter microscope name:")
+        if result:
+            tab = self.select()
+            tab_name = self.tab(tab)["text"]
+            self.tab(tab, text=result)
+            self.tab_list.remove(tab_name)
+            self.tab_list.append(result)
+
+    def delete_microscope(self):
+        tab = self.select()
+        tab_name = self.tab(tab)["text"]
+        current_tab_index = self.index("current")
+        if current_tab_index >= 0:
+            self.forget(current_tab_index)
+            self.tab_list.remove(tab_name)
+
 
 
 class MicroscopeTab(DockableNotebook):
@@ -155,60 +191,180 @@ class MicroscopeTab(DockableNotebook):
         # Init Frame
         DockableNotebook.__init__(self, parent, root, *args, **kwargs)
 
-        #: int: The index of the tab
-        self.index = index
-
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        tab_list = []
-        hardware = {
-            "camera": "Camera",
-            "daq": "Data Acquisition Card",
-            "filter_wheel": "Filter Wheel",
-            "galvo": "Galvo",
-            "lasers": "Lasers",
-            "mirrors": "Adaptive Optics",
-            "remote_focus": "Remote Focus Devices",
-            "shutter": "Shutters",
-            "stages": "Stages",
-            "zoom": "Zoom Device",
-        }
-
-        tab_names = list(hardware.values())
-        self.set_tablist(tab_list)
-
-        for key in hardware:
-            index = tab_names.index(hardware[key])
-            setattr(self, f"{key}_tab", HardwareTab(hardware_type=key, index=index))
-            tab_list.append(getattr(self, f"{key}_tab"))
-            self.add(getattr(self, f"{key}_tab"), text=hardware[key], sticky=tk.NSEW)
-        self.set_tablist(tab_list)
+        
+    def create_hardware_tab(self, name, hardware_widgets, widgets=None, top_widgets=None):
+        tab = HardwareTab(name, hardware_widgets, widgets=widgets, top_widgets=top_widgets)
+        self.tab_list.append(name)
+        self.add(tab, text=name, sticky=tk.NSEW)
 
 
 class HardwareTab(ttk.Frame):
-    def __init__(self, hardware_type, index, *args, **kwargs):
+    def __init__(self, name, hardware_widgets, *args, widgets=None, top_widgets=None, **kwargs):
         # Init Frame
         tk.Frame.__init__(self, *args, **kwargs)
-
-        #: int: The index of the tab
-        self.index = index
+        
+        self.name = name
 
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Import __init__ file for hardware type
-        base_module_path = "navigate.model.devices"
-        full_module_path = f"{base_module_path}.{hardware_type}"
-        module = importlib.import_module(full_module_path)
-        device_types = getattr(module, "device_types")
+        self.top_frame = ttk.Frame(self)
+        self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=20)
+        
+        self.hardware_frame = ttk.Frame(self)
+        self.hardware_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=20)
 
-        label = ttk.Label(self, text="Select a device:")
-        label.pack(pady=5, side=tk.LEFT)
-        device_var = tk.StringVar()
-        dropdown = ttk.Combobox(self, textvariable=device_var, state="readonly")
-        dropdown["values"] = list(device_types.values())
-        dropdown.pack(pady=5)
-        # dropdown.bind("<<ComboboxSelected>>", on_device_selected)
+        self.bottom_frame = ttk.Frame(self)
+        self.bottom_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=20)
+        self.frame_row = 0
+        self.row_offset = self.frame_row + 1
+
+        self.variables = {}
+        self.values_dict = {}
+        self.variables_list = []
+
+        self.build_widgets(top_widgets, parent=self.top_frame)
+
+        self.build_widgets(hardware_widgets, parent=self.hardware_frame)
+
+        self.build_widgets(widgets)
+
+    
+    def build_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
+        """Build hardware widgets
+        
+        Parameters
+        ----------
+        hardware_widgets: dict
+            name: (display_name, widget_type, value_type, values, condition)
+        """
+        if hardware_widgets is None:
+            return
+        if type(frame) is CollapsibleFrame:
+            content_frame = frame.content_frame
+        else:
+            content_frame = frame
+        i = 0
+        for k, v in hardware_widgets.items():
+            if k == "frame_config":
+                continue
+            if v[1] == "Label":
+                label = ttk.Label(content_frame, text=v[0])
+                label.grid(row=i, column=0, sticky=tk.NW, padx=3)
+                seperator = ttk.Separator(content_frame)
+                seperator.grid(row=i+1, columnspan=2, sticky=tk.NSEW, padx=3)
+                i += 2
+                continue
+            elif v[1] != "Button":
+                self.variables[k] = variable_types[v[2]]()
+                label_text = v[0] + "  :" if v[0][-1] != ":" else v[0]
+                label = ttk.Label(content_frame, text=label_text)
+                if direction == "vertical":
+                    label.grid(row=i, column=0, sticky=tk.NW, padx=(3, 10), pady=3)
+                else:
+                    label.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=3)
+                    i += 1
+                if v[1] == "Checkbutton":
+                    widget = widget_types[v[1]](content_frame, text="", variable=self.variables[k])
+                else:
+                    widget = widget_types[v[1]](content_frame, textvariable=self.variables[k], width=30)
+                if v[1] == "Combobox":
+                    if type(v[3]) == list:
+                        v[3] = dict([(t, t) for t in v[3]])
+                    self.values_dict[k] = v[3]
+                    temp = list(v[3].keys())
+                    widget.config(values=temp)
+                    if v[2] == "bool":
+                        widget.set(str(temp[-1]))
+                    else:
+                        widget.set(temp[-1])
+                elif v[1] == "Spinbox":
+                    if type(v[3]) != dict:
+                        v[3] = {}
+                    widget.config(from_=v[3].get("from", 0))
+                    widget.config(to=v[3].get("to", 100000))
+                    widget.config(increment=v[3].get("step", 1))
+                    widget.set(v[3].get("from", 0))
+            else:
+                widget = ttk.Button(content_frame, text=v[0], command=self.build_event_handler(hardware_widgets, k, frame, self.frame_row))
+            if direction == "vertical":
+                widget.grid(row=i, column=1, sticky=tk.NSEW, padx=5, pady=3)
+            else:
+                widget.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=3)
+            i += 1
+
+
+    def build_widgets(self, widgets, *args, parent=None, **kwargs):
+        if not widgets:
+            return
+        if parent is None:
+            parent = self.bottom_frame
+        collapsible = False
+        title = "Hardware"
+        format = None
+        temp_ref = None
+        if "frame_config" in widgets:
+            collapsible = widgets["frame_config"].get("collapsible", False)
+            title = widgets["frame_config"].get("title", "Hardware")
+            format = widgets["frame_config"].get("format", None)
+            temp_ref = widgets["frame_config"].get("ref", None)
+        if collapsible:
+            self.foldAllFrames()
+            frame = CollapsibleFrame(parent=parent, title=title)
+            # only display one callapsible frame at a time
+            frame.label.bind("<Button-1>", self.create_toggle_function(frame))
+        else:
+            frame = ttk.Frame(parent)
+        frame.grid(row=self.frame_row, column=0, sticky=tk.NSEW, padx=20)
+        self.frame_row += 1
+        
+        ref = None
+        direction = "vertical"
+        if kwargs:
+            ref = kwargs.get("ref", None)
+            direction = kwargs.get("direction", "vertical")
+        ref = ref or temp_ref
+        self.variables = {}
+        self.values_dict = {}
+        self.variables_list.append((self.variables, self.values_dict, ref, format))
+        self.build_hardware_widgets(widgets, frame=frame, direction=direction)
+
+    def foldAllFrames(self, except_frame=None):
+        for child in self.hardware_frame.winfo_children():
+            if isinstance(child, CollapsibleFrame) and child is not except_frame:
+                child.fold()
+        for child in self.bottom_frame.winfo_children():
+            if isinstance(child, CollapsibleFrame) and child is not except_frame:
+                child.fold()
+
+    def create_toggle_function(self, frame):
+
+        def func(event):
+            self.foldAllFrames(frame)
+            frame.toggle_visibility()
+        
+        return func
+
+    def build_event_handler(self, hardware_widgets, key, frame, frame_id):
+        
+        def func(*args, **kwargs):
+            v = hardware_widgets[key]
+            if "widgets" in v[2]:
+                if "parent" in v[2]:
+                    parent = self.hardware_frame if v[2]["parent"].startswith("hardware") else None
+                else:
+                    parent_id = frame.winfo_parent()
+                    parent = self.nametowidget(parent_id)
+                widgets = hardware_widgets if v[2]["widgets"] == "self" else v[2]["widgets"]
+                self.build_widgets(widgets, parent=parent, ref=v[2].get("ref", None), direction=v[2].get("direction", "vertical"))
+                # collaps other frame
+            elif v[2].get("delete", False):
+                frame.grid_remove()
+                self.variables_list[frame_id-self.row_offset] = None
+
+        return func

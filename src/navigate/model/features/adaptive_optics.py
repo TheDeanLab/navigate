@@ -453,8 +453,8 @@ class TonyWilson:
         if self.model.stop_acquisition:
             return True
 
-        return self.signal_id >= self.total_frame_num
-
+        return self.signal_id >= self.total_frame_num or self.done_all
+        
     def pre_func_data(self):
         """Prepare the data"""
         self.f_frame_id = (
@@ -662,9 +662,9 @@ class TonyWilson:
 
         if self.done_all:
             self.best_coefs = self.best_coefs_overall
-            self.model.stop_acquisition = True
-            self.model.end_acquisition()
-            print("Ending acquisition...")
+            # self.model.stop_acquisition = True
+            # self.model.end_acquisition()
+            # print("Ending acquisition...")
             try:
                 stop_time = time.time()
                 print(f"Total runtime:\t{(stop_time - self.start_time):.3f} sec")
@@ -690,4 +690,4 @@ class TonyWilson:
         if self.done_all and self.save_report:
             self.model.event_queue.put(("ao_save_report", self.report))
 
-        return self.frames_done >= self.total_frame_num
+        return self.frames_done >= self.total_frame_num or self.done_all

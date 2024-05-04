@@ -217,18 +217,9 @@ class TonyWilson:
                 self.change_coef += [i]
         self.n_coefs = len(self.change_coef)
 
-        start_from = self.model.configuration["experiment"]["AdaptiveOpticsParameters"][
+        self.start_from = self.model.configuration["experiment"]["AdaptiveOpticsParameters"][
             "TonyWilson"
         ]["from"]
-        if start_from == "flat":
-            self.best_coefs = np.zeros(self.n_modes, dtype=np.float32)
-        elif start_from == "current":
-            curr_expt_coefs = list(
-                self.model.configuration["experiment"]["MirrorParameters"][
-                    "modes"
-                ].values()
-            )
-            self.best_coefs = np.asarray(curr_expt_coefs, dtype=np.float32)
 
         self.metric = self.model.configuration["experiment"][
             "AdaptiveOpticsParameters"
@@ -238,10 +229,20 @@ class TonyWilson:
             "AdaptiveOpticsParameters"
         ]["TonyWilson"]["fitfunc"]
 
-        self.best_coefs_overall = deepcopy(self.best_coefs)
-        self.best_metric = 0.0
-        self.coef_sweep = None
-        self.best_peaks = []
+        # if start_from == "flat":
+        #     self.best_coefs = np.zeros(self.n_modes, dtype=np.float32)
+        # elif start_from == "current":
+        #     curr_expt_coefs = list(
+        #         self.model.configuration["experiment"]["MirrorParameters"][
+        #             "modes"
+        #         ].values()
+        #     )
+        #     self.best_coefs = np.asarray(curr_expt_coefs, dtype=np.float32)
+
+        # self.best_coefs_overall = deepcopy(self.best_coefs)
+        # self.best_metric = 0.0
+        # self.coef_sweep = None
+        # self.best_peaks = []
 
         # Queue
         self.tw_frame_queue = Queue()
@@ -364,6 +365,20 @@ class TonyWilson:
         self.total_frame_num = self.get_tw_frame_num()
 
         print(f"Total frame num: {self.total_frame_num}")
+
+        if self.start_from == "flat":
+            self.best_coefs = np.zeros(self.n_modes, dtype=np.float32)
+        elif self.start_from == "current":
+            curr_expt_coefs = list(
+                self.model.configuration["experiment"]["MirrorParameters"][
+                    "modes"
+                ].values()
+            )
+            self.best_coefs = np.asarray(curr_expt_coefs, dtype=np.float32)
+
+        self.best_coefs_overall = deepcopy(self.best_coefs)
+        self.best_metric = 0.0
+        self.best_peaks = []
 
     def in_func_signal(self):
         """Run the signal.

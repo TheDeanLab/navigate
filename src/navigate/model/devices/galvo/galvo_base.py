@@ -81,9 +81,7 @@ class GalvoBase:
         ]["daq"]["sample_rate"]
 
         #: float: Sweep time.
-        self.sweep_time = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["daq"]["sweep_time"]
+        self.sweep_time = 0
 
         #: float: Camera delay
         self.camera_delay = configuration["configuration"]["microscopes"][

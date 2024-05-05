@@ -9,10 +9,12 @@ camera_device_types = {
 camera_hardware_widgets = {
     "hardware/type": ["Device Type", "Combobox", "string", camera_device_types],
     "hardware/serial_number": ["Serial Number", "Input", "string", None],
+    "hardware/camera_connection": ["Camera Connection", "Input", "string",],
     "defect_correct_mode": ["Defect Correct Mode", "Combobox", "string", {"On": 2.0, "Off": 1.0}],
     "delay": ["Delay (ms)", "Spinbox", "float", None],
     "flip_x": ["Flip X", "Checkbutton", "bool", None],
     "flip_y": ["Flip Y", "Checkbutton", "bool", None],
+    "count": ["Microscope Channel Count", "Spinbox", "int", {"from": 1, "to": 10, "step": 1}]
 }
 
 filter_wheel_device_types = {
@@ -96,6 +98,7 @@ stage_top_widgets = {
 }
 
 stage_constants_widgets = {
+    "joystick_axes": ["Joystick Axes", "Input", "string", None],
     "x_min": ["Min X", "Spinbox", "float", {"from": -100000, "to": 10000, "step": 1000}],
     "x_max": ["Max X", "Spinbox", "float", {"from": -100000, "to": 10000, "step": 1000}],
     "y_min": ["Min Y", "Spinbox", "float", {"from": -100000, "to": 10000, "step": 1000}],
@@ -123,8 +126,8 @@ remote_focus_device_types = {
 remote_focus_hardware_widgets = {
     "type": ["Device Type", "Combobox", "string", remote_focus_device_types],
     "channel": ["DAQ Channel", "Input", "string", None],
-    "min": ["Minimum Voltage", "Spinbox", "float", {"from": 0, "to": 10, "step": 0.1}],
-    "max": ["Maximum Voltage", "Spinbox", "float", {"from": 0, "to": 10, "step": 0.1}],
+    "min": ["Minimum Voltage", "Spinbox", "float", {"from": -10, "to": 10, "step": 1}],
+    "max": ["Maximum Voltage", "Spinbox", "float", {"from": 0, "to": 10, "step": 1}],
     "comport": ["Serial Port", "Input", "string", None],
     "baudrate": ["Baudrate", "Input", "int", None],
     "frame_config": {"ref": "hardware"}
@@ -144,7 +147,7 @@ waveform_types = {
 galvo_hardware_widgets = {
     "hardware/type": ["Device Type", "Combobox", "string", galvo_device_types],
     "hardware/channel": ["DAQ Channel", "Input", "string", None],
-    "hardware/min": ["Minimum Voltage", "Spinbox", "float", {"from": 0, "to": 10, "step": 0.1}],
+    "hardware/min": ["Minimum Voltage", "Spinbox", "float", {"from": -10, "to": 10, "step": 0.1}],
     "hardware/max": ["Maximum Voltage", "Spinbox", "float", {"from": 0, "to": 10, "step": 0.1}],
     "waveform": ["Waveform", "Combobox", "string", waveform_types],
     "phase": ["Phase", "Input", "string", None],
@@ -172,7 +175,10 @@ zoom_position_widgets = {
 zoom_hardware_widgets = {
     "type": ["Device Type", "Combobox", "string", zoom_device_types,],
     "servo_id": ["Servo ID", "Input", "string", None],
-    "button_1": ["Add Zoom Value", "Button", {"widgets":zoom_position_widgets, "ref": "position;pixel_size", "direction": "horizon"}]
+    "port": ["Serial Port", "Input", "string", None],
+    "baudrate": ["Baudrate", "Input", "int", None],
+    "button_1": ["Add Zoom Value", "Button", {"widgets":zoom_position_widgets, "ref": "position;pixel_size", "direction": "horizon"}],
+    "frame_config": {"ref": "hardware"}
 }
 
 mirror_device_types = {
@@ -203,11 +209,11 @@ laser_hardware_widgets = {
     "power/hardware/min": ["Minimum Voltage", "Spinbox", "float", {"from": 0, "to": 100, "step": 1}],
     "power/hardware/max": ["Maximum Voltage", "Spinbox", "float", {"from": 0, "to": 100, "step": 1}],
     "button_1": ["Delete", "Button", {"delete": True}],
-    "frame_config": {"collapsible": True, "title": "Wavelength"}
+    "frame_config": {"collapsible": True, "title": "Wavelength", "format": "list-dict", "ref": "None"}
 }
 
 laser_top_widgets = {
-    "button_1": ["Add Wavelength", "Button", {"widgets": laser_hardware_widgets, "ref": "", "parent": "hardware"}],
+    "button_1": ["Add Wavelength", "Button", {"widgets": laser_hardware_widgets, "parent": "hardware"}],
 }
 
 hardwares_dict = {

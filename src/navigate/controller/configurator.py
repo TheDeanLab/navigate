@@ -191,7 +191,7 @@ class Configurator:
     def create_config_window(self, id):
         """Creates the configuration window tabs."""
 
-        tab_name = "Microscope " + str(id)
+        tab_name = "Microscope-" + str(id)
         microscope_tab = MicroscopeTab(
                             self.view.microscope_window,
                             name=tab_name,

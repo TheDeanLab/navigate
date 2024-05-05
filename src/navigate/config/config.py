@@ -45,7 +45,6 @@ import yaml
 
 # Local Imports
 from navigate.tools.common_functions import build_ref_name
-from navigate.tools.file_functions import save_yaml_file
 
 def get_navigate_path():
     """Establish a program home directory in AppData/Local/.navigate for Windows

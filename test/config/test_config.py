@@ -78,6 +78,7 @@ def test_config_methods():
         "verify_waveform_constants",
         "verify_configuration",
         "yaml",
+        "build_ref_name"
     ]
     for method in methods:
         assert method in desired_methods

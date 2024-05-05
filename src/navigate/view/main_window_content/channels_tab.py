@@ -289,9 +289,9 @@ class ChannelCreator(ttk.Labelframe):
                 ValidatedSpinbox(
                     self.frame_columns[4],
                     from_=0,
-                    to=5000.0,
+                    to=1000.0,
                     textvariable=self.exptime_variables[num],
-                    increment=25,
+                    increment=5,
                     width=5,
                     font=tk.font.Font(size=11),
                 )
@@ -306,9 +306,9 @@ class ChannelCreator(ttk.Labelframe):
                 ValidatedSpinbox(
                     self.frame_columns[5],
                     from_=0,
-                    to=5000.0,
+                    to=1000.0,
                     textvariable=self.interval_variables[num],
-                    increment=1,
+                    increment=5,
                     width=3,
                     font=tk.font.Font(size=11),
                 )
@@ -394,7 +394,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 label=start_labels[i],
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"from_": 0.0, "to": 10000, "increment": 0.5, "width": 6},
+                input_args={"from_": -5000, "to": 10000, "increment": 1, "width": 6},
             )
             self.inputs[start_names[i]].grid(
                 row=i + 1, column=0, sticky="N", pady=2, padx=(6, 0)
@@ -420,7 +420,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 label=end_labels[i],
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"from_": 0.0, "to": 10000, "increment": 0.5, "width": 6},
+                input_args={"from_": -5000, "to": 10000, "increment": 1, "width": 6},
             )
             self.inputs[end_names[i]].grid(
                 row=i + 1, column=1, sticky="N", pady=2, padx=(6, 0)
@@ -439,7 +439,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
             parent=self.pos_slice,
             input_class=ValidatedSpinbox,
             input_var=tk.DoubleVar(),
-            input_args={"width": 6},
+            input_args={"from_": 0.1, "to": 1000, "increment": 0.1, "width": 6},
         )
         self.inputs["step_size"].grid(row=1, column=2, sticky="N", padx=6)
 
@@ -455,7 +455,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 label=slice_labels[i],
                 input_class=ttk.Spinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"increment": 0.5, "width": 6},
+                input_args={"from_": 0.1, "to": 1000, "increment": 0.1, "width": 6},
             )
             self.inputs[slice_names[i]].widget.configure(state="disabled")
             self.inputs[slice_names[i]].grid(
@@ -603,7 +603,7 @@ class StackTimePointFrame(ttk.Labelframe):
             from_=0,
             to=5000.0,
             textvariable=self.stack_acq_spinval,  # this holds the data in the entry
-            increment=25,
+            increment=1,
             width=6,
         )
         self.stack_acq_spinbox.grid(row=2, column=1, sticky=tk.NSEW, pady=2)
@@ -623,7 +623,7 @@ class StackTimePointFrame(ttk.Labelframe):
             from_=0,
             to=5000.0,
             textvariable=self.stack_pause_spinval,
-            increment=25,
+            increment=1,
             width=6,
         )
         self.stack_pause_spinbox.grid(row=0, column=3, sticky=tk.NSEW, pady=2)

@@ -562,7 +562,7 @@ class Microscope:
                     exposure_time
                     + readout_time
                     + camera_delay
-                    + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration, camera_delay) - camera_delay
+                    + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration)
                 )        
                 # TODO: should we keep the percent_smoothing?
                 if ps > 0:

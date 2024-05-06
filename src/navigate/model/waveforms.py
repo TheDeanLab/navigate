@@ -273,10 +273,8 @@ def remote_focus_ramp_triangular(
     delay_array = np.zeros(delay_samples) + offset
 
     # ramp samples
-    # TODO: is 10ms too long?
-    # 10 ms for 200ms exposure; 5ms for 100ms exposure
     ramp_samples = int(
-        (exposure_time + camera_delay - remote_focus_delay - 0.01)
+        (exposure_time + camera_delay - remote_focus_delay)
         * sample_rate
     )
     if ramp_samples < 0:

@@ -163,7 +163,9 @@ class MainApp(ttk.Frame):
         # notebook
         #: SettingsNotebook: The settings notebook for the application
         self.settings = SettingsNotebook(self.frame_left, self.root)
+
         #: CameraNotebook: The camera notebook for the application
         self.camera_waveform = CameraNotebook(self.frame_top_right, self.root)
+
         #: AcquireBar: The acquire bar for the application
         self.acqbar = AcquireBar(self.top_frame, self.root)

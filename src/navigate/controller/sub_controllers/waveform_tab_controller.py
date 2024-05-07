@@ -328,3 +328,20 @@ class WaveformTabController(GUIController):
         """
         state = "normal" if mode == "stop" else "disabled"
         self.view.waveform_settings.inputs["waveform_template"].widget["state"] = state
+
+    def set_waveform_template(self, template_name):
+        """Set the waveform template name
+
+        Parameters
+        ----------
+        template_name : str
+            Set the waveform template name
+
+        Examples
+        --------
+        >>> self.set_waveform_template(template_name)
+        """
+        self.view.waveform_settings.inputs["waveform_template"].set(template_name)
+        self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "waveform_template"
+        ] = template_name

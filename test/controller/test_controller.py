@@ -101,19 +101,33 @@ def test_execute(controller):
         ("customized", "Normal", "", "Bidirectional", "Bidirectional"),
         ("live", "Light-Sheet", "Top-To-Bottom", "Bidirectional", "Default"),
         ("live", "Light-Sheet", "Bidirectional", "Bidirectional", "Bidirectional"),
-        ("customized", "Light-Sheet", "Bidirectional", "Bidirectional", "Bidirectional"),
+        ("customized", "Light-Sheet", "Bidirectional", "Bidirectional", "Bidirectional",),
         ("z-stack", "Light-Sheet", "Bidirectional", "Default", "Bidirectional"),
-        ("z-stack", "Light-Sheet", "Top-To-Bottom", "Default", "Default"),     
-    ]
+        ("z-stack", "Light-Sheet", "Top-To-Bottom", "Default", "Default"),
+    ],
 )
-def test_waveform_template(controller, acquisition_mode, sensor_mode, readout_direction, template_name, expected_template_name):
-    controller.configuration["experiment"]["MicroscopeState"]["waveform_template"] = template_name
-    controller.configuration["experiment"]["MicroscopeState"]["image_mode"] = acquisition_mode
+def test_waveform_template(
+    controller,
+    acquisition_mode,
+    sensor_mode,
+    readout_direction,
+    template_name,
+    expected_template_name,
+):
+    controller.configuration["experiment"]["MicroscopeState"][
+        "waveform_template"
+    ] = template_name
+    controller.configuration["experiment"]["MicroscopeState"][
+        "image_mode"
+    ] = acquisition_mode
     controller.configuration["experiment"]["CameraParameters"]["number_of_pixels"] = 10
     controller.populate_experiment_setting(in_initialize=True)
-    
+
     controller.camera_setting_controller.mode_widgets["Readout"].set(readout_direction)
     controller.camera_setting_controller.mode_widgets["Sensor"].set(sensor_mode)
     controller.update_experiment_setting()
 
-    assert controller.configuration["experiment"]["MicroscopeState"]["waveform_template"] == expected_template_name
+    assert (
+        controller.configuration["experiment"]["MicroscopeState"]["waveform_template"]
+        == expected_template_name
+    )

@@ -49,7 +49,11 @@ def controller(tk_root):
         waveform_templates_path,
         args,
     )
+    # To make sure the testcases won't hang on because of the model.event_queue
+    # The changes here won't affect other testcases,
+    # because the testcases from other files use DummyController and DummyModel instead of this controller fixture
     controller.model = MagicMock()
+    controller.model.get_offset_variance_maps.return_value = (None, None)
 
     yield controller
 

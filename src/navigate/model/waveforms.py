@@ -274,7 +274,7 @@ def remote_focus_ramp_triangular(
 
     # ramp samples
     ramp_samples = int(
-        (exposure_time + camera_delay - remote_focus_delay)
+        (exposure_time + camera_delay - remote_focus_delay-0.01)
         * sample_rate
     )
     if ramp_samples < 0:

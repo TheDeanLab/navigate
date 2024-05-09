@@ -240,7 +240,7 @@ class WaveformPopupController(GUIController):
         elif precision > 0:
             precision = -precision
         if increment == 0:
-            increment = 0.0001 if self.laser_max < 1 else 0.001
+            increment = 0.0001 if self.laser_max < 1 else 0.0001
         elif increment < 0:
             increment = -increment
 

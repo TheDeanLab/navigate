@@ -225,6 +225,8 @@ class NIDAQ(DAQBase):
         camera_low_time = sweep_time - camera_high_time - self.camera_delay
         camera_delay = self.camera_delay
 
+        logger.debug(f"*** camera task (sweep_time, exposure_time, delay, high, low): {sweep_time}, {exposure_time}, {camera_delay}, {camera_high_time}, {camera_low_time}")
+
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
             camera_trigger_out_line,
             high_time=camera_high_time,
@@ -311,6 +313,7 @@ class NIDAQ(DAQBase):
                     if k.split("/")[0] == board
                 ]
             ).squeeze()
+            logger.debug(f"*** anolog waveform length: {waveforms.shape}")
             self.analog_output_tasks[board].write(waveforms)
 
     def prepare_acquisition(self, channel_key):
@@ -371,6 +374,7 @@ class NIDAQ(DAQBase):
             self.master_trigger_task.write(
                 [False, True, True, True, False], auto_start=True
             )
+            logger.debug("*** DAQ send out triggers!!!!")
 
         try:
             self.camera_trigger_task.wait_until_done(timeout=10000)

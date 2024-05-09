@@ -562,7 +562,7 @@ class Microscope:
                     exposure_time
                     + readout_time
                     + camera_delay
-                    + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration)
+                    + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration, camera_delay) - camera_delay
                 )        
                 # TODO: should we keep the percent_smoothing?
                 if ps > 0:
@@ -644,6 +644,8 @@ class Microscope:
             )
             self.camera.set_line_interval(camera_line_interval)
         self.camera.set_exposure_time(self.current_exposure_time)
+
+        self.camera.report_settings()
 
         # Laser Settings
         self.current_laser_index = channel["laser_index"]

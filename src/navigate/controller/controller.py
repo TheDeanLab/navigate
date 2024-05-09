@@ -440,6 +440,17 @@ class Controller:
 
         """
         self.camera_setting_controller.update_experiment_values()
+
+        # set waveform template
+        if self.acquire_bar_controller.mode in ["live", "single", "z-stack"]:
+            camera_setting = self.configuration["experiment"]["CameraParameters"]
+            if camera_setting["sensor_mode"] == "Light-Sheet" and camera_setting[
+                "readout_direction"
+            ] in ["Bidirectional", "Rev. Bidirectional"]:
+                self.waveform_tab_controller.set_waveform_template("Bidirectional")
+            else:
+                self.waveform_tab_controller.set_waveform_template("Default")
+
         # update multi-positions
         positions = self.multiposition_tab_controller.get_positions()
         update_config_dict(
@@ -752,9 +763,11 @@ class Controller:
             )
 
             # Save the waveform_constants.yaml file.
-            save_yaml_file(file_directory=file_directory,
-                           content_dict=self.configuration['waveform_constants'],
-                           filename="waveform_constants.yml")
+            save_yaml_file(
+                file_directory=file_directory,
+                content_dict=self.configuration["waveform_constants"],
+                filename="waveform_constants.yml",
+            )
 
             self.camera_setting_controller.solvent = self.configuration["experiment"][
                 "Saving"
@@ -984,7 +997,6 @@ class Controller:
                     f"{image_id}"
                 )
                 self.execute("stop_acquire")
-
 
             # Display the Image in the View
             self.camera_view_controller.try_to_display_image(image_id=image_id)

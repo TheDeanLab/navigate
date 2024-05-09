@@ -16,7 +16,8 @@ technology developers.
 **Project Philosophy**
 =========================
 
-* Prioritize standard library imports for maximum stability, ahd minimize external dependencies.
+* Prioritize standard library imports for maximum stability, and minimize external
+dependencies.
 * Abstraction layer to drive different camera types, etc.
 * Plugin architecture for extensibility.
 * Maximize productivity for biological users through robust graphical user interface-based workflows.

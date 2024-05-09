@@ -3,7 +3,10 @@ Configuring Hardware Devices
 ============================
 
 The following section aims to provide users with the requisite information for configuring
-hardware devices. A high-level overview of the supported devices can be found :doc:`here <../hardware_overview>`.
+hardware devices. A high-level overview of the supported devices can be found
+:doc:`here <../hardware_overview>`. Additional devices are available by installing the
+**navigate-mmcore-plugin**. To learn more, please visit the **navigate-mmcore-plugin**
+`documentation <https://thedeanlab.github.io/navigate-mmcore-plugin/>`_.
 
 
 Data Acquisition Card

@@ -51,6 +51,10 @@ quantitative imaging applications such as fluorescence resonance energy transfer
 single particle tracking. This combination of features makes ASLM an exceptional tool
 for detailed, quantitative imaging across large sample volumes.
 
+**Instrument Location**:
+
+The University of Texas Southwestern Medical Center, Dallas, TX
+
 **Relevant Publications**:
 
 * `Deconvolution-free subcellular imaging with axially swept light sheet microscopy
@@ -131,6 +135,10 @@ and redirected by a custom glass-tipped tertiary objective set at a 40-degree an
 Images are captured using a Hamamatsu Flash 4.0 sCMOS camera. Multi-well plate plate imaging
 is available through mechanical sample scanning.
 
+**Instrument Location**:
+
+The University of Texas Southwestern Medical Center, Dallas, TX
+
 **Relevant Publications**:
 
 * `Increasing the field-of-view in oblique plane microscopy via optical tiling
@@ -201,6 +209,10 @@ objective in an epi-fluorescence format. The signal is then relayed through an O
 objective, directed by a custom glass-tipped tertiary objective at a 40-degree angle, and
 finally captured on a Hamamatsu Flash 4.0 sCMOS camera.
 
+**Instrument Location**:
+
+The University of Texas Southwestern Medical Center, Dallas, TX
+
 **Relevant Publications**:
 
 * `Adaptive optics in an oblique plane microscope <https://www.biorxiv.org/content/10.1101/2024.03.21.586191v1>`_
@@ -268,6 +280,9 @@ with a Hamamatsu ORCA Flash 4.0 sCMOS camera. It is also equipped with a fast fi
 wheel and 3D motorized stage from Sutter Instruments, which enables tiling of large volumes.
 For acquisition of Z-stacks, the microscope uses a piezo stage from Mad City Labs.
 
+**Instrument Location**:
+
+The University of Texas Southwestern Medical Center, Dallas, TX
 
 **Relevant Publications**:
 
@@ -329,6 +344,10 @@ from Sutter Instruments. The microscope is equipped with 2x NA 0.7 multi-immersi
 from Applied Scientific Instrumentation. Sample positioning is handled by a Sutter
 Instruments 3D motorized stage, which supports the tiling of large volumes. Z-stacks
 are acquired with a 200-micron Piezosystem Jena stage.
+
+**Instrument Location**:
+
+The University of Texas Southwestern Medical Center, Dallas, TX
 
 **Relevant Publications**:
 
@@ -403,6 +422,10 @@ are scanned simultaneously. This  approach aligns data automatically in its corr
 spatial context, significantly reducing the need for computational post-processing and
 eliminating data interpolation and duplication.
 
+**Instrument Location**:
+
+The University of Texas Southwestern Medical Center, Dallas, TX
+
 **Relevant Publications**:
 
 * `Mechanically sheared Axially Swept Light-Sheet Microscopy <https://www.biorxiv.org/content/10.1101/2024.04.10.588892>`_
@@ -448,7 +471,7 @@ eliminating data interpolation and duplication.
 ------------------
 
 
-MCT ASLM
+MCT-ASLM
 ********
 
 .. image:: mct_aslm.png
@@ -490,7 +513,12 @@ switching between macroscale and nanoscale imaging modes. The MCT-ASLM is adept 
 quickly producing detailed scans of large cleared tissues (up to 20 x 20 x 20 mm in size)
 at a resolution of 5 microns. Furthermore, it integrates advanced computer vision techniques
 to automatically identify biological features of interest and allows for detailed
-analysis with isotropic resolution up to 300 nm.
+analysis with isotropic resolution up to 300 nm. A publication describing the MCT-ASLM
+system is currently in preparation.
+
+**Instrument Location**:
+
+The University of Texas Southwestern Medical Center, Dallas, TX
 
 **Relevant Publications**:
 
@@ -554,7 +582,12 @@ illumination across the field of view and allows for rapid, wavelength-dependent
 switching between epi-illumination and TIRF modes. This microscope supports FRET detection,
 expanding its utility in live cell imaging applications. Imaging is executed using an
 Olympus NA 1.7 TIRF lens (APON100XHOTIRF) paired with two Hamamatsu Flash 4.0 v3 cameras,
-enabling high-resolution and high-sensitivity imaging.
+enabling high-resolution and high-sensitivity imaging. A publication describing the
+spectral TIRF system is currently in preparation.
+
+**Instrument Location**:
+
+The University of Texas Southwestern Medical Center, Dallas, TX
 
 **Relevant Publications**:
 
@@ -618,7 +651,12 @@ camera and an 8-position emission filter wheel. A galvanometer provides digitall
 scanned illumination and an electrotunable lens facilitates scanning of the illumination
 beam along its propagation direction, enabling Axially Swept Light-Sheet Imaging. Additionally,
 the setup includes a Meca500 robotic arm, which automates the loading and unloading of
-samples, significantly enhancing experimental throughput.
+samples, significantly enhancing experimental throughput. A publication describing the
+robotic mesoSPIM system is currently in preparation.
+
+**Instrument Location**:
+
+The University of Texas Southwestern Medical Center, Dallas, TX
 
 **Relevant Publications**:
 
@@ -677,6 +715,10 @@ embryonic structure that eventually forms the brain and spinal cord.
 Understanding the mechanisms of neural tube closure is crucial, as its failure leads to
 neural tube defects such as spina bifida.
 
+**Instrument Location**:
+
+The University of Colorado, Boulder, CO
+
 **Relevant Publications**:
 
 * `A versatile oblique plane microscope for large-scale and high-resolution imaging of subcellular dynamics
@@ -720,3 +762,97 @@ neural tube defects such as spina bifida.
         |
 
 ------------------
+
+Shepherd Lab MesoSPIM
+**********************
+
+More coming soon.
+
+**Instrument Location**:
+
+Arizona State University, Tempe, AZ
+
+**Relevant Publications**:
+
+* `The mesoSPIM initiative: open-source light-sheet microscopes for imaging cleared tissue <https://www.nature.com/articles/s41592-019-0554-0>`_.
+* `Isotropic imaging across spatial scales with axially swept light-sheet microscopy <https://www.nature.com/articles/s41596-022-00706-6>`_
+* `Light-sheet microscopy of cleared tissues with isotropic, subcellular resolution <https://www.nature.com/articles/s41592-019-0615-4>`_.
+
+
+.. collapse:: Technical Information
+
+    .. list-table::
+       :widths: 25 75
+       :header-rows: 1
+
+       * - Equipment
+         - Description
+       * - Lasers
+         - TBD
+       * - Stages
+         - TBD
+       * - Stage Controllers
+         - TBD
+       * - Cameras
+         - TBD
+       * - Filter Wheel
+         - TBD
+       * - Remote Focusing Units
+         - TBD
+       * - Data Acquisition Cards
+         - TBD
+       * - Galvo
+         - TBD
+       * - Zoom
+         - TBD
+       * - Other
+         - TBD
+
+
+
+------------------
+
+Shepherd Lab OPM
+**********************
+
+More coming soon.
+
+**Instrument Location**:
+
+Arizona State University, Tempe, AZ
+
+**Relevant Publications**:
+
+* `Increasing the field-of-view in oblique plane microscopy via optical tiling
+  <https://opg.optica.org/abstract.cfm?uri=boe-13-11-5616>`_
+* `A versatile oblique plane microscope for large-scale and high-resolution imaging of subcellular dynamics
+  <https://elifesciences.org/articles/57681>`_
+
+.. collapse:: Technical Information
+
+    .. list-table::
+       :widths: 25 75
+       :header-rows: 1
+
+       * - Equipment
+         - Description
+       * - Lasers
+         - TBD
+       * - Stages
+         - TBD
+       * - Stage Controllers
+         - TBD
+       * - Cameras
+         - TBD
+       * - Filter Wheel
+         - TBD
+       * - Remote Focusing Units
+         - TBD
+       * - Data Acquisition Cards
+         - TBD
+       * - Galvo
+         - TBD
+       * - Zoom
+         - TBD
+       * - Other
+         - TBD

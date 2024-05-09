@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add a New Hardware Device (Advanced) &mdash; navigate 0.0.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Supported Hardware" href="user_guide/hardware_overview.html" />
+    <link rel="prev" title="Write a Custom Device Plugin (Advanced)" href="advanced.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            navigate
+              <img src="_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="implementations/implementations.html">Example Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="i_want_to.html">I Want To…</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="beginner.html">Acquire an Image (Beginner)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intermediate.html">Write A Smart Acquisition Routine (Intermediate)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html">Write a Custom Device Plugin (Advanced)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Add a New Hardware Device (Advanced)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-is-the-device-abstraction-layer">What is the Device Abstraction Layer?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#device-integration-approaches">Device Integration Approaches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#device-class-creation">Device Class Creation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#establish-device-communication">Establish Device Communication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#device-class-constructor">Device Class Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#device-class-methods">Device Class Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#startup-and-configuration">Startup and Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-with-microscope-object-configurations">Integration with Microscope Object Configurations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-and-validation">Testing and Validation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/hardware_overview.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="i_want_to.html">I Want To…</a></li>
+      <li class="breadcrumb-item active">Add a New Hardware Device (Advanced)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/add_new_device.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="add-a-new-hardware-device-advanced">
+<h1>Add a New Hardware Device (Advanced)<a class="headerlink" href="#add-a-new-hardware-device-advanced" title="Permalink to this heading"></a></h1>
+<p><strong>navigate</strong> includes several standard hardware device types. These include:</p>
+<ul class="simple">
+<li><p>Cameras</p></li>
+<li><p>Data Acquisition Cards</p></li>
+<li><p>Filter Wheels</p></li>
+<li><p>Galvo Scanners</p></li>
+<li><p>Lasers</p></li>
+<li><p>Deformable Mirrors</p></li>
+<li><p>Remote Focusing Systems</p></li>
+<li><p>Shutters</p></li>
+<li><p>Stages</p></li>
+<li><p>Zoom Devices</p></li>
+</ul>
+<p>To add a new piece of hardware to one of these device types requires knowledge about
+the software’s device abstraction layer. Here’s a detailed guide to help you
+integrate new <code class="docutils literal notranslate"><span class="pre">CustomStage</span></code> device into <strong>navigate</strong>. The same principles work for
+other device types.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A strong knowledge of Python and object-oriented programming is required to
+integrate new hardware devices into <strong>navigate</strong>.</p>
+</div>
+<hr class="docutils" />
+<section id="what-is-the-device-abstraction-layer">
+<h2>What is the Device Abstraction Layer?<a class="headerlink" href="#what-is-the-device-abstraction-layer" title="Permalink to this heading"></a></h2>
+<p>To ensure compatibility and extendability, <strong>navigate</strong> utilizes a device abstraction
+layer, which allows the same commands to be used across different hardware devices.
+For example, all stages in <strong>navigate</strong> are programmed to include the <cite>stop()</cite>
+command, which can be used to stop the stage’s movement. When someone
+hits the <span class="guilabel">Stop Stage</span> button on the GUI, this action is relayed from the
+<code class="docutils literal notranslate"><span class="pre">Controller</span></code> to the <code class="docutils literal notranslate"><span class="pre">Model</span></code> and ultimately the <code class="docutils literal notranslate"><span class="pre">CustomStage</span></code>, which communicates
+with the hardware in a device-specific format to stop the stage’s movement.</p>
+</section>
+<hr class="docutils" />
+<section id="device-integration-approaches">
+<h2>Device Integration Approaches<a class="headerlink" href="#device-integration-approaches" title="Permalink to this heading"></a></h2>
+<p>There are two primary approaches to integrating new hardware into <strong>navigate</strong>:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>Plugin</strong>:</dt><dd><p>If you want to continue to work with an up-to-date version of <strong>navigate</strong>, consider
+integrating your new hardware device as a plugin. This allows you to pull
+updates from the main repository without losing your custom hardware integration.
+It also allows you to integrate non-standard device types.
+Learn more about the plugin architecture <a class="reference internal" href="plugin/plugin_home.html"><span class="doc">here</span></a>, and
+how to write a custom plugin <a class="reference internal" href="advanced.html"><span class="doc">here</span></a>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Fork</strong>:</dt><dd><p>Alternatively, you can fork the <strong>navigate</strong> repository on GitHub and modify it
+directly. This is useful for custom, in-house developments. In select
+circumstances, you can contribute your changes back to the main repository
+through a pull request. Please contact the <strong>navigate</strong> development team for
+guidance on this approach.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="device-class-creation">
+<h2>Device Class Creation<a class="headerlink" href="#device-class-creation" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>New hardware devices must have a corresponding device class in navigate. To ensure
+consistency and reduce redundancy, each device must inherit the appropriate abstract
+base class. For instance, a <code class="docutils literal notranslate"><span class="pre">CustomStage</span></code> device would inherit from <code class="docutils literal notranslate"><span class="pre">StageBase</span></code>.</p></li>
+<li><p>Classes should follow CamelCase naming conventions and reflect the device they
+control (e.g., <code class="docutils literal notranslate"><span class="pre">NewportStage</span></code> for a stage from the manufacturer Newport).</p></li>
+<li><p>Place the new device class within the appropriate device directory,
+<cite>src/navigate/model/devices/</cite>.</p></li>
+<li><p>Place related API or hardware documentation within the appropriate manufacturer
+directory, typically under <cite>src/navigate/model/devices/APIs/</cite>.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="establish-device-communication">
+<h2>Establish Device Communication<a class="headerlink" href="#establish-device-communication" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Each device requires a unique method to initialize a connection, which may
+involve APIs, serial communication, or other protocols. This method should be
+separate from the device class and is typically located at the beginning of the
+device file.</p></li>
+<li><p>For example, a function named <cite>build_custom_stage_connection()</cite> would handle
+the connection setup for <code class="docutils literal notranslate"><span class="pre">CustomStage</span></code> class.</p></li>
+<li><p>By separating the connection setup from the device class, you can easily
+interact with the hardware device outside of the larger <strong>navigate</strong> ecosystem,
+which can be useful for debugging and testing (e.g., within a Jupyter notebook).</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="device-class-constructor">
+<h2>Device Class Constructor<a class="headerlink" href="#device-class-constructor" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>The constructor for the device class (<cite>__init__</cite>) should accept parameters for
+the <cite>microscope_name</cite>, <cite>device_connection</cite>, <cite>configuration_file</cite>, and an optional
+<cite>device_ID</cite> (useful when multiple instances of the same device are used).</p></li>
+<li><p>The constructor should load and enforce device settings from the
+<cite>configuration_file</cite>. For a new stage, this could be defining the axes mapping
+between <strong>navigate</strong> and the device, <cite>{x:’X’, y:’Y’, z:’Z’}</cite>.</p></li>
+<li><p>Ensure the device class uses the connection established by your
+<cite>build_custom_stage_connection</cite> method.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="device-class-methods">
+<h2>Device Class Methods<a class="headerlink" href="#device-class-methods" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Implement any necessary device-specific methods within your device class.</p></li>
+<li><p>Essential methods are inherited from the base class (e.g., <code class="docutils literal notranslate"><span class="pre">StageBase</span></code> for the
+<code class="docutils literal notranslate"><span class="pre">CustomStage</span></code>), but you can override them or add new methods as needed for
+specialized functionality.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="startup-and-configuration">
+<h2>Startup and Configuration<a class="headerlink" href="#startup-and-configuration" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Utilize or modify methods within <cite>src/navigate/model/device_startup_functions</cite> to
+configure and start your device upon system initialization.</p></li>
+<li><p>These functions should handle configuration parsing and the device communication
+setup.</p></li>
+<li><p>Implement a retry mechanism, such as <cite>auto_redial</cite>, to handle communication
+issues robustly, attempting multiple times before failing.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="integration-with-microscope-object-configurations">
+<h2>Integration with Microscope Object Configurations<a class="headerlink" href="#integration-with-microscope-object-configurations" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Each microscope configuration in <strong>navigate</strong> that uses the new device should
+receive a reference to the established communication object.</p></li>
+<li><p>This setup is defined in the <em>configuration.yaml</em> and handled within the
+<cite>device_startup_functions</cite>, ensuring each configuration has access to the
+necessary hardware.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="testing-and-validation">
+<h2>Testing and Validation<a class="headerlink" href="#testing-and-validation" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Thoroughly test the new hardware integration to ensure it functions correctly
+within navigate, across all intended use cases and configurations.</p></li>
+<li><p>The naming convention for test files is: <cite>test_</cite> + module name.</p></li>
+<li><p>Device test files are located in <a href="#id1"><span class="problematic" id="id2">`</span></a>testmodeldevices`</p></li>
+<li><p>Device testing utilizes the <cite>pytest</cite> package.</p></li>
+</ul>
+<p>By following these steps, you can effectively integrate new hardware into the
+<strong>navigate</strong> platform, enhancing its functionality and ensuring it meets specific
+experimental needs.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="advanced.html" class="btn btn-neutral float-left" title="Write a Custom Device Plugin (Advanced)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="user_guide/hardware_overview.html" class="btn btn-neutral float-right" title="Supported Hardware" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

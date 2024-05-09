@@ -109,13 +109,14 @@ technology developers.</p>
 <section id="project-philosophy">
 <h2><strong>Project Philosophy</strong><a class="headerlink" href="#project-philosophy" title="Permalink to this heading"></a></h2>
 <ul class="simple">
-<li><p>Prioritize standard library imports for maximum stability, ahd minimize external dependencies.</p></li>
-<li><p>Abstraction layer to drive different camera types, etc.</p></li>
-<li><p>Plugin architecture for extensibility.</p></li>
-<li><p>Maximize productivity for biological users through robust graphical user interface-based workflows.</p></li>
-<li><p>Performant and responsive.</p></li>
-<li><p>Brutally obvious, well-documented, clean code organized in an industry standard Model-View-Controller architecture.</p></li>
+<li><p>Prioritize standard library imports for maximum stability, and minimize external</p></li>
 </ul>
+<p>dependencies.
+* Abstraction layer to drive different camera types, etc.
+* Plugin architecture for extensibility.
+* Maximize productivity for biological users through robust graphical user interface-based workflows.
+* Performant and responsive.
+* Brutally obvious, well-documented, clean code organized in an industry standard Model-View-Controller architecture.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This project is under active development. See our <a class="reference external" href="https://github.com/TheDeanLab/navigate">GitHub repository for updates</a>.</p>
@@ -146,10 +147,12 @@ Users should be aware of these risks and agree to utilize <strong>navigate</stro
 <li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#ct-aslm-v1">CT ASLM - v1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#ct-aslm-v2">CT ASLM - v2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#expansion-aslm">Expansion ASLM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#mct-aslm">MCT ASLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#mct-aslm">MCT-ASLM</a></li>
 <li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#spectral-tirf">Spectral TIRF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#robotic-mesospim">Robotic MesoSPIM</a></li>
 <li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#biofrontiers-opm">BioFrontiers OPM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#shepherd-lab-mesospim">Shepherd Lab MesoSPIM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#shepherd-lab-opm">Shepherd Lab OPM</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a><ul>
@@ -163,7 +166,8 @@ Users should be aware of these risks and agree to utilize <strong>navigate</stro
 <li class="toctree-l1"><a class="reference internal" href="i_want_to.html">I Want To…</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="beginner.html">Acquire an Image (Beginner)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="intermediate.html">Write A Smart Acquisition Routine (Intermediate)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="advanced.html">Write a Custom Plugin (Expert)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html">Write a Custom Device Plugin (Advanced)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="add_new_device.html">Add a New Hardware Device (Advanced)</a></li>
 </ul>
 </li>
 </ul>
@@ -175,6 +179,7 @@ Users should be aware of these risks and agree to utilize <strong>navigate</stro
 <li class="toctree-l1"><a class="reference internal" href="user_guide/file_formats.html">Supported File Formats</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/file_formats.html#tiff-ome-tiff">TIFF/OME-TIFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/file_formats.html#bigdataviewer-h5-n5-ome-zarr">BigDataViewer H5/N5/OME-Zarr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/file_formats.html#image-writing-benchmarks">Image Writing Benchmarks</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/gui_walkthrough.html">User Interface Walkthrough</a><ul>
@@ -281,7 +286,7 @@ Cellular Cancer Biology Imaging Research (CCBIR) program funded by the NIH Natio
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Dean Lab, UT Southwestern Medical Center.</p>
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
   </div>
 
    

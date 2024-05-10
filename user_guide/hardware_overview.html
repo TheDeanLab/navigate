@@ -49,13 +49,15 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Example Microscopes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Supported Hardware</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Supported Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#device-firmware">Device Firmware</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="file_formats.html">Supported File Formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup_microscope.html">Setting Up A Microscope</a></li>
@@ -70,9 +72,18 @@
 <li class="toctree-l1"><a class="reference internal" href="restapi.html">REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
 </ul>
 
         </div>
@@ -132,7 +143,7 @@ configure each of these devices is provided <a class="reference internal" href="
 </tr>
 <tr class="row-even"><td><p><em>Filter Wheel</em></p></td>
 <td><ul class="simple">
-<li><p>Applied Scientific Instrumentation with Tiger Controller</p></li>
+<li><p>ASI with Tiger Controller</p></li>
 <li><p>Sutter Lambda 10-3</p></li>
 <li><p>Sutter Lambda LS</p></li>
 </ul>
@@ -160,8 +171,8 @@ configure each of these devices is provided <a class="reference internal" href="
 <tr class="row-even"><td><p><em>Stages</em></p></td>
 <td><ul class="simple">
 <li><p>Analog controlled galvanometers and piezoelectric stages.</p></li>
-<li><p>Applied Scientific Instrumentation with Tiger Controller</p></li>
-<li><p>Applied Scientific Instrumentation with MFC2000 Controller</p></li>
+<li><p>ASI with Tiger Controller</p></li>
+<li><p>ASI with MFC2000 Controller</p></li>
 <li><p>Mad City Labs Nano-Drive</p></li>
 <li><p>Physik Instrumente</p></li>
 <li><p>Sutter MP285</p></li>
@@ -184,6 +195,63 @@ configure each of these devices is provided <a class="reference internal" href="
 </tr>
 </tbody>
 </table>
+<section id="device-firmware">
+<h2>Device Firmware<a class="headerlink" href="#device-firmware" title="Permalink to this heading"></a></h2>
+<p id="firmware-overview"><strong>navigate</strong> has been tested with the following firmware. Devices that are controlled
+with analog or digital voltages are omitted.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Manufacturer</strong></p></th>
+<th class="head"><p><strong>Firmware Version</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><em>ASI</em></p></td>
+<td><ul class="simple">
+<li><p>Tiger Controller 2.2.0.</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p><em>Dynamixel</em></p></td>
+<td><ul class="simple">
+<li><p>Dynamixel MX-28R</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p><em>National Instruments</em></p></td>
+<td><ul class="simple">
+<li><p>NI-DAQmx Device Drivers: 22.5.0, 22.8.0, 23.3.0, 23.8.0</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p><em>Hamamatsu</em></p></td>
+<td><ul class="simple">
+<li><p>DCAM API: 20.7.641, 21.7.4321, 22.9.6509, 22.11.4321, 23.12.6736</p></li>
+<li><p>Camera Firmware: 2.21B, 2.53.A, 3.20.A, 4.30.B,</p></li>
+<li><p>Active Silicon CoaXpress: 1.10, 1.13, 1.21.</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p><em>Photometrics</em></p></td>
+<td><ul class="simple">
+<li><p>PVCAM: 3.9.13</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p><em>Physik Instrumente</em></p></td>
+<td><ul class="simple">
+<li><p>PIMikroMove: 2.36.1.0</p></li>
+<li><p>PI_GCS2_DLL: 3.22.0.0</p></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 
 

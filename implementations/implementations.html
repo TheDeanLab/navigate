@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Example Microscopes &mdash; navigate 0.0.5 documentation</title>
+  <title>Implemented Microscopes &mdash; navigate 0.0.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Software Installation" href="../software_installation.html" />
-    <link rel="prev" title="Quick Start Guide" href="../quick_start.html" /> 
+    <link rel="next" title="Software API" href="../api.html" />
+    <link rel="prev" title="Plugin Architecture" href="../plugin/plugin_home.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,23 +47,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Example Microscopes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#aslm">ASLM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#optical-tiling-opm">Optical Tiling OPM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ao-opm">AO OPM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ct-aslm-v1">CT ASLM - v1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ct-aslm-v2">CT ASLM - v2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#expansion-aslm">Expansion ASLM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#mct-aslm">MCT-ASLM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#spectral-tirf">Spectral TIRF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#robotic-mesospim">Robotic MesoSPIM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#biofrontiers-opm">BioFrontiers OPM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#shepherd-lab-mesospim">Shepherd Lab MesoSPIM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#shepherd-lab-opm">Shepherd Lab OPM</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
 </ul>
@@ -84,9 +69,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/restapi.html">REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Implemented Microscopes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#aslm">ASLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optical-tiling-opm">Optical Tiling OPM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ao-opm">AO OPM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ct-aslm-v1">CT ASLM - v1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ct-aslm-v2">CT ASLM - v2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expansion-aslm">Expansion ASLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mct-aslm">MCT-ASLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spectral-tirf">Spectral TIRF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#robotic-mesospim">Robotic MesoSPIM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#biofrontiers-opm">BioFrontiers OPM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#shepherd-lab-mesospim">Shepherd Lab MesoSPIM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#shepherd-lab-opm">Shepherd Lab OPM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
 </ul>
 
         </div>
@@ -103,7 +111,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Example Microscopes</li>
+      <li class="breadcrumb-item active">Implemented Microscopes</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/implementations/implementations.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -113,8 +121,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="example-microscopes">
-<h1>Example Microscopes<a class="headerlink" href="#example-microscopes" title="Permalink to this heading"></a></h1>
+  <section id="implemented-microscopes">
+<h1>Implemented Microscopes<a class="headerlink" href="#implemented-microscopes" title="Permalink to this heading"></a></h1>
 <p>As an example of the flexibility of the <strong>navigate</strong> software, we describe several
 microscope implementations that are currently in use with the software. Each of these
 implementations is described in the following sections, including a list of the equipment
@@ -4790,8 +4798,8 @@ neural tube defects such as spina bifida.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../quick_start.html" class="btn btn-neutral float-left" title="Quick Start Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../software_installation.html" class="btn btn-neutral float-right" title="Software Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../plugin/plugin_home.html" class="btn btn-neutral float-left" title="Plugin Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api.html" class="btn btn-neutral float-right" title="Software API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -48,7 +48,6 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="implementations/implementations.html">Example Microscopes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="i_want_to.html">I Want To…</a></li>
 </ul>
@@ -69,9 +68,18 @@
 <li class="toctree-l1"><a class="reference internal" href="user_guide/restapi.html">REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin Architecture</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Software API</a></li>
 </ul>
 
         </div>
@@ -100,23 +108,26 @@
              
   <section id="navigate">
 <span id="navigate-home"></span><h1><strong>navigate</strong><a class="headerlink" href="#navigate" title="Permalink to this heading"></a></h1>
-<p><strong>navigate</strong> is an open-source Python software for general microscope control. It focuses
-on smart microscopy applications by providing reusable acquisition and analysis routines,
-termed <a class="reference internal" href="contributing/feature_container.html#features"><span class="std std-ref">features</span></a>, that can be chained
-in arbitrary orders to create custom acquisition protocols. <strong>navigate</strong> is designed to accommodate the needs of
+<p><strong>navigate</strong> is an open-source Python software for light-sheet microscope control. It
+focuses on smart microscopy applications by providing reusable acquisition and
+analysis routines, termed <a class="reference internal" href="contributing/feature_container.html#features"><span class="std std-ref">features</span></a>, that can be chained
+in arbitrary orders to create custom acquisition protocols.
+<strong>navigate</strong> is designed to accommodate the needs of
 a diverse user base, from biologists with no programming experience to advanced
 technology developers.</p>
 <section id="project-philosophy">
 <h2><strong>Project Philosophy</strong><a class="headerlink" href="#project-philosophy" title="Permalink to this heading"></a></h2>
 <ul class="simple">
-<li><p>Prioritize standard library imports for maximum stability, and minimize external</p></li>
+<li><p>Prioritize standard library imports for maximum stability, and minimize external
+dependencies.</p></li>
+<li><p>Abstraction layer to drive different camera types, etc.</p></li>
+<li><p>Plugin architecture for extensibility.</p></li>
+<li><p>Maximize productivity for biological users through robust graphical user
+interface-based workflows.</p></li>
+<li><p>Performant and responsive.</p></li>
+<li><p>Brutally obvious, well-documented, clean code organized in an industry standard
+Model-View-Controller architecture.</p></li>
 </ul>
-<p>dependencies.
-* Abstraction layer to drive different camera types, etc.
-* Plugin architecture for extensibility.
-* Maximize productivity for biological users through robust graphical user interface-based workflows.
-* Performant and responsive.
-* Brutally obvious, well-documented, clean code organized in an industry standard Model-View-Controller architecture.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This project is under active development. See our <a class="reference external" href="https://github.com/TheDeanLab/navigate">GitHub repository for updates</a>.</p>
@@ -135,144 +146,65 @@ Users should be aware of these risks and agree to utilize <strong>navigate</stro
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="quick_start.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quick_start.html#saving-a-z-stack-to-disk">Saving a Z-Stack to Disk</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="implementations/implementations.html">Example Microscopes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#aslm">ASLM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#optical-tiling-opm">Optical Tiling OPM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#ao-opm">AO OPM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#ct-aslm-v1">CT ASLM - v1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#ct-aslm-v2">CT ASLM - v2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#expansion-aslm">Expansion ASLM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#mct-aslm">MCT-ASLM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#spectral-tirf">Spectral TIRF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#robotic-mesospim">Robotic MesoSPIM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#biofrontiers-opm">BioFrontiers OPM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#shepherd-lab-mesospim">Shepherd Lab MesoSPIM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="implementations/implementations.html#shepherd-lab-opm">Shepherd Lab OPM</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="software_installation.html#computer-specifications">Computer Specifications</a></li>
-<li class="toctree-l2"><a class="reference internal" href="software_installation.html#quick-install">Quick install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="software_installation.html#launching-navigate">Launching <strong>navigate</strong></a></li>
-<li class="toctree-l2"><a class="reference internal" href="software_installation.html#developer-install">Developer install</a></li>
-<li class="toctree-l2"><a class="reference internal" href="software_installation.html#troubleshooting">Troubleshooting</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="i_want_to.html">I Want To…</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="beginner.html">Acquire an Image (Beginner)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="intermediate.html">Write A Smart Acquisition Routine (Intermediate)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="advanced.html">Write a Custom Device Plugin (Advanced)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="add_new_device.html">Add a New Hardware Device (Advanced)</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="i_want_to.html">I Want To…</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/hardware_overview.html">Supported Hardware</a></li>
-<li class="toctree-l1"><a class="reference internal" href="user_guide/file_formats.html">Supported File Formats</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/file_formats.html#tiff-ome-tiff">TIFF/OME-TIFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/file_formats.html#bigdataviewer-h5-n5-ome-zarr">BigDataViewer H5/N5/OME-Zarr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/file_formats.html#image-writing-benchmarks">Image Writing Benchmarks</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="user_guide/gui_walkthrough.html">User Interface Walkthrough</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/gui_walkthrough.html#menu-bar">Menu Bar</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/gui_walkthrough.html#acquisition-bar">Acquisition Bar</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/gui_walkthrough.html#settings-notebooks">Settings Notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/gui_walkthrough.html#display-notebooks">Display Notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/gui_walkthrough.html#additional-guis">Additional GUIs</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="user_guide/setup_microscope.html">Setting Up A Microscope</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/hardware/hardware_home.html">Hardware</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/multiple_cameras.html">Multiple Cameras</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="user_guide/acquiring_home.html">Acquiring Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/acquiring_guide.html">Acquiring Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/features.html">Reconfigurable Acquisitions Using Features</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="user_guide/case_studies/case_studies_home.html">Case Studies</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/case_studies/setup_voodoo.html">Setting up an Axially Swept Light-Sheet Microscope</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/case_studies/acquire_mesospimbt.html">Imaging on a mesoSPIM BT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/case_studies/acquire_CT-ASLM-V1_and_CT-ASLM-V2.html">Imaging on the CT-ASLM-V1 and CT-ASLM-V2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/case_studies/acquire_exASLM.html">Imaging on an Upright ASLM</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/case_studies/ilastik_segmentation.html">Analyzing Images via REST-API</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/case_studies/case_studies_home.html">Case Studies</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="contributing/software_architecture.html">Software Architecture</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contributing/software_architecture.html#model-view-controller-mvc">Model View Controller (MVC)</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_guidelines.html">Contributing Guidelines</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#general-principles">General Principles</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#coding-style">Coding Style</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#communicating-with-hardware">Communicating with Hardware</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#documentation">Documentation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#scientific-units">Scientific Units</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#pre-commit-hooks">Pre-Commit Hooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#dictionary-parsing">Dictionary Parsing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#unit-tests">Unit Tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guidelines.html#developing-with-a-mac">Developing with a Mac</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="contributing/feature_container.html">Feature Container</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contributing/feature_container.html#currently-implemented-features">Currently Implemented Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/feature_container.html#feature-objects">Feature Objects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/feature_container.html#custom-feature-lists">Custom Feature Lists</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/feature_container.html">Feature Container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/restapi.html">REST-API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin Architecture</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#introduction-to-plugins">Introduction to Plugins</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#installing-a-plugin">Installing a Plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#uninstalling-a-plugin">Uninstalling a Plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_home.html#designing-a-plugin">Designing a Plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin Architecture</a></li>
 </ul>
-</li>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.config.html">navigate.config</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.controller.html">navigate.controller</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.log_files.html">navigate.log_files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.model.html">navigate.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.tools.html">navigate.tools</a></li>
-<li class="toctree-l2"><a class="reference internal" href="_autosummary/navigate.view.html">navigate.view</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Software API</a></li>
 </ul>
 </div>
 </section>
 <section id="authors">
 <h2><strong>Authors</strong><a class="headerlink" href="#authors" title="Permalink to this heading"></a></h2>
-<p><strong>Navigate</strong> includes key contributions from numerous individuals, both past and present,
-in <a class="reference external" href="https://www.dean-lab.org">The Dean Lab</a>. Please see the accompanying manuscript for a full list of contributors.</p>
+<p><strong>navigate</strong> includes key contributions from numerous individuals, both past and
+present, in <a class="reference external" href="https://www.dean-lab.org">The Dean Lab</a>. Please see the accompanying manuscript
+for a full list of contributors. <span class="xref std std-ref">Outside contributors</span> are welcome.</p>
 </section>
 <section id="funding">
 <h2><strong>Funding</strong><a class="headerlink" href="#funding" title="Permalink to this heading"></a></h2>
-<p><strong>navigate</strong> is supported by the
-<a class="reference external" href="https://cellularsignaltransduction.org">UT Southwestern and University of North Carolina Center for Cell Signaling</a>, a Biomedical Technology Development and Dissemination (BTDD)
-Center funded by the NIH National Institute of General Medical Science (RM1GM145399), and
-the <a class="reference external" href="https://www.metastasis-imaging.org">Center for Metastatic Tumor Imaging</a> program, a
-Cellular Cancer Biology Imaging Research (CCBIR) program funded by the NIH National Cancer Institute (U54CA268072).</p>
+<p><strong>navigate</strong> is supported by the</p>
+<ul class="simple">
+<li><p>NIH National Institute of General Medical Science (RM1GM145399).</p></li>
+<li><p>NIH National Cancer Institute (1U54CA268072).</p></li>
+<li><p><a class="reference external" href="https://www.utsouthwestern.edu/departments/simmons/">Simmons Comprehensive Cancer Center</a> Translational Seed Grant.</p></li>
+<li><p><a class="reference external" href="https://engage.utsouthwestern.edu/pages/membership-giving/membership-giving---presidents-research-council">UTSW President’s Research Council</a></p></li>
+</ul>
 </section>
 </section>
 

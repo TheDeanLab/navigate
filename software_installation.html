@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="I Want To…" href="i_want_to.html" />
-    <link rel="prev" title="Example Microscopes" href="implementations/implementations.html" /> 
+    <link rel="prev" title="Quick Start Guide" href="quick_start.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,7 +49,6 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="implementations/implementations.html">Example Microscopes</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Software Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#computer-specifications">Computer Specifications</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#operating-system-compatibility">Operating System Compatibility</a></li>
@@ -81,9 +80,18 @@
 <li class="toctree-l1"><a class="reference internal" href="user_guide/restapi.html">REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin/plugin_home.html">Plugin Architecture</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Software API</a></li>
 </ul>
 
         </div>
@@ -120,14 +128,15 @@
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p><strong>navigate</strong> is developed for use on Windows-based systems. This is due to the
-compatibility of device drivers for various microscope hardware components, such as
+compatibility of <a class="reference internal" href="user_guide/hardware_overview.html#firmware-overview"><span class="std std-ref">device drivers</span></a> for various microscope
+hardware components, such as
 cameras, stages, and data acquisition cards, which are predominantly designed for the
 Windows environment.</p>
 <p>While it is possible to launch the software on a Mac using synthetic hardware mode,
 users should be aware of known issues with the Tkinter interface. These issues
 include improper positioning of widgets and problems with resizing the GUI window.
 As such, the use of <strong>navigate</strong> on MacOS is not recommended.</p>
-<p>The software is untested on Linux systems.Users considering the use of <strong>navigate</strong>
+<p>The software is untested on Linux systems. Users considering the use of <strong>navigate</strong>
 software on Linux should proceed with caution and be prepared for potential
 compatibility issues, especially with respect to device drivers.</p>
 </div>
@@ -299,12 +308,14 @@ program:</p>
 <span class="gp gp-VirtualEnv">(navigate)</span> <span class="go">navigate</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
 <p>If you are running Windows, you can create a desktop shortcut to <strong>navigate</strong> by
 right-clicking the Desktop, navigating to New and then Shortcut and entering
 <code class="docutils literal notranslate"><span class="pre">%windir%\system32\cmd.exe</span> <span class="pre">&quot;/c&quot;</span> <span class="pre">C:\path\to\miniconda\Scripts\activate.bat</span> <span class="pre">navigate</span> <span class="pre">&amp;&amp;</span> <span class="pre">navigate</span></code>
 into the location text box.</p>
+<p>This provides a convenient executable shortcut to launch the software, which is
+advantageous for users who are not comfortable with the command line.</p>
 </div>
 </section>
 <section id="developer-install">
@@ -393,7 +404,7 @@ users will have different paths, they can be found online.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="implementations/implementations.html" class="btn btn-neutral float-left" title="Example Microscopes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="quick_start.html" class="btn btn-neutral float-left" title="Quick Start Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="i_want_to.html" class="btn btn-neutral float-right" title="I Want To…" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

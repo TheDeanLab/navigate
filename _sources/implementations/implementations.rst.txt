@@ -1,5 +1,5 @@
 ===========================================
-Example Microscopes
+Implemented Microscopes
 ===========================================
 
 As an example of the flexibility of the **navigate** software, we describe several

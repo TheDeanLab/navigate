@@ -49,7 +49,6 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Example Microscopes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../software_installation.html">Software Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../i_want_to.html">I Want To…</a></li>
 </ul>
@@ -59,7 +58,13 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Supported File Formats</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#tiff-ome-tiff">TIFF/OME-TIFF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#bigdataviewer-h5-n5-ome-zarr">BigDataViewer H5/N5/OME-Zarr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#image-writing-benchmarks">Image Writing Benchmarks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#image-writing-benchmarks">Image Writing Benchmarks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#timelapse-imaging">Timelapse Imaging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#z-stack-imaging">Z-Stack Imaging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#additional-sources-of-overhead">Additional Sources of Overhead</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#computer-specifications-for-benchmarks">Computer Specifications for Benchmarks</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="gui_walkthrough.html">User Interface Walkthrough</a></li>
@@ -75,9 +80,18 @@
 <li class="toctree-l1"><a class="reference internal" href="restapi.html">REST-API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_home.html">Plugin Architecture</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">Software API</a></li>
 </ul>
 
         </div>
@@ -146,25 +160,22 @@ speed. The N5 format is faster than H5 because it allows multithreaded writes.</
 <section id="image-writing-benchmarks">
 <h2>Image Writing Benchmarks<a class="headerlink" href="#image-writing-benchmarks" title="Permalink to this heading"></a></h2>
 <p>To evaluate the performance of saving imaging data in different formats, we conducted
-benchmarks on a Linux-based system. We assessed the average disk write time for TIFF,
+benchmarks on a Linux-based system. We assessed the median disk write time for TIFF,
 OME-TIFF, H5, N5, and OME-Zarr formats across image resolutions of 512x512,
 1024x1024, and 2048x2048 under two conditions: (A) capturing 1000 single-plane
 images and (B) acquiring a single z-stack composed of 1000 planes. All times
-are measured in milliseconds. Bottom panel for both A and B has a reduced y-axis to
-highlight the differences in write times between the formats. Results are also
-presented in a table format below.</p>
-<p>The initial setup for writing H5/N5 files introduces
-significant overhead, and to a lesser extent for TIFF and OME-TIFF files, which
-elevates the average write time. However, the median write time remains consistently
-low and stable across most of the acquisition. For z-stack imaging, TIFF and OME-TIFF
-formats achieved write speeds of up to approximately 400 Hz for a 2048x2048 camera
+are measured in milliseconds. Results are presented below. For z-stack imaging, TIFF
+and OME-TIFF formats achieved write speeds of up to approximately 400 Hz for a 2048x2048 camera
 resolution, surpassing the operational speeds of most contemporary sCMOS cameras.
 The Big-TIFF variant was used for both TIFF and OME-TIFF formats to accommodate the
 large file sizes.</p>
-<a class="reference internal image-reference" href="../_images/benchmarks.png"><img alt="../_images/benchmarks.png" class="align-center" src="../_images/benchmarks.png" style="width: 50%;" /></a>
+<section id="timelapse-imaging">
+<h3>Timelapse Imaging<a class="headerlink" href="#timelapse-imaging" title="Permalink to this heading"></a></h3>
+<p>1000 images acquired, with a single Z plane. Median write time reported in
+milliseconds.</p>
 <table class="docutils align-center">
 <thead>
-<tr class="row-odd"><th class="head"><p>Z=1, T=1000</p></th>
+<tr class="row-odd"><th class="head"></th>
 <th class="head"><p>TIFF</p></th>
 <th class="head"><p>OME-TIFF</p></th>
 <th class="head"><p>H5</p></th>
@@ -196,9 +207,13 @@ large file sizes.</p>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="z-stack-imaging">
+<h3>Z-Stack Imaging<a class="headerlink" href="#z-stack-imaging" title="Permalink to this heading"></a></h3>
+<p>1 image acquired, with 1000 Z planes. Median write speed time in milliseconds.</p>
 <table class="docutils align-center">
 <thead>
-<tr class="row-odd"><th class="head"><p>Z=1000, T=1</p></th>
+<tr class="row-odd"><th class="head"></th>
 <th class="head"><p>TIFF</p></th>
 <th class="head"><p>OME-TIFF</p></th>
 <th class="head"><p>H5</p></th>
@@ -230,6 +245,16 @@ large file sizes.</p>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="additional-sources-of-overhead">
+<h3>Additional Sources of Overhead<a class="headerlink" href="#additional-sources-of-overhead" title="Permalink to this heading"></a></h3>
+<p>The initial setup for writing H5/N5 files introduces
+significant overhead, and to a lesser extent for TIFF and OME-TIFF files, which
+elevates the average write time. However, the median write time remains consistently
+low and stable across most of the acquisition.</p>
+</section>
+<section id="computer-specifications-for-benchmarks">
+<h3>Computer Specifications for Benchmarks<a class="headerlink" href="#computer-specifications-for-benchmarks" title="Permalink to this heading"></a></h3>
 <p>The computer specifications that the benchmarks were performed on are as follows:</p>
 <ul class="simple">
 <li><p>Architecture: x86_64</p></li>
@@ -241,6 +266,7 @@ large file sizes.</p>
 <li><p>CPU Speed: 883.850 MHz</p></li>
 <li><p>Memory: 0.5 TB</p></li>
 </ul>
+</section>
 </section>
 </section>
 

@@ -46,6 +46,7 @@ from navigate.config.configuration_database import (
     hardwares_dict,
     hardwares_config_name_dict,
 )
+from navigate.tools.file_functions import load_yaml_file
 
 # Logger Setup
 import logging
@@ -79,6 +80,7 @@ class Configurator:
         )
 
         self.view.top_window.add_button.config(command=self.add_microscope)
+        self.view.top_window.load_button.config(command=self.load_configuration)
         self.view.top_window.save_button.config(command=self.save)
         self.view.top_window.cancel_button.config(command=self.on_cancel)
         self.create_config_window(0)
@@ -100,9 +102,22 @@ class Configurator:
         self.microscope_id += 1
 
     def save(self):
+        """Save configuration file"""
+
         def set_value(temp_dict, key_list, value):
+            """Set value
+
+            Parameters
+            ----------
+            temp_dict: dict
+                Target dictionary
+            key_list: list
+                keyword list
+            value: any
+                value of the item
+            """
             if type(key_list) is list:
-                for i in range(len(key_list)-1):
+                for i in range(len(key_list) - 1):
                     k = key_list[i]
                     temp_dict[k] = temp_dict.get(k, {})
                     temp_dict = temp_dict[k]
@@ -123,7 +138,9 @@ class Configurator:
                 hardware_name = microscope_tab.tab(hardware_tab_index, "text")
                 hardware_tab = microscope_tab.nametowidget(hardware_tab_index)
                 hardware_dict = {}
-                microscope_dict[hardwares_config_name_dict.get(hardware_name, hardware_name)] = hardware_dict
+                microscope_dict[
+                    hardwares_config_name_dict.get(hardware_name, hardware_name)
+                ] = hardware_dict
                 for variable_list in hardware_tab.variables_list:
                     if variable_list is None:
                         continue
@@ -143,11 +160,20 @@ class Configurator:
                                 ref = ref_list[i]
                                 hardware_dict[ref] = hardware_dict.get(ref, {})
                                 temp_dict = hardware_dict[ref]
-                                k_idx = format[format.index("(")+1: format.index(",")].strip()
-                                v_idx = format[format.index(",")+1:format.index(")")].strip()
+                                k_idx = format[
+                                    format.index("(") + 1 : format.index(",")
+                                ].strip()
+                                v_idx = format[
+                                    format.index(",") + 1 : format.index(")")
+                                ].strip()
                                 k = variables[k_idx].get()
+                                if k.strip() == "":
+                                    print(
+                                        f"Notice: {hardware_name} has an empty value! Please double check!"
+                                    )
+                                    
                                 if k_idx in value_dict:
-                                    k = value_dict[k_idx][v]   
+                                    k = value_dict[k_idx][v]
                                 v = variables[v_idx].get()
                                 if v_idx in value_dict:
                                     v = value_dict[v_idx][v]
@@ -157,21 +183,36 @@ class Configurator:
                             temp_dict = {}
                             hardware_dict[ref] = hardware_dict.get("ref", temp_dict)
                     for k, var in variables.items():
-                        if k in value_dict:
-                            v = value_dict[k][var.get()]
-                        else:
-                            v = var.get()
+                        try:
+                            if k in value_dict:
+                                v = value_dict[k][var.get()]
+                            else:
+                                v = var.get()
+                        except tk._tkinter.TclError:
+                            v = ""
+                            print(
+                                f"Notice: {hardware_name} has an empty value! Please double check!"
+                            )
                         set_value(temp_dict, k.split("/"), v)
 
         self.write_to_yaml(config_dict, filename)
 
     def write_to_yaml(self, config, filename):
+        """write yaml file
+
+        Parameters
+        ----------
+        config: dict
+            configuration dictionary
+        filename: str
+            yaml file name
+        """
 
         def write_func(prefix, config_dict, f):
             for k in config_dict:
                 if type(config_dict[k]) == dict:
                     f.write(f"{prefix}{k}:\n")
-                    write_func(prefix+" "*2, config_dict[k], f)
+                    write_func(prefix + " " * 2, config_dict[k], f)
                 elif type(config_dict[k]) == list:
                     list_prefix = " "
                     if k != "None":
@@ -179,25 +220,24 @@ class Configurator:
                         list_prefix = " " * 2
                     for list_item in config_dict[k]:
                         f.write(f"{prefix}{list_prefix}-\n")
-                        write_func(prefix+list_prefix*2, list_item, f)
+                        write_func(prefix + list_prefix * 2, list_item, f)
                 else:
                     f.write(f"{prefix}{k}: {config_dict[k]}\n")
-    
+
         with open(filename, "w") as f:
             f.write("microscopes:\n")
             write_func("  ", config, f)
-
 
     def create_config_window(self, id):
         """Creates the configuration window tabs."""
 
         tab_name = "Microscope-" + str(id)
         microscope_tab = MicroscopeTab(
-                            self.view.microscope_window,
-                            name=tab_name,
-                            index=id,
-                            root=self.view.root,
-                        )
+            self.view.microscope_window,
+            name=tab_name,
+            index=id,
+            root=self.view.root,
+        )
         setattr(
             self.view.microscope_window,
             f"microscope_tab_{id}",
@@ -210,14 +250,157 @@ class Configurator:
             if type(widgets) == dict:
                 microscope_tab.create_hardware_tab(hardware_type, widgets)
             else:
-                microscope_tab.create_hardware_tab(hardware_type, hardware_widgets=widgets[1], widgets=widgets[2], top_widgets=widgets[0])
+                microscope_tab.create_hardware_tab(
+                    hardware_type,
+                    hardware_widgets=widgets[1],
+                    widgets=widgets[2],
+                    top_widgets=widgets[0],
+                )
 
         # Adding tabs to self notebook
         self.view.microscope_window.add(
-            getattr(self.view.microscope_window, f"microscope_tab_{id}"),
+            microscope_tab,
             text=tab_name,
             sticky=tk.NSEW,
         )
+
+    def load_configuration(self):
+        """Load configuration"""
+
+        def get_widget_value(name, value_dict):
+            value = value_dict
+            for key in name.split("/"):
+                if key.strip() == "":
+                    return value
+                value = value.get(key, None)
+                if value is None:
+                    return None
+            return value
+
+        def get_widgets_value(widgets, value_dict):
+            temp = {}
+            for key in widgets:
+                if key == "frame_config":
+                    continue
+                if widgets[key][1] in ["Button", "Label"]:
+                    continue
+                value = get_widget_value(key, value_dict)
+                if widgets[key][1] != "Spinbox" and widgets[key][3]:
+                    reverse_value_dict = dict(
+                        map(lambda v: (v[1], v[0]), widgets[key][3].items())
+                    )
+                    temp[key] = reverse_value_dict[value]
+                else:
+                    temp[key] = value
+            return temp
+
+        def build_widgets_value(widgets, value_dict):
+            if widgets is None or value_dict is None:
+                return [None]
+            result = []
+            ref = ""
+            format = ""
+            if "frame_config" in widgets:
+                ref = widgets["frame_config"].get("ref", "")
+                format = widgets["frame_config"].get("format", "")
+            if format.startswith("list"):
+                if ref != "" and ref.lower() != "none":
+                    value_dict = get_widget_value(ref, value_dict)
+                if type(value_dict) is not list:
+                    return [None]
+                for i in range(len(value_dict)):
+                    result.append(get_widgets_value(widgets, value_dict[i]))
+            elif format.startswith("item"):
+                format_list = format.split(";")
+                ref_list = ref.split(";")
+                for i, format_item in enumerate(format_list):
+                    k_idx = format_item[
+                        format_item.index("(") + 1 : format_item.index(",")
+                    ].strip()
+                    v_idx = format_item[
+                        format_item.index(",") + 1 : format_item.index(")")
+                    ].strip()
+                    temp_widget_values = get_widget_value(ref_list[i], value_dict)
+                    for j, k in enumerate(temp_widget_values.keys()):
+                        if len(result) < j + 1:
+                            result.append({k_idx: k, v_idx: temp_widget_values[k]})
+                        else:
+                            result[j][k_idx] = k
+                            result[j][v_idx] = temp_widget_values[k]
+            else:
+                if ref != "" and ref.lower() != "none":
+                    value_dict = get_widget_value(ref, value_dict)
+                result.append(get_widgets_value(widgets, value_dict))
+
+            return result
+
+        file_name = filedialog.askopenfilename(
+            defaultextension=".yml", filetypes=[("Yaml file", "*.yml *.yaml")]
+        )
+        if not file_name:
+            return
+        # delete microscopes
+        for index in range(self.view.microscope_window.index("end")):
+            tab_id = self.view.microscope_window.tabs()[index]
+            self.view.microscope_window.forget(tab_id)
+        self.view.microscope_window.tab_list = []
+
+        config_dict = load_yaml_file(file_name)
+        for i, microscope_name in enumerate(config_dict["microscopes"].keys()):
+            microscope_tab = MicroscopeTab(
+                self.view.microscope_window,
+                name=microscope_name,
+                index=i,
+                root=self.view.root,
+            )
+            self.view.microscope_window.add(
+                microscope_tab,
+                text=microscope_name,
+                sticky=tk.NSEW,
+            )
+            self.view.microscope_window.tab_list.append(microscope_name)
+            for hardware_type, widgets in hardwares_dict.items():
+                hardware_ref_name = hardwares_config_name_dict[hardware_type]
+                # build dictionary values for widgets
+                if type(widgets) == dict:
+                    try:
+                        widgets_value = build_widgets_value(
+                            widgets,
+                            config_dict["microscopes"][microscope_name][
+                                hardware_ref_name
+                            ],
+                        )
+                    except:
+                        widgets_value = [None]
+                    microscope_tab.create_hardware_tab(
+                        hardware_type, widgets, hardware_widgets_value=widgets_value
+                    )
+                else:
+                    try:
+                        widgets_value = [
+                            build_widgets_value(
+                                widgets[1],
+                                config_dict["microscopes"][microscope_name][
+                                    hardware_ref_name
+                                ],
+                            ),
+                            build_widgets_value(
+                                widgets[2],
+                                config_dict["microscopes"][microscope_name][
+                                    hardware_ref_name
+                                ],
+                            ),
+                        ]
+                    except:
+                        widgets_value = [[None], [None]]
+                    microscope_tab.create_hardware_tab(
+                        hardware_type,
+                        hardware_widgets=widgets[1],
+                        widgets=widgets[2],
+                        top_widgets=widgets[0],
+                        hardware_widgets_value=widgets_value[0],
+                        constants_widgets_value=widgets_value[1],
+                    )
 
     def device_selected(self, event):
         """Handle the event when a device is selected from the dropdown."""

@@ -49,15 +49,17 @@ widget_types = {
     "Input": ttk.Entry,
     "Spinbox": ttk.Spinbox,
     "Checkbutton": ttk.Checkbutton,
-    "Button": ttk.Button
+    "Button": ttk.Button,
 }
 
 variable_types = {
     "string": tk.StringVar,
     "float": tk.DoubleVar,
     "bool": tk.BooleanVar,
-    "int": tk.IntVar
+    "int": tk.IntVar,
 }
+
+
 class ConfigurationAssistantWindow(ttk.Frame):
     def __init__(self, root, *args, **kwargs):
         """Initiates the main application window
@@ -145,8 +147,11 @@ class TopWindow(ttk.Frame):
         self.add_button.grid(row=0, column=0, sticky=tk.NE, padx=3, pady=(10, 1))
         self.add_button.config(width=15)
 
+        self.load_button = tk.Button(root, text="Load Configuration")
+        self.load_button.grid(row=0, column=1, sticky=tk.NE, padx=3, pady=(10, 1))
+
         self.save_button = tk.Button(root, text="Save")
-        self.save_button.grid(row=0, column=1, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.save_button.grid(row=0, column=2, sticky=tk.NE, padx=3, pady=(10, 1))
         self.save_button.config(width=15)
 
         #: tk.Button: The button to cancel the application.
@@ -184,7 +189,6 @@ class MicroscopeWindow(DockableNotebook):
             self.tab_list.remove(tab_name)
 
 
-
 class MicroscopeTab(DockableNotebook):
     def __init__(self, parent, name, index, root, *args, **kwargs):
 
@@ -195,18 +199,31 @@ class MicroscopeTab(DockableNotebook):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        
-    def create_hardware_tab(self, name, hardware_widgets, widgets=None, top_widgets=None):
-        tab = HardwareTab(name, hardware_widgets, widgets=widgets, top_widgets=top_widgets)
+    def create_hardware_tab(
+        self, name, hardware_widgets, widgets=None, top_widgets=None, **kwargs
+    ):
+        tab = HardwareTab(
+            name, hardware_widgets, widgets=widgets, top_widgets=top_widgets, **kwargs
+        )
         self.tab_list.append(name)
         self.add(tab, text=name, sticky=tk.NSEW)
 
 
 class HardwareTab(ttk.Frame):
-    def __init__(self, name, hardware_widgets, *args, widgets=None, top_widgets=None, **kwargs):
+    def __init__(
+        self,
+        name,
+        hardware_widgets,
+        *args,
+        widgets=None,
+        top_widgets=None,
+        hardware_widgets_value=[None],
+        constants_widgets_value=[None],
+        **kwargs
+    ):
         # Init Frame
         tk.Frame.__init__(self, *args, **kwargs)
-        
+
         self.name = name
 
         # Formatting
@@ -215,7 +232,7 @@ class HardwareTab(ttk.Frame):
 
         self.top_frame = ttk.Frame(self)
         self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=20)
-        
+
         self.hardware_frame = ttk.Frame(self)
         self.hardware_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=20)
 
@@ -230,14 +247,19 @@ class HardwareTab(ttk.Frame):
 
         self.build_widgets(top_widgets, parent=self.top_frame)
 
-        self.build_widgets(hardware_widgets, parent=self.hardware_frame)
+        for widgets_value in hardware_widgets_value:
+            self.build_widgets(
+                hardware_widgets,
+                parent=self.hardware_frame,
+                widgets_value=widgets_value,
+            )
 
-        self.build_widgets(widgets)
+        for widgets_value in constants_widgets_value:
+            self.build_widgets(widgets, widgets_value=widgets_value)
 
-    
     def build_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
         """Build hardware widgets
-        
+
         Parameters
         ----------
         hardware_widgets: dict
@@ -257,7 +279,7 @@ class HardwareTab(ttk.Frame):
                 label = ttk.Label(content_frame, text=v[0])
                 label.grid(row=i, column=0, sticky=tk.NW, padx=3)
                 seperator = ttk.Separator(content_frame)
-                seperator.grid(row=i+1, columnspan=2, sticky=tk.NSEW, padx=3)
+                seperator.grid(row=i + 1, columnspan=2, sticky=tk.NSEW, padx=3)
                 i += 2
                 continue
             elif v[1] != "Button":
@@ -270,9 +292,13 @@ class HardwareTab(ttk.Frame):
                     label.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=3)
                     i += 1
                 if v[1] == "Checkbutton":
-                    widget = widget_types[v[1]](content_frame, text="", variable=self.variables[k])
+                    widget = widget_types[v[1]](
+                        content_frame, text="", variable=self.variables[k]
+                    )
                 else:
-                    widget = widget_types[v[1]](content_frame, textvariable=self.variables[k], width=30)
+                    widget = widget_types[v[1]](
+                        content_frame, textvariable=self.variables[k], width=30
+                    )
                 if v[1] == "Combobox":
                     if type(v[3]) == list:
                         v[3] = dict([(t, t) for t in v[3]])
@@ -291,15 +317,27 @@ class HardwareTab(ttk.Frame):
                     widget.config(increment=v[3].get("step", 1))
                     widget.set(v[3].get("from", 0))
             else:
-                widget = ttk.Button(content_frame, text=v[0], command=self.build_event_handler(hardware_widgets, k, frame, self.frame_row))
+                widget = ttk.Button(
+                    content_frame,
+                    text=v[0],
+                    command=self.build_event_handler(
+                        hardware_widgets, k, frame, self.frame_row
+                    ),
+                )
             if direction == "vertical":
                 widget.grid(row=i, column=1, sticky=tk.NSEW, padx=5, pady=3)
             else:
                 widget.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=3)
+
+            if len(v) >= 5 and v[4]:
+                label = ttk.Label(content_frame, text=v[4])
+                if direction == "vertical":
+                    label.grid(row=i, column=2, sticky=tk.NW, padx=(10, 10), pady=3)
+                else:
+                    label.grid(row=1, column=i, sticky=tk.NW, padx=(10, 3), pady=0)
             i += 1
 
-
-    def build_widgets(self, widgets, *args, parent=None, **kwargs):
+    def build_widgets(self, widgets, *args, parent=None, widgets_value=None, **kwargs):
         if not widgets:
             return
         if parent is None:
@@ -308,11 +346,13 @@ class HardwareTab(ttk.Frame):
         title = "Hardware"
         format = None
         temp_ref = None
+        direction = "vertical"
         if "frame_config" in widgets:
             collapsible = widgets["frame_config"].get("collapsible", False)
             title = widgets["frame_config"].get("title", "Hardware")
             format = widgets["frame_config"].get("format", None)
             temp_ref = widgets["frame_config"].get("ref", None)
+            direction = widgets["frame_config"].get("direction", "vertical")
         if collapsible:
             self.foldAllFrames()
             frame = CollapsibleFrame(parent=parent, title=title)
@@ -322,9 +362,8 @@ class HardwareTab(ttk.Frame):
             frame = ttk.Frame(parent)
         frame.grid(row=self.frame_row, column=0, sticky=tk.NSEW, padx=20)
         self.frame_row += 1
-        
+
         ref = None
-        direction = "vertical"
         if kwargs:
             ref = kwargs.get("ref", None)
             direction = kwargs.get("direction", "vertical")
@@ -333,6 +372,13 @@ class HardwareTab(ttk.Frame):
         self.values_dict = {}
         self.variables_list.append((self.variables, self.values_dict, ref, format))
         self.build_hardware_widgets(widgets, frame=frame, direction=direction)
+
+        if widgets_value:
+            for k, v in widgets_value.items():
+                try:
+                    self.variables[k].set(v)
+                except (TypeError, ValueError):
+                    pass
 
     def foldAllFrames(self, except_frame=None):
         for child in self.hardware_frame.winfo_children():
@@ -343,28 +389,37 @@ class HardwareTab(ttk.Frame):
                 child.fold()
 
     def create_toggle_function(self, frame):
-
         def func(event):
             self.foldAllFrames(frame)
             frame.toggle_visibility()
-        
+
         return func
 
     def build_event_handler(self, hardware_widgets, key, frame, frame_id):
-        
         def func(*args, **kwargs):
             v = hardware_widgets[key]
             if "widgets" in v[2]:
                 if "parent" in v[2]:
-                    parent = self.hardware_frame if v[2]["parent"].startswith("hardware") else None
+                    parent = (
+                        self.hardware_frame
+                        if v[2]["parent"].startswith("hardware")
+                        else None
+                    )
                 else:
                     parent_id = frame.winfo_parent()
                     parent = self.nametowidget(parent_id)
-                widgets = hardware_widgets if v[2]["widgets"] == "self" else v[2]["widgets"]
-                self.build_widgets(widgets, parent=parent, ref=v[2].get("ref", None), direction=v[2].get("direction", "vertical"))
+                widgets = (
+                    hardware_widgets if v[2]["widgets"] == "self" else v[2]["widgets"]
+                )
+                self.build_widgets(
+                    widgets,
+                    parent=parent,
+                    ref=v[2].get("ref", None),
+                    direction=v[2].get("direction", "vertical"),
+                )
                 # collaps other frame
             elif v[2].get("delete", False):
                 frame.grid_remove()
-                self.variables_list[frame_id-self.row_offset] = None
+                self.variables_list[frame_id - self.row_offset] = None
 
         return func

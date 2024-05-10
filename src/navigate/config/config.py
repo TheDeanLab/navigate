@@ -982,6 +982,10 @@ def verify_configuration(manager, configuration):
         if "mirror" in device_config[microscope_name].keys() and "mirror" not in hardware_dict:
             hardware_dict["mirror"] = device_config[microscope_name]["mirror"]["hardware"]
 
+    if "daq" not in hardware_dict:
+        hardware_dict["daq"] = {
+            "type": "synthetic"
+        }
     update_config_dict(manager, configuration["configuration"], "hardware", hardware_dict)
 
     update_config_dict(manager, configuration["configuration"], "gui", {"channels": {"count": channel_count}})

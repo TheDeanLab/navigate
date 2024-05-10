@@ -28,7 +28,7 @@ configure each of these devices is provided :doc:`here <hardware/supported_hardw
         * Imagine Optics
    * - *Filter Wheel*
      -
-        * Applied Scientific Instrumentation with Tiger Controller
+        * ASI with Tiger Controller
         * Sutter Lambda 10-3
         * Sutter Lambda LS
    * - *Galvanometers*
@@ -44,8 +44,8 @@ configure each of these devices is provided :doc:`here <hardware/supported_hardw
    * - *Stages*
      -
         * Analog controlled galvanometers and piezoelectric stages.
-        * Applied Scientific Instrumentation with Tiger Controller
-        * Applied Scientific Instrumentation with MFC2000 Controller
+        * ASI with Tiger Controller
+        * ASI with MFC2000 Controller
         * Mad City Labs Nano-Drive
         * Physik Instrumente
         * Sutter MP285
@@ -57,3 +57,47 @@ configure each of these devices is provided :doc:`here <hardware/supported_hardw
    * - *Zoom*
      -
         * Dynamixel MX-28R
+
+
+Device Firmware
+===============
+
+.. _firmware_overview:
+
+
+**navigate** has been tested with the following firmware. Devices that are controlled
+with analog or digital voltages are omitted.
+
+
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - **Manufacturer**
+     - **Firmware Version**
+   * - *ASI*
+     -
+        * Tiger Controller 2.2.0.
+
+   * - *Dynamixel*
+     -
+        * Dynamixel MX-28R
+
+   * - *National Instruments*
+     -
+        * NI-DAQmx Device Drivers: 22.5.0, 22.8.0, 23.3.0, 23.8.0
+
+   * - *Hamamatsu*
+     -
+        * DCAM API: 20.7.641, 21.7.4321, 22.9.6509, 22.11.4321, 23.12.6736
+        * Camera Firmware: 2.21B, 2.53.A, 3.20.A, 4.30.B,
+        * Active Silicon CoaXpress: 1.10, 1.13, 1.21.
+
+   * - *Photometrics*
+     -
+        * PVCAM: 3.9.13
+
+   * - *Physik Instrumente*
+     -
+        * PIMikroMove: 2.36.1.0
+        * PI_GCS2_DLL: 3.22.0.0

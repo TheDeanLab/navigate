@@ -32,7 +32,7 @@
 # Standard Library Imports
 import tkinter as tk
 from time import sleep
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 # Third Party Imports
 
@@ -80,6 +80,7 @@ class Configurator:
         )
 
         self.view.top_window.add_button.config(command=self.add_microscope)
+        self.view.top_window.new_button.config(command=self.new_configuration)
         self.view.top_window.load_button.config(command=self.load_configuration)
         self.view.top_window.save_button.config(command=self.save)
         self.view.top_window.cancel_button.config(command=self.on_cancel)
@@ -97,9 +98,23 @@ class Configurator:
         exit()
 
     def add_microscope(self):
-        """Evaluate the number of configurations and create the configuration window"""
+        """Add a new microscope tab"""
         self.create_config_window(self.microscope_id)
         self.microscope_id += 1
+
+    def delete_microscopes(self):
+        """Delete all microscopes"""
+        # delete microscopes
+        for index in range(self.view.microscope_window.index("end")):
+            tab_id = self.view.microscope_window.tabs()[index]
+            self.view.microscope_window.forget(tab_id)
+        self.view.microscope_window.tab_list = []
+        self.microscope_id = 0
+
+    def new_configuration(self):
+        """Create new configurations"""
+        self.delete_microscopes()
+        self.create_config_window(self.microscope_id)
 
     def save(self):
         """Save configuration file"""
@@ -128,6 +143,8 @@ class Configurator:
         )
         if not filename:
             return
+        # warning_info
+        warning_info = {}
         config_dict = {}
         for tab_index in self.view.microscope_window.tabs():
             microscope_name = self.view.microscope_window.tab(tab_index, "text")
@@ -168,8 +185,9 @@ class Configurator:
                                 ].strip()
                                 k = variables[k_idx].get()
                                 if k.strip() == "":
+                                    warning_info[hardware_name] = True
                                     print(
-                                        f"Notice: {hardware_name} has an empty value! Please double check!"
+                                        f"Notice: {hardware_name} has an empty value {ref}! Please double check if it's okay!"
                                     )
                                     
                                 if k_idx in value_dict:
@@ -191,11 +209,18 @@ class Configurator:
                         except tk._tkinter.TclError:
                             v = ""
                             print(
-                                f"Notice: {hardware_name} has an empty value! Please double check!"
+                                f"Notice: {hardware_name} has an empty value {k}! Please double check!"
                             )
+                            warning_info[hardware_name] = True
                         set_value(temp_dict, k.split("/"), v)
 
         self.write_to_yaml(config_dict, filename)
+        # display warning
+        if warning_info:
+            messagebox.showwarning(
+                title="Configuration",
+                message=f"There are empty value(s) with {', '.join(warning_info.keys())}. Please double check!"
+            )
 
     def write_to_yaml(self, config, filename):
         """write yaml file
@@ -234,14 +259,7 @@ class Configurator:
         tab_name = "Microscope-" + str(id)
         microscope_tab = MicroscopeTab(
             self.view.microscope_window,
-            name=tab_name,
-            index=id,
             root=self.view.root,
-        )
-        setattr(
-            self.view.microscope_window,
-            f"microscope_tab_{id}",
-            microscope_tab,
         )
         self.view.microscope_window.tab_list.append(tab_name)
         for hardware_type, widgets in hardwares_dict.items():
@@ -268,6 +286,7 @@ class Configurator:
         """Load configuration"""
 
         def get_widget_value(name, value_dict):
+            """Get the value from a dict"""
             value = value_dict
             for key in name.split("/"):
                 if key.strip() == "":
@@ -278,6 +297,7 @@ class Configurator:
             return value
 
         def get_widgets_value(widgets, value_dict):
+            """Get all key-value from valude_dict, keys are from widgets"""
             temp = {}
             for key in widgets:
                 if key == "frame_config":
@@ -285,6 +305,7 @@ class Configurator:
                 if widgets[key][1] in ["Button", "Label"]:
                     continue
                 value = get_widget_value(key, value_dict)
+                # widgets[key][3] is the value mapping dict
                 if widgets[key][1] != "Spinbox" and widgets[key][3]:
                     reverse_value_dict = dict(
                         map(lambda v: (v[1], v[0]), widgets[key][3].items())
@@ -295,6 +316,7 @@ class Configurator:
             return temp
 
         def build_widgets_value(widgets, value_dict):
+            """According to valude_dict build values for widgets"""
             if widgets is None or value_dict is None:
                 return [None]
             result = []
@@ -333,24 +355,27 @@ class Configurator:
                 result.append(get_widgets_value(widgets, value_dict))
 
             return result
-
+        # ask file name
         file_name = filedialog.askopenfilename(
             defaultextension=".yml", filetypes=[("Yaml file", "*.yml *.yaml")]
         )
         if not file_name:
             return
-        # delete microscopes
-        for index in range(self.view.microscope_window.index("end")):
-            tab_id = self.view.microscope_window.tabs()[index]
-            self.view.microscope_window.forget(tab_id)
-        self.view.microscope_window.tab_list = []
 
+        # read configuration.yaml
         config_dict = load_yaml_file(file_name)
+        if config_dict is None or "microscopes" not in config_dict:
+            messagebox.showerror(
+                title="Configuration",
+                message="It's not a valid configuration.yaml file!"
+            )
+            return
+        
+        self.delete_microscopes()
+
         for i, microscope_name in enumerate(config_dict["microscopes"].keys()):
             microscope_tab = MicroscopeTab(
                 self.view.microscope_window,
-                name=microscope_name,
-                index=i,
                 root=self.view.root,
             )
             self.view.microscope_window.add(
@@ -359,6 +384,7 @@ class Configurator:
                 sticky=tk.NSEW,
             )
             self.view.microscope_window.tab_list.append(microscope_name)
+            
             for hardware_type, widgets in hardwares_dict.items():
                 hardware_ref_name = hardwares_config_name_dict[hardware_type]
                 # build dictionary values for widgets

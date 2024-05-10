@@ -89,7 +89,7 @@ class ConfigurationAssistantWindow(ttk.Frame):
         except tk.TclError:
             pass
 
-        self.root.resizable(True, True)
+        self.root.resizable(False, False)
         self.root.geometry("")
         self.root.rowconfigure(0, weight=1)
         self.root.columnconfigure(0, weight=1)
@@ -103,7 +103,7 @@ class ConfigurationAssistantWindow(ttk.Frame):
         self.grid(column=0, row=0, sticky=tk.NSEW)
         self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
         self.microscope_frame.grid(
-            row=1, column=0, columnspan=4, sticky=tk.NSEW, padx=3, pady=3
+            row=1, column=0, columnspan=5, sticky=tk.NSEW, padx=3, pady=3
         )
 
         #: ttk.Frame: The top frame of the application
@@ -121,7 +121,7 @@ class TopWindow(ttk.Frame):
     """
 
     def __init__(self, main_frame, root, *args, **kwargs):
-        """Initialize Acquire Bar.
+        """Initialize Top Frame.
 
         Parameters
         ----------
@@ -143,25 +143,44 @@ class TopWindow(ttk.Frame):
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        self.add_button = tk.Button(root, text="Add A Microscope")
-        self.add_button.grid(row=0, column=0, sticky=tk.NE, padx=3, pady=(10, 1))
-        self.add_button.config(width=15)
+        self.new_button = tk.Button(root, text="New Configuration")
+        self.new_button.grid(row=0, column=0, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.new_button.config(width=15)
 
         self.load_button = tk.Button(root, text="Load Configuration")
         self.load_button.grid(row=0, column=1, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.load_button.config(width=15)
+
+        self.add_button = tk.Button(root, text="Add A Microscope")
+        self.add_button.grid(row=0, column=2, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.add_button.config(width=15)
 
         self.save_button = tk.Button(root, text="Save")
-        self.save_button.grid(row=0, column=2, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.save_button.grid(row=0, column=3, sticky=tk.NE, padx=3, pady=(10, 1))
         self.save_button.config(width=15)
 
         #: tk.Button: The button to cancel the application.
         self.cancel_button = tk.Button(root, text="Cancel")
-        self.cancel_button.grid(row=0, column=3, sticky=tk.NE, padx=3, pady=(10, 1))
+        self.cancel_button.grid(row=0, column=4, sticky=tk.NE, padx=3, pady=(10, 1))
         self.cancel_button.config(width=15)
 
 
 class MicroscopeWindow(DockableNotebook):
     def __init__(self, frame, root, *args, **kwargs):
+        """Initialize Microscope Frame.
+
+        Parameters
+        ----------
+        main_frame : ttk.Frame
+            Window to place widgets in.
+        root : tk.Tk
+            Root window of the application.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+        """
+
         DockableNotebook.__init__(self, frame, root, *args, **kwargs)
         self.grid(row=0, column=0, sticky=tk.NSEW)
 
@@ -181,6 +200,7 @@ class MicroscopeWindow(DockableNotebook):
             self.tab_list.append(result)
 
     def delete_microscope(self):
+        """Delete selected microscope"""
         tab = self.select()
         tab_name = self.tab(tab)["text"]
         current_tab_index = self.index("current")
@@ -190,7 +210,20 @@ class MicroscopeWindow(DockableNotebook):
 
 
 class MicroscopeTab(DockableNotebook):
-    def __init__(self, parent, name, index, root, *args, **kwargs):
+    def __init__(self, parent, root, *args, **kwargs):
+        """Initialize Microscope Tab.
+
+        Parameters
+        ----------
+        main_frame : ttk.Frame
+            Window to place widgets in.
+        root : tk.Tk
+            Root window of the application.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+        """
 
         # Init Frame
         DockableNotebook.__init__(self, parent, root, *args, **kwargs)
@@ -202,6 +235,23 @@ class MicroscopeTab(DockableNotebook):
     def create_hardware_tab(
         self, name, hardware_widgets, widgets=None, top_widgets=None, **kwargs
     ):
+        """Create hardware tab
+        
+        Parameters
+        ----------
+        name : str
+            tab name/hardware name
+        hardware_widgets : dict
+            hardware widgets dict
+        widgets : dict
+            constants widgets dict
+        top_widgets : dict
+            button widgets dict
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments
+        """
         tab = HardwareTab(
             name, hardware_widgets, widgets=widgets, top_widgets=top_widgets, **kwargs
         )
@@ -221,6 +271,27 @@ class HardwareTab(ttk.Frame):
         constants_widgets_value=[None],
         **kwargs
     ):
+        """Initialize Microscope Tab.
+
+        Parameters
+        ----------
+        name : str
+            tab name/hardware name
+        hardware_widgets : dict
+            hardware widgets dict
+        widgets : dict
+            constants widgets dict
+        top_widgets : dict
+            button widgets dict
+        hardware_widgets_value : list[dict]
+           list of values for hardware widgets
+        constants_widgets_value : list[dict]
+           list of values for constants widgets
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments
+        """
         # Init Frame
         tk.Frame.__init__(self, *args, **kwargs)
 
@@ -229,15 +300,32 @@ class HardwareTab(ttk.Frame):
         # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
+        scroll_frame = ttk.Frame(self)
+        scroll_frame.grid(row=3, column=0, sticky=tk.NSEW)
+        canvas = tk.Canvas(scroll_frame, width=1000, height=500)
+        scrollbar = ttk.Scrollbar(scroll_frame, orient="vertical", command=canvas.yview)
+        content_frame = ttk.Frame(canvas)
 
-        self.top_frame = ttk.Frame(self)
-        self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=20)
+        content_frame.bind(
+            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
 
-        self.hardware_frame = ttk.Frame(self)
-        self.hardware_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=20)
+        canvas.create_window((0, 0), window=content_frame, anchor="nw")
 
-        self.bottom_frame = ttk.Frame(self)
-        self.bottom_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=20)
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        self.top_frame = ttk.Frame(content_frame)
+
+        self.top_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10)
+
+        self.hardware_frame = ttk.Frame(content_frame)
+        self.hardware_frame.grid(row=1, column=0, sticky=tk.NSEW, padx=10)
+
+        self.bottom_frame = ttk.Frame(content_frame)
+        self.bottom_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=10)
         self.frame_row = 0
         self.row_offset = self.frame_row + 1
 
@@ -254,16 +342,28 @@ class HardwareTab(ttk.Frame):
                 widgets_value=widgets_value,
             )
 
+        count = 0
         for widgets_value in constants_widgets_value:
             self.build_widgets(widgets, widgets_value=widgets_value)
+            # if self.name in ["Filter Wheel"]:
+            #     count += 1
+            #     print("building widgets value:", self.name, widgets_value)
+            #     if count > 4:
+                    
+            # if count >= 10:
+            #     break
 
-    def build_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
-        """Build hardware widgets
+    def create_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
+        """create widgets
 
         Parameters
         ----------
-        hardware_widgets: dict
-            name: (display_name, widget_type, value_type, values, condition)
+        hardware_widgets : dict
+            name: (display_name, widget_type, value_type, values, info)
+        frame : tk.Frame
+            the parent frame for widgets
+        direction : str
+            direction of the widget layouts
         """
         if hardware_widgets is None:
             return
@@ -289,7 +389,7 @@ class HardwareTab(ttk.Frame):
                 if direction == "vertical":
                     label.grid(row=i, column=0, sticky=tk.NW, padx=(3, 10), pady=3)
                 else:
-                    label.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=3)
+                    label.grid(row=0, column=i, sticky=tk.NW, padx=(5, 3), pady=3)
                     i += 1
                 if v[1] == "Checkbutton":
                     widget = widget_types[v[1]](
@@ -327,7 +427,7 @@ class HardwareTab(ttk.Frame):
             if direction == "vertical":
                 widget.grid(row=i, column=1, sticky=tk.NSEW, padx=5, pady=3)
             else:
-                widget.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=3)
+                widget.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=(3, 0))
 
             if len(v) >= 5 and v[4]:
                 label = ttk.Label(content_frame, text=v[4])
@@ -338,6 +438,21 @@ class HardwareTab(ttk.Frame):
             i += 1
 
     def build_widgets(self, widgets, *args, parent=None, widgets_value=None, **kwargs):
+        """Build widgets
+        
+        Parameters
+        ----------
+        widgets : dict
+            widget dict
+        parent : frame
+            parent frame to put widgets
+        widgets_value : dict
+            valude dict of widgets
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments, ref="reference name", direction="vertical"
+        """
         if not widgets:
             return
         if parent is None:
@@ -371,16 +486,28 @@ class HardwareTab(ttk.Frame):
         self.variables = {}
         self.values_dict = {}
         self.variables_list.append((self.variables, self.values_dict, ref, format))
-        self.build_hardware_widgets(widgets, frame=frame, direction=direction)
-
+        self.create_hardware_widgets(widgets, frame=frame, direction=direction)
+        
         if widgets_value:
             for k, v in widgets_value.items():
                 try:
-                    self.variables[k].set(v)
+                    if k == "axes":
+                        print("*** type", type(v), v, str(v))
+                    self.variables[k].set(str(v))
                 except (TypeError, ValueError):
                     pass
+                except tk._tkinter.TclError:
+                    pass
+
 
     def foldAllFrames(self, except_frame=None):
+        """Fold all collapsible frames except one frame
+
+        Parameters
+        ----------
+        except_frame : tk.Frame
+            the unfold frame
+        """
         for child in self.hardware_frame.winfo_children():
             if isinstance(child, CollapsibleFrame) and child is not except_frame:
                 child.fold()
@@ -389,6 +516,13 @@ class HardwareTab(ttk.Frame):
                 child.fold()
 
     def create_toggle_function(self, frame):
+        """Toggle collapsible frame
+        
+        Parameters
+        ----------
+        frame : tk.Frame
+            the frame to toggle
+        """
         def func(event):
             self.foldAllFrames(frame)
             frame.toggle_visibility()
@@ -396,6 +530,19 @@ class HardwareTab(ttk.Frame):
         return func
 
     def build_event_handler(self, hardware_widgets, key, frame, frame_id):
+        """Build button event handler
+        
+        Parameters
+        ----------
+        hardware_widgets : dict
+            widget dict containing the button
+        key : str
+            reference of the button
+        frame : tk.Frame
+            the frame to put/delete widgets
+        frame_id : int
+            index of the frame
+        """
         def func(*args, **kwargs):
             v = hardware_widgets[key]
             if "widgets" in v[2]:

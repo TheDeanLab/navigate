@@ -955,7 +955,10 @@ def verify_configuration(manager, configuration):
             ref_list["camera"].append(camera_idx)
             hardware_dict["camera"].append(camera_config["hardware"])
 
-        channel_count = max(channel_count, camera_config.get("count", 5))
+        try:
+            channel_count = max(channel_count, camera_config.get("count", 5))
+        except TypeError:
+            channel_count = 5
 
         # zoom (one zoom)
         if "zoom" not in hardware_dict:

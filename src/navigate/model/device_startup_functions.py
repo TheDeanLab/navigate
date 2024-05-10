@@ -488,8 +488,8 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                         exception=TigerException,
                     )
                 )
-        
-        elif stage_type == "MS2000" and platform.system() == "Windows":
+        # TODO: This logic will not make sense if you do not have the ASI filterwheel?
+        elif (stage_type == "MS2000" and platform.system() == "Windows"):
             """ Filter wheel can be controlled from the same Tiger Controller. If
             so, then we will load this as a shared device. If not, we will create the
             connection to the Tiger Controller.
@@ -784,8 +784,8 @@ def start_zoom(
         )
     else:
         device_not_found(configuration["configuration"]["hardware"]["zoom"]["type"])
-
-
+        
+        
 def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devices={}):
     """Initializes the Filter Wheel class on a dedicated thread.
 
@@ -836,6 +836,17 @@ def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devic
         )
         return tiger_controller
 
+    elif device_type == "NI":
+        from navigate.model.devices.filter_wheel.filter_wheel_daq import (
+            build_filter_wheel_connection,
+        )
+        daq_fw_controller = auto_redial(
+            build_filter_wheel_connection,
+            (),
+            exception=Exception,
+        )
+        return daq_fw_controller
+    
     elif (
         device_type.lower() == "syntheticfilterwheel"
         or device_type.lower() == "synthetic"
@@ -893,7 +904,6 @@ def start_filter_wheel(
         device_type = configuration["configuration"]["microscopes"][microscope_name][
             "filter_wheel"
         ]["hardware"]["type"]
-
     if device_type == "SutterFilterWheel":
         from navigate.model.devices.filter_wheel.filter_wheel_sutter import (
             SutterFilterWheel,
@@ -906,6 +916,12 @@ def start_filter_wheel(
 
         return ASIFilterWheel(microscope_name, device_connection, configuration)
 
+    elif device_type == "NI":
+        
+        from navigate.model.devices.filter_wheel.filter_wheel_daq import DAQFilterWheel
+        
+        return DAQFilterWheel(microscope_name, device_connection, configuration)
+    
     elif (
         device_type.lower() == "syntheticfilterwheel"
         or device_type.lower() == "synthetic"
@@ -1336,14 +1352,6 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
         device_ref_name = build_ref_name("_", device["type"])
         devices["mirror"][device_ref_name] = load_mirror(configuration, is_synthetic)
 
-    # load filter wheel
-    if "filter_wheel" in configuration["configuration"]["hardware"].keys():
-        devices["filter_wheel"] = {}
-        device = configuration["configuration"]["hardware"]["filter_wheel"]
-        devices["filter_wheel"][device["type"]] = load_filter_wheel_connection(
-            configuration, is_synthetic, plugin_devices
-        )
-
     # load zoom
     if "zoom" in configuration["configuration"]["hardware"].keys():
         devices["zoom"] = {}
@@ -1356,6 +1364,14 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
     # load daq
     if "daq" in configuration["configuration"]["hardware"].keys():
         devices["daq"] = start_daq(configuration, is_synthetic)
+
+    # load filter wheel
+    if "filter_wheel" in configuration["configuration"]["hardware"].keys():
+        devices["filter_wheel"] = {}
+        device = configuration["configuration"]["hardware"]["filter_wheel"]
+        devices["filter_wheel"][device["type"]] = load_filter_wheel_connection(
+            configuration, is_synthetic, plugin_devices
+        )
 
     # load stage
     if "stage" in configuration["configuration"]["hardware"].keys():

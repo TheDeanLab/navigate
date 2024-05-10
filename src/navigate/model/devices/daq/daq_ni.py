@@ -37,7 +37,10 @@ import traceback
 
 # Third Party Imports
 import nidaqmx
+import nidaqmx.constants
+import nidaqmx.task
 import numpy as np
+import time
 
 # Local Imports
 from navigate.model.devices.daq.daq_base import DAQBase
@@ -516,3 +519,33 @@ class NIDAQ(DAQBase):
 
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()
+
+    def create_do_pulse(self, address, wait_until_done_delay=None):
+        print("DEBUG")
+        print("Create DO Pulse")
+        self.filter_wheel_task = nidaqmx.Task()
+        # filter_wheel_channel = self.configuration["configuration"]["microscopes"][self.microscope_name]["filter_wheel"]["hardware"]["channel"]
+        num_false = 50
+        num_true = 100
+        pulse_arr = np.concatenate((
+            np.zeros(num_false, dtype=bool),
+            np.ones(num_true, dtype=bool),
+            np.zeros(num_false, dtype=bool)
+        ))
+        num_arr = len(pulse_arr)
+        self.filter_wheel_task.do_channels.add_do_chan(address)
+        
+        #apply waveform templates
+        self.filter_wheel_task.timing.cfg_implicit_timing(
+            sample_mode=nidaqmx.constants.AcquisitionType.FINITE, 
+            samps_per_chan= num_arr 
+        )
+        
+        self.filter_wheel_task.write(pulse_arr, auto_start=True)
+    
+        #  Wheel Position Change Delay
+        if wait_until_done_delay:
+            time.sleep(self.wait_until_done_delay)
+            
+        self.filter_wheel_task.stop()
+        self.filter_wheel_task.close()    

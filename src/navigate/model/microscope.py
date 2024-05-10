@@ -218,7 +218,10 @@ class Microscope:
                     device_name == "galvo" or device_name == "remote_focus_device"
                 ):
                     device_connection = self.daq
-
+                
+                if device_name == "filter_wheel" and device_ref_name.startswith("NI"): 
+                    device_connection = self.daq
+                    
                 if device_ref_name.startswith("EquipmentSolutions"):
                     device_connection = self.daq
 

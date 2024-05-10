@@ -378,28 +378,28 @@ class MenuController(GUIController):
             self.view.menubar.menu_window: {
                 "Channel Settings": [
                     "standard",
-                    lambda event: self.switch_tabs(1),
+                    lambda *args: self.switch_tabs(1),
                     "Ctrl+1",
                     "<Control-Key-1>",
                     "<Control_L-Key-1",
                 ],
                 "Camera Settings": [
                     "standard",
-                    lambda event: self.switch_tabs(2),
+                    lambda *args: self.switch_tabs(2),
                     "Ctrl+2",
                     "<Control-Key-2>",
                     "<Control_L-Key-2",
                 ],
                 "Stage Control": [
                     "standard",
-                    lambda event: self.switch_tabs(3),
+                    lambda *args: self.switch_tabs(3),
                     "Ctrl+3",
                     "<Control-Key-3>",
                     "<Control_L-Key-3",
                 ],
                 "Multiposition Table": [
                     "standard",
-                    lambda event: self.switch_tabs(4),
+                    lambda *args: self.switch_tabs(4),
                     "Ctrl+4",
                     "<Control-Key-4>",
                     "<Control_L-Key-4",
@@ -407,7 +407,7 @@ class MenuController(GUIController):
                 "add_separator": ["standard", None, None, None, None],
                 "Popout Camera Display": [
                     "standard",
-                    self.not_implemented,
+                    lambda: self.popout_camera_display(),
                     None,
                     None,
                     None,
@@ -894,6 +894,10 @@ class MenuController(GUIController):
     def switch_tabs(self, tab):
         """Switch tabs."""
         self.parent_controller.view.settings.select(tab - 1)
+
+    def popout_camera_display(self):
+        """Pop out camera display."""
+        self.parent_controller.view.camera_waveform.popout()
 
     def popup_feature_list_setting(self):
         """Show feature list popup window"""

@@ -1,6 +1,6 @@
 """ File type specific data sources. """
 
-FILE_TYPES = ["TIFF", "OME-TIFF", "H5", "N5"]
+FILE_TYPES = ["TIFF", "OME-TIFF", "H5", "N5", "OME-Zarr"]
 
 
 def get_data_source(file_type):
@@ -31,6 +31,11 @@ def get_data_source(file_type):
         from .bdv_data_source import BigDataViewerDataSource
 
         return BigDataViewerDataSource
+
+    elif file_type == "OME-Zarr":
+        from .zarr_data_source import OMEZarrDataSource
+
+        return OMEZarrDataSource
 
     else:
         raise NotImplementedError(f"Unknown file type {file_type}. Cannot open.")

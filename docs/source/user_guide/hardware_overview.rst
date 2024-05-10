@@ -49,7 +49,8 @@ configure each of these devices is provided :doc:`here <hardware/supported_hardw
         * Mad City Labs Nano-Drive
         * Physik Instrumente
         * Sutter MP285
-        * Thorlabs KST101
+        * Thorlabs Stepper Actuators with a KST101 K-Cube Controller.
+        * Thorlabs Piezoelectric Inertia Actuators with a KIM001 K-Cube Controller
    * - *Shutters*
      -
         * Digitally controlled shutters.

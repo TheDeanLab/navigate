@@ -81,13 +81,8 @@ class ASIStage(StageBase):
 
     Note
     ----
-    ASI firmware requires all distances to be in a 10th of a micron.
+        ASI firmware requires all distances to be in a 10th of a micron.
 
-    Warning
-    -------
-        Do not ever change the F axis. This will alter the relative position of each
-        FTP stilt, adding strain to the system. Only move the Z axis, which will
-        change both stilt positions simultaneously.
     """
 
     def __init__(self, microscope_name, device_connection, configuration, device_id=0):
@@ -107,14 +102,15 @@ class ASIStage(StageBase):
         # Default axes mapping
         axes_mapping = {"x": "X", "y": "Y", "z": "Z"}
         if not self.axes_mapping:
+            #: dict: Mapping of software axes to ASI hardware axes
             self.axes_mapping = {
                 axis: axes_mapping[axis] for axis in self.axes if axis in axes_mapping
             }
-        #: Mapping of axes to ASI axes
         else:
-            # Force cast axes to uppercase
+            # Mapping of axes to ASI axes, force cast axes to uppercase
             self.axes_mapping = {k: v.upper() for k, v in self.axes_mapping.items()}
 
+        #: dict: Dictionary of ASI axes to software axes
         self.asi_axes = dict(map(lambda v: (v[1], v[0]), self.axes_mapping.items()))
 
         # Set feedback alignment values - Default to 85 if not specified
@@ -126,6 +122,7 @@ class ASIStage(StageBase):
                 for axis, self.stage_feedback in zip(self.asi_axes, self.stage_feedback)
             }
 
+        #: object: ASI MS2000 Controller
         self.ms2000_controller = device_connection
         if device_connection is not None:
             # Set feedback alignment values
@@ -195,7 +192,13 @@ class ASIStage(StageBase):
 
     def report_position(self):
         """Reports the position for all axes in microns, and create
-        position dictionary."""
+        position dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary of positions for each axis in microns.
+        """
         try:
             # positions from the device are in microns
             pos_dict = self.ms2000_controller.get_position(list(self.asi_axes.keys()))
@@ -232,7 +235,7 @@ class ASIStage(StageBase):
 
         axis_abs = self.get_abs_position(axis, abs_pos)
         if axis_abs == -1e50:
-            print("axis abs false")
+            logger.debug("move_axis_absolute failed, axis_abs == -1e50")
             return False
 
         # Move stage
@@ -241,10 +244,6 @@ class ASIStage(StageBase):
             self.ms2000_controller.move_axis(self.axes_mapping[axis], axis_abs * 10)
 
         except MS2000Exception as e:
-            print(
-                f"ASI stage move axis absolute failed or is trying to move out of "
-                f"range: {e}"
-            )
             logger.exception("ASI Stage Exception", e)
             return False
 
@@ -279,6 +278,7 @@ class ASIStage(StageBase):
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
         """Move Absolute Method.
+
         XYZ Values should remain in microns for the ASI API
         Theta Values are not accepted.
 
@@ -311,10 +311,6 @@ class ASIStage(StageBase):
         try:
             self.ms2000_controller.move(pos_dict)
         except MS2000Exception as e:
-            print(
-                f"ASI stage move axis absolute failed or is trying to move out of "
-                f"range: {e}"
-            )
             logger.exception("ASI Stage Exception", e)
             return False
         if wait_until_done:
@@ -327,7 +323,6 @@ class ASIStage(StageBase):
         try:
             self.ms2000_controller.stop()
         except MS2000Exception as e:
-            print(f"ASI stage halt command failed: {e}")
             logger.exception("ASI Stage Exception", e)
 
     def set_speed(self, velocity_dict=None, percent=None):
@@ -350,7 +345,9 @@ class ASIStage(StageBase):
             try:
                 self.ms2000_controller.set_speed_as_percent_max(percent)
             except MS2000Exception as e:
-                print(f"ASI Controller failed to set speed as a percent: {e}")
+                logger.exception(
+                    f"ASI Controller failed to set speed as a percent: {e}"
+                )
                 return False
         else:
             try:
@@ -415,11 +412,8 @@ class ASIStage(StageBase):
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in scanr: {e}")
             return False
-        # if wait_until_done:
-        #     self.ms2000_controller.wait_for_device()
 
         return True
-        # return True
 
     def scanv(
         self, start_position_mm, end_position_mm, number_of_lines, overshoot, axis="z"
@@ -451,14 +445,13 @@ class ASIStage(StageBase):
             )
         except MS2000Exception as e:
             logger.exception(f"MS2000Exception: {e}")
-            print(logger.exception())
             return False
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in scanr: {e}")
             return False
         return True
-    
-    def move_axis_relative(self, axis, distance, wait_until_done = False):
+
+    def move_axis_relative(self, axis, distance, wait_until_done=False):
         """Move the stage relative to the current position along the specified axis.
         XYZ Values should remain in microns for the ASI API
         Theta Values are not accepted.
@@ -468,18 +461,20 @@ class ASIStage(StageBase):
         axis : str
             The axis along which to move the stage (e.g., 'x', 'y', 'z').
         distance : float
-            The distance to move relative to the current position, in micrometers for XYZ axes.
+            The distance to move relative to the current position,
+            in micrometers for XYZ axes.
         wait_until_done : bool, optional
-            Whether to wait until the stage has moved to its new position, by default False.
+            Whether to wait until the stage has moved to its new position,
+            by default False.
 
         Returns
         -------
         success : bool
-        Indicates whether the move was successful.
+            Indicates whether the move was successful.
         """
         if axis not in self.axes_mapping:
             return False
-        
+
         abs_pos = self.get_axis_position(axis) + distance
 
         axis_abs = self.get_abs_position(axis, abs_pos)
@@ -490,7 +485,7 @@ class ASIStage(StageBase):
         # Move stage
         try:
             # The 10 is to account for the ASI units, 1/10 of a micron
-            self.ms2000_controller.moverel_axis(axis, distance*10)
+            self.ms2000_controller.moverel_axis(axis, distance * 10)
 
         except MS2000Exception as e:
             print(
@@ -503,8 +498,10 @@ class ASIStage(StageBase):
         if wait_until_done:
             self.ms2000_controller.wait_for_device()
         return True
-    
-    def scan_axis_triggered_move(self, start_position, end_position, axis, ttl_triggered = False): 
+
+    def scan_axis_triggered_move(
+        self, start_position, end_position, axis, ttl_triggered=False
+    ):
         """Move the stage along the specified axis from start position to end position,
         with optional TTL triggering.
 
@@ -530,19 +527,18 @@ class ASIStage(StageBase):
         distance = end_position - start_position
         self.move_axis_relative(axis, distance, True)
 
-        try: 
-            self.ms2000_controller.set_backlash(axis, .05)
-            if ttl_triggered: 
+        try:
+            self.ms2000_controller.set_backlash(axis, 0.05)
+            if ttl_triggered:
                 self.ms2000_controller.set_triggered_move(axis)
         except MS2000Exception as e:
             logger.exception(f"MS2000Exception: {e}")
-            print(logger.exception())
             return False
         except KeyError as e:
             logger.exception(f"ASI Stage - KeyError in scan_axis_triggered_move: {e}")
             return False
 
-        return True            
+        return True
 
     def start_scan(self, axis):
         """Start scan state machine

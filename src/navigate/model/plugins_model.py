@@ -207,14 +207,33 @@ class PluginsModel:
                                 "Please make sure the DEVICE_TYPE_NAME is given right!"
                             )
                             continue
-                        devices_dict[device_type_name] = {}
-                        devices_dict[device_type_name][
-                            "ref_list"
-                        ] = module.DEVICE_REF_LIST
-                        devices_dict[device_type_name][
-                            "load_device"
-                        ] = module.load_device
-                        devices_dict[device_type_name][
-                            "start_device"
-                        ] = module.start_device
+                        # core devices
+                        core_devices = ["camera", "remote_focus_device", "galvo",
+                                        "filter_wheel", "stage", "zoom", "shutter", "lasers"]
+                        if device_type_name in core_devices:
+                            if device_type_name not in devices_dict:
+                                devices_dict[device_type_name] = {}
+                                devices_dict[device_type_name]["load_device"] = []
+                                devices_dict[device_type_name]["start_device"] = []
+                            devices_dict[device_type_name]["load_device"].append(module.load_device)
+                            devices_dict[device_type_name]["start_device"].append(module.start_device)
+                        elif device_type_name == "multiple_devices":
+                            for device_name in core_devices:
+                                if device_name not in devices_dict:
+                                    devices_dict[device_name] = {}
+                                    devices_dict[device_name]["load_device"] = []
+                                    devices_dict[device_name]["start_device"] = []
+                                devices_dict[device_name]["load_device"].append(module.load_device)
+                                devices_dict[device_name]["start_device"].append(module.start_device)
+                        else:
+                            devices_dict[device_type_name] = {}
+                            devices_dict[device_type_name][
+                                "ref_list"
+                            ] = module.DEVICE_REF_LIST
+                            devices_dict[device_type_name][
+                                "load_device"
+                            ] = module.load_device
+                            devices_dict[device_type_name][
+                                "start_device"
+                            ] = module.start_device
         return devices_dict, plugin_acquisition_modes

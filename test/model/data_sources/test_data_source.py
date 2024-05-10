@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 
 def test_data_source_mode():
@@ -7,15 +8,18 @@ def test_data_source_mode():
     ds = DataSource()
 
     # set read and write
-    ds.mode = "r"
-    assert ds.mode == "r"
+
+    with pytest.raises(NotImplementedError):
+        ds.mode = "r"
+        assert ds.mode == "r"
 
     ds.mode = "w"
     assert ds.mode == "w"
 
     # set unknown mode, default to read
-    ds.mode = "goblin"
-    assert ds.mode == "r"
+    with pytest.raises(NotImplementedError):
+        ds.mode = "goblin"
+        assert ds.mode == "r"
 
 
 def test_data_source_cztp_indices():

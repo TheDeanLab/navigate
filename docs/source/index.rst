@@ -6,10 +6,11 @@
 ############
 
 
-**navigate** is an open-source Python software for general microscope control. It focuses
-on smart microscopy applications by providing reusable acquisition and analysis routines,
-termed :ref:`features <features>`, that can be chained
-in arbitrary orders to create custom acquisition protocols. **navigate** is designed to accommodate the needs of
+**navigate** is an open-source Python software for light-sheet microscope control. It
+focuses on smart microscopy applications by providing reusable acquisition and
+analysis routines, termed :ref:`features <features>`, that can be chained
+in arbitrary orders to create custom acquisition protocols.
+**navigate** is designed to accommodate the needs of
 a diverse user base, from biologists with no programming experience to advanced
 technology developers.
 
@@ -17,12 +18,14 @@ technology developers.
 =========================
 
 * Prioritize standard library imports for maximum stability, and minimize external
-dependencies.
+  dependencies.
 * Abstraction layer to drive different camera types, etc.
 * Plugin architecture for extensibility.
-* Maximize productivity for biological users through robust graphical user interface-based workflows.
+* Maximize productivity for biological users through robust graphical user
+  interface-based workflows.
 * Performant and responsive.
-* Brutally obvious, well-documented, clean code organized in an industry standard Model-View-Controller architecture.
+* Brutally obvious, well-documented, clean code organized in an industry standard
+  Model-View-Controller architecture.
 
 .. note::
 
@@ -43,16 +46,16 @@ dependencies.
 
 .. toctree::
    :caption: Getting Started
-   :maxdepth: 2
+   :maxdepth: 1
 
    quick_start
-   implementations/implementations
    software_installation
    i_want_to
 
+
 .. toctree::
    :caption: User Guide
-   :maxdepth: 2
+   :maxdepth: 1
 
    user_guide/hardware_overview
    user_guide/file_formats
@@ -63,7 +66,7 @@ dependencies.
 
 .. toctree::
    :caption: Development
-   :maxdepth: 2
+   :maxdepth: 1
 
    contributing/software_architecture
    contributing/contributing_guidelines
@@ -72,22 +75,34 @@ dependencies.
    plugin/plugin_home
 
 .. toctree::
-   :caption: Reference
-   :maxdepth: 2
+   :caption: Plugins
+   :maxdepth: 1
 
+   navigate Plugin Template <https://github.com/TheDeanLab/navigate-plugin-template>
+   navigate Confocal Projection Plugin <https://github.com/TheDeanLab/navigate-confocal-projection>
+   navigate at Scale <https://github.com/TheDeanLab/navigate-at-scale>
+   navigate MMCore Plugin <https://github.com/TheDeanLab/navigate-mmcore-plugin>
+   navigate ilastik Server <https://github.com/TheDeanLab/navigate-ilastik-server>
+
+.. toctree::
+   :caption: Reference
+   :maxdepth: 1
+
+   implementations/implementations
    api
 
 
 **Authors**
 ============
-**Navigate** includes key contributions from numerous individuals, both past and present,
-in `The Dean Lab <https://www.dean-lab.org>`_. Please see the accompanying manuscript for a full list of contributors.
+**navigate** includes key contributions from numerous individuals, both past and
+present, in `The Dean Lab <https://www.dean-lab.org>`_. Please see the accompanying manuscript
+for a full list of contributors. :ref:`Outside contributors <contributing/contributing_guidelines>` are welcome.
 
 **Funding**
 ============
 **navigate** is supported by the
-`UT Southwestern and University of North Carolina Center for Cell Signaling
-<https://cellularsignaltransduction.org>`_, a Biomedical Technology Development and Dissemination (BTDD)
-Center funded by the NIH National Institute of General Medical Science (RM1GM145399), and
-the `Center for Metastatic Tumor Imaging <https://www.metastasis-imaging.org>`_ program, a
-Cellular Cancer Biology Imaging Research (CCBIR) program funded by the NIH National Cancer Institute (U54CA268072).
+
+- NIH National Institute of General Medical Science (RM1GM145399).
+- NIH National Cancer Institute (1U54CA268072).
+- `Simmons Comprehensive Cancer Center <https://www.utsouthwestern.edu/departments/simmons/>`_ Translational Seed Grant.
+- `UTSW President's Research Council <https://engage.utsouthwestern.edu/pages/membership-giving/membership-giving---presidents-research-council>`_

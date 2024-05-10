@@ -50,34 +50,28 @@ Image Writing Benchmarks
 ------------------------
 
 To evaluate the performance of saving imaging data in different formats, we conducted
-benchmarks on a Linux-based system. We assessed the average disk write time for TIFF,
+benchmarks on a Linux-based system. We assessed the median disk write time for TIFF,
 OME-TIFF, H5, N5, and OME-Zarr formats across image resolutions of 512x512,
 1024x1024, and 2048x2048 under two conditions: (A) capturing 1000 single-plane
 images and (B) acquiring a single z-stack composed of 1000 planes. All times
-are measured in milliseconds. Bottom panel for both A and B has a reduced y-axis to
-highlight the differences in write times between the formats. Results are also
-presented in a table format below.
-
-The initial setup for writing H5/N5 files introduces
-significant overhead, and to a lesser extent for TIFF and OME-TIFF files, which
-elevates the average write time. However, the median write time remains consistently
-low and stable across most of the acquisition. For z-stack imaging, TIFF and OME-TIFF
-formats achieved write speeds of up to approximately 400 Hz for a 2048x2048 camera
+are measured in milliseconds. Results are presented below. For z-stack imaging, TIFF
+and OME-TIFF formats achieved write speeds of up to approximately 400 Hz for a 2048x2048 camera
 resolution, surpassing the operational speeds of most contemporary sCMOS cameras.
 The Big-TIFF variant was used for both TIFF and OME-TIFF formats to accommodate the
 large file sizes.
 
+Timelapse Imaging
+~~~~~~~~~~~~~~~~~
 
-.. image:: images/benchmarks.png
-    :width: 50%
-    :align: center
+1000 images acquired, with a single Z plane. Median write time reported in
+milliseconds.
 
 .. table::
    :widths: auto
    :align: center
 
    +-------------+---------+----------+-------+-------+---------+
-   | Z=1, T=1000 | TIFF    | OME-TIFF | H5    | N5    | OME-Zarr|
+   |             | TIFF    | OME-TIFF | H5    | N5    | OME-Zarr|
    +=============+=========+==========+=======+=======+=========+
    | 512x512     | 4.06    | 15.26    | 2.79  | 12.09 | 1.35    |
    +-------------+---------+----------+-------+-------+---------+
@@ -86,12 +80,17 @@ large file sizes.
    | 2048x2048   | 22.25   | 38.57    | 34.71 | 29.56 | 11.85   |
    +-------------+---------+----------+-------+-------+---------+
 
+Z-Stack Imaging
+~~~~~~~~~~~~~~~
+
+1 image acquired, with 1000 Z planes. Median write speed time in milliseconds.
+
 .. table::
    :widths: auto
    :align: center
 
    +--------------+---------+----------+-------+-------+---------+
-   | Z=1000, T=1  | TIFF    | OME-TIFF | H5    | N5    | OME-Zarr|
+   |              | TIFF    | OME-TIFF | H5    | N5    | OME-Zarr|
    +==============+=========+==========+=======+=======+=========+
    | 512x512      | 0.21    | 0.17     | 4.76  | 1.80  | 1.30    |
    +--------------+---------+----------+-------+-------+---------+
@@ -99,6 +98,17 @@ large file sizes.
    +--------------+---------+----------+-------+-------+---------+
    | 2048x2048    | 2.35    | 2.14     | 75.56 | 14.08 | 8.60    |
    +--------------+---------+----------+-------+-------+---------+
+
+Additional Sources of Overhead
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The initial setup for writing H5/N5 files introduces
+significant overhead, and to a lesser extent for TIFF and OME-TIFF files, which
+elevates the average write time. However, the median write time remains consistently
+low and stable across most of the acquisition.
+
+Computer Specifications for Benchmarks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The computer specifications that the benchmarks were performed on are as follows:
 

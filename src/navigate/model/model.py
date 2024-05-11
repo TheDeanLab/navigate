@@ -503,7 +503,7 @@ class Model:
             return
 
         if command == "acquire":
-            """ Begin an acquisition."""
+            """Begin an acquisition."""
             self.is_acquiring = True
             self.imaging_mode = self.configuration["experiment"]["MicroscopeState"][
                 "image_mode"
@@ -751,7 +751,8 @@ class Model:
 
         # elif command == "change_camera":
         #     new_camera = list(self.active_microscope.cameras.values())[args[0]]
-        #     print(f"Using new camera >> {new_camera.camera_controller._serial_number}")
+        #     print(f"Using new camera >> {
+        #     new_camera.camera_controller._serial_number}")
         #     self.active_microscope.camera = new_camera
 
         elif command == "exit":
@@ -1065,7 +1066,7 @@ class Model:
                 self.event_queue.put(
                     (
                         "warning",
-                        "There is an error happened. Please read the log files for details!",
+                        "An error happened. Please read the log files for details!",
                     )
                 )
                 return
@@ -1089,12 +1090,15 @@ class Model:
         acquisition parameters in real-time.
         """
         self.stop_acquisition = False
-        while self.stop_acquisition is False and self.stop_send_signal is False:
+        while not self.stop_acquisition and not self.stop_send_signal:
             self.run_acquisition()
-            if not self.injected_flag.value:
+            if self.injected_flag.value:
+                self.reset_feature_list()
+            elif hasattr(self, "signal_container"):
                 self.signal_container.reset()
             else:
                 self.reset_feature_list()
+
         # Update the stage position.
         # Allows the user to externally move the stage in the continuous mode.
         self.get_stage_position()
@@ -1151,7 +1155,6 @@ class Model:
                 ],
             )
             injected_flag.value = False
-
 
     def change_resolution(self, resolution_value):
         """Switch resolution mode of the microscope.

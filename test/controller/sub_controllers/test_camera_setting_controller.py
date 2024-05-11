@@ -116,14 +116,6 @@ class TestCameraSettingController:
 
         # Framerate
         assert (
-            self.camera_settings.framerate_widgets["exposure_time"].widget.min
-            == camera_config_dict["exposure_time_range"]["min"]
-        )
-        assert (
-            self.camera_settings.framerate_widgets["exposure_time"].widget.max
-            == camera_config_dict["exposure_time_range"]["max"]
-        )
-        assert (
             str(self.camera_settings.framerate_widgets["exposure_time"].widget["state"])
             == "disabled"
         )

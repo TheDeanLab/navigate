@@ -44,7 +44,7 @@ from multiprocessing.managers import ListProxy, DictProxy
 import yaml
 
 # Local Imports
-
+from navigate.tools.common_functions import build_ref_name
 
 def get_navigate_path():
     """Establish a program home directory in AppData/Local/.navigate for Windows
@@ -764,10 +764,8 @@ def verify_waveform_constants(manager, configuration):
                         waveform_dict[microscope_name][zoom],
                         laser,
                         {
-                            "amplitude": config_dict["remote_focus_device"][
-                                "amplitude"
-                            ],
-                            "offset": config_dict["remote_focus_device"]["offset"],
+                            "amplitude": 0,
+                            "offset": 0,
                             # "percent_smoothing": "0",
                             # "delay": config_dict["remote_focus_device"][
                             #     "delay"
@@ -864,9 +862,9 @@ def verify_waveform_constants(manager, configuration):
                         waveform_dict[microscope_name],
                         zoom,
                         {
-                            "amplitude": "0.11",
-                            "offset": config_dict["galvo"][i]["offset"],
-                            "frequency": config_dict["galvo"][i]["frequency"],
+                            "amplitude": "0",
+                            "offset": 0,
+                            "frequency": 10,
                         },
                     )
                 else:
@@ -896,12 +894,8 @@ def verify_waveform_constants(manager, configuration):
     other_constants_dict = {
         "remote_focus_settle_duration": "0",
         "percent_smoothing": "0",
-        "remote_focus_delay": config_dict["remote_focus_device"][
-            "delay"
-        ],
-        "remote_focus_ramp_falling": config_dict["remote_focus_device"][
-            "ramp_falling"
-        ]
+        "remote_focus_delay": "0",
+        "remote_focus_ramp_falling": "5"
     }
     if (
         "other_constants" not in waveform_dict.keys()
@@ -924,7 +918,16 @@ def verify_configuration(manager, configuration):
     
     Supports old version of configurations.
     """
+    channel_count = 5
+    # generate hardware header section
     device_config = configuration["configuration"]["microscopes"]
+    hardware_dict = {}
+    ref_list = {
+        "camera": [],
+        "stage": [],
+        "zoom": None,
+        "mirror": None,
+    }
     for microscope_name in device_config.keys():
         # camera
         # delay_percent -> delay
@@ -938,3 +941,54 @@ def verify_configuration(manager, configuration):
             remote_focus_config["ramp_falling"] = remote_focus_config.get("ramp_falling_percent", 5)
         if "delay" not in remote_focus_config.keys():
             remote_focus_config["delay"] = remote_focus_config.get("delay_percent", 0)
+        
+        # daq
+        daq_type = device_config[microscope_name]["daq"]["hardware"]["type"]
+        if not daq_type.lower().startswith("synthetic"):
+            hardware_dict["daq"] = {"type": daq_type}
+
+        # camera
+        if "camera" not in hardware_dict:  
+            hardware_dict["camera"] = []
+        camera_idx = build_ref_name("-", camera_config["hardware"]["type"], camera_config["hardware"]["serial_number"])
+        if camera_idx not in ref_list["camera"]:
+            ref_list["camera"].append(camera_idx)
+            hardware_dict["camera"].append(camera_config["hardware"])
+
+        try:
+            channel_count = max(channel_count, camera_config.get("count", 5))
+        except TypeError:
+            channel_count = 5
+
+        # zoom (one zoom)
+        if "zoom" not in hardware_dict:
+            zoom_config = device_config[microscope_name]["zoom"]["hardware"]
+            # zoom_idx = build_ref_name("-", zoom_config["type"], zoom_config["servo_id"])
+            hardware_dict["zoom"] = zoom_config
+
+        # filter wheel
+        if "filter_wheel" not in hardware_dict:
+            filter_wheel_config = device_config[microscope_name]["filter_wheel"]["hardware"]
+            hardware_dict["filter_wheel"] = filter_wheel_config
+        # stage
+        if "stage" not in hardware_dict:
+            hardware_dict["stage"] = []
+        stages = device_config[microscope_name]["stage"]["hardware"]
+        if type(stages) != ListProxy:
+            stages = [stages]
+        for i, stage in enumerate(stages):
+            stage_idx = build_ref_name("-", stage["type"], stage["serial_number"])
+            if stage_idx not in ref_list["stage"]:
+                hardware_dict["stage"].append(stage)
+
+        # mirror
+        if "mirror" in device_config[microscope_name].keys() and "mirror" not in hardware_dict:
+            hardware_dict["mirror"] = device_config[microscope_name]["mirror"]["hardware"]
+
+    if "daq" not in hardware_dict:
+        hardware_dict["daq"] = {
+            "type": "synthetic"
+        }
+    update_config_dict(manager, configuration["configuration"], "hardware", hardware_dict)
+
+    update_config_dict(manager, configuration["configuration"], "gui", {"channels": {"count": channel_count}})

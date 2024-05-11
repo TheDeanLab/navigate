@@ -80,9 +80,7 @@ class RemoteFocusBase:
         ]["daq"]["sample_rate"]
 
         #: float: Sweep time of the DAQ.
-        self.sweep_time = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["daq"]["sweep_time"]
+        self.sweep_time = 0
 
         #: float: Camera delay percent.
         self.camera_delay = configuration["configuration"]["microscopes"][

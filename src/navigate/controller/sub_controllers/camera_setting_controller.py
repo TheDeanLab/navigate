@@ -540,12 +540,12 @@ class CameraSettingController(GUIController):
         self.trigger_active = camera_config_dict["trigger_active"]
         self.readout_speed = camera_config_dict["readout_speed"]
         # framerate_widgets
-        self.framerate_widgets["exposure_time"].widget.min = camera_config_dict[
-            "exposure_time_range"
-        ]["min"]
-        self.framerate_widgets["exposure_time"].widget.max = camera_config_dict[
-            "exposure_time_range"
-        ]["max"]
+        # self.framerate_widgets["exposure_time"].widget.min = camera_config_dict[
+        #     "exposure_time_range"
+        # ]["min"]
+        # self.framerate_widgets["exposure_time"].widget.max = camera_config_dict[
+        #     "exposure_time_range"
+        # ]["max"]
 
         # roi max width and height
         self.roi_widgets["Width"].widget.config(to=self.default_width)

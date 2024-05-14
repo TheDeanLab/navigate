@@ -194,7 +194,7 @@ class Microscope:
                     device_plugin_dict = devices_dict.get(device_name, {})
                     try:
                         exec(
-                            f"device_plugin_dict['{device_ref_name}'] = devices_dict['__plugins__']['{device_name}']['load_device'](configuration, is_synthetic)"
+                            f"device_plugin_dict['{device_ref_name}'] = devices_dict['__plugins__']['{device_name}']['load_device'](self.microscope_name, configuration, is_synthetic)"
                         )
                         devices_dict[device_name] = device_plugin_dict
                         device_connection = device_plugin_dict[device_ref_name]

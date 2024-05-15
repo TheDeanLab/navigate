@@ -42,9 +42,6 @@ ORCA-Flash4.0 V3
 ORCA-Fusion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**navigate** works with both the back-thinned and front-illuminated versions of the
-ORCA-Fusion.
-
 -   :ref:`Install Directions <dcam>`.
 -   `ORCA-Fusion Manual <https://www.hamamatsu
     .com/jp/en/product/cameras/cmos-cameras/C15440-20UP.html>`_.

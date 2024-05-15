@@ -13,6 +13,8 @@ operation and high bandwidth. Tunable lenses axially scan
 a beam by introducing defocus into the optical train. Nonetheless, they do not provide the
 higher-order correction provided by voice coils in an aberration-free remote focusing system.
 
+--------------
+
 Equipment Solutions
 -------------------
 
@@ -50,6 +52,8 @@ operating range.
 
 |
 
+-------------
+
 Analog Controlled Voice Coils and Tunable Lenses
 ------------------------------------------------
 
@@ -77,6 +81,8 @@ operating range.
                 baudrate: 9600
 
 |
+
+------------------
 
 Synthetic Remote Focus Device
 -----------------------------

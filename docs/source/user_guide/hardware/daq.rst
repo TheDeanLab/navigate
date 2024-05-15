@@ -39,8 +39,13 @@ Manager as a **NI Data Acquisition Device**.
     the back of the cover. This is misleading. You must look at the device pinouts in
     NI MAX.
 
-Wiring
-^^^^^^
+
+.. note::
+
+    For NI-based cards, ``port0/line1`` is the equivalent of ``P0.1``.
+    There are multiple pins for each PFIO, including source, out, gate, etc. You must
+    use the out terminal.
+
 
 - Identify the device name in NI MAX, and change it if you would like. Common names are
   ``Dev1``, ``Dev2``, etc. This name must correspond with the pinouts provided in the
@@ -74,19 +79,14 @@ Wiring
 
 |
 
-.. note::
-
-    For NI-based cards, ``port0/line1`` is the equivalent of ``P0.1``.
-    There are multiple pins for each PFIO, including source, out, gate, etc. You must
-    use the out terminal.
-
 ------------------
 
 
 **navigate** has been tested with the following NI-based cards:
 
 PCIe/PXIe-6738
-^^^^^^^^^^^^^^^^^
+"""""""""""""""
+
 The PCIe-6738 can only create one software-timed analog task for every four channels.
 As such, the lasers much be attached to analog output ports outside of the banks (shown as solid lines in the device pinout) used
 by the galvo/remote focus units. For example, if you use ao0, ao2, and ao6 for the
@@ -107,7 +107,7 @@ turn lasers on simultaneously, we could distribute the lasers across independent
 
 
 PCIe/PXIe-6259
-^^^^^^^^^^^^^^^
+"""""""""""""""
 
 The PXI-6259 can create one software-timed analog task per channel. As such, the
 galvo/remote focus/lasers can be attached to any of the analog output ports. The 6259 has
@@ -125,7 +125,7 @@ located on ``connector 0``.
 
 
 PCIe/PXIe-6723
-^^^^^^^^^^^^^^^
+"""""""""""""""
 
 The PXI-6723 can also create one software-timed analog task per channel. As such, the analog
 outputs can be wired up as is most convenient.

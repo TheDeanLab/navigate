@@ -7,7 +7,7 @@ Supported Hardware
 
 
 **navigate** provides access to a growing list of hardware devices. Information on how to
-configure each of these devices is provided :doc:`here <hardware/supported_hardware>`.
+configure each of these devices is provided :doc:`here <hardware/hardware_home>`.
 
 
 .. list-table::

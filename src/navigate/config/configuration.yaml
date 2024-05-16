@@ -58,18 +58,8 @@ microscopes:
         name: camera
         type: HamamatsuOrca
         serial_number: 302352
-      lightsheet_rolling_shutter_width: 608
-      defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
-      delay_percent: 10
-      pulse_percent: 1
-      x_pixels_step: 4
-      y_pixels_step: 4
-      x_pixels_min: 4
-      y_pixels_min: 4
-      exposure_time_range:
-        min: 1
-        max: 1000
-        step: 1
+        camera_connection: PMPCIECam00 #Photometrics only
+      delay: 1.0 #ms
       flip_x: False
       flip_y: False
     remote_focus_device:
@@ -257,8 +247,6 @@ microscopes:
             max: 5
         type: LuxX
         index: 2
-        delay_percent: 10
-        pulse_percent: 87
   Nanoscale:
     daq:
       hardware:
@@ -283,19 +271,11 @@ microscopes:
       hardware:
         name: camera
         type: HamamatsuOrca
-        serial_number: 302158
-      lightsheet_rolling_shutter_width: 100
-      defect_correct_mode: 2.0 # Off: 1.0, On: 2.0
-      delay_percent: 10
-      pulse_percent: 1
-      x_pixels_step: 4
-      y_pixels_step: 4
-      x_pixels_min: 4
-      y_pixels_min: 4
-      exposure_time_range:
-        min: 1
-        max: 1000
-        step: 1
+        serial_number: 302352
+        camera_connection: PMPCIECam00 #Photometrics only
+      delay: 1.0 #ms
+      flip_x: False
+      flip_y: False
     remote_focus_device:
       hardware:
         name: daq

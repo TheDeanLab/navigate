@@ -33,7 +33,7 @@ camera_hardware_widgets = {
     "delay": ["Delay (ms)", "Spinbox", "float", None, None],
     "flip_x": ["Flip X", "Checkbutton", "bool", None, None],
     "flip_y": ["Flip Y", "Checkbutton", "bool", None, None],
-    "count": [
+    "supported_channel_count": [
         "Microscope Channel Count",
         "Spinbox",
         "int",

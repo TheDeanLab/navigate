@@ -1,9 +1,14 @@
-Hardware
-========
+.. _hardware_overview:
 
-The following section aims to provide users with the requisite information for configuring
-hardware devices. A high-level overview of the supported devices can be found
-:doc:`here <../hardware_overview>`. Additional devices are available by installing the
+====================
+Supported Hardware
+====================
+
+**navigate** provides access to a growing list of hardware devices. Information on
+how to configure each of these devices, including supported firmware, is provided
+here.
+
+Additional devices are available by installing the
 **navigate-mmcore-plugin**. To learn more, please visit the **navigate-mmcore-plugin**
 `documentation <https://thedeanlab.github.io/navigate-mmcore-plugin/>`_.
 

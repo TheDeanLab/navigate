@@ -18,6 +18,9 @@ higher-order correction provided by voice coils in an aberration-free remote foc
 Equipment Solutions
 -------------------
 
+LFA-2010
+~~~~~~~~
+
 Configuration of the device can be variable. Many voice coils we have received require
 establishing serial communication with the device to explicitly place it in an analog
 control mode. In this case, the comport must be specified properly in the configuration
@@ -60,10 +63,34 @@ Analog Controlled Voice Coils and Tunable Lenses
 In principle, this hardware type can support any analog-controlled voice coil or tunable lens.
 The `BLINK <https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK>`_ and the
 `Optotune Focus Tunable Lens <https://www.optotune.com/tunable-lenses>`_ are
-controlled with an analog signal from the DAQ. The BLINK is a voice coil that is
-pneumatically actuated voice coil. it is recommended that you specify the min and max voltages
-that are compatible with your device to prevent the device from receiving a voltage outside of its
-operating range.
+controlled with an analog signal from the DAQ.
+
+Thorlabs BLINK
+~~~~~~~~~~~~~~
+The BLINK is a voice coil that is
+pneumatically actuated voice coil. It is recommended that you specify the min and max
+voltages that are compatible with your device to prevent the device from receiving a
+voltage outside of its operating range.
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope_name:
+            remote_focus_device:
+              hardware:
+                type: NI
+                channel: PXI6269/ao3
+                min: -5.0
+                max: 5.0
+                comport: COM2
+                baudrate: 9600
+
+|
+
+Optotune Focus Tunable Lens
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. collapse:: Configuration File
 

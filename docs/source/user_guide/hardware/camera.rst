@@ -10,6 +10,18 @@ shutter modes of contemporary scientific CMOS cameras.
 Hamamatsu
 ---------
 
+.. note::
+
+    **navigate** has been tested with the following versions of the Hamamatsu's
+    drivers:
+
+    - DCAM API: 20.7.641, 21.7.4321, 22.9.6509, 22.11.4321, 23.12.6736
+    - Camera Firmware: 2.21B, 2.53.A, 3.20.A, 4.30.B,
+    - Active Silicon CoaXpress: 1.10, 1.13, 1.21.
+
+
+-----------------
+
 ORCA-Flash4.0 V3
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -131,6 +143,15 @@ Photometrics
 
 -   :ref:`Install Directions <pvcam>`.
 
+
+.. note::
+
+    **navigate** has been tested with the following versions of the Photometric's
+    drivers:
+
+    - PVCAM: 3.9.13
+
+-----------------
 
 Iris 15
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

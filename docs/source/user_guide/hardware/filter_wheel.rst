@@ -10,6 +10,10 @@ change the names of available filters to match what is in the filter wheel or tu
 
 Sutter Instruments
 ------------------
+
+Lambda 10-3 & 10-B
+~~~~~~~~~~~~~~~~~~
+
 We typically communicate with Sutter Lambda 10-3 controllers via serial port. It is
 recommended that you first establish communication with the device using manufacturer
 provided software. Alternatively, one can use MicroManager. For some filter wheel types,
@@ -45,8 +49,14 @@ enable control of both filter wheels independently.
 
 ASI
 ---
-The ASI filter wheel is controlled by the ASI Tiger Controller. Thus, you should provide the same
-``comport`` entry as you did for the stage. A single communication instance is used for both the stage and filter wheel.
+
+FW-1000
+~~~~~~~
+
+The ASI `filter wheel <https://www.asiimaging
+.com/illumination-control/fw-1000-high-speed-filter-wheel/>`_ is controlled by the
+ASI Tiger Controller. Thus, you should provide the same ``comport`` entry as you did
+for the stage. A single communication instance is used for both the stage and filter wheel.
 
 .. collapse:: Configuration File
 

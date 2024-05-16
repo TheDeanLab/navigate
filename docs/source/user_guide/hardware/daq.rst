@@ -1,6 +1,6 @@
-=====================
-Data Acquisition Card
-=====================
+======================
+Data Acquisition Cards
+======================
 
 Data acquisition cards deliver and receive analog and digital signals.
 To acquire an image, the software calculates all of the analog and digital waveforms and
@@ -26,6 +26,15 @@ the computer, first install the `NI-DAQmx drivers <https://www.ni.com/en-us/supp
 Once installed, connect the PCIe or PXIe-based device to the computer. A functioning
 system should be recognized by the operating system, and visible in the Windows Device
 Manager as a **NI Data Acquisition Device**.
+
+.. note::
+
+    **navigate** has been tested with the following versions of the NI-DAQmx drivers:
+
+    - 22.5.0
+    - 22.8.0
+    - 23.3.0
+    - 23.8.0
 
 
 .. tip::

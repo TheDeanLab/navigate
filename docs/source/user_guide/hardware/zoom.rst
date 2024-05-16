@@ -11,6 +11,9 @@ the fixed magnification and the effective pixel size of the microscope.
 Dynamixel
 ---------
 
+MX-28R
+~~~~~~
+
 This software supports the
 `Dynamixel Smart Actuator <https://www.dynamixel.com/>`_.
 
@@ -26,13 +29,6 @@ This software supports the
 .. collapse:: Configuration File
 
     .. code-block:: yaml
-
-      hardware:
-        zoom:
-          type: DynamixelZoom
-          servo_id: 1
-          port: COM18
-          baudrate: 1000000
 
       microscopes:
         microscope_name:

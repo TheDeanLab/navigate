@@ -32,13 +32,24 @@ The ASI `Tiger Controller <https://www.asiimaging.com/controllers/tiger-controll
 a multi-purpose controller for ASI stages, filter wheels, dichroic sliders,
 and more. We communicate with Tiger Controllers via a serial port. It is recommended that you
 first establish communication with the device using `ASI provided software <https://asiimaging.com/docs/products/tiger>`_.
-For stages in particular, there is a ``feedback_alignment`` configuration option option
-corresponds to the `Tiger Controller AA Command <https://asiimaging.com/docs/commands/aalign>`_.
 
-.. tip::
+.. note::
+
+    **navigate** has been tested with the following versions of the ASI's Tiger
+    Controller software:
+
+    - Tiger Controller 2.2.0.
+
+
+
+.. warning::
     If you are using the FTP-2000 stage, do not change the F stage axis. This
     will differentially drive the two vertical posts, causing them to torque and
     potentially damage one another.
+
+.. tip::
+    ASI stage's include a configuration option, ``feedback_alignment``, which
+    corresponds to the `Tiger Controller AA Command <https://asiimaging.com/docs/commands/aalign>`_.
 
 .. collapse:: Configuration File
 
@@ -50,6 +61,97 @@ corresponds to the `Tiger Controller AA Command <https://asiimaging.com/docs/com
               hardware:
                 -
                   type: ASI
+                  serial_number: 001
+                  axes: [X, Y, Z, F, Theta]
+                  axes_mapping: [A, B, C, D, E]
+                  feedback_alignment: [90, 90, 90, 90]
+                  volts_per_micron: 0.0
+                  min: 0.0
+                  max: 1.0
+                  controllername:
+                  stages:
+                  refmode:
+                  port:
+                  baudrate: 0
+              joystick_axes: [X, Y, Z]
+              x_min: -100000.0
+              x_max: 0.0
+              y_min: -100000.0
+              y_max: 0.0
+              z_min: -100000.0
+              z_max: 0.0
+              theta_min: 0.0
+              theta_max: 0.0
+              f_min: -100000.0
+              f_max: 0.0
+              x_offset: -100000.0
+              y_offset: -100000.0
+              z_offset: -100000.0
+              theta_offset: -100000.0
+              f_offset: -100000.0
+
+|
+
+MFC2000
+~~~~~~~
+
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope:
+            stage:
+              hardware:
+                -
+                  type: MFC2000
+                  serial_number: 001
+                  axes: [X, Y, Z, F, Theta]
+                  axes_mapping: [A, B, C, D, E]
+                  feedback_alignment: [90, 90, 90, 90]
+                  volts_per_micron: 0.0
+                  min: 0.0
+                  max: 1.0
+                  controllername:
+                  stages:
+                  refmode:
+                  port:
+                  baudrate: 0
+              joystick_axes: [X, Y, Z]
+              x_min: -100000.0
+              x_max: 0.0
+              y_min: -100000.0
+              y_max: 0.0
+              z_min: -100000.0
+              z_max: 0.0
+              theta_min: 0.0
+              theta_max: 0.0
+              f_min: -100000.0
+              f_max: 0.0
+              x_offset: -100000.0
+              y_offset: -100000.0
+              z_offset: -100000.0
+              theta_offset: -100000.0
+              f_offset: -100000.0
+
+|
+
+
+MS2000
+~~~~~~~
+
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope:
+            stage:
+              hardware:
+                -
+                  type: MS2000
                   serial_number: 001
                   axes: [X, Y, Z, F, Theta]
                   axes_mapping: [A, B, C, D, E]
@@ -136,7 +238,18 @@ Physik Instrumente
 ------------------
 
 These stages are controlled by `PI <https://www.pi-usa.us/en/>`_'s own
-`Python code <https://pypi.org/project/PIPython/>`_ and are quite stable. They
+`Python code <https://pypi.org/project/PIPython/>`_ and are quite stable.
+
+.. note::
+
+    **navigate** has been tested with the following versions of the Physik
+    Instrumente software and drivers:
+
+    - PIMikroMove: 2.36.1.0
+    - PI_GCS2_DLL: 3.22.0.0
+
+
+They
 include a special ``hardware`` option, ``refmode``, which corresponds to how the
 PI stage chooses to self-reference. Options are ``REF``, ``FRF``, ``MNL``, ``FNL``,
 ``MPL`` or ``FPL``. These are PI's GCS commands, and the correct reference mode
@@ -148,6 +261,9 @@ or on a label on the side of your stage.
     PI L-509.20DG10 has a unidirectional repeatability of 100 nm, bidirectional
     repeatability of 2 microns, and a minimum incremental motion of 100 nm.
     This is potentially too coarse.
+
+C-884
+~~~~~
 
 .. collapse:: Configuration File
 
@@ -211,15 +327,83 @@ or on a label on the side of your stage.
 
 |
 
+E-709
+~~~~~
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      hardware:
+        stage:
+          -
+            type: PI
+            controllername: E-709
+            stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
+            refmode: FRF FRF FRF FRF FRF FRF
+            serial_number: 119060508
+          -
+      microscopes:
+        microscope_name:
+          stage:
+            hardware:
+              name: stage
+              type: PI
+              serial_number: 119060508
+              axes: [x, y, z, theta, f]
+            y_unload_position: 10000
+            y_load_position: 90000
+
+            startfocus: 75000
+            x_max: 100000
+            x_min: -100000
+            y_max: 100000
+            y_min: -100000
+            z_max: 100000
+            z_min: -100000
+            f_max: 100000
+            f_min: 0
+            theta_max: 360
+            theta_min: 0
+
+            x_rot_position: 2000
+            y_rot_position: 2000
+            z_rot_position: 2000
+
+            x_step: 500
+            y_step: 500
+            z_step: 500
+            theta_step: 30
+            f_step: 500
+
+            position:
+              x_pos: 25250
+              y_pos: 40000
+              z_pos: 40000
+              f_pos: 70000
+              theta_pos: 0
+            velocity: 1000
+
+            x_offset: 0
+            y_offset: 0
+            z_offset: 0
+            f_offset: 0
+            theta_offset: 0
+
+|
+
 ------------------
 
 Thorlabs
 --------
 
-We currently support the `KIM001 <https://www.thorlabs.com/thorproduct.cfm?partnumber=KIM001>`_
-controller. Importantly, this device shows significant hysterisis, and thus we do not recommend
-it for precise positioning tasks (e.g., autofocusing). It serves as a cost-effective solution
-for manual, user-driven positioning.
+KIM001
+~~~~~~
+**navigate** supports the `KIM001 <https://www.thorlabs.com/thorproduct
+.cfm?partnumber=KIM001>`_ controller. However, this device shows significant
+hysteresis, and thus we do not recommend it for precise positioning tasks (e.g.,
+autofocusing). It serves as a cost-effective solution for manual, user-driven
+positioning.
 
 .. collapse:: Configuration File
 
@@ -248,6 +432,30 @@ for manual, user-driven positioning.
 
 |
 
+
+KST101
+~~~~~~
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope_name:
+          stage:
+              hardware:
+                -
+                  name: stage
+                  type: KST101
+                  serial_number: 74000375
+                  axes: [f]
+                  axes_mapping: [1]
+                  volts_per_micron: None
+                  axes_channels: None
+                  max: None
+                  min: None
+
+|
 --------------
 
 .. _galvo_stage:

@@ -11,6 +11,9 @@ sample or system-specific distortions in the optical wavefront.
 Imagine Optic
 -------------
 
+Mirao 52E
+~~~~~~~~~
+
 We currently have support for a
 `Mirao 52E <https://www.imagine-optic.com/products/deformable-mirror-mirao-52e/>`_.
 The ``flat_path`` provides a path to a system correction ``.wcs`` file, an Imagine

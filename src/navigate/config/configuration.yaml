@@ -42,7 +42,6 @@ microscopes:
       # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
       # Sampling rate in Hz
       sample_rate: 100000
-      sweep_time: 0.2
 
       # triggers
       master_trigger_out_line: PXI6259/port0/line1
@@ -256,7 +255,6 @@ microscopes:
       # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
       # Sampling rate in Hz
       sample_rate: 100000
-      sweep_time: 0.2
 
       # triggers
       master_trigger_out_line: PXI6259/port0/line1

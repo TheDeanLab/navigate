@@ -425,7 +425,7 @@ galvo_hardware_widgets = {
         "Input",
         "string",
         None,
-        "Example: PXI6259/ao1",
+        "*Analog Device only. Example: PXI6259/ao1",
     ],
     "hardware/min": [
         "Minimum Voltage",
@@ -442,7 +442,14 @@ galvo_hardware_widgets = {
         None,
     ],
     "waveform": ["Waveform", "Combobox", "string", waveform_types, None],
-    "phase": ["Phase", "Input", "string", None, "Example: 1.57"],
+    "phase": [
+        "Phase",
+        "Spinbox",
+        "float",
+        {"from": 0, "to": 10, "step": 0.1},
+        "Example: 1.57",
+        0
+    ],
     "button_1": ["Delete", "Button", {"delete": True}],
     "frame_config": {
         "collapsible": True,

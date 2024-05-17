@@ -65,7 +65,7 @@ galvo.
                 phase: 0
                -
                 hardware:
-                  type: NI
+                  type: synthetic
                   channel: PXI6259/ao1
                   min: -1.0
                   max: 1.0

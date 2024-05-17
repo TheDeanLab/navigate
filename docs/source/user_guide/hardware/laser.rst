@@ -40,13 +40,13 @@ modulation.
                     type: NI
                     channel: PXI6733/port0/line2
                     min: 0.0
-                    max: 0.0
+                    max: 5.0
                 power:
                   hardware:
                     type: NI
                     channel: PXI6733/ao0
                     min: 0.0
-                    max: 0.0
+                    max: 5.0
                -
                 wavelength: 561
                 onoff:
@@ -54,13 +54,13 @@ modulation.
                     type: NI
                     channel: PXI6733/port0/line3
                     min: 0.0
-                    max: 0.0
+                    max: 5.0
                 power:
                   hardware:
                     type: NI
                     channel: PXI6733/ao1
                     min: 0.0
-                    max: 0.0
+                    max: 5.0
 
 |
 
@@ -85,13 +85,13 @@ Synthetic Lasers
                     type: synthetic
                     channel: PXI6733/port0/line2
                     min: 0.0
-                    max: 0.0
+                    max: 5.0
                 power:
                   hardware:
                     type: synthetic
                     channel: PXI6733/ao0
                     min: 0.0
-                    max: 0.0
+                    max: 5.0
                -
                 wavelength: 561
                 onoff:
@@ -99,12 +99,12 @@ Synthetic Lasers
                     type: synthetic
                     channel: PXI6733/port0/line3
                     min: 0.0
-                    max: 0.0
+                    max: 5.0
                 power:
                   hardware:
                     type: synthetic
                     channel: PXI6733/ao1
                     min: 0.0
-                    max: 0.0
+                    max: 5.0
 
 |

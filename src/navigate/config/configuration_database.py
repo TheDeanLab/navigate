@@ -512,14 +512,14 @@ mirror_hardware_widgets = {
         None,
         "Example: D:\WaveKitX64\MirrorFiles\Beads.wcs",
     ],
-    "n_modes": ["Number of Modes", "Input", "int", None, None, "Example: 32"],
+    "n_modes": ["Number of Modes", "Input", "int", None, "Example: 32", 32],
     "frame_config": {"ref": "hardware"},
 }
 
 laser_device_types = {"Analog Device": "NI", "Virtual Device": "synthetic"}
 
 laser_hardware_widgets = {
-    "wavelength": ["Wavelength", "Input", "int", None, None, "Example: 488"],
+    "wavelength": ["Wavelength", "Input", "int", None, "Example: 488", 488],
     "onoff": ["On/Off Setting", "Label", None, None, None],
     "onoff/hardware/type": ["Type", "Combobox", "string", laser_device_types, None],
     "onoff/hardware/channel": [
@@ -556,14 +556,14 @@ laser_hardware_widgets = {
         "Minimum Voltage",
         "Spinbox",
         "float",
-        {"from": 0, "to": 100, "step": 1},
+        {"from": 0, "to": 1000, "step": 1},
         None,
     ],
     "power/hardware/max": [
         "Maximum Voltage",
         "Spinbox",
         "float",
-        {"from": 0, "to": 100, "step": 1},
+        {"from": 0, "to": 1000, "step": 1},
         None,
     ],
     "button_1": ["Delete", "Button", {"delete": True}],

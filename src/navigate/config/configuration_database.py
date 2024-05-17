@@ -85,6 +85,7 @@ filter_wheel_hardware_widgets = {
             "widgets": filter_wheel_widgets,
             "ref": "available_filters",
             "direction": "horizon",
+            "parent": "constants",
         },
     ],
 }
@@ -400,7 +401,7 @@ remote_focus_hardware_widgets = {
         {"from": 0, "to": 10, "step": 1},
         None,
     ],
-    "comport": ["Serial Port", "Input", "string", None, "*Equipment Solutions only"],
+    "port": ["Serial Port", "Input", "string", None, "*Equipment Solutions only"],
     "baudrate": [
         "Baudrate",
         "Input",
@@ -494,6 +495,7 @@ zoom_hardware_widgets = {
             "widgets": zoom_position_widgets,
             "ref": "position;pixel_size",
             "direction": "horizon",
+            "parent": "constants",
         },
     ],
     "frame_config": {"ref": "hardware"},

@@ -50,7 +50,7 @@ operating range.
                 channel: PXI6269/ao3
                 min: -5.0
                 max: 5.0
-                comport: COM2
+                port: COM2
                 baudrate: 9600
 
 |
@@ -84,7 +84,7 @@ voltage outside of its operating range.
                 channel: PXI6269/ao3
                 min: -5.0
                 max: 5.0
-                comport: COM2
+                port: COM2
                 baudrate: 9600
 
 |
@@ -104,7 +104,7 @@ Optotune Focus Tunable Lens
                 channel: PXI6269/ao3
                 min: -5.0
                 max: 5.0
-                comport: COM2
+                port: COM2
                 baudrate: 9600
 
 |
@@ -128,7 +128,7 @@ remote focus device.
                 channel: PXI6269/ao3
                 min: -5.0
                 max: 5.0
-                comport: COM2
+                port: COM2
                 baudrate: 9600
 
 |

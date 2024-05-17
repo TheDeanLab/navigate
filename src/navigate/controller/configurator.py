@@ -84,8 +84,8 @@ class Configurator:
         self.view.top_window.load_button.config(command=self.load_configuration)
         self.view.top_window.save_button.config(command=self.save)
         self.view.top_window.cancel_button.config(command=self.on_cancel)
+        self.microscope_id = 0
         self.create_config_window(0)
-        self.microscope_id = 1
 
         print(
             "WARNING: The Configuration Assistant is not fully implemented. "
@@ -99,14 +99,13 @@ class Configurator:
 
     def add_microscope(self):
         """Add a new microscope tab"""
-        self.create_config_window(self.microscope_id)
         self.microscope_id += 1
+        self.create_config_window(self.microscope_id)
 
     def delete_microscopes(self):
         """Delete all microscopes"""
         # delete microscopes
-        for index in range(self.view.microscope_window.index("end")):
-            tab_id = self.view.microscope_window.tabs()[index]
+        for tab_id in self.view.microscope_window.tabs():
             self.view.microscope_window.forget(tab_id)
         self.view.microscope_window.tab_list = []
         self.microscope_id = 0

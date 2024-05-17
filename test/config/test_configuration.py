@@ -360,7 +360,7 @@ class TestConfiguration(unittest.TestCase):
 
     def zoom_section(self, microscope, hardware_type):
         expected_keys = ["hardware", "position", "pixel_size", "stage_positions"]
-        type_keys = ["type", "servo_id"]
+        type_keys = ["type", "servo_id", "port", "baudrate"]
 
         for key in self.data["microscopes"][microscope][hardware_type].keys():
             if key == "hardware":

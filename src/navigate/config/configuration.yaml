@@ -86,6 +86,8 @@ microscopes:
           timeout: 0.25
 
       joystick_axes: [x, y, z]
+      # coupled_axes:
+      #   z: f
       x_max: 100000
       x_min: -100000
       y_max: 100000
@@ -112,6 +114,8 @@ microscopes:
       hardware:
         type: DynamixelZoom
         servo_id: 1
+        port: COM9
+        baudrate: 100000
       position:
         0.63x: 0
         1x: 627
@@ -294,6 +298,8 @@ microscopes:
           timeout: 0.25
 
       joystick_axes: [x, y, z]
+      # coupled_axes:
+      #   z: f
       x_max: 100000
       x_min: -100000
       y_max: 100000

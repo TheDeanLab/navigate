@@ -3,10 +3,10 @@ Supported File Formats
 ======================
 
 The choice of file format for saving imaging data in microscopy is crucial
-because it affects data integrity, accessibility, and analysis efficiency.
+because it affects write speed, data integrity, accessibility, and analysis efficiency.
 Formats like TIFF and its derivative OME-TIFF are widely used due to their ability
 to store metadata and support multiple imaging channels. However, modern formats such
-as Zarr, N5, and HDF5, including OME-ZARR, cater to the needs of large-scale,
+as Zarr, N5, and HDF5, including OME-Zarr, cater to the needs of large-scale,
 multi-dimensional datasets by enabling efficient data storage, access, and processing at
 cloud-compute scales.
 
@@ -35,14 +35,22 @@ to store metadata.
 
 ----------------
 
-BigDataViewer H5/N5/OME-Zarr
+BigDataViewer H5/N5
 ----------------------------
 
 **navigate** uses `h5py <https://docs.h5py.org/en/stable/index.html>`_ (H5) and
 `zarr <https://zarr.readthedocs.io/en/stable/>`_ (N5) to store data in a BigDataViewer
 file format. This is a pyramidal format, necessitating the saving of both the original
 data and down sampled versions of this data. The additional data slows down the write
-speed. The N5 format is faster than H5 because it allows multithreaded writes.
+speed. The N5 format can be faster than H5 because it allows for multithreaded writes.
+
+OME-Zarr
+--------
+OME-Zarr is a Zarr file format that adheres to strict metadata specifications, detailed
+at https://ngff.openmicroscopy.org/0.4/index.html. It allows for pyramidal data writing,
+storage of segmentation labels with the data set, and updating the pyramidal structure
+on the fly.
+
 
 ----------------
 
@@ -50,7 +58,7 @@ Image Writing Benchmarks
 ------------------------
 
 To evaluate the performance of saving imaging data in different formats, we conducted
-benchmarks on a Linux-based system. We assessed the median disk write time for TIFF,
+benchmarks on a RedHat Linux system. We assessed the median disk write time for TIFF,
 OME-TIFF, H5, N5, and OME-Zarr formats across image resolutions of 512x512,
 1024x1024, and 2048x2048 under two conditions: (A) capturing 1000 single-plane
 images and (B) acquiring a single z-stack composed of 1000 planes. All times
@@ -73,11 +81,11 @@ milliseconds.
    +-------------+---------+----------+-------+-------+---------+
    |             | TIFF    | OME-TIFF | H5    | N5    | OME-Zarr|
    +=============+=========+==========+=======+=======+=========+
-   | 512x512     | 4.06    | 15.26    | 2.79  | 12.09 | 1.35    |
+   | 512x512     | 0.83    | 10.0     | 1.69  | 3.02  | 1.09    |
    +-------------+---------+----------+-------+-------+---------+
-   | 1024x1024   | 6.69    | 15.25    | 8.33  | 14.74 | 2.46    |
+   | 1024x1024   | 1.55    | 10.4     | 6.46  | 5.70  | 2.27    |
    +-------------+---------+----------+-------+-------+---------+
-   | 2048x2048   | 22.25   | 38.57    | 34.71 | 29.56 | 11.85   |
+   | 2048x2048   | 11.2    | 38.6     | 28.8  | 19.6  | 11.6    |
    +-------------+---------+----------+-------+-------+---------+
 
 Z-Stack Imaging
@@ -92,11 +100,11 @@ Z-Stack Imaging
    +--------------+---------+----------+-------+-------+---------+
    |              | TIFF    | OME-TIFF | H5    | N5    | OME-Zarr|
    +==============+=========+==========+=======+=======+=========+
-   | 512x512      | 0.21    | 0.17     | 4.76  | 1.80  | 1.30    |
+   | 512x512      | 0.14    | 0.13     | 2.64  | 1.58  | 1.05    |
    +--------------+---------+----------+-------+-------+---------+
-   | 1024x1024    | 0.52    | 0.57     | 15.70 | 5.38  | 4.22    |
+   | 1024x1024    | 0.49    | 0.48     | 10.6  | 5.08  | 4.06    |
    +--------------+---------+----------+-------+-------+---------+
-   | 2048x2048    | 2.35    | 2.14     | 75.56 | 14.08 | 8.60    |
+   | 2048x2048    | 1.92    | 1.86     | 52.7  | 13.90 | 8.50    |
    +--------------+---------+----------+-------+-------+---------+
 
 Additional Sources of Overhead

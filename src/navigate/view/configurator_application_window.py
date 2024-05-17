@@ -416,6 +416,10 @@ class HardwareTab(ttk.Frame):
                     widget.config(to=v[3].get("to", 100000))
                     widget.config(increment=v[3].get("step", 1))
                     widget.set(v[3].get("from", 0))
+
+                # set default value
+                if len(v) >= 6 and v[5] is not None:
+                    self.variables[k].set(str(v[5]))
             else:
                 widget = ttk.Button(
                     content_frame,
@@ -429,6 +433,7 @@ class HardwareTab(ttk.Frame):
             else:
                 widget.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=(3, 0))
 
+            # display info label
             if len(v) >= 5 and v[4]:
                 label = ttk.Label(content_frame, text=v[4])
                 if direction == "vertical":

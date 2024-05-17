@@ -62,35 +62,39 @@ first establish communication with the device using `ASI provided software <http
                 -
                   type: ASI
                   serial_number: 001
-                  axes: [X, Y, Z, F, Theta]
+                  axes: [x, y, z, theta, f]
                   axes_mapping: [A, B, C, D, E]
-                  feedback_alignment: [90, 90, 90, 90]
+                  feedback_alignment: [90, 90, 90, 5, 90]
                   volts_per_micron: 0.0
                   min: 0.0
                   max: 1.0
                   controllername:
                   stages:
                   refmode:
-                  port:
-                  baudrate: 0
-              joystick_axes: [X, Y, Z]
-              x_min: -100000.0
-              x_max: 0.0
-              y_min: -100000.0
-              y_max: 0.0
-              z_min: -100000.0
-              z_max: 0.0
+                  port: COM12
+                  baudrate: 9600
+                  timeout: 0.25
+              joystick_axes: [x, y, z]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
               theta_min: 0.0
-              theta_max: 0.0
-              f_min: -100000.0
-              f_max: 0.0
-              x_offset: -100000.0
-              y_offset: -100000.0
-              z_offset: -100000.0
-              theta_offset: -100000.0
-              f_offset: -100000.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
 
-|
 
 MFC2000
 ~~~~~~~
@@ -107,33 +111,38 @@ MFC2000
                 -
                   type: MFC2000
                   serial_number: 001
-                  axes: [X, Y, Z, F, Theta]
+                  axes: [x, y, z, theta, f]
                   axes_mapping: [A, B, C, D, E]
-                  feedback_alignment: [90, 90, 90, 90]
+                  feedback_alignment: [90, 90, 90, 5, 90]
                   volts_per_micron: 0.0
                   min: 0.0
                   max: 1.0
                   controllername:
                   stages:
                   refmode:
-                  port:
-                  baudrate: 0
-              joystick_axes: [X, Y, Z]
-              x_min: -100000.0
-              x_max: 0.0
-              y_min: -100000.0
-              y_max: 0.0
-              z_min: -100000.0
-              z_max: 0.0
+                  port: COM12
+                  baudrate: 9600
+                  timeout: 0.25
+              joystick_axes: [x, y, z]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
               theta_min: 0.0
-              theta_max: 0.0
-              f_min: -100000.0
-              f_max: 0.0
-              x_offset: -100000.0
-              y_offset: -100000.0
-              z_offset: -100000.0
-              theta_offset: -100000.0
-              f_offset: -100000.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
 
 |
 
@@ -153,33 +162,38 @@ MS2000
                 -
                   type: MS2000
                   serial_number: 001
-                  axes: [X, Y, Z, F, Theta]
+                  axes: [x, y, z, theta, f]
                   axes_mapping: [A, B, C, D, E]
-                  feedback_alignment: [90, 90, 90, 90]
+                  feedback_alignment: [90, 90, 90, 5, 90]
                   volts_per_micron: 0.0
                   min: 0.0
                   max: 1.0
                   controllername:
                   stages:
                   refmode:
-                  port:
-                  baudrate: 0
-              joystick_axes: [X, Y, Z]
-              x_min: -100000.0
-              x_max: 0.0
-              y_min: -100000.0
-              y_max: 0.0
-              z_min: -100000.0
-              z_max: 0.0
+                  port: COM12
+                  baudrate: 9600
+                  timeout: 0.25
+              joystick_axes: [x, y, z]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
               theta_min: 0.0
-              theta_max: 0.0
-              f_min: -100000.0
-              f_max: 0.0
-              x_offset: -100000.0
-              y_offset: -100000.0
-              z_offset: -100000.0
-              theta_offset: -100000.0
-              f_offset: -100000.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
 
 |
 
@@ -208,29 +222,45 @@ the software is restarted, it should work.
 
     .. code-block:: yaml
 
-      hardware:
-        stage:
-        -
-          type: MP285
-          port: COM2
-          timeout: 0.25
-          baudrate: 9600
-          serial_number: 0000
-          stages: None
-
       microscopes:
-        microscope_name:
-          stage:
-            hardware:
-              name: stage1
-              type: MP285
-              serial_number: 0000
-              axes: [y, x, f]
-              axes_mapping: [z, y, x]
-              volts_per_micron: None
-              axes_channels: None
-              max: 25000
-              min: 0
+        microscope:
+            stage:
+              hardware:
+                -
+                  type: MP285
+                  serial_number: 001
+                  axes: [x, y, z]
+                  axes_mapping: [x, y, z]
+                  feedback_alignment: 
+                  volts_per_micron: 0.0
+                  min: 0.0
+                  max: 25000
+                  controllername:
+                  stages:
+                  refmode:
+                  port: COM1
+                  baudrate: 9600
+                  timeout: 0.25
+              joystick_axes: [x, y, z]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
+              theta_min: 0.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
 
 |
 
@@ -269,61 +299,45 @@ C-884
 
     .. code-block:: yaml
 
-      hardware:
-        stage:
-          -
-            type: PI
-            controllername: C-884
-            stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
-            refmode: FRF FRF FRF FRF FRF FRF
-            serial_number: 119060508
-          -
       microscopes:
-        microscope_name:
-          stage:
-            hardware:
-              name: stage
-              type: PI
-              serial_number: 119060508
-              axes: [x, y, z, theta, f]
-            y_unload_position: 10000
-            y_load_position: 90000
-
-            startfocus: 75000
-            x_max: 100000
-            x_min: -100000
-            y_max: 100000
-            y_min: -100000
-            z_max: 100000
-            z_min: -100000
-            f_max: 100000
-            f_min: 0
-            theta_max: 360
-            theta_min: 0
-
-            x_rot_position: 2000
-            y_rot_position: 2000
-            z_rot_position: 2000
-
-            x_step: 500
-            y_step: 500
-            z_step: 500
-            theta_step: 30
-            f_step: 500
-
-            position:
-              x_pos: 25250
-              y_pos: 40000
-              z_pos: 40000
-              f_pos: 70000
-              theta_pos: 0
-            velocity: 1000
-
-            x_offset: 0
-            y_offset: 0
-            z_offset: 0
-            f_offset: 0
-            theta_offset: 0
+        microscope:
+            stage:
+              hardware:
+                -
+                  type: PI
+                  serial_number: 119060508
+                  axes: [x, y, z, theta, f]
+                  axes_mapping: [1, 2, 3, 4, 5]
+                  feedback_alignment: 
+                  volts_per_micron: 0.0
+                  min: 
+                  max: 
+                  controllername: C-884
+                  stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
+                  refmode: FRF FRF FRF FRF FRF FRF
+                  port: 
+                  baudrate: 
+                  timeout: 
+              joystick_axes: [x, y, z]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
+              theta_min: 0.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
 
 |
 
@@ -334,61 +348,45 @@ E-709
 
     .. code-block:: yaml
 
-      hardware:
-        stage:
-          -
-            type: PI
-            controllername: E-709
-            stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
-            refmode: FRF FRF FRF FRF FRF FRF
-            serial_number: 119060508
-          -
       microscopes:
-        microscope_name:
-          stage:
-            hardware:
-              name: stage
-              type: PI
-              serial_number: 119060508
-              axes: [x, y, z, theta, f]
-            y_unload_position: 10000
-            y_load_position: 90000
-
-            startfocus: 75000
-            x_max: 100000
-            x_min: -100000
-            y_max: 100000
-            y_min: -100000
-            z_max: 100000
-            z_min: -100000
-            f_max: 100000
-            f_min: 0
-            theta_max: 360
-            theta_min: 0
-
-            x_rot_position: 2000
-            y_rot_position: 2000
-            z_rot_position: 2000
-
-            x_step: 500
-            y_step: 500
-            z_step: 500
-            theta_step: 30
-            f_step: 500
-
-            position:
-              x_pos: 25250
-              y_pos: 40000
-              z_pos: 40000
-              f_pos: 70000
-              theta_pos: 0
-            velocity: 1000
-
-            x_offset: 0
-            y_offset: 0
-            z_offset: 0
-            f_offset: 0
-            theta_offset: 0
+        microscope:
+            stage:
+              hardware:
+                -
+                  type: PI
+                  serial_number: 119060508
+                  axes: [x, y, z, theta, f]
+                  axes_mapping: [1, 2, 3, 4, 5]
+                  feedback_alignment: 
+                  volts_per_micron: 0.0
+                  min: 
+                  max: 
+                  controllername: E-709
+                  stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
+                  refmode: FRF FRF FRF FRF FRF FRF
+                  port: 
+                  baudrate: 
+                  timeout: 
+              joystick_axes: [x, y, z]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
+              theta_min: 0.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
 
 |
 
@@ -409,26 +407,45 @@ positioning.
 
     .. code-block:: yaml
 
-      hardware:
-        stage:
-          -
-            type: Thorlabs
-            serial_number: 74000375
-
       microscopes:
-        microscope_name:
-          stage:
+        microscope:
+            stage:
               hardware:
                 -
-                  name: stage
                   type: Thorlabs
                   serial_number: 74000375
                   axes: [f]
                   axes_mapping: [1]
-                  volts_per_micron: None
-                  axes_channels: None
-                  max: None
-                  min: None
+                  feedback_alignment: 
+                  volts_per_micron: 0.0
+                  min: 
+                  max: 
+                  controllername:
+                  stages: 
+                  refmode: 
+                  port: 
+                  baudrate: 
+                  timeout: 
+              joystick_axes: [f]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
+              theta_min: 0.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
 
 |
 
@@ -441,19 +458,45 @@ KST101
     .. code-block:: yaml
 
       microscopes:
-        microscope_name:
-          stage:
+        microscope:
+            stage:
               hardware:
                 -
-                  name: stage
                   type: KST101
-                  serial_number: 74000375
+                  serial_number: 26001318
                   axes: [f]
                   axes_mapping: [1]
-                  volts_per_micron: None
-                  axes_channels: None
-                  max: None
-                  min: None
+                  feedback_alignment:
+                  device_units_per_mm: 20000000/9.957067
+                  volts_per_micron: 0.0
+                  min: 0
+                  max: 25
+                  controllername:
+                  stages: 
+                  refmode: 
+                  port: 
+                  baudrate: 
+                  timeout: 
+              joystick_axes: [f]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
+              theta_min: 0.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
 
 |
 --------------
@@ -502,22 +545,26 @@ identical. The voltage signal is delivered via the data acquisition card specifi
                   refmode:
                   port:
                   baudrate: 0
-              joystick_axes: [X, Y, Z]
-              x_min: -100000.0
-              x_max: 0.0
-              y_min: -100000.0
-              y_max: 0.0
-              z_min: -100000.0
-              z_max: 0.0
+              joystick_axes: [f]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
               theta_min: 0.0
-              theta_max: 0.0
-              f_min: -100000.0
-              f_max: 0.0
-              x_offset: -100000.0
-              y_offset: -100000.0
-              z_offset: -100000.0
-              theta_offset: -100000.0
-              f_offset: -100000.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
 
 |
 
@@ -540,7 +587,7 @@ stage. For example, not all microscopes have a theta axis.
                 -
                   type: synthetic
                   serial_number: 001
-                  axes: [X, Y, Z, F, Theta]
+                  axes: [x, y, z, theta, f]
                   axes_mapping: [A, B, C, D, E]
                   volts_per_micron: 0.0
                   min: 0.0
@@ -550,21 +597,25 @@ stage. For example, not all microscopes have a theta axis.
                   refmode:
                   port:
                   baudrate: 0
-              joystick_axes: [X, Y, Z]
-              x_min: -100000.0
-              x_max: 0.0
-              y_min: -100000.0
-              y_max: 0.0
-              z_min: -100000.0
-              z_max: 0.0
+              joystick_axes: [x, y, z]
+              x_min: -10000.0
+              x_max: 10000.0
+              y_min: -10000.0
+              y_max: 10000.0
+              z_min: -10000.0
+              z_max: 10000.0
               theta_min: 0.0
-              theta_max: 0.0
-              f_min: -100000.0
-              f_max: 0.0
-              x_offset: -100000.0
-              y_offset: -100000.0
-              z_offset: -100000.0
-              theta_offset: -100000.0
-              f_offset: -100000.0
+              theta_max: 360.0
+              f_min: -10000.0
+              f_max: 10000.0
+              x_offset: 0.0
+              y_offset: 0.0
+              z_offset: 0.0
+              theta_offset: 0.0
+              f_offset: 0.0
+              flip_x: False
+              flip_y: False
+              flip_z: False
+              flip_f: False
 
 |

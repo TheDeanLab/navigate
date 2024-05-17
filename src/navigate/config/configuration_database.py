@@ -148,25 +148,31 @@ shutter_hardware_widgets = {
 
 stage_device_types = {
     "Applied Scientific Instrumentation": "ASI",
+    "ASI MFC2000": "MFC2000",
+    "ASI MS2000": "MS2000",
     "Analog/Digital Device": "GalvoNIStage",
     "Mad City Labs": "MCL",
     "Physik Instrumente": "PI",
     "Sutter Instruments": "MP285",
-    "ThorLabs KCube Inertial Device": "Thorlabs",
+    "ThorLabs KCube Inertial Device KIM001": "Thorlabs",
+    "ThorLabs KCube Inertial Device KST101": "KST101",
     "Virtual Device": "synthetic",
 }
 
 stage_hardware_widgets = {
     "type": ["Device Type", "Combobox", "string", stage_device_types, None],
     "serial_number": ["Serial Number", "Input", "string", None, None],
-    "axes": ["Axes", "Input", "string", None, "Example: [x, y, z]"],
-    "axes_mapping": ["Axes Mapping", "Input", "string", None, "Example: [X, M, Y]"],
+    "axes": ["Axes", "Input", "string", None,"Example: [x, y, z, theta, f]", "[x, y, z]"],
+    "axes_mapping": ["Axes Mapping", "Input", "string", None, "Example: [X, M, Y, D, E]", "[X, M, Y]"],
+    "feedback_alignment": ["Feedback Alighment", "Input", "string", None, "*ASI stage only. Example: [90, 90, 90, 0, 90]", "[90, 90, 90]"],
+    "device_units_per_mm": ["Device Units Per Micron", "Input", "float", None, "*KST101 only. Example: 2000.0", 1000.25],
     "volts_per_micron": [
         "Volts Per Micron",
-        "Spinbox",
-        "float",
-        {"from": 0, "to": 100, "step": 0.1},
-        "*Analog/Digital Device only",
+        "Input",
+        "string",
+        None,
+        "*Analog/Digital Device only. Example: '0.1*x+0.05'",
+        "0.1*x+0.05"
     ],
     "min": [
         "Minimum Volts",
@@ -174,6 +180,7 @@ stage_hardware_widgets = {
         "float",
         {"from": 0, "to": 5, "step": 0.1},
         "*Analog/Digital Device only",
+        0,
     ],
     "max": [
         "Maximum Volts",
@@ -181,6 +188,23 @@ stage_hardware_widgets = {
         "float",
         {"from": 1, "to": 100, "step": 0.1},
         "*Analog/Digital Device only",
+        5,
+    ],
+    "distance_threshold": [
+        "Distance Threshold", 
+        "Spinbox",
+        "float",
+        {"from": 0, "to": 100, "step": 1},
+        "*Analog-Controlled Galvo/Peizo only",
+        5
+    ],
+    "settle_duration_ms": [
+        "Settle Duration (ms)",
+        "Spinbox",
+        "float",
+        {"from": 0, "to": 100, "step": 1},
+        "*Analog-Controlled Galvo/Peizo only",
+        20
     ],
     "controllername": [
         "Controller Name",
@@ -204,7 +228,8 @@ stage_hardware_widgets = {
         "*Physik Instrumente only. Example: FRF FRF",
     ],
     "port": ["Serial Port", "Input", "string", None, "Example: COM1"],
-    "baudrate": ["Baudrate", "Input", "int", None, "Example: 9200"],
+    "baudrate": ["Baudrate", "Input", "int", None, "Example: 9600"],
+    "timeout": ["Serial Timeout", "Input", "float", None, "Example: 0.25", 0.25],
     "button_2": ["Delete", "Button", {"delete": True}],
     "frame_config": {
         "collapsible": True,
@@ -223,34 +248,38 @@ stage_top_widgets = {
 }
 
 stage_constants_widgets = {
-    "joystick_axes": ["Joystick Axes", "Input", "string", None, "Example: [x, y, z]"],
+    "joystick_axes": ["Joystick Axes", "Input", "string", None, "Example: [x, y, z]", "[x, y, z]"],
     "x_min": [
         "Min X",
         "Spinbox",
         "float",
-        {"from": -100000, "to": 10000, "step": 1000},
+        {"from": -100000, "to": 100000, "step": 1000},
         None,
+        -10000
     ],
     "x_max": [
         "Max X",
         "Spinbox",
         "float",
-        {"from": 0, "to": 10000, "step": 1000},
+        {"from": 0, "to": 100000, "step": 1000},
         None,
+        10000
     ],
     "y_min": [
         "Min Y",
         "Spinbox",
         "float",
-        {"from": -100000, "to": 10000, "step": 1000},
+        {"from": -100000, "to": 100000, "step": 1000},
         None,
+        -10000
     ],
     "y_max": [
         "Max Y",
         "Spinbox",
         "float",
-        {"from": 0, "to": 10000, "step": 1000},
+        {"from": 0, "to": 100000, "step": 1000},
         None,
+        10000
     ],
     "z_min": [
         "Min Z",
@@ -258,77 +287,92 @@ stage_constants_widgets = {
         "float",
         {"from": -100000, "to": 10000, "step": 1000},
         None,
+        -10000
     ],
     "z_max": [
         "Max Z",
         "Spinbox",
         "float",
-        {"from": 0, "to": 10000, "step": 1000},
+        {"from": 0, "to": 100000, "step": 1000},
         None,
+        10000
     ],
     "theta_min": [
         "Min Theta",
         "Spinbox",
         "float",
-        {"from": 0, "to": 360, "step": 1000},
+        {"from": 0, "to": 360, "step": 1},
         None,
+        0
     ],
     "theta_max": [
         "Max Theta",
         "Spinbox",
         "float",
-        {"from": 0, "to": 360, "step": 1000},
+        {"from": 0, "to": 360, "step": 1},
         None,
+        360,
     ],
     "f_min": [
         "Min Focus",
         "Spinbox",
         "float",
-        {"from": -100000, "to": 10000, "step": 1000},
+        {"from": -100000, "to": 100000, "step": 1000},
         None,
+        -10000,
     ],
     "f_max": [
         "Max Focus",
         "Spinbox",
         "float",
-        {"from": 0, "to": 10000, "step": 1000},
+        {"from": 0, "to": 100000, "step": 1000},
         None,
+        10000,
     ],
     "x_offset": [
         "Offset of X",
         "Spinbox",
         "float",
-        {"from": -100000, "to": 10000, "step": 1000},
-        "Example: 0",
+        {"from": -10000, "to": 10000, "step": 1000},
+        None,
+        0,
     ],
     "y_offset": [
         "Offset of Y",
         "Spinbox",
         "float",
-        {"from": -100000, "to": 10000, "step": 1000},
-        "Example: 0",
+        {"from": -10000, "to": 10000, "step": 100},
+        None,
+        0,
     ],
     "z_offset": [
         "Offset of Z",
         "Spinbox",
         "float",
-        {"from": -100000, "to": 10000, "step": 1000},
-        "Example: 0",
+        {"from": -10000, "to": 10000, "step": 10},
+        None,
+        0,
     ],
     "theta_offset": [
         "Offset of Theta",
         "Spinbox",
         "float",
-        {"from": -100000, "to": 10000, "step": 1000},
-        "Example: 0",
+        {"from": 0, "to": 360, "step": 1},
+        None,
+        0,
     ],
     "f_offset": [
         "Offset of Focus",
         "Spinbox",
         "float",
-        {"from": -100000, "to": 10000, "step": 1000},
-        "Example: 0",
+        {"from": -10000, "to": 10000, "step": 10},
+        None,
+        0,
     ],
+    "flip_x": ["Flip X", "Checkbutton", "bool", None, None],
+    "flip_y": ["Flip Y", "Checkbutton", "bool", None, None],
+    "flip_z": ["Flip Z", "Checkbutton", "bool", None, None],
+    "flip_f": ["Flip F", "Checkbutton", "bool", None, None],
     "frame_config": {"collapsible": True, "title": "Stage Constants"},
 }
 

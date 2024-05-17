@@ -56,7 +56,7 @@ first establish communication with the device using `ASI provided software <http
     .. code-block:: yaml
 
       microscopes:
-        microscope:
+        microscope_name:
             stage:
               hardware:
                 -
@@ -105,7 +105,7 @@ MFC2000
     .. code-block:: yaml
 
       microscopes:
-        microscope:
+        microscope_name:
             stage:
               hardware:
                 -
@@ -156,7 +156,7 @@ MS2000
     .. code-block:: yaml
 
       microscopes:
-        microscope:
+        microscope_name:
             stage:
               hardware:
                 -
@@ -223,7 +223,7 @@ the software is restarted, it should work.
     .. code-block:: yaml
 
       microscopes:
-        microscope:
+        microscope_name:
             stage:
               hardware:
                 -
@@ -300,7 +300,7 @@ C-884
     .. code-block:: yaml
 
       microscopes:
-        microscope:
+        microscope_name:
             stage:
               hardware:
                 -
@@ -349,7 +349,7 @@ E-709
     .. code-block:: yaml
 
       microscopes:
-        microscope:
+        microscope_name:
             stage:
               hardware:
                 -
@@ -408,7 +408,7 @@ positioning.
     .. code-block:: yaml
 
       microscopes:
-        microscope:
+        microscope_name:
             stage:
               hardware:
                 -
@@ -458,7 +458,7 @@ KST101
     .. code-block:: yaml
 
       microscopes:
-        microscope:
+        microscope_name:
             stage:
               hardware:
                 -

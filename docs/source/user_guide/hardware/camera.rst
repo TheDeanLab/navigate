@@ -42,6 +42,7 @@ ORCA-Flash4.0 V3
                 camera_connection:
               defect_correct_mode: 2.0
               delay: 1.0  #ms
+              settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
 
@@ -71,6 +72,7 @@ ORCA-Fusion
                 camera_connection:
               defect_correct_mode: 2.0
               delay: 1.0  #ms
+              settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
 
@@ -101,6 +103,7 @@ ORCA-Lightning
                 camera_connection:
               defect_correct_mode: 2.0
               delay: 1.0  #ms
+              settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
 
@@ -131,6 +134,7 @@ ORCA-Fire
                 camera_connection:
               defect_correct_mode: 2.0
               delay: 1.0  #ms
+              settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
 
@@ -169,6 +173,7 @@ Iris 15
                 camera_connection: PMPCIECam00
               defect_correct_mode: 2.0
               delay: 1.0  #ms
+              settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
 
@@ -197,6 +202,7 @@ the synthetic camera class must be used.
                 camera_connection:
               defect_correct_mode: 2.0
               delay: 1.0  #ms
+              settle_down: 0.1 #ms
               flip_x: False
               flip_y: False
 

@@ -30,7 +30,8 @@ camera_hardware_widgets = {
         {"On": 2.0, "Off": 1.0},
         None,
     ],
-    "delay": ["Delay (ms)", "Spinbox", "float", None, None],
+    "delay": ["Delay (ms)", "Spinbox", "float", {"from": 0, "to": 100, "step": 0.1}, None],
+    "settle_down": ["Settle Down (ms)", "Spinbox", "float", {"from": 0, "to": 100, "step": 0.1}, None],
     "flip_x": ["Flip X", "Checkbutton", "bool", None, None],
     "flip_y": ["Flip Y", "Checkbutton", "bool", None, None],
     "supported_channel_count": [

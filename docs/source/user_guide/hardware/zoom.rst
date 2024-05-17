@@ -47,7 +47,8 @@ This software supports the
               stage_positions:
                 BABB:
                   f:
-                    36X: 0
+                    1X: 0
+                    6.5x: 2
 
 
 |
@@ -80,6 +81,7 @@ Synthetic Zoom
               stage_positions:
                 BABB:
                   f:
-                    36X: 0
+                    1X: 0
+                    6.5x: 2
 
 |

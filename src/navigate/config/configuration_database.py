@@ -507,8 +507,8 @@ mirror_device_types = {
 }
 
 mirror_hardware_widgets = {
-    "type": ["Device Type", "Combobox", "string", mirror_device_types, None],
-    "flat_path": [
+    "hardware/type": ["Device Type", "Combobox", "string", mirror_device_types, None],
+    "hardware/flat_path": [
         "Flat Mirror Path",
         "Input",
         "string",
@@ -516,7 +516,6 @@ mirror_hardware_widgets = {
         "Example: D:\WaveKitX64\MirrorFiles\Beads.wcs",
     ],
     "n_modes": ["Number of Modes", "Input", "int", None, "Example: 32", 32],
-    "frame_config": {"ref": "hardware"},
 }
 
 laser_device_types = {"Analog Device": "NI", "Virtual Device": "synthetic"}

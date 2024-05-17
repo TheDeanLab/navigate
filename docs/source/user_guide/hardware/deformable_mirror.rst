@@ -30,7 +30,7 @@ coefficients.
               hardware:
                 type: ImagineOpticsMirror
                 flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
-                n_modes: 32
+              n_modes: 32
 
 
 |
@@ -50,8 +50,9 @@ one must configure the software to use a synthetic deformable mirror.
       microscopes:
         microscope_name:
           mirror:
-            type: SyntheticMirror
-            flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+            hardware:
+              type: SyntheticMirror
+              flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
             n_modes: 32
 
 

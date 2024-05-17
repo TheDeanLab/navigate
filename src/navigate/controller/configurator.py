@@ -305,11 +305,15 @@ class Configurator:
                     continue
                 value = get_widget_value(key, value_dict)
                 # widgets[key][3] is the value mapping dict
-                if widgets[key][1] != "Spinbox" and widgets[key][3]:
-                    reverse_value_dict = dict(
-                        map(lambda v: (v[1], v[0]), widgets[key][3].items())
-                    )
-                    temp[key] = reverse_value_dict[value]
+                if widgets[key][1] != "Spinbox"and widgets[key][3]:
+                    # if the value is not valid, return the last valid value
+                    if type(widgets[key][3]) == list:
+                        reverse_value_dict = dict(map(lambda v: (v, v), widgets[key][3]))
+                    else:
+                        reverse_value_dict = dict(
+                            map(lambda v: (v[1], v[0]), widgets[key][3].items())
+                        )
+                    temp[key] = reverse_value_dict.get(value, list(reverse_value_dict.values())[-1])
                 else:
                     temp[key] = value
             return temp
@@ -395,7 +399,7 @@ class Configurator:
                                 hardware_ref_name
                             ],
                         )
-                    except:
+                    except Exception as e:
                         widgets_value = [None]
                     microscope_tab.create_hardware_tab(
                         hardware_type, widgets, hardware_widgets_value=widgets_value

@@ -1096,8 +1096,6 @@ class Model:
                 self.reset_feature_list()
             elif hasattr(self, "signal_container"):
                 self.signal_container.reset()
-            else:
-                self.reset_feature_list()
 
         # Update the stage position.
         # Allows the user to externally move the stage in the continuous mode.

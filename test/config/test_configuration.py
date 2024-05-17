@@ -54,27 +54,28 @@ class TestConfiguration(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_hardware_section(self):
-        expected_hardware = ["daq", "camera", "filter_wheel", "stage", "zoom"]
+    # # hardware head section has been removed
+    # def test_hardware_section(self):
+    #     expected_hardware = ["daq", "camera", "filter_wheel", "stage", "zoom"]
 
-        hardware_types = self.data["hardware"].keys()
-        for hardware_type in hardware_types:
-            self.assertIn(hardware_type, expected_hardware)
-            if isinstance(self.data["hardware"][hardware_type], dict):
-                hardware_keys = self.data["hardware"][hardware_type].keys()
-                for key in hardware_keys:
-                    self.assertIn("type", self.data["hardware"][hardware_type])
-            elif isinstance(self.data["hardware"][hardware_type], list):
-                for i in range(len(self.data["hardware"][hardware_type])):
-                    self.assertIn("type", self.data["hardware"][hardware_type][i])
+    #     hardware_types = self.data["hardware"].keys()
+    #     for hardware_type in hardware_types:
+    #         self.assertIn(hardware_type, expected_hardware)
+    #         if isinstance(self.data["hardware"][hardware_type], dict):
+    #             hardware_keys = self.data["hardware"][hardware_type].keys()
+    #             for key in hardware_keys:
+    #                 self.assertIn("type", self.data["hardware"][hardware_type])
+    #         elif isinstance(self.data["hardware"][hardware_type], list):
+    #             for i in range(len(self.data["hardware"][hardware_type])):
+    #                 self.assertIn("type", self.data["hardware"][hardware_type][i])
 
     def test_gui_section(self):
-        expected_keys = ["channels", "stack_acquisition", "timepoint"]
+        expected_keys = ["channels"]
         expected_channel_keys = [
             "count",
-            "laser_power",
-            "exposure_time",
-            "interval_time",
+            # "laser_power",
+            # "exposure_time",
+            # "interval_time",
         ]
         expected_stack_keys = ["step_size", "start_pos", "end_pos"]
         min_max_step_keys = ["min", "max", "step"]
@@ -188,7 +189,7 @@ class TestConfiguration(unittest.TestCase):
             "laser_port_switcher",
             "laser_switch_state",
         ]
-        type_keys = ["name", "type"]
+        type_keys = ["type"]
 
         daq_keys = self.data["microscopes"][microscope][hardware_type].keys()
         for key in daq_keys:
@@ -204,36 +205,13 @@ class TestConfiguration(unittest.TestCase):
     def camera_section(self, microscope, hardware_type):
         expected_keys = [
             "hardware",
-            "x_pixels",
-            "y_pixels",
-            "pixel_size_in_microns",
-            "subsampling",
-            "sensor_mode",
-            "readout_direction",
-            "lightsheet_rolling_shutter_width",
             "defect_correct_mode",
-            "binning",
-            "readout_speed",
-            "trigger_active",
-            "trigger_mode",
-            "trigger_polarity",
-            "trigger_source",
-            "exposure_time",
-            "delay_percent",
-            "pulse_percent",
-            "line_interval",
-            "display_acquisition_subsampling",
-            "average_frame_rate",
-            "frames_to_average",
-            "exposure_time_range",
+            "delay",
+            "settle_down",
             "flip_x",
             "flip_y",
-            "x_pixels_step",
-            "y_pixels_step",
-            "x_pixels_min",
-            "y_pixels_min",
         ]
-        type_keys = ["name", "type"]
+        type_keys = ["type", "serial_number", "camera_connection"]
 
         camera_keys = self.data["microscopes"][microscope][hardware_type].keys()
         for key in camera_keys:
@@ -249,14 +227,8 @@ class TestConfiguration(unittest.TestCase):
     def remote_focus_section(self, microscope, hardware_type):
         expected_keys = [
             "hardware",
-            "delay_percent",
-            "ramp_rising_percent",
-            "ramp_falling_percent",
-            "amplitude",
-            "offset",
-            "smoothing",
         ]
-        type_keys = ["name", "type", "channel", "min", "max"]
+        type_keys = ["type", "channel", "min", "max", "port", "baudrate"]
         remote_focus_keys = self.data["microscopes"][microscope][hardware_type].keys()
         for key in remote_focus_keys:
             if key == "hardware":
@@ -272,13 +244,9 @@ class TestConfiguration(unittest.TestCase):
         expected_keys = [
             "hardware",
             "waveform",
-            "frequency",
-            "amplitude",
-            "offset",
-            "duty_cycle",
             "phase",
         ]
-        type_keys = ["name", "type", "channel", "min", "max"]
+        type_keys = ["type", "channel", "min", "max"]
 
         if isinstance(self.data["microscopes"][microscope][hardware_type], list):
             for i in range(len(self.data["microscopes"][microscope][hardware_type])):
@@ -305,7 +273,7 @@ class TestConfiguration(unittest.TestCase):
             "filter_wheel_delay",
             "available_filters",
         ]
-        type_keys = ["name", "type", "wheel_number"]
+        type_keys = ["type", "wheel_number", "port", "baudrate"]
 
         keys = self.data["microscopes"][microscope][hardware_type].keys()
         for key in keys:
@@ -335,12 +303,6 @@ class TestConfiguration(unittest.TestCase):
             "f_min",
             "theta_max",
             "theta_min",
-            "x_step",
-            "y_step",
-            "z_step",
-            "theta_step",
-            "f_step",
-            "velocity",
             "x_offset",
             "y_offset",
             "z_offset",
@@ -350,16 +312,22 @@ class TestConfiguration(unittest.TestCase):
             "flip_x",
             "flip_y",
             "flip_z",
+            "flip_f",
         ]
         type_keys = [
-            "name",
             "type",
             "serial_number",
             "axes",
             "volts_per_micron",
-            "axes_channels",
+            "axes_mapping",
             "max",
             "min",
+            "controllername",
+            "stages",
+            "refmode",
+            "port",
+            "baudrate",
+            "timeout",
         ]
 
         for key in self.data["microscopes"][microscope][hardware_type].keys():
@@ -392,7 +360,7 @@ class TestConfiguration(unittest.TestCase):
 
     def zoom_section(self, microscope, hardware_type):
         expected_keys = ["hardware", "position", "pixel_size", "stage_positions"]
-        type_keys = ["name", "type", "servo_id"]
+        type_keys = ["type", "servo_id"]
 
         for key in self.data["microscopes"][microscope][hardware_type].keys():
             if key == "hardware":
@@ -417,8 +385,8 @@ class TestConfiguration(unittest.TestCase):
                 self.assertIn(key, expected_keys)
 
     def shutter_section(self, microscope, hardware_type):
-        expected_keys = ["hardware", "shutter_min_do", "shutter_max_do"]
-        type_keys = ["name", "type", "channel"]
+        expected_keys = ["hardware"]
+        type_keys = ["type", "channel", "min", "max"]
 
         for key in self.data["microscopes"][microscope][hardware_type].keys():
             if key == "hardware":
@@ -436,12 +404,9 @@ class TestConfiguration(unittest.TestCase):
             "onoff",
             "power",
             "type",
-            "index",
-            "delay_percent",
-            "pulse_percent",
         ]
 
-        hardware_keys = ["name", "type", "channel", "min", "max"]
+        hardware_keys = ["type", "channel", "min", "max"]
 
         if isinstance(self.data["microscopes"][microscope][hardware_type], list):
             for i in range(len(self.data["microscopes"][microscope][hardware_type])):

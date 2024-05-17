@@ -23,6 +23,7 @@ microscopes:
         type: HamamatsuOrca
         serial_number: 302158
         camera_connection: PMPCIECam00 #Photometrics only
+      defect_correct_mode: 2.0
       delay: 1.0 #ms
       settle_down: 0.0 #ms
       flip_x: False
@@ -34,26 +35,16 @@ microscopes:
         channel: PXI6259/ao2
         min: 0
         max: 5
-      # Optotune EL-16-40-TC-VIS-5D-1-C
-      delay_percent: 7.5
-      ramp_rising_percent: 85
-      ramp_falling_percent: 2.5
-      amplitude: 0.7
-      offset: 2.3
-      smoothing: 0.0
+        port:
+        baudrate:
     galvo:
       -
         hardware:
-          name: daq
           type: NI
           channel: PXI6259/ao0
           min: -5
           max: 5
         waveform: sine
-        frequency: 99.9
-        amplitude: 2.5
-        offset: 0.5
-        duty_cycle: 50
         phase: 1.57079 # pi/2
     filter_wheel:
       hardware:
@@ -223,6 +214,7 @@ microscopes:
         type: HamamatsuOrca
         serial_number: 302352
         camera_connection: PMPCIECam00 #Photometrics only
+      defect_correct_mode: 2.0
       delay: 1.0 #ms
       settle_down: 0 #ms
       flip_x: False
@@ -233,12 +225,11 @@ microscopes:
         channel: PXI6259/ao3
         min: -0.7
         max: 0.7
-        comport: 
+        port: 
         baudrate: 0
     galvo:
       -
         hardware:
-          name: daq
           type: NI
           channel: PXI6259/ao1
           min: -5
@@ -249,6 +240,8 @@ microscopes:
       hardware:
         type: SutterFilterWheel
         wheel_number: 2
+        port:
+        baudrate:
       filter_wheel_delay: .030 # in seconds
       available_filters:
         Empty-Alignment: 0

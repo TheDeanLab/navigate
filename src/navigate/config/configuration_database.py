@@ -69,7 +69,7 @@ filter_wheel_hardware_widgets = {
     ],
     "hardware/wheel_number": ["Number of Wheels", "Spinbox", "int", None, "Example: 1"],
     "hardware/port": ["Serial Port", "Input", "string", None, "Example: COM1"],
-    "hardware/baudrate": ["Baudrate", "Input", "int", None, "Example: 9200"],
+    "hardware/baudrate": ["Baudrate", "Input", "int", None, "Example: 9600"],
     "filter_wheel_delay": [
         "Filter Wheel Delay (s)",
         "Input",
@@ -405,7 +405,7 @@ remote_focus_hardware_widgets = {
         "Input",
         "int",
         None,
-        "*Equipment Solutions only. Example: 9200",
+        "*Equipment Solutions only. Example: 9600",
     ],
     "frame_config": {"ref": "hardware"},
 }

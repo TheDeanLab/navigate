@@ -1,0 +1,183 @@
+# Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
+microscopes:
+  BTMesoSPIM:
+    daq:
+      hardware:
+        type: NI
+      sample_rate: 100000
+
+      # triggers
+      master_trigger_out_line: PCI6738/port0/line1 #3
+      camera_trigger_out_line: /PCI6738/ctr0 #9/42
+      trigger_source: /PCI6738/PFI0 #4
+
+      # Digital Laser Outputs
+      laser_port_switcher: PCI6738/port0/line0
+      laser_switch_state: False
+
+    camera:
+      hardware:
+        type: HamamatsuOrca
+        serial_number: 003209
+      defect_correct_mode: 1.0 #2.0
+      delay: 10 #ms
+      settle_down: 0.0 #ms
+      flip_x: True
+      flip_y: False
+    remote_focus_device:
+      hardware:
+        name: remote_focus
+        type: NI # SyntheticRemoteFocus #EquipmentSolutions # NI
+        channel: PCI6738/ao2  #45/46
+        port: COM7
+        min: 0
+        max: 5
+    galvo:
+      -
+        hardware:
+          type: NI
+          channel: PCI6738/ao0  #10/11
+          min: -5
+          max: 5
+        waveform: sawtooth
+        phase: 1.57079 # pi/2
+
+    filter_wheel:
+      hardware:
+        type: ASI #SyntheticFilterWheel #SutterFilterWheel
+        wheel_number: 1
+        port: COM8
+        baudrate: 115200
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        525-30: 0
+        600-37: 1
+        647LP: 2
+        Empty1: 3
+        Empty2: 4
+        670-30: 5
+        Blocked2: 6
+        Empty3: 7
+        Blocked3: 8
+        Blocked4: 9
+    stage:
+      hardware:
+        -
+          type: ASI
+          serial_number: 0000
+          port: COM8
+          timeout: 0.25
+          baudrate: 115200
+          axes: [x, y, z, f, theta]
+          feedback_alignment: [88, 91, 91, 91, 85]
+          axes_mapping: [X, V, Z, Y, T]
+          volts_per_micron: None
+          axes_channels: None
+          max: 5
+          min: 0
+
+      joystick_axes: [x, y, z, theta, f]
+      x_max: 125000
+      x_min: -125000
+      y_max: 125000
+      y_min: -125000
+      z_max: 50000
+      z_min: -50000
+      f_max: 1000000
+      f_min: -1000000
+      theta_max: 360000
+      theta_min: -360000
+
+      flip_x: False
+      flip_y: False
+      flip_z: False
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      theta_offset: 0
+      f_offset: 0
+    zoom:
+      hardware:
+        type: SyntheticZoom
+        servo_id: 1
+        port: COM18
+        baudrate: 9600
+      position:
+        5X: 0
+        4X: 0
+      pixel_size:
+        5X: 1.2  # 1.2 in BABB
+        4X: 1.3  # 1.3 in BABB
+      stage_positions:
+        BABB:
+          f:
+            5X: 0
+            4X: 0
+    shutter:
+      hardware:
+        type: SyntheticShutter
+        channel: PCI6738/port0/line10
+        min: 0
+        max: 5
+    lasers:
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line5 # 7/41
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao8 # 1  # 44/11
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line2 # 5/39
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao9 # 3  # 12/46
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 638
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line3 # 6/39
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao10 # 4  # 13/14
+            min: 0
+            max: 5
+        type: Obis
+
+gui:
+  channels:
+    count: 5
+
+
+# BDVParameters:
+# # The following parameters are used to configure the BigDataViewer
+#   # visualization. See the BigDataViewer documentation for more details.
+#   # https://imagej.net/BigDataViewer
+#   shear:
+#     shear_data: True
+#     shear_dimension: YZ # XZ, YZ, or XY
+#     shear_angle: 45
+#   rotate:
+#     rotate_data: False
+#     rotate_dimension: X # X, Y, Z
+#     rotate_angle: 0

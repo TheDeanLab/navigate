@@ -1,0 +1,370 @@
+# Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
+microscopes:
+  Nanoscale:
+    daq:
+      hardware:
+        type: NI
+
+      # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
+      # Sampling rate in Hz
+      sample_rate: 100000
+
+      # triggers
+      master_trigger_out_line: PXI6259/port0/line1
+      camera_trigger_out_line: /PXI6259/ctr0
+      trigger_source: /PXI6259/PFI0
+
+      # Digital Laser Outputs
+      laser_port_switcher: PXI6733/port0/line1
+      laser_switch_state: False
+
+    camera:
+      hardware:
+        type: HamamatsuOrcaLightning #SyntheticCamera
+        serial_number: 000035
+      defect_correct_mode: 2.0
+      delay: 10 #ms
+      settle_down: 0.0 #ms
+    remote_focus_device:
+      hardware:
+        type: NI
+        channel: PXI6259/ao3
+        min: -0.5
+        max: 0.5
+      # Optotune EL-16-40-TC-VIS-5D-1-C
+    galvo:
+      -
+        hardware:
+          type: NI
+          channel: PXI6259/ao1
+          min: 0
+          max: 5
+        phase: 1.57079 # pi/2
+    filter_wheel:
+      hardware:
+        type: ASI #SyntheticFilterWheel
+        wheel_number: 2
+        port: COM8
+        baudrate: 115200
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        BLU - FF01-442/42-32: 0
+        GFP - FF01-515/30-32: 1
+        RFP - FF01-595/31-32: 2
+        Far-Red - FF01-670/30-32: 3
+        Blocked1: 4
+        Empty: 5
+        Blocked3: 6
+        Blocked4: 7
+        Blocked5: 8
+        Blocked6: 9
+    stage:
+      hardware:
+        -
+          type: ASI
+          serial_number: 123456789
+          port: COM8
+          baudrate: 115200
+          axes: [x, y, z, f] # Software
+          axes_mapping: [M, Y, X, Z] # M Shear axis mapping
+          #axes_mapping: [M, X, Y, Z] #testing y
+          #axes_mapping: [M, X, Z, Y] #testing Z
+          # axes_mapping: [Z, Y, X, M]
+          feedback_alignment: [90, 90, 90, 90]
+
+        -
+          name: stage
+          type: SyntheticStage
+          serial_number: 987654321
+          axes: [theta]
+
+      x_max: 0 # Swapped from Z
+      x_min: -22708.3 # Swapped from Z
+      y_max: 1361.3
+      y_min: -3496.3
+      z_max: 3521.9 # Swapped from X
+      z_min: -4551.1 # Swapped from X
+      f_max: 3233.0 #=m
+      f_min: -9382.0 #=m
+      theta_max: 360
+      theta_min: 0
+      external_trigger: /PXI6259/PFI1
+      # joystick_axes: [x, y, z, f]
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      f_offset: 0
+      theta_offset: 0
+    zoom:
+      hardware:
+        type: SyntheticZoom
+        servo_id: 1
+      position:
+        N/A: 0
+      pixel_size:
+        N/A: 0.168
+    shutter:
+      hardware:
+        type: NI
+        channel: PXI6259/port0/line0
+        min: 0
+        max: 5
+    lasers:
+      # Omicron LightHub Ultra
+      # 488 and 640 are LuxX+ Lasers
+      # 561 is a Coherent OBIS Laser
+      # Digital Laser Outputs
+      - wavelength: 405
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao0
+            min: 0
+            max: 5
+        type: LuxX
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line3
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao1
+            min: 0
+            max: 5
+        type: LuxX
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line4
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao2
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 642
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line5
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao3
+            min: 0
+            max: 5
+        type: LuxX
+
+      - wavelength: LED
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao4
+            min: 0
+            max: 5
+
+  Macroscale:
+    daq:
+      hardware:
+        type: NI
+
+      # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
+      # Sampling rate in Hz
+      sample_rate: 100000
+
+      # triggers
+      master_trigger_out_line: PXI6259/port0/line1
+      camera_trigger_out_line: /PXI6259/ctr0
+      trigger_source: /PXI6259/PFI0
+
+      # Digital Laser Outputs
+      laser_port_switcher: PXI6733/port0/line1
+      laser_switch_state: True
+
+    camera:
+      hardware:
+        type: Photometrics #SyntheticCamera
+        serial_number: 1
+        camera_connection: PMPCIECam00
+      x_pixels: 5056.0
+      y_pixels: 2960.0
+      pixel_size_in_microns: 4.25
+      defect_correct_mode: 2.0
+      delay: 25 #8 #5.0
+      settle_down: 0.0 #ms
+    remote_focus_device:
+      hardware:
+        type: NI
+        channel: PXI6259/ao3
+        min: -0.5
+        max: 0.5
+      # Optotune EL-16-40-TC-VIS-5D-1-C
+    galvo:
+      -
+        hardware:
+          type: NI
+          channel: PXI6259/ao1
+          min: 0
+          max: 5
+        phase: 1.57079 # pi/2
+    filter_wheel:
+      hardware:
+        type: ASI #SyntheticFilterWheel
+        wheel_number: 2
+        port: COM8
+        baudrate: 115200
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        BLU - FF01-442/42-32: 0
+        GFP - FF01-515/30-32: 1
+        RFP - FF01-595/31-32: 2
+        Far-Red - FF01-670/30-32: 3
+        Blocked1: 4
+        Empty: 5
+        Blocked3: 6
+        Blocked4: 7
+        Blocked5: 8
+        Blocked6: 9
+    stage:
+      hardware:
+        -
+          name: stage
+          type: ASI
+          port: COM8
+          baudrate: 115200
+          serial_number: 123456789
+          axes: [x, y, z, f] #Software
+          # axes_mapping: [M, Y, X, Z]
+          axes_mapping: [M, Y, X, Z] #M  shear
+          feedback_alignment: [90, 90, 90, 90]
+
+        -
+          name: stage
+          type: SyntheticStage
+          serial_number: 987654321
+          axes: [theta]
+
+      x_max: 0 # Swapped from Z
+      x_min: -22708.3 # Swapped from Z
+      y_max: 1361.3
+      y_min: -3496.3
+      z_max: 3521.9 # Swapped from X
+      z_min: -4651.1 # Swapped from X
+      f_max: 3233.0 #=m
+      f_min: -9382.0 #=m
+      theta_max: 360
+      theta_min: 0
+      external_trigger: /PXI6259/PFI1
+      # joystick_axes: [x, y, z, f]
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      f_offset: 0
+      theta_offset: 0
+    zoom:
+      hardware:
+        type: SyntheticZoom
+        servo_id: 1
+      position:
+        N/A: 0
+      pixel_size:
+        N/A: 1.06
+    shutter:
+      hardware:
+        type: NI
+        channel: PXI6259/port0/line0
+        min: 0
+        max: 5
+    lasers:
+      # Omicron LightHub Ultra
+      # 488 and 640 are LuxX+ Lasers
+      # 561 is a Coherent OBIS Laser
+      # Digital Laser Outputs
+      - wavelength: 405
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao0
+            min: 0
+            max: 5
+        type: LuxX
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line3
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao1
+            min: 0
+            max: 5
+        type: LuxX
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line4
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao2
+            min: 0
+            max: 5
+        type: Obis
+
+      - wavelength: 642
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line5
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao3
+            min: 0
+            max: 5
+        type: LuxX
+
+      - wavelength: LED
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao4
+            min: 0
+            max: 5
+
+
+gui:
+  channels:
+    count: 5

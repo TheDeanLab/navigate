@@ -1,0 +1,212 @@
+microscopes:
+  OPM:
+    daq:
+      hardware:
+        type: NI
+      sample_rate: 100000
+      master_trigger_out_line: PXI6723/port0/line1
+      camera_trigger_out_line: /PXI6723/ctr0
+      trigger_source: /PXI6723/PFI0
+      laser_port_switcher: PXI6723/port0/line0
+      laser_switch_state: False
+
+    camera:
+      hardware:
+        type: HamamatsuOrca
+        serial_number: 000646
+      defect_correct_mode: 2.0
+      delay: 10.0 #ms
+      settle_down: 0.0 #ms
+      flip_x: False
+      flip_y: False
+
+    remote_focus_device:
+      hardware:
+        type: SyntheticRemoteFocus
+        channel: PXI6723/ao2
+        min: 0
+        max: 5
+
+    galvo:
+      -
+        hardware:
+          type: NI
+          channel: PXI6723/ao0
+          min: -10
+          max: 10
+        waveform: sine
+        phase: 1.57079
+
+    filter_wheel:
+      hardware:
+        type: ASI
+        wheel_number: 1
+        port: COM13
+        baudrate: 115200
+      filter_wheel_delay: .030
+      available_filters:
+        Empty-Alignment: 0
+        GFP - FF01-515/30-32: 1
+        RFP - FF01-595/31-32: 2
+        Far-Red - BLP01-647R/31-32: 3
+        Blocked1: 4
+        Blocked2: 5
+        Blocked3: 6
+        Blocked4: 7
+        Blocked5: 8
+        Blocked6: 9
+
+    stage:
+      hardware:
+        -
+          type: ASI
+          serial_number: 123456789
+          axes: [x, y, f]
+          axes_mapping: [X, Y, Z]
+          volts_per_micron: None
+          max: None
+          min: None
+          port: COM13
+          baudrate: 115200
+          timeout: 0.25
+        -
+          type: GalvoNIStage
+          serial_number: 987654321
+          axes: [z]
+          axes_mapping: [ PXI6723/ao1 ]
+          volts_per_micron: 0.05*x
+          distance_threshold: None
+          settle_duration_ms: 20 #ms
+          max: 10
+          min: -10
+        -
+          type: SyntheticStage
+          serial_number: 123
+          axes: [theta]
+          axes_mapping: [theta]
+          max: 360
+          min: 0
+      joystick_axes: [x, y, z]
+      x_max: 100000
+      x_min: -100000
+      y_max: 100000
+      y_min: -100000
+      z_max: 100000
+      z_min: -100000
+      f_max: 100000
+      f_min: -100000
+      theta_max: 360
+      theta_min: 0
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      theta_offset: 0
+      f_offset: 0
+
+      flip_x: False
+      flip_y: False
+      flip_z: False
+
+    zoom:
+      hardware:
+        type: SyntheticZoom
+        servo_id: 1
+      position:
+        0.63x: 0
+        1x: 627
+        2x: 1711
+        3x: 2301
+        4x: 2710
+        5x: 3079
+        6x: 3383
+      pixel_size:
+        0.63x: 9.7
+        1x: 6.38
+        2x: 3.14
+        3x: 2.12
+        4x: 1.609
+        5x: 1.255
+        6x: 1.044
+      stage_positions:
+        BABB:
+          f:
+            0.63x: 0
+            1x: 1
+            2x: 2
+            3x: 3
+            4x: 4
+            5x: 5
+            6x: 6
+
+    shutter:
+      hardware:
+        type: SyntheticShutter #NI
+        channel: PXI6723/port0/line0
+        min: 0
+        max: 5
+
+    lasers:
+      - wavelength: 405
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6321/port0/line3
+            min: 0
+            max: 5
+        power: #analog
+          hardware:
+            type: SyntheticLaser
+            channel: PCI6321/ao1
+            min: 0
+            max: 5
+        type: LuxX
+
+      - wavelength: 488
+        onoff: #digital
+          hardware:
+            type: NI
+            channel: PCI6321/port0/line5
+            min: 0
+            max: 5
+        power: #analog
+          hardware:
+            type: SyntheticLaser
+            channel: PCI6321/ao0
+            min: 0
+            max: 5
+        type: LuxX
+
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6321/port0/line7
+            min: 0
+            max: 5
+        power: #analog
+          hardware:
+            type: SyntheticLaser
+            channel: PCI6321/ao1
+            min: 0
+            max: 5
+        type: Obis
+
+      - wavelength: 640
+        onoff: #digital
+          hardware:
+            type: NI
+            channel: PCI6321/port0/line1
+            min: 0
+            max: 5
+        power: #analog
+          hardware:
+            type: SyntheticLaser
+            channel: PCI6321/ao2
+            min: 0
+            max: 5
+        type: LuxX
+
+gui:
+  channels:
+    count: 5

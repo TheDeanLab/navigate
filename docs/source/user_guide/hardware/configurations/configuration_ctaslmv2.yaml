@@ -1,0 +1,173 @@
+# Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
+microscopes:
+  CTASLMv2:
+    daq:
+      hardware:
+        type: NI
+      sample_rate: 100000
+
+      # triggers
+      master_trigger_out_line: PCI6738/port0/line1 #3
+      camera_trigger_out_line: /PCI6738/ctr0 #9/42
+      trigger_source: /PCI6738/PFI0 #4
+
+      # Digital Laser Outputs
+      laser_port_switcher: PCI6738/port0/line0
+      laser_switch_state: False
+
+    camera:
+      hardware:
+        type: HamamatsuOrca
+        serial_number: 302153
+      flip_x: True
+      flip_y: False
+      defect_correct_mode: 1.0
+      delay: 20
+    remote_focus_device:
+      hardware:
+        type: EquipmentSolutions # NI
+        channel: PCI6738/ao2  #45/46
+        port: COM7
+        min: -5
+        max: 5
+    galvo:
+      -
+        hardware:
+          type: NI
+          channel: PCI6738/ao0  #10/11
+          min: -5
+          max: 5
+        waveform: sawtooth
+        phase: 1.57079 # pi/2
+    filter_wheel:
+      hardware:
+        type: SutterFilterWheel
+        wheel_number: 1
+        port: COM10
+        baudrate: 9600
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        Empty-1: 0
+        525-30: 1
+        600-52: 2
+        670-30: 3
+        647-LP: 4
+        Empty-2: 5
+        Empty-3: 6
+        Empty-4: 7
+    stage:
+      hardware:
+        -
+          name: stage1
+          type: MP285
+          serial_number: 0000
+          axes: [y, x, f]
+          axes_mapping: [z, y, x]
+          volts_per_micron: None
+          max: 25000
+          min: 0
+          port: COM2
+          timeout: 0.25
+          baudrate: 9600
+        -
+          name: stage2
+          type: syntheticstage
+          serial_number: 0000
+          axes: [theta]
+          axes_mapping: [theta]
+          max: 360
+          min: 0
+        -
+          name: stage3
+          type: GalvoNIStage
+          serial_number: 0000
+          axes: [z]
+          axes_mapping: [PCI6738/ao6] #48/49
+          volts_per_micron: 0.05*x
+          max: 10
+          min: 0
+          distance_threshold: 20
+          settle_duration_ms: 100
+      x_max: 12500
+      x_min: -12500
+      y_max: 12500
+      y_min: -12500
+      z_max: 200
+      z_min: 0
+      f_max: 12500
+      f_min: -12500
+      theta_max: 360
+      theta_min: 0
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      theta_offset: 0
+      f_offset: 0
+      coupled_axes:
+        z: f
+    zoom:
+      hardware:
+        type: synthetic
+        servo_id: 1
+      position:
+        36X: 0
+      pixel_size:
+        36X: 0.180
+      stage_positions:
+        BABB:
+          f:
+            36X: 0
+    shutter:
+      hardware:
+        type: SyntheticShutter
+        channel: PCI6738/port0/line10
+        min: 0
+        max: 5
+    lasers:
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line5 # 7/41
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao8 #1  # 44/11
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line2 # 5/39
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao9 # 3  # 12/46
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 647
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line3 # 6/39
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao10 # 4  # 13/14
+            min: 0
+            max: 5
+        type: Obis
+
+gui:
+  channels:
+    count: 5

@@ -1,0 +1,229 @@
+# Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
+microscopes:
+  SpectralTIRF:
+    daq:
+      hardware:
+        type: NI
+
+      # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
+      # Sampling rate in Hz
+      sample_rate: 100000
+
+      # triggers
+      master_trigger_out_line: PCIE6738/port0/line1
+      camera_trigger_out_line: /PCIE6738/ctr0
+      trigger_source: /PCIE6738/PFI0
+
+      # Digital Laser Outputs
+      laser_port_switcher: PCIE6738/port0/line0
+      laser_switch_state: False
+
+    camera:
+      hardware:
+        type: HamamatsuOrca
+        serial_number: 001480
+      defect_correct_mode: 2.0
+      delay: 10 #ms
+      settle_down: 0.0 #ms
+    remote_focus_device:
+      hardware:
+        type: NI
+        channel: PCIE6738/ao2
+        min: 0
+        max: 5
+      # Optotune EL-16-40-TC-VIS-5D-1-C
+    galvo:
+      -
+        hardware:
+          type: NI
+          channel: PCIE6738/ao2  #galvo-x
+          min: -5
+          max: 5
+        waveform: sine
+        period: 10
+        phase: 0
+      -
+        hardware:
+          type: NI
+          channel: PCIE6738/ao3  #galvo-y
+          min: -5
+          max: 5
+        waveform: sine
+        period: 10
+        phase: 90
+    filter_wheel:
+      hardware:
+        name: emission
+        type: ASI
+        port: COM17
+        baudrate: 115200
+        wheel_number: 1
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        CFP - FF01-482/35: 0
+        YFP - FF01-250/15: 1
+        Blocked 1: 2
+        Empty Position 1: 3
+        Blocked 2: 4
+        Blocked 3: 5
+        Empty Position 2: 6
+        Blocked 4: 7
+        Blocked 5: 8
+        Blocked 6: 9
+    stage:
+      hardware:
+        -
+          type: ASI
+          serial_number: 119060508
+          port: COM17
+          baudrate: 115200
+          axes: [x, y, z]
+          axes_mapping: [x, y, z]
+          volts_per_micron: None
+          max: None
+          min: None
+        -
+          name: Synthetic
+          type: SyntheticStage
+          serial_number: 119060508
+          axes: [theta, f]
+          axes_mapping: [theta, f]
+          volts_per_micron: None
+          max: None
+          min: None
+
+      x_max: 50000
+      x_min: -50000
+      y_max: 50000
+      y_min: -50000
+      z_max: 50000
+      z_min: -50000
+      f_max: 50000
+      f_min: 0
+      theta_max: 360
+      theta_min: 0
+
+    zoom:
+      hardware:
+        type: synthetic
+        servo_id: 1
+      position:
+        110x: 0
+      pixel_size:
+        110x: 0.059
+    shutter:
+      hardware:
+        type: synthetic
+        channel: PCIE6738/port0/line0
+        min: 0
+        max: 5
+    lasers:
+      - wavelength: 445
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao5
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao4
+            min: 0
+            max: 5
+        type: LuxX
+
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao7
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao6
+            min: 0
+            max: 5
+        type: LuxX
+
+      - wavelength: 514
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao9
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao8
+            min: 0
+            max: 5
+        type: LuxX
+
+      - wavelength: 532
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao11
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao10
+            min: 0
+            max: 5
+        type: LuxX
+
+      - wavelength: 562
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao13
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao12
+            min: 0
+            max: 5
+        type: Obis
+
+      - wavelength: 592
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao15
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao14
+            min: 0
+            max: 5
+        type: LuxX
+
+
+      - wavelength: 642
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao17
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIE6738/ao16
+            min: 0
+            max: 5
+        type: LuxX
+
+gui:
+  channels:
+    count: 5

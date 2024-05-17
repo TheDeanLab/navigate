@@ -1,0 +1,389 @@
+# Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
+microscopes:
+  Mesoscale:
+    daq:
+      hardware:
+        name: daq
+        type: NI
+
+      # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
+      # Sampling rate in Hz
+      sample_rate: 100000
+      sweep_time: 0.2
+
+      # triggers
+      master_trigger_out_line: PXI6259/port0/line1
+      camera_trigger_out_line: /PXI6259/ctr0
+      trigger_source: /PXI6259/PFI0
+
+      # Digital Laser Outputs
+      laser_port_switcher: PXI6733/port0/line0
+      laser_switch_state: False
+
+    camera:
+      hardware:
+        name: camera
+        type: HamamatsuOrca
+        serial_number: 302352
+      x_pixels: 2048.0
+      y_pixels: 2048.0
+      pixel_size_in_microns: 6.5
+      subsampling: [1, 2, 4]
+      sensor_mode: Normal  # 12 for progressive, 1 for normal.
+      readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
+      lightsheet_rolling_shutter_width: 608
+      defect_correct_mode: 2.0
+      binning: 1x1
+      readout_speed: 0x7FFFFFFF
+      trigger_active: 1.0
+      trigger_mode: 1.0 # external light-sheet mode
+      trigger_polarity: 2.0  # positive pulse
+      trigger_source: 2.0  # 2 = external, 3 = software.
+      exposure_time: 20 # Use milliseconds throughout.
+      delay_percent: 10
+      pulse_percent: 1
+      line_interval: 0.000075
+      display_acquisition_subsampling: 4
+      average_frame_rate: 4.969
+      frames_to_average: 1
+      exposure_time_range:
+        min: 1
+        max: 1000
+        step: 1
+      flip_x: False
+      flip_y: False
+      x_pixels_step: 4
+      y_pixels_step: 4
+      x_pixels_min: 4
+      y_pixels_min: 4
+
+    remote_focus_device:
+      hardware:
+        name: daq
+        type: NI
+        channel: PXI6259/ao2
+        min: -5
+        max: 5
+      # Optotune EL-16-40-TC-VIS-5D-1-C
+      delay_percent: 7.5
+      ramp_rising_percent: 85
+      ramp_falling_percent: 2.5
+      amplitude: 0.7
+      offset: 2.3
+      smoothing: 0.0
+    galvo:
+      -
+        hardware:
+          name: daq
+          type: NI
+          channel: PXI6259/ao0
+          min: -5
+          max: 5
+        frequency: 99.9
+        amplitude: 2.5
+        offset: 0
+        duty_cycle: 50
+        phase: 1.57079 # pi/2
+    filter_wheel:
+      hardware:
+        name: filter_wheel
+        type: SutterFilterWheel
+        wheel_number: 1
+        port: COM2
+        baudrate: 9600
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        Empty-Alignment: 5
+        GFP - FF01-515/30-32: 6
+        RFP - FF01-595/31-32: 7
+        Far-Red - BLP01-647R/31-32: 8
+        Blocked1: 4
+        Blocked2: 0
+        Blocked3: 1
+        Blocked4: 2
+        Blocked5: 3
+        Blocked6: 9
+    stage:
+      hardware:
+        name: stage
+        type: PI
+        serial_number: 119060508
+        axes: [x, y, z, theta, f]
+        controllername: C-884
+        stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
+        refmode: FRF FRF FRF FRF FRF FRF
+
+      x_max: 100000
+      x_min: -100000
+      y_max: 100000
+      y_min: -100000
+      z_max: 100000
+      z_min: -100000
+      f_max: 100000
+      f_min: 0
+      theta_max: 360
+      theta_min: 0
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      f_offset: 0
+      theta_offset: 0
+
+      flip_x: False
+      flip_y: False
+      flip_z: False
+    zoom:
+      hardware:
+        type: DynamixelZoom
+        servo_id: 1
+        port: COM9
+        baudrate: 1000000
+      position:
+        0.63x: 0
+        1x: 627
+        2x: 1711
+        3x: 2301
+        4x: 2710
+        5x: 3079
+        6x: 3383
+      pixel_size:
+        0.63x: 9.7
+        1x: 6.38
+        2x: 3.14
+        3x: 2.12
+        4x: 1.609
+        5x: 1.255
+        6x: 1.044
+      stage_positions:
+        BABB:
+          f:
+            0.63x: 67410
+            1x: 70775
+            2x: 72455
+            3x: 72710
+            4x: 72795
+            5x: 72850
+            6x: 72880
+        CUBIC:
+          f:
+            0.63x: 67410
+            1x: 70775
+            2x: 72455
+            3x: 72710
+            4x: 72795
+            5x: 72850
+            6x: 72880
+    shutter:
+      hardware:
+        type: NI
+        channel: PXI6259/port0/line0
+        min: 0
+        max: 5
+    lasers:
+      # Omicron LightHub Ultra
+      # 488 and 640 are LuxX+ Lasers
+      # 561 is a Coherent OBIS Laser
+      # Digital Laser Outputs
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao0
+            min: 0
+            max: 5
+        type: LuxX
+      - wavelength: 562
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line3
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao1
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 642
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line4
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao2
+            min: 0
+            max: 5
+        type: LuxX
+
+  Nanoscale:
+    daq:
+      hardware:
+        type: NI
+
+      # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
+      # Sampling rate in Hz
+      sample_rate: 100000
+
+      # triggers
+      master_trigger_out_line: PXI6259/port0/line1
+      camera_trigger_out_line: /PXI6259/ctr0
+      trigger_source: /PXI6259/PFI0
+
+      # Digital Laser Outputs
+      laser_port_switcher: PXI6733/port0/line0
+      laser_switch_state: True
+
+    camera:
+      hardware:
+        type: HamamatsuOrca
+        serial_number: 500502
+      defect_correct_mode: 2.0
+      delay: 10 #ms
+      settle_down: 0.0 #ms
+
+    remote_focus_device:
+      hardware:
+        type: EquipmentSolutions  #NI
+        channel: PXI6259/ao3
+        port: COM6
+        min: -5
+        max: 5
+      # waveform: trig_remote_focus_ramp
+    galvo:
+      -
+        hardware:
+          type: NI
+          channel: PXI6259/ao1
+          min: -5
+          max: 5
+    filter_wheel:
+      hardware:
+        type: SutterFilterWheel
+        wheel_number: 2
+        port: COM2
+        baudrate: 9600
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        Empty-Alignment: 0
+        GFP - FF01-515/30-32: 1
+        RFP - FF01-595/31-32: 2
+        Far-Red - BLP01-647R/31-32: 3
+        Blocked1: 4
+        Blocked2: 5
+        Blocked3: 6
+        Blocked4: 7
+        Blocked5: 8
+        Blocked6: 9
+    stage:
+      hardware:
+        -
+          type: PI
+          serial_number: 119060508
+          axes: [x, y, z, theta]
+          controllername: C-884
+          stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
+          refmode: FRF FRF FRF FRF FRF FRF
+        -
+          type: PI
+          serial_number: 0116049747
+          axes: [f]
+          controllername: E-709
+          stages: P-726.1CD
+          refmode: ATZ
+        # -
+        #   name: stage2
+        #   type: MCL
+        #   serial_number: 4011
+        #   axes: [f]
+      x_max: 100000
+      x_min: -100000
+      y_max: 100000
+      y_min: -100000
+      z_max: 100000
+      z_min: -100000
+      f_max: 100000
+      f_min: 0
+      theta_max: 360
+      theta_min: 0
+
+      x_offset: 500  # -1000
+      y_offset: 300  # -70
+      z_offset: -18396  # -17842
+      # x_offset: 0
+      # y_offset: 0
+      # z_offset: 0
+      f_offset: 0
+      theta_offset: 0
+    zoom:
+      position:
+        N/A: 0
+      pixel_size:
+        N/A: 0.167
+    shutter:
+      hardware:
+        type: NI
+        channel: PXI6259/port2/line0
+    lasers:
+      # Omicron LightHub Ultra
+      # 488 and 640 are LuxX+ Lasers
+      # 561 is a Coherent OBIS Laser
+      # Digital Laser Outputs
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao0
+            min: 0
+            max: 5
+        type: LuxX
+      - wavelength: 562
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line3
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao1
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 642
+        onoff:
+          hardware:
+            type: NI
+            channel: PXI6733/port0/line4
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PXI6733/ao2
+            min: 0
+            max: 5
+        type: LuxX
+
+gui:
+  channels:
+    count: 5

@@ -1,0 +1,243 @@
+# Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
+microscopes:
+  CTASLMv2:
+    daq:
+      hardware:
+        type: NI
+      sample_rate: 100000
+
+      # triggers
+      master_trigger_out_line: PCI6738/port0/line1 #3
+      camera_trigger_out_line: /PCI6738/ctr0 #9/42
+      trigger_source: /PCI6738/PFI0 #4
+
+    camera:
+#      -
+      hardware:
+        type: HamamatsuOrca
+        serial_number: 100803
+      defect_correct_mode: 2.0
+      delay: 20 #ms
+      settle_down: 0.0 #ms
+#      -
+#        hardware:
+#          name: camera
+#          type: HamamatsuOrca
+#          serial_number: 003054
+#        x_pixels: 2048.0
+#        y_pixels: 2048.0
+#        pixel_size_in_microns: 6.5
+#        subsampling: [1, 2, 4]
+#        sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
+#        readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
+#        lightsheet_rolling_shutter_width: 608
+#        defect_correct_mode: 2.0
+#        binning: 1x1
+#        readout_speed: 2.0
+#        trigger_active: 1.0
+#        trigger_mode: 1.0 # external light-sheet mode
+#        trigger_polarity: 2.0  # positive pulse
+#        trigger_source: 2.0  # 2 = external, 3 = software.
+#        exposure_time: 20 # Use milliseconds throughout.
+#        delay_percent: 20
+#        pulse_percent: 1
+#        line_interval: 0.000075
+#        display_acquisition_subsampling: 4
+#        display_acquisition_subsampling: 4
+#        average_frame_rate: 4.969
+#        frames_to_average: 1
+#        exposure_time_range:
+#          min: 1
+#          max: 1000
+#          step: 1
+
+    remote_focus_device:
+      hardware:
+        type: NI #synthetic #EquipmentSolutions # NI
+        channel: PCI6738/ao2  #45/46
+        port: COM700
+        min: -5
+        max: 5
+    galvo:
+      -
+        hardware:
+          type: NI
+          channel: PCI6738/ao0  #10/11
+          min: -5
+          max: 5
+        waveform: sawtooth
+        phase: 1.57079 # pi/2
+    filter_wheel:
+      hardware:
+        type: SutterFilterWheel
+        wheel_number: 1
+        port: COM1
+        baudrate: 9600
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        647-LP: 0
+        600-50: 1
+        525-50: 2
+        480-40: 3
+        Empty-1: 4
+        Empty-2: 5
+        Empty-3: 6
+        Empty-4: 7
+    stage:
+      hardware:
+        -
+          name: stage1
+          type: synthetic #MP285
+          serial_number: 0001
+          port: COM6
+          timeout: 0.25
+          baudrate: 9600
+          axes: [y, x, f]
+          axes_mapping: [z, y, x]
+          max: 25000
+          min: 0
+        -
+          name: stage2
+          type: syntheticstage
+          serial_number: 0000
+          axes: [theta]
+          axes_mapping: [theta]
+          max: 360
+          min: 0
+        -
+          name: PIFOC
+          type: GalvoNIStage
+          serial_number: 0000
+          axes: [z]
+          axes_mapping: [PCI6738/ao6] #48/49
+          volts_per_micron: 0.1*x
+          max: 10
+          min: 0
+      x_max: 12500
+      x_min: -12500
+      y_max: 12500
+      y_min: -12500
+      z_max: 200
+      z_min: 0
+      f_max: 12500
+      f_min: -12500
+      theta_max: 360
+      theta_min: 0
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      theta_offset: 0
+      f_offset: 0
+    zoom:
+      hardware:
+        type: synthetic
+        servo_id: 1
+        port: COM18
+        baudrate: 10000
+      position:
+        62.5X: 0.104
+      pixel_size:
+        62.5X: 0.104
+      stage_positions:
+        BABB:
+          f:
+            62.5X: 0
+    shutter:
+      hardware:
+        type: SyntheticShutter
+        channel: PCI6738/port0/line10
+        min: 0
+        max: 5
+    lasers:
+      - wavelength: 405
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line5 # 7/41
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao8 # 16/50
+            min: 0
+            max: 5
+        type: Obis
+
+      - wavelength: 445
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line2 # 5/39
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao9 # 17/50
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line3 # 6/39
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao10 # 51/50
+            min: 0
+            max: 5
+        type: Obis
+
+      - wavelength: 514
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line4 #40/41
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao11  #52/18
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port1/line6 # 8/42
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao12 #53/20
+            min: 0
+            max: 5
+        type: Obis
+
+      - wavelength: 640
+        onoff:
+          hardware:
+            type: NI
+            channel: PCI6738/port0/line0 #9/42
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCI6738/ao13 #54/20
+            min: 0
+            max: 5
+        type: Obis
+
+gui:
+  channels:
+    count: 5

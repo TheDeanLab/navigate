@@ -1,0 +1,311 @@
+# Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
+microscopes:
+  ProjectionScope:
+    daq:
+      hardware:
+        type: NI
+
+      # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
+      # Sampling rate in Hz
+      sample_rate: 100000
+
+      # triggers
+      master_trigger_out_line: /PCIe-6738/port0/line1
+      camera_trigger_out_line: /PCIe-6738/ctr0 #PFI7 Camera trigger
+      trigger_source: /PCIe-6738/PFI0
+
+    mirror:
+      hardware:
+        name: mirror
+        type: ImagineOpticsMirror
+        flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+      n_modes: 32
+
+    zoom:
+      hardware:
+        type: SyntheticZoom
+        servo_id: 1
+      position:
+        1x: 0
+      pixel_size:
+        1x: 0.15
+    shutter:
+      hardware:
+        type: SyntheticShutter
+        channel: none/line0
+    camera:
+      hardware:
+        name: camera
+        type: HamamatsuOrca
+        serial_number: 001301
+      defect_correct_mode: 2.0
+      delay: 10 #ms
+      settle_down: 0.0 #ms
+    remote_focus_device:
+      hardware:
+        type: SyntheticRemoteFocus
+        channel: none
+        min: 0
+        max: 5
+    galvo:
+      -
+        # shear galvo measured: 351.04 um/V
+        name: sheargalvo
+        hardware:
+          type: NI # SyntheticGalvo
+          channel: PCIe-6738/ao12
+          min: -5
+          max: 5
+        # waveform: halfsaw
+        waveform: sawtooth
+        phase: 1.57079
+      -
+        name: xgalvo
+        hardware:
+          type: NI # SyntheticGalvo
+          channel: PCIe-6738/ao0
+          min: -5
+          max: 5
+        waveform: sawtooth
+        phase: 1.57079
+    stage:
+      hardware:
+        -
+          name: fake_stage
+          type: SyntheticStage
+          serial_number: 123
+          axes: [x,y,theta,z]
+        -
+          name: snouty_piezo
+          type: GalvoNIStage
+          serial_number: 124
+          axes: [f]
+          axes_mapping: [PCIe-6738/ao14]
+          min: 0
+          max: 10
+          volts_per_micron: (10/15.4)*x + 5.0
+
+      x_max: 50
+      x_min: -50
+      y_max: 50
+      y_min: -50
+      z_max: 500
+      z_min: -500
+      f_max: 100000
+      f_min: -100000
+      theta_max: 360
+      theta_min: 0
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      f_offset: 0
+      theta_offset: 0
+    filter_wheel:
+      hardware:
+        type: SyntheticFilterWheel
+        wheel_number: 1
+        port: COM6
+        baudrate: 9600
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        FRFP - BLP01-664R-25: 0
+        RFP - FF01-598/25-25: 1
+        GFP - 527/20: 2
+        GFPRFP - ZET488/561m: 3
+        Empty-Alignment: 4
+        Blocked2: 5
+        Blocked3: 6
+        Blocked4: 7
+        Blocked5: 8
+        Blocked6: 9
+    lasers:
+      # Omicron LightHub Ultra
+      # 488 and 640 are LuxX+ Lasers
+      # 561 is a Coherent OBIS Laser
+      # Digital Laser Outputs
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIe-6738/port1/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIe-6738/ao5
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIe-6738/port1/line3
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIe-6738/ao11
+            min: 0
+            max: 5
+        type: Obis
+
+  StackingScope:
+    daq:
+      hardware:
+        type: NI
+
+      # NI PCIe-1073 Chassis with PXI-6259 and PXI-6733 DAQ Boards.
+      # Sampling rate in Hz
+      sample_rate: 100000
+
+      # triggers
+      master_trigger_out_line: /PCIe-6738/port0/line1
+      camera_trigger_out_line: /PCIe-6738/ctr0 #PFI7 Camera trigger
+      trigger_source: /PCIe-6738/PFI0
+
+    mirror:
+      hardware:
+        name: mirror
+        type: ImagineOpticsMirror
+        flat_path: D:\WaveKitX64\MirrorFiles\BeadsCoverslip_20231212.wcs
+      n_modes: 32
+
+    zoom:
+      hardware:
+        type: SyntheticZoom
+        servo_id: 1
+      position:
+        1x: 0
+      pixel_size:
+        1x: 0.15
+    shutter:
+      hardware:
+        name: shutter
+        type: SyntheticShutter
+        channel: none/line0
+    camera:
+      hardware:
+        name: camera
+        type: HamamatsuOrca
+        serial_number: 001301
+      defect_correct_mode: 2.0
+      delay: 10 #ms
+
+    remote_focus_device:
+      hardware:
+        type: SyntheticRemoteFocus
+        channel: none
+        min: 0
+        max: 10
+      # Optotune EL-16-40-TC-VIS-5D-1-C
+    galvo:
+      -
+        name: sheargalvo
+        hardware:
+          type: NI # SyntheticGalvo
+          channel: PCIe-6738/ao12
+          min: -5
+          max: 5
+        phase: 1.57079
+    stage:
+      hardware:
+        -
+          name: fake_stage
+          type: SyntheticStage
+          serial_number: 123
+          axes: [x,y,theta]
+        -
+          name: snouty_piezo
+          type: GalvoNIStage
+          serial_number: 124
+          axes: [f]
+          axes_mapping: [PCIe-6738/ao14]
+          min: 0
+          max: 10
+          volts_per_micron: (10/15.4)*x + 5.0
+        -
+          name: z_galvo
+          type: GalvoNIStage
+          serial_number: 125
+          axes: [z]
+          # axes_channels: [PCIe-6738/ao0]
+          axes_mapping: [PCIe-6738/ao0]
+          min: -3.5
+          max: 3.5
+          volts_per_micron: 0.007*x
+
+      x_max: 50
+      x_min: -50
+      y_max: 50
+      y_min: -50
+      z_max: 500
+      z_min: -500
+      f_max: 100000
+      f_min: -100000
+      theta_max: 360
+      theta_min: 0
+
+      x_offset: 0
+      y_offset: 0
+      z_offset: 0
+      f_offset: 0
+      theta_offset: 0
+    filter_wheel:
+      hardware:
+        type: SyntheticFilterWheel
+        wheel_number: 1
+        port: COM6
+        baudrate: 9600
+      filter_wheel_delay: .030 # in seconds
+      available_filters:
+        FRFP - BLP01-664R-25: 0
+        RFP - FF01-598/25-25: 1
+        GFP - 527/20: 2
+        GFPRFP - ZET488/561m: 3
+        Empty-Alignment: 4
+        Blocked2: 5
+        Blocked3: 6
+        Blocked4: 7
+        Blocked5: 8
+        Blocked6: 9
+    lasers:
+      # Omicron LightHub Ultra
+      # 488 and 640 are LuxX+ Lasers
+      # 561 is a Coherent OBIS Laser
+      # Digital Laser Outputs
+      - wavelength: 488
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIe-6738/port1/line2
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIe-6738/ao5
+            min: 0
+            max: 5
+        type: Obis
+      - wavelength: 561
+        onoff:
+          hardware:
+            type: NI
+            channel: PCIe-6738/port1/line3
+            min: 0
+            max: 5
+        power:
+          hardware:
+            type: NI
+            channel: PCIe-6738/ao11
+            min: 0
+            max: 5
+        type: Obis
+
+gui:
+  channels:
+    count: 5

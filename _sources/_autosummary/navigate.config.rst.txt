@@ -29,4 +29,5 @@
    :recursive:
 
    navigate.config.config
+   navigate.config.configuration_database
 

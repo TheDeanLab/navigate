@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>navigate.config.config.build_nested_dict &mdash; navigate 0.0.5 documentation</title>
+  <title>navigate.config.configuration_database &mdash; navigate 0.0.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
 
@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="navigate.config.config.get_configuration_paths" href="navigate.config.config.get_configuration_paths.html" />
-    <link rel="prev" title="navigate.config.config" href="navigate.config.config.html" /> 
+    <link rel="next" title="navigate.controller" href="navigate.controller.html" />
+    <link rel="prev" title="navigate.config.config.verify_waveform_constants" href="navigate.config.config.verify_waveform_constants.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -82,18 +82,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../implementations/implementations.html">Implemented Microscopes</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Software API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="navigate.config.html">navigate.config</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="navigate.config.config.html">navigate.config.config</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">navigate.config.config.build_nested_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.get_configuration_paths.html">navigate.config.config.get_configuration_paths</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.get_navigate_path.html">navigate.config.config.get_navigate_path</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.load_configs.html">navigate.config.config.load_configs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.update_config_dict.html">navigate.config.config.update_config_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.verify_configuration.html">navigate.config.config.verify_configuration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.verify_experiment_config.html">navigate.config.config.verify_experiment_config</a></li>
-<li class="toctree-l4"><a class="reference internal" href="navigate.config.config.verify_waveform_constants.html">navigate.config.config.verify_waveform_constants</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="navigate.config.configuration_database.html">navigate.config.configuration_database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigate.config.config.html">navigate.config.config</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">navigate.config.configuration_database</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="navigate.controller.html">navigate.controller</a></li>
@@ -121,10 +111,9 @@
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../api.html">Software API</a></li>
           <li class="breadcrumb-item"><a href="navigate.config.html">navigate.config</a></li>
-          <li class="breadcrumb-item"><a href="navigate.config.config.html">navigate.config.config</a></li>
-      <li class="breadcrumb-item active">navigate.config.config.build_nested_dict</li>
+      <li class="breadcrumb-item active">navigate.config.configuration_database</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/navigate.config.config.build_nested_dict.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/navigate.config.configuration_database.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -132,39 +121,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="navigate-config-config-build-nested-dict">
-<h1>navigate.config.config.build_nested_dict<a class="headerlink" href="#navigate-config-config-build-nested-dict" title="Permalink to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="navigate.config.config.build_nested_dict">
-<span class="sig-prename descclassname"><span class="pre">navigate.config.config.</span></span><span class="sig-name descname"><span class="pre">build_nested_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.config.config.build_nested_dict" title="Permalink to this definition"></a></dt>
-<dd><p>Nest dictionaries recursively.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>manager</strong> (<em>multiprocessing.Manager</em>) – Shares objects (e.g., dict) between processes</p></li>
-<li><p><strong>parent_dict</strong> (<em>dict</em>) – Dictionary we are adding to</p></li>
-<li><p><strong>key_name</strong> (<em>str</em>) – Name of dictionary to insert</p></li>
-<li><p><strong>dict_data</strong> (<em>dict</em>) – Dictionary to insert</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">build_nested_dict</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">parent_dict</span><span class="p">,</span> <span class="n">key_name</span><span class="p">,</span> <span class="n">dict_data</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
+  <section id="module-navigate.config.configuration_database">
+<span id="navigate-config-configuration-database"></span><h1>navigate.config.configuration_database<a class="headerlink" href="#module-navigate.config.configuration_database" title="Permalink to this heading"></a></h1>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="navigate.config.config.html" class="btn btn-neutral float-left" title="navigate.config.config" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="navigate.config.config.get_configuration_paths.html" class="btn btn-neutral float-right" title="navigate.config.config.get_configuration_paths" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="navigate.config.config.verify_waveform_constants.html" class="btn btn-neutral float-left" title="navigate.config.config.verify_waveform_constants" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="navigate.controller.html" class="btn btn-neutral float-right" title="navigate.controller" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

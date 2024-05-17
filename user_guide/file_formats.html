@@ -57,7 +57,8 @@
 <li class="toctree-l1"><a class="reference internal" href="hardware_overview.html">Supported Hardware</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Supported File Formats</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#tiff-ome-tiff">TIFF/OME-TIFF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bigdataviewer-h5-n5-ome-zarr">BigDataViewer H5/N5/OME-Zarr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bigdataviewer-h5-n5">BigDataViewer H5/N5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ome-zarr">OME-Zarr</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#image-writing-benchmarks">Image Writing Benchmarks</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#timelapse-imaging">Timelapse Imaging</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#z-stack-imaging">Z-Stack Imaging</a></li>
@@ -121,10 +122,10 @@
   <section id="supported-file-formats">
 <h1>Supported File Formats<a class="headerlink" href="#supported-file-formats" title="Permalink to this heading"></a></h1>
 <p>The choice of file format for saving imaging data in microscopy is crucial
-because it affects data integrity, accessibility, and analysis efficiency.
+because it affects write speed, data integrity, accessibility, and analysis efficiency.
 Formats like TIFF and its derivative OME-TIFF are widely used due to their ability
 to store metadata and support multiple imaging channels. However, modern formats such
-as Zarr, N5, and HDF5, including OME-ZARR, cater to the needs of large-scale,
+as Zarr, N5, and HDF5, including OME-Zarr, cater to the needs of large-scale,
 multi-dimensional datasets by enabling efficient data storage, access, and processing at
 cloud-compute scales.</p>
 <p>To enable ambitious imaging projects, <strong>navigate</strong> <strong>navigate</strong> comes pre-packaged with TIFF, OME-TIFF, OME-Zarr, HDF5/N5
@@ -148,19 +149,26 @@ TIFF, BigTIFF, and OME-TIFF data to file. The <strong>navigate</strong> package 
 to store metadata.</p>
 </section>
 <hr class="docutils" />
-<section id="bigdataviewer-h5-n5-ome-zarr">
-<h2>BigDataViewer H5/N5/OME-Zarr<a class="headerlink" href="#bigdataviewer-h5-n5-ome-zarr" title="Permalink to this heading"></a></h2>
+<section id="bigdataviewer-h5-n5">
+<h2>BigDataViewer H5/N5<a class="headerlink" href="#bigdataviewer-h5-n5" title="Permalink to this heading"></a></h2>
 <p><strong>navigate</strong> uses <a class="reference external" href="https://docs.h5py.org/en/stable/index.html">h5py</a> (H5) and
 <a class="reference external" href="https://zarr.readthedocs.io/en/stable/">zarr</a> (N5) to store data in a BigDataViewer
 file format. This is a pyramidal format, necessitating the saving of both the original
 data and down sampled versions of this data. The additional data slows down the write
-speed. The N5 format is faster than H5 because it allows multithreaded writes.</p>
+speed. The N5 format can be faster than H5 because it allows for multithreaded writes.</p>
+</section>
+<section id="ome-zarr">
+<h2>OME-Zarr<a class="headerlink" href="#ome-zarr" title="Permalink to this heading"></a></h2>
+<p>OME-Zarr is a Zarr file format that adheres to strict metadata specifications, detailed
+at <a class="reference external" href="https://ngff.openmicroscopy.org/0.4/index.html">https://ngff.openmicroscopy.org/0.4/index.html</a>. It allows for pyramidal data writing,
+storage of segmentation labels with the data set, and updating the pyramidal structure
+on the fly.</p>
 </section>
 <hr class="docutils" />
 <section id="image-writing-benchmarks">
 <h2>Image Writing Benchmarks<a class="headerlink" href="#image-writing-benchmarks" title="Permalink to this heading"></a></h2>
 <p>To evaluate the performance of saving imaging data in different formats, we conducted
-benchmarks on a Linux-based system. We assessed the median disk write time for TIFF,
+benchmarks on a RedHat Linux system. We assessed the median disk write time for TIFF,
 OME-TIFF, H5, N5, and OME-Zarr formats across image resolutions of 512x512,
 1024x1024, and 2048x2048 under two conditions: (A) capturing 1000 single-plane
 images and (B) acquiring a single z-stack composed of 1000 planes. All times
@@ -185,25 +193,25 @@ milliseconds.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>512x512</p></td>
-<td><p>4.06</p></td>
-<td><p>15.26</p></td>
-<td><p>2.79</p></td>
-<td><p>12.09</p></td>
-<td><p>1.35</p></td>
+<td><p>0.83</p></td>
+<td><p>10.0</p></td>
+<td><p>1.69</p></td>
+<td><p>3.02</p></td>
+<td><p>1.09</p></td>
 </tr>
 <tr class="row-odd"><td><p>1024x1024</p></td>
-<td><p>6.69</p></td>
-<td><p>15.25</p></td>
-<td><p>8.33</p></td>
-<td><p>14.74</p></td>
-<td><p>2.46</p></td>
+<td><p>1.55</p></td>
+<td><p>10.4</p></td>
+<td><p>6.46</p></td>
+<td><p>5.70</p></td>
+<td><p>2.27</p></td>
 </tr>
 <tr class="row-even"><td><p>2048x2048</p></td>
-<td><p>22.25</p></td>
-<td><p>38.57</p></td>
-<td><p>34.71</p></td>
-<td><p>29.56</p></td>
-<td><p>11.85</p></td>
+<td><p>11.2</p></td>
+<td><p>38.6</p></td>
+<td><p>28.8</p></td>
+<td><p>19.6</p></td>
+<td><p>11.6</p></td>
 </tr>
 </tbody>
 </table>
@@ -223,25 +231,25 @@ milliseconds.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>512x512</p></td>
-<td><p>0.21</p></td>
-<td><p>0.17</p></td>
-<td><p>4.76</p></td>
-<td><p>1.80</p></td>
-<td><p>1.30</p></td>
+<td><p>0.14</p></td>
+<td><p>0.13</p></td>
+<td><p>2.64</p></td>
+<td><p>1.58</p></td>
+<td><p>1.05</p></td>
 </tr>
 <tr class="row-odd"><td><p>1024x1024</p></td>
-<td><p>0.52</p></td>
-<td><p>0.57</p></td>
-<td><p>15.70</p></td>
-<td><p>5.38</p></td>
-<td><p>4.22</p></td>
+<td><p>0.49</p></td>
+<td><p>0.48</p></td>
+<td><p>10.6</p></td>
+<td><p>5.08</p></td>
+<td><p>4.06</p></td>
 </tr>
 <tr class="row-even"><td><p>2048x2048</p></td>
-<td><p>2.35</p></td>
-<td><p>2.14</p></td>
-<td><p>75.56</p></td>
-<td><p>14.08</p></td>
-<td><p>8.60</p></td>
+<td><p>1.92</p></td>
+<td><p>1.86</p></td>
+<td><p>52.7</p></td>
+<td><p>13.90</p></td>
+<td><p>8.50</p></td>
 </tr>
 </tbody>
 </table>

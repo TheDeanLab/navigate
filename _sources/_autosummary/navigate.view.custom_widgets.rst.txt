@@ -29,6 +29,7 @@ navigate.view.custom\_widgets
    :recursive:
 
    navigate.view.custom_widgets.ArrowLabel
+   navigate.view.custom_widgets.CollapsibleFrame
    navigate.view.custom_widgets.DockableNotebook
    navigate.view.custom_widgets.LabelInputWidgetFactory
    navigate.view.custom_widgets.hover

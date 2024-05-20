@@ -284,13 +284,15 @@ class StageController(GUIController):
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can
         unbind later."""
+        widgets = self.view.get_widgets()
         if not self.position_callbacks_bound:
             for axis in ["x", "y", "z", "theta", "f"]:
                 # add event bind to position entry variables
-                cbname = self.widget_vals[axis].trace_add(
-                    "write", self.position_callback(axis)
-                )
-                self.position_callback_traces[axis] = cbname
+                widgets[axis].bind("<FocusOut>", self.position_callback(axis))
+                # cbname = self.widget_vals[axis].trace_add(
+                #     "write", self.position_callback(axis)
+                # )
+                # self.position_callback_traces[axis] = cbname
             self.position_callbacks_bound = True
 
     def unbind_position_callbacks(self):
@@ -403,6 +405,7 @@ class StageController(GUIController):
             # guarantee stage won't move out of limits
             if position_val.get() != temp:
                 position_val.set(temp)
+                self.position_callback(axis)()
 
         return handler
 

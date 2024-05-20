@@ -135,8 +135,8 @@ class PluginsController:
                     )
                     if plugin_frame_module is None:
                         print(
-                            "Make sure that the plug in frame name is correct! "
-                            f"Plug in {plugin_name} needs to be reinstalled!"
+                            f"Make sure that the plugin frame name {plugin_class_name} is correct! "
+                            f"Plugin {plugin_name} needs to be uninstalled from navigate or reinstalled!"
                         )
                         return
                     plugin_frame = getattr(

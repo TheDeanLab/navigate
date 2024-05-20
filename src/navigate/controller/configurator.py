@@ -84,8 +84,8 @@ class Configurator:
         self.view.top_window.load_button.config(command=self.load_configuration)
         self.view.top_window.save_button.config(command=self.save)
         self.view.top_window.cancel_button.config(command=self.on_cancel)
+        self.microscope_id = 0
         self.create_config_window(0)
-        self.microscope_id = 1
 
         print(
             "WARNING: The Configuration Assistant is not fully implemented. "
@@ -99,14 +99,13 @@ class Configurator:
 
     def add_microscope(self):
         """Add a new microscope tab"""
-        self.create_config_window(self.microscope_id)
         self.microscope_id += 1
+        self.create_config_window(self.microscope_id)
 
     def delete_microscopes(self):
         """Delete all microscopes"""
         # delete microscopes
-        for index in range(self.view.microscope_window.index("end")):
-            tab_id = self.view.microscope_window.tabs()[index]
+        for tab_id in self.view.microscope_window.tabs():
             self.view.microscope_window.forget(tab_id)
         self.view.microscope_window.tab_list = []
         self.microscope_id = 0
@@ -306,11 +305,15 @@ class Configurator:
                     continue
                 value = get_widget_value(key, value_dict)
                 # widgets[key][3] is the value mapping dict
-                if widgets[key][1] != "Spinbox" and widgets[key][3]:
-                    reverse_value_dict = dict(
-                        map(lambda v: (v[1], v[0]), widgets[key][3].items())
-                    )
-                    temp[key] = reverse_value_dict[value]
+                if widgets[key][1] != "Spinbox"and widgets[key][3]:
+                    # if the value is not valid, return the last valid value
+                    if type(widgets[key][3]) == list:
+                        reverse_value_dict = dict(map(lambda v: (v, v), widgets[key][3]))
+                    else:
+                        reverse_value_dict = dict(
+                            map(lambda v: (v[1], v[0]), widgets[key][3].items())
+                        )
+                    temp[key] = reverse_value_dict.get(value, list(reverse_value_dict.values())[-1])
                 else:
                     temp[key] = value
             return temp
@@ -396,7 +399,7 @@ class Configurator:
                                 hardware_ref_name
                             ],
                         )
-                    except:
+                    except Exception as e:
                         widgets_value = [None]
                     microscope_tab.create_hardware_tab(
                         hardware_type, widgets, hardware_widgets_value=widgets_value

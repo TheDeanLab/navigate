@@ -6,6 +6,8 @@ Software Architecture
     :align: center
     :alt: Software Architecture
 
+------------------
+
 .. _software-architecture-section:
 
 Model View Controller (MVC)
@@ -26,9 +28,11 @@ The architecture of **navigate** is designed following the industry-standard Mod
   It relays user input in the form of traces and commands to the model and relays model
   output in the form of images and data to the view.
 
+------------------
 
-Communication Enhancements
-----------------------------
+
+Extendability
+============================
 
 To maximize the extendability of **navigate**, it incorporates:
 
@@ -39,8 +43,11 @@ To maximize the extendability of **navigate**, it incorporates:
 - **Plugin Layer**: Offers the flexibility to integrate non-supported devices through
   plugins, enhancing the system's adaptability to various hardware.
 
+------------------
+
+
 Data Acquisition and Processing
---------------------------------
+===============================
 
 **navigate** employs a feature container for running acquisition routines, characterized by:
 
@@ -55,8 +62,11 @@ Data Acquisition and Processing
   **navigate** during run-time. Image analysis is performed on images in memory that are
   stored as numpy arrays, ensuring rapid processing.
 
+------------------
+
+
 Feature Lists
--------------------
+============================
 
 Feature lists are highly versatile, capable of:
 

@@ -1,9 +1,51 @@
+hardware:
+  daq:
+    type: NI
+  camera:
+    -
+      type: HamamatsuOrca
+      serial_number: 000420
+  filter_wheel:
+    type: SutterFilterWheel
+    port: COM34
+    baudrate: 9600
+    number_of_wheels: 1
+  stage:
+    -
+      type: MP285
+      port: COM2
+      timeout: 0.25
+      baudrate: 9600
+      serial_number: 0000
+      stages: None
+    -
+      type: syntheticstage
+      port: COM9999
+      timeout: 0.25
+      baudrate: 9600
+      serial_number: 0000
+      stages: None
+    -
+      type: GalvoNIStage
+      port: COM9999
+      timeout: 0.25
+      baudrate: 9600
+      serial_number: 0000
+      stages: None
+  zoom:
+    type: synthetic
+    servo_id: 1
+    port: COM18
+    baudrate: 1000000
+
 microscopes:
   CTASLMv1:
     daq:
       hardware:
+        name: daq
         type: NI
       sample_rate: 100000
+      sweep_time: 0.2
 
       # triggers
       master_trigger_out_line: PCI6738/port0/line1
@@ -16,36 +58,67 @@ microscopes:
 
     camera:
       hardware:
+        name: camera
         type: HamamatsuOrca
         serial_number: 000420
+      x_pixels: 2048.0
+      y_pixels: 2048.0
+      pixel_size_in_microns: 6.5
+      subsampling: [1, 2, 4]
+      sensor_mode: Normal  # 12 for progressive, 1 for normal. Normal/Light-Sheet
+      readout_direction: Top-to-Bottom  # Top-to-Bottom', 'Bottom-to-Top'
+      lightsheet_rolling_shutter_width: 608
       defect_correct_mode: 2.0
-      delay: 2.0 #ms
-      settle_down: 0.0 #ms
-      flip_x: False
-      flip_y: False
+      binning: 1x1
+      readout_speed: 1.0
+      trigger_active: 1.0
+      trigger_mode: 1.0 # external light-sheet mode
+      trigger_polarity: 2.0  # positive pulse
+      trigger_source: 2.0  # 2 = external, 3 = software.
+      exposure_time: 20 # Use milliseconds throughout.
+      delay_percent: 2 #10
+      pulse_percent: 1
+      line_interval: 0.000075
+      display_acquisition_subsampling: 4
+      average_frame_rate: 4.969
+      frames_to_average: 1
+      exposure_time_range:
+        min: 1
+        max: 1000
+        step: 1
     remote_focus_device:
       hardware:
+        name: remote_focus
         type: EquipmentSolutions # NI
         channel: PCI6738/ao2  #45/46
-        port: COM1
-        baudrate: 9600
+        comport: COM1
         min: -5
         max: 5
+      delay_percent: 7.5
+      ramp_rising_percent: 85
+      ramp_falling_percent: 2.5
+      amplitude: 0.7
+      offset: 2.3
+      smoothing: 0.0
     galvo:
       -
         hardware:
+          name: daq
           type: NI
           channel: PCI6738/ao0  #10/11
           min: -5
           max: 5
         waveform: sawtooth
+        frequency: 99.9
+        amplitude: 2.5
+        offset: 0.5
+        duty_cycle: 50
         phase: 1.57079 # pi/2
     filter_wheel:
       hardware:
+        name: filter_wheel
         type: SutterFilterWheel
         wheel_number: 1
-        port: COM34
-        baudrate: 9600
       filter_wheel_delay: .030 # in seconds
       available_filters:
         445-20: 6
@@ -71,24 +144,27 @@ microscopes:
     stage:
       hardware:
         -
+          name: stage1
           type: MP285
           serial_number: 0000
           axes: [y, x, f]
           axes_mapping: [z, y, x]
           volts_per_micron: None
+          axes_channels: None
           max: 25000
           min: 0
-          port: COM2
-          timeout: 0.25
-          baudrate: 9600
         -
+          name: stage2
           type: syntheticstage
           serial_number: 0000
           axes: [theta]
           axes_mapping: [theta]
+          volts_per_micron: PCI6738/ao0
+          # axes_channels: f
           max: 360
           min: 0
         -
+          name: stage3
           type: GalvoNIStage
           serial_number: 0000
           axes: [z]
@@ -108,6 +184,13 @@ microscopes:
       theta_max: 360
       theta_min: 0
 
+      x_step: 500
+      y_step: 500
+      z_step: 5
+      theta_step: 30
+      f_step: 500
+      velocity: 1000
+
       x_offset: 0
       y_offset: 0
       z_offset: 0
@@ -115,6 +198,7 @@ microscopes:
       f_offset: 0
     zoom:
       hardware:
+        name: zoom
         type: synthetic
         servo_id: 1
       position:
@@ -127,6 +211,7 @@ microscopes:
             16X: 0
     shutter:
       hardware:
+        name: daq
         type: synthetic
         channel: PCI6738/port0/line10
         min: 0
@@ -135,60 +220,114 @@ microscopes:
       - wavelength: 642
         onoff:
           hardware:
+            name: daq
             type: NI
             channel: PCI6738/port1/line5 # 38/35
             min: 0
             max: 5
         power:
           hardware:
+            name: daq
             type: NI
             channel: PCI6738/ao8 #16/50 #ao1  # 44/11
             min: 0
             max: 5
         type: Obis
+        index: 0
+        delay_percent: 10
+        pulse_percent: 87
       - wavelength: 561
         onoff:
           hardware:
+            name: daq
             type: NI
             channel: PCI6738/port1/line2 # 5/39
             min: 0
             max: 5
         power:
           hardware:
+            name: daq
             type: NI
             channel: PCI6738/ao9 #17/50 #ao3  # 12/46
             min: 0
             max: 5
         type: Obis
+        index: 1
+        delay_percent: 10
+        pulse_percent: 87
       - wavelength: 488
         onoff:
           hardware:
+            name: daq
             type: NI
             channel: PCI6738/port1/line3 # 6/39
             min: 0
             max: 5
         power:
           hardware:
+            name: daq
             type: NI
             channel: PCI6738/ao10 #51/50 #ao4 13/14
             min: 0
             max: 5
         type: Obis
+        index: 2
+        delay_percent: 10
+        pulse_percent: 87
       - wavelength: 405
         onoff:
           hardware:
+            name: daq
             type: NI
             channel: PCI6738/port1/line4 # 40/41
             min: 0
             max: 5
         power:
           hardware:
+            name: daq
             type: NI
             channel: PCI6738/ao11 #52/18 #ao5  #47/14
             min: 0
             max: 5
         type: Obis
+        index: 2
+        delay_percent: 10
+        pulse_percent: 87
 
 gui:
   channels:
     count: 5
+    laser_power:
+      min: 0
+      max: 100
+      step: 10
+    exposure_time:
+      min: 1
+      max: 1000
+      step: 5
+    interval_time:
+      min: 0
+      max: 1000
+      step: 5
+  stack_acquisition:
+    step_size:
+      min: 0.100
+      max: 1000
+      step: 0.1
+    start_pos:
+      min: -5000
+      max: 5000
+      step: 1
+    end_pos:
+      min: -5000
+      max: 10000
+      step: 1
+  timepoint:
+    timepoints:
+      min: 1
+      max: 1000
+      step: 1
+    stack_pause:
+      min: 0
+      max: 1000
+      step: 1

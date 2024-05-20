@@ -342,16 +342,8 @@ class HardwareTab(ttk.Frame):
                 widgets_value=widgets_value,
             )
 
-        count = 0
         for widgets_value in constants_widgets_value:
             self.build_widgets(widgets, widgets_value=widgets_value)
-            # if self.name in ["Filter Wheel"]:
-            #     count += 1
-            #     print("building widgets value:", self.name, widgets_value)
-            #     if count > 4:
-                    
-            # if count >= 10:
-            #     break
 
     def create_hardware_widgets(self, hardware_widgets, frame, direction="vertical"):
         """create widgets
@@ -416,6 +408,10 @@ class HardwareTab(ttk.Frame):
                     widget.config(to=v[3].get("to", 100000))
                     widget.config(increment=v[3].get("step", 1))
                     widget.set(v[3].get("from", 0))
+
+                # set default value
+                if len(v) >= 6 and v[5] is not None:
+                    self.variables[k].set(str(v[5]))
             else:
                 widget = ttk.Button(
                     content_frame,
@@ -429,6 +425,7 @@ class HardwareTab(ttk.Frame):
             else:
                 widget.grid(row=0, column=i, sticky=tk.NW, padx=(10, 3), pady=(3, 0))
 
+            # display info label
             if len(v) >= 5 and v[4]:
                 label = ttk.Label(content_frame, text=v[4])
                 if direction == "vertical":
@@ -491,8 +488,6 @@ class HardwareTab(ttk.Frame):
         if widgets_value:
             for k, v in widgets_value.items():
                 try:
-                    if k == "axes":
-                        print("*** type", type(v), v, str(v))
                     self.variables[k].set(str(v))
                 except (TypeError, ValueError):
                     pass

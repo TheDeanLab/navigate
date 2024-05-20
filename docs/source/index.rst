@@ -57,7 +57,7 @@ technology developers.
    :caption: User Guide
    :maxdepth: 1
 
-   user_guide/hardware_overview
+   user_guide/hardware/hardware_home
    user_guide/file_formats
    user_guide/gui_walkthrough
    user_guide/setup_microscope

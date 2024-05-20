@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Hardware" href="hardware/hardware_home.html" />
+    <link rel="next" title="Multiple Cameras" href="multiple_cameras.html" />
     <link rel="prev" title="Setting Up A Microscope" href="setup_microscope.html" /> 
 </head>
 
@@ -54,15 +54,15 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="hardware_overview.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware/hardware_home.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="file_formats.html">Supported File Formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="setup_microscope.html">Setting Up A Microscope</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Configuration Overview</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#configuration-file">Configuration File</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#hardware-section">Hardware Section</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#microscope-section">Microscope Section</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gui-section">GUI Section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initial-configuration">Initial Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#microscope-configurations">Microscope Configurations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#stage-subsection">Stage Subsection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#zoom-subsection">Zoom Subsection</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#experiment-file">Experiment File</a></li>
@@ -71,7 +71,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#rest-api-configuration-file">Rest API Configuration File</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="hardware/hardware_home.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware/hardware_home.html">Supported Hardware</a></li>
 <li class="toctree-l2"><a class="reference internal" href="multiple_cameras.html">Multiple Cameras</a></li>
 </ul>
 </li>
@@ -131,11 +131,12 @@
 <code class="docutils literal notranslate"><span class="pre">rest_api_config.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">waveform_templates.yml</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">waveform_constants.yml</span></code> files.</p>
 <hr class="docutils" />
-<section id="configuration-file">
-<h2>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this heading"></a></h2>
+<section id="initial-configuration">
+<h2>Initial Configuration<a class="headerlink" href="#initial-configuration" title="Permalink to this heading"></a></h2>
 <p>In order for the <strong>navigate</strong> software to function, you will need to configure the
-specifications of the various hardware that you will be using. The first time you
-launch the software, <strong>navigate</strong> will create a copy of the
+specifications of the various hardware that you will be using in the <code class="docutils literal notranslate"><span class="pre">configuration</span>
+<span class="pre">.yaml</span></code> file.</p>
+<p>The first time you launch the software, <strong>navigate</strong> will create a copy of the
 <code class="docutils literal notranslate"><span class="pre">navigate\config\configuration.yaml</span></code> and the rest of the configuration files in
 <code class="docutils literal notranslate"><span class="pre">C:\Users\Username\AppData\Local\.navigate\config</span></code> on  Windows or <code class="docutils literal notranslate"><span class="pre">~/.navigate</span></code> on
 Mac/Linux. <strong>navigate</strong> uses these local copies of the configuration files to store
@@ -159,105 +160,14 @@ along in this file when reading the next sections.</p>
 study for a general walkthrough of how to build your own configuration file and see
 <span class="xref std std-doc">Implementations</span> for examples of configuration files.</p>
 <hr class="docutils" />
-<section id="hardware-section">
-<span id="id1"></span><h3>Hardware Section<a class="headerlink" href="#hardware-section" title="Permalink to this heading"></a></h3>
-<p>The first section of the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file is called <code class="docutils literal notranslate"><span class="pre">hardware</span></code>. It contains
-all the necessary information to find and connect each hardware device to the
-computer/software.</p>
-<p>Here is an example of what the section will look like:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration in YAML</span>
-<span class="nt">hardware</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">daq</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
-<span class="w">    </span><span class="nt">camera</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span>
-<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span>
-<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302158</span>
-<span class="w">        </span><span class="p p-Indicator">-</span>
-<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span>
-<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">302352</span>
-<span class="w">    </span><span class="nt">filter_wheel</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span>
-<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM19</span>
-<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
-<span class="w">        </span><span class="nt">number_of_wheels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span>
-<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PI</span>
-<span class="w">          </span><span class="nt">controllername</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;C-884&#39;</span>
-<span class="w">          </span><span class="nt">stages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE</span>
-<span class="w">          </span><span class="nt">refmode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FRF FRF FRF FRF FRF FRF</span>
-<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">119060508</span>
-<span class="w">        </span><span class="p p-Indicator">-</span>
-<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Thorlabs</span>
-<span class="w">          </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">74000375</span>
-<span class="w">    </span><span class="nt">zoom</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DynamixelZoom</span>
-<span class="w">        </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM18</span>
-<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
-</pre></div>
-</div>
-<p>This example specifies that we are connected to</p>
-<ul class="simple">
-<li><p>A National Instruments DAQ (possibly multiple).</p></li>
-<li><p>Two Hamamatsu Orca (Flash or Fusion) cameras with different serial numbers for
-identification.</p></li>
-<li><p>A Sutter filter wheel controller connected via USB on port <code class="docutils literal notranslate"><span class="pre">COM19</span></code>. This control two
-filter wheels.</p></li>
-<li><p>A Physik Instrumente controller, identified by serial number, with access to 5 stages in <code class="docutils literal notranslate"><span class="pre">FRF</span></code> refrence mode
-(see PI’s documentation).</p></li>
-<li><p>A Thorlabs stage (with a single axis), identified by a serial number.</p></li>
-<li><p>A Dynamixel zoom device connected via USB on port <code class="docutils literal notranslate"><span class="pre">COM18</span></code>.</p></li>
-</ul>
-<p>Make sure that the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> specifies the hardware on your microscope.
-For example, if you wanted to remove the Thorlabs stage and replace the PI stage with
-an ASI stage, the <code class="docutils literal notranslate"><span class="pre">stage</span></code> section would instead read:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stage</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
-<span class="w">    </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123456789</span>
-<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM7</span>
-<span class="w">    </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
-</pre></div>
-</div>
-<p>Notice that since we are now using a single stage, we no longer have a <code class="docutils literal notranslate"><span class="pre">-</span></code> above the
-stage entry. The <code class="docutils literal notranslate"><span class="pre">-</span></code> indicates a list, and is only needed if we want to load multiple
-types of a single hardware.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The type of the device is needed when deciding which Python object to instantiate
-on startup of the software (eg <code class="docutils literal notranslate"><span class="pre">type:</span> <span class="pre">ASI</span></code>). The other fields (eg <code class="docutils literal notranslate"><span class="pre">port:</span> <span class="pre">COM7</span></code>)
-change depending on the manufacturer’s API. They help the API communicate with the
-computer you are using, which in turn allows the <strong>navigate</strong> software to communicate
-with the device.</p>
-</div>
-<p>Running the software with our current microscope setup would fail. It turns out our
-ASI stage only moves in the <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">Z</span></code> and <code class="docutils literal notranslate"><span class="pre">F</span></code> axes. We need a way to handle
-the <code class="docutils literal notranslate"><span class="pre">Theta</span></code> axis. To address this, we will change our <code class="docutils literal notranslate"><span class="pre">stage</span></code> block of the YAML to
-also load a <code class="docutils literal notranslate"><span class="pre">SyntheticStage</span></code>:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stage</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
-<span class="w">        </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123456789</span>
-<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM7</span>
-<span class="w">        </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
-<span class="w">    </span><span class="p p-Indicator">-</span>
-<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SyntheticStage</span>
-<span class="w">        </span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">987654321</span>
-</pre></div>
-</div>
-<p>If your microscope system does not have a device listed in the hardware section using
-the synthetic typing will allow the software to run without it. Another example would
-be replacing the zoom type with <code class="docutils literal notranslate"><span class="pre">SyntheticZoom</span></code> in the instance your microscope does
-not use that hardware. Your system will still run as you expect.</p>
-</section>
-<hr class="docutils" />
-<section id="microscope-section">
-<h3>Microscope Section<a class="headerlink" href="#microscope-section" title="Permalink to this heading"></a></h3>
-<p>The second section of <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> contains the microscope configurations
+<section id="microscope-configurations">
+<h3>Microscope Configurations<a class="headerlink" href="#microscope-configurations" title="Permalink to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file contains the microscope configurations
 that you will be using with the software. Each microscope is represented as a YAML
-dictionary, as in the hardware section. This section enables us to load one or more
-microscopes using the same hardware with varying combinations:</p>
+dictionary.</p>
+<p>Switching between each microscope is
+readily performed in <strong>navigate</strong>, enabling you to switch between different
+configurations or imaging modes, each with their own unique or shared hardware:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">microscope1</span><span class="p">:</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -268,21 +178,22 @@ microscopes using the same hardware with varying combinations:</p>
 </pre></div>
 </div>
 <p>Where <code class="docutils literal notranslate"><span class="pre">microscope1</span></code> and <code class="docutils literal notranslate"><span class="pre">microscope2</span></code> are names of two different microscopes using
-different combinations of the hardware listed in the <code class="docutils literal notranslate"><span class="pre">hardware</span></code> section. The names of
+different combinations of the hardware. The names of
 the microscopes must not include spaces or special characters such as <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>, <code class="docutils literal notranslate"><span class="pre">\</span></code>,
 <code class="docutils literal notranslate"><span class="pre">#</span></code>, <code class="docutils literal notranslate"><span class="pre">%</span></code>, or <code class="docutils literal notranslate"><span class="pre">?</span></code>.</p>
 <p>Each microscope is expected to have a <code class="docutils literal notranslate"><span class="pre">daq</span></code>, <code class="docutils literal notranslate"><span class="pre">camera</span></code>, <code class="docutils literal notranslate"><span class="pre">remote_focus_device</span></code>,
-<code class="docutils literal notranslate"><span class="pre">galvo</span></code>, <code class="docutils literal notranslate"><span class="pre">filter_wheel</span></code>, <code class="docutils literal notranslate"><span class="pre">stage</span></code>, <code class="docutils literal notranslate"><span class="pre">zoom</span></code>, <code class="docutils literal notranslate"><span class="pre">shutter</span></code> and <code class="docutils literal notranslate"><span class="pre">lasers</span></code> section of
-the YAML dictionary. As in the hardware section, unused devices can be specified as
-synthetic.</p>
+<code class="docutils literal notranslate"><span class="pre">galvo</span></code>, <code class="docutils literal notranslate"><span class="pre">filter_wheel</span></code>, <code class="docutils literal notranslate"><span class="pre">stage</span></code>, <code class="docutils literal notranslate"><span class="pre">zoom</span></code>, <code class="docutils literal notranslate"><span class="pre">shutter</span></code>, <code class="docutils literal notranslate"><span class="pre">mirror</span></code> and
+<code class="docutils literal notranslate"><span class="pre">lasers</span></code> section of the YAML dictionary. As in the hardware section, unused devices
+can be specified as synthetic.</p>
 <p>Most of the information to set up these devices can be found in the
-<a class="reference internal" href="hardware/supported_hardware.html"><span class="doc">Supported Hardware</span></a> section of the documentation.
+<span class="xref std std-doc">Supported Hardware</span> section of the documentation.
 Additional explanations of a few specific sections of the microscope configuration are
 below. Notably, the <code class="docutils literal notranslate"><span class="pre">zoom</span></code> section of the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> specifies effective
 pixel size.</p>
+</section>
 <hr class="docutils" />
 <section id="stage-subsection">
-<h4>Stage Subsection<a class="headerlink" href="#stage-subsection" title="Permalink to this heading"></a></h4>
+<h3>Stage Subsection<a class="headerlink" href="#stage-subsection" title="Permalink to this heading"></a></h3>
 <p>The stage section of the microscope 1) puts the stage control from the <code class="docutils literal notranslate"><span class="pre">hardware</span></code>
 section into the microscope 2) sets boundaries for stage movement and 3) optionally
 specifies joystick-controlled axes.</p>
@@ -326,10 +237,9 @@ specifies joystick-controlled axes.</p>
 <p>First, we set the axes controlled by each piece of hardware and a mapping from the
 hardware’s API axes to our software’s axes. For example, the ASI <code class="docutils literal notranslate"><span class="pre">M</span></code> axis is mapped
 onto our software’s <code class="docutils literal notranslate"><span class="pre">X</span></code> axis below.</p>
-<p>As you may recall from the <a class="reference internal" href="#hardware-section"><span class="std std-ref">Hardware Section</span></a>, we needed to
-add the <code class="docutils literal notranslate"><span class="pre">SyntheticStage</span></code> to control <code class="docutils literal notranslate"><span class="pre">Theta</span></code>. We now specify in the microscope that
-<code class="docutils literal notranslate"><span class="pre">Theta</span></code> is controlled by the synthetic stage in the <code class="docutils literal notranslate"><span class="pre">hardware</span></code> section of
-<code class="docutils literal notranslate"><span class="pre">microscope1</span></code>.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">stages</span></code>, <strong>navigate</strong> requires that stages are configured for each microscope
+in <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">Z</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, and <code class="docutils literal notranslate"><span class="pre">Theta</span></code>. If no physical stage is present, then
+that axes should be defined as a <code class="docutils literal notranslate"><span class="pre">SyntheticStage</span></code>, as shown above for <code class="docutils literal notranslate"><span class="pre">Theta</span></code>.</p>
 <p>Below this, we specify that only <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code> and <code class="docutils literal notranslate"><span class="pre">Z</span></code> axes may be controlled by a
 joystick and we set the stage bounds for each of the axes.</p>
 <p>Finally, we set the offset for each stage axis. This is an offset relative to other
@@ -339,7 +249,7 @@ to move to a different offset in order to observe the sample at the same positio
 <code class="docutils literal notranslate"><span class="pre">microscope1</span></code>.</p>
 <hr class="docutils" />
 <section id="stage-axes-definition">
-<h5>Stage Axes Definition<a class="headerlink" href="#stage-axes-definition" title="Permalink to this heading"></a></h5>
+<h4>Stage Axes Definition<a class="headerlink" href="#stage-axes-definition" title="Permalink to this heading"></a></h4>
 <p>Many times, the coordinate system of the stage hardware do not agree with the optical
 definition of each axes identity. For example, many stages define their vertical
 dimension as <code class="docutils literal notranslate"><span class="pre">Z</span></code>, whereas optically, we often define this axis as <code class="docutils literal notranslate"><span class="pre">X</span></code>. Thus, there
@@ -351,7 +261,7 @@ and <code class="docutils literal notranslate"><span class="pre">F</span></code>
 <span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">r</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
-<p>If, on a certain microscope, the <code class="docutils literal notranslate"><span class="pre">Z</span></code> stage axis corresponds to the optical y-axis,
+<p>If, on a certain microscope, the <code class="docutils literal notranslate"><span class="pre">Z</span></code> stage axis corresponds to the optical Y-axis,
 and vice versa, you would then have to import the stages as following:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">axes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">theta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
 <span class="nt">axes_mapping</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">x</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">z</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">y</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">r</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">f</span><span class="p p-Indicator">]</span>
@@ -360,7 +270,7 @@ and vice versa, you would then have to import the stages as following:</p>
 </section>
 <hr class="docutils" />
 <section id="joystick-axes-definition">
-<h5>Joystick Axes Definition<a class="headerlink" href="#joystick-axes-definition" title="Permalink to this heading"></a></h5>
+<h4>Joystick Axes Definition<a class="headerlink" href="#joystick-axes-definition" title="Permalink to this heading"></a></h4>
 <p>If you are using a joystick, it is possible to disable GUI control of the stage axes
 that the joystick can interact with. The axes that the joystick can interact with
 appear in the stage field as following:</p>
@@ -382,11 +292,11 @@ as following:</p>
 </section>
 <hr class="docutils" />
 <section id="zoom-subsection">
-<h4>Zoom Subsection<a class="headerlink" href="#zoom-subsection" title="Permalink to this heading"></a></h4>
+<h3>Zoom Subsection<a class="headerlink" href="#zoom-subsection" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">zoom</span></code> section of <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> specifies control over microscope
-zoom lenses. For example, we use the
-<a class="reference external" href="https://www.dynamixel.com/">Dynamixel Smart Actuator</a> to control the rotating
-zoom wheel on an Olympus MVXPLAPO 1x/0.25.</p>
+zoom lenses, or devices that change the magnifcation of the imaging system. For
+example, we use the <a class="reference external" href="https://www.dynamixel.com/">Dynamixel Smart Actuator</a> to
+control the rotating zoom wheel on an Olympus MVXPLAPO 1x/0.25.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">microscope1</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">zoom</span><span class="p">:</span>
@@ -422,12 +332,12 @@ zoom wheel on an Olympus MVXPLAPO 1x/0.25.</p>
 <span class="w">                        </span><span class="nt">6x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">hardware</span></code> section connects to the zoom hardware. The <code class="docutils literal notranslate"><span class="pre">positions</span></code> specify the
-voltage of the actuator at different zoom positions. The <code class="docutils literal notranslate"><span class="pre">pixel_size</span></code> specifies the
-effective pixel size of the system at each zoom. The <code class="docutils literal notranslate"><span class="pre">stage_positions</span></code> account for
-focal shifts in between the different zoom values (the MVXPLAPO does not have a
-consistent focal plane). These may change depending on the immersion media. Here it is
-specified for a <code class="docutils literal notranslate"><span class="pre">BABB</span></code> (Benzyl Alcohol Benzyl Benzoate) immersion media.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">positions</span></code> specify the voltage of the actuator at different zoom positions.
+The <code class="docutils literal notranslate"><span class="pre">pixel_size</span></code> specifies the effective pixel size of the system at each zoom. The
+<code class="docutils literal notranslate"><span class="pre">stage_positions</span></code> account for focal shifts in between the different zoom values
+(the MVXPLAPO does not have a consistent focal plane). These may change depending on
+the immersion media. Here it is specified for a <code class="docutils literal notranslate"><span class="pre">BABB</span></code> (Benzyl Alcohol Benzyl
+Benzoate) immersion media.</p>
 <p>Regardless of whether or not your microscope uses a zoom device, you must have a
 <code class="docutils literal notranslate"><span class="pre">zoom</span></code> entry, indicating the effective pixel size of your system in micrometers.
 For example,</p>
@@ -441,85 +351,6 @@ For example,</p>
 <span class="w">  </span><span class="nt">pixel_size</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">N/A</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.168</span>
 </pre></div>
-</div>
-</section>
-</section>
-<hr class="docutils" />
-<section id="gui-section">
-<h3>GUI Section<a class="headerlink" href="#gui-section" title="Permalink to this heading"></a></h3>
-<p>The third and final section of the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file is the GUI parameters.</p>
-<p>It will look something like the below:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">gui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">channels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">        </span><span class="nt">laser_power</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
-<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
-<span class="w">        </span><span class="nt">exposure_time</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">        </span><span class="nt">interval_time</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">    </span><span class="nt">stack_acquisition</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">step_size</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.200</span>
-<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
-<span class="w">        </span><span class="nt">start_pos</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5000</span>
-<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
-<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">end_pos</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-5000</span>
-<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
-<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">    </span><span class="nt">timepoint</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">timepoints</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">stack_pause</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">            </span><span class="nt">step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</pre></div>
-</div>
-<p>The values in each field relate to GUI widgets.</p>
-<ul class="simple">
-<li><p>The <code class="docutils literal notranslate"><span class="pre">channels</span></code> section indicates GUI settings for the channel settings under
-<span class="guilabel">Channels</span>, <span class="guilabel">Channel Settings</span>.</p>
-<ul>
-<li><p><cite>count</cite> specifies how many channels should be displayed.</p></li>
-<li><p><cite>laser_power</cite>, <cite>exposure_time</cite> and <cite>interval_time</cite> are used to set
-the minimum, maximum and step size values for <span class="guilabel">Power</span>,
-<span class="guilabel">Exp. Time (ms)</span> and <span class="guilabel">Interval</span>, respectively.</p></li>
-</ul>
-</li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">stack_acquisition</span></code> section indicates GUI settings for the stack acquisition
-settings under <span class="guilabel">Channels</span>, <span class="guilabel">Stack Acquisition Settings (um)</span>.</p>
-<ul>
-<li><p><cite>step_size</cite>, <cite>start_pos</cite> and <cite>end_pos</cite> are used to set the minimum, maximum and step
-size values for <span class="guilabel">Step Size</span>, <span class="guilabel">Start</span> and <span class="guilabel">End</span>,
-respectively.</p></li>
-</ul>
-</li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">timepoint</span></code> section indicates GUI settings for the timepoint
-settings under <span class="guilabel">Channels</span>, <span class="guilabel">Timepoint Settings</span>.</p>
-<ul>
-<li><p><cite>timepoints</cite> and <cite>stack_pause</cite> are used to set the minimum, maximum and step
-size values for <span class="guilabel">Timepoints</span> and <span class="guilabel">Stack Pause (s)</span>,
-respectively.</p></li>
-</ul>
-</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This section is still under development. The plan going forward is to have all
-widgets be controlled in this manner.</p>
 </div>
 </section>
 </section>
@@ -562,7 +393,7 @@ information on how to setup the REST API for communication with ilastik can be f
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="setup_microscope.html" class="btn btn-neutral float-left" title="Setting Up A Microscope" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hardware/hardware_home.html" class="btn btn-neutral float-right" title="Hardware" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="multiple_cameras.html" class="btn btn-neutral float-right" title="Multiple Cameras" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

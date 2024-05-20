@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mechanical Zoom &mdash; navigate 0.0.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Deformable Mirrors" href="deformable_mirror.html" />
+    <link rel="prev" title="Shutters" href="shutter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            navigate
+              <img src="../../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="hardware_home.html">Supported Hardware</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="daq.html">Data Acquisition Cards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html">Cameras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="remote_focus.html">Remote Focusing Devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stage.html">Stages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter_wheel.html">Filter Wheels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="galvo.html">Galvanometers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="laser.html">Lasers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shutter.html">Shutters</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Mechanical Zoom</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dynamixel">Dynamixel</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mx-28r">MX-28R</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-zoom">Synthetic Zoom</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deformable_mirror.html">Deformable Mirrors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../setup_microscope.html">Setting Up A Microscope</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="hardware_home.html">Supported Hardware</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="daq.html">Data Acquisition Cards</a></li>
+<li class="toctree-l3"><a class="reference internal" href="camera.html">Cameras</a></li>
+<li class="toctree-l3"><a class="reference internal" href="remote_focus.html">Remote Focusing Devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html">Stages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter_wheel.html">Filter Wheels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="galvo.html">Galvanometers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="laser.html">Lasers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="shutter.html">Shutters</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Mechanical Zoom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dynamixel">Dynamixel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#synthetic-zoom">Synthetic Zoom</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="deformable_mirror.html">Deformable Mirrors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../multiple_cameras.html">Multiple Cameras</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="hardware_home.html">Supported Hardware</a></li>
+      <li class="breadcrumb-item active">Mechanical Zoom</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user_guide/hardware/zoom.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mechanical-zoom">
+<h1>Mechanical Zoom<a class="headerlink" href="#mechanical-zoom" title="Permalink to this heading"></a></h1>
+<p>Zoom devices control the magnification of the microscope. If such control is not
+needed, the software expects a <a class="reference internal" href="#synthetic-zoom"><span class="std std-ref">Synthetic Zoom</span></a> to provide
+the fixed magnification and the effective pixel size of the microscope.</p>
+<hr class="docutils" />
+<section id="dynamixel">
+<h2>Dynamixel<a class="headerlink" href="#dynamixel" title="Permalink to this heading"></a></h2>
+<section id="mx-28r">
+<h3>MX-28R<a class="headerlink" href="#mx-28r" title="Permalink to this heading"></a></h3>
+<p>This software supports the
+<a class="reference external" href="https://www.dynamixel.com/">Dynamixel Smart Actuator</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">positions</span></code> specify the voltage of the actuator at different zoom positions.
+The <code class="docutils literal notranslate"><span class="pre">stage_positions</span></code> account for focal shifts in between the different zoom values
+(the MVXPLAPO does not have a consistent focal plane). These may change depending on
+the immersion media. Here it is specified for a <code class="docutils literal notranslate"><span class="pre">BABB</span></code> (Benzyl Alcohol Benzyl
+Benzoate) immersion media.  The <code class="docutils literal notranslate"><span class="pre">pixel_size</span></code> specifies the effective pixel size of
+the system at each zoom.</p>
+</div>
+<details class="summary-configuration-file">
+<summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">zoom</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DynamixelZoom</span>
+<span class="w">          </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM1</span>
+<span class="w">          </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
+<span class="w">        </span><span class="nt">position</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">1x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200.0</span>
+<span class="w">          </span><span class="nt">6.5x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000.0</span>
+<span class="w">        </span><span class="nt">pixel_size</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">1x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6.5</span>
+<span class="w">          </span><span class="nt">6.5x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">        </span><span class="nt">stage_positions</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">BABB</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">f</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">1X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">              </span><span class="nt">6.5x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+<hr class="docutils" />
+</section>
+</section>
+<section id="synthetic-zoom">
+<span id="id1"></span><h2>Synthetic Zoom<a class="headerlink" href="#synthetic-zoom" title="Permalink to this heading"></a></h2>
+<details class="summary-configuration-file">
+<summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">zoom</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synthetic</span>
+<span class="w">          </span><span class="nt">servo_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM1</span>
+<span class="w">          </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
+<span class="w">        </span><span class="nt">position</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">1x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200.0</span>
+<span class="w">          </span><span class="nt">6.5x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000.0</span>
+<span class="w">        </span><span class="nt">pixel_size</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">1x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6.5</span>
+<span class="w">          </span><span class="nt">6.5x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">        </span><span class="nt">stage_positions</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">BABB</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">f</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">1X</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">              </span><span class="nt">6.5x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="shutter.html" class="btn btn-neutral float-left" title="Shutters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="deformable_mirror.html" class="btn btn-neutral float-right" title="Deformable Mirrors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

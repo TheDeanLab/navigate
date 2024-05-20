@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hardware &mdash; navigate 0.0.5 documentation</title>
+  <title>Supported Hardware &mdash; navigate 0.0.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
 
@@ -22,8 +22,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Configuring Hardware Devices" href="supported_hardware.html" />
-    <link rel="prev" title="Configuration Overview" href="../software_configuration.html" /> 
+    <link rel="next" title="Data Acquisition Cards" href="daq.html" />
+    <link rel="prev" title="Add a New Hardware Device (Advanced)" href="../../add_new_device.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -54,13 +54,34 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../hardware_overview.html">Supported Hardware</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Supported Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="daq.html">Data Acquisition Cards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html">Cameras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="remote_focus.html">Remote Focusing Devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stage.html">Stages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter_wheel.html">Filter Wheels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="galvo.html">Galvanometers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="laser.html">Lasers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shutter.html">Shutters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zoom.html">Mechanical Zoom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deformable_mirror.html">Deformable Mirrors</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../file_formats.html">Supported File Formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../setup_microscope.html">Setting Up A Microscope</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Hardware</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="supported_hardware.html">Configuring Hardware Devices</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Supported Hardware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="daq.html">Data Acquisition Cards</a></li>
+<li class="toctree-l3"><a class="reference internal" href="camera.html">Cameras</a></li>
+<li class="toctree-l3"><a class="reference internal" href="remote_focus.html">Remote Focusing Devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html">Stages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter_wheel.html">Filter Wheels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="galvo.html">Galvanometers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="laser.html">Lasers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="shutter.html">Shutters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zoom.html">Mechanical Zoom</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deformable_mirror.html">Deformable Mirrors</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../multiple_cameras.html">Multiple Cameras</a></li>
@@ -105,8 +126,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../setup_microscope.html">Setting Up A Microscope</a></li>
-      <li class="breadcrumb-item active">Hardware</li>
+      <li class="breadcrumb-item active">Supported Hardware</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/user_guide/hardware/hardware_home.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -116,11 +136,123 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="hardware">
-<h1>Hardware<a class="headerlink" href="#hardware" title="Permalink to this heading"></a></h1>
+  <section id="supported-hardware">
+<span id="hardware-overview"></span><h1>Supported Hardware<a class="headerlink" href="#supported-hardware" title="Permalink to this heading"></a></h1>
+<p><strong>navigate</strong> provides access to a growing list of hardware devices. Information on
+how to configure each of these devices, including supported firmware, is provided
+here.</p>
+<p>Additional devices are available by installing the
+<strong>navigate-mmcore-plugin</strong>. To learn more, please visit the <strong>navigate-mmcore-plugin</strong>
+<a class="reference external" href="https://thedeanlab.github.io/navigate-mmcore-plugin/">documentation</a>.</p>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Devices</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="supported_hardware.html">Configuring Hardware Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="daq.html">Data Acquisition Cards</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="daq.html#national-instruments-ni">National Instruments (NI)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="daq.html#pcie-pxie-6738">PCIe/PXIe-6738</a></li>
+<li class="toctree-l3"><a class="reference internal" href="daq.html#pcie-pxie-6259">PCIe/PXIe-6259</a></li>
+<li class="toctree-l3"><a class="reference internal" href="daq.html#pcie-pxie-6723">PCIe/PXIe-6723</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="daq.html#synthetic-data-acquisition-card">Synthetic Data Acquisition Card</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="camera.html">Cameras</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="camera.html#hamamatsu">Hamamatsu</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="camera.html#orca-flash4-0-v3">ORCA-Flash4.0 V3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="camera.html#orca-fusion">ORCA-Fusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="camera.html#orca-lightning">ORCA-Lightning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="camera.html#orca-fire">ORCA-Fire</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html#photometrics">Photometrics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="camera.html#iris-15">Iris 15</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html#synthetic-camera">Synthetic Camera</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="remote_focus.html">Remote Focusing Devices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="remote_focus.html#equipment-solutions">Equipment Solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="remote_focus.html#lfa-2010">LFA-2010</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="remote_focus.html#analog-controlled-voice-coils-and-tunable-lenses">Analog Controlled Voice Coils and Tunable Lenses</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="remote_focus.html#thorlabs-blink">Thorlabs BLINK</a></li>
+<li class="toctree-l3"><a class="reference internal" href="remote_focus.html#id1">Optotune Focus Tunable Lens</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="remote_focus.html#synthetic-remote-focus-device">Synthetic Remote Focus Device</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stage.html">Stages</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stage.html#applied-scientific-instrumentation">Applied Scientific Instrumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stage.html#tiger-controller">Tiger Controller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html#mfc2000">MFC2000</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html#ms2000">MS2000</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stage.html#sutter-instruments">Sutter Instruments</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stage.html#mp-285">MP-285</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stage.html#physik-instrumente">Physik Instrumente</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stage.html#c-884">C-884</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html#e-709">E-709</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stage.html#thorlabs">Thorlabs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stage.html#kim001">KIM001</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html#kst101">KST101</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stage.html#analog-controlled-galvo-piezo">Analog-Controlled Galvo/Piezo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stage.html#synthetic-stage">Synthetic Stage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="filter_wheel.html">Filter Wheels</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="filter_wheel.html#sutter-instruments">Sutter Instruments</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="filter_wheel.html#lambda-10-3-10-b">Lambda 10-3 &amp; 10-B</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="filter_wheel.html#asi">ASI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="filter_wheel.html#fw-1000">FW-1000</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="filter_wheel.html#synthetic-filter-wheel">Synthetic Filter Wheel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="galvo.html">Galvanometers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="galvo.html#analog-controlled-galvo">Analog-Controlled Galvo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="galvo.html#synthetic-galvo">Synthetic Galvo</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="laser.html">Lasers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="laser.html#analog-digital-controlled-lasers">Analog/Digital-Controlled Lasers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="laser.html#synthetic-lasers">Synthetic Lasers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="shutter.html">Shutters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="shutter.html#analog-digital-controlled-shutters">Analog/Digital-Controlled Shutters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shutter.html#synthetic-shutter">Synthetic Shutter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="zoom.html">Mechanical Zoom</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="zoom.html#dynamixel">Dynamixel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="zoom.html#mx-28r">MX-28R</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="zoom.html#synthetic-zoom">Synthetic Zoom</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deformable_mirror.html">Deformable Mirrors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deformable_mirror.html#imagine-optic">Imagine Optic</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="deformable_mirror.html#mirao-52e">Mirao 52E</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deformable_mirror.html#synthetic-mirror">Synthetic Mirror</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -129,8 +261,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../software_configuration.html" class="btn btn-neutral float-left" title="Configuration Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="supported_hardware.html" class="btn btn-neutral float-right" title="Configuring Hardware Devices" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../../add_new_device.html" class="btn btn-neutral float-left" title="Add a New Hardware Device (Advanced)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="daq.html" class="btn btn-neutral float-right" title="Data Acquisition Cards" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

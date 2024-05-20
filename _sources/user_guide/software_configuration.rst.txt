@@ -8,11 +8,13 @@ This section outlines the ``configuration.yaml``, ``experiment.yml``,
 
 -----------------
 
-Configuration File
-==================
+Initial Configuration
+=====================
 In order for the **navigate** software to function, you will need to configure the
-specifications of the various hardware that you will be using. The first time you
-launch the software, **navigate** will create a copy of the
+specifications of the various hardware that you will be using in the ``configuration
+.yaml`` file.
+
+The first time you launch the software, **navigate** will create a copy of the
 ``navigate\config\configuration.yaml`` and the rest of the configuration files in
 ``C:\Users\Username\AppData\Local\.navigate\config`` on  Windows or ``~/.navigate`` on
 Mac/Linux. **navigate** uses these local copies of the configuration files to store
@@ -41,117 +43,16 @@ study for a general walkthrough of how to build your own configuration file and 
 
 -----------------
 
-.. _hardware_section:
+Microscope Configurations
+-------------------------
 
-Hardware Section
-----------------
-The first section of the ``configuration.yaml`` file is called ``hardware``. It contains
-all the necessary information to find and connect each hardware device to the
-computer/software.
-
-Here is an example of what the section will look like:
-
-.. code-block:: yaml
-
-    # Configuration in YAML
-    hardware:
-        daq:
-            type: NI
-        camera:
-            -
-              type: HamamatsuOrca
-              serial_number: 302158
-            -
-              type: HamamatsuOrca
-              serial_number: 302352
-        filter_wheel:
-            type: SutterFilterWheel
-            port: COM19
-            baudrate: 9600
-            number_of_wheels: 2
-        stage:
-            -
-              type: PI
-              controllername: 'C-884'
-              stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
-              refmode: FRF FRF FRF FRF FRF FRF
-              serial_number: 119060508
-            -
-              type: Thorlabs
-              serial_number: 74000375
-        zoom:
-            type: DynamixelZoom
-            servo_id: 1
-            port: COM18
-            baudrate: 1000000
-
-This example specifies that we are connected to
-
-* A National Instruments DAQ (possibly multiple).
-* Two Hamamatsu Orca (Flash or Fusion) cameras with different serial numbers for
-  identification.
-* A Sutter filter wheel controller connected via USB on port ``COM19``. This control two
-  filter wheels.
-* A Physik Instrumente controller, identified by serial number, with access to 5 stages in ``FRF`` refrence mode
-  (see PI's documentation).
-* A Thorlabs stage (with a single axis), identified by a serial number.
-* A Dynamixel zoom device connected via USB on port ``COM18``.
-
-Make sure that the ``configuration.yaml`` specifies the hardware on your microscope.
-For example, if you wanted to remove the Thorlabs stage and replace the PI stage with
-an ASI stage, the ``stage`` section would instead read:
-
-.. code-block:: yaml
-
-    stage:
-        type: ASI
-        serial_number: 123456789
-        port: COM7
-        baudrate: 115200
-
-Notice that since we are now using a single stage, we no longer have a ``-`` above the
-stage entry. The ``-`` indicates a list, and is only needed if we want to load multiple
-types of a single hardware.
-
-.. note::
-
-    The type of the device is needed when deciding which Python object to instantiate
-    on startup of the software (eg ``type: ASI``). The other fields (eg ``port: COM7``)
-    change depending on the manufacturer's API. They help the API communicate with the
-    computer you are using, which in turn allows the **navigate** software to communicate
-    with the device.
-
-Running the software with our current microscope setup would fail. It turns out our
-ASI stage only moves in the ``X``, ``Y``, ``Z`` and ``F`` axes. We need a way to handle
-the ``Theta`` axis. To address this, we will change our ``stage`` block of the YAML to
-also load a ``SyntheticStage``:
-
-.. code-block:: yaml
-
-    stage:
-        -
-            type: ASI
-            serial_number: 123456789
-            port: COM7
-            baudrate: 115200
-        -
-            type: SyntheticStage
-            serial_number: 987654321
-
-If your microscope system does not have a device listed in the hardware section using
-the synthetic typing will allow the software to run without it. Another example would
-be replacing the zoom type with ``SyntheticZoom`` in the instance your microscope does
-not use that hardware. Your system will still run as you expect.
-
------------------
-
-Microscope Section
-------------------
-
-The second section of ``configuration.yaml`` contains the microscope configurations
+The ``configuration.yaml`` file contains the microscope configurations
 that you will be using with the software. Each microscope is represented as a YAML
-dictionary, as in the hardware section. This section enables us to load one or more
-microscopes using the same hardware with varying combinations:
+dictionary.
+
+Switching between each microscope is
+readily performed in **navigate**, enabling you to switch between different
+configurations or imaging modes, each with their own unique or shared hardware:
 
 .. code-block:: yaml
 
@@ -164,14 +65,14 @@ microscopes using the same hardware with varying combinations:
             ...
 
 Where ``microscope1`` and ``microscope2`` are names of two different microscopes using
-different combinations of the hardware listed in the ``hardware`` section. The names of
+different combinations of the hardware. The names of
 the microscopes must not include spaces or special characters such as ``<``, ``\``,
 ``#``, ``%``, or ``?``.
 
 Each microscope is expected to have a ``daq``, ``camera``, ``remote_focus_device``,
-``galvo``, ``filter_wheel``, ``stage``, ``zoom``, ``shutter`` and ``lasers`` section of
-the YAML dictionary. As in the hardware section, unused devices can be specified as
-synthetic.
+``galvo``, ``filter_wheel``, ``stage``, ``zoom``, ``shutter``, ``mirror`` and
+``lasers`` section of the YAML dictionary. As in the hardware section, unused devices
+can be specified as synthetic.
 
 Most of the information to set up these devices can be found in the
 :doc:`Supported Hardware <hardware/supported_hardware>` section of the documentation.
@@ -182,7 +83,7 @@ pixel size.
 -----------------
 
 Stage Subsection
-^^^^^^^^^^^^^^^^
+-------------------------
 
 The stage section of the microscope 1) puts the stage control from the ``hardware``
 section into the microscope 2) sets boundaries for stage movement and 3) optionally
@@ -226,14 +127,15 @@ specifies joystick-controlled axes.
             theta_offset: 0
             f_offset: 0
 
+
+
 First, we set the axes controlled by each piece of hardware and a mapping from the
 hardware's API axes to our software's axes. For example, the ASI ``M`` axis is mapped
 onto our software's ``X`` axis below.
 
-As you may recall from the :ref:`Hardware Section <hardware_section>`, we needed to
-add the ``SyntheticStage`` to control ``Theta``. We now specify in the microscope that
-``Theta`` is controlled by the synthetic stage in the ``hardware`` section of
-``microscope1``.
+For ``stages``, **navigate** requires that stages are configured for each microscope
+in ``X``, ``Y``, ``Z``, ``F``, and ``Theta``. If no physical stage is present, then
+that axes should be defined as a ``SyntheticStage``, as shown above for ``Theta``.
 
 Below this, we specify that only ``X``, ``Y`` and ``Z`` axes may be controlled by a
 joystick and we set the stage bounds for each of the axes.
@@ -262,7 +164,7 @@ and ``F`` is focus, but this can be changed by changing axes mapping.
     axes: [x, y, z, theta, f]
     axes_mapping: [x, y, z, r, f]
 
-If, on a certain microscope, the ``Z`` stage axis corresponds to the optical y-axis,
+If, on a certain microscope, the ``Z`` stage axis corresponds to the optical Y-axis,
 and vice versa, you would then have to import the stages as following:
 
 .. code-block:: yaml
@@ -298,12 +200,13 @@ appear in the stage field as following:
 -----------------
 
 Zoom Subsection
-^^^^^^^^^^^^^^^
+-------------------------
+
 
 The ``zoom`` section of ``configuration.yaml`` specifies control over microscope
-zoom lenses. For example, we use the
-`Dynamixel Smart Actuator <https://www.dynamixel.com/>`_ to control the rotating
-zoom wheel on an Olympus MVXPLAPO 1x/0.25.
+zoom lenses, or devices that change the magnifcation of the imaging system. For
+example, we use the `Dynamixel Smart Actuator <https://www.dynamixel.com/>`_ to
+control the rotating zoom wheel on an Olympus MVXPLAPO 1x/0.25.
 
 .. code-block:: yaml
 
@@ -342,12 +245,12 @@ zoom wheel on an Olympus MVXPLAPO 1x/0.25.
                             6x: 6
 
 
-The ``hardware`` section connects to the zoom hardware. The ``positions`` specify the
-voltage of the actuator at different zoom positions. The ``pixel_size`` specifies the
-effective pixel size of the system at each zoom. The ``stage_positions`` account for
-focal shifts in between the different zoom values (the MVXPLAPO does not have a
-consistent focal plane). These may change depending on the immersion media. Here it is
-specified for a ``BABB`` (Benzyl Alcohol Benzyl Benzoate) immersion media.
+The ``positions`` specify the voltage of the actuator at different zoom positions.
+The ``pixel_size`` specifies the effective pixel size of the system at each zoom. The
+``stage_positions`` account for focal shifts in between the different zoom values
+(the MVXPLAPO does not have a consistent focal plane). These may change depending on
+the immersion media. Here it is specified for a ``BABB`` (Benzyl Alcohol Benzyl
+Benzoate) immersion media.
 
 Regardless of whether or not your microscope uses a zoom device, you must have a
 ``zoom`` entry, indicating the effective pixel size of your system in micrometers.
@@ -365,83 +268,6 @@ For example,
       pixel_size:
         N/A: 0.168
 
------------------
-
-GUI Section
------------
-
-The third and final section of the ``configuration.yaml`` file is the GUI parameters.
-
-It will look something like the below:
-
-.. code-block:: yaml
-
-    gui:
-        channels:
-            count: 5
-            laser_power:
-                min: 0
-                max: 100
-                step: 10
-            exposure_time:
-                min: 1
-                max: 1000
-                step: 5
-            interval_time:
-                min: 0
-                max: 1000
-                step: 5
-        stack_acquisition:
-            step_size:
-                min: 0.200
-                max: 1000
-                step: 0.1
-            start_pos:
-                min: -5000
-                max: 5000
-                step: 1
-            end_pos:
-                min: -5000
-                max: 10000
-                step: 1
-        timepoint:
-            timepoints:
-                min: 1
-                max: 1000
-                step: 1
-            stack_pause:
-                min: 0
-                max: 1000
-                step: 1
-
-The values in each field relate to GUI widgets.
-
-- The ``channels`` section indicates GUI settings for the channel settings under
-  :guilabel:`Channels`, :guilabel:`Channel Settings`.
-
-  - `count` specifies how many channels should be displayed.
-  - `laser_power`, `exposure_time` and `interval_time` are used to set
-    the minimum, maximum and step size values for :guilabel:`Power`,
-    :guilabel:`Exp. Time (ms)` and :guilabel:`Interval`, respectively.
-
-- The ``stack_acquisition`` section indicates GUI settings for the stack acquisition
-  settings under :guilabel:`Channels`, :guilabel:`Stack Acquisition Settings (um)`.
-
-  - `step_size`, `start_pos` and `end_pos` are used to set the minimum, maximum and step
-    size values for :guilabel:`Step Size`, :guilabel:`Start` and :guilabel:`End`,
-    respectively.
-
-- The ``timepoint`` section indicates GUI settings for the timepoint
-  settings under :guilabel:`Channels`, :guilabel:`Timepoint Settings`.
-
-  - `timepoints` and `stack_pause` are used to set the minimum, maximum and step
-    size values for :guilabel:`Timepoints` and :guilabel:`Stack Pause (s)`,
-    respectively.
-
-.. note::
-
-    This section is still under development. The plan going forward is to have all
-    widgets be controlled in this manner.
 
 -----------------
 

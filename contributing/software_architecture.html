@@ -54,7 +54,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware_overview.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware/hardware_home.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/file_formats.html">Supported File Formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/gui_walkthrough.html">User Interface Walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/setup_microscope.html">Setting Up A Microscope</a></li>
@@ -64,12 +64,10 @@
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Software Architecture</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#model-view-controller-mvc">Model View Controller (MVC)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#communication-enhancements">Communication Enhancements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#data-acquisition-and-processing">Data Acquisition and Processing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#feature-lists">Feature Lists</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#model-view-controller-mvc">Model View Controller (MVC)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extendability">Extendability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-acquisition-and-processing">Data Acquisition and Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-lists">Feature Lists</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contributing_guidelines.html">Contributing Guidelines</a></li>
@@ -118,6 +116,7 @@
   <section id="software-architecture">
 <h1>Software Architecture<a class="headerlink" href="#software-architecture" title="Permalink to this heading"></a></h1>
 <img alt="Software Architecture" class="align-center" src="../_images/architecture.png" />
+<hr class="docutils" />
 <section id="model-view-controller-mvc">
 <span id="software-architecture-section"></span><h2>Model View Controller (MVC)<a class="headerlink" href="#model-view-controller-mvc" title="Permalink to this heading"></a></h2>
 <p>The architecture of <strong>navigate</strong> is designed following the industry-standard Model-View-Controller (MVC) pattern. In this structure:</p>
@@ -135,8 +134,10 @@ and the view components, coordinating the application’s overall functionality.
 It relays user input in the form of traces and commands to the model and relays model
 output in the form of images and data to the view.</p></li>
 </ul>
-<section id="communication-enhancements">
-<h3>Communication Enhancements<a class="headerlink" href="#communication-enhancements" title="Permalink to this heading"></a></h3>
+</section>
+<hr class="docutils" />
+<section id="extendability">
+<h2>Extendability<a class="headerlink" href="#extendability" title="Permalink to this heading"></a></h2>
 <p>To maximize the extendability of <strong>navigate</strong>, it incorporates:</p>
 <ul class="simple">
 <li><p><strong>REST-API Level</strong>: A RESTful API layer is included to facilitate communication with external
@@ -147,8 +148,9 @@ Data does not need to be saved locally to be loaded by the external system.</p><
 plugins, enhancing the system’s adaptability to various hardware.</p></li>
 </ul>
 </section>
+<hr class="docutils" />
 <section id="data-acquisition-and-processing">
-<h3>Data Acquisition and Processing<a class="headerlink" href="#data-acquisition-and-processing" title="Permalink to this heading"></a></h3>
+<h2>Data Acquisition and Processing<a class="headerlink" href="#data-acquisition-and-processing" title="Permalink to this heading"></a></h2>
 <p><strong>navigate</strong> employs a feature container for running acquisition routines, characterized by:</p>
 <ul class="simple">
 <li><p><strong>Reconfigurable Workflows</strong>: Supports custom data acquisition workflows, which are
@@ -163,8 +165,9 @@ customizable acquisition “recipes” tailored to specific specimens.</p></li>
 stored as numpy arrays, ensuring rapid processing.</p></li>
 </ul>
 </section>
+<hr class="docutils" />
 <section id="feature-lists">
-<h3>Feature Lists<a class="headerlink" href="#feature-lists" title="Permalink to this heading"></a></h3>
+<h2>Feature Lists<a class="headerlink" href="#feature-lists" title="Permalink to this heading"></a></h2>
 <p>Feature lists are highly versatile, capable of:</p>
 <ul class="simple">
 <li><p><strong>Sequential Execution</strong>: Acquisition routes can be executed in a predefined order, ensuring
@@ -174,7 +177,6 @@ and loop structures (while, for-loops), providing flexibility in data acquisitio
 <li><p><strong>Non-Imaging Processes</strong>: Supports the inclusion of non-imaging-based processes,
 such as solvent exchange, broadening the application scope of the system.</p></li>
 </ul>
-</section>
 </section>
 </section>
 

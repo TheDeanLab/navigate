@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Acquisition Cards &mdash; navigate 0.0.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Cameras" href="camera.html" />
+    <link rel="prev" title="Supported Hardware" href="hardware_home.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            navigate
+              <img src="../../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="hardware_home.html">Supported Hardware</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data Acquisition Cards</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#national-instruments-ni">National Instruments (NI)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pcie-pxie-6738">PCIe/PXIe-6738</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pcie-pxie-6259">PCIe/PXIe-6259</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pcie-pxie-6723">PCIe/PXIe-6723</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-data-acquisition-card">Synthetic Data Acquisition Card</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html">Cameras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="remote_focus.html">Remote Focusing Devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stage.html">Stages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter_wheel.html">Filter Wheels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="galvo.html">Galvanometers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="laser.html">Lasers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shutter.html">Shutters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zoom.html">Mechanical Zoom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deformable_mirror.html">Deformable Mirrors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../setup_microscope.html">Setting Up A Microscope</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../software_configuration.html">Configuration Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="hardware_home.html">Supported Hardware</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Data Acquisition Cards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#national-instruments-ni">National Instruments (NI)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#synthetic-data-acquisition-card">Synthetic Data Acquisition Card</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="camera.html">Cameras</a></li>
+<li class="toctree-l3"><a class="reference internal" href="remote_focus.html">Remote Focusing Devices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html">Stages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter_wheel.html">Filter Wheels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="galvo.html">Galvanometers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="laser.html">Lasers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="shutter.html">Shutters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zoom.html">Mechanical Zoom</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deformable_mirror.html">Deformable Mirrors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../multiple_cameras.html">Multiple Cameras</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="hardware_home.html">Supported Hardware</a></li>
+      <li class="breadcrumb-item active">Data Acquisition Cards</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user_guide/hardware/daq.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data-acquisition-cards">
+<h1>Data Acquisition Cards<a class="headerlink" href="#data-acquisition-cards" title="Permalink to this heading"></a></h1>
+<p>Data acquisition cards deliver and receive analog and digital signals.
+To acquire an image, the software calculates all of the analog and digital waveforms and
+queues these waveforms on the data acquisition card. Upon receipt of a trigger (either from the software itself,
+or an external piece of hardware), all
+of the analog and digital signals are delivered in parallel. This provides
+deterministic behavior on a per-frame basis, which is necessary for proper acquisition of light-sheet data.
+It does not however provide us with deterministic behavior between image
+frames, and some jitter in timing is anticipated.</p>
+<hr class="docutils" />
+<section id="national-instruments-ni">
+<span id="hardware-ni"></span><h2>National Instruments (NI)<a class="headerlink" href="#national-instruments-ni" title="Permalink to this heading"></a></h2>
+<p>In principle, most NI-based data acquisition cards should work with the software, so long
+as there are a sufficient number of analog and digital ports, and the sampling rate (typically 100 kHz)
+is high enough per port.</p>
+<p>Prior to installing the card within
+the computer, first install the <a class="reference external" href="https://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html#464560">NI-DAQmx drivers</a>.
+Once installed, connect the PCIe or PXIe-based device to the computer. A functioning
+system should be recognized by the operating system, and visible in the Windows Device
+Manager as a <strong>NI Data Acquisition Device</strong>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>navigate</strong> has been tested with the following versions of the NI-DAQmx drivers:</p>
+<ul class="simple">
+<li><p>22.5.0</p></li>
+<li><p>22.8.0</p></li>
+<li><p>23.3.0</p></li>
+<li><p>23.8.0</p></li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>The most important aspect is to wire up the breakout box properly.</strong></p>
+<p>To find the device pin outs for your NI-based data acquisition card, open NI
+MAX, find the card under devices, right-click and select “device pinouts”.</p>
+<p>Important: Should you use the SCB-68A breakout box, do not look at the pinout on
+the back of the cover. This is misleading. You must look at the device pinouts in
+NI MAX.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For NI-based cards, <code class="docutils literal notranslate"><span class="pre">port0/line1</span></code> is the equivalent of <code class="docutils literal notranslate"><span class="pre">P0.1</span></code>.
+There are multiple pins for each PFIO, including source, out, gate, etc. You must
+use the out terminal.</p>
+</div>
+<ul class="simple">
+<li><p>Identify the device name in NI MAX, and change it if you would like. Common names are
+<code class="docutils literal notranslate"><span class="pre">Dev1</span></code>, <code class="docutils literal notranslate"><span class="pre">Dev2</span></code>, etc. This name must correspond with the pinouts provided in the
+configuration file.</p></li>
+<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">master_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">trigger_source</span></code> with a direct wire,
+commonly <code class="docutils literal notranslate"><span class="pre">PXI6259/port0/line1</span></code> and <code class="docutils literal notranslate"><span class="pre">/PXI6259/PFI0</span></code>. In this example, the default name
+for the device (e.g., <code class="docutils literal notranslate"><span class="pre">Dev1</span></code>) has been changed to <code class="docutils literal notranslate"><span class="pre">PXI6259</span></code>.</p></li>
+<li><p>Connect the <code class="docutils literal notranslate"><span class="pre">camera_trigger_out_line</span></code> to the <code class="docutils literal notranslate"><span class="pre">Ext.</span> <span class="pre">Trigger</span></code> on the camera using
+the <code class="docutils literal notranslate"><span class="pre">CTR0Out</span></code> pin.</p></li>
+<li><p>These values must precisely match those in the configuration file. An example is provided below:</p></li>
+</ul>
+<details class="summary-configuration-file">
+<summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">daq</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+<span class="w">        </span><span class="nt">sample_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">        </span><span class="nt">master_trigger_out_line</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PXI6259/port0/line1</span>
+<span class="w">        </span><span class="nt">camera_trigger_out_line</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PXI6259/ctr0</span>
+<span class="w">        </span><span class="nt">trigger_source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PXI6259/PFIO</span>
+<span class="w">        </span><span class="nt">laser_port_switcher</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PXI6733/port0/line0</span>
+<span class="w">        </span><span class="nt">laser_switch_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+<hr class="docutils" />
+<p><strong>navigate</strong> has been tested with the following NI-based cards:</p>
+<section id="pcie-pxie-6738">
+<h3>PCIe/PXIe-6738<a class="headerlink" href="#pcie-pxie-6738" title="Permalink to this heading"></a></h3>
+<p>The PCIe-6738 can only create one software-timed analog task for every four channels.
+As such, the lasers much be attached to analog output ports outside of the banks (shown as solid lines in the device pinout) used
+by the galvo/remote focus units. For example, if you use ao0, ao2, and ao6 for the
+remote focus, galvo, and galvo stage, the lasers should be connected to ao8, ao9, and
+ao10. In such a configuration, they will not compete with the other analog output
+ports. Since only one task will be created created on the ao8, ao9, ao10 bank at a time
+(only one laser is on at a time), only one laser can be on at a time. If we wanted to
+turn lasers on simultaneously, we could distribute the lasers across independent banks
+(e.g. ao8, ao14, ao19).</p>
+<details class="summary-device-pinout">
+<summary>Device Pinout</summary><img alt="../../_images/6738_pinout.png" src="../../_images/6738_pinout.png" />
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="pcie-pxie-6259">
+<h3>PCIe/PXIe-6259<a class="headerlink" href="#pcie-pxie-6259" title="Permalink to this heading"></a></h3>
+<p>The PXI-6259 can create one software-timed analog task per channel. As such, the
+galvo/remote focus/lasers can be attached to any of the analog output ports. The 6259 has
+two connectors, and it is important to make sure that the analog and digital ports that you
+are using are connected to the correct connector. For example, if you are using <code class="docutils literal notranslate"><span class="pre">ao0</span></code>, this is
+located on <code class="docutils literal notranslate"><span class="pre">connector</span> <span class="pre">0</span></code>.</p>
+<details class="summary-device-pinout">
+<summary>Device Pinout</summary><img alt="../../_images/6259_pinout.png" src="../../_images/6259_pinout.png" />
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="pcie-pxie-6723">
+<h3>PCIe/PXIe-6723<a class="headerlink" href="#pcie-pxie-6723" title="Permalink to this heading"></a></h3>
+<p>The PXI-6723 can also create one software-timed analog task per channel. As such, the analog
+outputs can be wired up as is most convenient.</p>
+<details class="summary-device-pinout">
+<summary>Device Pinout</summary><img alt="../../_images/6723_pinout.png" src="../../_images/6723_pinout.png" />
+</details></section>
+</section>
+<hr class="docutils" />
+<section id="synthetic-data-acquisition-card">
+<h2>Synthetic Data Acquisition Card<a class="headerlink" href="#synthetic-data-acquisition-card" title="Permalink to this heading"></a></h2>
+<p>If no data acquisition card is present, one must configure the software to use a synthetic
+data acquisition card.</p>
+<details class="summary-configuration-file">
+<summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">daq</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+<span class="w">        </span><span class="nt">sample_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">        </span><span class="nt">master_trigger_out_line</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PXI6259/port0/line1</span>
+<span class="w">        </span><span class="nt">camera_trigger_out_line</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PXI6259/ctr0</span>
+<span class="w">        </span><span class="nt">trigger_source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PXI6259/PFIO</span>
+<span class="w">        </span><span class="nt">laser_port_switcher</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PXI6733/port0/line0</span>
+<span class="w">        </span><span class="nt">laser_switch_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hardware_home.html" class="btn btn-neutral float-left" title="Supported Hardware" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="camera.html" class="btn btn-neutral float-right" title="Cameras" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -95,6 +95,7 @@ first establish communication with the device using `ASI provided software <http
               flip_z: False
               flip_f: False
 
+-----------------
 
 MFC2000
 ~~~~~~~
@@ -146,6 +147,7 @@ MFC2000
 
 |
 
+-----------------
 
 MS2000
 ~~~~~~~
@@ -264,6 +266,8 @@ the software is restarted, it should work.
 
 |
 
+-----------------
+
 Physik Instrumente
 ------------------
 
@@ -291,6 +295,8 @@ or on a label on the side of your stage.
     PI L-509.20DG10 has a unidirectional repeatability of 100 nm, bidirectional
     repeatability of 2 microns, and a minimum incremental motion of 100 nm.
     This is potentially too coarse.
+
+-----------------
 
 C-884
 ~~~~~
@@ -340,6 +346,8 @@ C-884
               flip_f: False
 
 |
+
+-----------------
 
 E-709
 ~~~~~
@@ -449,6 +457,7 @@ positioning.
 
 |
 
+-----------------
 
 KST101
 ~~~~~~

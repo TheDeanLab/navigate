@@ -65,6 +65,8 @@ The `BLINK <https://www.thorlabs.com/thorproduct.cfm?partnumber=BLINK>`_ and the
 `Optotune Focus Tunable Lens <https://www.optotune.com/tunable-lenses>`_ are
 controlled with an analog signal from the DAQ.
 
+-----------------
+
 Thorlabs BLINK
 ~~~~~~~~~~~~~~
 The BLINK is a voice coil that is
@@ -88,6 +90,8 @@ voltage outside of its operating range.
                 baudrate: 9600
 
 |
+
+-----------------
 
 Optotune Focus Tunable Lens
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

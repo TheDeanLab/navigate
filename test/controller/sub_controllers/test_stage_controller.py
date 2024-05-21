@@ -73,7 +73,7 @@ def test_set_position(stage_controller):
     }
     stage_controller.set_position(position)
     for axis in position.keys():
-        assert stage_controller.widget_vals[axis].get() == position[axis]
+        assert float(stage_controller.widget_vals[axis].get()) == position[axis]
         assert widgets[axis].widget.trigger_focusout_validation.called
         assert stage_controller.stage_setting_dict[axis] == position.get(axis, 0)
     stage_controller.show_verbose_info.assert_has_calls([call("Stage position changed"), call("Set stage position")])
@@ -95,7 +95,7 @@ def test_set_position_silent(stage_controller):
     }
     stage_controller.set_position_silent(position)
     for axis in position.keys():
-        assert stage_controller.widget_vals[axis].get() == position[axis]
+        assert float(stage_controller.widget_vals[axis].get()) == position[axis]
         widgets[axis].widget.trigger_focusout_validation.assert_called_once()
         assert stage_controller.stage_setting_dict[axis] == position.get(axis, 0)
     stage_controller.show_verbose_info.assert_has_calls([call("Set stage position")])

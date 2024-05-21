@@ -398,7 +398,7 @@ class StageController(GUIController):
             to move."""
             stage_direction = -1 if self.flip_flags[axis] else 1
             try:
-                temp = position_val.get() + step_val.get() * stage_direction
+                temp = float(position_val.get()) + step_val.get() * stage_direction
             except tk._tkinter.TclError:
                 return
             if self.stage_limits is True:
@@ -407,7 +407,7 @@ class StageController(GUIController):
                 elif temp < self.position_min[axis]:
                     temp = self.position_min[axis]
             # guarantee stage won't move out of limits
-            if position_val.get() != temp:
+            if float(position_val.get()) != temp:
                 position_val.set(temp)
                 self.position_callback(axis)()
 
@@ -439,7 +439,7 @@ class StageController(GUIController):
             to move."""
             stage_direction = -1 if self.flip_flags[axis] else 1
             try:
-                temp = position_val.get() - step_val.get() * stage_direction
+                temp = float(position_val.get()) - step_val.get() * stage_direction
             except tk._tkinter.TclError:
                 return
             if self.stage_limits is True:
@@ -448,7 +448,7 @@ class StageController(GUIController):
                 elif temp > self.position_max[axis]:
                     temp = self.position_max[axis]
             # guarantee stage won't move out of limits
-            if position_val.get() != temp:
+            if float(position_val.get()) != temp:
                 position_val.set(temp)
                 self.position_callback(axis)()
 
@@ -558,7 +558,7 @@ class StageController(GUIController):
                 self.view.after_cancel(self.event_id[axis])
             # if position is not a number, then do not move stage
             try:
-                position = position_var.get()
+                position = float(position_var.get())
                 if self.stage_limits:
                     widget.trigger_focusout_validation()
                     # if position is not inside limits do not move stage

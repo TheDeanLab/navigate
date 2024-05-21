@@ -337,11 +337,11 @@ class StageController(GUIController):
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
         """
-        self.unbind_position_callbacks()
+        # self.unbind_position_callbacks()
 
         self.set_position(position)
 
-        self.bind_position_callbacks()
+        # self.bind_position_callbacks()
 
     def get_position(self):
         """This function returns current position from the view.
@@ -446,6 +446,7 @@ class StageController(GUIController):
             # guarantee stage won't move out of limits
             if position_val.get() != temp:
                 position_val.set(temp)
+                self.position_callback(axis)()
 
         return handler
 
@@ -468,6 +469,7 @@ class StageController(GUIController):
 
         def handler():
             position_val.set(0)
+            self.position_callback(axis)()
 
         return handler
 
@@ -485,6 +487,8 @@ class StageController(GUIController):
         def handler():
             x_val.set(0)
             y_val.set(0)
+            self.position_callback("x")()
+            self.position_callback("y")()
 
         return handler
 

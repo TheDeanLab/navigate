@@ -127,6 +127,11 @@ specifies joystick-controlled axes.
             theta_offset: 0
             f_offset: 0
 
+            flip_x: False
+            flip_y: False
+            flip_z: False
+            flip_f: False
+
 
 
 First, we set the axes controlled by each piece of hardware and a mapping from the
@@ -140,11 +145,26 @@ that axes should be defined as a ``SyntheticStage``, as shown above for ``Theta`
 Below this, we specify that only ``X``, ``Y`` and ``Z`` axes may be controlled by a
 joystick and we set the stage bounds for each of the axes.
 
-Finally, we set the offset for each stage axis. This is an offset relative to other
+Below this, we set the minimum and maximum values for each axis. This can be used to
+set boundaries that prevent the stage from crashing into the sides of a chamber.
+
+Below this, we set the offset for each stage axis. This is an offset relative to other
 microscopes (e.g. ``microscope2``) specified in ``configuration.yaml``. In this case,
 ``microscope1`` is the reference microscope. Additional microscopes may ask the stage
 to move to a different offset in order to observe the sample at the same position as
 ``microscope1``.
+
+Finally, we set the flip flags. These are important for getting
+:ref:`multiposition <user_guide/gui_walkthrough:multiposition>` acquisitions to
+run properly. We set a convention in the software to expect that increasing value along
+an axis brings the sample further into our field of view. That is, increasing the
+x-axis position should bring the sample further to the right in the frame (in the case
+:ref:`Flip XY <user_guide/gui_walkthrough:LUT>` is toggled on) and increasing the
+y-axis position should bring the sample down. Increasing the z-position should bring
+the sample closer to the objective. If the stage behaves the opposite of any of these
+ways, it is prudent to set the flip flag. If set properly, the calculations for moving
+through multiple positions will be performed correctly. These only need to be
+configured once when setting up the microscope.
 
 -----------------
 

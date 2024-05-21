@@ -21,7 +21,7 @@ microscopes:
         serial_number: 302153
       flip_x: True
       flip_y: False
-      defect_correct_mode: 1.0
+      defect_correct_mode: 2.0
       delay: 20
     remote_focus_device:
       hardware:

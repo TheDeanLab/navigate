@@ -19,7 +19,7 @@ microscopes:
       hardware:
         type: HamamatsuOrca
         serial_number: 003209
-      defect_correct_mode: 1.0 #2.0
+      defect_correct_mode: 2.0 #2.0
       delay: 10 #ms
       settle_down: 0.0 #ms
       flip_x: True

@@ -94,16 +94,15 @@ specifies joystick-controlled axes.
     microscopes:
         microscope1:
             stage:
-            hardware:
-                -
+                hardware:
+                  -
                     name: stage
                     type: ASI
                     serial_number: 123456789
                     axes: [x, y, z, f] # Software
                     axes_mapping: [M, Y, X, Z] # M Shear axis mapping
 
-
-                -
+                  -
                     name: stage
                     type: SyntheticStage
                     serial_number: 987654321

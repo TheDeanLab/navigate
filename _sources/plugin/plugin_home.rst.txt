@@ -172,7 +172,7 @@ A function to load the device connection should be given,
 
 .. code-block:: python
 
-    def load_device(configuration, is_synthetic=False):
+    def load_device(hardware_configuration, is_synthetic=False):
         # ...
         return device_connection
 

@@ -288,7 +288,7 @@ class StageController(GUIController):
         if not self.position_callbacks_bound:
             for axis in ["x", "y", "z", "theta", "f"]:
                 # add event bind to position entry variables
-                widgets[axis].bind("<FocusOut>", self.position_callback(axis))
+                widgets[axis].widget.bind("<FocusOut>", self.position_callback(axis))
                 # cbname = self.widget_vals[axis].trace_add(
                 #     "write", self.position_callback(axis)
                 # )
@@ -320,13 +320,11 @@ class StageController(GUIController):
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
         """
-        widgets = self.view.get_widgets()
         for axis in ["x", "y", "z", "theta", "f"]:
-            self.widget_vals[axis].set(position.get(axis, 0))
-            # validate position value if set through variable
-            if self.stage_limits:
-                widgets[axis].widget.trigger_focusout_validation()
-            self.stage_setting_dict[axis] = position.get(axis, 0)
+            if axis not in position:
+                continue
+            self.widget_vals[axis].set(position[axis])
+            self.position_callback(axis)()
         self.show_verbose_info("Set stage position")
 
     def set_position_silent(self, position):
@@ -337,11 +335,17 @@ class StageController(GUIController):
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
         """
-        # self.unbind_position_callbacks()
+        widgets = self.view.get_widgets()
+        for axis in ["x", "y", "z", "theta", "f"]:
+            if axis not in position:
+                continue
+            self.widget_vals[axis].set(position[axis])
+            # validate position value if set through variable
+            if self.stage_limits:
+                widgets[axis].widget.trigger_focusout_validation()
+            self.stage_setting_dict[axis] = position.get(axis, 0)
+        self.show_verbose_info("Set stage position")
 
-        self.set_position(position)
-
-        # self.bind_position_callbacks()
 
     def get_position(self):
         """This function returns current position from the view.

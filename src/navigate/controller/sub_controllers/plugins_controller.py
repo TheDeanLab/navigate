@@ -369,7 +369,7 @@ class UninstallPluginController(GUIController):
             save_yaml_file(
                 self.plugin_config_path, self.plugin_config, "plugins_config.yml"
             )
-            tk.messagebox.showwarning(
+            messagebox.showwarning(
                 title="Navigate",
                 message="Plugins are uninstalled! Please restart Navigate!",
             )

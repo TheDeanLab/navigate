@@ -95,10 +95,11 @@ class PluginsController:
         plugins_config_path = os.path.join(
             get_navigate_path(), "config", "plugins_config.yml"
         )
-        if not os.path.exists(plugins_config_path):
+        plugins_config = load_yaml_file(plugins_config_path)
+        if plugins_config is None:
+            plugins_config = {}
             save_yaml_file(get_navigate_path(), {}, "plugins_config.yml")
         else:
-            plugins_config = load_yaml_file(plugins_config_path)
             for plugin_name, plugin_path in plugins_config.items():
                 if plugin_path and os.path.exists(plugin_path):
                     installed_plugins[plugin_name] = plugin_path

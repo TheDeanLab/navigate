@@ -676,9 +676,9 @@ def verify_experiment_config(manager, configuration):
             try:
                 for j in range(5):
                     float(position[j])
-            except ValueError:
+            except (ValueError, KeyError):
                 position_ids.append(i)
-                break
+                
     for idx in position_ids[::-1]:
         del multipositions[idx]
     if len(multipositions) < 1:

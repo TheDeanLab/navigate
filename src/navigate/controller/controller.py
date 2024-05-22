@@ -453,12 +453,7 @@ class Controller:
 
         # update multi-positions
         positions = self.multiposition_tab_controller.get_positions()
-        update_config_dict(
-            self.manager,
-            self.configuration["experiment"],
-            "MultiPositions",
-            positions,
-        )
+        self.configuration["experiment"]["MultiPositions"] = positions
         self.configuration["experiment"]["MicroscopeState"][
             "multiposition_count"
         ] = len(positions)

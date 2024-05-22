@@ -682,13 +682,8 @@ def verify_experiment_config(manager, configuration):
     for idx in position_ids[::-1]:
         del multipositions[idx]
     if len(multipositions) < 1:
-        multipositions.append(None)
-        update_config_dict(
-            manager,
-            multipositions,
-            0,
-            [10.0, 10.0, 10.0, 10.0, 10.0],
-        )
+        multipositions.append([10.0, 10.0, 10.0, 10.0, 10.0])
+
     microscope_setting_dict["multiposition_count"] = len(multipositions)
 
 

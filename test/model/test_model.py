@@ -219,7 +219,7 @@ def test_multiposition_acquisition(model):
         model.__test_manager,  # noqa
         model.configuration["experiment"],
         "MultiPositions",
-        [{"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}],
+        [[10.0, 10.0, 10.0, 10.0, 10.0]],
     )
     model.run_command("acquire")
 

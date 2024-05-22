@@ -115,7 +115,7 @@ class Microscope:
             return
 
         device_ref_dict = {
-            "camera": ["type", "serial_number"],
+            "camera": ["serial_number"],
             "filter_wheel": ["type"],
             "zoom": ["type", "servo_id"],
             "shutter": ["type", "channel"],

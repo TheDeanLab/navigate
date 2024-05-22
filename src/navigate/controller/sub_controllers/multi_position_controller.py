@@ -110,8 +110,8 @@ class MultiPositionController(GUIController):
         axis_dict = {"x": "X", "y": "Y", "z": "Z", "theta": "R", "f": "F"}
         data = {}
 
-        for name in axis_dict:
-            data[axis_dict[name]] = list(pos[name] for pos in positions)
+        for i, name in enumerate(axis_dict.keys()):
+            data[axis_dict[name]] = list(pos[i] for pos in positions)
         self.table.model.df = pd.DataFrame(data)
         self.table.redraw()
         self.show_verbose_info("loaded new positions")
@@ -121,8 +121,8 @@ class MultiPositionController(GUIController):
 
         Returns
         -------
-        dict
-            positions in the format of {index: {axis: value}}
+        list
+            positions in the format of [[x, y, z, theta, f], ]
 
         Example
         -------
@@ -130,19 +130,23 @@ class MultiPositionController(GUIController):
         """
         axis_dict = {"X": "x", "Y": "y", "Z": "z", "R": "theta", "F": "f"}
         positions = []
+        print("*** get positions!")
         rows = self.table.model.df.shape[0]
+        print("*** row count:", rows)
         for i in range(rows):
             temp = list(self.table.model.df.iloc[i])
+            print("*** multiposition table:", temp)
             if (
                 len(
                     list(filter(lambda v: type(v) == float and not math.isnan(v), temp))
                 )
                 == 5
             ):
-                temp = dict(self.table.model.df.iloc[i])
-                positions.append({})
-                for k in axis_dict:
-                    positions[i][axis_dict[k]] = temp[k]
+                # temp = dict(self.table.model.df.iloc[i])
+                # positions.append({})
+                # for k in axis_dict:
+                #     positions[i][axis_dict[k]] = temp[k]
+                positions.append(temp)
         return positions
 
     def handle_double_click(self, event):

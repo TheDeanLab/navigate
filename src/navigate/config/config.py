@@ -673,9 +673,9 @@ def verify_experiment_config(manager, configuration):
     position_ids = []
     multipositions = configuration["experiment"]["MultiPositions"]
     for i, position in enumerate(multipositions):
-        for axis in ["x", "y", "z", "theta", "f"]:
             try:
-                position[axis] = float(position[axis])
+                for j in range(5):
+                    float(position[j])
             except ValueError:
                 position_ids.append(i)
                 break
@@ -687,7 +687,7 @@ def verify_experiment_config(manager, configuration):
             manager,
             multipositions,
             0,
-            {"x": 10.0, "y": 10.0, "z": 10.0, "f": 10.0, "theta": 10.0},
+            [10.0, 10.0, 10.0, 10.0, 10.0],
         )
     microscope_setting_dict["multiposition_count"] = len(multipositions)
 

@@ -96,15 +96,15 @@ class MultiPositionController(GUIController):
 
         Parameters
         ----------
-        positions : dict
+        positions : [[]]
             positions to be set
 
         Example
         -------
-        >>>    positions = {
-        >>>    0: {'x': 0, 'y': 0, 'z': 0, 'theta': 0, 'f': 0},
-        >>>    1: {'x': 1, 'y': 1, 'z': 1, 'theta': 1, 'f': 1},
-        >>>    2: {'x': 2, 'y': 2, 'z': 2, 'theta': 2, 'f': 2}}
+        >>>    positions = [
+        >>>    [0, 0, 0, 0, 0],
+        >>>    [1, 1, 1, 1, 1],
+        >>>    [2, 2, 2, 2, 2]]
         >>>    set_positions(positions)
         """
         axis_dict = {"x": "X", "y": "Y", "z": "Z", "theta": "R", "f": "F"}
@@ -128,24 +128,16 @@ class MultiPositionController(GUIController):
         -------
         >>> get_positions()
         """
-        axis_dict = {"X": "x", "Y": "y", "Z": "z", "R": "theta", "F": "f"}
         positions = []
-        print("*** get positions!")
         rows = self.table.model.df.shape[0]
-        print("*** row count:", rows)
         for i in range(rows):
             temp = list(self.table.model.df.iloc[i])
-            print("*** multiposition table:", temp)
             if (
                 len(
                     list(filter(lambda v: type(v) == float and not math.isnan(v), temp))
                 )
                 == 5
             ):
-                # temp = dict(self.table.model.df.iloc[i])
-                # positions.append({})
-                # for k in axis_dict:
-                #     positions[i][axis_dict[k]] = temp[k]
                 positions.append(temp)
         return positions
 

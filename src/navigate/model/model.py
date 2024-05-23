@@ -1424,11 +1424,9 @@ class Model:
             os.makedirs(feature_lists_path)
             return
         # get __sequence.yml
-        if not os.path.exists(f"{feature_lists_path}/__sequence.yml"):
+        feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+        if feature_records is None:
             feature_records = []
-        else:
-            feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
-
         # add non added feature lists
         feature_list_files = [
             temp
@@ -1440,6 +1438,8 @@ class Model:
             if item == "__sequence.yml":
                 continue
             temp = load_yaml_file(f"{feature_lists_path}/{item}")
+            if temp is None:
+                continue
             add_flag = True
             for feature in feature_records:
                 if feature["feature_list_name"] == temp["feature_list_name"]:
@@ -1460,6 +1460,9 @@ class Model:
                 del feature_records[i]
                 continue
             item = load_yaml_file(f"{feature_lists_path}/{temp['yaml_file_name']}")
+            if item is None:
+                i += 1
+                continue
 
             if item["module_name"]:
                 try:

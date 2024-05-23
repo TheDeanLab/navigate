@@ -415,6 +415,9 @@ class Controller:
         )
         self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
+        self.waveform_tab_controller.set_waveform_template(
+            self.configuration["experiment"]["MicroscopeState"]["waveform_template"]
+        )
 
         # autofocus popup
         if hasattr(self, "af_popup_controller"):

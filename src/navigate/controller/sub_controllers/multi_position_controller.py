@@ -96,22 +96,22 @@ class MultiPositionController(GUIController):
 
         Parameters
         ----------
-        positions : dict
+        positions : [[]]
             positions to be set
 
         Example
         -------
-        >>>    positions = {
-        >>>    0: {'x': 0, 'y': 0, 'z': 0, 'theta': 0, 'f': 0},
-        >>>    1: {'x': 1, 'y': 1, 'z': 1, 'theta': 1, 'f': 1},
-        >>>    2: {'x': 2, 'y': 2, 'z': 2, 'theta': 2, 'f': 2}}
+        >>>    positions = [
+        >>>    [0, 0, 0, 0, 0],
+        >>>    [1, 1, 1, 1, 1],
+        >>>    [2, 2, 2, 2, 2]]
         >>>    set_positions(positions)
         """
         axis_dict = {"x": "X", "y": "Y", "z": "Z", "theta": "R", "f": "F"}
         data = {}
 
-        for name in axis_dict:
-            data[axis_dict[name]] = list(pos[name] for pos in positions)
+        for i, name in enumerate(axis_dict.keys()):
+            data[axis_dict[name]] = list(pos[i] for pos in positions)
         self.table.model.df = pd.DataFrame(data)
         self.table.redraw()
         self.show_verbose_info("loaded new positions")
@@ -121,14 +121,13 @@ class MultiPositionController(GUIController):
 
         Returns
         -------
-        dict
-            positions in the format of {index: {axis: value}}
+        list
+            positions in the format of [[x, y, z, theta, f], ]
 
         Example
         -------
         >>> get_positions()
         """
-        axis_dict = {"X": "x", "Y": "y", "Z": "z", "R": "theta", "F": "f"}
         positions = []
         rows = self.table.model.df.shape[0]
         for i in range(rows):
@@ -139,10 +138,7 @@ class MultiPositionController(GUIController):
                 )
                 == 5
             ):
-                temp = dict(self.table.model.df.iloc[i])
-                positions.append({})
-                for k in axis_dict:
-                    positions[i][axis_dict[k]] = temp[k]
+                positions.append(temp)
         return positions
 
     def handle_double_click(self, event):

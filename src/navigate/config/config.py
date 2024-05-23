@@ -673,22 +673,17 @@ def verify_experiment_config(manager, configuration):
     position_ids = []
     multipositions = configuration["experiment"]["MultiPositions"]
     for i, position in enumerate(multipositions):
-        for axis in ["x", "y", "z", "theta", "f"]:
             try:
-                position[axis] = float(position[axis])
-            except ValueError:
+                for j in range(5):
+                    float(position[j])
+            except (ValueError, KeyError):
                 position_ids.append(i)
-                break
+                
     for idx in position_ids[::-1]:
         del multipositions[idx]
     if len(multipositions) < 1:
-        multipositions.append(None)
-        update_config_dict(
-            manager,
-            multipositions,
-            0,
-            {"x": 10.0, "y": 10.0, "z": 10.0, "f": 10.0, "theta": 10.0},
-        )
+        multipositions.append([10.0, 10.0, 10.0, 10.0, 10.0])
+
     microscope_setting_dict["multiposition_count"] = len(multipositions)
 
 

@@ -219,7 +219,14 @@ def test_multiposition_acquisition(model):
         model.__test_manager,  # noqa
         model.configuration["experiment"],
         "MultiPositions",
-        [{"x": 10.0, "y": 10.0, "z": 10.0, "theta": 10.0, "f": 10.0}],
+        [[10.0, 10.0, 10.0, 10.0, 10.0]],
+    )
+    model.configuration["experiment"]["MicroscopeState"]["image_mode"] = "z-stack"
+    model.configuration["experiment"]["MicroscopeState"]["number_z_steps"] = 10
+
+    model.configuration["experiment"]["MicroscopeState"]["step_size"] = 5.0
+    model.configuration["experiment"]["MicroscopeState"]["end_position"] = (
+        model.configuration["experiment"]["MicroscopeState"]["start_position"] + 15.0
     )
     model.run_command("acquire")
 

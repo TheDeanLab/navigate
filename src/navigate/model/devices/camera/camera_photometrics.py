@@ -274,6 +274,7 @@ class PhotometricsBase(CameraBase):
         """
         # todo calculate line delay from scandelay
         self._scandelay = line_interval_time
+        self.camera_controller.prog_scan_line_delay = line_interval_time
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width

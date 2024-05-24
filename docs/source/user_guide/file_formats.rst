@@ -10,8 +10,8 @@ as Zarr, N5, and HDF5, including OME-Zarr, cater to the needs of large-scale,
 multi-dimensional datasets by enabling efficient data storage, access, and processing at
 cloud-compute scales.
 
-To enable ambitious imaging projects, **navigate** **navigate** comes pre-packaged with TIFF, OME-TIFF, OME-Zarr, HDF5/N5
-(`BigDataViewer <https://imagej.net/plugins/bdv/>`_) file saving formats.
+To enable ambitious imaging projects, **navigate** comes pre-packaged with TIFF, OME-TIFF, OME-Zarr,
+and HDF5/N5 (`BigDataViewer <https://imagej.net/plugins/bdv/>`_) file saving formats.
 OME, or Open Microscopy Environment, is a standardized metadata model that ensures
 that imaging data can be accurately understood, shared, and analyzed across different software
 platforms and research groups.
@@ -63,7 +63,7 @@ OME-TIFF, H5, N5, and OME-Zarr formats across image resolutions of 512x512,
 1024x1024, and 2048x2048 under two conditions: (A) capturing 1000 single-plane
 images and (B) acquiring a single z-stack composed of 1000 planes. All times
 are measured in milliseconds. Results are presented below. For z-stack imaging, TIFF
-and OME-TIFF formats achieved write speeds of up to approximately 400 Hz for a 2048x2048 camera
+and OME-TIFF formats achieved write speeds of up to approximately 300 Hz for a 2048x2048 camera
 resolution, surpassing the operational speeds of most contemporary sCMOS cameras.
 The Big-TIFF variant was used for both TIFF and OME-TIFF formats to accommodate the
 large file sizes.
@@ -81,11 +81,11 @@ milliseconds.
    +-------------+---------+----------+-------+-------+---------+
    |             | TIFF    | OME-TIFF | H5    | N5    | OME-Zarr|
    +=============+=========+==========+=======+=======+=========+
-   | 512x512     | 0.83    | 10.0     | 1.69  | 3.02  | 1.09    |
+   | 512x512     | 1.19    | 29.24    | 3.17  | 9.00  | 5.30    |
    +-------------+---------+----------+-------+-------+---------+
-   | 1024x1024   | 1.55    | 10.4     | 6.46  | 5.70  | 2.27    |
+   | 1024x1024   | 1.84    | 36.69    | 18.59 | 14.55 | 8.81    |
    +-------------+---------+----------+-------+-------+---------+
-   | 2048x2048   | 11.2    | 38.6     | 28.8  | 19.6  | 11.6    |
+   | 2048x2048   | 5.55    | 44.65    | 84.18 | 38.60 | 25.02   |
    +-------------+---------+----------+-------+-------+---------+
 
 Z-Stack Imaging
@@ -100,11 +100,11 @@ Z-Stack Imaging
    +--------------+---------+----------+-------+-------+---------+
    |              | TIFF    | OME-TIFF | H5    | N5    | OME-Zarr|
    +==============+=========+==========+=======+=======+=========+
-   | 512x512      | 0.14    | 0.13     | 2.64  | 1.58  | 1.05    |
+   | 512x512      | 0.28    | 0.25     | 7.30  | 5.10  | 3.29    |
    +--------------+---------+----------+-------+-------+---------+
-   | 1024x1024    | 0.49    | 0.48     | 10.6  | 5.08  | 4.06    |
+   | 1024x1024    | 0.89    | 0.88     | 29.15 | 12.44 | 8.26    |
    +--------------+---------+----------+-------+-------+---------+
-   | 2048x2048    | 1.92    | 1.86     | 52.7  | 13.90 | 8.50    |
+   | 2048x2048    | 4.12    | 3.30     | 135.74| 37.09 | 24.83   |
    +--------------+---------+----------+-------+-------+---------+
 
 Additional Sources of Overhead
@@ -118,13 +118,8 @@ low and stable across most of the acquisition.
 Computer Specifications for Benchmarks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The computer specifications that the benchmarks were performed on are as follows:
+The computer specifications that the benchmarks were performed on are as follows.
 
--   Architecture: x86_64
--   CPU operational modes: 32-bit, 64-bit
--   Number of CPUs: 72
--   Threads per core: 2
--   Cores per socket: 18
--   CPU Model: Intel(R) Xeon(R) Gold 6354 CPU @ 3.00GHz
--   CPU Speed: 883.850 MHz
--   Memory: 0.5 TB
+-   CPU: Intel(R) Xeon(R) Silver 4112 CPU @ 2.60GHz
+-   Memory: 88 GB
+-   Hard Drive: Micron 5200 ECO 7680gb SSD

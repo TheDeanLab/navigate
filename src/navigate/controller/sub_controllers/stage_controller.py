@@ -359,7 +359,7 @@ class StageController(GUIController):
         position = {}
         try:
             for axis in ["x", "y", "z", "theta", "f"]:
-                position[axis] = self.widget_vals[axis].get()
+                position[axis] = float(self.widget_vals[axis].get())
                 if self.stage_limits is True:
                     if (
                         position[axis] < self.position_min[axis]

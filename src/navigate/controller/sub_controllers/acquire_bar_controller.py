@@ -246,6 +246,9 @@ class AcquireBarController(GUIController):
             mode = list(reverse_dict.keys())[0]
         self.mode = mode
         self.view.pull_down.set(reverse_dict[mode])
+        self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "image_mode"
+        ] = mode
         self.show_verbose_info("Image mode is set to", mode)
 
     def get_mode(self):

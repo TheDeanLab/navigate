@@ -1213,7 +1213,7 @@ class Controller:
             elif event == "multiposition":
                 # Update the multi-position tab without appending to the list
                 update_table(
-                    table=self.view.settings.multiposition_tab.multipoint_list.get_table(),
+                    table=self.multiposition_tab_controller.table,
                     pos=value,
                 )
                 self.channels_tab_controller.is_multiposition_val.set(True)

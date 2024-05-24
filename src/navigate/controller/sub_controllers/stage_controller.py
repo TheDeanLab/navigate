@@ -359,7 +359,7 @@ class StageController(GUIController):
         position = {}
         try:
             for axis in ["x", "y", "z", "theta", "f"]:
-                position[axis] = self.widget_vals[axis].get()
+                position[axis] = float(self.widget_vals[axis].get())
                 if self.stage_limits is True:
                     if (
                         position[axis] < self.position_min[axis]
@@ -554,6 +554,9 @@ class StageController(GUIController):
 
         def handler(*args):
             """Callback functions bind to position variables."""
+            # check if focus on another window
+            if not self.view.focus_get():
+                return
             if self.event_id[axis]:
                 self.view.after_cancel(self.event_id[axis])
             # if position is not a number, then do not move stage

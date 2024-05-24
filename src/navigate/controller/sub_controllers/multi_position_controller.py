@@ -134,7 +134,7 @@ class MultiPositionController(GUIController):
             temp = list(self.table.model.df.iloc[i])
             if (
                 len(
-                    list(filter(lambda v: type(v) == float and not math.isnan(v), temp))
+                    list(filter(lambda v: type(v) in (float, int) and not math.isnan(v), temp))
                 )
                 == 5
             ):
@@ -211,12 +211,10 @@ class MultiPositionController(GUIController):
             )
             logger.info("The csv file isn't right, it should contain [X, Y, Z, R, F]")
             return
-        model = TableModel(dataframe=df)
-        self.table.updateModel(model)
-        try:
-            self.table.redraw()
-        except KeyError:
-            pass
+        self.table.model.df = df
+        self.table.update_rowcolors()
+        self.table.redraw()
+        self.table.tableChanged()
         self.show_verbose_info("loaded csv file", filename)
 
     def export_positions(self):

@@ -554,6 +554,9 @@ class StageController(GUIController):
 
         def handler(*args):
             """Callback functions bind to position variables."""
+            # check if focus on another window
+            if not self.view.focus_get():
+                return
             if self.event_id[axis]:
                 self.view.after_cancel(self.event_id[axis])
             # if position is not a number, then do not move stage

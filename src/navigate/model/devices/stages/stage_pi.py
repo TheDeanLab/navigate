@@ -249,7 +249,6 @@ class PIStage(StageBase):
 
         if wait_until_done is True:
             return self.wait_on_target(axes=list(pos_dict.keys()))
-
         return True
 
     def stop(self):
@@ -274,7 +273,7 @@ class PIStage(StageBase):
         """
         try:
             self.pi_tools.waitontarget(
-                self.pi_device, axes=axes, timeout=1.75, polldelay=0.01
+                self.pi_device, axes=axes, timeout=10.75, polldelay=0.01
             )
         except GCSError as e:
             print("Wait on target failed")

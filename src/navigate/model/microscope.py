@@ -371,6 +371,8 @@ class Microscope:
         # print(self.stages)
         pos_dict = self.get_stage_position()
         for stage, axes in self.stages_list:
+
+            # x_abs: current x_pos + current_x_offset - former_x_offset
             pos = {
                 axis
                 + "_abs": (

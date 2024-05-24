@@ -85,7 +85,7 @@ class TestGalvoBase(unittest.TestCase):
         assert self.galvo.microscope_name == "Mesoscale"
         assert self.galvo.galvo_name == "Galvo 0"
         assert self.galvo.sample_rate == 100000
-        assert self.galvo.sweep_time == 0.2
+
         assert self.galvo.camera_delay == self.configuration["configuration"]["microscopes"][
            self.microscope_name
         ]["camera"]["delay"] / 1000

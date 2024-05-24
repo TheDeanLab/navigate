@@ -12,7 +12,8 @@ Operating System Compatibility
 
 .. important::
    **navigate** is developed for use on Windows-based systems. This is due to the
-   compatibility of device drivers for various microscope hardware components, such as
+   compatibility of :ref:`device drivers <firmware_overview>` for various microscope
+   hardware components, such as
    cameras, stages, and data acquisition cards, which are predominantly designed for the
    Windows environment.
 
@@ -21,8 +22,8 @@ Operating System Compatibility
    include improper positioning of widgets and problems with resizing the GUI window.
    As such, the use of **navigate** on MacOS is not recommended.
 
-   The software is untested on Linux systems.Users considering the use of **navigate** 
-   software on Linux should proceed with caution and be prepared for potential 
+   The software is untested on Linux systems. Users considering the use of **navigate**
+   software on Linux should proceed with caution and be prepared for potential
    compatibility issues, especially with respect to device drivers.
 
 .. note::
@@ -33,16 +34,16 @@ Hardware Considerations
 -----------------------
 
 **navigate** will run on a mid-range laptop with at least 8 GB of RAM and a processor
-with two cores. Most of its operations are undemanding. Saving data at a reasonable 
-rate, however, will require an SSD. The hardware configuration for an example 
+with two cores. Most of its operations are undemanding. Saving data at a reasonable
+rate, however, will require an SSD. The hardware configuration for an example
 microscope control machine is shown below.
 
 .. important::
    Scientific cameras are capable of rapidly generating large amounts of high-resolution data.
-   As such, the read/write speed of the data storage device is a critical for smooth operation 
+   As such, the read/write speed of the data storage device is a critical for smooth operation
    of the software. For example, for a standard Hamamatsu camera with a 2048 x 2048 sensor,
    operating at 16-bit depth and 20 frames per second, the data save rate is approximately ~167 MB/s.
-   While such capabilities are well within the capabilities of modern SSDs, they are beyond the 
+   While such capabilities are well within the capabilities of modern SSDs, they are beyond the
    capabilities of most HDDs. Therefore, it is recommended to use a fast SSD data saving operations.
 
 
@@ -97,7 +98,7 @@ microscope control machine is shown below.
         - **Interface**: PCI-E x 8
 
     .. note::
-       The specifications listed are based on an example system configuration and can 
+       The specifications listed are based on an example system configuration and can
        be adjusted based on specific needs and availability.
 
 ---------------------
@@ -157,7 +158,7 @@ To install the bleeding edge version of **navigate**, run the following command:
 
 .. note::
 
-    If you are running the software on a computer that is not connected to microscope 
+    If you are running the software on a computer that is not connected to microscope
     hardware, you can add the flag ``-sh`` (``--synthetic-hardware``) to launch the
     program:
 
@@ -175,12 +176,15 @@ Open an ``Anaconda Prompt (Miniconda3)`` and enter the following.
     (base) conda activate navigate
     (navigate) navigate
 
-.. note::
+.. tip::
 
     If you are running Windows, you can create a desktop shortcut to **navigate** by
     right-clicking the Desktop, navigating to New and then Shortcut and entering
     ``%windir%\system32\cmd.exe "/c" C:\path\to\miniconda\Scripts\activate.bat navigate && navigate``
     into the location text box.
+
+    This provides a convenient executable shortcut to launch the software, which is
+    advantageous for users who are not comfortable with the command line.
 
 
 Developer install

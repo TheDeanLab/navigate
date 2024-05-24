@@ -81,12 +81,13 @@ class PluginsModel:
         plugins_config_path = os.path.join(
             get_navigate_path(), "config", "plugins_config.yml"
         )
-        if not os.path.exists(plugins_config_path):
+        plugins_config = load_yaml_file(plugins_config_path)
+        if plugins_config is None:
+            plugins_config = {}
             save_yaml_file(
                 os.path.join(get_navigate_path(), "config"), {}, "plugins_config.yml"
             )
         else:
-            plugins_config = load_yaml_file(plugins_config_path)
             verified_plugins_config = {}
             for plugin_name, plugin_path in plugins_config.items():
                 if not plugin_path:

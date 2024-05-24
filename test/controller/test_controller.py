@@ -1,5 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -48,6 +49,11 @@ def controller(tk_root):
         waveform_templates_path,
         args,
     )
+    # To make sure the testcases won't hang on because of the model.event_queue
+    # The changes here won't affect other testcases,
+    # because the testcases from other files use DummyController and DummyModel instead of this controller fixture
+    controller.model = MagicMock()
+    controller.model.get_offset_variance_maps.return_value = (None, None)
 
     yield controller
 
@@ -89,3 +95,43 @@ def test_prepare_acquire_data(controller):
 def test_execute(controller):
     controller.execute("acquire", "single")
     assert True
+
+
+@pytest.mark.parametrize(
+    "acquisition_mode, sensor_mode, readout_direction, template_name, expected_template_name",
+    [
+        ("live", "Normal", "", "Bidirectional", "Default"),
+        ("z-stack", "Normal", "", "Bidirectional", "Default"),
+        ("customized", "Normal", "", "Bidirectional", "Bidirectional"),
+        ("live", "Light-Sheet", "Top-To-Bottom", "Bidirectional", "Default"),
+        ("live", "Light-Sheet", "Bidirectional", "Bidirectional", "Bidirectional"),
+        ("customized", "Light-Sheet", "Bidirectional", "Bidirectional", "Bidirectional",),
+        ("z-stack", "Light-Sheet", "Bidirectional", "Default", "Bidirectional"),
+        ("z-stack", "Light-Sheet", "Top-To-Bottom", "Default", "Default"),
+    ],
+)
+def test_waveform_template(
+    controller,
+    acquisition_mode,
+    sensor_mode,
+    readout_direction,
+    template_name,
+    expected_template_name,
+):
+    controller.configuration["experiment"]["MicroscopeState"][
+        "waveform_template"
+    ] = template_name
+    controller.configuration["experiment"]["MicroscopeState"][
+        "image_mode"
+    ] = acquisition_mode
+    controller.configuration["experiment"]["CameraParameters"]["number_of_pixels"] = 10
+    controller.populate_experiment_setting(in_initialize=True)
+
+    controller.camera_setting_controller.mode_widgets["Readout"].set(readout_direction)
+    controller.camera_setting_controller.mode_widgets["Sensor"].set(sensor_mode)
+    controller.update_experiment_setting()
+
+    assert (
+        controller.configuration["experiment"]["MicroscopeState"]["waveform_template"]
+        == expected_template_name
+    )

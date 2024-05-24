@@ -115,7 +115,7 @@ class Microscope:
             return
 
         device_ref_dict = {
-            "camera": ["type", "serial_number"],
+            "camera": ["serial_number"],
             "filter_wheel": ["type"],
             "zoom": ["type", "servo_id"],
             "shutter": ["type", "channel"],
@@ -194,12 +194,14 @@ class Microscope:
                     device_plugin_dict = devices_dict.get(device_name, {})
                     try:
                         exec(
-                            f"device_plugin_dict['{device_ref_name}'] = devices_dict['__plugins__']['{device_name}']['load_device'](configuration, is_synthetic)"
+                            f"device_plugin_dict['{device_ref_name}'] = devices_dict['__plugins__']['{device_name}']['load_device']"
+                            f"(configuration['configuration']['microscopes'][self.microscope_name]['{device_name}']['hardware'], is_synthetic)"
                         )
                         devices_dict[device_name] = device_plugin_dict
                         device_connection = device_plugin_dict[device_ref_name]
                         exec(
-                            f"self.plugin_devices['{device_name}'] = devices_dict['__plugins__']['{device_name}']['start_device'](self.microscope_name, device_connection, configuration, is_synthetic)"
+                            f"self.plugin_devices['{device_name}'] = devices_dict['__plugins__']['{device_name}']['start_device']"
+                            f"(self.microscope_name, device_connection, configuration, is_synthetic)"
                         )
                     except RuntimeError:
                         print(

@@ -521,7 +521,7 @@ class PositionFrame(ttk.Labelframe):
                 parent=self,
                 label=entry_labels[i],
                 input_class=ValidatedEntry,
-                input_var=tk.DoubleVar(),
+                input_var=tk.StringVar(),
                 input_args={
                     "required": True,
                     "precision": 0.1,

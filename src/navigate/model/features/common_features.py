@@ -595,7 +595,7 @@ class MoveToNextPositionInMultiPositionTable:
         )
         if self.current_idx >= self.position_count:
             return False
-        pos_dict = self.multiposition_table[self.current_idx]
+        pos_dict = dict(zip(["x", "y", "z", "theta", "f"], self.multiposition_table[self.current_idx]))
         # pause data thread if necessary
         if self.current_idx == 0:
             temp = self.model.get_stage_position()
@@ -606,7 +606,7 @@ class MoveToNextPositionInMultiPositionTable:
                 )
             )
         else:
-            pre_stage_pos = self.multiposition_table[self.current_idx - 1]
+            pre_stage_pos = dict(zip(["x", "y", "z", "theta", "f"], self.multiposition_table[self.current_idx - 1]))
         delta_x = abs(pos_dict["x"] - pre_stage_pos["x"])
         delta_y = abs(pos_dict["y"] - pre_stage_pos["y"])
         delta_z = abs(pos_dict["z"] - pre_stage_pos["z"])
@@ -872,14 +872,15 @@ class ZStackAcquisition:
         #: float: The f position of the channel being acquired in the z-stack
         self.restore_f = pos_dict["f_pos"]
 
+        # position: x, y, z, theta, f
         if bool(microscope_state["is_multiposition"]):
             self.positions = self.model.configuration["experiment"]["MultiPositions"]
         else:
             self.positions = [
-                {
-                    "x": float(pos_dict["x_pos"]),
-                    "y": float(pos_dict["y_pos"]),
-                    "z": float(
+                [
+                    float(pos_dict["x_pos"]),
+                    float(pos_dict["y_pos"]),
+                    float(
                         microscope_state.get(
                             "stack_z_origin",
                             pos_dict["z_pos"],
@@ -887,8 +888,8 @@ class ZStackAcquisition:
                         if not self.get_origin
                         else pos_dict["z_pos"]
                     ),
-                    "theta": float(pos_dict["theta_pos"]),
-                    "f": float(
+                    float(pos_dict["theta_pos"]),
+                    float(
                         microscope_state.get(
                             "stack_focus_origin",
                             pos_dict["f_pos"],
@@ -896,7 +897,7 @@ class ZStackAcquisition:
                         if not self.get_origin
                         else pos_dict["f_pos"]
                     ),
-                }
+                ]
             ]
 
         # Setup next channel down here, to ensure defocus isn't merged into
@@ -910,6 +911,7 @@ class ZStackAcquisition:
             f"{self.start_z_position}"
         )
         self.current_position_idx = 0
+        self.current_position = dict(zip(["x", "y", "z", "theta", "f"], self.positions[0]))
         self.z_position_moved_time = 0
         self.need_to_move_new_position = True
         self.need_to_move_z_position = True
@@ -941,16 +943,20 @@ class ZStackAcquisition:
         if self.model.stop_acquisition:
             return False
         data_thread_is_paused = False
+        
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
 
+            self.pre_position = self.current_position
+            self.current_position = dict(zip(["x", "y", "z", "theta", "f"], self.positions[self.current_position_idx]))
+
             # calculate first z, f position
             self.current_z_position = (
-                self.start_z_position + self.positions[self.current_position_idx]["z"]
+                self.start_z_position + self.current_position["z"]
             )
             self.current_focus_position = (
-                self.start_focus + self.positions[self.current_position_idx]["f"]
+                self.start_focus + self.current_position["f"]
             )
             if self.defocus is not None:
                 self.current_focus_position += self.defocus[
@@ -963,7 +969,7 @@ class ZStackAcquisition:
                 map(
                     lambda ax: (
                         f"{ax}_abs",
-                        self.positions[self.current_position_idx][ax],
+                        self.current_position[ax],
                     ),
                     ["x", "y", "theta"],
                 )
@@ -971,21 +977,21 @@ class ZStackAcquisition:
 
             if self.current_position_idx > 0:
                 delta_x = (
-                    self.positions[self.current_position_idx]["x"]
-                    - self.positions[self.current_position_idx - 1]["x"]
+                    self.current_position["x"]
+                    - self.pre_position["x"]
                 )
                 delta_y = (
-                    self.positions[self.current_position_idx]["y"]
-                    - self.positions[self.current_position_idx - 1]["y"]
+                    self.current_position["y"]
+                    - self.pre_position["y"]
                 )
                 delta_z = (
-                    self.positions[self.current_position_idx]["z"]
-                    - self.positions[self.current_position_idx - 1]["z"]
+                    self.current_position["z"]
+                    - self.pre_position["z"]
                     + self.z_stack_distance
                 )
                 delta_f = (
-                    self.positions[self.current_position_idx]["f"]
-                    - self.positions[self.current_position_idx - 1]["f"]
+                    self.current_position["f"]
+                    - self.pre_position["f"]
                     + self.f_stack_distance
                 )
             else:
@@ -1076,10 +1082,10 @@ class ZStackAcquisition:
             self.z_position_moved_time = 0
             # calculate first z, f position
             self.current_z_position = (
-                self.start_z_position + self.positions[self.current_position_idx]["z"]
+                self.start_z_position + self.current_position["z"]
             )
             self.current_focus_position = (
-                self.start_focus + self.positions[self.current_position_idx]["f"]
+                self.start_focus + self.current_position["f"]
             )
             if (
                 self.z_stack_distance > self.stage_distance_threshold

@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath("../../src"))
 # -- Project information -----------------------------------------------------
 
 project = "navigate"
-copyright = "2023, Dean Lab, UT Southwestern Medical Center"
+copyright = "2024, Dean Lab, UT Southwestern Medical Center"
 author = "Dean Lab, UT Southwestern Medical Center"
 
 # The full version, including alpha/beta/rc tags
@@ -111,17 +111,25 @@ pygments_style = "sphinx"
 
 # -- LaTeX output options ----------------------------------------------------
 
-latex_elements = {'preamble': r'''
+latex_elements = {
+    "preamble": r"""
                   \usepackage[utf8]{inputenc}
                   \usepackage{enumitem}
                   \setlistdepth{99}
                   \DeclareUnicodeCharacter{03BC}{$\mu$}
-                  ''',
-                  'extraclassoptions': 'openany,oneside'}
+                  """,
+    "extraclassoptions": "openany,oneside",
+}
 
 latex_documents = [
-  ('index', 'navigate.tex', 'navigate Documentation',
-   'Dean Lab, UT Southwestern Medical Center', 'manual', True),
+    (
+        "index",
+        "navigate.tex",
+        "navigate Documentation",
+        "Dean Lab, UT Southwestern Medical Center",
+        "manual",
+        True,
+    ),
 ]
 
 latex_domain_indices = False

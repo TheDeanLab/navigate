@@ -1384,26 +1384,22 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
                     camera = plugin_devices["camera"]["load_device"](
                         configuration, id, is_synthetic
                     )
+                else:
+                    raise e
 
             if (not is_synthetic) and device["type"].startswith("Hamamatsu"):
                 camera_serial_number = str(camera._serial_number)
-                device_ref_name = build_ref_name(
-                    "_", device["type"], camera_serial_number
-                )
+                device_ref_name = camera_serial_number
                 # if the serial number has leading zeros,
                 # the yaml reader will convert it to an octal number
                 if camera_serial_number.startswith("0"):
                     try:
                         oct_num = int(camera_serial_number, 8)
-                        devices["camera"][
-                            build_ref_name("_", device["type"], oct_num)
-                        ] = camera
+                        device_ref_name = str(oct_num)
                     except ValueError:
                         pass
             else:
-                device_ref_name = build_ref_name(
-                    "_", device["type"], device["serial_number"]
-                )
+                device_ref_name = str(device["serial_number"])
             devices["camera"][device_ref_name] = camera
 
     # load mirror

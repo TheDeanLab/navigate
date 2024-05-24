@@ -286,19 +286,19 @@ class ChannelSettingController(GUIController):
                 except Exception:
                     setting_dict[widget_name] = 0
                     return False
-                ref_name = (
-                    "exposure_time"
-                    if widget_name == "camera_exposure_time"
-                    else widget_name
-                )
-                setting_range = self.parent_controller.parent_controller.configuration[
-                    "configuration"
-                ]["gui"]["channels"][ref_name]
-                if (
-                    setting_dict[widget_name] < setting_range["min"]
-                    or setting_dict[widget_name] > setting_range["max"]
-                ):
-                    return False
+                # ref_name = (
+                #     "exposure_time"
+                #     if widget_name == "camera_exposure_time"
+                #     else widget_name
+                # )
+                # setting_range = self.parent_controller.parent_controller.configuration[
+                #     "configuration"
+                # ]["gui"]["channels"][ref_name]
+                # if (
+                #     setting_dict[widget_name] < setting_range["min"]
+                #     or setting_dict[widget_name] > setting_range["max"]
+                # ):
+                #     return False
             else:
                 setting_dict[widget_name] = channel_vals[widget_name].get()
 
@@ -429,20 +429,20 @@ class ChannelSettingController(GUIController):
             Warning info
         """
         selected_channel_num = 0
-        setting_range = self.configuration_controller.gui_setting["channels"]
         for channel_key in self.channel_setting_dict.keys():
             setting_dict = self.channel_setting_dict[channel_key]
+            idx = int(channel_key[len("channel_"):]) - 1
             if setting_dict["is_selected"]:
                 selected_channel_num += 1
                 # laser power
-                if setting_dict["laser_power"] < setting_range["laser_power"]["min"]:
+                if setting_dict["laser_power"] < self.view.laserpower_pulldowns[idx]["from"]:
                     return f"Laser power below configured threshold. Please adjust to meet or exceed the specified minimum in the configuration.yaml({setting_range['laser_power']['min']})."
-                elif setting_dict["laser_power"] > setting_range["laser_power"]["max"]:
+                elif setting_dict["laser_power"] > self.view.laserpower_pulldowns[idx]["to"]:
                     return f"Laser power exceeds configured maximum. Please adjust to meet or be below the specified maximum in the configuration.yaml({setting_range['laser_power']['max']})."
                 # exposure time
-                if setting_dict["camera_exposure_time"] < setting_range["exposure_time"]["min"]:
+                if setting_dict["camera_exposure_time"] < self.view.exptime_pulldowns[idx]["from"]:
                     return f"Exposure time below configured threshold.Please adjust to meet or exceed the specified minimum in the configuration.yaml({setting_range['exposure_time']['min']})."
-                elif setting_dict["camera_exposure_time"] > setting_range["exposure_time"]["max"]:
+                elif setting_dict["camera_exposure_time"] > self.view.exptime_pulldowns[idx]["to"]:
                     return f"Exposure time exceeds configured maximum. Please adjust to meet or be below the specified maximum in the configuration.yaml({setting_range['exposure_time']['max']})"
 
         if selected_channel_num == 0:

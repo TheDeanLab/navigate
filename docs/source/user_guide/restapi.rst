@@ -10,3 +10,5 @@ piece of software, but slower than direct access of the data in memory.
 
 An example of using our REST-API to communicate with ilastik, a widely used image segmentation tool,
 is provided in our Case Studies section :doc:`here <case_studies/ilastik_segmentation>`.
+The navigate ilastik Server plugin can be found `here <https://github
+.com/TheDeanLab/navigate-ilastik-server>`_.

@@ -54,9 +54,9 @@ class TestZStack:
         position_list = self.model.configuration["experiment"]["MultiPositions"]
         if len(position_list) < 5:
             for i in range(5):
-                pos = {}
-                for axis in ["x", "y", "z", "theta", "f"]:
-                    pos[axis] = random.randint(1, 10000)
+                pos = [0] * 5
+                for i in range(5):
+                    pos[i] = random.randint(1, 10000)
                 position_list.append(pos)
 
     def get_next_record(self, record_prefix, idx):
@@ -97,13 +97,13 @@ class TestZStack:
         else:
             pos_dict = self.model.configuration["experiment"]["StageParameters"]
             positions = [
-                {
-                    "x": pos_dict["x"],
-                    "y": pos_dict["y"],
-                    "z": self.config.get("stack_z_origin", pos_dict["z"]),
-                    "theta": pos_dict["theta"],
-                    "f": self.config.get("stack_focus_origin", pos_dict["f"]),
-                }
+                [
+                    pos_dict["x"],
+                    pos_dict["y"],
+                    self.config.get("stack_z_origin", pos_dict["z"]),
+                    pos_dict["theta"],
+                    self.config.get("stack_focus_origin", pos_dict["f"]),
+                ]
             ]
 
         z_step = self.config["step_size"]
@@ -141,14 +141,15 @@ class TestZStack:
 
             # x, y, theta
             pos_moved = self.model.signal_records[idx][1][0]
-            for axis in ["x", "y", "theta"]:
-                assert pos[axis] == pos_moved[axis + "_abs"], (
-                    f"should move to {axis}: {pos[axis]}, "
+            for i, axis in [(0,"x"), (1,"y"), (3,"theta")]:
+                assert pos[i] == pos_moved[axis + "_abs"], (
+                    f"should move to {axis}: {pos[i]}, "
                     f"but moved to {pos_moved[axis + '_abs']}"
                 )
 
-            z_pos = pos["z"] + self.config["start_position"]
-            f_pos = pos["f"] + self.config["start_focus"]
+            # (x, y, z, theta, f)
+            z_pos = pos[2] + self.config["start_position"]
+            f_pos = pos[4] + self.config["start_focus"]
 
             if mode == "per_z":
                 f_pos += selected_channels[0]["defocus"]

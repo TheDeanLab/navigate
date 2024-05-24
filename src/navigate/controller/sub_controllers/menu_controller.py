@@ -183,35 +183,35 @@ class MenuController(GUIController):
         # File Menu
         file_menu = {
             self.view.menubar.menu_file: {
-                "New Experiment": [
+                "Load Default Configuration": [
                     "standard",
                     self.new_experiment,
                     "Ctrl+Shift+N",
                     "<Control-N>",
                     "<Control_L-N>",
                 ],
-                "Load Experiment": [
+                "Load Experiment File": [
                     "standard",
                     self.load_experiment,
                     "Ctrl+Shift+O",
                     "<Control-O>",
                     "<Control_L-O>",
                 ],
-                "Save Experiment": [
+                "Save Experiment File": [
                     "standard",
                     self.save_experiment,
                     "Ctrl+Shift+S",
                     "<Control-S>",
                     "<Control_L-S>",
                 ],
-                "Load Waveform Constants": [
+                "Load Waveform Constants File": [
                     "standard",
                     self.load_waveform_constants,
                     None,
                     None,
                     None,
                 ],
-                "Save Waveform Constants": [
+                "Save Waveform Constants File": [
                     "standard",
                     self.save_waveform_constants,
                     None,

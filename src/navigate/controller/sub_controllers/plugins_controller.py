@@ -35,6 +35,7 @@ from pathlib import Path
 import os
 import inspect
 import tkinter as tk
+from tkinter import messagebox
 
 # Third-party imports
 
@@ -94,10 +95,11 @@ class PluginsController:
         plugins_config_path = os.path.join(
             get_navigate_path(), "config", "plugins_config.yml"
         )
-        if not os.path.exists(plugins_config_path):
+        plugins_config = load_yaml_file(plugins_config_path)
+        if plugins_config is None:
+            plugins_config = {}
             save_yaml_file(get_navigate_path(), {}, "plugins_config.yml")
         else:
-            plugins_config = load_yaml_file(plugins_config_path)
             for plugin_name, plugin_path in plugins_config.items():
                 if plugin_path and os.path.exists(plugin_path):
                     installed_plugins[plugin_name] = plugin_path
@@ -135,16 +137,21 @@ class PluginsController:
                     )
                     if plugin_frame_module is None:
                         print(
-                            "Make sure that the plug in frame name is correct! "
-                            f"Plug in {plugin_name} needs to be reinstalled!"
+                            f"Make sure that the plugin frame name {plugin_class_name} is correct! "
+                            f"Plugin {plugin_name} needs to be uninstalled from navigate or reinstalled!"
                         )
-                        return
+                        continue
                     plugin_frame = getattr(
                         plugin_frame_module, f"{plugin_class_name}Frame"
                     )
                     plugin_controller_module = load_module_from_file(
                         f"{plugin_class_name}Controller", controller_file
                     )
+                    if plugin_controller_module is None:
+                        print(
+                            f"Make sure that the plugin controller {plugin_class_name} is correct! "
+                            f"Plugin {plugin_name} needs to be uninstalled from navigate or reinstalled!"
+                        )
                     plugin_controller = getattr(
                         plugin_controller_module, f"{plugin_class_name}Controller"
                     )
@@ -208,13 +215,22 @@ class PluginsController:
         controller: object
             navigate controller
         """
-        plugin_frame = frame(self.view.settings)
-        self.view.settings.add(plugin_frame, text=plugin_name, sticky=tk.NSEW)
-        plugin_controller = controller(plugin_frame, self.parent_controller)
-        controller_name = (
-            "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
-        )
-        self.plugins_dict[controller_name] = plugin_controller
+        try:
+            plugin_frame = frame(self.view.settings)
+            self.view.settings.add(plugin_frame, text=plugin_name, sticky=tk.NSEW)
+            plugin_controller = controller(plugin_frame, self.parent_controller)
+            controller_name = (
+                "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
+            )
+            self.plugins_dict[controller_name] = plugin_controller
+        except:
+            messagebox.showwarning(
+                title="Warning",
+                message=(
+                    f"Plugin {plugin_name} has something went wrong."
+                    f"Please make sure the plugin works correctly or uninstall it!"
+                )
+            )
 
     def build_popup_window(self, plugin_name, frame, controller):
         """Build popup window for a plugin
@@ -264,7 +280,19 @@ class PluginsController:
                 ),
             )
 
-        return func
+        def func_with_wrapper(*args, **kwargs):
+            try:
+                func(*args, **kwargs)
+            except:
+                messagebox.showwarning(
+                    title="Warning",
+                    message=(
+                        f"Plugin {plugin_name} has something went wrong."
+                        f"Please make sure the plugin works correctly or uninstall it from navigate!"
+                    )
+                )
+
+        return func_with_wrapper
 
 
 class UninstallPluginController(GUIController):
@@ -342,7 +370,7 @@ class UninstallPluginController(GUIController):
             save_yaml_file(
                 self.plugin_config_path, self.plugin_config, "plugins_config.yml"
             )
-            tk.messagebox.showwarning(
+            messagebox.showwarning(
                 title="Navigate",
                 message="Plugins are uninstalled! Please restart Navigate!",
             )

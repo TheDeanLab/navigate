@@ -121,14 +121,10 @@ class DAQFilterWheel(FilterWheelBase):
         """
         if self.check_if_filter_in_filter_dictionary(filter_name) is True:
             # get the daq address from config
-            daq_address = self.filter_dictionary[filter_name]
-            
-            self.filter_wheel.create_do_pulse(daq_address, self.wait_until_done_delay)
-               
-            # #  Wheel Position Change Delay
-            # if wait_until_done:
-            #     time.sleep(self.wait_until_done_delay)
-            #     self.filter_wheel.close()
+            self.filter_wheel.send_do_pulse(self.filter_dictionary[filter_name])
+            #  Wheel Position Change Delay
+            if wait_until_done:
+                time.sleep(self.wait_until_done_delay)
             
                 
     def close(self):

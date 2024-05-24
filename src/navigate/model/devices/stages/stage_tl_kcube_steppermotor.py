@@ -169,7 +169,7 @@ class TLKSTStage(StageBase):
         try:
             pos = (
                 self.kst_controller.KST_GetCurrentPosition(self.serial_number)
-                / self.device_unit_scale
+                / float(self.device_unit_scale)
             )
             setattr(self, "f_pos", pos)
         except (

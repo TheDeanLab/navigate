@@ -54,6 +54,7 @@ def controller(tk_root):
     # because the testcases from other files use DummyController
     # and DummyModel instead of this controller fixture
     controller.model = MagicMock()
+    controller.threads_pool = MagicMock()
     controller.model.get_offset_variance_maps.return_value = (None, None)
 
     yield controller
@@ -84,6 +85,8 @@ def test_update_buffer(controller):
     # Confirm that the buffer size has been updated.
     assert controller.img_width == 100
     assert controller.img_height == 100
+
+    assert True
 
 
 def test_change_microscope(controller):
@@ -162,6 +165,8 @@ def test_change_microscope(controller):
             is True
         )
 
+        assert True
+
 
 def test_initialize_cam_view(controller):
     minmax_values = [0, 2**16 - 1]
@@ -178,6 +183,8 @@ def test_initialize_cam_view(controller):
         controller.camera_view_controller.image_metrics["Frames"].get()
         == image_metrics[0]
     )
+
+    assert True
 
 
 def test_populate_experiment_setting(controller):
@@ -198,16 +205,28 @@ def test_prepare_acquire_data(controller):
     #     assert controller.prepare_acquire_data() is False
     #     mock_showerror.assert_called_once()
 
+    assert True
+
 
 def test_set_mode_of_sub(controller):
-    mode = "live"
     controller.acquire_bar_controller.stop_acquire = MagicMock()
+    controller.channels_tab_controller.set_mode = MagicMock()
+    controller.camera_setting_controller.set_mode = MagicMock()
+    controller.waveform_tab_controller.set_mode = MagicMock()
+
+    #
+    mode = "live"
     controller.set_mode_of_sub(mode)
+    assert controller.channels_tab_controller.set_mode.called is True
+    assert controller.camera_setting_controller.set_mode.called is True
+    assert controller.waveform_tab_controller.set_mode.called is True
     assert controller.acquire_bar_controller.stop_acquire.called is False
 
     mode = "stop"
     controller.set_mode_of_sub(mode)
     assert controller.acquire_bar_controller.stop_acquire.called is True
+
+    assert True
 
 
 def test_execute_joystick_toggle(controller):
@@ -221,11 +240,15 @@ def test_execute_joystick_toggle(controller):
     controller.execute("joystick_toggle")
     assert controller.threads_pool.createThread.called is True
 
+    assert True
+
 
 def test_execute_stop_stage(controller):
     controller.threads_pool.createThread = MagicMock()
     controller.execute(command="stop_stage")
     assert controller.threads_pool.createThread.called is True
+
+    assert True
 
 
 def test_execute_move_stage_and_update_info(controller):
@@ -237,6 +260,8 @@ def test_execute_move_stage_and_update_info(controller):
             float(controller.stage_controller.widget_vals[axis].get())
             == positions[axis]
         )
+
+    assert True
 
 
 @pytest.mark.parametrize(
@@ -284,3 +309,5 @@ def test_waveform_template(
         controller.configuration["experiment"]["MicroscopeState"]["waveform_template"]
         == expected_template_name
     )
+
+    assert True

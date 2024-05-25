@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only (subject to the
@@ -104,6 +104,11 @@ class PhotometricsBase(CameraBase):
 
         """
         super().__init__(microscope_name, device_connection, configuration)
+
+        self.camera_parameters["supported_readout_directions"] = [
+            "Top-to-Bottom",
+            "Bottom-to-Top",
+        ]
 
         #: int: Exposure Time in milliseconds
         self._exposuretime = 20

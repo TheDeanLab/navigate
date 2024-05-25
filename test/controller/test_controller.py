@@ -163,19 +163,80 @@ def test_change_microscope(controller):
         )
 
 
+def test_initialize_cam_view(controller):
+    minmax_values = [0, 2**16 - 1]
+    image_metrics = [1, 0, 0]
+    controller.initialize_cam_view()
+
+    assert (
+        controller.camera_view_controller.image_palette["Min"].get() == minmax_values[0]
+    )
+    assert (
+        controller.camera_view_controller.image_palette["Max"].get() == minmax_values[1]
+    )
+    assert (
+        controller.camera_view_controller.image_metrics["Frames"].get()
+        == image_metrics[0]
+    )
+
+
 def test_populate_experiment_setting(controller):
     controller.populate_experiment_setting(in_initialize=False)
     assert True
 
 
 def test_prepare_acquire_data(controller):
-    controller.prepare_acquire_data()
-    assert True
+
+    # Test without warning message
+    controller.set_mode_of_sub = MagicMock()
+    assert controller.prepare_acquire_data() is True
+    assert controller.set_mode_of_sub.called is True
+
+    # Test with warning message. Challenging since controller is local.
+    # with patch('controller.tkinter.messagebox.showerror') as mock_showerror:
+    #     controller.update_experiment_setting.return_value = "Warning!"
+    #     assert controller.prepare_acquire_data() is False
+    #     mock_showerror.assert_called_once()
 
 
-def test_execute(controller):
-    controller.execute("acquire", "single")
-    assert True
+def test_set_mode_of_sub(controller):
+    mode = "live"
+    controller.acquire_bar_controller.stop_acquire = MagicMock()
+    controller.set_mode_of_sub(mode)
+    assert controller.acquire_bar_controller.stop_acquire.called is False
+
+    mode = "stop"
+    controller.set_mode_of_sub(mode)
+    assert controller.acquire_bar_controller.stop_acquire.called is True
+
+
+def test_execute_joystick_toggle(controller):
+    # joystick_toggle
+    controller.threads_pool.createThread = MagicMock()
+    controller.stage_controller.joystick_is_on = False
+    controller.execute("joystick_toggle")
+    assert controller.threads_pool.createThread.called is False
+
+    controller.stage_controller.joystick_is_on = True
+    controller.execute("joystick_toggle")
+    assert controller.threads_pool.createThread.called is True
+
+
+def test_execute_stop_stage(controller):
+    controller.threads_pool.createThread = MagicMock()
+    controller.execute(command="stop_stage")
+    assert controller.threads_pool.createThread.called is True
+
+
+def test_execute_move_stage_and_update_info(controller):
+    positions = {"x": 51, "y": 52.0, "z": -530.3, "theta": 1, "f": 0}
+
+    controller.execute("move_stage_and_update_info", positions)
+    for axis, value in positions.items():
+        assert (
+            float(controller.stage_controller.widget_vals[axis].get())
+            == positions[axis]
+        )
 
 
 @pytest.mark.parametrize(

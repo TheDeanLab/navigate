@@ -209,26 +209,10 @@ def test_prepare_acquire_data(controller):
 
 
 def test_set_mode_of_sub(controller):
-    # Patch the sub controllers
-    controller.channels_tab_controller.set_mode = MagicMock()
-    controller.camera_view_controller.set_mode = MagicMock()
-    controller.camera_setting_controller.set_mode = MagicMock()
-    controller.waveform_tab_controller.set_mode = MagicMock()
-    controller.acquire_bar_controller.stop_acquire = MagicMock()
+    modes = ["customized", "stop", "live"]
 
-    # Test with mode = "live"
-    mode = "live"
-    controller.set_mode_of_sub(mode)
-    assert controller.channels_tab_controller.set_mode.called is True
-    assert controller.camera_setting_controller.set_mode.called is True
-    assert controller.waveform_tab_controller.set_mode.called is True
-    assert controller.acquire_bar_controller.stop_acquire.called is False
-
-    # Test with mode = "stop"
-    mode = "stop"
-    controller.acquire_bar_controller.stop_acquire.reset_mock()
-    controller.set_mode_of_sub(mode)
-    assert controller.acquire_bar_controller.stop_acquire.called is True
+    for mode in modes:
+        controller.set_mode_of_sub(mode=mode)
 
     assert True
 

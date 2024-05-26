@@ -852,16 +852,14 @@ class Controller:
 
             # clear show_img_pipe
             while self.show_img_pipe.poll():
-                # TODO: image_id never called.
                 self.show_img_pipe.recv()
-                # image_id = self.show_img_pipe.recv()
 
         elif command == "exit":
-            """Exit the program."""
-            # Save current GUI settings to .navigate/config/experiment.yml file.
-            self.sloppy_stop()
-            # self.menu_controller.feature_id_val.set(0)
+            """Exit the program.
 
+            Saves the current GUI settings to .navigate/config/experiment.yml file.
+            """
+            self.sloppy_stop()
             self.update_experiment_setting()
             file_directory = os.path.join(get_navigate_path(), "config")
             save_yaml_file(
@@ -918,7 +916,7 @@ class Controller:
         self.threads_pool.createThread('model', target)
         commands and the need to stop as abruptly as
         possible when the user hits stop. Here we leverage
-        ObjectInSubprocess's refusal to let us access
+        ObjectInSubprocess' refusal to let us access
         the model from two threads to our advantage, and just
         try repeatedly until we get a command in front
         of the next command in the model threads_pool resource.
@@ -940,9 +938,9 @@ class Controller:
         Parameters
         ----------
         command : string
-            string = 'acquire' or 'autofocus'
+            'acquire' or 'autofocus'
         mode : string
-            string = 'continuous', 'z-stack', 'single', or 'projection'
+            'continuous', 'z-stack', 'single', or 'projection'
         args : function-specific passes.
         """
         self.camera_view_controller.image_count = 0
@@ -1010,6 +1008,7 @@ class Controller:
             # update framerate
             stop_time = time.time()
             frames_per_second = images_received / (stop_time - start_time)
+
             # Update the Framerate in the Camera Settings Tab
             self.camera_setting_controller.framerate_widgets["max_framerate"].set(
                 frames_per_second

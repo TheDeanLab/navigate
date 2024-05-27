@@ -419,6 +419,7 @@ def test_execute_acquire_and_acquire_and_save(controller):
     controller.threads_pool.createThread = MagicMock()
     for statement in ["acquire", "acquire_and_save"]:
         for mode in ["live", "z-stack", "single"]:
+            controller.acquire_bar_controller.mode = mode
             controller.execute(statement, mode)
             controller.threads_pool.createThread.assert_called_with(
                 "camera",
@@ -521,8 +522,9 @@ def test_capture_image(controller):
 
     assert controller.acquire_bar_controller.framerate != 0
     assert controller.camera_setting_controller.framerate_widgets[
-        "max-framerate"
+        "max_framerate"
     ].get() != str(0)
+
     assert True
 
 

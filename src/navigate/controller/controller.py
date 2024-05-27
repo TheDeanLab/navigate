@@ -814,8 +814,10 @@ class Controller:
                         feature_list_popup, self
                     )
                     self.features_popup_controller.populate_feature_list(feature_id)
+
                     # wait until close the popup windows
                     self.view.wait_window(feature_list_popup.popup)
+
                     # do not run acquisition if "cancel" is selected
                     temp = self.features_popup_controller.start_acquisiton_flag
                     delattr(self, "features_popup_controller")
@@ -1007,7 +1009,15 @@ class Controller:
             )
             # update framerate
             stop_time = time.time()
-            frames_per_second = images_received / (stop_time - start_time)
+            try:
+                frames_per_second = images_received / (stop_time - start_time)
+            except ZeroDivisionError:
+                frames_per_second = 1 / (
+                    self.configuration["experiment"]["MicroscopeState"]["channels"][
+                        "channel_1"
+                    ].get("camera_exposure_time", 200)
+                    / 1000
+                )
 
             # Update the Framerate in the Camera Settings Tab
             self.camera_setting_controller.framerate_widgets["max_framerate"].set(

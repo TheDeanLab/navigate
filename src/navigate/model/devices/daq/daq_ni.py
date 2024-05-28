@@ -520,12 +520,13 @@ class NIDAQ(DAQBase):
         self.is_updating_analog_task = False
         self.wait_to_run_lock.release()
 
-    def send_do_pulse(self, address):
-        self.filter_wheel_task = nidaqmx.Task()
-        self.filter_wheel_task.do_channels.add_do_chan(
-            address,
-            line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
-            )
-        self.filter_wheel_task.write([False, True, True, False], auto_start=True)
-        self.filter_wheel_task.stop()
-        self.filter_wheel_task.close()    
+    # This function is moved to filter_wheel_daq.py
+    # def send_do_pulse(self, address):
+    #     self.filter_wheel_task = nidaqmx.Task()
+    #     self.filter_wheel_task.do_channels.add_do_chan(
+    #         address,
+    #         line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
+    #         )
+    #     self.filter_wheel_task.write([False, True, True, False], auto_start=True)
+    #     self.filter_wheel_task.stop()
+    #     self.filter_wheel_task.close()

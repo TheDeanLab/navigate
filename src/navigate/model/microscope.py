@@ -221,8 +221,9 @@ class Microscope:
                 ):
                     device_connection = self.daq
                 
-                if device_name == "filter_wheel" and device_ref_name.startswith("NI"): 
-                    device_connection = self.daq
+                #TODO: if creating nidaq task in filter_wheel_daq.py works, we can delete the following two lines.
+                # if device_name == "filter_wheel" and device_ref_name.startswith("NI"): 
+                #     device_connection = self.daq
                     
                 if device_ref_name.startswith("EquipmentSolutions"):
                     device_connection = self.daq

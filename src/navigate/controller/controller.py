@@ -814,8 +814,10 @@ class Controller:
                         feature_list_popup, self
                     )
                     self.features_popup_controller.populate_feature_list(feature_id)
+
                     # wait until close the popup windows
                     self.view.wait_window(feature_list_popup.popup)
+
                     # do not run acquisition if "cancel" is selected
                     temp = self.features_popup_controller.start_acquisiton_flag
                     delattr(self, "features_popup_controller")
@@ -852,16 +854,14 @@ class Controller:
 
             # clear show_img_pipe
             while self.show_img_pipe.poll():
-                # TODO: image_id never called.
                 self.show_img_pipe.recv()
-                # image_id = self.show_img_pipe.recv()
 
         elif command == "exit":
-            """Exit the program."""
-            # Save current GUI settings to .navigate/config/experiment.yml file.
-            self.sloppy_stop()
-            # self.menu_controller.feature_id_val.set(0)
+            """Exit the program.
 
+            Saves the current GUI settings to .navigate/config/experiment.yml file.
+            """
+            self.sloppy_stop()
             self.update_experiment_setting()
             file_directory = os.path.join(get_navigate_path(), "config")
             save_yaml_file(
@@ -918,7 +918,7 @@ class Controller:
         self.threads_pool.createThread('model', target)
         commands and the need to stop as abruptly as
         possible when the user hits stop. Here we leverage
-        ObjectInSubprocess's refusal to let us access
+        ObjectInSubprocess' refusal to let us access
         the model from two threads to our advantage, and just
         try repeatedly until we get a command in front
         of the next command in the model threads_pool resource.
@@ -940,9 +940,9 @@ class Controller:
         Parameters
         ----------
         command : string
-            string = 'acquire' or 'autofocus'
+            'acquire' or 'autofocus'
         mode : string
-            string = 'continuous', 'z-stack', 'single', or 'projection'
+            'continuous', 'z-stack', 'single', or 'projection'
         args : function-specific passes.
         """
         self.camera_view_controller.image_count = 0
@@ -1009,7 +1009,16 @@ class Controller:
             )
             # update framerate
             stop_time = time.time()
-            frames_per_second = images_received / (stop_time - start_time)
+            try:
+                frames_per_second = images_received / (stop_time - start_time)
+            except ZeroDivisionError:
+                frames_per_second = 1 / (
+                    self.configuration["experiment"]["MicroscopeState"]["channels"][
+                        "channel_1"
+                    ].get("camera_exposure_time", 200)
+                    / 1000
+                )
+
             # Update the Framerate in the Camera Settings Tab
             self.camera_setting_controller.framerate_widgets["max_framerate"].set(
                 frames_per_second
@@ -1210,6 +1219,7 @@ class Controller:
                     waveform_dict=value,
                     sample_rate=self.configuration_controller.daq_sample_rate,
                 )
+
             elif event == "multiposition":
                 # Update the multi-position tab without appending to the list
                 update_table(
@@ -1242,10 +1252,12 @@ class Controller:
                     if value["done"]:
                         print("Tony Wilson done! Updating expt...")
                         self.ao_popup_controller.update_experiment_values()
+
             elif event == "mirror_update":
                 if hasattr(self, "ao_popup_controller"):
                     self.ao_popup_controller.set_widgets_from_coef(value["coefs"])
                     self.ao_popup_controller.plot_mirror(value)
+
             elif event == "ao_save_report":
                 if hasattr(self, "ao_popup_controller"):
                     self.ao_popup_controller.save_report_to_file(value)
@@ -1255,7 +1267,6 @@ class Controller:
                 break
 
             elif event == "update_stage":
-                # ZM: I am so sorry for this.
                 for _ in range(10):
                     try:
                         self.update_stage_controller_silent(value)
@@ -1263,20 +1274,12 @@ class Controller:
                     except RuntimeError:
                         time.sleep(0.001)
                         pass
+
             elif event == "remove_positions":
                 self.multiposition_tab_controller.remove_positions(value)
+
             elif event == "exposure_time":
                 self.channels_tab_controller.set_exposure_time(value[0], value[1])
-
-    # def exit_program(self):
-    #     """Exit the program.
-
-    #     This function is called when the user clicks the exit button in the GUI.
-    #     """
-    #     if messagebox.askyesno("Exit", "Are you sure?"):
-    #         logger.info("Exiting Program")
-    #         self.execute("exit")
-    #         sys.exit()
 
     def add_acquisition_mode(self, name, acquisition_obj):
         if name in self.plugin_acquisition_modes:

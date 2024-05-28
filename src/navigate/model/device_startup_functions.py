@@ -438,7 +438,18 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                     exception=TLFTDICommunicationError,
                 )
             )
+        elif stage_type == "KST101":
+            from navigate.model.devices.stages.stage_tl_kcube_steppermotor import (
+                build_TLKSTStage_connection
+            )
 
+            stage_devices.append(
+                auto_redial(
+                    build_TLKSTStage_connection,
+                    (stage_config["serial_number"],),
+                    exception=Exception,
+                )
+            )
         elif stage_type == "MCL" and platform.system() == "Windows":
             from navigate.model.devices.stages.stage_mcl import (
                 build_MCLStage_connection,

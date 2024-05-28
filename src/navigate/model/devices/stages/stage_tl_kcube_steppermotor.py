@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -115,8 +115,15 @@ class TLKSTStage(StageBase):
         """
         super().__init__(microscope_name, device_connection, configuration, device_id)
 
-        #: dict: Mapping of axes to KST axes. Only initialize focus.
-        self.axes_mapping = {"f": 1}
+        #: dict: Mapping of axes to KST axes. Only support one axis.
+        axes_mapping = {"x": 1, "y": 1, "z": 1, "f": 1}
+
+        if not self.axes_mapping:
+            if self.axes[0] not in axes_mapping:
+                raise KeyError(f"KTS101 doesn't support axis: {self.axes[0]}")
+            self.axes_mapping = {
+                self.axes[0]: axes_mapping[self.axes[0]]
+            }
 
         #: list: List of KST axes available.
         self.KST_axes = list(self.axes_mapping.values())
@@ -171,7 +178,7 @@ class TLKSTStage(StageBase):
                 self.kst_controller.KST_GetCurrentPosition(self.serial_number)
                 / float(self.device_unit_scale)
             )
-            setattr(self, "f_pos", pos)
+            setattr(self, f"{self.axes[0]}_pos", pos)
         except (
             self.kst_controller.TLFTDICommunicationError,
             self.kst_controller.TLDLLError,

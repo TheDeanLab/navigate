@@ -873,15 +873,7 @@ def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devic
         return tiger_controller
 
     elif device_type == "NI":
-        from navigate.model.devices.filter_wheel.filter_wheel_daq import (
-            build_filter_wheel_connection,
-        )
-        daq_fw_controller = auto_redial(
-            build_filter_wheel_connection,
-            (),
-            exception=Exception,
-        )
-        return daq_fw_controller
+        return DummyDeviceConnection()
     
     elif (
         device_type.lower() == "syntheticfilterwheel"

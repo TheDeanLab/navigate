@@ -196,6 +196,10 @@ class Configurator:
                 for variable_list in hardware_tab.variables_list:
                     if variable_list is None:
                         continue
+                    # variables: tkinter.vars
+                    # value_dict: value mapping dict defined in the database
+                    # ref: reference name defined in the database
+                    # format: list-dict or item()
                     variables, value_dict, ref, format = variable_list
                     if format is None:
                         format = ""
@@ -225,10 +229,11 @@ class Configurator:
                                         f"Notice: {hardware_name} has an empty value "
                                         f"{ref}! Please double check if it's okay!"
                                     )
-
+                                # value of the k_idx
+                                v = variables[k_idx].get()
                                 if k_idx in value_dict:
-                                    # TODO: Annie, v is not defined.
-                                    k = value_dict[k_idx][v]  # noqa
+                                    k = value_dict[k_idx][v]
+                                # value of the v_idx
                                 v = variables[v_idx].get()
                                 if v_idx in value_dict:
                                     v = value_dict[v_idx][v]

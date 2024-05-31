@@ -7,3 +7,4 @@ Acquiring Data
 
    acquiring_guide
    features
+   feature_guide

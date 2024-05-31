@@ -8,11 +8,89 @@ This section outlines the ``configuration.yaml``, ``experiment.yml``,
 
 -----------------
 
-Initial Configuration
+Configuration File
 =====================
+
 In order for the **navigate** software to function, you will need to configure the
 specifications of the various hardware that you will be using in the ``configuration
-.yaml`` file.
+.yaml`` file. We offer two options for setting up the configuration file:
+
+1. **Automatic Configuration**: You can use the **navigate** GUI to set up the
+    configuration file. This is the recommended method for users who are new to the
+    software.
+2. **Manual Configuration**: You can manually set up the configuration file by
+   following the instructions below.
+
+-----------------
+
+Automatic Configuration
+-------------------------
+
+.. note::
+
+    The **navigate** configuration assistant is a new feature that is currently in
+    development. If you encounter any issues, please let us know by opening an issue
+    on our GitHub repository.
+
+The **navigate** software provides a GUI that allows you to set up the configuration
+file. To set up the configuration file using the GUI, launch the software using the
+following command:
+
+    .. code-block:: console
+
+      (base) conda activate navigate
+      (navigate) navigate -c
+
+This will launch the **navigate** software in the configuration assistant mode. The
+configuration assistant will guide you through the process of setting up the
+configuration file. The configuration assistant will ask you to specify the hardware
+that you are using, the number of microscope instances you wish to create (see below),
+and the devices that you wish to use with each microscope instance. An image of the
+Configuration Assistant is shown below:
+
+.. image:: images/configuration_assistant.png
+    :width: 800
+    :align: center
+
+-----------------
+
+Configuration Assistant Elements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A brief overview of the Configuration Assistant:
+
+- :guilabel:`New Configuration` This button allows you to create a new configuration
+  file.
+- :guilabel:`Load Configuration` This button allows you to open an existing configuration
+  file.
+- :guilabel:`Add A Microscope` This button allows you create another microscope
+  instance. You can create as many microscope instances as you need. Each instance
+  can be equipped with different hardware.
+- :guilabel:`Save` This button allows you to save the configuration file.
+  For new configuration file to be automatically loaded by the software, you must save
+  the configuration file to the default location (e.g.,
+  ``C:\Users\Username\AppData\Local\.navigate\config`` on  Windows or ``~/.navigate``
+  on Mac/Linux).
+- :guilabel:`Cancel` This cancels the configuration process and closes the software.
+
+Microscope names can be changed by right-clicking on the microscope name in the tab and
+selecting :guilabel:`Rename`. The microscope name must not include spaces or special
+characters.
+
+Microscopes can also be individually deleted by right-clicking on the microscope name
+in the tab and selecting :guilabel:`Delete`.
+
+For each microscope instance, you can specify the hardware that you are using. Each
+hardware type is located in its own tab. The first column within each tab is the name of
+the hardware parameter being specified. The second column is a menu or entry that allows
+you to specify the hardware parameter. The third column is an example of the hardware
+parameter that you are specifying.
+
+
+-----------------
+
+Manual Configuration
+-------------------------
 
 The first time you launch the software, **navigate** will create a copy of the
 ``navigate\config\configuration.yaml`` and the rest of the configuration files in
@@ -44,7 +122,7 @@ study for a general walkthrough of how to build your own configuration file and 
 -----------------
 
 Microscope Configurations
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``configuration.yaml`` file contains the microscope configurations
 that you will be using with the software. Each microscope is represented as a YAML
@@ -83,7 +161,7 @@ pixel size.
 -----------------
 
 Stage Subsection
--------------------------
+^^^^^^^^^^^^^^^^^
 
 The stage section of the microscope 1) puts the stage control from the ``hardware``
 section into the microscope 2) sets boundaries for stage movement and 3) optionally
@@ -219,7 +297,7 @@ appear in the stage field as following:
 -----------------
 
 Zoom Subsection
--------------------------
+^^^^^^^^^^^^^^^^
 
 
 The ``zoom`` section of ``configuration.yaml`` specifies control over microscope

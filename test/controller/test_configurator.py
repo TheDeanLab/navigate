@@ -82,3 +82,12 @@ class TestConfigurator(unittest.TestCase):
         mock_asksaveasfilename.return_value = ""
         self.configurator.save()
         mock_write_to_yaml.assert_not_called()
+
+    def test_create_config_window(self):
+        pass
+
+    def test_load_configuration(self):
+        pass
+
+    def test_device_selected(self):
+        pass

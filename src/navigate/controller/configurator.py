@@ -274,7 +274,7 @@ class Configurator:
         for hardware_type, widgets in hardwares_dict.items():
             if not widgets:
                 continue
-            if type(widgets) == dict:
+            if isinstance(widgets, dict):
                 microscope_tab.create_hardware_tab(hardware_type, widgets)
             else:
                 microscope_tab.create_hardware_tab(
@@ -317,7 +317,7 @@ class Configurator:
                 # widgets[key][3] is the value mapping dict
                 if widgets[key][1] != "Spinbox" and widgets[key][3]:
                     # if the value is not valid, return the last valid value
-                    if type(widgets[key][3]) == list:
+                    if isinstance(widgets[key][3], list):
                         reverse_value_dict = dict(
                             map(lambda v: (v, v), widgets[key][3])
                         )
@@ -406,7 +406,7 @@ class Configurator:
             for hardware_type, widgets in hardwares_dict.items():
                 hardware_ref_name = hardwares_config_name_dict[hardware_type]
                 # build dictionary values for widgets
-                if type(widgets) == dict:
+                if isinstance(widgets, dict):
                     try:
                         widgets_value = build_widgets_value(
                             widgets,

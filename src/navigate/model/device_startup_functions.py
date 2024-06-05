@@ -751,6 +751,17 @@ def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devic
             exception=Exception,
         )
 
+    elif device_type == "LUDLFilterWheel":
+        from navigate.model.devices.filter_wheel.filter_wheel_ludl import (
+            build_filter_wheel_connection,
+        )
+
+        return auto_redial(
+            build_filter_wheel_connection,
+            (device_info["port"], device_info["baudrate"], 0.25),
+            exception=Exception,
+        )
+
     elif device_type == "ASI":
         from navigate.model.devices.filter_wheel.filter_wheel_asi import (
             build_filter_wheel_connection,
@@ -827,6 +838,13 @@ def start_filter_wheel(
         )
 
         return SutterFilterWheel(microscope_name, device_connection, configuration)
+
+    elif device_type == "LUDLFilterWheel":
+        from navigate.model.devices.filter_wheel.filter_wheel_ludl import (
+            LUDLFilterWheel,
+        )
+
+        return LUDLFilterWheel(microscope_name, device_connection, configuration)
 
     elif device_type == "ASI":
         from navigate.model.devices.filter_wheel.filter_wheel_asi import ASIFilterWheel

@@ -234,6 +234,6 @@ def update_table(table, pos, append=False):
     else:
         table.model.df = frame
     table.currentrow = table.model.df.shape[0] - 1
-    table.update_rowcolors()
+    table.resetColors()
     table.redraw()
     table.tableChanged()

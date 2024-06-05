@@ -113,7 +113,9 @@ class MultiPositionController(GUIController):
         for i, name in enumerate(axis_dict.keys()):
             data[axis_dict[name]] = list(pos[i] for pos in positions)
         self.table.model.df = pd.DataFrame(data)
+        self.table.currentrow = 0
         self.table.redraw()
+        self.table.tableChanged()
         self.show_verbose_info("loaded new positions")
 
     def get_positions(self):
@@ -152,13 +154,21 @@ class MultiPositionController(GUIController):
         event : tkinter event
             event that triggers the function
         """
+        # it is calculated based on the GUI position
         rowclicked = self.table.get_row_clicked(event)
+        # make sure a valid row is clicked
+        if rowclicked >= self.table.model.df.shape[0]:
+            return
         df = self.table.model.df
-        temp = list(df.loc[rowclicked])
+        # df.loc uses key index
+        # df.iloc uses position index
+        temp = list(df.iloc[rowclicked])
         # validate position
         if list(filter(lambda v: type(v) != int and type(v) != float, temp)):
-            #  TODO: show error: position is invalid
-            print("position is invalid")
+            messagebox.showwarning(
+                title="Warning",
+                message="The selected position is invalid, can't go to this position!"
+            )
             logger.info("position is invalid")
             return
         position = {
@@ -212,7 +222,9 @@ class MultiPositionController(GUIController):
             logger.info("The csv file isn't right, it should contain [X, Y, Z, R, F]")
             return
         self.table.model.df = df
-        self.table.update_rowcolors()
+        self.table.currentrow = 0
+        # reset index
+        self.table.resetColors()
         self.table.redraw()
         self.table.tableChanged()
         self.show_verbose_info("loaded csv file", filename)

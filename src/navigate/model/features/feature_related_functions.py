@@ -40,6 +40,7 @@ import importlib
 # Local application imports
 from navigate.model.features.auto_tile_scan import CalculateFocusRange  # noqa
 from navigate.model.features.autofocus import Autofocus  # noqa
+from navigate.model.features.adaptive_optics import TonyWilson  # noqa
 from navigate.model.features.common_features import (
     ChangeResolution,  # noqa
     Snap,  # noqa

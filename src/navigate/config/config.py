@@ -913,9 +913,46 @@ def verify_configuration(manager, configuration):
     
     Supports old version of configurations.
     """
+    device_config = configuration["configuration"]["microscopes"]
+
+    # get microscope inheritance sequence
+    microscope_name_seq = []
+    inherited_microscope_dict = {}
+    for microscope_name in device_config.keys():
+        try:
+            parenthesis_l = microscope_name.index("(")
+        except ValueError:
+            if microscope_name.strip() not in microscope_name_seq:
+                microscope_name_seq.append(microscope_name.strip())
+            continue
+
+        if ")" not in microscope_name[parenthesis_l+1:] :
+            microscope_name_seq.append(microscope_name.strip())
+            continue
+
+        parenthesis_r = microscope_name[parenthesis_l+1:].index(")")
+        parent_microscope_name = microscope_name[parenthesis_l+1: parenthesis_l+parenthesis_r+1].strip()
+
+        if parent_microscope_name not in microscope_name_seq:
+            microscope_name_seq.append(parent_microscope_name)
+        
+        idx = microscope_name_seq.index(parent_microscope_name)
+        child_microscope_name = microscope_name[:parenthesis_l].strip()
+        microscope_name_seq.insert(idx+1, child_microscope_name)
+        inherited_microscope_dict[child_microscope_name] = parent_microscope_name
+        device_config[child_microscope_name] = device_config.pop(microscope_name)
+
+    # update microscope devices from parent microscope
+    for microscope_name in microscope_name_seq:
+        if microscope_name not in inherited_microscope_dict:
+            continue
+        parent_microscope_name = inherited_microscope_dict[microscope_name]
+        for device_name in device_config[parent_microscope_name].keys():
+            if device_name not in device_config[microscope_name].keys():
+                device_config[microscope_name][device_name] = device_config[parent_microscope_name][device_name]
+
     channel_count = 5
     # generate hardware header section
-    device_config = configuration["configuration"]["microscopes"]
     hardware_dict = {}
     ref_list = {
         "camera": [],

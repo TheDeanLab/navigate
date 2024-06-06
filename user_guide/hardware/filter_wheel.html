@@ -68,6 +68,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#fw-1000">FW-1000</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#ludl-electronic-products">LUDL Electronic Products</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mac6000">MAC6000</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#analog-digital-devices">Analog/Digital Devices</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#synthetic-filter-wheel">Synthetic Filter Wheel</a></li>
 </ul>
 </li>
@@ -201,6 +206,65 @@ for the stage. A single communication instance is used for both the stage and fi
 <div class="line"><br /></div>
 </div>
 </section>
+</section>
+<hr class="docutils" />
+<section id="ludl-electronic-products">
+<h2>LUDL Electronic Products<a class="headerlink" href="#ludl-electronic-products" title="Permalink to this heading"></a></h2>
+<section id="mac6000">
+<h3>MAC6000<a class="headerlink" href="#mac6000" title="Permalink to this heading"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Currently, the software only supports a single filter wheel for the MAC6000
+device. Should additional filter wheels be necessary, please reach out to the
+<strong>navigate</strong> team by placing a feature request on GitHub.</p>
+</div>
+<details class="summary-configuration-file">
+<summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LUDLFilterWheel</span>
+<span class="w">          </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM1</span>
+<span class="w">          </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
+<span class="w">        </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.03</span>
+<span class="w">        </span><span class="nt">available_filters</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">Empty-Alignment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">GFP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">RFP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">          </span><span class="nt">Far-Red</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="analog-digital-devices">
+<h2>Analog/Digital Devices<a class="headerlink" href="#analog-digital-devices" title="Permalink to this heading"></a></h2>
+<p>Some manufacturers provide filter wheels that are controlled by analog or digital signals.
+Here, each digital signal corresponds to a filter position. The user must specify the
+number of filters in the filter wheel and the digital signal that corresponds to each
+filter position.</p>
+<details class="summary-configuration-file">
+<summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NI</span>
+<span class="w">          </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.050</span>
+<span class="w">        </span><span class="nt">available_filters</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">473nm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dev2/port0/line1</span>
+<span class="w">          </span><span class="nt">561nm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dev2/port0/line3</span>
+<span class="w">          </span><span class="nt">638nm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dev2/port0/line5</span>
+<span class="w">          </span><span class="nt">Empty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dev2/port0/line7</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
 </section>
 <hr class="docutils" />
 <section id="synthetic-filter-wheel">

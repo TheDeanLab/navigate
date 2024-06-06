@@ -30,11 +30,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Standard library imports
 from pathlib import Path
 import os
 import inspect
 import tkinter as tk
+from tkinter import messagebox
 
+# Third-party imports
+
+# Local application imports
 from navigate.config.config import get_navigate_path
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
@@ -46,18 +51,29 @@ from navigate.view.popups.plugins_popup import PluginsPopup
 
 
 class PluginsController:
-    """Plugins manaager in the controller side"""
+    """Plugins manager in the controller side"""
 
     def __init__(self, view, parent_controller):
-        """Initialize plugins manager class"""
+        """Initialize plugins manager class.
+
+        Parameters
+        ----------
+        view: object
+            tkinter frame object.
+        parent_controller: object
+            navigate controller.
+        """
         #: object: tkinter frame object.
         self.view = view
+
         #: object: navigate controller.
         self.parent_controller = parent_controller
+
         #: str: plugins default path.
         self.plugins_path = os.path.join(
             Path(__file__).resolve().parent.parent.parent, "plugins"
         )
+
         #: dict: installed plugins with GUI
         self.plugins_dict = {}
 
@@ -66,7 +82,7 @@ class PluginsController:
         for plugin_name in self.plugins_dict:
             try:
                 self.plugins_dict[plugin_name].populate_experiment_setting()
-            except:
+            except Exception:
                 pass
 
     def load_plugins(self):
@@ -79,10 +95,11 @@ class PluginsController:
         plugins_config_path = os.path.join(
             get_navigate_path(), "config", "plugins_config.yml"
         )
-        if not os.path.exists(plugins_config_path):
+        plugins_config = load_yaml_file(plugins_config_path)
+        if plugins_config is None:
+            plugins_config = {}
             save_yaml_file(get_navigate_path(), {}, "plugins_config.yml")
         else:
-            plugins_config = load_yaml_file(plugins_config_path)
             for plugin_name, plugin_path in plugins_config.items():
                 if plugin_path and os.path.exists(plugin_path):
                     installed_plugins[plugin_name] = plugin_path
@@ -118,12 +135,23 @@ class PluginsController:
                     plugin_frame_module = load_module_from_file(
                         f"{plugin_class_name}Frame", view_file
                     )
+                    if plugin_frame_module is None:
+                        print(
+                            f"Make sure that the plugin frame name {plugin_class_name} is correct! "
+                            f"Plugin {plugin_name} needs to be uninstalled from navigate or reinstalled!"
+                        )
+                        continue
                     plugin_frame = getattr(
                         plugin_frame_module, f"{plugin_class_name}Frame"
                     )
                     plugin_controller_module = load_module_from_file(
                         f"{plugin_class_name}Controller", controller_file
                     )
+                    if plugin_controller_module is None:
+                        print(
+                            f"Make sure that the plugin controller {plugin_class_name} is correct! "
+                            f"Plugin {plugin_name} needs to be uninstalled from navigate or reinstalled!"
+                        )
                     plugin_controller = getattr(
                         plugin_controller_module, f"{plugin_class_name}Controller"
                     )
@@ -187,16 +215,25 @@ class PluginsController:
         controller: object
             navigate controller
         """
-        plugin_frame = frame(self.view.settings)
-        self.view.settings.add(plugin_frame, text=plugin_name, sticky=tk.NSEW)
-        plugin_controller = controller(plugin_frame, self.parent_controller)
-        controller_name = (
-            "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
-        )
-        self.plugins_dict[controller_name] = plugin_controller
+        try:
+            plugin_frame = frame(self.view.settings)
+            self.view.settings.add(plugin_frame, text=plugin_name, sticky=tk.NSEW)
+            plugin_controller = controller(plugin_frame, self.parent_controller)
+            controller_name = (
+                "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
+            )
+            self.plugins_dict[controller_name] = plugin_controller
+        except:
+            messagebox.showwarning(
+                title="Warning",
+                message=(
+                    f"Plugin {plugin_name} has something went wrong."
+                    f"Please make sure the plugin works correctly or uninstall it!"
+                )
+            )
 
     def build_popup_window(self, plugin_name, frame, controller):
-        """Build popup window for plugins
+        """Build popup window for a plugin
 
         Parameters
         ----------
@@ -212,6 +249,15 @@ class PluginsController:
         )
 
         def func(*args, **kwargs):
+            """Function to build popup window for a plugin
+
+            Parameters
+            ----------
+            args: list
+                arguments.
+            kwargs: dict
+                keyword arguments.
+            """
             if controller_name in self.plugins_dict:
                 self.plugins_dict[controller_name].popup.deiconify()
                 return
@@ -234,15 +280,40 @@ class PluginsController:
                 ),
             )
 
-        return func
+        def func_with_wrapper(*args, **kwargs):
+            try:
+                func(*args, **kwargs)
+            except:
+                messagebox.showwarning(
+                    title="Warning",
+                    message=(
+                        f"Plugin {plugin_name} has something went wrong."
+                        f"Please make sure the plugin works correctly or uninstall it from navigate!"
+                    )
+                )
+
+        return func_with_wrapper
 
 
 class UninstallPluginController(GUIController):
+    """Uninstall plugin controller"""
+
     def __init__(self, view, parent_controller):
+        """Initialize uninstall plugin controller class.
+
+        Parameters
+        ----------
+        view: object
+            tkinter frame object.
+        parent_controller: object
+            navigate controller.
+        """
         super().__init__(view, parent_controller)
 
+        #: str: plugin config path.
         self.plugin_config_path = os.path.join(get_navigate_path(), "config")
 
+        #: PluginsPopup: popup window object.
         self.popup = PluginsPopup(view)
         self.popup.uninstall_btn.config(command=self.uninstall_plugins)
         self.popup.popup.protocol("WM_DELETE_WINDOW", self.exit_func)
@@ -267,13 +338,21 @@ class UninstallPluginController(GUIController):
         self.popup.build_widgets(self.plugin_config)
 
     def uninstall_plugins(self, *args):
-        """Uninstall plugins"""
+        """Uninstall plugins.
+
+        Parameters
+        ----------
+        args: list
+            arguments.
+        """
         feature_lists_path = get_navigate_path() + "/feature_lists"
         features = os.listdir(feature_lists_path)
         feature_config = {}
         for feature_name in features:
             if feature_name.endswith(".yml") and feature_name != "__sequence.yml":
-                feature_content = load_yaml_file(os.path.join(feature_lists_path, feature_name))
+                feature_content = load_yaml_file(
+                    os.path.join(feature_lists_path, feature_name)
+                )
                 if feature_content and feature_content.get("filename", None):
                     feature_config[feature_name] = feature_content["filename"]
         flag = False
@@ -281,7 +360,9 @@ class UninstallPluginController(GUIController):
             if var.get():
                 # remove the feature list if a deleted plugin has any.
                 for feature_name in feature_config:
-                    if feature_config[feature_name].startswith(self.plugin_config[var.get()]):
+                    if feature_config[feature_name].startswith(
+                        self.plugin_config[var.get()]
+                    ):
                         os.remove(f"{feature_lists_path}/{feature_name}")
                 self.plugin_config.pop(var.get())
                 flag = True
@@ -289,7 +370,7 @@ class UninstallPluginController(GUIController):
             save_yaml_file(
                 self.plugin_config_path, self.plugin_config, "plugins_config.yml"
             )
-            tk.messagebox.showwarning(
+            messagebox.showwarning(
                 title="Navigate",
                 message="Plugins are uninstalled! Please restart Navigate!",
             )

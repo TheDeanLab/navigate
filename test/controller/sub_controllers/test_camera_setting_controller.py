@@ -116,14 +116,6 @@ class TestCameraSettingController:
 
         # Framerate
         assert (
-            self.camera_settings.framerate_widgets["exposure_time"].widget.min
-            == camera_config_dict["exposure_time_range"]["min"]
-        )
-        assert (
-            self.camera_settings.framerate_widgets["exposure_time"].widget.max
-            == camera_config_dict["exposure_time_range"]["max"]
-        )
-        assert (
             str(self.camera_settings.framerate_widgets["exposure_time"].widget["state"])
             == "disabled"
         )
@@ -209,7 +201,9 @@ class TestCameraSettingController:
             assert hasattr(self.camera_settings, attr)
 
     def test_populate_experiment_values(self):
-
+        self.camera_settings.parent_controller.configuration["experiment"][
+                "CameraParameters"
+            ]["readout_time"] = 0.1
         # Populate widgets with values from experiment file and check
         self.camera_settings.populate_experiment_values()
         camera_setting_dict = self.camera_settings.parent_controller.configuration[

@@ -6,4 +6,4 @@ Setting Up A Microscope
    :maxdepth: 2
 
    software_configuration
-   hardware/hardware_home
+   multiple_cameras

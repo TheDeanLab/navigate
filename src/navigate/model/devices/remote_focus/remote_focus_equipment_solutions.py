@@ -75,7 +75,7 @@ class RemoteFocusEquipmentSolutions(RemoteFocusNI):
         #: str: Name of the RS232 communication port.
         self.comport = configuration["configuration"]["microscopes"][microscope_name][
             "remote_focus_device"
-        ]["hardware"].get("comport", "COM1")
+        ]["hardware"].get("port", "COM1")
 
         #: int: Baud rate of the RS232 communication port.
         self.baud_rate = 115200

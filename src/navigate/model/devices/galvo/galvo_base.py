@@ -81,25 +81,18 @@ class GalvoBase:
         ]["daq"]["sample_rate"]
 
         #: float: Sweep time.
-        self.sweep_time = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["daq"]["sweep_time"]
+        self.sweep_time = 0
 
-        #: float: Camera delay percent.
-        self.camera_delay_percent = configuration["configuration"]["microscopes"][
+        #: float: Camera delay
+        self.camera_delay = configuration["configuration"]["microscopes"][
             microscope_name
-        ]["camera"]["delay_percent"]
+        ]["camera"]["delay"] / 1000
 
         #: float: Galvo max voltage.
         self.galvo_max_voltage = self.device_config["hardware"]["max"]
 
         #: float: Galvo min voltage.
         self.galvo_min_voltage = self.device_config["hardware"]["min"]
-
-        #: float: Percent galvo ramp rising percent.
-        self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["remote_focus_device"]["ramp_falling_percent"]
 
         # Galvo Waveform Information
         #: str: Galvo waveform. Waveform or Sawtooth.
@@ -174,7 +167,7 @@ class GalvoBase:
                         frequency=galvo_frequency,
                         amplitude=galvo_amplitude,
                         offset=galvo_offset,
-                        phase=(self.camera_delay_percent / 100) * exposure_time,
+                        phase=self.camera_delay,
                     )
                 elif self.galvo_waveform == "sine":
                     self.waveform_dict[channel_key] = sine_wave(
@@ -192,7 +185,7 @@ class GalvoBase:
                         frequency=galvo_frequency,
                         amplitude=galvo_amplitude,
                         offset=galvo_offset,
-                        phase=(self.camera_delay_percent / 100) * exposure_time,
+                        phase=self.camera_delay,
                     )
                     half_samples = (
                         new_wave.argmax() if galvo_amplitude > 0 else new_wave.argmin()

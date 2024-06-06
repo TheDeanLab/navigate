@@ -1,4 +1,8 @@
-# serialport.py
+# Standard Imports
+import threading
+import time
+
+# Third Party Imports
 from serial import Serial
 from serial import SerialException
 from serial import SerialTimeoutException
@@ -6,9 +10,8 @@ from serial import EIGHTBITS
 from serial import PARITY_NONE
 from serial import STOPBITS_ONE
 from serial.tools import list_ports
-import threading
 
-import time
+# Local Imports
 
 
 class TigerException(Exception):

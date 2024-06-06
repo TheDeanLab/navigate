@@ -214,6 +214,8 @@ class WaveformTabController(GUIController):
         # two pass
         for k in self.waveform_dict["camera_waveform"].keys():
             remote_focus_waveform = self.waveform_dict["remote_focus_waveform"][k]
+            if remote_focus_waveform is None:
+                continue
             max_remote_focus_waveform = np.maximum(max_remote_focus_waveform, np.max(remote_focus_waveform))
             min_remote_focus_waveform = np.minimum(min_remote_focus_waveform, np.min(remote_focus_waveform))
             camera_waveform = self.waveform_dict["camera_waveform"][k]
@@ -326,3 +328,20 @@ class WaveformTabController(GUIController):
         """
         state = "normal" if mode == "stop" else "disabled"
         self.view.waveform_settings.inputs["waveform_template"].widget["state"] = state
+
+    def set_waveform_template(self, template_name):
+        """Set the waveform template name
+
+        Parameters
+        ----------
+        template_name : str
+            Set the waveform template name
+
+        Examples
+        --------
+        >>> self.set_waveform_template(template_name)
+        """
+        self.view.waveform_settings.inputs["waveform_template"].set(template_name)
+        self.parent_controller.configuration["experiment"]["MicroscopeState"][
+            "waveform_template"
+        ] = template_name

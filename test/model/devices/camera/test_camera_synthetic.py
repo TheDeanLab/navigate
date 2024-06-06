@@ -105,7 +105,6 @@ class TestSyntheticCamera:
             "generate_new_frame",
             "get_new_frame",
             "set_ROI",
-            "get_minimum_waiting_time",
         ]
 
         for m in methods:
@@ -117,18 +116,17 @@ class TestSyntheticCamera:
         self.synthetic_camera.report_settings()
         self.synthetic_camera.close_camera()
         self.synthetic_camera.set_sensor_mode(mode="test")
-        self.synthetic_camera.set_exposure_time(exposure_time=200)
+        self.synthetic_camera.set_exposure_time(exposure_time=0.2)
         self.synthetic_camera.set_line_interval(line_interval_time=1)
         self.synthetic_camera.set_binning(binning_string="2x2")
         self.synthetic_camera.initialize_image_series()
         self.synthetic_camera.close_image_series()
         self.synthetic_camera.get_new_frame()
         self.synthetic_camera.set_ROI()
-        self.synthetic_camera.get_minimum_waiting_time()
 
     def test_synthetic_camera_exposure(self):
         exposure_time = 200
-        self.synthetic_camera.set_exposure_time(exposure_time=exposure_time)
+        self.synthetic_camera.set_exposure_time(exposure_time=exposure_time / 1000)
         assert (exposure_time / 1000) == self.synthetic_camera.camera_exposure_time
 
     def test_synthetic_camera_binning(self):
@@ -185,10 +183,6 @@ class TestSyntheticCamera:
         assert (
             self.synthetic_camera.is_acquiring is False
         ), "is_acquiring should be False"
-
-    def test_synthetic_get_camera_minimum_wating_time(self):
-        wait_time = self.synthetic_camera.get_minimum_waiting_time()
-        assert wait_time == 0.01
 
     def test_synthetic_camera_set_roi(self):
         self.synthetic_camera.set_ROI()

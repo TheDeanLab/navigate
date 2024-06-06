@@ -284,13 +284,15 @@ class StageController(GUIController):
     def bind_position_callbacks(self):
         """Binds position_callback() to each axis, records the trace name so we can
         unbind later."""
+        widgets = self.view.get_widgets()
         if not self.position_callbacks_bound:
             for axis in ["x", "y", "z", "theta", "f"]:
                 # add event bind to position entry variables
-                cbname = self.widget_vals[axis].trace_add(
-                    "write", self.position_callback(axis)
-                )
-                self.position_callback_traces[axis] = cbname
+                widgets[axis].widget.bind("<FocusOut>", self.position_callback(axis))
+                # cbname = self.widget_vals[axis].trace_add(
+                #     "write", self.position_callback(axis)
+                # )
+                # self.position_callback_traces[axis] = cbname
             self.position_callbacks_bound = True
 
     def unbind_position_callbacks(self):
@@ -318,13 +320,11 @@ class StageController(GUIController):
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
         """
-        widgets = self.view.get_widgets()
         for axis in ["x", "y", "z", "theta", "f"]:
-            self.widget_vals[axis].set(position.get(axis, 0))
-            # validate position value if set through variable
-            if self.stage_limits:
-                widgets[axis].widget.trigger_focusout_validation()
-            self.stage_setting_dict[axis] = position.get(axis, 0)
+            if axis not in position:
+                continue
+            self.widget_vals[axis].set(position[axis])
+            self.position_callback(axis)()
         self.show_verbose_info("Set stage position")
 
     def set_position_silent(self, position):
@@ -335,11 +335,17 @@ class StageController(GUIController):
         position : dict
             {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
         """
-        self.unbind_position_callbacks()
+        widgets = self.view.get_widgets()
+        for axis in ["x", "y", "z", "theta", "f"]:
+            if axis not in position:
+                continue
+            self.widget_vals[axis].set(position[axis])
+            # validate position value if set through variable
+            if self.stage_limits:
+                widgets[axis].widget.trigger_focusout_validation()
+            self.stage_setting_dict[axis] = position.get(axis, 0)
+        self.show_verbose_info("Set stage position")
 
-        self.set_position(position)
-
-        self.bind_position_callbacks()
 
     def get_position(self):
         """This function returns current position from the view.
@@ -353,7 +359,7 @@ class StageController(GUIController):
         position = {}
         try:
             for axis in ["x", "y", "z", "theta", "f"]:
-                position[axis] = self.widget_vals[axis].get()
+                position[axis] = float(self.widget_vals[axis].get())
                 if self.stage_limits is True:
                     if (
                         position[axis] < self.position_min[axis]
@@ -392,7 +398,7 @@ class StageController(GUIController):
             to move."""
             stage_direction = -1 if self.flip_flags[axis] else 1
             try:
-                temp = position_val.get() + step_val.get() * stage_direction
+                temp = float(position_val.get()) + step_val.get() * stage_direction
             except tk._tkinter.TclError:
                 return
             if self.stage_limits is True:
@@ -401,8 +407,9 @@ class StageController(GUIController):
                 elif temp < self.position_min[axis]:
                     temp = self.position_min[axis]
             # guarantee stage won't move out of limits
-            if position_val.get() != temp:
+            if float(position_val.get()) != temp:
                 position_val.set(temp)
+                self.position_callback(axis)()
 
         return handler
 
@@ -432,7 +439,7 @@ class StageController(GUIController):
             to move."""
             stage_direction = -1 if self.flip_flags[axis] else 1
             try:
-                temp = position_val.get() - step_val.get() * stage_direction
+                temp = float(position_val.get()) - step_val.get() * stage_direction
             except tk._tkinter.TclError:
                 return
             if self.stage_limits is True:
@@ -441,8 +448,9 @@ class StageController(GUIController):
                 elif temp > self.position_max[axis]:
                     temp = self.position_max[axis]
             # guarantee stage won't move out of limits
-            if position_val.get() != temp:
+            if float(position_val.get()) != temp:
                 position_val.set(temp)
+                self.position_callback(axis)()
 
         return handler
 
@@ -465,6 +473,7 @@ class StageController(GUIController):
 
         def handler():
             position_val.set(0)
+            self.position_callback(axis)()
 
         return handler
 
@@ -482,6 +491,8 @@ class StageController(GUIController):
         def handler():
             x_val.set(0)
             y_val.set(0)
+            self.position_callback("x")()
+            self.position_callback("y")()
 
         return handler
 
@@ -543,11 +554,14 @@ class StageController(GUIController):
 
         def handler(*args):
             """Callback functions bind to position variables."""
+            # check if focus on another window
+            if not self.view.focus_get():
+                return
             if self.event_id[axis]:
                 self.view.after_cancel(self.event_id[axis])
             # if position is not a number, then do not move stage
             try:
-                position = position_var.get()
+                position = float(position_var.get())
                 if self.stage_limits:
                     widget.trigger_focusout_validation()
                     # if position is not inside limits do not move stage

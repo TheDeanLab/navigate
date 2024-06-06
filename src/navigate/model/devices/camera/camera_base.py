@@ -83,10 +83,6 @@ class CameraBase:
         self.is_acquiring = False
 
         # Initialize Pixel Information
-        #: int: Maximum image width
-        self.max_image_width = 2048
-        #: int: Maximum image height
-        self.max_image_height = 2048
         #: int: Minimum image width
         self.min_image_width = 4
         #: int: Minimum image height
@@ -96,11 +92,15 @@ class CameraBase:
         #: int: Minimum step size for image height.
         self.step_image_height = 4
         #: int: Number of pixels in the x direction
-        self.x_pixels = self.max_image_width
+        self.x_pixels = 2048
         #: int: Number of pixels in the y direction
-        self.y_pixels = self.max_image_height
-        self.camera_parameters["x_pixels"] = self.max_image_width
-        self.camera_parameters["y_pixels"] = self.max_image_height
+        self.y_pixels = 2048
+        #: float: minimum exposure time
+        self.minimum_exposure_time = 0.001
+        self.camera_parameters["x_pixels"] = 2048
+        self.camera_parameters["y_pixels"] = 2048
+        # TODO: trigger_source, readout_speed, trigger_active, trigger_mode and trigger_polarity
+        # can be removed after updating how we get the readout time in model and controller
         self.camera_parameters["trigger_source"] = 2.0
         self.camera_parameters["readout_speed"] = 1.0
         self.camera_parameters["pixel_size_in_microns"] = 6.5
@@ -194,26 +194,28 @@ class CameraBase:
         Parameters
         ----------
         full_chip_exposure_time : float
-            Normal mode exposure time.
+            Normal mode exposure time in seconds.
         shutter_width : int
             Width of light-sheet rolling shutter.
 
         Returns
         -------
         exposure_time : float
-            Light-sheet mode exposure time (ms).
+            Light-sheet mode exposure time (s).
         camera_line_interval : float
             HamamatsuOrca line interval duration (s).
+        full_chip_exposure time : float
+            Full chip exposure time (s).
         """
 
-        camera_line_interval = (full_chip_exposure_time / 1000) / (
+        camera_line_interval = full_chip_exposure_time / (
             shutter_width + self.y_pixels - 1
         )
 
         self.camera_parameters["line_interval"] = camera_line_interval
 
-        exposure_time = camera_line_interval * shutter_width * 1000
-        return exposure_time, camera_line_interval
+        exposure_time = camera_line_interval * shutter_width
+        return exposure_time, camera_line_interval, full_chip_exposure_time
 
     def close_camera(self):
         """Close camera."""

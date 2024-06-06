@@ -22,10 +22,10 @@ File
 
 The :guilabel:`File` menu lets a user create, load and save
 :ref:`experiment files <user_guide/software_configuration:experiment file>`,
-which store the states of the GUI and the hardware. This is useful if a user wants to 
+which store the states of the GUI and the hardware. The menu also provides an option to load and save :ref:`waveform constants files <user_guide/software_configuration:waveform constants file>` to store the waveform constants used for a given experiment. This is useful if a user wants to
 perform an experiment with the same parameters multiple times, but close the software 
-in between acquisitions. To facilitate reproducibility, an `experiment.yml` file is 
-always saved with collected image data.
+in between acquisitions. To facilitate reproducibility, `experiment.yml` and `waveform_constants.yml` files are
+always saved with the collected image data.
 
 The :guilabel:`File` menu also provides access to toggle the :guilabel:`Save Data` flag,
 also found under :guilabel:`Timepoint Settings` in the 

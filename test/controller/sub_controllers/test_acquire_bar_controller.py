@@ -236,6 +236,9 @@ class TestAcquireBarController:
         self.acquire_bar_controller.set_mode(mode)
         test = self.acquire_bar_controller.get_mode()
         assert test == mode, "Mode not set correctly"
+        # assert imaging mode is updated in the experiment
+        assert self.acquire_bar_controller.parent_controller.configuration[
+                "experiment"]["MicroscopeState"]["image_mode"] == mode
 
     def test_set_save(self):
         """Tests the set_save method of the AcquireBarController class
@@ -298,7 +301,7 @@ class TestAcquireBarController:
             the AcquireBarController class is not correct
         """
         # Assuming mode starts on live
-        assert self.acquire_bar_controller.mode == "live"
+        self.acquire_bar_controller.mode = "live"
 
         # Setting to mode specified by user
         self.acquire_bar_controller.view.pull_down.set(user_mode)
@@ -310,6 +313,8 @@ class TestAcquireBarController:
 
         # Checking that new mode gets set by function
         assert self.acquire_bar_controller.mode == expected_mode
+        assert self.acquire_bar_controller.parent_controller.configuration[
+                "experiment"]["MicroscopeState"]["image_mode"] == expected_mode
 
         # Resetting to live
         self.acquire_bar_controller.view.pull_down.set("Continuous Scan")

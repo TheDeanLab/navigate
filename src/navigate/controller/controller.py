@@ -78,6 +78,7 @@ from navigate.config.config import (
     update_config_dict,
     verify_experiment_config,
     verify_waveform_constants,
+    verify_configuration,
     get_navigate_path,
 )
 from navigate.tools.file_functions import create_save_path, save_yaml_file
@@ -153,6 +154,7 @@ class Controller:
             waveform_templates=waveform_templates_path,
         )
 
+        verify_configuration(self.manager, self.configuration)
         verify_experiment_config(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)
 
@@ -311,6 +313,12 @@ class Controller:
         self.img_width = img_width
         self.img_height = img_height
 
+        # virtual microscopes
+        for microscope_name in self.additional_microscopes:
+            self.model.destroy_virtual_microscope(microscope_name)
+            # TODO: destroy the popup window
+            self.additional_microscopes.pop(microscope_name)
+
     def update_acquire_control(self):
         """Update the acquire control based on the current experiment parameters."""
         self.view.acqbar.stop_stage.config(
@@ -407,6 +415,9 @@ class Controller:
         )
         self.channels_tab_controller.populate_experiment_values()
         self.camera_setting_controller.populate_experiment_values()
+        self.waveform_tab_controller.set_waveform_template(
+            self.configuration["experiment"]["MicroscopeState"]["waveform_template"]
+        )
 
         # autofocus popup
         if hasattr(self, "af_popup_controller"):
@@ -432,14 +443,20 @@ class Controller:
 
         """
         self.camera_setting_controller.update_experiment_values()
+
+        # set waveform template
+        if self.acquire_bar_controller.mode in ["live", "single", "z-stack"]:
+            camera_setting = self.configuration["experiment"]["CameraParameters"]
+            if camera_setting["sensor_mode"] == "Light-Sheet" and camera_setting[
+                "readout_direction"
+            ] in ["Bidirectional", "Rev. Bidirectional"]:
+                self.waveform_tab_controller.set_waveform_template("Bidirectional")
+            else:
+                self.waveform_tab_controller.set_waveform_template("Default")
+
         # update multi-positions
         positions = self.multiposition_tab_controller.get_positions()
-        update_config_dict(
-            self.manager,
-            self.configuration["experiment"],
-            "MultiPositions",
-            positions,
-        )
+        self.configuration["experiment"]["MultiPositions"] = positions
         self.configuration["experiment"]["MicroscopeState"][
             "multiposition_count"
         ] = len(positions)
@@ -735,11 +752,21 @@ class Controller:
                 return
             saving_settings = self.configuration["experiment"]["Saving"]
             file_directory = create_save_path(saving_settings)
+
+            # Save the experiment.yaml file.
             save_yaml_file(
-                file_directory,
-                self.configuration["experiment"],
+                file_directory=file_directory,
+                content_dict=self.configuration["experiment"],
                 filename="experiment.yml",
             )
+
+            # Save the waveform_constants.yaml file.
+            save_yaml_file(
+                file_directory=file_directory,
+                content_dict=self.configuration["waveform_constants"],
+                filename="waveform_constants.yml",
+            )
+
             self.camera_setting_controller.solvent = self.configuration["experiment"][
                 "Saving"
             ]["solvent"]
@@ -787,8 +814,10 @@ class Controller:
                         feature_list_popup, self
                     )
                     self.features_popup_controller.populate_feature_list(feature_id)
+
                     # wait until close the popup windows
                     self.view.wait_window(feature_list_popup.popup)
+
                     # do not run acquisition if "cancel" is selected
                     temp = self.features_popup_controller.start_acquisiton_flag
                     delattr(self, "features_popup_controller")
@@ -825,16 +854,14 @@ class Controller:
 
             # clear show_img_pipe
             while self.show_img_pipe.poll():
-                # TODO: image_id never called.
                 self.show_img_pipe.recv()
-                # image_id = self.show_img_pipe.recv()
 
         elif command == "exit":
-            """Exit the program."""
-            # Save current GUI settings to .navigate/config/experiment.yml file.
-            self.sloppy_stop()
-            # self.menu_controller.feature_id_val.set(0)
+            """Exit the program.
 
+            Saves the current GUI settings to .navigate/config/experiment.yml file.
+            """
+            self.sloppy_stop()
             self.update_experiment_setting()
             file_directory = os.path.join(get_navigate_path(), "config")
             save_yaml_file(
@@ -891,7 +918,7 @@ class Controller:
         self.threads_pool.createThread('model', target)
         commands and the need to stop as abruptly as
         possible when the user hits stop. Here we leverage
-        ObjectInSubprocess's refusal to let us access
+        ObjectInSubprocess' refusal to let us access
         the model from two threads to our advantage, and just
         try repeatedly until we get a command in front
         of the next command in the model threads_pool resource.
@@ -913,9 +940,9 @@ class Controller:
         Parameters
         ----------
         command : string
-            string = 'acquire' or 'autofocus'
+            'acquire' or 'autofocus'
         mode : string
-            string = 'continuous', 'z-stack', 'single', or 'projection'
+            'continuous', 'z-stack', 'single', or 'projection'
         args : function-specific passes.
         """
         self.camera_view_controller.image_count = 0
@@ -950,6 +977,8 @@ class Controller:
         )
 
         self.stop_acquisition_flag = False
+        start_time = time.time()
+        self.camera_setting_controller.update_readout_time()
 
         while True:
             if self.stop_acquisition_flag:
@@ -978,6 +1007,26 @@ class Controller:
                 mode=mode,
                 stop=False,
             )
+            # update framerate
+            stop_time = time.time()
+            try:
+                frames_per_second = images_received / (stop_time - start_time)
+            except ZeroDivisionError:
+                frames_per_second = 1 / (
+                    self.configuration["experiment"]["MicroscopeState"]["channels"][
+                        "channel_1"
+                    ].get("camera_exposure_time", 200)
+                    / 1000
+                )
+
+            # Update the Framerate in the Camera Settings Tab
+            self.camera_setting_controller.framerate_widgets["max_framerate"].set(
+                frames_per_second
+            )
+
+            # Update the Framerate in the Acquire Bar to provide an estimate of
+            # the duration of time remaining.
+            self.acquire_bar_controller.framerate = frames_per_second
 
         logger.info(
             f"Navigate Controller - Captured {images_received}, " f"{mode} Images"
@@ -1170,10 +1219,11 @@ class Controller:
                     waveform_dict=value,
                     sample_rate=self.configuration_controller.daq_sample_rate,
                 )
+
             elif event == "multiposition":
                 # Update the multi-position tab without appending to the list
                 update_table(
-                    table=self.view.settings.multiposition_tab.multipoint_list.get_table(),
+                    table=self.multiposition_tab_controller.table,
                     pos=value,
                 )
                 self.channels_tab_controller.is_multiposition_val.set(True)
@@ -1202,10 +1252,12 @@ class Controller:
                     if value["done"]:
                         print("Tony Wilson done! Updating expt...")
                         self.ao_popup_controller.update_experiment_values()
+
             elif event == "mirror_update":
                 if hasattr(self, "ao_popup_controller"):
                     self.ao_popup_controller.set_widgets_from_coef(value["coefs"])
                     self.ao_popup_controller.plot_mirror(value)
+
             elif event == "ao_save_report":
                 if hasattr(self, "ao_popup_controller"):
                     self.ao_popup_controller.save_report_to_file(value)
@@ -1215,7 +1267,6 @@ class Controller:
                 break
 
             elif event == "update_stage":
-                # ZM: I am so sorry for this.
                 for _ in range(10):
                     try:
                         self.update_stage_controller_silent(value)
@@ -1224,27 +1275,11 @@ class Controller:
                         time.sleep(0.001)
                         pass
 
-            elif event == "framerate":
-                # Update the Framerate in the Camera Settings Tab
-                self.camera_setting_controller.framerate_widgets["max_framerate"].set(
-                    value
-                )
-
-                # Update the Framerate in the Acquire Bar to provide an estimate of
-                # the duration of time remaining.
-                self.acquire_bar_controller.framerate = value
             elif event == "remove_positions":
                 self.multiposition_tab_controller.remove_positions(value)
 
-    # def exit_program(self):
-    #     """Exit the program.
-
-    #     This function is called when the user clicks the exit button in the GUI.
-    #     """
-    #     if messagebox.askyesno("Exit", "Are you sure?"):
-    #         logger.info("Exiting Program")
-    #         self.execute("exit")
-    #         sys.exit()
+            elif event == "exposure_time":
+                self.channels_tab_controller.set_exposure_time(value[0], value[1])
 
     def add_acquisition_mode(self, name, acquisition_obj):
         if name in self.plugin_acquisition_modes:

@@ -120,6 +120,10 @@ class SyntheticCamera(CameraBase):
         self.serial_number = "synthetic"
         #: float: exposure time
         self.camera_exposure_time = 0.2
+        #: int: width
+        self.x_pixels = self.camera_parameters["x_pixels"]
+        #: int: height
+        self.y_pixels = self.camera_parameters["y_pixels"]
 
         logger.info("SyntheticCamera Class Initialized")
 
@@ -154,10 +158,10 @@ class SyntheticCamera(CameraBase):
         Parameters
         ----------
         exposure_time : float
-            Exposure time in milliseconds.
+            Exposure time in seconds.
 
         """
-        self.camera_exposure_time = exposure_time / 1000
+        self.camera_exposure_time = exposure_time
 
     def set_line_interval(self, line_interval_time):
         """Set SyntheticCamera line interval.
@@ -274,7 +278,7 @@ class SyntheticCamera(CameraBase):
     def get_new_frame(self):
         """Get frame from SyntheticCamera camera."""
 
-        time.sleep(self.camera_exposure_time / 1000)
+        time.sleep(self.camera_exposure_time)
         timeout = 500
         while self.pre_frame_idx == self.current_frame_idx and timeout:
             time.sleep(0.001)
@@ -303,16 +307,6 @@ class SyntheticCamera(CameraBase):
         self.x_pixels = roi_width
         self.y_pixels = roi_height
 
-    def get_minimum_waiting_time(self):
-        """Get minimum waiting time for SyntheticCamera.
-
-        Returns
-        -------
-        float
-            Minimum waiting time.
-        """
-        return 0.01
-
     def calculate_readout_time(self):
         """Calculate duration of time needed to readout an image. Calculates the readout
         time and maximum frame rate according to the camera configuration settings.
@@ -321,11 +315,8 @@ class SyntheticCamera(CameraBase):
         -------
         readout_time : float
             Duration of time needed to readout an image.
-        max_frame_rate : float
-            Maximum framerate for a given camera acquisition mode.
 
         """
         exposure_time = self.camera_controller.get_property_value("exposure_time")
         readout_time = 0.01  # 10 milliseconds.
-        max_frame_rate = 1 / (exposure_time + readout_time)
-        return readout_time, max_frame_rate
+        return readout_time

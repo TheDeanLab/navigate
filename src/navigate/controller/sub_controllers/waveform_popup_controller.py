@@ -75,14 +75,17 @@ class WaveformPopupController(GUIController):
         ]
         #: dict: Galvo constants for the microscope.
         self.galvo_setting = self.resolution_info["galvo_constants"]
+
         #: ConfigurationController: The configuration controller.
         self.configuration_controller = self.parent_controller.configuration_controller
+
         #: str: The path to the waveform constants file.
         self.waveform_constants_path = waveform_constants_path
 
         # Get mode and mag widgets
         #: dict: The widgets for the mode and magnification.
         self.widgets = self.view.get_widgets()
+
         #: dict: The variables for the mode and magnification.
         self.variables = self.view.get_variables()
 
@@ -90,29 +93,39 @@ class WaveformPopupController(GUIController):
         #: list: The lasers.
         self.lasers = self.configuration_controller.lasers_info
 
-        # Initialize
         #: str: The current resolution.
         self.resolution = None
+
         #: str: The current magnification.
         self.mag = None
+
         #: str: The current microscope operation mode.
         self.mode = "stop"
+
         #: dict: Remote focus experiment dictionary.
         self.remote_focus_experiment_dict = None
+
         #: bool: Flag to update galvo device.
         self.update_galvo_device_flag = None
+
         #: bool: Flag to update waveform parameters.
         self.update_waveform_parameters_flag = False
+
         #: bool: Flag to enable/disable waveforms.
         self.waveforms_enabled = True
+
         #: dict: Dictionary of amplitude values.
         self.amplitude_dict = None
+
         #: float: the minimum value of remote focus device
         self.laser_min = 0
+
         #: float: the maximum value of remote focus device
         self.laser_max = 1.0
+
         #: dict: Dictionary of galvo minimum values
         self.galvo_min = {}
+
         #: dict: Dictionary of galvo maximum values
         self.galvo_max = {}
 
@@ -161,6 +174,9 @@ class WaveformPopupController(GUIController):
         self.variables["Delay"].trace_add("write", self.update_waveform_parameters)
         self.variables["Duty"].trace_add("write", self.update_waveform_parameters)
         self.variables["Smoothing"].trace_add("write", self.update_waveform_parameters)
+        self.variables["Ramp_falling"].trace_add(
+            "write", self.update_waveform_parameters
+        )
 
         # Save waveform constants
         self.view.get_buttons()["Save"].configure(command=self.save_waveform_constants)
@@ -286,7 +302,7 @@ class WaveformPopupController(GUIController):
         # amplitude.
         #
 
-    def populate_experiment_values(self):
+    def populate_experiment_values(self, force_update=False):
         """Set experiment values."""
         self.remote_focus_experiment_dict = self.parent_controller.configuration[
             "experiment"
@@ -294,11 +310,17 @@ class WaveformPopupController(GUIController):
         resolution_value = self.remote_focus_experiment_dict["microscope_name"]
         zoom_value = self.remote_focus_experiment_dict["zoom"]
         mag = zoom_value
-        if (
-            self.widgets["Mode"].get() == resolution_value
+        if (not force_update
+            and self.widgets["Mode"].get() == resolution_value
             and self.widgets["Mag"].get() == mag
         ):
             return
+
+        # Microscope information
+        self.resolution_info = self.parent_controller.configuration[
+            "waveform_constants"
+        ]
+        self.galvo_setting = self.resolution_info["galvo_constants"]
         self.widgets["Mode"].set(resolution_value)
         self.show_magnification(mag)
 
@@ -380,26 +402,22 @@ class WaveformPopupController(GUIController):
         # Currently pulls from the original microscope configuration YAML file, not the
         # current microscope configuration according to the model
         self.update_waveform_parameters_flag = False
-        waveform_configuration = self.resolution_info["remote_focus_constants"][
-            self.resolution
-        ][self.mag][self.lasers[0]]
         self.widgets["Smoothing"].set(
-            waveform_configuration.get("percent_smoothing", 0)
+            self.resolution_info["other_constants"].get("percent_smoothing", 0)
         )
         self.widgets["Smoothing"].widget.trigger_focusout_validation()
-        self.widgets["Delay"].set(waveform_configuration.get("percent_delay", 7.5))
+        self.widgets["Delay"].set(
+            self.resolution_info["other_constants"].get("remote_focus_delay", 7.5)
+        )
         self.widgets["Delay"].widget.trigger_focusout_validation()
-        if "other_constants" not in self.resolution_info:
-            update_config_dict(
-                self.parent_controller.manager,
-                self.resolution_info,
-                "other_constants",
-                {"remote_focus_settle_duration": 0},
-            )
         self.widgets["Duty"].set(
             self.resolution_info["other_constants"]["remote_focus_settle_duration"]
         )
         self.widgets["Duty"].widget.trigger_focusout_validation()
+        self.widgets["Ramp_falling"].set(
+            self.resolution_info["other_constants"]["remote_focus_ramp_falling"]
+        )
+        self.widgets["Ramp_falling"].widget.trigger_focusout_validation()
         self.update_waveform_parameters_flag = True
 
         # update resolution value in central controller (menu)
@@ -491,21 +509,20 @@ class WaveformPopupController(GUIController):
             delay = float(self.widgets["Delay"].widget.get())
             duty_cycle = float(self.widgets["Duty"].widget.get())
             smoothing = float(self.widgets["Smoothing"].widget.get())
+            ramp_falling = float(self.widgets["Ramp_falling"].widget.get())
         except ValueError:
             return
 
         # Update the waveform parameters
         # all the lasers use the same delay, smoothing value
-        for laser in self.lasers:
-            self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
-                laser
-            ]["percent_delay"] = delay
-            self.resolution_info["remote_focus_constants"][self.resolution][self.mag][
-                laser
-            ]["percent_smoothing"] = smoothing
         self.resolution_info["other_constants"][
             "remote_focus_settle_duration"
         ] = duty_cycle
+        self.resolution_info["other_constants"][
+            "remote_focus_ramp_falling"
+        ] = ramp_falling
+        self.resolution_info["other_constants"]["remote_focus_delay"] = delay
+        self.resolution_info["other_constants"]["percent_smoothing"] = smoothing
 
         # Pass the values to the parent controller.
         self.event_id = self.view.popup.after(
@@ -516,11 +533,18 @@ class WaveformPopupController(GUIController):
         )
 
     def estimate_galvo_setting(self, *args, **kwargs):
-        """Estimate galvo settings according to the acquisition parameters.
+        """Digitally scanned light-sheet frequency estimation.
 
-        Will only work if all channels have the same exposure duration.
-        Gets the line interval from the camera, number of pixels from the light-sheet
-        mode, and estimates the frequency as 1 / (line interval * number of pixels).
+        When imaging in a digitally scanned light-sheet mode, the galvo must
+        operate at a specific frequency, otherwise periodic lines will appear in
+        the image. This function estimates the frequency of the galvo based on the
+        line interval and the number of pixels in the light-sheet mode.
+
+        Note
+        ----
+            Will only work if all channels have the same exposure duration.
+            The framerate widget doesn't update unless you change the
+            exposure time in the channel settings. Default is 100ms.
 
         Parameters
         ----------
@@ -530,37 +554,36 @@ class WaveformPopupController(GUIController):
             The key is the name of the galvo and the value is the galvo setting.
         """
 
+        # Get the name of the galvo.
         galvo_name = args[0]
 
+        # Get the number of pixels in the light-sheet mode.
         number_of_pixels = (
             self.parent_controller.camera_setting_controller.mode_widgets[
                 "Pixels"
             ].get()
         )
+
+        # If not in the light-sheet mode, widget returns an empty string.
         if number_of_pixels == "":
-            # If we are not in the light-sheet mode, widget returns an empty string.
             return
 
-        # TODO: Worth noting that this doesn't matter because it cancels out in the
-        # frequency bit, but this is often not the right value. The framerate widget
-        # doesn't update unless you change the exposure time in the channel settings.
-        # It launches as a default of 100 ms every time.
+        # Get the exposure time. Convert to seconds.
         exposure_time = (
             self.parent_controller.camera_setting_controller.framerate_widgets[
                 "exposure_time"
             ].get()
         )
+        exposure_time = exposure_time / 1000
 
-        # The camera line interval won't be set until starting acquisition,
-        # we need to calculate it directly
-        # exposure_time and light_sheet_exposure_time are both ms
+        # Get the light sheet exposure time.
         (
-            light_sheet_exposure_time,
-            _,
+            light_sheet_exposure_time, _, _,
         ) = self.parent_controller.model.get_camera_line_interval_and_exposure_time(
             exposure_time, int(number_of_pixels) + 1
-        )  # TODO: Unclear why we need the +1. Figure out the reason.
+        )
 
+        # Calculate the frequency of the galvo.
         frequency = 2 / light_sheet_exposure_time * exposure_time
 
         # Update the GUI

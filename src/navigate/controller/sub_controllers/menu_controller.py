@@ -65,8 +65,14 @@ from navigate.controller.sub_controllers import (
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
 from navigate.tools.decorators import FeatureList
 from navigate.tools.common_functions import load_module_from_file
-from navigate.config.config import get_navigate_path
 
+
+# Misc. Local Imports
+from navigate.config.config import (
+    update_config_dict,
+    verify_waveform_constants,
+    get_navigate_path,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -88,8 +94,10 @@ class FakeEvent:
         """
         #: str: The character that was pressed.
         self.char = char
+
         #: str: The key that was pressed.
         self.keysym = keysym
+
         #: int: The state of the keyboard.
         self.state = 0
 
@@ -108,24 +116,34 @@ class MenuController(GUIController):
             The parent controller.
         """
         super().__init__(view, parent_controller)
+
         #: Controller: The parent controller.
         self.parent_controller = parent_controller
+
         #: tk.canvas: The view class.
         self.view = view
+
         #: tkinter.StringVar: Resolution value.
         self.resolution_value = tk.StringVar()
+
         #: tkinter.IntVar: Feature id value.
         self.feature_id_val = tk.IntVar()
+
         #: tkinter.IntVar: Disable stage limits.
         self.disable_stage_limits = tk.IntVar()
+
         #: FakeEvent: Fake event.
         self.fake_event = None
+
         #: list: List of feature list names.
         self.feature_list_names = []
+
         #: int: System feature list count.
         self.system_feature_list_count = 0
+
         #: int: Feature list count.
         self.feature_list_count = 0
+
         #: str: Feature list file name.
         self.feature_list_file_name = "feature_lists.yaml"
 
@@ -165,26 +183,40 @@ class MenuController(GUIController):
         # File Menu
         file_menu = {
             self.view.menubar.menu_file: {
-                "New Experiment": [
+                "Load Default Configuration": [
                     "standard",
                     self.new_experiment,
                     "Ctrl+Shift+N",
                     "<Control-N>",
                     "<Control_L-N>",
                 ],
-                "Load Experiment": [
+                "Load Experiment File": [
                     "standard",
                     self.load_experiment,
                     "Ctrl+Shift+O",
                     "<Control-O>",
                     "<Control_L-O>",
                 ],
-                "Save Experiment": [
+                "Save Experiment File": [
                     "standard",
                     self.save_experiment,
                     "Ctrl+Shift+S",
                     "<Control-S>",
                     "<Control_L-S>",
+                ],
+                "Load Waveform Constants File": [
+                    "standard",
+                    self.load_waveform_constants,
+                    None,
+                    None,
+                    None,
+                ],
+                "Save Waveform Constants File": [
+                    "standard",
+                    self.save_waveform_constants,
+                    None,
+                    None,
+                    None,
                 ],
                 "add_separator": [None],
                 "Toggle Save Data": [
@@ -346,28 +378,28 @@ class MenuController(GUIController):
             self.view.menubar.menu_window: {
                 "Channel Settings": [
                     "standard",
-                    lambda event: self.switch_tabs(1),
+                    lambda *args: self.switch_tabs(1),
                     "Ctrl+1",
                     "<Control-Key-1>",
                     "<Control_L-Key-1",
                 ],
                 "Camera Settings": [
                     "standard",
-                    lambda event: self.switch_tabs(2),
+                    lambda *args: self.switch_tabs(2),
                     "Ctrl+2",
                     "<Control-Key-2>",
                     "<Control_L-Key-2",
                 ],
                 "Stage Control": [
                     "standard",
-                    lambda event: self.switch_tabs(3),
+                    lambda *args: self.switch_tabs(3),
                     "Ctrl+3",
                     "<Control-Key-3>",
                     "<Control_L-Key-3",
                 ],
                 "Multiposition Table": [
                     "standard",
-                    lambda event: self.switch_tabs(4),
+                    lambda *args: self.switch_tabs(4),
                     "Ctrl+4",
                     "<Control-Key-4>",
                     "<Control_L-Key-4",
@@ -375,7 +407,7 @@ class MenuController(GUIController):
                 "add_separator": ["standard", None, None, None, None],
                 "Popout Camera Display": [
                     "standard",
-                    self.not_implemented,
+                    lambda: self.popout_camera_display(),
                     None,
                     None,
                     None,
@@ -690,6 +722,45 @@ class MenuController(GUIController):
             return
         save_yaml_file("", self.parent_controller.configuration["experiment"], filename)
 
+    def save_waveform_constants(self):
+        """Save a waveform constants file
+
+        Updates model.waveform_constants and saves it to file
+
+        """
+        filename = filedialog.asksaveasfilename(
+            defaultextension=".yml", filetypes=[("Yaml file", "*.yml *.yaml")]
+        )
+        if not filename:
+            return
+        save_yaml_file(
+            "", self.parent_controller.configuration["waveform_constants"], filename
+        )
+
+    def load_waveform_constants(self):
+        """Load a waveform constants file"""
+
+        filename = filedialog.askopenfilename(
+            defaultextension=".yml", filetypes=[("Yaml files", "*.yml *.yaml")]
+        )
+        if not filename:
+            return
+
+        update_config_dict(
+            self.parent_controller.manager,
+            self.parent_controller.configuration,
+            "waveform_constants",
+            filename,
+        )
+        verify_waveform_constants(
+            self.parent_controller.manager, self.parent_controller.configuration
+        )
+
+        if hasattr(self.parent_controller, "waveform_popup_controller"):
+            self.parent_controller.waveform_popup_controller.populate_experiment_values(
+                force_update=True
+            )
+
     def load_images(self):
         """Load images from a file."""
         filenames = filedialog.askopenfilenames(
@@ -762,9 +833,13 @@ class MenuController(GUIController):
         )
 
     def popup_waveform_setting(self):
+        """Pop up the Waveform setting window.
+
+        If the window is already open, show it. Otherwise, create a new one."""
         if hasattr(self.parent_controller, "waveform_popup_controller"):
             self.parent_controller.waveform_popup_controller.showup()
             return
+
         waveform_constants_popup = WaveformParameterPopupWindow(
             self.view, self.parent_controller.configuration_controller
         )
@@ -819,6 +894,10 @@ class MenuController(GUIController):
     def switch_tabs(self, tab):
         """Switch tabs."""
         self.parent_controller.view.settings.select(tab - 1)
+
+    def popout_camera_display(self):
+        """Pop out camera display."""
+        self.parent_controller.view.camera_waveform.popout()
 
     def popup_feature_list_setting(self):
         """Show feature list popup window"""

@@ -31,7 +31,7 @@
 #
 
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 import numpy as np
 
 AXES = ["x", "y", "z", "theta", "f"]
@@ -54,6 +54,52 @@ def stage_controller(dummy_controller):
         dummy_controller.camera_view_controller.canvas,
         dummy_controller,
     )
+
+# test before set position variables to MagicMock()
+def test_set_position(stage_controller):
+
+    widgets = stage_controller.view.get_widgets()
+    vals = {}
+    for axis in AXES:
+        widgets[axis].widget.trigger_focusout_validation = MagicMock()
+        vals[axis] = np.random.randint(0, 9)
+
+    stage_controller.view.get_widgets = MagicMock(return_value=widgets)
+    stage_controller.show_verbose_info = MagicMock()
+    position = {
+        "x": np.random.random(),
+        "y": np.random.random(),
+        "z": np.random.random(),
+    }
+    stage_controller.set_position(position)
+    for axis in position.keys():
+        assert float(stage_controller.widget_vals[axis].get()) == position[axis]
+        assert widgets[axis].widget.trigger_focusout_validation.called
+        assert stage_controller.stage_setting_dict[axis] == position.get(axis, 0)
+    stage_controller.show_verbose_info.assert_has_calls([call("Stage position changed"), call("Set stage position")])
+
+def test_set_position_silent(stage_controller):
+
+    widgets = stage_controller.view.get_widgets()
+    vals = {}
+    for axis in AXES:
+        widgets[axis].widget.trigger_focusout_validation = MagicMock()
+        vals[axis] = np.random.randint(0, 9)
+
+    stage_controller.view.get_widgets = MagicMock(return_value=widgets)
+    stage_controller.show_verbose_info = MagicMock()
+    position = {
+        "x": np.random.random(),
+        "y": np.random.random(),
+        "z": np.random.random(),
+    }
+    stage_controller.set_position_silent(position)
+    for axis in position.keys():
+        assert float(stage_controller.widget_vals[axis].get()) == position[axis]
+        widgets[axis].widget.trigger_focusout_validation.assert_called_once()
+        assert stage_controller.stage_setting_dict[axis] == position.get(axis, 0)
+    stage_controller.show_verbose_info.assert_has_calls([call("Set stage position")])
+    assert call("Stage position changed") not in stage_controller.show_verbose_info.mock_calls
 
 
 @pytest.mark.parametrize(
@@ -103,30 +149,6 @@ def test_stage_key_press(stage_controller, flip_x, flip_y):
 
     stage_config["flip_x"] = False
     stage_config["flip_y"] = False
-
-
-def test_set_position(stage_controller):
-
-    widgets = stage_controller.view.get_widgets()
-    vals = {}
-    for axis in AXES:
-        widgets[axis].widget.trigger_focusout_validation = MagicMock()
-        vals[axis] = np.random.randint(0, 9)
-        stage_controller.widget_vals[axis].set = MagicMock()
-
-    stage_controller.view.get_widgets = MagicMock(return_value=widgets)
-    stage_controller.show_verbose_info = MagicMock()
-    position = {
-        "x": np.random.random(),
-        "y": np.random.random(),
-        "z": np.random.random(),
-    }
-    stage_controller.set_position(position)
-    for axis in AXES:
-        assert stage_controller.widget_vals[axis].set.called
-        widgets[axis].widget.trigger_focusout_validation.assert_called_once()
-        assert stage_controller.stage_setting_dict[axis] == position.get(axis, 0)
-    stage_controller.show_verbose_info.assert_called_once_with("Set stage position")
 
 
 def test_get_position(stage_controller):

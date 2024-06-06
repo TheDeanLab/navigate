@@ -41,7 +41,6 @@ import nidaqmx
 
 # Local Imports
 from navigate.model.devices.stages.stage_base import StageBase
-from navigate.model.waveforms import dc_value, remote_focus_ramp
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -128,19 +127,12 @@ class GalvoNIStage(StageBase):
         ]["daq"]["trigger_source"]
 
         #: float: Percent of the camera delay.
-        self.camera_delay_percent = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["camera"]["delay_percent"]
-
-        #: float: Percent of the remote focus delay.
-        self.remote_focus_ramp_falling = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["remote_focus_device"]["ramp_falling_percent"]
-
-        #: float: Percent of the remote focus delay.
-        self.remote_focus_delay = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["remote_focus_device"]["delay_percent"]
+        self.camera_delay = (
+            configuration["configuration"]["microscopes"][microscope_name]["camera"][
+                "delay"
+            ]
+            / 1000
+        )
 
         #: float: Sample rate of the DAQ.
         self.sample_rate = self.configuration["configuration"]["microscopes"][
@@ -171,7 +163,7 @@ class GalvoNIStage(StageBase):
             Dictionary of positions for each axis.
         """
         return self.get_position_dict()
-    
+
     def update_waveform(self, waveform_dict):
         """Update the waveform for the stage.
 
@@ -187,7 +179,7 @@ class GalvoNIStage(StageBase):
         """
         self.switch_mode("waveform")
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        
+
         for channel_key in microscope_state["channels"].keys():
             # channel includes 'is_selected', 'laser', 'filter', 'camera_exposure'...
             channel = microscope_state["channels"][channel_key]
@@ -247,7 +239,11 @@ class GalvoNIStage(StageBase):
         if volts < self.galvo_min_voltage:
             volts = self.galvo_min_voltage
 
-        self.ao_task.write(volts, auto_start=True)
+        try:
+            self.ao_task.write(volts, auto_start=True)
+        except Exception as e:
+            logger.debug(f"Error moving {axis} to {axis_abs} volts: {volts}")
+            logger.exception(e)
         # Stage Settle Duration in Milliseconds
         if (
             wait_until_done
@@ -306,7 +302,12 @@ class GalvoNIStage(StageBase):
             if self.ao_task is None:
                 self.ao_task = nidaqmx.Task()
                 self.ao_task.ao_channels.add_ao_voltage_chan(self.axes_channels[0])
-            self.move_axis_absolute(self.axes[0], float(self.configuration["experiment"]["StageParameters"][self.axes[0]]))
+            self.move_axis_absolute(
+                self.axes[0],
+                float(
+                    self.configuration["experiment"]["StageParameters"][self.axes[0]]
+                ),
+            )
         elif self.ao_task:
             self.ao_task.stop()
             self.ao_task.close()

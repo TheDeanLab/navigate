@@ -76,7 +76,9 @@ def test_config_methods():
         "update_config_dict",
         "verify_experiment_config",
         "verify_waveform_constants",
+        "verify_configuration",
         "yaml",
+        "build_ref_name"
     ]
     for method in methods:
         assert method in desired_methods
@@ -360,7 +362,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         }
 
         multipositions_sample = [
-            {"x": 10.0, "y": 10.0, "z": 10.0, "f": 10.0, "theta": 10.0}
+            [10.0, 10.0, 10.0, 10.0, 10.0]
         ]
 
         self.experiment_sample = {
@@ -423,7 +425,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
 
         # MultiPositions
         for i, position in enumerate(self.experiment_sample["MultiPositions"]):
-            self.assert_equal_dict(position, experiement_config["MultiPositions"][i])
+            assert position == experiement_config["MultiPositions"][i]
 
     def test_load_experiment_file_with_missing_parameters(self):
         experiment = load_yaml_file(os.path.join(self.config_path, "experiment.yml"))

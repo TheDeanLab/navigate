@@ -34,3 +34,4 @@ light sheet microscopes. These include:
    acquire_mesospimbt
    acquire_CT-ASLM-V1_and_CT-ASLM-V2
    acquire_exASLM
+   ilastik_segmentation

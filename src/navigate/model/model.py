@@ -503,6 +503,7 @@ class Model:
             return
 
         if command == "acquire":
+            """Begin an acquisition."""
             self.is_acquiring = True
             self.imaging_mode = self.configuration["experiment"]["MicroscopeState"][
                 "image_mode"
@@ -750,14 +751,15 @@ class Model:
 
         # elif command == "change_camera":
         #     new_camera = list(self.active_microscope.cameras.values())[args[0]]
-        #     print(f"Using new camera >> {new_camera.camera_controller._serial_number}")
+        #     print(f"Using new camera >> {
+        #     new_camera.camera_controller._serial_number}")
         #     self.active_microscope.camera = new_camera
 
         elif command == "exit":
             for camera in self.active_microscope.cameras.values():
                 camera.camera_controller.dev_close()
         else:
-            self.active_microscope.run_command(command, args)
+            self.active_microscope.run_command(command, *args)
 
     # main function to update mirror/set experiment mode values
     def update_mirror(self, coef=[], flatten=False):
@@ -868,7 +870,6 @@ class Model:
 
         # whether acquire specific number of frames.
         count_frame = num_of_frames > 0
-        start_time = time.time()
 
         while not self.stop_acquisition:
             if self.ask_to_pause_data_thread:
@@ -889,9 +890,6 @@ class Model:
                 continue
 
             acquired_frame_num += len(frame_ids)
-            stop_time = time.time()
-            frames_per_second = acquired_frame_num / (stop_time - start_time)
-            self.event_queue.put(("framerate", frames_per_second))
 
             wait_num = self.camera_wait_iterations
 
@@ -1068,7 +1066,7 @@ class Model:
                 self.event_queue.put(
                     (
                         "warning",
-                        "There is an error happened. Please read the log files for details!",
+                        "An error happened. Please read the log files for details!",
                     )
                 )
                 return
@@ -1092,12 +1090,13 @@ class Model:
         acquisition parameters in real-time.
         """
         self.stop_acquisition = False
-        while self.stop_acquisition is False and self.stop_send_signal is False:
+        while not self.stop_acquisition and not self.stop_send_signal:
             self.run_acquisition()
-            if not self.injected_flag.value:
-                self.signal_container.reset()
-            else:
+            if self.injected_flag.value:
                 self.reset_feature_list()
+            elif hasattr(self, "signal_container"):
+                self.signal_container.reset()
+
         # Update the stage position.
         # Allows the user to externally move the stage in the continuous mode.
         self.get_stage_position()
@@ -1154,7 +1153,6 @@ class Model:
                 ],
             )
             injected_flag.value = False
-
 
     def change_resolution(self, resolution_value):
         """Switch resolution mode of the microscope.
@@ -1426,11 +1424,9 @@ class Model:
             os.makedirs(feature_lists_path)
             return
         # get __sequence.yml
-        if not os.path.exists(f"{feature_lists_path}/__sequence.yml"):
+        feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
+        if feature_records is None:
             feature_records = []
-        else:
-            feature_records = load_yaml_file(f"{feature_lists_path}/__sequence.yml")
-
         # add non added feature lists
         feature_list_files = [
             temp
@@ -1442,6 +1438,8 @@ class Model:
             if item == "__sequence.yml":
                 continue
             temp = load_yaml_file(f"{feature_lists_path}/{item}")
+            if temp is None:
+                continue
             add_flag = True
             for feature in feature_records:
                 if feature["feature_list_name"] == temp["feature_list_name"]:
@@ -1462,6 +1460,9 @@ class Model:
                 del feature_records[i]
                 continue
             item = load_yaml_file(f"{feature_lists_path}/{temp['yaml_file_name']}")
+            if item is None:
+                i += 1
+                continue
 
             if item["module_name"]:
                 try:

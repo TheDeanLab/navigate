@@ -113,8 +113,6 @@ class ChannelsTabController(GUIController):
         self.z_origin = 0
         #: float: The focus origin of the stack.
         self.focus_origin = 0
-        #: float: The stage velocity.
-        self.stage_velocity = None
         #: float: The filter wheel delay.
         self.filter_wheel_delay = None
         #: dict: The microscope state dictionary.
@@ -181,10 +179,9 @@ class ChannelsTabController(GUIController):
         config = self.parent_controller.configuration_controller
 
         self.stack_acq_widgets["cycling"].widget["values"] = ["Per Z", "Per Stack"]
-        self.stage_velocity = config.stage_setting_dict["velocity"]
         self.filter_wheel_delay = config.filter_wheel_setting_dict["filter_wheel_delay"]
         self.channel_setting_controller.initialize()
-        self.set_spinbox_range_limits(config.configuration["configuration"]["gui"])
+        # self.set_spinbox_range_limits(config.configuration["configuration"]["gui"])
         self.show_verbose_info("channels tab has been initialized")
 
     def populate_experiment_values(self):
@@ -648,7 +645,7 @@ class ChannelsTabController(GUIController):
             # time. Probably assemble a matrix of all the positions and then do
             # the calculations.
 
-            stage_delay = 0  # distance[max_distance_idx]/self.stage_velocity
+            stage_delay = 0
             # TODO False value.
 
             # If we were actually acquiring the data, we would call the function to
@@ -848,3 +845,18 @@ class ChannelsTabController(GUIController):
             if self.microscope_state_dict["timepoints"] < 1:
                 return "Timepoints should be at least 1!"
         return None
+    
+    def set_exposure_time(self, channel, exposure_time):
+        """Set exposure time for a specified channel
+        
+        Parameters
+        ----------
+        channel : str
+            Channel name, such as "channel_1", "channel_2",...
+        exposure_time : float
+            Exposure time in miliseconds.
+        """
+        idx = int(channel[channel.index('_')+1:]) - 1
+        self.channel_setting_controller.in_initialization = True
+        self.channel_setting_controller.view.exptime_variables[idx].set(exposure_time)
+        self.channel_setting_controller.in_initialization = False

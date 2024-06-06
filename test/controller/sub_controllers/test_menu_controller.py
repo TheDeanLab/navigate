@@ -39,7 +39,10 @@ import tkinter as tk
 import pytest
 
 # Local Imports
-from navigate.controller.sub_controllers.menu_controller import MenuController, FakeEvent
+from navigate.controller.sub_controllers.menu_controller import (
+    MenuController,
+    FakeEvent,
+)
 
 
 class TestFakeEvent(unittest.TestCase):
@@ -64,6 +67,9 @@ class TestStageMovement(unittest.TestCase):
 
     def tearDown(self):
         self.root.destroy()
+
+    def test_initialize_menus(self):
+        self.mc.initialize_menus()
 
     def test_stage_movement_with_ttk_entry(self):
         self.mc.parent_controller.view.focus_get.return_value = MagicMock(
@@ -183,25 +189,27 @@ class TestMenuController(unittest.TestCase):
         class MockWidget:
             def __int__(self):
                 self.value = False
+
             def set(self, value):
                 self.value = value
+
             def get(self):
                 return self.value
-            
-        channel_tab_controller = MagicMock()
-        self.menu_controller.parent_controller.channels_tab_controller = channel_tab_controller
-        channel_tab_controller.timepoint_vals = {
-            "is_save": MockWidget()
-        }
-        self.menu_controller.view.settings.channels_tab.stack_timepoint_frame\
-            .save_data.get = MagicMock(return_value = False)
-        self.menu_controller.toggle_save()
-        assert channel_tab_controller.timepoint_vals["is_save"].get() == True
 
-        self.menu_controller.view.settings.channels_tab.stack_timepoint_frame\
-            .save_data.get = MagicMock(return_value=True)
+        channel_tab_controller = MagicMock()
+        self.menu_controller.parent_controller.channels_tab_controller = (
+            channel_tab_controller
+        )
+        channel_tab_controller.timepoint_vals = {"is_save": MockWidget()}
+        temp = self.menu_controller.view.settings.channels_tab.stack_timepoint_frame
+        temp.save_data.get = MagicMock(return_value=False)
         self.menu_controller.toggle_save()
-        assert channel_tab_controller.timepoint_vals["is_save"].get() == False
+        assert channel_tab_controller.timepoint_vals["is_save"].get() is True
+
+        temp = self.menu_controller.view.settings.channels_tab.stack_timepoint_frame
+        temp.save_data.get = MagicMock(return_value=True)
+        self.menu_controller.toggle_save()
+        assert channel_tab_controller.timepoint_vals["is_save"].get() is False
 
     def test_stage_movement(self):
         # TODO: DummyController does not have a stage controller.
@@ -216,7 +224,9 @@ class TestMenuController(unittest.TestCase):
             )
 
     @patch("src.navigate.controller.sub_controllers.menu_controller.platform.system")
-    @patch("src.navigate.controller.sub_controllers.menu_controller.subprocess.check_call")
+    @patch(
+        "src.navigate.controller.sub_controllers.menu_controller.subprocess.check_call"
+    )
     def test_open_folder(self, mock_check_call, mock_system):
         mock_system.return_value = "Darwin"
         self.menu_controller.open_folder("test_path")

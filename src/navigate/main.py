@@ -34,12 +34,12 @@
 import tkinter as tk
 import platform
 import os
-import warnings
 
 # Third Party Imports
 
 # Local Imports
 from navigate.controller.controller import Controller
+from navigate.controller.configurator import Configurator
 from navigate.log_files.log_functions import log_setup
 from navigate.view.splash_screen import SplashScreen
 from navigate.tools.main_functions import (
@@ -68,7 +68,7 @@ def main():
         --waveform_constants-path
         --rest-api-file
         --waveform-templates-file
-        --logging-config
+        --logging-confi
 
     Returns
     -------
@@ -78,12 +78,14 @@ def main():
     --------
     >>> python main.py --synthetic-hardware
     """
-    if platform.system() != 'Windows':
-        print("WARNING: navigate was built to operate on a Windows platform. "
-              "While much of the software will work for evaluation purposes, some "
-              "unanticipated behaviors may occur. For example, it is known that the "
-              "Tkinter-based GUI does not grid symmetrically, nor resize properly "
-              "on MacOS. Testing on Linux operating systems has not been performed.")
+    if platform.system() != "Windows":
+        print(
+            "WARNING: navigate was built to operate on a Windows platform. "
+            "While much of the software will work for evaluation purposes, some "
+            "unanticipated behaviors may occur. For example, it is known that the "
+            "Tkinter-based GUI does not grid symmetrically, nor resize properly "
+            "on MacOS. Testing on Linux operating systems has not been performed."
+        )
 
     # Start the GUI, withdraw main screen, and show splash screen.
     root = tk.Tk()
@@ -106,20 +108,25 @@ def main():
         rest_api_path,
         waveform_templates_path,
         logging_path,
+        configurator,
     ) = evaluate_parser_input_arguments(args)
 
     log_setup("logging.yml", logging_path)
 
-    Controller(
-        root,
-        splash_screen,
-        configuration_path,
-        experiment_path,
-        waveform_constants_path,
-        rest_api_path,
-        waveform_templates_path,
-        args,
-    )
+    if args.configurator:
+        Configurator(root, splash_screen)
+    else:
+        Controller(
+            root,
+            splash_screen,
+            configuration_path,
+            experiment_path,
+            waveform_constants_path,
+            rest_api_path,
+            waveform_templates_path,
+            args,
+        )
+
     root.mainloop()
 
 

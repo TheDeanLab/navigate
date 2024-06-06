@@ -207,17 +207,11 @@ class TextExperimentFile(unittest.TestCase):
                 ), f"{key_key} is not of type {expected_values[key_key]}"
 
     def test_multiposition(self):
-        expected_values = {
-            "x": float,
-            "y": float,
-            "z": float,
-            "theta": float,
-            "f": float,
-        }
+        expected_values = [float, float, float, float, float]
         positions = self.data["MultiPositions"]
+        print("*** positions:", positions)
         for position in positions:
-            for key in position.keys():
-                self.assertIn(key, expected_values)
+            for i in range(len(expected_values)):
                 assert isinstance(
-                    position[key], expected_values[key]
-                ), f"{key} is not of type {expected_values[key]}"
+                    position[i], expected_values[i]
+                ), f"{i} is not of type {expected_values[i]}"

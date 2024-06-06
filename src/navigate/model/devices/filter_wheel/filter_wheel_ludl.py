@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,10 @@
 #  Standard Library Imports
 import logging
 import time
+import io
 
 # Third Party Imports
-import numpy as np
 import serial
-import io
 
 # Local Imports
 from navigate.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
@@ -45,6 +44,7 @@ from navigate.model.devices.filter_wheel.filter_wheel_base import FilterWheelBas
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
+
 
 def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
     """Build LUDLFilterWheel Serial Port connection
@@ -71,23 +71,24 @@ def build_filter_wheel_connection(comport, baudrate, timeout=0.25):
     logging.debug(f"LUDLFilterWheel - Opening Serial Port {comport}")
     try:
         return serial.Serial(
-            comport, 
-            baudrate, 
+            comport,
+            baudrate,
             parity=serial.PARITY_NONE,
             timeout=timeout,
             xonxoff=False,
-            stopbits=serial.STOPBITS_TWO
-            )
+            stopbits=serial.STOPBITS_TWO,
+        )
     except serial.SerialException:
         logger.warning("LUDLFilterWheel - Could not establish Serial Port Connection")
         raise UserWarning(
             "Could not communicate with LUDL MAC6000 via COMPORT", comport
         )
-    
+
+
 class LUDLFilterWheel(FilterWheelBase):
 
     """LUDLFilterWheel - Class for controlling LUDL Electronic Products Filter Wheels
-    
+
     Testing using MAC6000 controller over RS-232. USB or Ethernet not tested.
     Single filter wheel only, but MAC6000 can handle max 2. Would need to modify code.
 
@@ -99,11 +100,24 @@ class LUDLFilterWheel(FilterWheelBase):
     """
 
     def __init__(self, microscope_name, device_connection, configuration):
+        """Initialize the LUDLFilterWheel class.
+
+        Parameters
+        ----------
+        microscope_name : str
+            Name of the microscope.
+        device_connection : serial.Serial
+            Serial port connection to the filter wheel.
+        configuration : dict
+            Configuration file for the microscope.
+        """
 
         super().__init__(microscope_name, device_connection, configuration)
 
         #: obj: Serial port connection to the filter wheel.
         self.serial = device_connection
+
+        #: io.TextIOWrapper: Text I/O wrapper for the serial port.
         self.sio = io.TextIOWrapper(io.BufferedRWPair(self.serial, self.serial))
 
         #: str: Name of the microscope.
@@ -120,12 +134,21 @@ class LUDLFilterWheel(FilterWheelBase):
         ]["filter_wheel"]["filter_wheel_delay"]
 
     def set_filter(self, filter_name, wait_until_done=True):
+        """Set the filter wheel to a specific filter position.
+
+        Parameters
+        ----------
+        filter_name : str
+            Name of the filter position.
+        wait_until_done : bool
+            Wait until the filter wheel has changed positions.
+        """
 
         if self.check_if_filter_in_filter_dictionary(filter_name) is True:
 
             # single wheel code only...
 
-            # Set the new position by cross referencing the filter dict
+            # Set the new position by cross-referencing the filter dict
             self.wheel_position = self.filter_dictionary[filter_name]
 
             # Send the command to go to the new position
@@ -142,4 +165,4 @@ class LUDLFilterWheel(FilterWheelBase):
         """
         logger.debug("LUDLFilterWheel - Closing the Filter Wheel Serial Port")
         self.set_filter(list(self.filter_dictionary.keys())[0])
-        self.serial.close()                
+        self.serial.close()

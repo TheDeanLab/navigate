@@ -960,9 +960,17 @@ def verify_configuration(manager, configuration):
         "zoom": None,
         "mirror": None,
     }
+    required_devices = ["camera", "daq", "filter_wheel", "shutter", "remote_focus_device", "galvo", "stage", "lasers"]
     for microscope_name in device_config.keys():
         # camera
         # delay_percent -> delay
+        for device_name in required_devices:
+            if device_name not in device_config[microscope_name]:
+                print("**************************************************************************")
+                print(f"*** Please make sure you have {device_name} in the configuration for microscope {microscope_name}.")
+                print(f"*** Or please makesure {microscope_name} is inherited from another valid microscope!")
+                print("**************************************************************************")
+                raise Exception()
         camera_config = device_config[microscope_name]["camera"]
         if "delay" not in camera_config.keys():
             camera_config["delay"] = camera_config.get("delay_percent", 2)

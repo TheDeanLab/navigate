@@ -37,6 +37,8 @@ import traceback
 
 # Third Party Imports
 import nidaqmx
+import nidaqmx.constants
+import nidaqmx.task
 import numpy as np
 
 # Local Imports
@@ -220,7 +222,6 @@ class NIDAQ(DAQBase):
             self.microscope_name
         ]["daq"]["camera_trigger_out_line"]
         camera_high_time = 0.004
-        exposure_time = self.exposure_times[channel_key]
         sweep_time = self.sweep_times[channel_key]
         camera_low_time = sweep_time - camera_high_time
         camera_delay = self.camera_delay
@@ -299,7 +300,10 @@ class NIDAQ(DAQBase):
             # TODO: may change this later to automatically expand the waveform to the
             #  longest
             for k, v in self.analog_outputs.items():
-                if k.split("/")[0] == board and len(v["waveform"][channel_key]) < max_sample:
+                if (
+                    k.split("/")[0] == board
+                    and len(v["waveform"][channel_key]) < max_sample
+                ):
                     v["waveform"][channel_key] = np.hstack(
                         [v["waveform"][channel_key]] * self.waveform_expand_num
                     )
@@ -429,10 +433,13 @@ class NIDAQ(DAQBase):
             self.microscope_name = microscope_name
             self.analog_outputs = {}
             self.analog_output_tasks = {}
-        
-        self.camera_delay = self.configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["camera"]["delay"] / 1000
+
+        self.camera_delay = (
+            self.configuration["configuration"]["microscopes"][microscope_name][
+                "camera"
+            ]["delay"]
+            / 1000
+        )
         self.sample_rate = self.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"]

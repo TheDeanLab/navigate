@@ -68,46 +68,67 @@ class Microscope:
         # Initialize microscope object
         #: str: Name of the microscope.
         self.microscope_name = name
+
         #: dict: Configuration dictionary.
         self.configuration = configuration
+
         #: SharedNDArray: Buffer for image data.
         self.data_buffer = None
+
         #: dict: Dictionary of stages.
         self.stages = {}
+
         #: list: List of stages.
         self.stages_list = []
+
         #: bool: Ask stage for position.
         self.ask_stage_for_position = True
+
         #: dict: Dictionary of lasers.
         self.lasers = {}
+
         #: dict: Dictionary of galvanometers.
         self.galvo = {}
+
         #: dict: Dictionary of data acquisition devices.
         self.daq = devices_dict.get("daq", None)
+
         #: object; Tiger Controller object.
         self.tiger_controller = None
+
         #: dict: Dictionary of microscope info.
         self.info = {}
+
         #: int: Current channel.
         self.current_channel = None
+
         #: int: Current laser index.
         self.current_laser_index = 0
+
         #: list: List of all channels.
         self.channels = None
+
         #: list: List of available channels.
         self.available_channels = None
+
         #: int: Number of images.
         self.number_of_frames = None
+
         #: float: Central focus position.
         self.central_focus = None
+
         #: Bool: Is a synthetic microscope.
         self.is_synthetic = is_synthetic
+
         #: list: List of laser wavelengths.
         self.laser_wavelength = []
+
         #: dict: Dictionary of returned stage positions.
         self.ret_pos_dict = {}
+
         #: dict: Dictionary of commands
         self.commands = {}
+
         #: dict: Dictionary of plugin devices
         self.plugin_devices = {}
 
@@ -125,26 +146,24 @@ class Microscope:
             "mirror": ["type"],
         }
 
-        # TODO: This cannot be pulled into the repo.
-        #  I need help comping up with a more general way to have
-        # shared devices.
-        # devices_dict['filter_wheel']['ASI'] = devices_dict['stages']['ASI_119060508']
-
         device_name_dict = {"lasers": "wavelength"}
 
         laser_list = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["lasers"]
+
+        #: dict: Dictionary of laser configurations.
         self.laser_wavelength = [laser["wavelength"] for laser in laser_list]
 
         if "__plugins__" not in devices_dict:
             devices_dict["__plugins__"] = {}
 
-        # LOAD/START CAMERAS, FILTER_WHEELS, ZOOM, SHUTTERS, REMOTE_FOCUS_DEVICES,
-        # GALVOS, AND LASERS
+        # Load and start all devices
         for device_name in self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ].keys():
+
+            # Skip the daq and stage devices. These are handled separately.
             if device_name in ["daq", "stage"]:
                 continue
             is_plugin = False
@@ -164,10 +183,12 @@ class Microscope:
                     is_plugin = True
                 else:
                     print(
-                        f"Device {device_name} could not be loaded! Please make sure there is no spelling error!"
+                        f"Device {device_name} could not be loaded! "
+                        f"Please make sure there is no spelling error!"
                     )
                     logger.debug(
-                        f"Device {device_name} could not be loaded! Please make sure there is no spelling error!"
+                        f"Device {device_name} could not be loaded! "
+                        f"Please make sure there is no spelling error!"
                     )
                     continue
             for i, device in enumerate(device_config_list):
@@ -194,18 +215,24 @@ class Microscope:
                     device_plugin_dict = devices_dict.get(device_name, {})
                     try:
                         exec(
-                            f"device_plugin_dict['{device_ref_name}'] = devices_dict['__plugins__']['{device_name}']['load_device']"
-                            f"(configuration['configuration']['microscopes'][self.microscope_name]['{device_name}']['hardware'], is_synthetic)"
+                            f"device_plugin_dict['{device_ref_name}'] = devices_dict["
+                            f"'__plugins__']['{device_name}']['load_device']"
+                            f"(configuration['configuration']['microscopes']["
+                            f"self.microscope_name]['{device_name}']['hardware'], "
+                            f"is_synthetic)"
                         )
                         devices_dict[device_name] = device_plugin_dict
                         device_connection = device_plugin_dict[device_ref_name]
                         exec(
-                            f"self.plugin_devices['{device_name}'] = devices_dict['__plugins__']['{device_name}']['start_device']"
-                            f"(self.microscope_name, device_connection, configuration, is_synthetic)"
+                            f"self.plugin_devices['{device_name}'] = devices_dict["
+                            f"'__plugins__']['{device_name}']['start_device']"
+                            f"(self.microscope_name, device_connection, configuration, "
+                            f"is_synthetic)"
                         )
                     except RuntimeError:
                         print(
-                            f"Device {device_name} isn't loaded correctly! Please check the spelling and the plugin!"
+                            f"Device {device_name} isn't loaded correctly! "
+                            f"Please check the spelling and the plugin!"
                         )
                         continue
 
@@ -262,6 +289,7 @@ class Microscope:
         stage_devices = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["stage"]["hardware"]
+
         # set the NI Galvo stage flag
         self.configuration["configuration"]["microscopes"][self.microscope_name][
             "stage"
@@ -294,7 +322,7 @@ class Microscope:
                     "3. You may be using a stage that is not supported by "
                     "Navigate. Please check the list of supported stages in "
                     "the documentation."
-                    f"The stage that failed to load is: {device_ref_name}"
+                    f"The stage that failed to load is: {device_ref_name}",
                 )
 
             # SHARED DEVICES
@@ -434,7 +462,10 @@ class Microscope:
         """End the acquisition."""
         self.daq.stop_acquisition()
         # set NI Galvo stage to normal stage mode
-        if self.configuration["experiment"]["MicroscopeState"]["image_mode"] == "confocal-projection":
+        if (
+            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
+            == "confocal-projection"
+        ):
             for stage, _ in self.stages_list:
                 if type(stage).__name__ == "GalvoNIStage":
                     stage.switch_mode("normal")
@@ -509,37 +540,45 @@ class Microscope:
         exposure_times = {}
         sweep_times = {}
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        zoom = microscope_state["zoom"]
+        # zoom = microscope_state["zoom"] # assigned but not used?
         waveform_constants = self.configuration["waveform_constants"]
-        camera_delay = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["camera"]["delay"] / 1000
-        camera_settle_duration = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["camera"].get("settle_duration", 0) / 1000
-        remote_focus_ramp_falling = float(
-                waveform_constants["other_constants"]["remote_focus_ramp_falling"]
-            ) / 1000
+        camera_delay = (
+            self.configuration["configuration"]["microscopes"][self.microscope_name][
+                "camera"
+            ]["delay"]
+            / 1000
+        )
+        camera_settle_duration = (
+            self.configuration["configuration"]["microscopes"][self.microscope_name][
+                "camera"
+            ].get("settle_duration", 0)
+            / 1000
+        )
+        remote_focus_ramp_falling = (
+            float(waveform_constants["other_constants"]["remote_focus_ramp_falling"])
+            / 1000
+        )
 
         duty_cycle_wait_duration = (
-            float(
-                waveform_constants["other_constants"]["remote_focus_settle_duration"]
-            ) / 1000
+            float(waveform_constants["other_constants"]["remote_focus_settle_duration"])
+            / 1000
         )
-        ps = float(
-            waveform_constants["other_constants"].get("percent_smoothing", 0.0)
-        )
+        ps = float(waveform_constants["other_constants"].get("percent_smoothing", 0.0))
 
         readout_time = 0
-        readout_mode = self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
+        readout_mode = self.configuration["experiment"]["CameraParameters"][
+            "sensor_mode"
+        ]
         if readout_mode == "Normal":
             readout_time = self.camera.calculate_readout_time()
-        elif (
-            self.configuration["experiment"]["CameraParameters"]["readout_direction"] in ["Bidirectional", "Rev. Bidirectional"]
-        ):
+        elif self.configuration["experiment"]["CameraParameters"][
+            "readout_direction"
+        ] in ["Bidirectional", "Rev. Bidirectional"]:
             remote_focus_ramp_falling = 0
         # set readout out time
-        self.configuration["experiment"]["CameraParameters"]["readout_time"] = readout_time * 1000
+        self.configuration["experiment"]["CameraParameters"]["readout_time"] = (
+            readout_time * 1000
+        )
 
         for channel_key in microscope_state["channels"].keys():
             channel = microscope_state["channels"][channel_key]
@@ -547,27 +586,47 @@ class Microscope:
                 exposure_time = float(channel["camera_exposure_time"]) / 1000
 
                 if readout_mode == "Light-Sheet":
-                    _, _, updated_exposure_time = self.camera.calculate_light_sheet_exposure_time(
+                    (
+                        _,
+                        _,
+                        updated_exposure_time,
+                    ) = self.camera.calculate_light_sheet_exposure_time(
                         exposure_time,
                         int(
                             self.configuration["experiment"]["CameraParameters"][
                                 "number_of_pixels"
                             ]
-                        )
+                        ),
                     )
                     if updated_exposure_time != exposure_time:
-                        print(f"*** Notice: The actual exposure time of the camera for {channel_key} is {round(updated_exposure_time*1000, 1)}ms, not {exposure_time*1000}ms!")
+                        print(
+                            f"*** Notice: The actual exposure time of the camera for "
+                            f"{channel_key} is {round(updated_exposure_time*1000, 1)}"
+                            f"ms, not {exposure_time*1000}ms!"
+                        )
                         exposure_time = round(updated_exposure_time, 4)
                         # update the experiment file
-                        channel["camera_exposure_time"] = round(updated_exposure_time * 1000, 1)
-                        self.output_event_queue.put(("exposure_time", (channel_key, channel["camera_exposure_time"])))
+                        channel["camera_exposure_time"] = round(
+                            updated_exposure_time * 1000, 1
+                        )
+                        self.output_event_queue.put(
+                            (
+                                "exposure_time",
+                                (channel_key, channel["camera_exposure_time"]),
+                            )
+                        )
 
                 sweep_time = (
                     exposure_time
                     + readout_time
                     + camera_delay
-                    + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration, camera_delay) - camera_delay
-                )        
+                    + max(
+                        remote_focus_ramp_falling + duty_cycle_wait_duration,
+                        camera_settle_duration,
+                        camera_delay,
+                    )
+                    - camera_delay
+                )
                 # TODO: should we keep the percent_smoothing?
                 if ps > 0:
                     sweep_time = (1 + ps / 100) * sweep_time
@@ -637,7 +696,7 @@ class Microscope:
             (
                 self.current_exposure_time,
                 camera_line_interval,
-                _
+                _,
             ) = self.camera.calculate_light_sheet_exposure_time(
                 self.current_exposure_time,
                 int(
@@ -872,7 +931,8 @@ class Microscope:
         else:
             exec(
                 f"self.{device_name} = start_{device_name}(name, "
-                f"device_connection, self.configuration, self.is_synthetic, plugin_devices)"
+                f"device_connection, self.configuration, "
+                f"self.is_synthetic, plugin_devices)"
             )
             self.info[device_name] = device_ref_name
 

@@ -68,46 +68,67 @@ class Microscope:
         # Initialize microscope object
         #: str: Name of the microscope.
         self.microscope_name = name
+
         #: dict: Configuration dictionary.
         self.configuration = configuration
+
         #: SharedNDArray: Buffer for image data.
         self.data_buffer = None
+
         #: dict: Dictionary of stages.
         self.stages = {}
+
         #: list: List of stages.
         self.stages_list = []
+
         #: bool: Ask stage for position.
         self.ask_stage_for_position = True
+
         #: dict: Dictionary of lasers.
         self.lasers = {}
+
         #: dict: Dictionary of galvanometers.
         self.galvo = {}
+
         #: dict: Dictionary of data acquisition devices.
         self.daq = devices_dict.get("daq", None)
+
         #: object; Tiger Controller object.
         self.tiger_controller = None
+
         #: dict: Dictionary of microscope info.
         self.info = {}
+
         #: int: Current channel.
         self.current_channel = None
+
         #: int: Current laser index.
         self.current_laser_index = 0
+
         #: list: List of all channels.
         self.channels = None
+
         #: list: List of available channels.
         self.available_channels = None
+
         #: int: Number of images.
         self.number_of_frames = None
+
         #: float: Central focus position.
         self.central_focus = None
+
         #: Bool: Is a synthetic microscope.
         self.is_synthetic = is_synthetic
+
         #: list: List of laser wavelengths.
         self.laser_wavelength = []
+
         #: dict: Dictionary of returned stage positions.
         self.ret_pos_dict = {}
+
         #: dict: Dictionary of commands
         self.commands = {}
+
         #: dict: Dictionary of plugin devices
         self.plugin_devices = {}
 
@@ -125,26 +146,24 @@ class Microscope:
             "mirror": ["type"],
         }
 
-        # TODO: This cannot be pulled into the repo.
-        #  I need help comping up with a more general way to have
-        # shared devices.
-        # devices_dict['filter_wheel']['ASI'] = devices_dict['stages']['ASI_119060508']
-
         device_name_dict = {"lasers": "wavelength"}
 
         laser_list = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["lasers"]
+
+        #: dict: Dictionary of laser configurations.
         self.laser_wavelength = [laser["wavelength"] for laser in laser_list]
 
         if "__plugins__" not in devices_dict:
             devices_dict["__plugins__"] = {}
 
-        # LOAD/START CAMERAS, FILTER_WHEELS, ZOOM, SHUTTERS, REMOTE_FOCUS_DEVICES,
-        # GALVOS, AND LASERS
+        # Load and start all devices
         for device_name in self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ].keys():
+
+            # Skip the daq and stage devices. These are handled separately.
             if device_name in ["daq", "stage"]:
                 continue
             is_plugin = False
@@ -164,10 +183,12 @@ class Microscope:
                     is_plugin = True
                 else:
                     print(
-                        f"Device {device_name} could not be loaded! Please make sure there is no spelling error!"
+                        f"Device {device_name} could not be loaded! "
+                        f"Please make sure there is no spelling error!"
                     )
                     logger.debug(
-                        f"Device {device_name} could not be loaded! Please make sure there is no spelling error!"
+                        f"Device {device_name} could not be loaded! "
+                        f"Please make sure there is no spelling error!"
                     )
                     continue
             for i, device in enumerate(device_config_list):
@@ -194,18 +215,24 @@ class Microscope:
                     device_plugin_dict = devices_dict.get(device_name, {})
                     try:
                         exec(
-                            f"device_plugin_dict['{device_ref_name}'] = devices_dict['__plugins__']['{device_name}']['load_device']"
-                            f"(configuration['configuration']['microscopes'][self.microscope_name]['{device_name}']['hardware'], is_synthetic)"
+                            f"device_plugin_dict['{device_ref_name}'] = devices_dict["
+                            f"'__plugins__']['{device_name}']['load_device']"
+                            f"(configuration['configuration']['microscopes']["
+                            f"self.microscope_name]['{device_name}']['hardware'], "
+                            f"is_synthetic)"
                         )
                         devices_dict[device_name] = device_plugin_dict
                         device_connection = device_plugin_dict[device_ref_name]
                         exec(
-                            f"self.plugin_devices['{device_name}'] = devices_dict['__plugins__']['{device_name}']['start_device']"
-                            f"(self.microscope_name, device_connection, configuration, is_synthetic)"
+                            f"self.plugin_devices['{device_name}'] = devices_dict["
+                            f"'__plugins__']['{device_name}']['start_device']"
+                            f"(self.microscope_name, device_connection, configuration, "
+                            f"is_synthetic)"
                         )
                     except RuntimeError:
                         print(
-                            f"Device {device_name} isn't loaded correctly! Please check the spelling and the plugin!"
+                            f"Device {device_name} isn't loaded correctly! "
+                            f"Please check the spelling and the plugin!"
                         )
                         continue
 
@@ -220,10 +247,6 @@ class Microscope:
                     device_name == "galvo" or device_name == "remote_focus_device"
                 ):
                     device_connection = self.daq
-                
-                #TODO: if creating nidaq task in filter_wheel_daq.py works, we can delete the following two lines.
-                # if device_name == "filter_wheel" and device_ref_name.startswith("NI"): 
-                #     device_connection = self.daq
                     
                 if device_ref_name.startswith("EquipmentSolutions"):
                     device_connection = self.daq
@@ -266,6 +289,7 @@ class Microscope:
         stage_devices = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["stage"]["hardware"]
+
         # set the NI Galvo stage flag
         self.configuration["configuration"]["microscopes"][self.microscope_name][
             "stage"

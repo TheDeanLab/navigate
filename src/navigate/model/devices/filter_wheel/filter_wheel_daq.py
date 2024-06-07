@@ -36,6 +36,8 @@ import time
 
 # Third Party Imports
 import nidaqmx
+from nidaqmx.errors import DaqError
+from nidaqmx.constants import LineGrouping
 
 # Local Imports
 from navigate.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
@@ -46,30 +48,22 @@ logger = logging.getLogger(p)
 
 
 def build_filter_wheel_connection():
-    """Build DAQFilterwheel connection using the DAQ model object
+    """Build DAQFilterwheel connection.
 
-    Parameters
-    ----------
-    daq_object : NIDAQ
-        An instance of the NIDAQ class
+    The NI DAQ task is created within the DAQFIlterWheel Instance, so a shared
+    device connection is not needed. Accordingly, this function returns None.
 
     Returns
     -------
-    tiger_controller : TigerController
-        ASI Tiger Controller object.
+    daq_fw_controller : None
+        No device is returned.
     """
     daq_fw_controller = None
     return daq_fw_controller
 
 
 class DAQFilterWheel(FilterWheelBase):
-    """DAQFilterWheel - Class for controlling ASI Filter Wheels
-
-    Note
-    ----
-        Additional information on the ASI Filter Wheel can be found at:
-        https://asiimaging.com/docs/fw_1000#fw-1000_ascii_command_set
-    """
+    """DAQFilterWheel - Class for controlling filter wheels with a DAQ."""
 
     def __init__(self, microscope_name, device_connection, configuration):
         """Initialize the DAQFilterWheel class.
@@ -78,18 +72,15 @@ class DAQFilterWheel(FilterWheelBase):
         ----------
         microscope_name : str
             Name of the microscope.
-        device_connection : dict
-            Dictionary of device connections.
+        device_connection : object
+            Connection to the NIDAQ Instance. Imported but not used.
         configuration : dict
             Dictionary of configuration parameters.
         """
 
         super().__init__(microscope_name, device_connection, configuration)
 
-        #: obj: ASI Tiger Controller object.
-        self.filter_wheel = device_connection
-
-        #: str: Name of the ASI Filter Wheel.
+        #: str: Name of the microscope.
         self.microscope_name = microscope_name
 
         #: float: Delay for filter wheel to change positions.
@@ -114,7 +105,7 @@ class DAQFilterWheel(FilterWheelBase):
 
     def set_filter(self, filter_name, wait_until_done=True):
         """Change the filter wheel to the filter designated by the filter
-        position argument.
+        position argument. Requires a digital port on the DAQ.
 
         Parameters
         ----------
@@ -124,23 +115,33 @@ class DAQFilterWheel(FilterWheelBase):
             Waits duration of time necessary for filter wheel to change positions.
         """
         if self.check_if_filter_in_filter_dictionary(filter_name) is True:
-            # get the daq address from config
-            self.filter_wheel_task = nidaqmx.Task()
-            self.filter_wheel_task.do_channels.add_do_chan(
-                self.filter_dictionary[filter_name],
-                line_grouping=nidaqmx.constants.LineGrouping.CHAN_FOR_ALL_LINES,
+            try:
+                # Create the nidaqmx Task, and add the DO channel.
+                self.filter_wheel_task = nidaqmx.Task()
+                self.filter_wheel_task.do_channels.add_do_chan(
+                    lines=self.filter_dictionary[filter_name],
+                    line_grouping=LineGrouping.CHAN_FOR_ALL_LINES,
                 )
-            #TODO: Does self.filter_wheel_task.write(True, auto_start=True) work?
-            # self.filter_wheel_task.write(True, auto_start=True)
-            self.filter_wheel_task.write([False, True, True, False], auto_start=True)
-            self.filter_wheel_task.stop()
-            self.filter_wheel_task.close()
-            # We can remove the function in daq_ni.py if creating nidaq task here works
-            # self.filter_wheel.send_do_pulse(self.filter_dictionary[filter_name])
-            #  Wheel Position Change Delay
-            if wait_until_done:
-                time.sleep(self.wait_until_done_delay)
-            
+
+                # Trigger the nidaqmx Task to a 5V state.
+                self.filter_wheel_task.write([True],
+                                             auto_start=True
+                                             )
+
+                #  Wheel Position Change Delay in seconds
+                if wait_until_done:
+                    time.sleep(self.wait_until_done_delay)
+
+                # Trigger the nidaqmx Task to a 0V state.
+                self.filter_wheel_task.write([False],
+                                             auto_start=True
+                                             )
+
+                # Clean up the task
+                self.filter_wheel_task.stop()
+                self.filter_wheel_task.close()
+            except DaqError as e:
+                logger.debug(e)
                 
     def close(self):
         """Close the DAQ Filter Wheel

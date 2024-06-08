@@ -918,7 +918,8 @@ def verify_configuration(manager, configuration):
     # get microscope inheritance sequence
     microscope_name_seq = []
     inherited_microscope_dict = {}
-    for microscope_name in device_config.keys():
+    microscope_names_list = list(device_config.keys())
+    for microscope_name in microscope_names_list:
         try:
             parenthesis_l = microscope_name.index("(")
         except ValueError:

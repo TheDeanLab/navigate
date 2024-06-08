@@ -927,7 +927,7 @@ def verify_configuration(manager, configuration):
                 microscope_name_seq.append(microscope_name.strip())
             continue
 
-        if ")" not in microscope_name[parenthesis_l+1:] :
+        if ")" not in microscope_name[parenthesis_l+1:]:
             microscope_name_seq.append(microscope_name.strip())
             continue
 
@@ -948,6 +948,9 @@ def verify_configuration(manager, configuration):
         if microscope_name not in inherited_microscope_dict:
             continue
         parent_microscope_name = inherited_microscope_dict[microscope_name]
+        if parent_microscope_name not in device_config.keys():
+            raise Exception(f"Microscope {parent_microscope_name} is not defined in configuration.yaml")
+        
         for device_name in device_config[parent_microscope_name].keys():
             if device_name not in device_config[microscope_name].keys():
                 device_config[microscope_name][device_name] = device_config[parent_microscope_name][device_name]

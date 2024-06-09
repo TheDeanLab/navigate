@@ -104,6 +104,23 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
     return val
 
 
+class SerialConnectionFactory:
+
+    _connections = {}
+
+    @classmethod
+    def build_connection(cls, build_connection_function, args, exception=Exception):
+        port = args[0]
+        if str(port) not in cls._connections:
+            cls._connections[str(port)] = auto_redial(
+                build_connection_function,
+                args,
+                exception=exception
+            )
+
+        return cls._connections[str(port)]
+
+
 def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
     """Initializes the camera api class.
 
@@ -415,7 +432,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             )
 
             stage_devices.append(
-                auto_redial(
+                SerialConnectionFactory.build_connection(
                     build_MP285_connection,
                     (
                         stage_config["port"],
@@ -474,29 +491,23 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             so, then we will load this as a shared device. If not, we will create the
             connection to the Tiger Controller.
             """
-            filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"][
-                "type"
-            ]
-            if filter_wheel == "ASI":
-                stage_devices.append("shared device")
-            else:
-                from navigate.model.devices.stages.stage_asi import (
-                    build_ASI_Stage_connection,
-                )
-                from navigate.model.devices.APIs.asi.asi_tiger_controller import (
-                    TigerException,
-                )
+            from navigate.model.devices.stages.stage_asi import (
+                build_ASI_Stage_connection,
+            )
+            from navigate.model.devices.APIs.asi.asi_tiger_controller import (
+                TigerException,
+            )
 
-                stage_devices.append(
-                    auto_redial(
-                        build_ASI_Stage_connection,
-                        (
-                            stage_config["port"],
-                            stage_config["baudrate"],
-                        ),
-                        exception=TigerException,
-                    )
+            stage_devices.append(
+                SerialConnectionFactory.build_connection(
+                    build_ASI_Stage_connection,
+                    (
+                        stage_config["port"],
+                        stage_config["baudrate"],
+                    ),
+                    exception=TigerException,
                 )
+            )
 
         elif stage_type == "MS2000" and platform.system() == "Windows":
             """Filter wheel can be controlled from the same Controller. If
@@ -505,30 +516,24 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
 
             TODO: Evaluate whether MS2000 should be able to operate as a shared device.
             """
-            filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"][
-                "type"
-            ]
 
-            if filter_wheel == "MS2000":
-                stage_devices.append("shared device")
-            else:
-                from navigate.model.devices.stages.stage_asi_MSTwoThousand import (
+            from navigate.model.devices.stages.stage_asi_MSTwoThousand import (
+                build_ASI_Stage_connection,
+            )
+            from navigate.model.devices.APIs.asi.asi_MS2000_controller import (
+                MS2000Exception,
+            )
+
+            stage_devices.append(
+                SerialConnectionFactory.build_connection(
                     build_ASI_Stage_connection,
+                    (
+                        stage_config["port"],
+                        stage_config["baudrate"],
+                    ),
+                    exception=MS2000Exception,
                 )
-                from navigate.model.devices.APIs.asi.asi_MS2000_controller import (
-                    MS2000Exception,
-                )
-
-                stage_devices.append(
-                    auto_redial(
-                        build_ASI_Stage_connection,
-                        (
-                            stage_config["port"],
-                            stage_config["baudrate"],
-                        ),
-                        exception=MS2000Exception,
-                    )
-                )
+            )
 
         elif stage_type == "MFC2000" and platform.system() == "Windows":
             """Filter wheel can be controlled from the same Tiger Controller. If
@@ -537,29 +542,23 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
 
             TODO: Evaluate whether MFC2000 should be able to operate as a shared device.
             """
-            filter_wheel = configuration["configuration"]["hardware"]["filter_wheel"][
-                "type"
-            ]
-            if filter_wheel == "MFC2000":
-                stage_devices.append("shared device")
-            else:
-                from navigate.model.devices.stages.stage_asi_MFCTwoThousand import (
-                    build_ASI_Stage_connection,
-                )
-                from navigate.model.devices.APIs.asi.asi_tiger_controller import (
-                    TigerException,
-                )
+            from navigate.model.devices.stages.stage_asi_MFCTwoThousand import (
+                build_ASI_Stage_connection,
+            )
+            from navigate.model.devices.APIs.asi.asi_tiger_controller import (
+                TigerException,
+            )
 
-                stage_devices.append(
-                    auto_redial(
-                        build_ASI_Stage_connection,
-                        (
-                            stage_config["port"],
-                            stage_config["baudrate"],
-                        ),
-                        exception=TigerException,
-                    )
+            stage_devices.append(
+                SerialConnectionFactory.build_connection(
+                    build_ASI_Stage_connection,
+                    (
+                        stage_config["port"],
+                        stage_config["baudrate"],
+                    ),
+                    exception=TigerException,
                 )
+            )
 
         elif stage_type == "GalvoNIStage" and platform.system() == "Windows":
             stage_devices.append(DummyDeviceConnection())
@@ -866,7 +865,7 @@ def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devic
             build_filter_wheel_connection,
         )
 
-        return auto_redial(
+        return SerialConnectionFactory.build_connection(
             build_filter_wheel_connection,
             (device_info["port"], device_info["baudrate"], 0.25),
             exception=Exception,
@@ -877,7 +876,7 @@ def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devic
             build_filter_wheel_connection,
         )
 
-        return auto_redial(
+        return SerialConnectionFactory.build_connection(
             build_filter_wheel_connection,
             (device_info["port"], device_info["baudrate"], 0.25),
             exception=Exception,
@@ -888,7 +887,7 @@ def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devic
             build_filter_wheel_connection,
         )
 
-        tiger_controller = auto_redial(
+        tiger_controller = SerialConnectionFactory.build_connection(
             build_filter_wheel_connection,
             (device_info["port"], device_info["baudrate"], 0.25),
             exception=Exception,

@@ -93,8 +93,6 @@ class Microscope:
         #: dict: Dictionary of data acquisition devices.
         self.daq = devices_dict.get("daq", None)
 
-        #: object; Tiger Controller object.
-        self.tiger_controller = None
 
         #: dict: Dictionary of microscope info.
         self.info = {}
@@ -251,18 +249,6 @@ class Microscope:
                 if device_ref_name.startswith("EquipmentSolutions"):
                     device_connection = self.daq
 
-                if device_ref_name.startswith("ASI") and self.tiger_controller is None:
-                    # The first ASI instance of a device connection will be passed to
-                    # all other ASI devices as self.tiger_controller
-                    device_connection = devices_dict[device_name][device_ref_name]
-                    self.tiger_controller = device_connection
-                elif (
-                    device_ref_name.startswith("ASI")
-                    and self.tiger_controller is not None
-                ):
-                    # If subsequent ASI-based tiger controller devices are included.
-                    device_connection = self.tiger_controller
-
                 # LOAD AND START DEVICES
                 self.load_and_start_devices(
                     device_name=device_name,
@@ -332,11 +318,6 @@ class Microscope:
                 self.configuration["configuration"]["microscopes"][
                     self.microscope_name
                 ]["stage"]["has_ni_galvo_stage"] = True
-
-            if device_ref_name.startswith("ASI") and self.tiger_controller is not None:
-                # If the self.tiger_controller is already set, then we can pass it to
-                # other devices that are connected to the same controller.
-                devices_dict["stages"][device_ref_name] = self.tiger_controller
 
             stage = start_stage(
                 microscope_name=self.microscope_name,

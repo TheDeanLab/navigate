@@ -87,30 +87,20 @@ class SutterFilterWheel(FilterWheelBase):
         https://www.sutter.com/manuals/LB10-3_OpMan.pdf
     """
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(self, device_connection, device_config):
         """Initialize the SutterFilterWheel class.
 
         Parameters
         ----------
-        microscope_name : str
-            Name of the microscope.
         device_connection : dict
             Dictionary of device connections.
-        configuration : dict
-            Dictionary of configuration parameters.
+        device_config : dict
+            Dictionary of device configuration parameters.
         """
-        super().__init__(microscope_name, device_connection, configuration)
+        super().__init__(device_connection, device_config)
 
         #: obj: Serial port connection to the filter wheel.
         self.serial = device_connection
-
-        #: str: Name of the microscope.
-        self.microscope_name = microscope_name
-
-        #: int: Number of filter wheels.
-        self.number_of_filter_wheels = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["filter_wheel"]["hardware"]["wheel_number"]
 
         #: bool: Wait until filter wheel has completed movement.
         self.wait_until_done = True
@@ -230,19 +220,16 @@ class SutterFilterWheel(FilterWheelBase):
                 self.init_finished = True
                 logger.debug("SutterFilterWheel - Initialized.")
 
-            for wheel_idx in range(self.number_of_filter_wheels):
-                """Loop through each filter, and send the binary sequence via serial to
-                move to the desired filter wheel position
-                When number_of_filter_wheels = 1, loop executes once, and only wheel A
-                changes. When number_of_filter_wheels = 2, loop executes twice, with
-                both wheel A and B moving to the same position sequentially
-                Filter Wheel Command Byte Encoding = wheel + (self.speed*16) +
-                position = command byte
-                """
-                logger.debug(f"SutterFilterWheel - Moving to Position {wheel_idx}")
-                output_command = wheel_idx * 128 + self.wheel_position + 16 * self.speed
-                output_command = output_command.to_bytes(1, "little")
-                self.serial.write(output_command)
+            """send the binary sequence via serial to move to the desired filter wheel position
+            When number_of_filter_wheels = 1, wheel A changes. 
+            When number_of_filter_wheels = 2, wheel B changes.
+            Filter Wheel Command Byte Encoding = wheel + (self.speed*16) +
+            position = command byte
+            """
+            logger.debug(f"SutterFilterWheel - Moving to Position {self.filter_wheel_number-1}")
+            output_command = (self.filter_wheel_number-1) * 128 + self.wheel_position + 16 * self.speed
+            output_command = output_command.to_bytes(1, "little")
+            self.serial.write(output_command)
 
             #  Wheel Position Change Delay
             if wait_until_done:

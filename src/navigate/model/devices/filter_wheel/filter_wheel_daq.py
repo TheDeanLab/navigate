@@ -65,28 +65,21 @@ def build_filter_wheel_connection():
 class DAQFilterWheel(FilterWheelBase):
     """DAQFilterWheel - Class for controlling filter wheels with a DAQ."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(self, device_connection, device_config):
         """Initialize the DAQFilterWheel class.
 
         Parameters
         ----------
-        microscope_name : str
-            Name of the microscope.
         device_connection : object
             Connection to the NIDAQ Instance. Imported but not used.
-        configuration : dict
-            Dictionary of configuration parameters.
+        device_config : dict
+            Dictionary of device configuration parameters.
         """
 
-        super().__init__(microscope_name, device_connection, configuration)
-
-        #: str: Name of the microscope.
-        self.microscope_name = microscope_name
+        super().__init__(device_connection, device_config)
 
         #: float: Delay for filter wheel to change positions.
-        self.wait_until_done_delay = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["filter_wheel"]["filter_wheel_delay"]
+        self.wait_until_done_delay = device_config["filter_wheel_delay"]
 
         self.filter_wheel_task = None
 

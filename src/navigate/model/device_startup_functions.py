@@ -113,9 +113,7 @@ class SerialConnectionFactory:
         port = args[0]
         if str(port) not in cls._connections:
             cls._connections[str(port)] = auto_redial(
-                build_connection_function,
-                args,
-                exception=exception
+                build_connection_function, args, exception=exception
             )
 
         return cls._connections[str(port)]
@@ -833,7 +831,7 @@ def start_zoom(
         device_not_found("Zoom", device_type)
 
 
-def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devices={}):
+def load_filter_wheel_connection(device_info, is_synthetic=False, plugin_devices={}):
     """Initializes the Filter Wheel class on a dedicated thread.
 
     Load filter wheel information from the configuration file. Proper filter wheel types
@@ -841,8 +839,8 @@ def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devic
 
     Parameters
     ----------
-    configuration : multiprocesing.managers.DictProxy
-        Global configuration of the microscope
+    device_info : multiprocesing.managers.DictProxy
+        filter wheel device configuration
     is_synthetic : bool
         Run synthetic version of hardware?
     plugin_devices : dict
@@ -853,7 +851,6 @@ def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devic
     Filter : class
         Filter class.
     """
-    device_info = configuration["configuration"]["hardware"]["filter_wheel"]
     if is_synthetic:
         device_type = "SyntheticFilterWheel"
 
@@ -922,6 +919,7 @@ def start_filter_wheel(
     microscope_name,
     device_connection,
     configuration,
+    id=0,
     is_synthetic=False,
     plugin_devices={},
 ):
@@ -937,6 +935,8 @@ def start_filter_wheel(
         Hardware device to connect to
     configuration : multiprocesing.managers.DictProxy
         Global configuration of the microscope
+    id : int
+        Index of filter_wheel in the configuration dictionary
     is_synthetic : bool
         Run synthetic version of hardware?
     plugin_devices : dict
@@ -956,36 +956,38 @@ def start_filter_wheel(
     if device_connection is None:
         device_not_found(microscope_name, "filter_wheel")
 
+    device_config = configuration["configuration"]["microscopes"][microscope_name][
+        "filter_wheel"
+    ][id]
+
     if is_synthetic:
         device_type = "SyntheticFilterWheel"
     else:
-        device_type = configuration["configuration"]["microscopes"][microscope_name][
-            "filter_wheel"
-        ]["hardware"]["type"]
+        device_type = device_config["hardware"]["type"]
 
     if device_type == "SutterFilterWheel":
         from navigate.model.devices.filter_wheel.filter_wheel_sutter import (
             SutterFilterWheel,
         )
 
-        return SutterFilterWheel(microscope_name, device_connection, configuration)
+        return SutterFilterWheel(device_connection, device_config)
 
     elif device_type == "LUDLFilterWheel":
         from navigate.model.devices.filter_wheel.filter_wheel_ludl import (
             LUDLFilterWheel,
         )
 
-        return LUDLFilterWheel(microscope_name, device_connection, configuration)
+        return LUDLFilterWheel(device_connection, device_config)
 
     elif device_type == "ASI":
         from navigate.model.devices.filter_wheel.filter_wheel_asi import ASIFilterWheel
 
-        return ASIFilterWheel(microscope_name, device_connection, configuration)
+        return ASIFilterWheel(device_connection, device_config)
 
     elif device_type == "NI":
         from navigate.model.devices.filter_wheel.filter_wheel_daq import DAQFilterWheel
 
-        return DAQFilterWheel(microscope_name, device_connection, configuration)
+        return DAQFilterWheel(device_connection, device_config)
 
     elif (
         device_type.lower() == "syntheticfilterwheel"
@@ -995,7 +997,7 @@ def start_filter_wheel(
             SyntheticFilterWheel,
         )
 
-        return SyntheticFilterWheel(microscope_name, device_connection, configuration)
+        return SyntheticFilterWheel(device_connection, device_config)
 
     elif "filter_wheel" in plugin_devices:
         for start_function in plugin_devices["filter_wheel"]["start_device"]:
@@ -1006,6 +1008,7 @@ def start_filter_wheel(
                     configuration,
                     is_synthetic,
                     device_type="filter_wheel",
+                    id=id,
                 )
             except RuntimeError:
                 continue
@@ -1258,12 +1261,14 @@ def start_remote_focus_device(
 
     if device_type == "NI":
         from navigate.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
+
         return RemoteFocusNI(microscope_name, device_connection, configuration)
 
     elif device_type == "EquipmentSolutions":
         from navigate.model.devices.remote_focus.remote_focus_equipment_solutions import (
             RemoteFocusEquipmentSolutions,
         )
+
         return RemoteFocusEquipmentSolutions(
             microscope_name, device_connection, configuration
         )
@@ -1471,13 +1476,17 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
     if "daq" in configuration["configuration"]["hardware"].keys():
         devices["daq"] = start_daq(configuration, is_synthetic)
 
-    # load filter wheel
+    # load filter wheels
     if "filter_wheel" in configuration["configuration"]["hardware"].keys():
         devices["filter_wheel"] = {}
-        device = configuration["configuration"]["hardware"]["filter_wheel"]
-        devices["filter_wheel"][device["type"]] = load_filter_wheel_connection(
-            configuration, is_synthetic, plugin_devices
-        )
+        filter_wheels = configuration["configuration"]["hardware"]["filter_wheel"]
+        for i, filter_wheel_config in enumerate(filter_wheels):
+            device_ref_name = build_ref_name(
+                "_", filter_wheel_config["type"], filter_wheel_config["wheel_number"]
+            )
+            devices["filter_wheel"][device_ref_name] = load_filter_wheel_connection(
+                filter_wheel_config, is_synthetic, plugin_devices
+            )
 
     # load stage
     if "stage" in configuration["configuration"]["hardware"].keys():

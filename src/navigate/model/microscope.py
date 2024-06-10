@@ -90,6 +90,9 @@ class Microscope:
         #: dict: Dictionary of galvanometers.
         self.galvo = {}
 
+        #: dict: Dictionary of filter_wheels
+        self.filter_wheel = {}
+
         #: dict: Dictionary of data acquisition devices.
         self.daq = devices_dict.get("daq", None)
 
@@ -135,7 +138,7 @@ class Microscope:
 
         device_ref_dict = {
             "camera": ["serial_number"],
-            "filter_wheel": ["type"],
+            "filter_wheel": ["type", "wheel_number"],
             "zoom": ["type", "servo_id"],
             "shutter": ["type", "channel"],
             "remote_focus_device": ["type", "channel"],
@@ -666,7 +669,8 @@ class Microscope:
             channel_key
         ]
         # Filter Wheel Settings.
-        self.filter_wheel.set_filter(channel["filter"])
+        for k in self.filter_wheel:
+            self.filter_wheel[k].set_filter(channel[k])
 
         # Camera Settings
         self.current_exposure_time = float(channel["camera_exposure_time"]) / 1000

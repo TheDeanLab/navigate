@@ -1321,7 +1321,6 @@ class Model:
         # TODO: lasers
         temp = {
             "zoom": "SyntheticZoom",
-            "filter_wheel": "SyntheticFilterWheel",
             "shutter": "SyntheticShutter",
             "remote_focus_device": "SyntheticRemoteFocus",
             "mirror": "SyntheticMirror",
@@ -1345,6 +1344,15 @@ class Model:
                     )
                 else:
                     microscope.galvo[k] = self.microscopes[microscope_name].galvo[k]
+            elif k.startswith("filter"):
+                if microscope_config[k] == "":
+                    idx = int(k[k.rfind("_")+1:])
+                    microscope.filter_wheel[k] = SyntheticFilterWheel(
+                        type("DummyConnection", (object,), {}),
+                        self.configuration["configuration"]["microscopes"][microscope_name][
+                            "filter_wheel"
+                        ][idx]
+                    )
             else:
                 if microscope_config[k] == "":
                     exec(

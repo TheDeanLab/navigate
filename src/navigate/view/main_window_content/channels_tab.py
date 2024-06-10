@@ -193,7 +193,7 @@ class ChannelCreator(ttk.Labelframe):
         #: list: List of the frames for the columns
         self.frame_columns = []
 
-    def populate_frame(self, channels):
+    def populate_frame(self, channels, filter_wheels):
         """Populates the frame with the widgets.
 
         This function populates the frame with the widgets for the channels. By updating
@@ -205,8 +205,18 @@ class ChannelCreator(ttk.Labelframe):
         ----------
         channels : int
             The number of channels to be added to the frame.
+        filter_wheels : int
+            The number of filter wheels
         """
-
+        if filter_wheels > 1:
+            self.label_text = [
+                "Channel",
+                "Laser",
+                "Power",
+            ]
+            for i in range(filter_wheels):
+                self.label_text.append(f"Filter-{i}")
+            self.label_text += ["Exp. Time (ms)", "Interval", "Defocus"]
         #  Creates a column frame for each widget,
         for idx in range(len(self.label_text)):
             self.frame_columns.append(ttk.Frame(self))
@@ -225,11 +235,12 @@ class ChannelCreator(ttk.Labelframe):
         # Creates the widgets for each channel - populates the rows.
         for num in range(0, channels):
 
+            column_id = 0
             #  Channel Checkboxes
             self.channel_variables.append(tk.BooleanVar())
             self.channel_checks.append(
                 ttk.Checkbutton(
-                    self.frame_columns[0],
+                    self.frame_columns[column_id],
                     text="CH" + str(num + 1),
                     variable=self.channel_variables[num],
                 )
@@ -237,12 +248,13 @@ class ChannelCreator(ttk.Labelframe):
             self.channel_checks[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            column_id += 1
 
             #  Laser Dropdowns
             self.laser_variables.append(tk.StringVar())
             self.laser_pulldowns.append(
                 ttk.Combobox(
-                    self.frame_columns[1],
+                    self.frame_columns[column_id],
                     textvariable=self.laser_variables[num],
                     width=6,
                 )
@@ -251,12 +263,13 @@ class ChannelCreator(ttk.Labelframe):
             self.laser_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            column_id += 1
 
             #  Laser Power Spinbox
             self.laserpower_variables.append(tk.StringVar())
             self.laserpower_pulldowns.append(
                 ValidatedSpinbox(
-                    self.frame_columns[2],
+                    self.frame_columns[column_id],
                     from_=0,
                     to=100.0,
                     textvariable=self.laserpower_variables[num],
@@ -268,26 +281,29 @@ class ChannelCreator(ttk.Labelframe):
             self.laserpower_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NS, padx=1, pady=1
             )
+            column_id += 1
 
-            #  FilterWheel Dropdowns
-            self.filterwheel_variables.append(tk.StringVar())
-            self.filterwheel_pulldowns.append(
-                ttk.Combobox(
-                    self.frame_columns[3],
-                    textvariable=self.filterwheel_variables[num],
-                    width=10,
+            for i in range(filter_wheels):
+                #  FilterWheel Dropdowns
+                self.filterwheel_variables.append(tk.StringVar())
+                self.filterwheel_pulldowns.append(
+                    ttk.Combobox(
+                        self.frame_columns[column_id],
+                        textvariable=self.filterwheel_variables[-1],
+                        width=10,
+                    )
                 )
-            )
-            self.filterwheel_pulldowns[num].config(state="readonly")
-            self.filterwheel_pulldowns[num].grid(
-                row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
-            )
+                self.filterwheel_pulldowns[-1].config(state="readonly")
+                self.filterwheel_pulldowns[-1].grid(
+                    row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
+                )
+                column_id += 1
 
             #  Exposure Time Spin boxes
             self.exptime_variables.append(tk.StringVar())
             self.exptime_pulldowns.append(
                 ValidatedSpinbox(
-                    self.frame_columns[4],
+                    self.frame_columns[column_id],
                     from_=0,
                     to=1000.0,
                     textvariable=self.exptime_variables[num],
@@ -299,12 +315,13 @@ class ChannelCreator(ttk.Labelframe):
             self.exptime_pulldowns[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            column_id += 1
 
             #  Time Interval Spin boxes
             self.interval_variables.append(tk.StringVar())
             self.interval_spins.append(
                 ValidatedSpinbox(
-                    self.frame_columns[5],
+                    self.frame_columns[column_id],
                     from_=0,
                     to=1000.0,
                     textvariable=self.interval_variables[num],
@@ -316,6 +333,7 @@ class ChannelCreator(ttk.Labelframe):
             self.interval_spins[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            column_id += 1
             hover = Hover(self.interval_spins[num], text="Not Implemented", type="free")
             hover.setdescription(text="Not Implemented")
 
@@ -323,7 +341,7 @@ class ChannelCreator(ttk.Labelframe):
             self.defocus_variables.append(tk.DoubleVar())
             self.defocus_spins.append(
                 ValidatedSpinbox(
-                    self.frame_columns[6],
+                    self.frame_columns[column_id],
                     from_=-500.0,
                     to=500.0,
                     textvariable=self.defocus_variables[num],
@@ -335,6 +353,7 @@ class ChannelCreator(ttk.Labelframe):
             self.defocus_spins[num].grid(
                 row=num + 1, column=0, sticky=tk.NSEW, padx=1, pady=1
             )
+            column_id += 1
 
             if num % 2 == 1:
                 self.filterwheel_pulldowns[num].grid(pady=2)

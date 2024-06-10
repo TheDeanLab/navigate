@@ -130,10 +130,11 @@ class ConfigurationController:
 
         setting = {
             "laser": self.lasers_info,
-            "filter": list(
-                self.microscope_config["filter_wheel"]["available_filters"].keys()
-            ),
         }
+        for i, filter_wheel_config in enumerate(self.microscope_config["filter_wheel"]):
+            setting[f"filter_wheel_{i}"] = list(
+                filter_wheel_config["available_filters"].keys()
+            )
         return setting
 
     @property
@@ -378,9 +379,24 @@ class ConfigurationController:
             Number of channels.
         """
         if self.microscope_config is not None:
-            return self.configuration[
-                "configuration"]["gui"]["channels"].get("count", 5)
+            return self.configuration["configuration"]["gui"]["channels"].get(
+                "count", 5
+            )
         return 5
+
+    @property
+    def number_of_filter_wheels(self):
+        """Return number of filter wheels
+
+        Returns
+        -------
+        number_of_filter_wheels : int
+            Number of filter wheels
+        """
+
+        if self.microscope_config is not None:
+            return len(self.microscope_config["filter_wheel"])
+        return 1
 
     @property
     def microscope_list(self):
@@ -404,7 +420,7 @@ class ConfigurationController:
         return self.configuration["waveform_constants"]["remote_focus_constants"][
             microscope_name
         ].keys()
-    
+
     @property
     def gui_setting(self):
         return self.configuration["configuration"]["gui"]

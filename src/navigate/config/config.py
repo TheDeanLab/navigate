@@ -913,9 +913,50 @@ def verify_configuration(manager, configuration):
     
     Supports old version of configurations.
     """
+    device_config = configuration["configuration"]["microscopes"]
+
+    # get microscope inheritance sequence
+    microscope_name_seq = []
+    inherited_microscope_dict = {}
+    microscope_names_list = list(device_config.keys())
+    for microscope_name in microscope_names_list:
+        try:
+            parenthesis_l = microscope_name.index("(")
+        except ValueError:
+            if microscope_name.strip() not in microscope_name_seq:
+                microscope_name_seq.append(microscope_name.strip())
+            continue
+
+        if ")" not in microscope_name[parenthesis_l+1:]:
+            microscope_name_seq.append(microscope_name.strip())
+            continue
+
+        parenthesis_r = microscope_name[parenthesis_l+1:].index(")")
+        parent_microscope_name = microscope_name[parenthesis_l+1: parenthesis_l+parenthesis_r+1].strip()
+
+        if parent_microscope_name not in microscope_name_seq:
+            microscope_name_seq.append(parent_microscope_name)
+        
+        idx = microscope_name_seq.index(parent_microscope_name)
+        child_microscope_name = microscope_name[:parenthesis_l].strip()
+        microscope_name_seq.insert(idx+1, child_microscope_name)
+        inherited_microscope_dict[child_microscope_name] = parent_microscope_name
+        device_config[child_microscope_name] = device_config.pop(microscope_name)
+
+    # update microscope devices from parent microscope
+    for microscope_name in microscope_name_seq:
+        if microscope_name not in inherited_microscope_dict:
+            continue
+        parent_microscope_name = inherited_microscope_dict[microscope_name]
+        if parent_microscope_name not in device_config.keys():
+            raise Exception(f"Microscope {parent_microscope_name} is not defined in configuration.yaml")
+        
+        for device_name in device_config[parent_microscope_name].keys():
+            if device_name not in device_config[microscope_name].keys():
+                device_config[microscope_name][device_name] = device_config[parent_microscope_name][device_name]
+
     channel_count = 5
     # generate hardware header section
-    device_config = configuration["configuration"]["microscopes"]
     hardware_dict = {}
     ref_list = {
         "camera": [],
@@ -923,9 +964,17 @@ def verify_configuration(manager, configuration):
         "zoom": None,
         "mirror": None,
     }
+    required_devices = ["camera", "daq", "filter_wheel", "shutter", "remote_focus_device", "galvo", "stage", "lasers"]
     for microscope_name in device_config.keys():
         # camera
         # delay_percent -> delay
+        for device_name in required_devices:
+            if device_name not in device_config[microscope_name]:
+                print("**************************************************************************")
+                print(f"*** Please make sure you have {device_name} in the configuration for microscope {microscope_name}.")
+                print(f"*** Or please makesure {microscope_name} is inherited from another valid microscope!")
+                print("**************************************************************************")
+                raise Exception()
         camera_config = device_config[microscope_name]["camera"]
         if "delay" not in camera_config.keys():
             camera_config["delay"] = camera_config.get("delay_percent", 2)

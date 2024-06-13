@@ -51,6 +51,7 @@ from navigate.model.features.common_features import (
     StackPause,  # noqa
     ZStackAcquisition,  # noqa
     FindTissueSimple2D,  # noqa
+    SetCameraParameters, # noqa
 )
 from navigate.model.features.image_writer import ImageWriter  # noqa
 from navigate.model.features.restful_features import IlastikSegmentation  # noqa

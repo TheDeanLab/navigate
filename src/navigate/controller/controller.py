@@ -1280,6 +1280,8 @@ class Controller:
 
             elif event == "exposure_time":
                 self.channels_tab_controller.set_exposure_time(value[0], value[1])
+            elif event == "display_camera_parameters":
+                self.camera_setting_controller.update_camera_parameters_silent(*value)
 
     def add_acquisition_mode(self, name, acquisition_obj):
         if name in self.plugin_acquisition_modes:

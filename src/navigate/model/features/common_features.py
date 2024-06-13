@@ -1412,3 +1412,106 @@ class FindTissueSimple2D:
             )
 
             self.model.event_queue.put(("multiposition", table_values))
+
+class SetCameraParameters:
+    """
+    SetCameraParameters class for modifying the parameters of a camera.
+
+    This class provides functionality to update the parameters of a camera.
+
+    Notes:
+    ------
+    - This class can set sensor_mode, readout_direction and rolling_shutter_with.
+
+    - If the value of a parameter is None it doesn't update the parameter value.
+    """
+
+    def __init__(self, model, sensor_mode="Normal", readout_direction=None, rolling_shutter_width=None):
+        """Initialize the ChangeResolution class.
+
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for resolution mode changes.
+        sensor_mode : str, optional
+            The desired sensor mode to set for the camera. "Normal" or "Light-Sheet"
+        readout_direction : str, optional
+            The readout direction to set for the camera.
+            "Top-to-Bottom", "Bottom-to-Top", "Bidirectional" or "Rev. Bidirectional"
+        rolling_shutter_width : int, optional
+            The number of pixels for the rolling shutter.
+        """
+        #: MicroscopeModel: The microscope model associated with the resolution change.
+        self.model = model
+
+        #: dict: A dictionary defining the configuration for the resolution change
+        self.config_table = {
+            "signal": {"main": self.signal_func, "cleanup": self.cleanup},
+            "node": {"device_related": True},
+        }
+
+        #: str: The desired sensor mode to set for the camera.
+        self.sensor_mode = sensor_mode
+
+        #: str: The reading direction to set for the microscope.
+        self.readout_direction = readout_direction
+
+        #: int: The number of pixels for the rolling shutter.
+        try:
+            self.rolling_shutter_width = int(rolling_shutter_width)
+        except ValueError:
+            self.rolling_shutter_width = None
+
+    def signal_func(self):
+        """Perform actions to change the resolution mode and update the active
+         microscope.
+
+        This method carries out actions to change the resolution mode of the microscope
+         by reconfiguring the microscope settings, updating the active microscope, and
+         resuming data acquisition.
+
+        Returns:
+        -------
+        bool
+            A boolean value indicating the success of the resolution change process.
+        """
+        update_flag = False
+        update_sensor_mode = False
+        camera_parameters = self.model.configuration["experiment"]["CameraParameters"]
+        camera_config = self.model.configuration["configuration"]["microscopes"][
+            self.model.active_microscope_name
+        ]["camera"]
+        updated_value = [None] * 3
+        if self.sensor_mode in ["Normal", "Light-Sheet"] and self.sensor_mode != camera_parameters["sensor_mode"]:
+            update_flag = True
+            update_sensor_mode = True
+            camera_parameters["sensor_mode"] = self.sensor_mode
+            updated_value[0] = self.sensor_mode
+        if camera_parameters["sensor_mode"] == "Light-Sheet":
+            if self.readout_direction in camera_config["supported_readout_directions"] and \
+                (update_sensor_mode or camera_parameters["readout_direction"] != self.readout_direction):
+                update_flag = True
+                camera_parameters["readout_direction"] = self.readout_direction
+                updated_value[1] = self.readout_direction
+            if self.rolling_shutter_width and (update_sensor_mode or self.rolling_shutter_width != camera_parameters["number_of_pixels"]):
+                update_flag = True
+                camera_parameters["number_of_pixels"] = self.rolling_shutter_width
+                updated_value[2] = self.rolling_shutter_width
+        
+        if not update_flag:
+            return True
+        # pause data thread
+        self.model.pause_data_thread()
+        # end active microscope
+        self.model.active_microscope.end_acquisition()
+        # set parameters and prepare active microscope
+        waveform_dict = self.model.active_microscope.prepare_acquisition()
+        self.model.event_queue.put(("waveform", waveform_dict))
+        self.model.event_queue.put(("display_camera_parameters", updated_value))
+        # resume data thread
+        self.model.resume_data_thread()
+        return True
+    
+    def cleanup(self):
+        self.model.resume_data_thread()

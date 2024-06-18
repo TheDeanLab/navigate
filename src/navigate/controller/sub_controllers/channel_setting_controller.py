@@ -67,7 +67,12 @@ class ChannelSettingController(GUIController):
 
         # num: numbers of channels
         self.num = self.configuration_controller.number_of_channels
-        self.view.populate_frame(channels=self.num)
+        self.number_of_filter_wheels = (
+            self.configuration_controller.number_of_filter_wheels
+        )
+        self.view.populate_frame(
+            channels=self.num, filter_wheels=self.number_of_filter_wheels
+        )
 
         #: str: The mode of the channel setting controller. Either 'live' or 'stop'.
         self.mode = "stop"
@@ -116,7 +121,10 @@ class ChannelSettingController(GUIController):
 
             if not self.view.channel_variables[i].get():
                 self.view.laserpower_pulldowns[i].config(state=state)
-                self.view.filterwheel_pulldowns[i]["state"] = state_readonly
+                for j in range(self.number_of_filter_wheels):
+                    self.view.filterwheel_pulldowns[
+                        i * self.number_of_filter_wheels + j
+                    ]["state"] = state_readonly
                 self.view.defocus_spins[i].config(state=state)
 
     def initialize(self):
@@ -129,7 +137,11 @@ class ChannelSettingController(GUIController):
         setting_dict = self.configuration_controller.channels_info
         for i in range(self.num):
             self.view.laser_pulldowns[i]["values"] = setting_dict["laser"]
-            self.view.filterwheel_pulldowns[i]["values"] = setting_dict["filter"]
+            for j in range(self.number_of_filter_wheels):
+                ref_name = f"filter_wheel_{j}"
+                self.view.filterwheel_pulldowns[i * self.number_of_filter_wheels + j][
+                    "values"
+                ] = setting_dict[ref_name]
         self.show_verbose_info("channel has been initialized")
 
     def populate_experiment_values(self, setting_dict):
@@ -271,11 +283,13 @@ class ChannelSettingController(GUIController):
                 setting_dict["laser_index"] = self.get_index(
                     "laser", channel_vals["laser"].get()
                 )
-            elif widget_name == "filter":
-                setting_dict["filter"] = channel_vals["filter"].get()
-                setting_dict["filter_position"] = self.get_index(
-                    "filter", channel_vals["filter"].get()
-                )
+            elif widget_name.startswith("filter"):
+                for i in range(self.number_of_filter_wheels):
+                    ref_name = f"filter_wheel_{i}"
+                    setting_dict[ref_name] = channel_vals[ref_name].get()
+                    setting_dict[f"filter_position_{i}"] = self.get_index(
+                        ref_name, channel_vals[ref_name].get()
+                    )
             elif widget_name in [
                 "laser_power",
                 "camera_exposure_time",
@@ -385,12 +399,16 @@ class ChannelSettingController(GUIController):
         result = {
             "is_selected": self.view.channel_variables[index],
             "laser": self.view.laser_variables[index],
-            "filter": self.view.filterwheel_variables[index],
             "camera_exposure_time": self.view.exptime_variables[index],
             "laser_power": self.view.laserpower_variables[index],
             "interval_time": self.view.interval_variables[index],
             "defocus": self.view.defocus_variables[index],
         }
+        for i in range(self.number_of_filter_wheels):
+            ref_name = f"filter_wheel_{i}"
+            result[ref_name] = self.view.filterwheel_variables[
+                index * self.number_of_filter_wheels + i
+            ]
         return result
 
     def get_index(self, dropdown_name, value):
@@ -416,8 +434,9 @@ class ChannelSettingController(GUIController):
             return -1
         if dropdown_name == "laser":
             return self.view.laser_pulldowns[0]["values"].index(value)
-        elif dropdown_name == "filter":
-            return self.view.filterwheel_pulldowns[0]["values"].index(value)
+        elif dropdown_name.startswith("filter"):
+            idx = int(dropdown_name[dropdown_name.rfind("_") + 1 :])
+            return self.view.filterwheel_pulldowns[idx]["values"].index(value)
         return -1
 
     def verify_experiment_values(self):
@@ -431,18 +450,30 @@ class ChannelSettingController(GUIController):
         selected_channel_num = 0
         for channel_key in self.channel_setting_dict.keys():
             setting_dict = self.channel_setting_dict[channel_key]
-            idx = int(channel_key[len("channel_"):]) - 1
+            idx = int(channel_key[len("channel_") :]) - 1
             if setting_dict["is_selected"]:
                 selected_channel_num += 1
                 # laser power
-                if setting_dict["laser_power"] < self.view.laserpower_pulldowns[idx]["from"]:
+                if (
+                    setting_dict["laser_power"]
+                    < self.view.laserpower_pulldowns[idx]["from"]
+                ):
                     return f"Laser power below configured threshold. Please adjust to meet or exceed the specified minimum in the configuration.yaml({setting_range['laser_power']['min']})."
-                elif setting_dict["laser_power"] > self.view.laserpower_pulldowns[idx]["to"]:
+                elif (
+                    setting_dict["laser_power"]
+                    > self.view.laserpower_pulldowns[idx]["to"]
+                ):
                     return f"Laser power exceeds configured maximum. Please adjust to meet or be below the specified maximum in the configuration.yaml({setting_range['laser_power']['max']})."
                 # exposure time
-                if setting_dict["camera_exposure_time"] < self.view.exptime_pulldowns[idx]["from"]:
+                if (
+                    setting_dict["camera_exposure_time"]
+                    < self.view.exptime_pulldowns[idx]["from"]
+                ):
                     return f"Exposure time below configured threshold.Please adjust to meet or exceed the specified minimum in the configuration.yaml({setting_range['exposure_time']['min']})."
-                elif setting_dict["camera_exposure_time"] > self.view.exptime_pulldowns[idx]["to"]:
+                elif (
+                    setting_dict["camera_exposure_time"]
+                    > self.view.exptime_pulldowns[idx]["to"]
+                ):
                     return f"Exposure time exceeds configured maximum. Please adjust to meet or be below the specified maximum in the configuration.yaml({setting_range['exposure_time']['max']})"
 
         if selected_channel_num == 0:

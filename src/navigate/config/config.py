@@ -46,6 +46,7 @@ import yaml
 # Local Imports
 from navigate.tools.common_functions import build_ref_name
 
+
 def get_navigate_path():
     """Establish a program home directory in AppData/Local/.navigate for Windows
     or ~/.navigate for Mac and Linux.
@@ -448,7 +449,7 @@ def verify_experiment_config(manager, configuration):
         "Top-to-Bottom",
         "Bottom-to-Top",
         "Bidirectional",
-        "Rev. Bidirectional"
+        "Rev. Bidirectional",
     ]:
         camera_setting_dict["readout_direction"] = "Top-to-Bottom"
 
@@ -610,11 +611,15 @@ def verify_experiment_config(manager, configuration):
             "lasers"
         ]
     ]
-    filterwheel_list = list(
-        configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"][
-            "available_filters"
-        ].keys()
+    number_of_filter_wheels = len(
+        configuration["configuration"]["microscopes"][microscope_name]["filter_wheel"]
     )
+    filterwheel_list = [
+        list(filter_wheel_config["available_filters"].keys())
+        for filter_wheel_config in configuration["configuration"]["microscopes"][
+            microscope_name
+        ]["filter_wheel"]
+    ]
     prefix = "channel_"
     channel_nums = configuration["configuration"]["gui"]["channels"]["count"]
     channel_setting_dict = microscope_setting_dict["channels"]
@@ -634,11 +639,20 @@ def verify_experiment_config(manager, configuration):
             channel_value["laser"] = laser_list[0]
         channel_value["laser_index"] = laser_list.index(channel_value["laser"])
         # filter wheel
-        if channel_value["filter"] not in filterwheel_list:
-            channel_value["filter"] = filterwheel_list[0]
-        channel_value["filter_position"] = filterwheel_list.index(
-            channel_value["filter"]
-        )
+        for i in range(number_of_filter_wheels):
+            ref_name = f"filter_wheel_{i}"
+            if (
+                ref_name not in channel_value
+                or channel_value[ref_name] not in filterwheel_list[i]
+            ):
+                channel_value[ref_name] = filterwheel_list[i][0]
+            channel_value[f"filter_position_{i}"] = filterwheel_list[i].index(
+                channel_value[ref_name]
+            )
+        if "filter" in channel_value:
+            channel_value.pop("filter")
+        if "filter_position" in channel_value:
+            channel_value.pop("filter_position")
         # is_selected
         if (
             "is_selected" not in channel_value.keys()
@@ -673,12 +687,12 @@ def verify_experiment_config(manager, configuration):
     position_ids = []
     multipositions = configuration["experiment"]["MultiPositions"]
     for i, position in enumerate(multipositions):
-            try:
-                for j in range(5):
-                    float(position[j])
-            except (ValueError, KeyError):
-                position_ids.append(i)
-                
+        try:
+            for j in range(5):
+                float(position[j])
+        except (ValueError, KeyError):
+            position_ids.append(i)
+
     for idx in position_ids[::-1]:
         del multipositions[idx]
     if len(multipositions) < 1:
@@ -890,7 +904,7 @@ def verify_waveform_constants(manager, configuration):
         "remote_focus_settle_duration": "0",
         "percent_smoothing": "0",
         "remote_focus_delay": "0",
-        "remote_focus_ramp_falling": "5"
+        "remote_focus_ramp_falling": "5",
     }
     if (
         "other_constants" not in waveform_dict.keys()
@@ -908,9 +922,10 @@ def verify_waveform_constants(manager, configuration):
         except (ValueError, KeyError):
             waveform_dict["other_constants"][k] = "0"
 
+
 def verify_configuration(manager, configuration):
     """Verify configuration files.
-    
+
     Supports old version of configurations.
     """
     device_config = configuration["configuration"]["microscopes"]
@@ -961,6 +976,7 @@ def verify_configuration(manager, configuration):
     ref_list = {
         "camera": [],
         "stage": [],
+        "filter_wheel": [],
         "zoom": None,
         "mirror": None,
     }
@@ -982,19 +998,25 @@ def verify_configuration(manager, configuration):
         # ramp_falling_percent -> ramp_falling
         remote_focus_config = device_config[microscope_name]["remote_focus_device"]
         if "ramp_falling" not in remote_focus_config.keys():
-            remote_focus_config["ramp_falling"] = remote_focus_config.get("ramp_falling_percent", 5)
+            remote_focus_config["ramp_falling"] = remote_focus_config.get(
+                "ramp_falling_percent", 5
+            )
         if "delay" not in remote_focus_config.keys():
             remote_focus_config["delay"] = remote_focus_config.get("delay_percent", 0)
-        
+
         # daq
         daq_type = device_config[microscope_name]["daq"]["hardware"]["type"]
         if not daq_type.lower().startswith("synthetic"):
             hardware_dict["daq"] = {"type": daq_type}
 
         # camera
-        if "camera" not in hardware_dict:  
+        if "camera" not in hardware_dict:
             hardware_dict["camera"] = []
-        camera_idx = build_ref_name("-", camera_config["hardware"]["type"], camera_config["hardware"]["serial_number"])
+        camera_idx = build_ref_name(
+            "-",
+            camera_config["hardware"]["type"],
+            camera_config["hardware"]["serial_number"],
+        )
         if camera_idx not in ref_list["camera"]:
             ref_list["camera"].append(camera_idx)
             hardware_dict["camera"].append(camera_config["hardware"])
@@ -1012,8 +1034,32 @@ def verify_configuration(manager, configuration):
 
         # filter wheel
         if "filter_wheel" not in hardware_dict:
-            filter_wheel_config = device_config[microscope_name]["filter_wheel"]["hardware"]
-            hardware_dict["filter_wheel"] = filter_wheel_config
+            hardware_dict["filter_wheel"] = []
+            filter_wheel_seq = []
+
+        filter_wheel_config = device_config[microscope_name]["filter_wheel"]
+        if type(filter_wheel_config) == DictProxy:
+            # support older version of configuration.yaml
+            # filter_wheel_delay and available filters
+            update_config_dict(
+                manager,
+                device_config[microscope_name],
+                "filter_wheel",
+                [filter_wheel_config],
+            )
+
+        temp_config = device_config[microscope_name]["filter_wheel"]
+        for _, filter_wheel_config in enumerate(temp_config):
+            filter_wheel_idx = build_ref_name(
+                "-",
+                filter_wheel_config["hardware"]["type"],
+                filter_wheel_config["hardware"]["wheel_number"],
+            )
+            if filter_wheel_idx not in ref_list["filter_wheel"]:
+                ref_list["filter_wheel"].append(filter_wheel_idx)
+                hardware_dict["filter_wheel"].append(filter_wheel_config["hardware"])
+                filter_wheel_seq.append(filter_wheel_config)
+
         # stage
         if "stage" not in hardware_dict:
             hardware_dict["stage"] = []
@@ -1026,13 +1072,39 @@ def verify_configuration(manager, configuration):
                 hardware_dict["stage"].append(stage)
 
         # mirror
-        if "mirror" in device_config[microscope_name].keys() and "mirror" not in hardware_dict:
-            hardware_dict["mirror"] = device_config[microscope_name]["mirror"]["hardware"]
+        if (
+            "mirror" in device_config[microscope_name].keys()
+            and "mirror" not in hardware_dict
+        ):
+            hardware_dict["mirror"] = device_config[microscope_name]["mirror"][
+                "hardware"
+            ]
 
     if "daq" not in hardware_dict:
-        hardware_dict["daq"] = {
-            "type": "synthetic"
-        }
-    update_config_dict(manager, configuration["configuration"], "hardware", hardware_dict)
+        hardware_dict["daq"] = {"type": "synthetic"}
 
-    update_config_dict(manager, configuration["configuration"], "gui", {"channels": {"count": channel_count}})
+    # make sure all microscopes have the same filter wheel sequence
+    if len(device_config.keys()) > 1:
+        for microscope_name in device_config.keys():
+            temp_config = device_config[microscope_name]["filter_wheel"]
+            filter_wheel_ids = list(range(len(ref_list["filter_wheel"])))
+            for _, filter_wheel_config in enumerate(temp_config):
+                filter_wheel_idx = build_ref_name(
+                    "-",
+                    filter_wheel_config["hardware"]["type"],
+                    filter_wheel_config["hardware"]["wheel_number"],
+                )
+                filter_wheel_ids.remove(ref_list["filter_wheel"].index(filter_wheel_idx))
+            for i in filter_wheel_ids:
+                temp_config.insert(i, filter_wheel_seq[i])
+
+    update_config_dict(
+        manager, configuration["configuration"], "hardware", hardware_dict
+    )
+
+    update_config_dict(
+        manager,
+        configuration["configuration"],
+        "gui",
+        {"channels": {"count": channel_count}},
+    )

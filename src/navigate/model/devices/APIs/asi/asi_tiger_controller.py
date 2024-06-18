@@ -311,12 +311,20 @@ class TigerController:
         response = self.serial_port.readline()
         self.safe_to_write.set()
 
-        response = response.decode(encoding="ascii")
+        try:
+            response = response.decode(encoding="ascii")
+        except UnicodeDecodeError:
+            """
+            Low-Frequency Serial Communication error:
+            utf-8' codec can't decode byte 0x8c in position 0: 
+            invalid start byte
+            """
+            return ""
+
         # Remove leading and trailing empty spaces
         self.report_to_console(f"Received Response: {response.strip()}")
         if response.startswith(":N"):
             raise TigerException(response)
-
         return response  # in case we want to read the response
 
     def moverel(self, x: int = 0, y: int = 0, z: int = 0) -> None:
@@ -517,7 +525,7 @@ class TigerController:
         waiting_time = 0.0
 
         while busy:
-            waiting_time += 0.001
+            waiting_time += 0.005
             if waiting_time >= timeout:
                 break
             time.sleep(0.001)
@@ -761,7 +769,6 @@ class TigerController:
         1> FW 0 ERR FW 0 not ready
         0> Although FW 0 not ready – can still change FW 0 parameters.
         """
-        assert filter_wheel_number in range(2)
         self.send_filter_wheel_command(f"FW {filter_wheel_number}")
         self.read_response()
 

@@ -63,8 +63,8 @@ class SyntheticFilterWheel(FilterWheelBase):
         Flag for enabling the wait period for a filter wheel change.
     """
 
-    def __init__(self, microscope_name, device_connection, configuration):
-        super().__init__(microscope_name, device_connection, configuration)
+    def __init__(self, device_connection, device_config):
+        super().__init__(device_connection, device_config)
 
     def filter_change_delay(self, filter_name):
         """Calculate duration of time necessary to change filter wheel positions

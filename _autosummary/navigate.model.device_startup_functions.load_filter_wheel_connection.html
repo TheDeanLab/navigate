@@ -108,6 +108,7 @@
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.device_startup_functions.start_stage.html">navigate.model.device_startup_functions.start_stage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.device_startup_functions.start_zoom.html">navigate.model.device_startup_functions.start_zoom</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.device_startup_functions.DummyDeviceConnection.html">navigate.model.device_startup_functions.DummyDeviceConnection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.device_startup_functions.SerialConnectionFactory.html">navigate.model.device_startup_functions.SerialConnectionFactory</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="navigate.model.devices.html">navigate.model.devices</a></li>
@@ -156,14 +157,14 @@
 <h1>navigate.model.device_startup_functions.load_filter_wheel_connection<a class="headerlink" href="#navigate-model-device-startup-functions-load-filter-wheel-connection" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="navigate.model.device_startup_functions.load_filter_wheel_connection">
-<span class="sig-prename descclassname"><span class="pre">navigate.model.device_startup_functions.</span></span><span class="sig-name descname"><span class="pre">load_filter_wheel_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_devices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.device_startup_functions.load_filter_wheel_connection" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">navigate.model.device_startup_functions.</span></span><span class="sig-name descname"><span class="pre">load_filter_wheel_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_synthetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_devices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.device_startup_functions.load_filter_wheel_connection" title="Permalink to this definition"></a></dt>
 <dd><p>Initializes the Filter Wheel class on a dedicated thread.</p>
 <p>Load filter wheel information from the configuration file. Proper filter wheel types
 include SutterFilterWheel, ASI, and SyntheticFilterWheel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>configuration</strong> (<em>multiprocesing.managers.DictProxy</em>) – Global configuration of the microscope</p></li>
+<li><p><strong>device_info</strong> (<em>multiprocesing.managers.DictProxy</em>) – filter wheel device configuration</p></li>
 <li><p><strong>is_synthetic</strong> (<em>bool</em>) – Run synthetic version of hardware?</p></li>
 <li><p><strong>plugin_devices</strong> (<em>dict</em>) – Dictionary of plugin devices</p></li>
 </ul>

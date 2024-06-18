@@ -31,12 +31,10 @@ navigate.model.devices.filter\_wheel.filter\_wheel\_asi.ASIFilterWheel
    .. autosummary::
    
       ~ASIFilterWheel.filter_wheel
-      ~ASIFilterWheel.microscope_name
-      ~ASIFilterWheel.number_of_filter_wheels
       ~ASIFilterWheel.wait_until_done_delay
-      ~ASIFilterWheel.active_filter_wheel
       ~ASIFilterWheel.filter_wheel_position
       ~ASIFilterWheel.filter_dictionary
       ~ASIFilterWheel.wheel_position
+      ~ASIFilterWheel.filter_wheel_number
    
    

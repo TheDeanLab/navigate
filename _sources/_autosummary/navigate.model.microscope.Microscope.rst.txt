@@ -53,8 +53,8 @@ navigate.model.microscope.Microscope
       ~Microscope.ask_stage_for_position
       ~Microscope.lasers
       ~Microscope.galvo
+      ~Microscope.filter_wheel
       ~Microscope.daq
-      ~Microscope.tiger_controller
       ~Microscope.info
       ~Microscope.current_channel
       ~Microscope.current_laser_index

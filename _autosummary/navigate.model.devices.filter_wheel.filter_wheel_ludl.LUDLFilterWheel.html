@@ -151,7 +151,7 @@
 <h1>navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel<a class="headerlink" href="#navigate-model-devices-filter-wheel-filter-wheel-ludl-ludlfilterwheel" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.devices.filter_wheel.filter_wheel_ludl.</span></span><span class="sig-name descname"><span class="pre">LUDLFilterWheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.devices.filter_wheel.filter_wheel_ludl.</span></span><span class="sig-name descname"><span class="pre">LUDLFilterWheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="navigate.model.devices.filter_wheel.filter_wheel_base.FilterWheelBase.html#navigate.model.devices.filter_wheel.filter_wheel_base.FilterWheelBase" title="navigate.model.devices.filter_wheel.filter_wheel_base.FilterWheelBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterWheelBase</span></code></a></p>
 <p>LUDLFilterWheel - Class for controlling LUDL Electronic Products Filter Wheels</p>
 <p>Testing using MAC6000 controller over RS-232. USB or Ethernet not tested.
@@ -163,14 +163,13 @@ Single filter wheel only, but MAC6000 can handle max 2. Would need to modify cod
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">microscope_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configuration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize the LUDLFilterWheel class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>microscope_name</strong> (<em>str</em>) – Name of the microscope.</p></li>
 <li><p><strong>device_connection</strong> (<em>serial.Serial</em>) – Serial port connection to the filter wheel.</p></li>
-<li><p><strong>configuration</strong> (<em>dict</em>) – Configuration file for the microscope.</p></li>
+<li><p><strong>device_config</strong> (<em>dict</em>) – Dictionary of device configuration parameters.</p></li>
 </ul>
 </dd>
 </dl>
@@ -179,7 +178,7 @@ Single filter wheel only, but MAC6000 can handle max 2. Would need to modify cod
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.__init__" title="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(microscope_name, device_connection, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.__init__" title="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(device_connection, device_config)</p></td>
 <td><p>Initialize the LUDLFilterWheel class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.check_if_filter_in_filter_dictionary" title="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.check_if_filter_in_filter_dictionary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_if_filter_in_filter_dictionary</span></code></a>(filter_name)</p></td>
@@ -201,12 +200,6 @@ Single filter wheel only, but MAC6000 can handle max 2. Would need to modify cod
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.sio" title="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.sio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sio</span></code></a></p></td>
 <td><p>Text I/O wrapper for the serial port.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.microscope_name" title="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.microscope_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">microscope_name</span></code></a></p></td>
-<td><p>Name of the microscope.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.number_of_filter_wheels" title="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.number_of_filter_wheels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_filter_wheels</span></code></a></p></td>
-<td><p>Number of filter wheels.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.wait_until_done_delay" title="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.wait_until_done_delay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_until_done_delay</span></code></a></p></td>
 <td><p>Delay for filter wheel to change positions.</p></td>
@@ -267,20 +260,9 @@ filter dictionary</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.microscope_name">
-<span class="sig-name descname"><span class="pre">microscope_name</span></span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.microscope_name" title="Permalink to this definition"></a></dt>
-<dd><p>Name of the microscope.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.number_of_filter_wheels">
-<span class="sig-name descname"><span class="pre">number_of_filter_wheels</span></span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.number_of_filter_wheels" title="Permalink to this definition"></a></dt>
-<dd><p>Number of filter wheels.</p>
+<dt class="sig sig-object py" id="navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.filter_wheel_number">
+<span class="sig-name descname"><span class="pre">filter_wheel_number</span></span><a class="headerlink" href="#navigate.model.devices.filter_wheel.filter_wheel_ludl.LUDLFilterWheel.filter_wheel_number" title="Permalink to this definition"></a></dt>
+<dd><p>index of filter wheel</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>

@@ -31,10 +31,9 @@ navigate.model.devices.filter\_wheel.filter\_wheel\_ludl.LUDLFilterWheel
    
       ~LUDLFilterWheel.serial
       ~LUDLFilterWheel.sio
-      ~LUDLFilterWheel.microscope_name
-      ~LUDLFilterWheel.number_of_filter_wheels
       ~LUDLFilterWheel.wait_until_done_delay
       ~LUDLFilterWheel.filter_dictionary
       ~LUDLFilterWheel.wheel_position
+      ~LUDLFilterWheel.filter_wheel_number
    
    

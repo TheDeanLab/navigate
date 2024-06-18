@@ -41,6 +41,7 @@ navigate.controller.configuration\_controller.ConfigurationController
       ~ConfigurationController.lasers_info
       ~ConfigurationController.microscope_list
       ~ConfigurationController.number_of_channels
+      ~ConfigurationController.number_of_filter_wheels
       ~ConfigurationController.remote_focus_dict
       ~ConfigurationController.stage_default_position
       ~ConfigurationController.stage_flip_flags

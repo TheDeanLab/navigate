@@ -211,19 +211,16 @@
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.axes_mapping" title="navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.axes_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes_mapping</span></code></a></p></td>
-<td><p>Mapping of axes to KST axes.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.KST_axes" title="navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.KST_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KST_axes</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.KST_axes" title="navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.KST_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KST_axes</span></code></a></p></td>
 <td><p>List of KST axes available.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.serial_number" title="navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.serial_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serial_number</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.serial_number" title="navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.serial_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serial_number</span></code></a></p></td>
 <td><p>Serial number of the stage.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.device_unit_scale" title="navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.device_unit_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">device_unit_scale</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.device_unit_scale" title="navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.device_unit_scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">device_unit_scale</span></code></a></p></td>
 <td><p>Device units per mm.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.kst_controller" title="navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.kst_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kst_controller</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.kst_controller" title="navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.kst_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kst_controller</span></code></a></p></td>
 <td><p>Thorlabs KST Stage controller</p></td>
 </tr>
 </tbody>
@@ -406,12 +403,9 @@ Expect values in micrometers, except for theta, which is in degrees.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.axes_mapping">
 <span class="sig-name descname"><span class="pre">axes_mapping</span></span><a class="headerlink" href="#navigate.model.devices.stages.stage_tl_kcube_steppermotor.TLKSTStage.axes_mapping" title="Permalink to this definition"></a></dt>
-<dd><p>Mapping of axes to KST axes. Only initialize focus.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
+<dd><p>Initial setting for all positions
+self.x_pos, self.y_pos etc are the true axis positions, no matter whether
+the stages are zeroed or not. All units are in microns.</p>
 </dd></dl>
 
 <dl class="py attribute">

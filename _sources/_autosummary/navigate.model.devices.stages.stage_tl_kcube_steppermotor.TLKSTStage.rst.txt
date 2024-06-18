@@ -36,13 +36,13 @@ navigate.model.devices.stages.stage\_tl\_kcube\_steppermotor.TLKSTStage
 
    .. autosummary::
    
-      ~TLKSTStage.axes_mapping
       ~TLKSTStage.KST_axes
       ~TLKSTStage.serial_number
       ~TLKSTStage.device_unit_scale
       ~TLKSTStage.kst_controller
       ~TLKSTStage.axes
       ~TLKSTStage.stage_feedback
+      ~TLKSTStage.axes_mapping
       ~TLKSTStage.stage_limits
    
    

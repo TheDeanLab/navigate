@@ -44,6 +44,7 @@ navigate.model.device\_startup\_functions
       :template: custom_class.rst
    
       DummyDeviceConnection
+      SerialConnectionFactory
    
    
 

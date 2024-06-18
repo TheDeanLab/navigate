@@ -29,5 +29,6 @@ navigate.model.devices.filter\_wheel.filter\_wheel\_base.FilterWheelBase
    
       ~FilterWheelBase.filter_dictionary
       ~FilterWheelBase.wheel_position
+      ~FilterWheelBase.filter_wheel_number
    
    

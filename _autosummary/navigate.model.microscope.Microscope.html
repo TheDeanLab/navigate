@@ -250,11 +250,11 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.galvo" title="navigate.model.microscope.Microscope.galvo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">galvo</span></code></a></p></td>
 <td><p>Dictionary of galvanometers.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.daq" title="navigate.model.microscope.Microscope.daq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">daq</span></code></a></p></td>
-<td><p>Dictionary of data acquisition devices.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.filter_wheel" title="navigate.model.microscope.Microscope.filter_wheel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_wheel</span></code></a></p></td>
+<td><p>Dictionary of filter_wheels</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.tiger_controller" title="navigate.model.microscope.Microscope.tiger_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tiger_controller</span></code></a></p></td>
-<td><p>object; Tiger Controller object.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.daq" title="navigate.model.microscope.Microscope.daq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">daq</span></code></a></p></td>
+<td><p>Dictionary of data acquisition devices.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.info" title="navigate.model.microscope.Microscope.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">info</span></code></a></p></td>
 <td><p>Dictionary of microscope info.</p></td>
@@ -281,7 +281,7 @@
 <td><p>Is a synthetic microscope.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.laser_wavelength" title="navigate.model.microscope.Microscope.laser_wavelength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">laser_wavelength</span></code></a></p></td>
-<td><p>List of laser wavelengths.</p></td>
+<td><p>Dictionary of laser configurations.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.microscope.Microscope.ret_pos_dict" title="navigate.model.microscope.Microscope.ret_pos_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ret_pos_dict</span></code></a></p></td>
 <td><p>Dictionary of returned stage positions.</p></td>
@@ -643,6 +643,17 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.filter_wheel">
+<span class="sig-name descname"><span class="pre">filter_wheel</span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.filter_wheel" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of filter_wheels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.microscope.Microscope.galvo">
 <span class="sig-name descname"><span class="pre">galvo</span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.galvo" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionary of galvanometers.</p>
@@ -678,10 +689,10 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.microscope.Microscope.laser_wavelength">
 <span class="sig-name descname"><span class="pre">laser_wavelength</span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.laser_wavelength" title="Permalink to this definition"></a></dt>
-<dd><p>List of laser wavelengths.</p>
+<dd><p>Dictionary of laser configurations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -761,12 +772,6 @@ necessary, ensuring the hardware is ready for imaging the selected channel.</p>
 <dd class="field-odd"><p>list</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navigate.model.microscope.Microscope.tiger_controller">
-<span class="sig-name descname"><span class="pre">tiger_controller</span></span><a class="headerlink" href="#navigate.model.microscope.Microscope.tiger_controller" title="Permalink to this definition"></a></dt>
-<dd><p>object; Tiger Controller object.</p>
 </dd></dl>
 
 </dd></dl>

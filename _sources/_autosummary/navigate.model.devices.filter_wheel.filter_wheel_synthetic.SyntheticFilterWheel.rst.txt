@@ -33,5 +33,6 @@ navigate.model.devices.filter\_wheel.filter\_wheel\_synthetic.SyntheticFilterWhe
    
       ~SyntheticFilterWheel.filter_dictionary
       ~SyntheticFilterWheel.wheel_position
+      ~SyntheticFilterWheel.filter_wheel_number
    
    

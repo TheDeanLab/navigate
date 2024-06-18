@@ -769,7 +769,6 @@ class TigerController:
         1> FW 0 ERR FW 0 not ready
         0> Although FW 0 not ready – can still change FW 0 parameters.
         """
-        assert filter_wheel_number in range(2)
         self.send_filter_wheel_command(f"FW {filter_wheel_number}")
         self.read_response()
 

@@ -1,4 +1,3 @@
-# Only one microscope can be active in the GUI at a time, but all microscopes will be accessible
 microscopes:
   BTMesoSPIM:
     daq:
@@ -45,7 +44,7 @@ microscopes:
     filter_wheel:
       hardware:
         type: ASI #SyntheticFilterWheel #SutterFilterWheel
-        wheel_number: 1
+        wheel_number: 0
         port: COM8
         baudrate: 115200
       filter_wheel_delay: .030 # in seconds

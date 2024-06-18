@@ -99,7 +99,8 @@ class ASIFilterWheel(FilterWheelBase):
         self.wait_until_done_delay = device_config["filter_wheel_delay"]
 
         # Send Filter Wheel/Wheels to Zeroth Position
-        self.filter_wheel.select_filter_wheel(filter_wheel_number=self.filter_wheel_number)
+        self.filter_wheel.select_filter_wheel(
+            filter_wheel_number=self.filter_wheel_number)
 
         self.filter_wheel.move_filter_wheel(filter_wheel_position=0)
 

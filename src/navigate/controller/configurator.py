@@ -300,7 +300,20 @@ class Configurator:
         """Load configuration"""
 
         def get_widget_value(name, value_dict):
-            """Get the value from a dict"""
+            """Get the value from a dict
+
+            Parameters
+            ----------
+            name: str
+                key name
+            value_dict: dict
+                value dictionary
+
+            Returns
+            -------
+            any or None
+                value
+            """
             value = value_dict
             for key in name.split("/"):
                 if key.strip() == "":
@@ -311,7 +324,20 @@ class Configurator:
             return value
 
         def get_widgets_value(widgets, value_dict):
-            """Get all key-value from valude_dict, keys are from widgets"""
+            """Get all key-value from value_dict, keys are from widgets.
+
+            Parameters
+            ----------
+            widgets: dict
+                widgets dictionary
+            value_dict: dict
+                value dictionary
+
+            Returns
+            -------
+            dict
+                key-value dictionary
+            """
             temp = {}
             for key in widgets:
                 if key == "frame_config":
@@ -338,7 +364,20 @@ class Configurator:
             return temp
 
         def build_widgets_value(widgets, value_dict):
-            """According to valude_dict build values for widgets"""
+            """According to value_dict build values for widgets.
+
+            Parameters
+            ----------
+            widgets: dict
+                widgets dictionary
+            value_dict: dict
+                value dictionary
+
+            Returns
+            -------
+            list
+                values for widgets
+            """
             if widgets is None or value_dict is None:
                 return [None]
             result = []

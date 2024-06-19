@@ -33,7 +33,6 @@ import tkinter as tk
 from tkinter import ttk, simpledialog
 import logging
 from pathlib import Path
-import importlib
 
 # Third Party Imports
 
@@ -236,7 +235,7 @@ class MicroscopeTab(DockableNotebook):
         self, name, hardware_widgets, widgets=None, top_widgets=None, **kwargs
     ):
         """Create hardware tab
-        
+
         Parameters
         ----------
         name : str
@@ -436,7 +435,7 @@ class HardwareTab(ttk.Frame):
 
     def build_widgets(self, widgets, *args, parent=None, widgets_value=None, **kwargs):
         """Build widgets
-        
+
         Parameters
         ----------
         widgets : dict
@@ -484,7 +483,7 @@ class HardwareTab(ttk.Frame):
         self.values_dict = {}
         self.variables_list.append((self.variables, self.values_dict, ref, format))
         self.create_hardware_widgets(widgets, frame=frame, direction=direction)
-        
+
         if widgets_value:
             for k, v in widgets_value.items():
                 try:
@@ -493,7 +492,6 @@ class HardwareTab(ttk.Frame):
                     pass
                 except tk._tkinter.TclError:
                     pass
-
 
     def foldAllFrames(self, except_frame=None):
         """Fold all collapsible frames except one frame
@@ -512,12 +510,13 @@ class HardwareTab(ttk.Frame):
 
     def create_toggle_function(self, frame):
         """Toggle collapsible frame
-        
+
         Parameters
         ----------
         frame : tk.Frame
             the frame to toggle
         """
+
         def func(event):
             self.foldAllFrames(frame)
             frame.toggle_visibility()
@@ -526,7 +525,7 @@ class HardwareTab(ttk.Frame):
 
     def build_event_handler(self, hardware_widgets, key, frame, frame_id):
         """Build button event handler
-        
+
         Parameters
         ----------
         hardware_widgets : dict
@@ -538,6 +537,7 @@ class HardwareTab(ttk.Frame):
         frame_id : int
             index of the frame
         """
+
         def func(*args, **kwargs):
             v = hardware_widgets[key]
             if "widgets" in v[2]:

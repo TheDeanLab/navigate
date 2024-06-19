@@ -119,7 +119,7 @@ class TestChannelSettingController:
 
             # Test channel callback through trace writes
             for k in setting_dict.keys():
-                if k == "laser_index" or k == "filter_position":
+                if k == "laser_index" or k.startswith("filter_position"):
                     continue
                 if k == "defocus":
                     new_val = float(random.randint(1, 10))

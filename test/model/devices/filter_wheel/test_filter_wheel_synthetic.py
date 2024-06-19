@@ -43,7 +43,12 @@ def test_synthetic_filter_wheel_functions():
     microscope_name = model.configuration["experiment"]["MicroscopeState"][
         "microscope_name"
     ]
-    fw = SyntheticFilterWheel(microscope_name, None, model.configuration)
+    fw = SyntheticFilterWheel(
+        None, 
+        model.configuration["configuration"]["microscopes"][microscope_name][
+            "filter_wheel"
+        ][0],
+    )
 
     funcs = ["filter_change_delay", "set_filter", "read", "close"]
     args = [["channel_dummy"], ["channel_dummy"], [int(random.random() * 100)], None]

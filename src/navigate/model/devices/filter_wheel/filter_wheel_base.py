@@ -45,26 +45,25 @@ logger = logging.getLogger(p)
 class FilterWheelBase:
     """FilterWheelBase - Parent class for controlling filter wheels."""
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(self, device_connection, device_config):
         """Initialize the FilterWheelBase class.
 
         Parameters
         ----------
-        microscope_name : str
-            Name of the microscope.
         device_connection : dict
             Dictionary of device connections.
-        configuration : dict
-            Dictionary of configuration parameters.
+        device_config : dict
+            Dictionary of device configuration parameters.
         """
 
         #: dict: Dictionary of filters available on the filter wheel.
-        self.filter_dictionary = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["filter_wheel"]["available_filters"]
+        self.filter_dictionary = device_config["available_filters"]
 
         #: int: Filter wheel position.
         self.wheel_position = 0
+
+        #: int: index of filter wheel
+        self.filter_wheel_number = device_config["hardware"]["wheel_number"]
 
     def check_if_filter_in_filter_dictionary(self, filter_name):
         """Checks if the filter designation (string) given exists in the

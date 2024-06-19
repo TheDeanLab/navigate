@@ -162,6 +162,7 @@ class FeaturePopupController(GUIController):
             )
         #: bool: Whether the acquisition should start.
         self.start_acquisiton_flag = True
+        self.close_child_popups()
         self.view.popup.dismiss()
 
     def verify_feature_list(self):
@@ -177,17 +178,37 @@ class FeaturePopupController(GUIController):
 
     def exit_func(self):
         """Exit the popup"""
+        self.close_child_popups()
         self.view.popup.dismiss()
         delattr(self.parent_controller, "features_popup_controller")
 
     def cancel_acquisition(self):
         """Cancel the acquisition"""
         self.start_acquisiton_flag = False
+        self.close_child_popups()
         self.view.popup.dismiss()
+
+    def close_child_popups(self):
+        """Close child config popups"""
+        for popup in self.feature_list_graph_controller.child_popups:
+            popup.popup.dismiss()
 
 
 class FeatureListGraphController:
-    def __init__(self, feature_list_view, feature_content_view, preview_btn):
+    def __init__(self, feature_list_view, feature_content_view, preview_btn, child_popups=None):
+        """Initialize feature list window
+
+        Parameters
+        ----------
+        feature_list_view : frame
+            feature list graph view
+        feature_content_view : text
+            feature list content
+        preview_btn : button
+            preview button
+        child_popups : list
+            list of child config popup windows
+        """
         self.feature_list_view = feature_list_view
         self.feature_content_view = feature_content_view
         self.preview_btn = preview_btn
@@ -209,7 +230,17 @@ class FeatureListGraphController:
         # event
         self.preview_btn.configure(command=self.draw_feature_list_graph)
 
+        # popups
+        self.child_popups = [] if child_popups is None else child_popups
+
     def update(self, feature_list_content):
+        """Update feature list window
+
+        Parameters
+        ----------
+        feature_list_content : list
+            The feature list
+        """
         self.feature_list = None
         self.features = []
         self.feature_structure = []
@@ -229,7 +260,6 @@ class FeatureListGraphController:
         ----------
         feature_list : list
             The feature list
-
         """
         for temp in feature_list:
             if type(temp) is dict:
@@ -244,10 +274,19 @@ class FeatureListGraphController:
         self.feature_structure.append(")")
 
     def get_feature_content(self):
+        """Get feature list content
+
+        Returns
+        -------
+        content : str
+            feature list content
+        """
         content = self.feature_content_view.get("1.0", "end-1c")
         return content
 
     def update_feature_content(self):
+        """Update feature content
+        """
         self.feature_content_view.delete("1.0", tk.END)
         self.feature_content_view.insert("1.0", self.build_feature_list_text())
 
@@ -411,7 +450,8 @@ class FeatureListGraphController:
                 args_value = list(spec.defaults)
             else:
                 args_value = spec.defaults
-            if "args" in feature:
+            # if there is any parameters
+            if args_value is not None and "args" in feature:
                 for i, a in enumerate(feature["args"]):
                     args_value[i] = a
             kwargs = {}
@@ -444,6 +484,7 @@ class FeatureListGraphController:
                     popup.feature_list_true_frame.feature_view_frame,
                     popup.feature_list_true_frame.content,
                     popup.preview_btn_true,
+                    self.child_popups,
                 )
                 self.feature_list_graph_controllers_true[idx].update(feature["true"])
             if "false" in feature:
@@ -453,8 +494,12 @@ class FeatureListGraphController:
                     popup.feature_list_false_frame.feature_view_frame,
                     popup.feature_list_false_frame.content,
                     popup.preview_btn_false,
+                    self.child_popups
                 )
                 self.feature_list_graph_controllers_false[idx].update(feature["false"])
+            
+            # save the popup reference
+            self.child_popups.append(popup)
 
         def refresh_parameters(popup):
             """Refresh the feature parameters
@@ -494,6 +539,9 @@ class FeatureListGraphController:
             widgets = popup.get_widgets()
             feature_name = popup.feature_name_widget.get()
             feature["name"] = getattr(feature_related_functions, feature_name)
+            # if new feature doesn't have any parameters
+            if "args" in feature and len(widgets) == 0:
+                del feature["args"]
             if len(widgets) > 0:
                 feature["args"] = [w.get() for w in widgets]
                 for i, a in enumerate(feature["args"]):
@@ -737,6 +785,18 @@ class FeatureListGraphController:
 
 
 def verify_feature_list(content):
+    """Verify if feature list is valid
+
+    Parameters
+    ----------
+    content : str
+        The feature list content
+    
+    Returns
+    -------
+    feature list : list
+        feature list
+    """
     feature_list_content = "".join(content.split("\n"))
     if feature_list_content in ["break", '"break"', "'break'"]:
         return ["break"]

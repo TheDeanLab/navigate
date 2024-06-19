@@ -179,7 +179,10 @@ class ChannelsTabController(GUIController):
         config = self.parent_controller.configuration_controller
 
         self.stack_acq_widgets["cycling"].widget["values"] = ["Per Z", "Per Stack"]
-        self.filter_wheel_delay = config.filter_wheel_setting_dict["filter_wheel_delay"]
+        self.filter_wheel_delay = [
+            config.filter_wheel_setting_dict[i]["filter_wheel_delay"]
+            for i in range(config.number_of_filter_wheels)
+        ]
         self.channel_setting_controller.initialize()
         # self.set_spinbox_range_limits(config.configuration["configuration"]["gui"])
         self.show_verbose_info("channels tab has been initialized")
@@ -683,9 +686,11 @@ class ChannelsTabController(GUIController):
             filter_wheel_change_times = number_of_timepoints * (
                 1 if perStack else number_of_slices
             )
-            experiment_duration += self.filter_wheel_delay * filter_wheel_change_times
+            experiment_duration += (
+                sum(self.filter_wheel_delay) * filter_wheel_change_times
+            )
         else:
-            experiment_duration += self.filter_wheel_delay
+            experiment_duration += sum(self.filter_wheel_delay)
         self.timepoint_vals["experiment_duration"].set(
             str(datetime.timedelta(seconds=experiment_duration))
         )
@@ -845,10 +850,10 @@ class ChannelsTabController(GUIController):
             if self.microscope_state_dict["timepoints"] < 1:
                 return "Timepoints should be at least 1!"
         return None
-    
+
     def set_exposure_time(self, channel, exposure_time):
         """Set exposure time for a specified channel
-        
+
         Parameters
         ----------
         channel : str
@@ -856,7 +861,7 @@ class ChannelsTabController(GUIController):
         exposure_time : float
             Exposure time in miliseconds.
         """
-        idx = int(channel[channel.index('_')+1:]) - 1
+        idx = int(channel[channel.index("_") + 1 :]) - 1
         self.channel_setting_controller.in_initialization = True
         self.channel_setting_controller.view.exptime_variables[idx].set(exposure_time)
         self.channel_setting_controller.in_initialization = False

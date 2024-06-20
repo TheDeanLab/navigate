@@ -64,9 +64,12 @@ class TestWriteToYaml(unittest.TestCase):
 
 @pytest.fixture(scope="session")
 def configurator():
-    root = tk.Tk()
-    configurator = Configurator(root, DummySplashScreen())
-    return configurator
+    try:
+        root = tk.Tk()
+        configurator = Configurator(root, DummySplashScreen())
+        yield configurator
+    except SystemExit:
+        pass
 
 
 def test_add_microscope(configurator):
@@ -143,5 +146,5 @@ def test_load_configuration(configurator):
             assert microscope in tab_list
 
 
-def test_device_selected(self):
+def test_device_selected(configurator):
     pass

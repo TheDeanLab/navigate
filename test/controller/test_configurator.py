@@ -62,7 +62,7 @@ class TestWriteToYaml(unittest.TestCase):
         self.assertEqual(written_content, expected_content)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def configurator():
     root = tk.Tk()
     configurator = Configurator(root, DummySplashScreen())

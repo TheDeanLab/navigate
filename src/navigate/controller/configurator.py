@@ -124,8 +124,8 @@ class Configurator:
         self.create_config_window(0)
 
         print(
-            "WARNING: The Configuration Assistant is not fully implemented. "
-            "Users are still required to manually configure their system."
+            "WARNING: The Configuration Assistant is in development and may "
+            "not work as expected."
         )
 
     def on_cancel(self):

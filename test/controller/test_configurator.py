@@ -64,10 +64,12 @@ class TestWriteToYaml(unittest.TestCase):
 
 @pytest.fixture(scope="session")
 def configurator():
+    root = tk.Tk()
+    configurator = Configurator(root, DummySplashScreen())
+    yield configurator
+
     try:
-        root = tk.Tk()
-        configurator = Configurator(root, DummySplashScreen())
-        yield configurator
+        configurator.on_cancel()
     except SystemExit:
         pass
 

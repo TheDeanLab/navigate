@@ -31,7 +31,7 @@ that will guide you through the process of creating your
 Terminal or Anaconda Prompt, activate your **navigate** Python environment
 and launch the software by typing: ``navigate -c``.
 
-   .. image:: images/configurator.png
+   .. image:: images/configurator.PNG
      :width: 400px
      :align: center
 
@@ -52,6 +52,7 @@ the configuration, you can save it by clicking the :guilabel:`Save` button.
 For **navigate** to use the configuration file by default, it should be
 saved as ``configuration.yaml`` in the following directory, depending upon
 your operating system:
+
 * Windows: ``C:\Users\Username\AppData\Local\.navigate\config``
 * Mac/Linux: ``~/.navigate``
 

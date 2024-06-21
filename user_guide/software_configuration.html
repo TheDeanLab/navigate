@@ -60,9 +60,11 @@
 <li class="toctree-l1 current"><a class="reference internal" href="setup_microscope.html">Setting Up A Microscope</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Configuration Overview</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#initial-configuration">Initial Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#configuration-wizard">Configuration Wizard</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#manual-configuration">Manual Configuration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#microscope-configurations">Microscope Configurations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#stage-subsection">Stage Subsection</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#zoom-subsection">Zoom Subsection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#microscope-inheritance">Microscope Inheritance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#microscope-hardware-specification">Microscope Hardware Specification</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#experiment-file">Experiment File</a></li>
@@ -133,19 +135,65 @@
 <section id="initial-configuration">
 <h2>Initial Configuration<a class="headerlink" href="#initial-configuration" title="Permalink to this heading"></a></h2>
 <p>In order for the <strong>navigate</strong> software to function, you will need to configure the
-specifications of the various hardware that you will be using in the <code class="docutils literal notranslate"><span class="pre">configuration</span>
-<span class="pre">.yaml</span></code> file.</p>
-<p>The first time you launch the software, <strong>navigate</strong> will create a copy of the
-<code class="docutils literal notranslate"><span class="pre">navigate\config\configuration.yaml</span></code> and the rest of the configuration files in
-<code class="docutils literal notranslate"><span class="pre">C:\Users\Username\AppData\Local\.navigate\config</span></code> on  Windows or <code class="docutils literal notranslate"><span class="pre">~/.navigate</span></code> on
-Mac/Linux. <strong>navigate</strong> uses these local copies of the configuration files to store
-information specific to the setup attached to the computer it is installed on.</p>
-<p>To avoid confusion, we recommend launching the software in the synthetic hardware
-mode initially. Within your Terminal, or Anaconda Prompt, activate your <strong>navigate</strong>
-Python environment and launch the software by typing: <code class="docutils literal notranslate"><span class="pre">navigate</span> <span class="pre">-sh</span></code>. Thereafter, you
-should only modify the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file in your local <code class="docutils literal notranslate"><span class="pre">.navigate\config</span></code>
-directory. The local copy avoids conflicts between different microscopes after pulling
-new changes from GitHub.</p>
+specifications of the various hardware that you will be using in the
+<code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file.</p>
+<p>An example <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file is provided in the
+<code class="docutils literal notranslate"><span class="pre">navigate\config</span></code> directory. However, to avoid conflicts between different
+microscopes after pulling new changes from GitHub, <strong>navigate</strong> by default
+loads a local version of the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file. This file is
+stored in the <code class="docutils literal notranslate"><span class="pre">C:\Users\Username\AppData\Local\.navigate\config</span></code> directory
+on Windows or <code class="docutils literal notranslate"><span class="pre">~/.navigate</span></code> on Mac/Linux.</p>
+<hr class="docutils" />
+<section id="configuration-wizard">
+<h3>Configuration Wizard<a class="headerlink" href="#configuration-wizard" title="Permalink to this heading"></a></h3>
+<p>To help you set up your configuration file, we have created a configuration wizard
+that will guide you through the process of creating your
+<code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file. To launch the configuration wizard, open your
+Terminal or Anaconda Prompt, activate your <strong>navigate</strong> Python environment
+and launch the software by typing: <code class="docutils literal notranslate"><span class="pre">navigate</span> <span class="pre">-c</span></code>.</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="user_guide/images/configurator.png"><img alt="user_guide/images/configurator.png" class="align-center" src="user_guide/images/configurator.png" style="width: 400px;" /></a>
+</div></blockquote>
+<p>The configuration wizard provides a convenient way for configuring your
+hardware. For each microscope, which can be renamed or deleted by
+right-clicking on the microscope tab, you will be asked to specify the
+hardware that you are using. Each hardware type is listed as its own
+independent tab, and required parameters are shown on the left column, a
+field for the parameter is shown in the middle, and an example of the
+parameter is shown on the right.</p>
+<p>Additional microscope instances can be added by clicking the
+<span class="guilabel">Add A Microscope</span> button. Should one want to start from scratch, the
+<span class="guilabel">New Configuration</span> button will clear the current configuration.
+If you have a configuration that you would like to modify, you can load it by
+clicking the <span class="guilabel">Load Configuration</span> button. Once you have completed
+the configuration, you can save it by clicking the <span class="guilabel">Save</span> button.
+For <strong>navigate</strong> to use the configuration file by default, it should be
+saved as <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> in the following directory, depending upon
+your operating system:
+* Windows: <code class="docutils literal notranslate"><span class="pre">C:\Users\Username\AppData\Local\.navigate\config</span></code>
+* Mac/Linux: <code class="docutils literal notranslate"><span class="pre">~/.navigate</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The configuration wizard is actively being developed, and may not support
+every device type or configuration option. If you encounter any issues
+with the configuration wizard, please let us know by creating an issue on
+<a class="reference external" href="https://github.com/TheDeanLab/navigate/issues/new/choose">GitHub</a>..</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="manual-configuration">
+<h3>Manual Configuration<a class="headerlink" href="#manual-configuration" title="Permalink to this heading"></a></h3>
+<p>If you prefer to manually configure your <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file, we
+recommend launching the software in the synthetic hardware mode initially.
+Within your Terminal, or Anaconda Prompt, activate your <strong>navigate</strong>
+Python environment and launch the software in the synthetic hardware mode by
+typing: <code class="docutils literal notranslate"><span class="pre">navigate</span> <span class="pre">-sh</span></code>.</p>
+<p>Upon launching the software in the synthetic hardware mode, <strong>navigate</strong> will
+create a copy of the <code class="docutils literal notranslate"><span class="pre">navigate\config\configuration.yaml</span></code> file in
+<code class="docutils literal notranslate"><span class="pre">C:\Users\Username\AppData\Local\.navigate\config</span></code> on  Windows or <code class="docutils literal notranslate"><span class="pre">~/</span>
+<span class="pre">.navigate</span></code> on Mac/Linux.</p>
+<p>Thereafter, you should only modify the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file in your
+local <code class="docutils literal notranslate"><span class="pre">.navigate\config</span></code> directory.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Once <strong>navigate</strong> is open in the synthetic hardware mode, you can open the
@@ -158,15 +206,16 @@ along in this file when reading the next sections.</p>
 <p>See the <a class="reference internal" href="case_studies/setup_voodoo.html#setup-aslm"><span class="std std-ref">Setting up an Axially Swept Light-Sheet Microscope</span></a> case
 study for a general walkthrough of how to build your own configuration file and see
 <span class="xref std std-doc">Implementations</span> for examples of configuration files.</p>
+</section>
 <hr class="docutils" />
 <section id="microscope-configurations">
 <h3>Microscope Configurations<a class="headerlink" href="#microscope-configurations" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file contains the microscope configurations
 that you will be using with the software. Each microscope is represented as a YAML
 dictionary.</p>
-<p>Switching between each microscope is
-readily performed in <strong>navigate</strong>, enabling you to switch between different
-configurations or imaging modes, each with their own unique or shared hardware:</p>
+<p>Switching between each microscope is readily performed in <strong>navigate</strong>,
+enabling you to switch between different configurations or imaging modes,
+each with their own unique or shared hardware:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">microscope1</span><span class="p">:</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -176,10 +225,39 @@ configurations or imaging modes, each with their own unique or shared hardware:<
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </pre></div>
 </div>
-<p>Where <code class="docutils literal notranslate"><span class="pre">microscope1</span></code> and <code class="docutils literal notranslate"><span class="pre">microscope2</span></code> are names of two different microscopes using
-different combinations of the hardware. The names of
+<p>Here, <code class="docutils literal notranslate"><span class="pre">microscope1</span></code> and <code class="docutils literal notranslate"><span class="pre">microscope2</span></code> are names of two different
+microscopes using different combinations of the hardware. The names of
 the microscopes must not include spaces or special characters such as <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>, <code class="docutils literal notranslate"><span class="pre">\</span></code>,
 <code class="docutils literal notranslate"><span class="pre">#</span></code>, <code class="docutils literal notranslate"><span class="pre">%</span></code>, or <code class="docutils literal notranslate"><span class="pre">?</span></code>.</p>
+</section>
+<section id="microscope-inheritance">
+<h3>Microscope Inheritance<a class="headerlink" href="#microscope-inheritance" title="Permalink to this heading"></a></h3>
+<p>When setting up a <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> file with multiple microscopes, the
+file can grow quite large and repetitive, especially if the microscopes share
+many of the same hardware components. To avoid this, <strong>navigate</strong> allows for
+inheritance of hardware components from one microscope to another. In the
+following example, <code class="docutils literal notranslate"><span class="pre">microscope2</span></code> inherits all of the hardware components
+from <code class="docutils literal notranslate"><span class="pre">microscope1</span></code> except for the camera, since this is specified in the
+<code class="docutils literal notranslate"><span class="pre">microscope2</span></code> section.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">microscope1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuOrca</span>
+<span class="w">                </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">microscope2(microscope1)</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">camera</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HamamatsuFusion</span>
+<span class="w">                </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="microscope-hardware-specification">
+<h3>Microscope Hardware Specification<a class="headerlink" href="#microscope-hardware-specification" title="Permalink to this heading"></a></h3>
 <p>Each microscope is expected to have a <code class="docutils literal notranslate"><span class="pre">daq</span></code>, <code class="docutils literal notranslate"><span class="pre">camera</span></code>, <code class="docutils literal notranslate"><span class="pre">remote_focus_device</span></code>,
 <code class="docutils literal notranslate"><span class="pre">galvo</span></code>, <code class="docutils literal notranslate"><span class="pre">filter_wheel</span></code>, <code class="docutils literal notranslate"><span class="pre">stage</span></code>, <code class="docutils literal notranslate"><span class="pre">zoom</span></code>, <code class="docutils literal notranslate"><span class="pre">shutter</span></code>, <code class="docutils literal notranslate"><span class="pre">mirror</span></code> and
 <code class="docutils literal notranslate"><span class="pre">lasers</span></code> section of the YAML dictionary. As in the hardware section, unused devices
@@ -189,10 +267,8 @@ can be specified as synthetic.</p>
 Additional explanations of a few specific sections of the microscope configuration are
 below. Notably, the <code class="docutils literal notranslate"><span class="pre">zoom</span></code> section of the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> specifies effective
 pixel size.</p>
-</section>
-<hr class="docutils" />
 <section id="stage-subsection">
-<h3>Stage Subsection<a class="headerlink" href="#stage-subsection" title="Permalink to this heading"></a></h3>
+<h4>Stage Subsection<a class="headerlink" href="#stage-subsection" title="Permalink to this heading"></a></h4>
 <p>The stage section of the microscope 1) puts the stage control from the <code class="docutils literal notranslate"><span class="pre">hardware</span></code>
 section into the microscope 2) sets boundaries for stage movement and 3) optionally
 specifies joystick-controlled axes.</p>
@@ -263,6 +339,7 @@ the sample closer to the objective. If the stage behaves the opposite of any of 
 ways, it is prudent to set the flip flag. If set properly, the calculations for moving
 through multiple positions will be performed correctly. These only need to be
 configured once when setting up the microscope.</p>
+</section>
 <hr class="docutils" />
 <section id="stage-axes-definition">
 <h4>Stage Axes Definition<a class="headerlink" href="#stage-axes-definition" title="Permalink to this heading"></a></h4>
@@ -305,10 +382,9 @@ as following:</p>
 </pre></div>
 </div>
 </section>
-</section>
 <hr class="docutils" />
 <section id="zoom-subsection">
-<h3>Zoom Subsection<a class="headerlink" href="#zoom-subsection" title="Permalink to this heading"></a></h3>
+<h4>Zoom Subsection<a class="headerlink" href="#zoom-subsection" title="Permalink to this heading"></a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">zoom</span></code> section of <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code> specifies control over microscope
 zoom lenses, or devices that change the magnifcation of the imaging system. For
 example, we use the <a class="reference external" href="https://www.dynamixel.com/">Dynamixel Smart Actuator</a> to
@@ -368,6 +444,7 @@ For example,</p>
 <span class="w">    </span><span class="nt">N/A</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.168</span>
 </pre></div>
 </div>
+</section>
 </section>
 </section>
 <hr class="docutils" />

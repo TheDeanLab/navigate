@@ -138,9 +138,45 @@
              
   <section id="filter-wheels">
 <h1>Filter Wheels<a class="headerlink" href="#filter-wheels" title="Permalink to this heading"></a></h1>
-<p>Filter wheels can be used in both illumination and detection paths. Dichroic
-turrets are controlled via the same code as filter wheels. The user is expected to
-change the names of available filters to match what is in the filter wheel or turret.</p>
+<p>Filter wheels can be used in both illumination and detection paths. The user
+is expected to change the names of available filters to match what is in the
+filter wheel or turret. If more than one filter wheel is present, the user
+should add additional filter_wheel instances in the <code class="docutils literal notranslate"><span class="pre">configuration.yaml</span></code>
+file as follows:</p>
+<details class="summary-configuration-file">
+<summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span>
+<span class="w">          </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM1</span>
+<span class="w">          </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
+<span class="w">        </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.03</span>
+<span class="w">        </span><span class="nt">available_filters</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">Empty-Alignment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">GFP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">RFP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">          </span><span class="nt">Far-Red</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span>
+<span class="w">          </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM1</span>
+<span class="w">          </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
+<span class="w">        </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.03</span>
+<span class="w">        </span><span class="nt">available_filters</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">CFP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">YFP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">RFP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">          </span><span class="nt">Far-Red</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
 <hr class="docutils" />
 <section id="sutter-instruments">
 <h2>Sutter Instruments<a class="headerlink" href="#sutter-instruments" title="Permalink to this heading"></a></h2>
@@ -158,6 +194,7 @@ enable control of both filter wheels independently.</p>
 <details class="summary-configuration-file">
 <summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
 <span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span>
@@ -188,6 +225,7 @@ for the stage. A single communication instance is used for both the stage and fi
 <details class="summary-configuration-file">
 <summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
 <span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
@@ -221,6 +259,7 @@ device. Should additional filter wheels be necessary, please reach out to the
 <details class="summary-configuration-file">
 <summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
 <span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LUDLFilterWheel</span>

@@ -44,7 +44,7 @@ from navigate.controller.sub_controllers.gui_controller import GUIController
 from navigate.controller.sub_controllers.channel_setting_controller import (
     ChannelSettingController,
 )
-from navigate.controller.sub_controllers.tiling_wizard_controller2 import (
+from navigate.controller.sub_controllers.tiling_wizard_controller import (
     TilingWizardController,
 )
 

@@ -2,9 +2,45 @@
 Filter Wheels
 =============
 
-Filter wheels can be used in both illumination and detection paths. Dichroic
-turrets are controlled via the same code as filter wheels. The user is expected to
-change the names of available filters to match what is in the filter wheel or turret.
+Filter wheels can be used in both illumination and detection paths. The user
+is expected to change the names of available filters to match what is in the
+filter wheel or turret. If more than one filter wheel is present, the user
+should add additional filter_wheel instances in the ``configuration.yaml``
+file as follows:
+
+.. collapse:: Configuration File
+
+    .. code-block:: yaml
+
+      microscopes:
+        microscope_name:
+          -
+            filter_wheel:
+              hardware:
+                type: SutterFilterWheel
+                wheel_number: 1
+                port: COM1
+                baudrate: 9600
+              filter_wheel_delay: 0.03
+              available_filters:
+                Empty-Alignment: 0
+                GFP: 1
+                RFP: 2
+                Far-Red: 3
+          -
+            filter_wheel:
+              hardware:
+                type: SutterFilterWheel
+                wheel_number: 2
+                port: COM1
+                baudrate: 9600
+              filter_wheel_delay: 0.03
+              available_filters:
+                CFP: 0
+                YFP: 1
+                RFP: 2
+                Far-Red: 3
+|
 
 -----------
 
@@ -30,6 +66,7 @@ enable control of both filter wheels independently.
 
       microscopes:
         microscope_name:
+          -
             filter_wheel:
               hardware:
                 type: SutterFilterWheel
@@ -64,6 +101,7 @@ for the stage. A single communication instance is used for both the stage and fi
 
       microscopes:
         microscope_name:
+          -
             filter_wheel:
               hardware:
                 type: ASI
@@ -99,6 +137,7 @@ MAC6000
 
       microscopes:
         microscope_name:
+          -
             filter_wheel:
               hardware:
                 type: LUDLFilterWheel

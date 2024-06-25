@@ -105,6 +105,7 @@ class Controller:
         waveform_constants_path,
         rest_api_path,
         waveform_templates_path,
+        gui_configuration_path,
         args,
     ):
         """Initialize the Navigate Controller.
@@ -130,6 +131,9 @@ class Controller:
         waveform_templates_path : string
             Path to the waveform templates yaml file.
             Provides waveform templates for each channel.
+        gui_configuration_path : string
+            Path to the GUI configuration yaml file.
+            Provides GUI configuration parameters.
         *args :
             Command line input arguments for non-default
             file paths or using synthetic hardware modes.
@@ -152,6 +156,7 @@ class Controller:
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
             waveform_templates=waveform_templates_path,
+            gui=gui_configuration_path,
         )
 
         verify_configuration(self.manager, self.configuration)

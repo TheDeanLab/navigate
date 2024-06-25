@@ -221,7 +221,7 @@ def create_parser():
     )
 
     input_args.add_argument(
-        "--waveform-constants-path",
+        "--waveform-constants-file",
         type=Path,
         required=False,
         default=None,

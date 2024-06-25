@@ -178,12 +178,7 @@ class ChannelsTabController(GUIController):
         self.initialize()
 
     def initialize(self):
-        """Initializes widgets and gets other necessary configuration
-
-        Examples
-        --------
-        >>> self.initialize()
-        """
+        """Initializes widgets and gets other necessary configuration."""
         config = self.parent_controller.configuration_controller
 
         self.stack_acq_widgets["cycling"].widget["values"] = ["Per Z", "Per Stack"]
@@ -192,7 +187,7 @@ class ChannelsTabController(GUIController):
             for i in range(config.number_of_filter_wheels)
         ]
         self.channel_setting_controller.initialize()
-        # self.set_spinbox_range_limits(config.configuration["configuration"]["gui"])
+        self.set_spinbox_range_limits(self.parent_controller.configuration["gui"])
         self.show_verbose_info("channels tab has been initialized")
 
     def populate_experiment_values(self):
@@ -257,41 +252,59 @@ class ChannelsTabController(GUIController):
         ----------
         settings : dict
             dictionary of settings from configuration file
-
-        Examples
-        --------
-        >>> self.set_spinbox_range_limits(settings)
         """
-        temp_dict = {
-            self.stack_acq_widgets["step_size"]: settings["stack_acquisition"][
-                "step_size"
-            ],
-            self.stack_acq_widgets["start_position"]: settings["stack_acquisition"][
-                "start_pos"
-            ],
-            self.stack_acq_widgets["end_position"]: settings["stack_acquisition"][
-                "end_pos"
-            ],
-            self.view.stack_timepoint_frame.stack_pause_spinbox: settings["timepoint"][
-                "stack_pause"
-            ],
-            self.view.stack_timepoint_frame.exp_time_spinbox: settings["timepoint"][
-                "timepoints"
-            ],
-        }
-        for idx, widget in enumerate(temp_dict):
-            # Hacky Solution until stack time points are converted to LabelInput
-            if idx < 3:
-                widget.widget.configure(from_=temp_dict[widget]["min"])
-                widget.widget.configure(to=temp_dict[widget]["max"])
-                widget.widget.configure(increment=temp_dict[widget]["step"])
-            else:
-                widget.configure(from_=temp_dict[widget]["min"])
-                widget.configure(to=temp_dict[widget]["max"])
-                widget.configure(increment=temp_dict[widget]["step"])
 
-        # channels setting
-        self.channel_setting_controller.set_spinbox_range_limits(settings["channels"])
+        # Z-Stack Step Size
+        self.stack_acq_widgets["step_size"].widget.configure(
+            from_=settings["stack_acquisition"]["step_size"].get("min", 0.01),
+            to=settings["stack_acquisition"]["step_size"].get("max", 1000),
+            increment=settings["stack_acquisition"]["step_size"].get("step", 0.01),
+        )
+
+        # Z-Stack Z Start Position
+        self.stack_acq_widgets["start_position"].widget.configure(
+            from_=settings["stack_acquisition"]["z_start_pos"].get("min", -1000),
+            to=settings["stack_acquisition"]["z_start_pos"].get("max", 1000),
+            increment=settings["stack_acquisition"]["z_start_pos"].get("step", 1),
+        )
+
+        # Z-Stack Z End Position
+        self.stack_acq_widgets["end_position"].widget.configure(
+            from_=settings["stack_acquisition"]["z_end_pos"].get("min", -1000),
+            to=settings["stack_acquisition"]["z_end_pos"].get("max", 1000),
+            increment=settings["stack_acquisition"]["z_end_pos"].get("step", 1),
+        )
+
+        # Z-Stack F Start Position
+        self.stack_acq_widgets["start_focus"].widget.configure(
+            from_=settings["stack_acquisition"]["f_start_pos"].get("min", -1000),
+            to=settings["stack_acquisition"]["f_start_pos"].get("max", 1000),
+            increment=settings["stack_acquisition"]["f_start_pos"].get("step", 1),
+        )
+
+        # Z-Stack F End Position
+        self.stack_acq_widgets["end_focus"].widget.configure(
+            from_=settings["stack_acquisition"]["f_end_pos"].get("min", -1000),
+            to=settings["stack_acquisition"]["f_end_pos"].get("max", 1000),
+            increment=settings["stack_acquisition"]["f_end_pos"].get("step", 1),
+        )
+
+        # Stack Pause Duration
+        self.view.stack_timepoint_frame.stack_pause_spinbox.configure(
+            from_=settings["time"]["stack_pause"].get("min", 0),
+            to=settings["time"]["stack_pause"].get("max", 100),
+            increment=settings["time"]["stack_pause"].get("step", 1),
+        )
+
+        # Timepoints
+        self.view.stack_timepoint_frame.exp_time_spinbox.configure(
+            from_=settings["time"]["timepoints"].get("min", 1),
+            to=settings["time"]["timepoints"].get("max", 5000),
+            increment=settings["time"]["timepoints"].get("step", 1),
+        )
+
+        # Channel settings
+        self.channel_setting_controller.set_spinbox_range_limits(settings)
 
     def set_mode(self, mode):
         """Change acquisition mode.

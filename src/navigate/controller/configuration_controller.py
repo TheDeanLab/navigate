@@ -379,9 +379,7 @@ class ConfigurationController:
             Number of channels.
         """
         if self.microscope_config is not None:
-            return self.configuration["configuration"]["gui"]["channels"].get(
-                "count", 5
-            )
+            return self.configuration["gui"]["channel_settings"].get("count", 5)
         return 5
 
     @property

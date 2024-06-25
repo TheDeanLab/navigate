@@ -88,11 +88,14 @@ class ChannelsTabController(GUIController):
         )
 
         self.view.stack_timepoint_frame.exp_time_spinbox.set_precision(0)
+
         # Get Widgets and Buttons from stack_acquisition_settings in view
         #: dict: The widgets in the stack acquisition settings frame.
         self.stack_acq_widgets = self.view.stack_acq_frame.get_widgets()
+
         #: dict: The values in the stack acquisition settings frame.
         self.stack_acq_vals = self.view.stack_acq_frame.get_variables()
+
         #: dict: The buttons in the stack acquisition settings frame.
         self.stack_acq_buttons = self.view.stack_acq_frame.get_buttons()
 
@@ -111,10 +114,13 @@ class ChannelsTabController(GUIController):
         # stack acquisition_variables
         #: float: The z origin of the stack.
         self.z_origin = 0
+
         #: float: The focus origin of the stack.
         self.focus_origin = 0
+
         #: float: The filter wheel delay.
         self.filter_wheel_delay = None
+
         #: dict: The microscope state dictionary.
         self.microscope_state_dict = None
 
@@ -122,17 +128,17 @@ class ChannelsTabController(GUIController):
         self.stack_acq_vals["cycling"].trace_add("write", self.update_cycling_setting)
 
         # time point setting variables
+        temp = self.view.stack_timepoint_frame
+
         #: dict: Dictionary of time point settings.
         self.timepoint_vals = {
-            "is_save": self.view.stack_timepoint_frame.save_data,
-            "timepoints": self.view.stack_timepoint_frame.exp_time_spinval,
-            "stack_acq_time": self.view.stack_timepoint_frame.stack_acq_spinval,
-            "stack_pause": self.view.stack_timepoint_frame.stack_pause_spinval,
-            "experiment_duration": self.view.stack_timepoint_frame.total_time_spinval,
+            "is_save": temp.save_data,
+            "timepoints": temp.exp_time_spinval,
+            "stack_acq_time": temp.stack_acq_spinval,
+            "stack_pause": temp.stack_pause_spinval,
+            "experiment_duration": temp.total_time_spinval,
+            "timepoint_interval": temp.timepoint_interval_spinval,
         }
-        self.timepoint_vals[
-            "timepoint_interval"
-        ] = self.view.stack_timepoint_frame.timepoint_interval_spinval
 
         # timepoint event binds
         self.timepoint_vals["is_save"].trace_add("write", self.update_save_setting)
@@ -146,8 +152,10 @@ class ChannelsTabController(GUIController):
         # Multi Position Acquisition
         #: bool: Whether or not the user has selected to use multiposition.
         self.is_multiposition = False
+
         #: bool: cache multiposition flag
         self.is_multiposition_cache = False
+
         #: bool: Whether or not the user has selected to use multiposition.
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(
@@ -301,7 +309,7 @@ class ChannelsTabController(GUIController):
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
 
-        state_readonly = "readonly" if mode == "stop" else "disabled"
+        # state_readonly = "readonly" if mode == "stop" else "disabled"
         if mode != "stop":
             state = "disabled"
         elif image_mode == "live" or image_mode == "single":
@@ -845,7 +853,7 @@ class ChannelsTabController(GUIController):
                 return "The number of Z steps should be at least 1!"
             try:
                 float(self.microscope_state_dict["stack_pause"])
-            except:
+            except Exception:
                 return "Stack pause should be a valid number!"
             if self.microscope_state_dict["timepoints"] < 1:
                 return "Timepoints should be at least 1!"

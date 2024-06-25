@@ -192,22 +192,27 @@ class Controller:
         # Sub Gui Controllers
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(self.view.acqbar, self)
+
         #: ChannelsTabController: Channels Tab Sub-Controller.
         self.channels_tab_controller = ChannelsTabController(
             self.view.settings.channels_tab, self
         )
+
         #: MultiPositionController: Multi-Position Tab Sub-Controller.
         self.multiposition_tab_controller = MultiPositionController(
             self.view.settings.multiposition_tab.multipoint_list, self
         )
+
         #: CameraViewController: Camera View Tab Sub-Controller.
         self.camera_view_controller = CameraViewController(
             self.view.camera_waveform.camera_tab, self
         )
+
         #: CameraSettingController: Camera Settings Tab Sub-Controller.
         self.camera_setting_controller = CameraSettingController(
             self.view.settings.camera_settings_tab, self
         )
+
         #: StageController: Stage Sub-Controller.
         self.stage_controller = StageController(
             self.view.settings.stage_control_tab,
@@ -215,10 +220,12 @@ class Controller:
             self.camera_view_controller.canvas,
             self,
         )
+
         #: WaveformTabController: Waveform Display Sub-Controller.
         self.waveform_tab_controller = WaveformTabController(
             self.view.camera_waveform.waveform_tab, self
         )
+
         #: KeystrokeController: Keystroke Sub-Controller.
         self.keystroke_controller = KeystrokeController(self.view, self)
 

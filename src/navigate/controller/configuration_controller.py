@@ -251,9 +251,9 @@ class ConfigurationController:
 
         """
         axis = ["x", "y", "z", "theta", "f"]
+        position_limits = {}
         if self.microscope_config is not None:
             stage_dict = self.microscope_config["stage"]
-            position_limits = {}
             for a in axis:
                 position_limits[a] = stage_dict[a + suffix]
         else:

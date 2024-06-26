@@ -101,7 +101,7 @@ def evaluate_parser_input_arguments(args):
         ), "experiment_file file Path {} not valid".format(args.experiment_file)
         experiment_path = args.experiment_file
 
-    if args.waveform_constants_path:
+    if args.waveform_constants_file:
         assert (
             args.waveform_constants_path.exists()
         ), "waveform_constants_path Path {} not valid".format(

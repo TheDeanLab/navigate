@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -126,6 +126,8 @@ class CameraViewController(GUIController):
         self.menu.add_command(label="Move Here", command=self.move_stage)
         self.menu.add_command(label="Reset Display", command=self.reset_display)
         self.menu.add_command(label="Mark Position", command=self.mark_position)
+        self.menu.add_command(label="Toggle Crosshair", command=self.left_click)
+        self.menu.add_command(label="Move Crosshair Here", command=self.move_crosshair)
 
         #: int: The x position of the mouse.
         self.move_to_x = None
@@ -162,6 +164,9 @@ class CameraViewController(GUIController):
 
         #: bool: The crosshair flag.
         self.apply_cross_hair = True
+
+        #: bool: Displace crosshair flag.
+        self.displace_cross_hair = False
 
         #: str: The mode of the camera view controller.
         self.mode = "stop"
@@ -251,7 +256,7 @@ class CameraViewController(GUIController):
         #: bool: The display mask flag.
         self.mask_color_table = None
 
-        #: bool: Whether or not to flip the image.
+        #: bool: Whether to flip the image.
         self.flip_flags = None
 
         #: bool: Image catche flag
@@ -267,10 +272,18 @@ class CameraViewController(GUIController):
         #: numpy.ndarray: The ilastik mask.
         self.ilastik_seg_mask = None
 
+    def move_crosshair(self, *args):
+        """Moves the crosshair to the current mouse position."""
+        self.displace_cross_hair = True
+        crosshair_x, crosshair_y = self.calculate_offset()
+        self.crosshair_x = -crosshair_x
+        self.crosshair_y = -crosshair_y
+
     def update_snr(self):
         """Updates the signal to noise ratio."""
         #: bool: The signal to noise ratio flag.
         self._snr_selected = False
+
         #: numpy.ndarray: The offset of the image.
         #: numpy.ndarray: The variance of the image.
         self._offset, self._variance = None, None
@@ -359,10 +372,6 @@ class CameraViewController(GUIController):
             The x position of the mouse.
         y : int
             The y position of the mouse.
-
-        Examples
-        --------
-        >>> x, y = self.get_absolute_position()
         """
         x = self.parent_controller.view.winfo_pointerx()
         y = self.parent_controller.view.winfo_pointery()
@@ -375,7 +384,6 @@ class CameraViewController(GUIController):
         ----------
         event : tkinter.Event
             x, y location.  0,0 is top left corner.
-
         """
         try:
             # only popup the menu when click on image
@@ -397,10 +405,6 @@ class CameraViewController(GUIController):
             'minmax', 'image'.
         data : list
             Min and max intensity values.
-
-        Examples
-        --------
-        >>> self.initialize('minmax', [0, 255])
         """
         # Pallete section (colors, autoscale, min/max counts)
         # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
@@ -435,10 +439,6 @@ class CameraViewController(GUIController):
         ----------
         mode : str
             camera_view_controller mode.
-
-        Examples
-        --------
-        >>> self.set_mode('live')
         """
         self.mode = mode
         if mode == "live" or mode == "stop":
@@ -539,10 +539,6 @@ class CameraViewController(GUIController):
         ----------
         display_flag : bool
             True to display the image, False to not display the image.
-
-        Examples
-        --------
-        >>> self.reset_display()
         """
         self.zoom_width = self.canvas_width
         self.zoom_height = self.canvas_height
@@ -550,6 +546,7 @@ class CameraViewController(GUIController):
         self.zoom_offset = np.array([[0], [0]])
         self.zoom_value = 1
         self.zoom_scale = 1
+        self.displace_cross_hair = False
         if display_flag:
             self.process_image()
 
@@ -559,10 +556,6 @@ class CameraViewController(GUIController):
         Applies digital zoom, detects saturation, down-samples the image, scales the
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
-
-        Examples
-        --------
-        >>> self.process_image()
         """
         # self.image -> self.zoom_image.
         self.digital_zoom()
@@ -596,10 +589,6 @@ class CameraViewController(GUIController):
             num = 4 is zoom out.
             num = 5 is zoom in.
             x, y location.  0,0 is top left corner.
-
-        Examples
-        --------
-        >>> self.mouse_wheel(event)
         """
         if event.x >= self.canvas_width or event.y >= self.canvas_height:
             return
@@ -629,7 +618,6 @@ class CameraViewController(GUIController):
 
         The x and y positions are between 0
         and the canvas width and height respectively.
-
         """
         self.zoom_rect = self.zoom_rect - self.zoom_offset
         self.zoom_rect = self.zoom_rect * self.zoom_value
@@ -645,15 +633,7 @@ class CameraViewController(GUIController):
         y_start_index = int(-self.zoom_rect[1][0] / self.zoom_scale)
         y_end_index = int(y_start_index + self.zoom_height)
 
-        # crosshair
-        crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
-        crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
-        if crosshair_x < 0 or crosshair_x >= self.canvas_width:
-            crosshair_x = -1
-        if crosshair_y < 0 or crosshair_y >= self.canvas_height:
-            crosshair_y = -1
-        self.crosshair_x = int(crosshair_x)
-        self.crosshair_y = int(crosshair_y)
+        self.calculate_crosshair()
 
         self.zoom_image = self.image[
             int(y_start_index * self.canvas_height_scale) : int(
@@ -664,14 +644,8 @@ class CameraViewController(GUIController):
             ),
         ]
 
-    def left_click(self, event):
-        """Toggles cross-hair on image upon left click event.
-
-        Parameters
-        ----------
-        event : tkinter.Event
-            Tkinter event.
-        """
+    def left_click(self, *args):
+        """Toggles cross-hair on image upon left click event."""
         if self.image is not None:
             # If True, make False. If False, make True.
             self.apply_cross_hair = not self.apply_cross_hair
@@ -762,11 +736,8 @@ class CameraViewController(GUIController):
     def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
         """Initialize the non-live display.
 
-        Starts image and slice counter,
-        number of channels,
-        number of slices,
-        images per volume,
-        and image volume.
+        Starts image and slice counter, number of channels, number of slices,
+        images per volume, and image volume.
 
         Parameters
         ----------
@@ -776,11 +747,6 @@ class CameraViewController(GUIController):
             Microscope state.
         camera_parameters : dict
             Camera parameters.
-
-        Example
-        -------
-        >>> self.initialize_non_live_display(buffer,
-        >>> microscope_state, camera_parameters)
         """
         self.data_buffer = buffer
         self.is_displaying_image.value = False
@@ -808,10 +774,6 @@ class CameraViewController(GUIController):
             State of the microscope
         images_received : int
             Number of images received.
-
-        Example
-        -------
-        >>> self.identify_channel_index_and_slice(microscope_state, images_received)
         """
         # Reset the image counter after the full acquisition of an image volume.
         if self.image_counter == self.total_images_per_volume:
@@ -881,10 +843,6 @@ class CameraViewController(GUIController):
             Index of the slider.
         channel_display_index : int
             Index of the channel to display.
-
-        Example
-        -------
-        >>> self.retrieve_image_slice_from_volume(slider_index, channel_display_index)
         """
         if self.display_state == "XY MIP":
             self.image = np.max(
@@ -918,10 +876,6 @@ class CameraViewController(GUIController):
         ----------
         image_id: int
             frame index in the data_buffer.
-
-        Example
-        -------
-        >>> self.display_image(image_id)
         """
 
         # Identify image identity (e.g., slice #, channel #).
@@ -971,8 +925,22 @@ class CameraViewController(GUIController):
         with self.is_displaying_image as is_displaying_image:
             is_displaying_image.value = False
 
+    def calculate_crosshair(self):
+        """Calculate the cross-hair position."""
+
+        if self.displace_cross_hair is False:
+            crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
+            crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
+            if crosshair_x < 0 or crosshair_x >= self.canvas_width:
+                crosshair_x = -1
+            if crosshair_y < 0 or crosshair_y >= self.canvas_height:
+                crosshair_y = -1
+            self.crosshair_x = int(crosshair_x)
+            self.crosshair_y = int(crosshair_y)
+
     def add_crosshair(self):
         """Adds a cross-hair to the image."""
+
         self.cross_hair_image = np.copy(self.down_sampled_image)
         if self.apply_cross_hair:
             self.cross_hair_image[:, self.crosshair_x] = 1
@@ -984,14 +952,7 @@ class CameraViewController(GUIController):
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
         """
-        # if self.colormap == 'gradient':
-        #     self.cross_hair_image = self.rainbow_lut(self.cross_hair_image)
-        # elif self.colormap == 'rainbow':
-        #     self.cross_hair_image = self.gradient_lut(self.cross_hair_image)
-        # elif self.colormap == 'RdBu_r':
-        #     self.cross_hair_image = self.rdbu_r_lut(self.cross_hair_image)
-        # else:
-        #     self.cross_hair_image = self.gray_lut(self.cross_hair_image)
+
         self.cross_hair_image = self.colormap(self.cross_hair_image)
 
         # Convert RGBA to RGB Image.
@@ -1025,10 +986,6 @@ class CameraViewController(GUIController):
         Returns
         -------
         self.apply_LUT_image : np.arrays
-
-        Example
-        -------
-        >>> self.update_LUT()
         """
         if self.image is None:
             pass
@@ -1103,10 +1060,6 @@ class CameraViewController(GUIController):
             Minimum counts for the image.
         self.max_counts : int
             Maximum counts for the image.
-
-        Example
-        -------
-        >>> self.update_min_max_counts()
         """
         if self.image_palette["Min"].get() != "":
             self.min_counts = float(self.image_palette["Min"].get())
@@ -1128,10 +1081,6 @@ class CameraViewController(GUIController):
         -------
         self.mask_color_table : np.array
             Array of colors to use for the segmentation mask
-
-        Example
-        -------
-        >>> self.set_mask_color_table()
         """
         self.mask_color_table = np.zeros((256, 1, 3), dtype=np.uint8)
         self.mask_color_table[0] = [0, 0, 0]
@@ -1152,10 +1101,6 @@ class CameraViewController(GUIController):
         ----------
         mask : np.array
             Segmentation mask to display
-
-        Example
-        -------
-        >>> self.display_mask()
         """
         self.ilastik_seg_mask = cv2.applyColorMap(mask, self.mask_color_table)
         self.ilastik_mask_ready_lock.release()

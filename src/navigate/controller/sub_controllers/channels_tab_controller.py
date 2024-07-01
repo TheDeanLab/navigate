@@ -122,7 +122,7 @@ class ChannelsTabController(GUIController):
         self.filter_wheel_delay = None
 
         #: dict: The microscope state dictionary.
-        self.microscope_state_dict = {}
+        self.microscope_state_dict = None
 
         # laser/stack cycling event binds
         self.stack_acq_vals["cycling"].trace_add("write", self.update_cycling_setting)
@@ -193,6 +193,10 @@ class ChannelsTabController(GUIController):
     def populate_experiment_values(self):
         """Distribute initial MicroscopeState values to this and sub-controllers and
         associated views.
+
+        Examples
+        --------
+        >>> self.populate_experiment_values()
         """
         self.in_initialization = True
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
@@ -309,9 +313,11 @@ class ChannelsTabController(GUIController):
         ----------
         mode : str
             acquisition mode
-        """
 
-        # TODO: Why do we have mode and image_mode?
+        Examples
+        --------
+        >>> self.set_mode(mode)
+        """
         image_mode = self.microscope_state_dict["image_mode"]
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
@@ -369,6 +375,10 @@ class ChannelsTabController(GUIController):
         args : dict
             Values is a dict as follows {'step_size':  'start_position': ,
                                          'end_position': ,'number_z_steps'}
+
+        Examples
+        --------
+        >>> self.update_z_steps()
         """
 
         # won't do any calculation when initialization
@@ -453,6 +463,10 @@ class ChannelsTabController(GUIController):
         args : dict
             Values is a dict as follows {'start_position': , 'abs_z_start': ,
             'stack_z_origin': }
+
+        Examples
+        --------
+        >>> self.update_start_position()
         """
 
         # We have a new origin
@@ -483,6 +497,9 @@ class ChannelsTabController(GUIController):
             Values is a dict as follows {'end_position': , 'abs_z_end': ,
             'stack_z_origin': }
 
+        Examples
+        --------
+        >>> self.update_end_position()
         """
         # Grab current values
         z_end = self.parent_controller.configuration["experiment"]["StageParameters"][
@@ -533,6 +550,9 @@ class ChannelsTabController(GUIController):
             Values is a dict as follows {'cycling_setting': , 'cycling_setting': ,
                                          'stack_z_origin': }
 
+        Examples
+        --------
+        >>> self.update_cycling_setting()
         """
         # won't do any calculation when initializing
         if self.in_initialization:
@@ -559,6 +579,10 @@ class ChannelsTabController(GUIController):
         args : dict
             Values is a dict as follows {'save_data': , 'save_data': ,
                                          'stack_z_origin': }
+
+        Examples
+        --------
+        >>> self.update_save_setting()
         """
 
         if self.in_initialization:
@@ -586,6 +610,9 @@ class ChannelsTabController(GUIController):
         call_parent : bool
             Tell parent controller that time point setting has changed.
 
+        Examples
+        --------
+        >>> self.update_timepoint_setting()
         """
 
         if self.in_initialization:
@@ -709,6 +736,10 @@ class ChannelsTabController(GUIController):
         """Toggle Multi-position Acquisition.
 
         Recalculates the experiment duration.
+
+        Examples
+        --------
+        >>> self.toggle_multiposition()
         """
         self.is_multiposition = self.is_multiposition_val.get()
         self.microscope_state_dict["is_multiposition"] = self.is_multiposition
@@ -736,6 +767,10 @@ class ChannelsTabController(GUIController):
 
         Will only launch when button in GUI is pressed, and will not duplicate.
         Pressing button again brings popup to top
+
+        Examples
+        --------
+        >>> self.launch_tiling_wizard()
         """
 
         if hasattr(self, "tiling_wizard_controller"):
@@ -753,6 +788,11 @@ class ChannelsTabController(GUIController):
             List of variables to set.
         values : list
             List of values to set to variables.
+
+        Examples
+        --------
+        >>> self.set_info([self.timepoint_vals['timepoint_interval'],
+                           self.timepoint_vals['stack_pause']], [1, 1])
         """
         for name in values.keys():
             if name in vals:
@@ -773,6 +813,10 @@ class ChannelsTabController(GUIController):
         -------
         command : object
             Returns parent_controller.execute(command) if command = 'get_stage_position'
+
+        Examples
+        --------
+        >>> self.execute('recalculate_timepoint')
         """
         if command == "recalculate_timepoint":
             # update selected channels num
@@ -836,7 +880,7 @@ class ChannelsTabController(GUIController):
         channel : str
             Channel name, such as "channel_1", "channel_2",...
         exposure_time : float
-            Exposure time in milliseconds.
+            Exposure time in miliseconds.
         """
         idx = int(channel[channel.index("_") + 1 :]) - 1
         self.channel_setting_controller.in_initialization = True

@@ -23,7 +23,6 @@ class TestLaserNI(unittest.TestCase):
             waveform_constants_path,
             rest_api_path,
             waveform_templates_path,
-            gui_configuration_path,
         ) = get_configuration_paths()
 
         self.configuration = load_configs(
@@ -33,7 +32,6 @@ class TestLaserNI(unittest.TestCase):
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
             waveform_templates=waveform_templates_path,
-            gui_configuration=gui_configuration_path,
         )
 
         self.microscope_name = self.configuration["configuration"][

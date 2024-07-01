@@ -119,7 +119,7 @@ def test_get_configuration_paths():
     paths = config.get_configuration_paths()
     for path in paths:
         assert isinstance(path, pathlib.Path)
-    assert len(paths) == 6
+    assert len(paths) == 5
 
 
 def test_get_configuration_paths_create_dir(monkeypatch):

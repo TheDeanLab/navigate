@@ -45,7 +45,26 @@ from navigate.model.data_sources import FILE_TYPES
 
 
 class TestAcquireBarController:
-    """Tests for the AcquireBarController class"""
+    """Tests for the AcquireBarController class
+
+    Attributes
+    ----------
+    acqbarController : AcquireBarController
+        Instance of the AcquireBarController class
+
+    Methods
+    -------
+    test_init()
+        Tests the initialization of the AcquireBarController class
+    test_attr()
+        Tests the attributes of the AcquireBarController class
+    test_set_save()
+        Tests the set_save_option method of the AcquireBarController class
+    test_stop_acquire()
+        Tests the stop_acquire method of the AcquireBarController class
+    test_populate_experiment_values()
+        Tests the populate_experiment_values method of the AcquireBarController class
+    """
 
     @pytest.fixture(autouse=True)
     def setup_class(self, dummy_controller):
@@ -65,6 +84,9 @@ class TestAcquireBarController:
     def test_init(self):
         """Tests the initialization of the AcquireBarController class
 
+
+
+
         Raises
         ------
         AssertionError
@@ -74,6 +96,9 @@ class TestAcquireBarController:
 
     def test_attr(self):
         """Tests the attributes of the AcquireBarController class
+
+
+
 
         Raises
         ------

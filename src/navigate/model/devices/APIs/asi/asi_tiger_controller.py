@@ -47,12 +47,16 @@ class TigerException(Exception):
         #: str: Error code received from Tiger Console
         self.code = code
 
-        #: str: Error message
-        self.message = self.error_codes[code]
-
-        # Gets the proper message based on error code received.
-        super().__init__(self.message)
-        # Sends message to base exception constructor for python purposes
+        try:
+            #: str: Error message
+            self.message = self.error_codes[code]
+            # Gets the proper message based on error code received.
+            super().__init__(self.message)
+            # Sends message to base exception constructor for python purposes
+        except KeyError:
+            self.message = "Warning: KeyError Received in TigerController."
+            # Occasionally receive a KeyError: for `:N-1\r\n`
+            return
 
     def __str__(self):
         """Overrides base Exception string to be displayed
@@ -167,6 +171,8 @@ class TigerController:
 
             #: list[str]: Default axes sequence of the Tiger Controller
             self.default_axes_sequence = self.get_default_motor_axis_sequence()
+            # TODO: This calls all of the axes that are currently connected to the TigerController.
+            # TODO: Should we only call the axes which we wish to control as a stage?
 
     def get_default_motor_axis_sequence(self) -> None:
         """Get the default motor axis sequence from the ASI device

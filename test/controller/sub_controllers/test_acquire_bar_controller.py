@@ -45,26 +45,7 @@ from navigate.model.data_sources import FILE_TYPES
 
 
 class TestAcquireBarController:
-    """Tests for the AcquireBarController class
-
-    Attributes
-    ----------
-    acqbarController : AcquireBarController
-        Instance of the AcquireBarController class
-
-    Methods
-    -------
-    test_init()
-        Tests the initialization of the AcquireBarController class
-    test_attr()
-        Tests the attributes of the AcquireBarController class
-    test_set_save()
-        Tests the set_save_option method of the AcquireBarController class
-    test_stop_acquire()
-        Tests the stop_acquire method of the AcquireBarController class
-    test_populate_experiment_values()
-        Tests the populate_experiment_values method of the AcquireBarController class
-    """
+    """Tests for the AcquireBarController class"""
 
     @pytest.fixture(autouse=True)
     def setup_class(self, dummy_controller):
@@ -78,16 +59,11 @@ class TestAcquireBarController:
         c = dummy_controller
         v = dummy_controller.view
 
-        self.acquire_bar_controller = AcquireBarController(
-            v.acqbar, c
-        )
+        self.acquire_bar_controller = AcquireBarController(v.acqbar, c)
         self.acquire_bar_controller.populate_experiment_values()
 
     def test_init(self):
         """Tests the initialization of the AcquireBarController class
-
-
-
 
         Raises
         ------
@@ -98,9 +74,6 @@ class TestAcquireBarController:
 
     def test_attr(self):
         """Tests the attributes of the AcquireBarController class
-
-
-
 
         Raises
         ------
@@ -237,8 +210,12 @@ class TestAcquireBarController:
         test = self.acquire_bar_controller.get_mode()
         assert test == mode, "Mode not set correctly"
         # assert imaging mode is updated in the experiment
-        assert self.acquire_bar_controller.parent_controller.configuration[
-                "experiment"]["MicroscopeState"]["image_mode"] == mode
+        assert (
+            self.acquire_bar_controller.parent_controller.configuration["experiment"][
+                "MicroscopeState"
+            ]["image_mode"]
+            == mode
+        )
 
     def test_set_save(self):
         """Tests the set_save method of the AcquireBarController class
@@ -313,8 +290,12 @@ class TestAcquireBarController:
 
         # Checking that new mode gets set by function
         assert self.acquire_bar_controller.mode == expected_mode
-        assert self.acquire_bar_controller.parent_controller.configuration[
-                "experiment"]["MicroscopeState"]["image_mode"] == expected_mode
+        assert (
+            self.acquire_bar_controller.parent_controller.configuration["experiment"][
+                "MicroscopeState"
+            ]["image_mode"]
+            == expected_mode
+        )
 
         # Resetting to live
         self.acquire_bar_controller.view.pull_down.set("Continuous Scan")

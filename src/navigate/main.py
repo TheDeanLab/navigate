@@ -109,6 +109,7 @@ def main():
         waveform_templates_path,
         logging_path,
         configurator,
+        gui_configuration_path,
     ) = evaluate_parser_input_arguments(args)
 
     log_setup("logging.yml", logging_path)
@@ -124,6 +125,7 @@ def main():
             waveform_constants_path,
             rest_api_path,
             waveform_templates_path,
+            gui_configuration_path,
             args,
         )
 

@@ -251,9 +251,9 @@ class ConfigurationController:
 
         """
         axis = ["x", "y", "z", "theta", "f"]
+        position_limits = {}
         if self.microscope_config is not None:
             stage_dict = self.microscope_config["stage"]
-            position_limits = {}
             for a in axis:
                 position_limits[a] = stage_dict[a + suffix]
         else:
@@ -379,9 +379,7 @@ class ConfigurationController:
             Number of channels.
         """
         if self.microscope_config is not None:
-            return self.configuration["configuration"]["gui"]["channels"].get(
-                "count", 5
-            )
+            return self.configuration["gui"]["channel_settings"].get("count", 5)
         return 5
 
     @property

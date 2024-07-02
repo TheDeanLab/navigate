@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -89,65 +89,38 @@ def get_configuration_paths():
         Path to file containing REST API configuration
     waveform_templates_path : str
         Path to file containing waveform templates
+    gui_configuration_path : str
+        Path to file containing GUI configuration
     """
+    # Create the navigate home directory if it doesn't exist
     navigate_directory = get_navigate_path()
     if not os.path.exists(navigate_directory):
         os.mkdir(navigate_directory)
+
+    # Create the configuration directory if it doesn't exist
     configuration_directory = Path(os.path.join(navigate_directory, "config"))
     if not os.path.exists(configuration_directory):
         os.mkdir(configuration_directory)
 
-    # Configuration files should be stored in this directory
-    configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
-    experiment_path = Path.joinpath(configuration_directory, "experiment.yml")
-    waveform_constants_path = Path.joinpath(
-        configuration_directory, "waveform_constants.yml"
-    )
-    rest_api_path = Path.joinpath(configuration_directory, "rest_api_config.yml")
-    waveform_templates_path = Path.joinpath(
-        configuration_directory, "waveform_templates.yml"
-    )
+    configuration_files = [
+        "configuration.yaml",
+        "experiment.yml",
+        "waveform_constants.yml",
+        "rest_api_config.yml",
+        "waveform_templates.yml",
+        "gui_configuration.yml",
+    ]
 
-    # If they are not already,
-    # copy the default ones that ship with the software to this folder
-    if not os.path.exists(configuration_path):
-        copy_base_directory = Path(__file__).resolve().parent
-        copy_configuration_path = Path.joinpath(
-            copy_base_directory, "configuration.yaml"
-        )
-        shutil.copyfile(copy_configuration_path, configuration_path)
+    base_directory = Path(__file__).resolve().parent
+    paths = []
+    for file in configuration_files:
+        copy_file_path = Path.joinpath(base_directory, file)
+        file_path = Path.joinpath(configuration_directory, file)
+        paths.append(file_path)
+        if not os.path.exists(file_path):
+            shutil.copyfile(copy_file_path, file_path)
 
-    if not os.path.exists(experiment_path):
-        copy_base_directory = Path(__file__).resolve().parent
-        copy_experiment_path = Path.joinpath(copy_base_directory, "experiment.yml")
-        shutil.copyfile(copy_experiment_path, experiment_path)
-
-    if not os.path.exists(waveform_constants_path):
-        copy_base_directory = Path(__file__).resolve().parent
-        copy_waveform_constants_path = Path.joinpath(
-            copy_base_directory, "waveform_constants.yml"
-        )
-        shutil.copyfile(copy_waveform_constants_path, waveform_constants_path)
-
-    if not os.path.exists(rest_api_path):
-        copy_base_directory = Path(__file__).resolve().parent
-        copy_rest_api_path = Path.joinpath(copy_base_directory, "rest_api_config.yml")
-        shutil.copyfile(copy_rest_api_path, rest_api_path)
-
-    if not os.path.exists(waveform_templates_path):
-        copy_base_directory = Path(__file__).resolve().parent
-        copy_waveform_templates_path = Path.joinpath(
-            copy_base_directory, "waveform_templates.yml"
-        )
-        shutil.copyfile(copy_waveform_templates_path, waveform_templates_path)
-
-    return (
-        configuration_path,
-        experiment_path,
-        waveform_constants_path,
-        rest_api_path,
-        waveform_templates_path,
-    )
+    return [path for path in paths]
 
 
 def load_configs(manager, **kwargs):
@@ -942,19 +915,21 @@ def verify_configuration(manager, configuration):
                 microscope_name_seq.append(microscope_name.strip())
             continue
 
-        if ")" not in microscope_name[parenthesis_l+1:]:
+        if ")" not in microscope_name[parenthesis_l + 1 :]:
             microscope_name_seq.append(microscope_name.strip())
             continue
 
-        parenthesis_r = microscope_name[parenthesis_l+1:].index(")")
-        parent_microscope_name = microscope_name[parenthesis_l+1: parenthesis_l+parenthesis_r+1].strip()
+        parenthesis_r = microscope_name[parenthesis_l + 1 :].index(")")
+        parent_microscope_name = microscope_name[
+            parenthesis_l + 1 : parenthesis_l + parenthesis_r + 1
+        ].strip()
 
         if parent_microscope_name not in microscope_name_seq:
             microscope_name_seq.append(parent_microscope_name)
-        
+
         idx = microscope_name_seq.index(parent_microscope_name)
         child_microscope_name = microscope_name[:parenthesis_l].strip()
-        microscope_name_seq.insert(idx+1, child_microscope_name)
+        microscope_name_seq.insert(idx + 1, child_microscope_name)
         inherited_microscope_dict[child_microscope_name] = parent_microscope_name
         device_config[child_microscope_name] = device_config.pop(microscope_name)
 
@@ -964,11 +939,16 @@ def verify_configuration(manager, configuration):
             continue
         parent_microscope_name = inherited_microscope_dict[microscope_name]
         if parent_microscope_name not in device_config.keys():
-            raise Exception(f"Microscope {parent_microscope_name} is not defined in configuration.yaml")
-        
+            raise Exception(
+                f"Microscope {parent_microscope_name} is not "
+                f"defined in configuration.yaml"
+            )
+
         for device_name in device_config[parent_microscope_name].keys():
             if device_name not in device_config[microscope_name].keys():
-                device_config[microscope_name][device_name] = device_config[parent_microscope_name][device_name]
+                device_config[microscope_name][device_name] = device_config[
+                    parent_microscope_name
+                ][device_name]
 
     channel_count = 5
     # generate hardware header section
@@ -980,16 +960,26 @@ def verify_configuration(manager, configuration):
         "zoom": None,
         "mirror": None,
     }
-    required_devices = ["camera", "daq", "filter_wheel", "shutter", "remote_focus_device", "galvo", "stage", "lasers"]
+    required_devices = [
+        "camera",
+        "daq",
+        "filter_wheel",
+        "shutter",
+        "remote_focus_device",
+        "galvo",
+        "stage",
+        "lasers",
+    ]
     for microscope_name in device_config.keys():
         # camera
         # delay_percent -> delay
         for device_name in required_devices:
             if device_name not in device_config[microscope_name]:
-                print("**************************************************************************")
-                print(f"*** Please make sure you have {device_name} in the configuration for microscope {microscope_name}.")
-                print(f"*** Or please makesure {microscope_name} is inherited from another valid microscope!")
-                print("**************************************************************************")
+                print(
+                    f"*** Please make sure you have {device_name} "
+                    f"in the configuration for microscope {microscope_name}, or "
+                    f"{microscope_name} is inherited from another valid microscope!"
+                )
                 raise Exception()
         camera_config = device_config[microscope_name]["camera"]
         if "delay" not in camera_config.keys():
@@ -1029,7 +1019,8 @@ def verify_configuration(manager, configuration):
         # zoom (one zoom)
         if "zoom" not in hardware_dict:
             zoom_config = device_config[microscope_name]["zoom"]["hardware"]
-            # zoom_idx = build_ref_name("-", zoom_config["type"], zoom_config["servo_id"])
+            # zoom_idx = build_ref_name("-", zoom_config["type"],
+            # zoom_config["servo_id"])
             hardware_dict["zoom"] = zoom_config
 
         # filter wheel
@@ -1094,7 +1085,9 @@ def verify_configuration(manager, configuration):
                     filter_wheel_config["hardware"]["type"],
                     filter_wheel_config["hardware"]["wheel_number"],
                 )
-                filter_wheel_ids.remove(ref_list["filter_wheel"].index(filter_wheel_idx))
+                filter_wheel_ids.remove(
+                    ref_list["filter_wheel"].index(filter_wheel_idx)
+                )
             for i in filter_wheel_ids:
                 temp_config.insert(i, filter_wheel_seq[i])
 

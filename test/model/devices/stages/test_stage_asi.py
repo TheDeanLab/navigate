@@ -37,7 +37,7 @@ import random
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.stages.stage_asi import ASIStage
+from navigate.model.devices.stages.asi import ASIStage
 from navigate.model.devices.APIs.asi.asi_tiger_controller import TigerController
 
 
@@ -213,7 +213,7 @@ class TestStageASI:
             )
 
         if axes_mapping is None:
-            # using default mapping which is hard coded in stage_pi.py
+            # using default mapping which is hard coded in pi.py
             default_mapping = {"x": "Z", "y": "Y", "z": "X", "f": "M"}
             for axis, device_axis in stage.axes_mapping.items():
                 assert default_mapping[axis] == device_axis

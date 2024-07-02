@@ -37,8 +37,9 @@ import random
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.stages.stage_sutter import SutterStage
+from navigate.model.devices.stages.sutter import SutterStage
 from navigate.model.devices.APIs.sutter.MP285 import MP285
+
 
 class MockMP285Stage:
     def __init__(self, ignore_obj):
@@ -62,18 +63,26 @@ class MockMP285Stage:
         if command == bytes.fromhex("63") + bytes.fromhex("0d"):
             # get current x, y, and z position
             self.output_buffer.append(
-                self.x_abs.to_bytes(4, byteorder="little", signed=True) +
-                self.y_abs.to_bytes(4, byteorder="little", signed=True) +
-                self.z_abs.to_bytes(4, byteorder="little", signed=True) +
-                bytes.fromhex("0d")
+                self.x_abs.to_bytes(4, byteorder="little", signed=True)
+                + self.y_abs.to_bytes(4, byteorder="little", signed=True)
+                + self.z_abs.to_bytes(4, byteorder="little", signed=True)
+                + bytes.fromhex("0d")
             )
-        elif command[0] == int("6d", 16) and len(command) == 14 and command[-1] == int("0d", 16):
+        elif (
+            command[0] == int("6d", 16)
+            and len(command) == 14
+            and command[-1] == int("0d", 16)
+        ):
             # move x, y, and z to specific position
             self.x_abs = int.from_bytes(command[1:5], byteorder="little", signed=True)
             self.y_abs = int.from_bytes(command[5:9], byteorder="little", signed=True)
             self.z_abs = int.from_bytes(command[9:13], byteorder="little", signed=True)
             self.output_buffer.append(bytes.fromhex("0d"))
-        elif command[0] == int("56", 16) and len(command) == 4 and command[-1] == int("0d", 16):
+        elif (
+            command[0] == int("56", 16)
+            and len(command) == 4
+            and command[-1] == int("0d", 16)
+        ):
             # set resolution and velocity
             self.output_buffer.append(bytes.fromhex("0d"))
         elif command[0] == int("03", 16) and len(command) == 1:
@@ -95,22 +104,27 @@ class MockMP285Stage:
     def __getattr__(self, __name: str):
         return self.ignore_obj
 
+
 @pytest.fixture
 def mp285_serial_device(ignore_obj):
     return MockMP285Stage(ignore_obj)
-    
+
 
 class TestStageSutter:
     """Unit Test for StageBase Class"""
 
     @pytest.fixture(autouse=True)
-    def setup_class(self, stage_configuration, mp285_serial_device, random_single_axis_test, random_multiple_axes_test):
+    def setup_class(
+        self,
+        stage_configuration,
+        mp285_serial_device,
+        random_single_axis_test,
+        random_multiple_axes_test,
+    ):
         self.microscope_name = "Mesoscale"
         self.configuration = {
             "configuration": {
-                "microscopes": {
-                    self.microscope_name: stage_configuration
-                }
+                "microscopes": {self.microscope_name: stage_configuration}
             }
         }
         self.stage_configuration = stage_configuration
@@ -129,9 +143,10 @@ class TestStageSutter:
         mp285.connect_to_serial()
         return mp285
 
-
     def test_stage_attributes(self):
-        stage = SutterStage(self.microscope_name, self.build_device_connection(), self.configuration)
+        stage = SutterStage(
+            self.microscope_name, self.build_device_connection(), self.configuration
+        )
 
         # Methods
         assert hasattr(stage, "get_position_dict") and callable(
@@ -163,7 +178,9 @@ class TestStageSutter:
     def test_initialize_stage(self, axes, axes_mapping):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
-        stage = SutterStage(self.microscope_name, self.build_device_connection(), self.configuration)
+        stage = SutterStage(
+            self.microscope_name, self.build_device_connection(), self.configuration
+        )
 
         # Attributes
         for axis in axes:
@@ -171,11 +188,17 @@ class TestStageSutter:
             assert hasattr(stage, f"{axis}_min")
             assert hasattr(stage, f"{axis}_max")
             assert getattr(stage, f"{axis}_pos") == 0
-            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
-            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
+            assert (
+                getattr(stage, f"{axis}_min")
+                == self.stage_configuration["stage"][f"{axis}_min"]
+            )
+            assert (
+                getattr(stage, f"{axis}_max")
+                == self.stage_configuration["stage"][f"{axis}_max"]
+            )
 
         if axes_mapping is None:
-            # using default mapping which is hard coded in stage_sutter.py
+            # using default mapping which is hard coded in sutter.py
             default_mapping = {"x": "x", "y": "y", "z": "z"}
             for axis, device_axis in stage.axes_mapping.items():
                 assert default_mapping[axis] == device_axis
@@ -184,7 +207,7 @@ class TestStageSutter:
             for i, axis in enumerate(axes):
                 assert stage.axes_mapping[axis] == axes_mapping[i]
 
-        assert stage.stage_limits == True
+        assert stage.stage_limits is True
 
     @pytest.mark.parametrize(
         "axes, axes_mapping",

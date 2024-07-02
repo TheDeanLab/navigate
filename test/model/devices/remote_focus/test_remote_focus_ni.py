@@ -3,8 +3,8 @@ import pytest
 
 @pytest.mark.hardware
 def test_remote_focus_ni_functions():
-    from navigate.model.devices.daq.daq_ni import NIDAQ
-    from navigate.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
+    from navigate.model.devices.daq.ni import NIDAQ
+    from navigate.model.devices.remote_focus.ni import RemoteFocusNI
     from test.model.dummy import DummyModel
 
     model = DummyModel()

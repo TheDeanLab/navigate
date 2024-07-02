@@ -37,7 +37,7 @@ import random
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
+from navigate.model.devices.stages.tl_kcube_inertial import TLKIMStage
 
 
 class MockKimController:
@@ -54,14 +54,14 @@ class MockKimController:
 
     def KIM_GetCurrentPosition(self, serial_number, axis):
         return getattr(self, f"{axis}_abs", 0)
-    
+
     def KIM_MoveAbsolute(self, serial_number, axis, pos: int):
         if axis in self.axes:
             setattr(self, f"{axis}_abs", int(pos))
 
     def __getattr__(self, __name: str):
         return self.ignore_obj
-    
+
 
 @pytest.fixture
 def kim_controller(ignore_obj):
@@ -72,13 +72,17 @@ class TestStageTlKCubeInertial:
     """Unit Test for StageBase Class"""
 
     @pytest.fixture(autouse=True)
-    def setup_class(self, stage_configuration, kim_controller, random_single_axis_test, random_multiple_axes_test):
+    def setup_class(
+        self,
+        stage_configuration,
+        kim_controller,
+        random_single_axis_test,
+        random_multiple_axes_test,
+    ):
         self.microscope_name = "Mesoscale"
         self.configuration = {
             "configuration": {
-                "microscopes": {
-                    self.microscope_name: stage_configuration
-                }
+                "microscopes": {self.microscope_name: stage_configuration}
             }
         }
         self.stage_configuration = stage_configuration
@@ -136,11 +140,17 @@ class TestStageTlKCubeInertial:
             assert hasattr(stage, f"{axis}_min")
             assert hasattr(stage, f"{axis}_max")
             assert getattr(stage, f"{axis}_pos") == 0
-            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
-            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
+            assert (
+                getattr(stage, f"{axis}_min")
+                == self.stage_configuration["stage"][f"{axis}_min"]
+            )
+            assert (
+                getattr(stage, f"{axis}_max")
+                == self.stage_configuration["stage"][f"{axis}_max"]
+            )
 
         if axes_mapping is None:
-            # using default mapping which is hard coded in stage_pi.py
+            # using default mapping which is hard coded in pi.py
             default_mapping = {"x": 4, "y": 2, "z": 3, "f": 1}
             for axis, device_axis in stage.axes_mapping.items():
                 assert default_mapping[axis] == device_axis
@@ -149,7 +159,7 @@ class TestStageTlKCubeInertial:
             for i, axis in enumerate(axes):
                 assert stage.axes_mapping[axis] == axes_mapping[i]
 
-        assert stage.stage_limits == True
+        assert stage.stage_limits is True
 
     @pytest.mark.parametrize(
         "axes, axes_mapping",
@@ -171,7 +181,9 @@ class TestStageTlKCubeInertial:
     def test_report_position(self, axes, axes_mapping):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
-        stage = TLKIMStage(self.microscope_name, self.kim_controller, self.configuration)
+        stage = TLKIMStage(
+            self.microscope_name, self.kim_controller, self.configuration
+        )
 
         for _ in range(10):
             pos_dict = {}
@@ -202,7 +214,9 @@ class TestStageTlKCubeInertial:
     def test_move_axis_absolute(self, axes, axes_mapping):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
-        stage = TLKIMStage(self.microscope_name, self.kim_controller, self.configuration)
+        stage = TLKIMStage(
+            self.microscope_name, self.kim_controller, self.configuration
+        )
         self.random_single_axis_test(stage)
         stage.stage_limits = False
         self.random_single_axis_test(stage)
@@ -227,7 +241,9 @@ class TestStageTlKCubeInertial:
     def test_move_absolute(self, axes, axes_mapping):
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
-        stage = TLKIMStage(self.microscope_name, self.kim_controller, self.configuration)
+        stage = TLKIMStage(
+            self.microscope_name, self.kim_controller, self.configuration
+        )
         self.random_multiple_axes_test(stage)
         stage.stage_limits = False
         self.random_multiple_axes_test(stage)

@@ -36,7 +36,7 @@ import unittest
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.zoom.zoom_synthetic import SyntheticZoom
+from navigate.model.devices.zoom.synthetic import SyntheticZoom
 from test.model.dummy import DummyModel
 
 

@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+# (subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -34,7 +35,7 @@
 def test_synthetic_filter_wheel_functions():
     import random
 
-    from navigate.model.devices.filter_wheel.filter_wheel_synthetic import (
+    from navigate.model.devices.filter_wheel.synthetic import (
         SyntheticFilterWheel,
     )
     from test.model.dummy import DummyModel
@@ -44,7 +45,7 @@ def test_synthetic_filter_wheel_functions():
         "microscope_name"
     ]
     fw = SyntheticFilterWheel(
-        None, 
+        None,
         model.configuration["configuration"]["microscopes"][microscope_name][
             "filter_wheel"
         ][0],

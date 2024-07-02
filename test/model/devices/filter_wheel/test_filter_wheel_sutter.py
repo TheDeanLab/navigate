@@ -37,7 +37,7 @@ import time
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.filter_wheel.filter_wheel_sutter import SutterFilterWheel
+from navigate.model.devices.filter_wheel.sutter import SutterFilterWheel
 
 
 class TestSutterFilterWheel(unittest.TestCase):
@@ -52,7 +52,7 @@ class TestSutterFilterWheel(unittest.TestCase):
         self.speed = 2
         self.number_of_filter_wheels = 2
         self.microscope_name = "mock_filter_wheel"
-        self.mock_configuration ={
+        self.mock_configuration = {
             "hardware": {"wheel_number": self.number_of_filter_wheels},
             "available_filters": {
                 "filter1": 0,

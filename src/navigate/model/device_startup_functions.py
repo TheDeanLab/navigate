@@ -164,14 +164,14 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
         return auto_redial(HamamatsuController.DCAM, (camera_id,), exception=Exception)
 
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
-        from navigate.model.devices.camera.camera_synthetic import (
+        from navigate.model.devices.camera.synthetic import (
             SyntheticCameraController,
         )
 
         return SyntheticCameraController()
 
     elif cam_type == "Photometrics":
-        from navigate.model.devices.camera.camera_photometrics import (
+        from navigate.model.devices.camera.photometrics import (
             build_photometrics_connection,
         )
 
@@ -230,40 +230,40 @@ def start_camera(
         ]["hardware"]["type"]
 
     if cam_type == "HamamatsuOrca":
-        from navigate.model.devices.camera.camera_hamamatsu import HamamatsuOrca
+        from navigate.model.devices.camera.hamamatsu import HamamatsuOrca
 
         return HamamatsuOrca(microscope_name, device_connection, configuration)
 
     elif cam_type == "HamamatsuOrcaLightning":
-        from navigate.model.devices.camera.camera_hamamatsu import (
+        from navigate.model.devices.camera.hamamatsu import (
             HamamatsuOrcaLightning,
         )
 
         return HamamatsuOrcaLightning(microscope_name, device_connection, configuration)
 
     elif cam_type == "HamamatsuOrcaFire":
-        from navigate.model.devices.camera.camera_hamamatsu import (
+        from navigate.model.devices.camera.hamamatsu import (
             HamamatsuOrcaFire,
         )
 
         return HamamatsuOrcaFire(microscope_name, device_connection, configuration)
 
     elif cam_type == "HamamatsuOrcaFusion":
-        from navigate.model.devices.camera.camera_hamamatsu import (
+        from navigate.model.devices.camera.hamamatsu import (
             HamamatsuOrcaFusion,
         )
 
         return HamamatsuOrcaFusion(microscope_name, device_connection, configuration)
 
     elif cam_type == "Photometrics":
-        from navigate.model.devices.camera.camera_photometrics import (
+        from navigate.model.devices.camera.photometrics import (
             PhotometricsBase,
         )
 
         return PhotometricsBase(microscope_name, device_connection, configuration)
 
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":
-        from navigate.model.devices.camera.camera_synthetic import SyntheticCamera
+        from navigate.model.devices.camera.synthetic import SyntheticCamera
 
         return SyntheticCamera(microscope_name, device_connection, configuration)
 
@@ -354,11 +354,11 @@ def start_mirror(
         ]["hardware"]["type"]
 
     if mirror_type == "ImagineOpticsMirror":
-        from navigate.model.devices.mirrors.mirror_imop import ImagineOpticsMirror
+        from navigate.model.devices.mirrors.imop import ImagineOpticsMirror
 
         return ImagineOpticsMirror(microscope_name, device_connection, configuration)
     elif mirror_type == "SyntheticMirror":
-        from navigate.model.devices.mirrors.mirror_synthetic import SyntheticMirror
+        from navigate.model.devices.mirrors.synthetic import SyntheticMirror
 
         return SyntheticMirror(microscope_name, device_connection, configuration)
     elif "mirror" in plugin_devices:
@@ -408,7 +408,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             stage_type = stage_config["type"]
 
         if stage_type == "PI" and platform.system() == "Windows":
-            from navigate.model.devices.stages.stage_pi import build_PIStage_connection
+            from navigate.model.devices.stages.pi import build_PIStage_connection
             from pipython.pidevice.gcserror import GCSError
 
             stage_devices.append(
@@ -425,7 +425,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             )
 
         elif stage_type == "MP285" and platform.system() == "Windows":
-            from navigate.model.devices.stages.stage_sutter import (
+            from navigate.model.devices.stages.sutter import (
                 build_MP285_connection,
             )
 
@@ -442,7 +442,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             )
 
         elif stage_type == "Thorlabs" and platform.system() == "Windows":
-            from navigate.model.devices.stages.stage_tl_kcube_inertial import (
+            from navigate.model.devices.stages.tl_kcube_inertial import (
                 build_TLKIMStage_connection,
             )
             from navigate.model.devices.APIs.thorlabs.kcube_inertial import (
@@ -458,7 +458,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             )
 
         elif stage_type == "KST101":
-            from navigate.model.devices.stages.stage_tl_kcube_steppermotor import (
+            from navigate.model.devices.stages.tl_kcube_steppermotor import (
                 build_TLKSTStage_connection,
             )
 
@@ -471,7 +471,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             )
 
         elif stage_type == "MCL" and platform.system() == "Windows":
-            from navigate.model.devices.stages.stage_mcl import (
+            from navigate.model.devices.stages.mcl import (
                 build_MCLStage_connection,
             )
             from navigate.model.devices.APIs.mcl.madlib import MadlibError
@@ -489,7 +489,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             so, then we will load this as a shared device. If not, we will create the
             connection to the Tiger Controller.
             """
-            from navigate.model.devices.stages.stage_asi import (
+            from navigate.model.devices.stages.asi import (
                 build_ASI_Stage_connection,
             )
             from navigate.model.devices.APIs.asi.asi_tiger_controller import (
@@ -515,7 +515,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
             TODO: Evaluate whether MS2000 should be able to operate as a shared device.
             """
 
-            from navigate.model.devices.stages.stage_asi_MSTwoThousand import (
+            from navigate.model.devices.stages.asi_MSTwoThousand import (
                 build_ASI_Stage_connection,
             )
             from navigate.model.devices.APIs.asi.asi_MS2000_controller import (
@@ -540,7 +540,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
 
             TODO: Evaluate whether MFC2000 should be able to operate as a shared device.
             """
-            from navigate.model.devices.stages.stage_asi_MFCTwoThousand import (
+            from navigate.model.devices.stages.asi_MFCTwoThousand import (
                 build_ASI_Stage_connection,
             )
             from navigate.model.devices.APIs.asi.asi_tiger_controller import (
@@ -633,52 +633,52 @@ def start_stage(
         device_type = device_config["type"]
 
     if device_type == "PI":
-        from navigate.model.devices.stages.stage_pi import PIStage
+        from navigate.model.devices.stages.pi import PIStage
 
         return PIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "MP285":
-        from navigate.model.devices.stages.stage_sutter import SutterStage
+        from navigate.model.devices.stages.sutter import SutterStage
 
         return SutterStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "Thorlabs":
-        from navigate.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
+        from navigate.model.devices.stages.tl_kcube_inertial import TLKIMStage
 
         return TLKIMStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "KST101":
-        from navigate.model.devices.stages.stage_tl_kcube_steppermotor import TLKSTStage
+        from navigate.model.devices.stages.tl_kcube_steppermotor import TLKSTStage
 
         return TLKSTStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "MCL":
-        from navigate.model.devices.stages.stage_mcl import MCLStage
+        from navigate.model.devices.stages.mcl import MCLStage
 
         return MCLStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "ASI":
-        from navigate.model.devices.stages.stage_asi import ASIStage
+        from navigate.model.devices.stages.asi import ASIStage
 
         return ASIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "MS2000":
-        from navigate.model.devices.stages.stage_asi_MSTwoThousand import ASIStage
+        from navigate.model.devices.stages.asi_MSTwoThousand import ASIStage
 
         return ASIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "MFC2000":
-        from navigate.model.devices.stages.stage_asi import ASIStage
+        from navigate.model.devices.stages.asi import ASIStage
 
         return ASIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type == "GalvoNIStage":
-        from navigate.model.devices.stages.stage_galvo import GalvoNIStage
+        from navigate.model.devices.stages.ni import GalvoNIStage
 
         return GalvoNIStage(microscope_name, device_connection, configuration, id)
 
     elif device_type.lower() == "syntheticstage" or device_type.lower() == "synthetic":
-        from navigate.model.devices.stages.stage_synthetic import SyntheticStage
+        from navigate.model.devices.stages.synthetic import SyntheticStage
 
         return SyntheticStage(microscope_name, device_connection, configuration, id)
 
@@ -733,7 +733,7 @@ def load_zoom_connection(configuration, is_synthetic=False, plugin_devices={}):
         device_type = device_info["type"]
 
     if device_type == "DynamixelZoom":
-        from navigate.model.devices.zoom.zoom_dynamixel import (
+        from navigate.model.devices.zoom.dynamixel import (
             build_dynamixel_zoom_connection,
         )
 
@@ -802,15 +802,15 @@ def start_zoom(
         device_type = "NoDevice"
 
     if device_type == "DynamixelZoom":
-        from navigate.model.devices.zoom.zoom_dynamixel import DynamixelZoom
+        from navigate.model.devices.zoom.dynamixel import DynamixelZoom
 
         return DynamixelZoom(microscope_name, device_connection, configuration)
     elif device_type.lower() == "syntheticzoom" or device_type.lower() == "synthetic":
-        from navigate.model.devices.zoom.zoom_synthetic import SyntheticZoom
+        from navigate.model.devices.zoom.synthetic import SyntheticZoom
 
         return SyntheticZoom(microscope_name, device_connection, configuration)
     elif device_type == "NoDevice" or "None":
-        from navigate.model.devices.zoom.zoom_base import ZoomBase
+        from navigate.model.devices.zoom.base import ZoomBase
 
         return ZoomBase(microscope_name, device_connection, configuration)
     elif "zoom" in plugin_devices:
@@ -858,7 +858,7 @@ def load_filter_wheel_connection(device_info, is_synthetic=False, plugin_devices
         device_type = device_info["type"]
 
     if device_type == "SutterFilterWheel":
-        from navigate.model.devices.filter_wheel.filter_wheel_sutter import (
+        from navigate.model.devices.filter_wheel.sutter import (
             build_filter_wheel_connection,
         )
 
@@ -869,7 +869,7 @@ def load_filter_wheel_connection(device_info, is_synthetic=False, plugin_devices
         )
 
     elif device_type == "LUDLFilterWheel":
-        from navigate.model.devices.filter_wheel.filter_wheel_ludl import (
+        from navigate.model.devices.filter_wheel.ludl import (
             build_filter_wheel_connection,
         )
 
@@ -880,7 +880,7 @@ def load_filter_wheel_connection(device_info, is_synthetic=False, plugin_devices
         )
 
     elif device_type == "ASI":
-        from navigate.model.devices.filter_wheel.filter_wheel_asi import (
+        from navigate.model.devices.filter_wheel.asi import (
             build_filter_wheel_connection,
         )
 
@@ -966,26 +966,26 @@ def start_filter_wheel(
         device_type = device_config["hardware"]["type"]
 
     if device_type == "SutterFilterWheel":
-        from navigate.model.devices.filter_wheel.filter_wheel_sutter import (
+        from navigate.model.devices.filter_wheel.sutter import (
             SutterFilterWheel,
         )
 
         return SutterFilterWheel(device_connection, device_config)
 
     elif device_type == "LUDLFilterWheel":
-        from navigate.model.devices.filter_wheel.filter_wheel_ludl import (
+        from navigate.model.devices.filter_wheel.ludl import (
             LUDLFilterWheel,
         )
 
         return LUDLFilterWheel(device_connection, device_config)
 
     elif device_type == "ASI":
-        from navigate.model.devices.filter_wheel.filter_wheel_asi import ASIFilterWheel
+        from navigate.model.devices.filter_wheel.asi import ASIFilterWheel
 
         return ASIFilterWheel(device_connection, device_config)
 
     elif device_type == "NI":
-        from navigate.model.devices.filter_wheel.filter_wheel_daq import DAQFilterWheel
+        from navigate.model.devices.filter_wheel.ni import DAQFilterWheel
 
         return DAQFilterWheel(device_connection, device_config)
 
@@ -993,7 +993,7 @@ def start_filter_wheel(
         device_type.lower() == "syntheticfilterwheel"
         or device_type.lower() == "synthetic"
     ):
-        from navigate.model.devices.filter_wheel.filter_wheel_synthetic import (
+        from navigate.model.devices.filter_wheel.synthetic import (
             SyntheticFilterWheel,
         )
 
@@ -1047,12 +1047,12 @@ def start_daq(configuration, is_synthetic=False):
         device_type = configuration["configuration"]["hardware"]["daq"]["type"]
 
     if device_type == "NI":
-        from navigate.model.devices.daq.daq_ni import NIDAQ
+        from navigate.model.devices.daq.ni import NIDAQ
 
         return NIDAQ(configuration)
 
     elif device_type.lower() == "syntheticdaq" or device_type.lower() == "synthetic":
-        from navigate.model.devices.daq.daq_synthetic import SyntheticDAQ
+        from navigate.model.devices.daq.synthetic import SyntheticDAQ
 
         return SyntheticDAQ(configuration)
 
@@ -1107,7 +1107,7 @@ def start_shutter(
     if device_type == "NI":
         if device_connection is not None:
             return device_connection
-        from navigate.model.devices.shutter.laser_shutter_ttl import ShutterTTL
+        from navigate.model.devices.shutter.ni import ShutterTTL
 
         return ShutterTTL(microscope_name, None, configuration)
     elif (
@@ -1115,7 +1115,7 @@ def start_shutter(
     ):
         if device_connection is not None:
             return device_connection
-        from navigate.model.devices.shutter.laser_shutter_synthetic import (
+        from navigate.model.devices.shutter.synthetic import (
             SyntheticShutter,
         )
 
@@ -1189,13 +1189,13 @@ def start_lasers(
     if device_type == "NI":
         if device_connection is not None:
             return device_connection
-        from navigate.model.devices.lasers.laser_ni import LaserNI
+        from navigate.model.devices.lasers.ni import LaserNI
 
         return LaserNI(microscope_name, device_connection, configuration, id)
     elif device_type.lower() == "syntheticlaser" or device_type.lower() == "synthetic":
         if device_connection is not None:
             return device_connection
-        from navigate.model.devices.lasers.laser_synthetic import SyntheticLaser
+        from navigate.model.devices.lasers.synthetic import SyntheticLaser
 
         return SyntheticLaser(microscope_name, device_connection, configuration, id)
     elif "lasers" in plugin_devices:
@@ -1260,12 +1260,12 @@ def start_remote_focus_device(
         ]["hardware"]["type"]
 
     if device_type == "NI":
-        from navigate.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
+        from navigate.model.devices.remote_focus.ni import RemoteFocusNI
 
         return RemoteFocusNI(microscope_name, device_connection, configuration)
 
     elif device_type == "EquipmentSolutions":
-        from navigate.model.devices.remote_focus.remote_focus_equipment_solutions import (
+        from navigate.model.devices.remote_focus.equipment_solutions import (
             RemoteFocusEquipmentSolutions,
         )
 
@@ -1277,7 +1277,7 @@ def start_remote_focus_device(
         device_type.lower() == "syntheticremotefocus"
         or device_type.lower() == "synthetic"
     ):
-        from navigate.model.devices.remote_focus.remote_focus_synthetic import (
+        from navigate.model.devices.remote_focus.synthetic import (
             SyntheticRemoteFocus,
         )
 
@@ -1348,11 +1348,11 @@ def start_galvo(
         ][id]["hardware"]["type"]
 
     if device_type == "NI":
-        from navigate.model.devices.galvo.galvo_ni import GalvoNI
+        from navigate.model.devices.galvo.ni import GalvoNI
 
         return GalvoNI(microscope_name, device_connection, configuration, id)
     elif device_type.lower() == "syntheticgalvo" or device_type.lower() == "synthetic":
-        from navigate.model.devices.galvo.galvo_synthetic import SyntheticGalvo
+        from navigate.model.devices.galvo.synthetic import SyntheticGalvo
 
         return SyntheticGalvo(microscope_name, device_connection, configuration, id)
     elif "galvo" in plugin_devices:

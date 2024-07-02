@@ -1,5 +1,5 @@
 def test_remote_focus_synthetic_functions():
-    from navigate.model.devices.remote_focus.remote_focus_synthetic import (
+    from navigate.model.devices.remote_focus.synthetic import (
         SyntheticRemoteFocus,
     )
     from test.model.dummy import DummyModel

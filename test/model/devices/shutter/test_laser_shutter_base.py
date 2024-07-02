@@ -30,7 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import unittest
-from navigate.model.devices.shutter.laser_shutter_base import ShutterBase
+from navigate.model.devices.shutter.base import ShutterBase
 from test.model.dummy import DummyModel
 
 

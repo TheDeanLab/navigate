@@ -37,7 +37,8 @@ import random
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.stages.stage_mcl import MCLStage
+from navigate.model.devices.stages.mcl import MCLStage
+
 
 class MockMCLController:
     def __init__(self):
@@ -45,28 +46,28 @@ class MockMCLController:
         for axis in self.axes:
             setattr(self, f"{axis}_abs", 0)
         self.MadlibError = Exception
-    
+
     def MCL_SingleReadN(self, axis, handle=None):
         try:
             return getattr(self, f"{axis}_abs")
-        except:
+        except Exception:
             raise self.MadlibError
-    
+
     def MCL_SingleWriteN(self, pos, axis, handle=None):
         setattr(self, f"{axis}_abs", pos)
-    
+
 
 class TestStageMCL:
     """Unit Test for StageBase Class"""
 
     @pytest.fixture(autouse=True)
-    def setup_class(self, stage_configuration, random_single_axis_test, random_multiple_axes_test):
+    def setup_class(
+        self, stage_configuration, random_single_axis_test, random_multiple_axes_test
+    ):
         self.microscope_name = "Mesoscale"
         self.configuration = {
             "configuration": {
-                "microscopes": {
-                    self.microscope_name: stage_configuration
-                }
+                "microscopes": {self.microscope_name: stage_configuration}
             }
         }
         self.stage_configuration = stage_configuration
@@ -125,12 +126,18 @@ class TestStageMCL:
             assert hasattr(stage, f"{axis}_min")
             assert hasattr(stage, f"{axis}_max")
             assert getattr(stage, f"{axis}_pos") == 0
-            assert getattr(stage, f"{axis}_min") == self.stage_configuration["stage"][f"{axis}_min"]
-            assert getattr(stage, f"{axis}_max") == self.stage_configuration["stage"][f"{axis}_max"]
+            assert (
+                getattr(stage, f"{axis}_min")
+                == self.stage_configuration["stage"][f"{axis}_min"]
+            )
+            assert (
+                getattr(stage, f"{axis}_max")
+                == self.stage_configuration["stage"][f"{axis}_max"]
+            )
 
         if axes_mapping is None:
-            # using default mapping which is hard coded in stage_mcl.py
-            default_mapping = {'x': 'x', 'y': 'y', 'z': 'z', 'f': 'f', 'theta': 'aux'}
+            # using default mapping which is hard coded in mcl.py
+            default_mapping = {"x": "x", "y": "y", "z": "z", "f": "f", "theta": "aux"}
             for axis, device_axis in stage.axes_mapping.items():
                 assert default_mapping[axis] == device_axis
             assert len(stage.axes_mapping) <= len(stage.axes)
@@ -138,7 +145,7 @@ class TestStageMCL:
             for i, axis in enumerate(axes):
                 assert stage.axes_mapping[axis] == axes_mapping[i]
 
-        assert stage.stage_limits == True
+        assert stage.stage_limits is True
 
     @pytest.mark.parametrize(
         "axes, axes_mapping",
@@ -161,10 +168,7 @@ class TestStageMCL:
     )
     def test_report_position(self, axes, axes_mapping):
         MCL_device = MockMCLController()
-        device_connection = {
-            "controller": MCL_device,
-            "handle": None
-        }
+        device_connection = {"controller": MCL_device, "handle": None}
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
         stage = MCLStage(self.microscope_name, device_connection, self.configuration)
@@ -199,10 +203,7 @@ class TestStageMCL:
     )
     def test_move_axis_absolute(self, axes, axes_mapping):
         MCL_device = MockMCLController()
-        device_connection = {
-            "controller": MCL_device,
-            "handle": None
-        }
+        device_connection = {"controller": MCL_device, "handle": None}
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
         stage = MCLStage(self.microscope_name, device_connection, self.configuration)
@@ -231,10 +232,7 @@ class TestStageMCL:
     )
     def test_move_absolute(self, axes, axes_mapping):
         MCL_device = MockMCLController()
-        device_connection = {
-            "controller": MCL_device,
-            "handle": None
-        }
+        device_connection = {"controller": MCL_device, "handle": None}
         self.stage_configuration["stage"]["hardware"]["axes"] = axes
         self.stage_configuration["stage"]["hardware"]["axes_mapping"] = axes_mapping
         stage = MCLStage(self.microscope_name, device_connection, self.configuration)

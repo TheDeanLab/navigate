@@ -47,7 +47,7 @@ class TestZoomDynamixel(unittest.TestCase):
 
     @pytest.mark.skipif(platform.system() != "Windows", reason="No DLL for mac")
     def test_zoom_dynamixel_attributes(self):
-        from navigate.model.devices.zoom.zoom_dynamixel import DynamixelZoom
+        from navigate.model.devices.zoom.dynamixel import DynamixelZoom
 
         attributes = dir(DynamixelZoom)
         desired_attributes = ["move", "read_position", "set_zoom"]

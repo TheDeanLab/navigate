@@ -34,7 +34,7 @@ import pytest
 
 @pytest.fixture
 def dummy_zoom(dummy_model):
-    from navigate.model.devices.zoom.zoom_base import ZoomBase
+    from navigate.model.devices.zoom.base import ZoomBase
 
     return ZoomBase(dummy_model.active_microscope_name, None, dummy_model.configuration)
 

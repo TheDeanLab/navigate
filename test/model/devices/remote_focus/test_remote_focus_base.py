@@ -40,7 +40,7 @@ import numpy as np
 
 
 def test_remote_focus_base_init():
-    from navigate.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
+    from navigate.model.devices.remote_focus.base import RemoteFocusBase
     from test.model.dummy import DummyModel
 
     model = DummyModel()
@@ -52,7 +52,7 @@ def test_remote_focus_base_init():
 
 @pytest.mark.parametrize("smoothing", [0] + list(np.random.rand(5) * 100))
 def test_remote_focus_base_adjust(smoothing):
-    from navigate.model.devices.remote_focus.remote_focus_base import RemoteFocusBase
+    from navigate.model.devices.remote_focus.base import RemoteFocusBase
     from test.model.dummy import DummyModel
 
     model = DummyModel()

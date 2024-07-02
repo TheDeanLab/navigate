@@ -31,8 +31,13 @@
 
 import unittest
 from unittest.mock import MagicMock
-from navigate.model.devices.galvo.galvo_base import GalvoBase
-from navigate.config import load_configs, get_configuration_paths, verify_configuration, verify_waveform_constants
+from navigate.model.devices.galvo.base import GalvoBase
+from navigate.config import (
+    load_configs,
+    get_configuration_paths,
+    verify_configuration,
+    verify_waveform_constants,
+)
 from multiprocessing import Manager
 import numpy as np
 
@@ -86,9 +91,13 @@ class TestGalvoBase(unittest.TestCase):
         assert self.galvo.galvo_name == "Galvo 0"
         assert self.galvo.sample_rate == 100000
 
-        assert self.galvo.camera_delay == self.configuration["configuration"]["microscopes"][
-           self.microscope_name
-        ]["camera"]["delay"] / 1000
+        assert (
+            self.galvo.camera_delay
+            == self.configuration["configuration"]["microscopes"][self.microscope_name][
+                "camera"
+            ]["delay"]
+            / 1000
+        )
         assert self.galvo.galvo_max_voltage == 5
         assert self.galvo.galvo_min_voltage == -5
         assert self.galvo.galvo_waveform == "sawtooth" or "sine"

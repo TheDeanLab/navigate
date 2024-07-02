@@ -38,7 +38,7 @@ import pytest
 @pytest.fixture(scope="module")
 def prepare_cameras(dummy_model):
     from navigate.model.devices.APIs.hamamatsu.HamamatsuAPI import DCAM, camReg
-    from navigate.model.devices.camera.camera_hamamatsu import HamamatsuOrca
+    from navigate.model.devices.camera.hamamatsu import HamamatsuOrca
 
     def start_camera(idx=0):
         # open camera
@@ -104,7 +104,7 @@ class TestHamamatsuOrca:
         return value > target_min and value < target_max
 
     def test_hamamatsu_camera_attributes(self):
-        from navigate.model.devices.camera.camera_hamamatsu import HamamatsuOrca
+        from navigate.model.devices.camera.hamamatsu import HamamatsuOrca
 
         attributes = dir(HamamatsuOrca)
         desired_attributes = [
@@ -134,7 +134,7 @@ class TestHamamatsuOrca:
 
             camera = self.cameras[microscope_name]
 
-            assert camera != None, f"Should start the camera {microscope_name}"
+            assert camera is not None, f"Should start the camera {microscope_name}"
 
             camera_controller = camera.camera_controller
             camera_configs = self.model.configuration["configuration"]["microscopes"][
@@ -299,9 +299,10 @@ class TestHamamatsuOrca:
                 if top % 2 == 1 or bottom % 2 == 0:
                     assert r is False
                 else:
-                    assert (
-                        r == True
-                    ), f"try to set{x}x{y}, but get {self.camera.x_pixels}x{self.camera.y_pixels}"
+                    assert r is True, (
+                        f"try to set{x}x{y}, but get "
+                        f"{self.camera.x_pixels}x{self.camera.y_pixels}"
+                    )
                     assert (
                         self.camera.x_pixels == x
                     ), f"trying to set {x}x{y}. width should be changed to {x}"

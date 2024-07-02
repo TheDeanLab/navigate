@@ -36,7 +36,7 @@ import unittest
 # Third Party Imports
 
 # Local Imports
-from navigate.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
+from navigate.model.devices.shutter.synthetic import SyntheticShutter
 from test.model.dummy import DummyModel
 
 

@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only
+(subject to the limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -31,9 +32,8 @@
 # """
 
 # Third Party Imports
-import pytest
 
-from navigate.model.devices.camera.camera_base import CameraBase
+from navigate.model.devices.camera.base import CameraBase
 
 
 def test_start_camera(dummy_model):

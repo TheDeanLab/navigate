@@ -1,5 +1,5 @@
 def test_filter_wheel_base_functions():
-    from navigate.model.devices.filter_wheel.filter_wheel_base import FilterWheelBase
+    from navigate.model.devices.filter_wheel.base import FilterWheelBase
     from test.model.dummy import DummyModel
 
     model = DummyModel()

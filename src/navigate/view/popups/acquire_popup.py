@@ -69,7 +69,7 @@ class AcquirePopUp:
         # window
         #: PopUp: The popup window
         self.popup = PopUp(
-            root, "File Saving Dialog", "430x400+320+180", transient=True
+            root, "File Saving Dialog", "430x370+320+180", transient=True
         )
 
         # Storing the content frame of the popup, this will be the parent of the widgets

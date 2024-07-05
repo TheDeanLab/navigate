@@ -76,7 +76,7 @@ class ShutterTTL(ShutterBase):
         self.shutter_task.do_channels.add_do_chan(
             shutter_channel, line_grouping=LineGrouping.CHAN_FOR_ALL_LINES
         )
-        self.shutter_task.write(self.shutter_state, auto_start=True)
+        self.open_shutter()
 
     def __del__(self):
         """Close the ShutterTTL at exit."""
@@ -86,14 +86,34 @@ class ShutterTTL(ShutterBase):
         """Open the shutter"""
         #: bool: Shutter state
         self.shutter_state = True
-        self.shutter_task.write(self.shutter_state, auto_start=True)
-        logger.debug("ShutterTTL - Shutter opened")
+        try:
+            self.shutter_task.write(self.shutter_state, auto_start=True)
+            logger.debug("ShutterTTL - Shutter opened")
+        except nidaqmx.errors.DaqError as e:
+            print(
+                "Warning, the shutter did not open. Check the hardware "
+                "specifications. Some NI devices (e.g.PCIe-6738) have "
+                "port/sample size limitations. If the port/sample size is "
+                "exceeded, the shutter will not open. We recommend trying a "
+                "different port."
+            )
+            logger.debug(e)
 
     def close_shutter(self):
         """Close the shutter"""
         self.shutter_state = False
-        self.shutter_task.write(self.shutter_state, auto_start=True)
-        logger.debug("ShutterTTL - The shutter is closed")
+        try:
+            self.shutter_task.write(self.shutter_state, auto_start=True)
+            logger.debug("ShutterTTL - The shutter is closed")
+        except nidaqmx.errors.DaqError as e:
+            print(
+                "Warning, the shutter did not close. Check the hardware "
+                "specifications. Some NI devices (e.g.PCIe-6738) have "
+                "port/sample size limitations. If the port/sample size is "
+                "exceeded, the shutter will not open. We recommend trying a "
+                "different port."
+            )
+            logger.debug(e)
 
     @property
     def state(self):

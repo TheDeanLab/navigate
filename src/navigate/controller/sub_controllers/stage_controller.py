@@ -174,20 +174,24 @@ class StageController(GUIController):
         config = self.parent_controller.configuration_controller
         self.disable_synthetic_stages(config)
 
+        # Get the minimum and maximum stage limits.
         self.position_min = config.get_stage_position_limits("_min")
         self.position_max = config.get_stage_position_limits("_max")
 
         widgets = self.view.get_widgets()
         step_dict = self.stage_setting_dict[config.microscope_name]
         for axis in ["x", "y", "z", "theta", "f"]:
+            # Set Stage Limits
             widgets[axis].widget.min = self.position_min[axis]
             widgets[axis].widget.max = self.position_max[axis]
             if axis == "x" or axis == "y":
                 step_axis = "xy"
             else:
                 step_axis = axis
+
+            # Set step size.
             # the minimum step should be non-zero and non-negative.
-            widgets[step_axis + "_step"].widget.configure(from_=1)
+            widgets[step_axis + "_step"].widget.configure(from_=0.01)
             widgets[step_axis + "_step"].widget.configure(to=self.position_max[axis])
             step_increment = step_dict[step_axis + "_step"] // 10
             if step_increment == 0:
@@ -345,7 +349,6 @@ class StageController(GUIController):
                 widgets[axis].widget.trigger_focusout_validation()
             self.stage_setting_dict[axis] = position.get(axis, 0)
         self.show_verbose_info("Set stage position")
-
 
     def get_position(self):
         """This function returns current position from the view.
@@ -565,9 +568,8 @@ class StageController(GUIController):
                 if self.stage_limits:
                     widget.trigger_focusout_validation()
                     # if position is not inside limits do not move stage
-                    if (
-                        position < float(self.position_min[axis])
-                        or position > float(self.position_max[axis])
+                    if position < float(self.position_min[axis]) or position > float(
+                        self.position_max[axis]
                     ):
                         return
             except tk._tkinter.TclError:

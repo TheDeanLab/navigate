@@ -78,7 +78,7 @@ def test_config_methods():
         "verify_waveform_constants",
         "verify_configuration",
         "yaml",
-        "build_ref_name"
+        "build_ref_name",
     ]
     for method in methods:
         assert method in desired_methods
@@ -101,8 +101,6 @@ def test_get_navigate_path_windows(monkeypatch):
     assert path_string.startswith("LOCALAPPDATA")
     assert path_string.endswith(".navigate")
 
-    
-
 
 def test_get_navigate_path_mac(monkeypatch):
     """Test that the Navigate path is a string."""
@@ -121,7 +119,7 @@ def test_get_configuration_paths():
     paths = config.get_configuration_paths()
     for path in paths:
         assert isinstance(path, pathlib.Path)
-    assert len(paths) == 5
+    assert len(paths) == 6
 
 
 def test_get_configuration_paths_create_dir(monkeypatch):
@@ -135,6 +133,7 @@ def test_get_configuration_paths_create_dir(monkeypatch):
         assert path.suffix.lower() in [".yml", ".yaml"]
     # delete generated folder
     delete_folder("TESTPATH")
+
 
 # test that the system is exited if no file is provided to load_yaml_config
 def test_load_yaml_config_no_file():
@@ -271,6 +270,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             self.manager,
             configuration=os.path.join(self.config_path, "configuration.yaml"),
         )
+        config.verify_configuration(self.manager, configuration)
         saving_dict_sample = {
             "root_directory": config.get_navigate_path(),
             "save_directory": config.get_navigate_path(),
@@ -361,9 +361,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "waveform_template": "Default",
         }
 
-        multipositions_sample = [
-            [10.0, 10.0, 10.0, 10.0, 10.0]
-        ]
+        multipositions_sample = [[10.0, 10.0, 10.0, 10.0, 10.0]]
 
         self.experiment_sample = {
             "Saving": saving_dict_sample,
@@ -391,6 +389,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             configuration=os.path.join(self.config_path, "configuration.yaml"),
             experiment=experiment_file_path,
         )
+        config.verify_configuration(self.manager, configuration)
         config.verify_experiment_config(self.manager, configuration)
 
         experiement_config = configuration["experiment"]
@@ -476,6 +475,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 self.test_root, "experiment_missing_parameters.yml"
             ),
         )
+        config.verify_configuration(self.manager, configuration)
         config.verify_experiment_config(self.manager, configuration)
         # verify Saving parameters are added
         for k in saving_parameters_deleted:
@@ -511,6 +511,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             configuration=os.path.join(self.config_path, "configuration.yaml"),
             experiment=os.path.join(self.config_path, "experiment.yml"),
         )
+        config.verify_configuration(self.manager, configuration)
         experiment = configuration["experiment"]
         # Saving parameters
         # check if root_directory and save_directory exist
@@ -665,6 +666,8 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 "defocus": 0.0,
             }
         ]
+        # number_of_filter_wheels =
+
         config.verify_experiment_config(self.manager, configuration)
         assert type(experiment["MicroscopeState"]["channels"]) is DictProxy
         assert len(list(experiment["MicroscopeState"]["channels"].keys())) == 0
@@ -713,7 +716,7 @@ class TestVerifyExperimentConfig(unittest.TestCase):
         filterwheels = list(
             configuration["configuration"]["microscopes"][microscope_name][
                 "filter_wheel"
-            ]["available_filters"].keys()
+            ][0]["available_filters"].keys()
         )
         config.update_config_dict(
             self.manager,
@@ -723,8 +726,8 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 "is_selected": 1,
                 "laser": "48nm",
                 "laser_index": -1,
-                "filter": "nonexsit_filter_***",
-                "filter_position": 1,
+                "filter_wheel_0": "nonexsit_filter_***",
+                "filter_position_0": 1,
                 "camera_exposure_time": -200.0,
                 "laser_power": "a",
                 "interval_time": -3,
@@ -735,8 +738,8 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "is_selected": False,
             "laser": lasers[0],
             "laser_index": 0,
-            "filter": filterwheels[0],
-            "filter_position": 0,
+            "filter_wheel_0": filterwheels[0],
+            "filter_position_0": 0,
             "camera_exposure_time": 200.0,
             "laser_power": 20.0,
             "interval_time": 0.0,
@@ -759,8 +762,8 @@ class TestVerifyExperimentConfig(unittest.TestCase):
                 "is_selected": 1,
                 "laser": lasers[1],
                 "laser_index": 3,
-                "filter": filterwheels[2],
-                "filter_position": 1,
+                "filter_wheel_0": filterwheels[2],
+                "filter_position_0": 1,
                 "camera_exposure_time": -200.0,
                 "laser_power": "a",
                 "interval_time": -3,
@@ -771,8 +774,8 @@ class TestVerifyExperimentConfig(unittest.TestCase):
             "is_selected": False,
             "laser": lasers[1],
             "laser_index": 1,
-            "filter": filterwheels[2],
-            "filter_position": 2,
+            "filter_wheel_0": filterwheels[2],
+            "filter_position_0": 2,
             "camera_exposure_time": 200.0,
             "laser_power": 20.0,
             "interval_time": 0.0,

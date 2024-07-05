@@ -30,10 +30,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from navigate.model.devices.galvo.galvo_ni import GalvoNI
-from nidaqmx.constants import AcquisitionType
-from navigate.config import load_configs, get_configuration_paths, verify_configuration, verify_waveform_constants
+from navigate.config import (
+    load_configs,
+    get_configuration_paths,
+    verify_configuration,
+    verify_waveform_constants,
+)
 from multiprocessing import Manager
 
 
@@ -51,6 +55,7 @@ class TestGalvoNI(unittest.TestCase):
             waveform_constants_path,
             rest_api_path,
             waveform_templates_path,
+            gui_configuration_path,
         ) = get_configuration_paths()
 
         self.configuration = load_configs(
@@ -60,6 +65,7 @@ class TestGalvoNI(unittest.TestCase):
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
             waveform_templates=waveform_templates_path,
+            gui_configuration=gui_configuration_path,
         )
         verify_configuration(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)
@@ -83,9 +89,13 @@ class TestGalvoNI(unittest.TestCase):
         assert self.galvo.microscope_name == "Mesoscale"
         assert self.galvo.galvo_name == "Galvo 0"
         assert self.galvo.sample_rate == 100000
-        assert self.galvo.camera_delay == self.configuration["configuration"]["microscopes"][
-           self.microscope_name
-        ]["camera"]["delay"] / 1000
+        assert (
+            self.galvo.camera_delay
+            == self.configuration["configuration"]["microscopes"][self.microscope_name][
+                "camera"
+            ]["delay"]
+            / 1000
+        )
         assert self.galvo.galvo_max_voltage == 5
         assert self.galvo.galvo_min_voltage == -5
         assert self.galvo.galvo_waveform == "sawtooth" or "sine"
@@ -106,7 +116,7 @@ class TestGalvoNI(unittest.TestCase):
 
         assert type(waveforms) == dict
         self.device_connection.assert_not_called()
-        
+
         for channel_key, channel_setting in self.configuration["experiment"][
             "MicroscopeState"
         ]["channels"].items():

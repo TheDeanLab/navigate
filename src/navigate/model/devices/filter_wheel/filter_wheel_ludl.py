@@ -99,20 +99,18 @@ class LUDLFilterWheel(FilterWheelBase):
 
     """
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(self, device_connection, device_config):
         """Initialize the LUDLFilterWheel class.
 
         Parameters
         ----------
-        microscope_name : str
-            Name of the microscope.
         device_connection : serial.Serial
             Serial port connection to the filter wheel.
-        configuration : dict
-            Configuration file for the microscope.
+        device_config : dict
+            Dictionary of device configuration parameters.
         """
 
-        super().__init__(microscope_name, device_connection, configuration)
+        super().__init__(device_connection, device_config)
 
         #: obj: Serial port connection to the filter wheel.
         self.serial = device_connection
@@ -120,18 +118,8 @@ class LUDLFilterWheel(FilterWheelBase):
         #: io.TextIOWrapper: Text I/O wrapper for the serial port.
         self.sio = io.TextIOWrapper(io.BufferedRWPair(self.serial, self.serial))
 
-        #: str: Name of the microscope.
-        self.microscope_name = microscope_name
-
-        #: int: Number of filter wheels.
-        self.number_of_filter_wheels = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["filter_wheel"]["hardware"]["wheel_number"]
-
         #: float: Delay for filter wheel to change positions.
-        self.wait_until_done_delay = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["filter_wheel"]["filter_wheel_delay"]
+        self.wait_until_done_delay = device_config["filter_wheel_delay"]
 
     def set_filter(self, filter_name, wait_until_done=True):
         """Set the filter wheel to a specific filter position.

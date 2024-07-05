@@ -65,10 +65,6 @@ class DummyController:
         ----------
         view : DummyView
             The view to be controlled by this controller.
-
-        Example
-        -------
-        >>> controller = DummyController(view)
         """
         from navigate.controller.configuration_controller import ConfigurationController
         from navigate.controller.sub_controllers import MenuController
@@ -81,24 +77,35 @@ class DummyController:
 
         #: dict: The configuration dictionary.
         self.configuration = DummyModel().configuration
+
         #: list: The list of commands.
         self.commands = []
+
         #: DummyView: The view to be controlled by this controller.
         self.view = view
+
         #: ConfigurationController: The configuration controller.
         self.configuration_controller = ConfigurationController(self.configuration)
+
         #: MenuController: The menu controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
+
+        #: ChannelsTabController: The channels tab controller.
         self.channels_tab_controller = ChannelsTabController(
             self.view.settings.channels_tab, self
         )
+
+        #: MultiPositionController: The multiposition tab controller.
         self.multiposition_tab_controller = MultiPositionController(
             self.view.settings.multiposition_tab.multipoint_list, self
         )
+
         #: dict: The stage positions.
         self.stage_pos = {}
+
         #: dict: The stage offset positions.
         self.off_stage_pos = {}
+
         base_directory = Path.joinpath(Path(__file__).resolve().parent.parent)
         configuration_directory = Path.joinpath(base_directory, "config")
         self.waveform_constants_path = Path.joinpath(
@@ -117,10 +124,6 @@ class DummyController:
             The command to be executed.
         sec : float
             The time to wait before executing the command.
-
-        Example
-        -------
-        >>> controller.execute('move_stage', 1)
         """
 
         self.commands.append(str)
@@ -164,25 +167,29 @@ class DummyModel:
         """Initialize the Dummy model."""
         # Set up the model, experiment, waveform dictionaries
         base_directory = Path(__file__).resolve().parent.parent.parent
-        configuration_directory = Path.joinpath(base_directory,
-                                                "src",
-                                                "navigate",
-                                                "config")
+        configuration_directory = Path.joinpath(
+            base_directory, "src", "navigate", "config"
+        )
 
         config = Path.joinpath(configuration_directory, "configuration.yaml")
         experiment = Path.joinpath(configuration_directory, "experiment.yml")
         waveform_constants = Path.joinpath(
             configuration_directory, "waveform_constants.yml"
         )
+        gui_configuration = Path.joinpath(
+            configuration_directory, "gui_configuration.yml"
+        )
 
         #: Manager: The manager.
         self.manager = Manager()
+
         #: dict: The configuration dictionary.
         self.configuration = load_configs(
             self.manager,
             configuration=config,
             experiment=experiment,
             waveform_constants=waveform_constants,
+            gui=gui_configuration,
         )
 
         verify_configuration(self.manager, self.configuration)
@@ -191,51 +198,68 @@ class DummyModel:
 
         #: DummyDevice: The device.
         self.device = DummyDevice()
+
         #: Pipe: The pipe for sending signals.
         self.signal_pipe, self.data_pipe = None, None
+
         #: DummyMicroscope: The microscope.
         self.active_microscope = DummyMicroscope(
             "Mesoscale", self.configuration, devices_dict={}, is_synthetic=True
         )
+
         #: Object: The signal container.
         self.signal_container = None
+
         #: Object: The data container.
         self.data_container = None
+
         #: Thread: The signal thread.
         self.signal_thread = None
+
         #: Thread: The data thread.
         self.data_thread = None
 
         #: bool: The flag for stopping the model.
         self.stop_flag = False
+
         #: int: The frame id.
         self.frame_id = 0  # signal_num
+
         #: list: The list of data.
         self.data = []
+
         #: list: The list of signal records.
         self.signal_records = []
+
         #: list: The list of data records.
         self.data_records = []
+
         #: int: The image width.
         self.img_width = int(
             self.configuration["experiment"]["CameraParameters"]["x_pixels"]
         )
+
         #: int: The image height.
         self.img_height = int(
             self.configuration["experiment"]["CameraParameters"]["y_pixels"]
         )
+
         #: int: The number of frames in the data buffer.
         self.number_of_frames = 10
+
         #: ndarray: The data buffer.
         self.data_buffer = np.zeros(
             (self.number_of_frames, self.img_width, self.img_height)
         )
+
         #: ndarray: The data buffer positions.
         self.data_buffer_positions = np.zeros(
             shape=(self.number_of_frames, 5), dtype=float
         )  # z-index, x, y, z, theta, f
+
         #: dict: The camera dictionary.
         self.camera = {}
+
         #: str: The active microscope name.
         self.active_microscope_name = self.configuration["experiment"][
             "MicroscopeState"
@@ -520,64 +544,91 @@ class DummyMicroscope:
         exposure_times = {}
         sweep_times = {}
         microscope_state = self.configuration["experiment"]["MicroscopeState"]
-        zoom = microscope_state["zoom"]
         waveform_constants = self.configuration["waveform_constants"]
-        camera_delay = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["camera"]["delay"] / 1000
-        camera_settle_duration = self.configuration["configuration"]["microscopes"][
-            self.microscope_name
-        ]["camera"].get("settle_duration", 0) / 1000
-        remote_focus_ramp_falling = float(
-                waveform_constants["other_constants"]["remote_focus_ramp_falling"]
-            ) / 1000
+        camera_delay = (
+            self.configuration["configuration"]["microscopes"][self.microscope_name][
+                "camera"
+            ]["delay"]
+            / 1000
+        )
+        camera_settle_duration = (
+            self.configuration["configuration"]["microscopes"][self.microscope_name][
+                "camera"
+            ].get("settle_duration", 0)
+            / 1000
+        )
+        remote_focus_ramp_falling = (
+            float(waveform_constants["other_constants"]["remote_focus_ramp_falling"])
+            / 1000
+        )
 
         duty_cycle_wait_duration = (
-            float(
-                waveform_constants["other_constants"]["remote_focus_settle_duration"]
-            ) / 1000
+            float(waveform_constants["other_constants"]["remote_focus_settle_duration"])
+            / 1000
         )
-        ps = float(
-            waveform_constants["other_constants"].get("percent_smoothing", 0.0)
-        )
+        ps = float(waveform_constants["other_constants"].get("percent_smoothing", 0.0))
 
         readout_time = 0
-        readout_mode = self.configuration["experiment"]["CameraParameters"]["sensor_mode"]
+        readout_mode = self.configuration["experiment"]["CameraParameters"][
+            "sensor_mode"
+        ]
         if readout_mode == "Normal":
             readout_time = self.camera.calculate_readout_time()
-        elif (
-            self.configuration["experiment"]["CameraParameters"]["readout_direction"] in ["Bidirectional", "Rev. Bidirectional"]
-        ):
+        elif self.configuration["experiment"]["CameraParameters"][
+            "readout_direction"
+        ] in ["Bidirectional", "Rev. Bidirectional"]:
             remote_focus_ramp_falling = 0
         # set readout out time
-        self.configuration["experiment"]["CameraParameters"]["readout_time"] = readout_time * 1000
+        self.configuration["experiment"]["CameraParameters"]["readout_time"] = (
+            readout_time * 1000
+        )
         for channel_key in microscope_state["channels"].keys():
             channel = microscope_state["channels"][channel_key]
             if channel["is_selected"] is True:
                 exposure_time = channel["camera_exposure_time"] / 1000
 
                 if readout_mode == "Light-Sheet":
-                    _, _, updated_exposure_time = self.camera.calculate_light_sheet_exposure_time(
+                    (
+                        _,
+                        _,
+                        updated_exposure_time,
+                    ) = self.camera.calculate_light_sheet_exposure_time(
                         exposure_time,
                         int(
                             self.configuration["experiment"]["CameraParameters"][
                                 "number_of_pixels"
                             ]
-                        )
+                        ),
                     )
                     if updated_exposure_time != exposure_time:
-                        print(f"*** Notice: The actual exposure time of the camera for {channel_key} is {round(updated_exposure_time*1000, 1)}ms, not {exposure_time*1000}ms!")
+                        print(
+                            f"*** Notice: The actual exposure time of the camera for "
+                            f"{channel_key} is {round(updated_exposure_time*1000, 1)}ms"
+                            f", not {exposure_time*1000}ms!"
+                        )
                         exposure_time = round(updated_exposure_time, 4)
                         # update the experiment file
-                        channel["camera_exposure_time"] = round(updated_exposure_time * 1000, 1)
-                        self.output_event_queue.put(("exposure_time", (channel_key, channel["camera_exposure_time"])))
+                        channel["camera_exposure_time"] = round(
+                            updated_exposure_time * 1000, 1
+                        )
+                        self.output_event_queue.put(
+                            (
+                                "exposure_time",
+                                (channel_key, channel["camera_exposure_time"]),
+                            )
+                        )
 
                 sweep_time = (
                     exposure_time
                     + readout_time
                     + camera_delay
-                    + max(remote_focus_ramp_falling + duty_cycle_wait_duration, camera_settle_duration, camera_delay) - camera_delay
-                )        
+                    + max(
+                        remote_focus_ramp_falling + duty_cycle_wait_duration,
+                        camera_settle_duration,
+                        camera_delay,
+                    )
+                    - camera_delay
+                )
                 # TODO: should we keep the percent_smoothing?
                 if ps > 0:
                     sweep_time = (1 + ps / 100) * sweep_time

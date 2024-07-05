@@ -6,11 +6,16 @@ def test_filter_wheel_base_functions():
     microscope_name = model.configuration["experiment"]["MicroscopeState"][
         "microscope_name"
     ]
-    fw = FilterWheelBase(microscope_name, None, model.configuration)
+    fw = FilterWheelBase(
+        None,
+        model.configuration["configuration"]["microscopes"][microscope_name][
+            "filter_wheel"
+        ][0],
+    )
 
     filter_dict = model.configuration["configuration"]["microscopes"][microscope_name][
         "filter_wheel"
-    ]["available_filters"]
+    ][0]["available_filters"]
 
     assert fw.check_if_filter_in_filter_dictionary(list(filter_dict.keys())[0])
     try:

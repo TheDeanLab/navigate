@@ -58,9 +58,10 @@ class TestMain(unittest.TestCase):
         input_arguments = [
             "--config-file",
             "--experiment-file",
-            "--waveform-constants-path",
+            "--waveform-constants-file",
             "--rest-api-file",
             "--logging-config",
+            "--gui-config-file",
         ]
         for arg in input_arguments:
             parser.parse_args([arg, str(Path.joinpath(navigate_path, "test.yml"))])

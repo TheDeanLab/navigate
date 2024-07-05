@@ -11,21 +11,76 @@ This section outlines the ``configuration.yaml``, ``experiment.yml``,
 Initial Configuration
 =====================
 In order for the **navigate** software to function, you will need to configure the
-specifications of the various hardware that you will be using in the ``configuration
-.yaml`` file.
+specifications of the various hardware that you will be using in the
+``configuration.yaml`` file.
 
-The first time you launch the software, **navigate** will create a copy of the
-``navigate\config\configuration.yaml`` and the rest of the configuration files in
-``C:\Users\Username\AppData\Local\.navigate\config`` on  Windows or ``~/.navigate`` on
-Mac/Linux. **navigate** uses these local copies of the configuration files to store
-information specific to the setup attached to the computer it is installed on.
+An example ``configuration.yaml`` file is provided in the
+``navigate\config`` directory. However, to avoid conflicts between different
+microscopes after pulling new changes from GitHub, **navigate** by default
+loads a local version of the ``configuration.yaml`` file. This file is
+stored in the ``C:\Users\Username\AppData\Local\.navigate\config`` directory
+on Windows or ``~/.navigate`` on Mac/Linux.
 
-To avoid confusion, we recommend launching the software in the synthetic hardware
-mode initially. Within your Terminal, or Anaconda Prompt, activate your **navigate**
-Python environment and launch the software by typing: ``navigate -sh``. Thereafter, you
-should only modify the ``configuration.yaml`` file in your local ``.navigate\config``
-directory. The local copy avoids conflicts between different microscopes after pulling
-new changes from GitHub.
+-----------------
+
+Configuration Wizard
+-------------------------
+To help you set up your configuration file, we have created a configuration wizard
+that will guide you through the process of creating your
+``configuration.yaml`` file. To launch the configuration wizard, open your
+Terminal or Anaconda Prompt, activate your **navigate** Python environment
+and launch the software by typing: ``navigate -c``.
+
+   .. image:: images/configurator.PNG
+     :width: 400px
+     :align: center
+
+The configuration wizard provides a convenient way for configuring your
+hardware. For each microscope, which can be renamed or deleted by
+right-clicking on the microscope tab, you will be asked to specify the
+hardware that you are using. Each hardware type is listed as its own
+independent tab, and required parameters are shown on the left column, a
+field for the parameter is shown in the middle, and an example of the
+parameter is shown on the right.
+
+Additional microscope instances can be added by clicking the
+:guilabel:`Add A Microscope` button. Should one want to start from scratch, the
+:guilabel:`New Configuration` button will clear the current configuration.
+If you have a configuration that you would like to modify, you can load it by
+clicking the :guilabel:`Load Configuration` button. Once you have completed
+the configuration, you can save it by clicking the :guilabel:`Save` button.
+For **navigate** to use the configuration file by default, it should be
+saved as ``configuration.yaml`` in the following directory, depending upon
+your operating system:
+
+* Windows: ``C:\Users\Username\AppData\Local\.navigate\config``
+* Mac/Linux: ``~/.navigate``
+
+.. note::
+
+   The configuration wizard is actively being developed, and may not support
+   every device type or configuration option. If you encounter any issues
+   with the configuration wizard, please let us know by creating an issue on
+   `GitHub <https://github.com/TheDeanLab/navigate/issues/new/choose>`_..
+
+
+-----------------
+
+Manual Configuration
+-------------------------
+If you prefer to manually configure your ``configuration.yaml`` file, we
+recommend launching the software in the synthetic hardware mode initially.
+Within your Terminal, or Anaconda Prompt, activate your **navigate**
+Python environment and launch the software in the synthetic hardware mode by
+typing: ``navigate -sh``.
+
+Upon launching the software in the synthetic hardware mode, **navigate** will
+create a copy of the ``navigate\config\configuration.yaml`` file in
+``C:\Users\Username\AppData\Local\.navigate\config`` on  Windows or ``~/
+.navigate`` on Mac/Linux.
+
+Thereafter, you should only modify the ``configuration.yaml`` file in your
+local ``.navigate\config`` directory.
 
 .. tip::
 
@@ -50,9 +105,9 @@ The ``configuration.yaml`` file contains the microscope configurations
 that you will be using with the software. Each microscope is represented as a YAML
 dictionary.
 
-Switching between each microscope is
-readily performed in **navigate**, enabling you to switch between different
-configurations or imaging modes, each with their own unique or shared hardware:
+Switching between each microscope is readily performed in **navigate**,
+enabling you to switch between different configurations or imaging modes,
+each with their own unique or shared hardware:
 
 .. code-block:: yaml
 
@@ -64,10 +119,43 @@ configurations or imaging modes, each with their own unique or shared hardware:
             ...
             ...
 
-Where ``microscope1`` and ``microscope2`` are names of two different microscopes using
-different combinations of the hardware. The names of
+Here, ``microscope1`` and ``microscope2`` are names of two different
+microscopes using different combinations of the hardware. The names of
 the microscopes must not include spaces or special characters such as ``<``, ``\``,
 ``#``, ``%``, or ``?``.
+
+Microscope Inheritance
+-------------------------
+When setting up a ``configuration.yaml`` file with multiple microscopes, the
+file can grow quite large and repetitive, especially if the microscopes share
+many of the same hardware components. To avoid this, **navigate** allows for
+inheritance of hardware components from one microscope to another. In the
+following example, ``microscope2`` inherits all of the hardware components
+from ``microscope1`` except for the camera, since this is specified in the
+``microscope2`` section.
+
+.. code-block:: yaml
+
+    microscopes:
+        microscope1:
+            camera:
+                hardware:
+                    type: HamamatsuOrca
+                    ...
+            ...
+        microscope2(microscope1):
+            camera:
+                hardware:
+                    type: HamamatsuFusion
+                    ...
+            ...
+
+
+-----------------
+
+
+Microscope Hardware Specification
+---------------------------------
 
 Each microscope is expected to have a ``daq``, ``camera``, ``remote_focus_device``,
 ``galvo``, ``filter_wheel``, ``stage``, ``zoom``, ``shutter``, ``mirror`` and
@@ -80,10 +168,8 @@ Additional explanations of a few specific sections of the microscope configurati
 below. Notably, the ``zoom`` section of the ``configuration.yaml`` specifies effective
 pixel size.
 
------------------
-
 Stage Subsection
--------------------------
+^^^^^^^^^^^^^^^^
 
 The stage section of the microscope 1) puts the stage control from the ``hardware``
 section into the microscope 2) sets boundaries for stage movement and 3) optionally
@@ -168,7 +254,7 @@ configured once when setting up the microscope.
 -----------------
 
 Stage Axes Definition
-"""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^
 
 Many times, the coordinate system of the stage hardware do not agree with the optical
 definition of each axes identity. For example, many stages define their vertical
@@ -194,7 +280,7 @@ and vice versa, you would then have to import the stages as following:
 -----------------
 
 Joystick Axes Definition
-""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are using a joystick, it is possible to disable GUI control of the stage axes
 that the joystick can interact with. The axes that the joystick can interact with
@@ -219,7 +305,7 @@ appear in the stage field as following:
 -----------------
 
 Zoom Subsection
--------------------------
+^^^^^^^^^^^^^^^
 
 
 The ``zoom`` section of ``configuration.yaml`` specifies control over microscope

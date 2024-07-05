@@ -79,47 +79,33 @@ class ASIFilterWheel(FilterWheelBase):
         https://asiimaging.com/docs/fw_1000#fw-1000_ascii_command_set
     """
 
-    def __init__(self, microscope_name, device_connection, configuration):
+    def __init__(self, device_connection, device_config):
         """Initialize the ASIFilterWheel class.
 
         Parameters
         ----------
-        microscope_name : str
-            Name of the microscope.
         device_connection : dict
             Dictionary of device connections.
-        configuration : dict
-            Dictionary of configuration parameters.
+        device_config : dict
+            Dictionary of device configuration parameters.
         """
 
-        super().__init__(microscope_name, device_connection, configuration)
+        super().__init__(device_connection, device_config)
 
         #: obj: ASI Tiger Controller object.
         self.filter_wheel = device_connection
 
-        #: str: Name of the ASI Filter Wheel.
-        self.microscope_name = microscope_name
-
-        #: int: Number of filter wheels.
-        self.number_of_filter_wheels = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["filter_wheel"]["hardware"]["wheel_number"]
-
         #: float: Delay for filter wheel to change positions.
-        self.wait_until_done_delay = configuration["configuration"]["microscopes"][
-            microscope_name
-        ]["filter_wheel"]["filter_wheel_delay"]
+        self.wait_until_done_delay = device_config["filter_wheel_delay"]
 
         # Send Filter Wheel/Wheels to Zeroth Position
-        for i in range(self.number_of_filter_wheels):
-            self.filter_wheel.select_filter_wheel(filter_wheel_number=i)
+        self.filter_wheel.select_filter_wheel(
+            filter_wheel_number=self.filter_wheel_number)
 
-            #: int: Active filter wheel.
-            self.active_filter_wheel = i
-            self.filter_wheel.move_filter_wheel(filter_wheel_position=0)
+        self.filter_wheel.move_filter_wheel(filter_wheel_position=0)
 
-            #: int: Filter wheel position.
-            self.filter_wheel_position = 0
+        #: int: Filter wheel position.
+        self.filter_wheel_position = 0
 
     def __enter__(self):
         """Enter the ASI Filter Wheel context manager."""
@@ -164,9 +150,8 @@ class ASIFilterWheel(FilterWheelBase):
             # Calculate the Delay Needed to Change the Positions
             self.filter_change_delay(filter_name)
 
-            for wheel_idx in range(self.number_of_filter_wheels):
-                self.filter_wheel.select_filter_wheel(filter_wheel_number=wheel_idx)
-                self.filter_wheel.move_filter_wheel(self.filter_dictionary[filter_name])
+            self.filter_wheel.select_filter_wheel(filter_wheel_number=self.filter_wheel_number)
+            self.filter_wheel.move_filter_wheel(self.filter_dictionary[filter_name])
 
             #  Wheel Position Change Delay
             if wait_until_done:

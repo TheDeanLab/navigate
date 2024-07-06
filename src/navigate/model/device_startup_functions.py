@@ -71,11 +71,6 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
     -------
     val : object
         Result of func
-
-    Examples
-    --------
-    >>> auto_redial(DCAM, (0,), exception=Exception)
-
     """
     val = None
 
@@ -105,11 +100,31 @@ def auto_redial(func, args, n_tries=10, exception=Exception, **kwargs):
 
 
 class SerialConnectionFactory:
+    """Serial Connection Factory.
+
+    This class is used to build serial connections to devices.
+    """
 
     _connections = {}
 
     @classmethod
     def build_connection(cls, build_connection_function, args, exception=Exception):
+        """Builds a serial connection to a device.
+
+        Parameters
+        ----------
+        build_connection_function : function
+            Function that builds the connection to the device.
+        args : tuple
+            Arguments to the build_connection_function
+        exception : Exception
+            Exception to catch when building the connection
+
+        Returns
+        -------
+        connection : object
+            Connection to the device
+        """
         port = args[0]
         if str(port) not in cls._connections:
             cls._connections[str(port)] = auto_redial(
@@ -138,10 +153,6 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
     -------
     Camera controller: class
         Camera api class.
-
-    Examples
-    --------
-    >>> load_camera_connection(configuration, camera_id=0, is_synthetic=False)
     """
 
     if is_synthetic:
@@ -213,11 +224,6 @@ def start_camera(
     -------
     Camera : class
         Camera class.
-
-    Examples
-    --------
-    >>> start_camera(microscope_name, device_connection, configuration,
-        is_synthetic=False)
     """
     if device_connection is None:
         device_not_found(microscope_name, "camera")
@@ -235,30 +241,22 @@ def start_camera(
         return HamamatsuOrca(microscope_name, device_connection, configuration)
 
     elif cam_type == "HamamatsuOrcaLightning":
-        from navigate.model.devices.camera.hamamatsu import (
-            HamamatsuOrcaLightning,
-        )
+        from navigate.model.devices.camera.hamamatsu import HamamatsuOrcaLightning
 
         return HamamatsuOrcaLightning(microscope_name, device_connection, configuration)
 
     elif cam_type == "HamamatsuOrcaFire":
-        from navigate.model.devices.camera.hamamatsu import (
-            HamamatsuOrcaFire,
-        )
+        from navigate.model.devices.camera.hamamatsu import HamamatsuOrcaFire
 
         return HamamatsuOrcaFire(microscope_name, device_connection, configuration)
 
     elif cam_type == "HamamatsuOrcaFusion":
-        from navigate.model.devices.camera.hamamatsu import (
-            HamamatsuOrcaFusion,
-        )
+        from navigate.model.devices.camera.hamamatsu import HamamatsuOrcaFusion
 
         return HamamatsuOrcaFusion(microscope_name, device_connection, configuration)
 
     elif cam_type == "Photometrics":
-        from navigate.model.devices.camera.photometrics import (
-            PhotometricsBase,
-        )
+        from navigate.model.devices.camera.photometrics import PhotometricsBase
 
         return PhotometricsBase(microscope_name, device_connection, configuration)
 
@@ -268,7 +266,6 @@ def start_camera(
         return SyntheticCamera(microscope_name, device_connection, configuration)
 
     elif "camera" in plugin_devices:
-
         for start_function in plugin_devices["camera"]["start_device"]:
             try:
                 return start_function(
@@ -311,8 +308,10 @@ def load_mirror(configuration, is_synthetic=False):
         from navigate.model.devices.APIs.imagineoptics.imop import IMOP_Mirror
 
         return auto_redial(IMOP_Mirror, (), exception=Exception)
+
     elif mirror_type == "SyntheticMirror":
         return DummyDeviceConnection()
+
     else:
         device_not_found("mirror", mirror_type)
 
@@ -348,6 +347,7 @@ def start_mirror(
     """
     if device_connection is None or is_synthetic:
         mirror_type = "SyntheticMirror"
+
     else:
         mirror_type = configuration["configuration"]["microscopes"][microscope_name][
             "mirror"
@@ -357,14 +357,17 @@ def start_mirror(
         from navigate.model.devices.mirrors.imop import ImagineOpticsMirror
 
         return ImagineOpticsMirror(microscope_name, device_connection, configuration)
+
     elif mirror_type == "SyntheticMirror":
         from navigate.model.devices.mirrors.synthetic import SyntheticMirror
 
         return SyntheticMirror(microscope_name, device_connection, configuration)
+
     elif "mirror" in plugin_devices:
         return plugin_devices["mirror"]["start_device"](
             microscope_name, device_connection, configuration
         )
+
     else:
         device_not_found(microscope_name, "mirror", mirror_type)
 
@@ -388,10 +391,6 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
     -------
     Stage : class
         Stage class.
-
-    Examples
-    --------
-    >>> load_stages(configuration, is_synthetic=False, plugin_devices={})
     """
     stage_devices = []
 
@@ -404,6 +403,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
         stage_config = configuration["configuration"]["hardware"]["stage"][i]
         if is_synthetic:
             stage_type = "SyntheticStage"
+
         else:
             stage_type = stage_config["type"]
 
@@ -580,6 +580,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                     continue
             if not is_found:
                 device_not_found(stage_type)
+
         else:
             device_not_found(stage_type)
 
@@ -616,19 +617,16 @@ def start_stage(
     -------
     Stage : class
         Stage class.
-
-    Examples
-    --------
-    >>> start_stage(microscope_name, device_connection, configuration, id=0,
-                    is_synthetic=False)
     """
     device_config = configuration["configuration"]["microscopes"][microscope_name][
         "stage"
     ]["hardware"]
     if is_synthetic:
         device_type = "SyntheticStage"
+
     elif type(device_config) == ListProxy:
         device_type = device_config[id]["type"]
+
     else:
         device_type = device_config["type"]
 
@@ -683,7 +681,6 @@ def start_stage(
         return SyntheticStage(microscope_name, device_connection, configuration, id)
 
     elif "stage" in plugin_devices:
-
         for start_function in plugin_devices["stage"]["start_device"]:
             try:
                 return start_function(
@@ -697,6 +694,7 @@ def start_stage(
             except RuntimeError:
                 continue
         device_not_found(microscope_name, "stage", device_type, id)
+
     else:
         device_not_found(microscope_name, "stage", device_type, id)
 
@@ -720,15 +718,12 @@ def load_zoom_connection(configuration, is_synthetic=False, plugin_devices={}):
     -------
     Zoom : class
         Zoom class.
-
-    Examples
-    --------
-    >>> load_zoom_connection(configuration, is_synthetic=False)
     """
 
     device_info = configuration["configuration"]["hardware"]["zoom"]
     if is_synthetic:
         device_type = "SyntheticZoom"
+
     else:
         device_type = device_info["type"]
 
@@ -740,17 +735,18 @@ def load_zoom_connection(configuration, is_synthetic=False, plugin_devices={}):
         return auto_redial(
             build_dynamixel_zoom_connection, (configuration,), exception=Exception
         )
+
     elif device_type.lower() == "syntheticzoom" or device_type.lower() == "synthetic":
         return DummyDeviceConnection()
 
     elif "zoom" in plugin_devices:
-
         for load_function in plugin_devices["zoom"]["load_device"]:
             try:
                 return load_function(device_info, is_synthetic, device_type="zoom")
             except RuntimeError:
                 continue
         device_not_found("Zoom", device_type)
+
     else:
         device_not_found("Zoom", device_type)
 
@@ -783,14 +779,10 @@ def start_zoom(
     -------
     Zoom : class
         Zoom class.
-
-    Examples
-    --------
-    >>> start_zoom(microscope_name, device_connection, configuration,
-                   is_synthetic=False)
     """
     if is_synthetic:
         device_type = "SyntheticZoom"
+
     elif (
         "hardware"
         in configuration["configuration"]["microscopes"][microscope_name]["zoom"]
@@ -798,6 +790,7 @@ def start_zoom(
         device_type = configuration["configuration"]["microscopes"][microscope_name][
             "zoom"
         ]["hardware"]["type"]
+
     else:
         device_type = "NoDevice"
 
@@ -805,16 +798,18 @@ def start_zoom(
         from navigate.model.devices.zoom.dynamixel import DynamixelZoom
 
         return DynamixelZoom(microscope_name, device_connection, configuration)
+
     elif device_type.lower() == "syntheticzoom" or device_type.lower() == "synthetic":
         from navigate.model.devices.zoom.synthetic import SyntheticZoom
 
         return SyntheticZoom(microscope_name, device_connection, configuration)
+
     elif device_type == "NoDevice" or "None":
         from navigate.model.devices.zoom.base import ZoomBase
 
         return ZoomBase(microscope_name, device_connection, configuration)
-    elif "zoom" in plugin_devices:
 
+    elif "zoom" in plugin_devices:
         for start_zoom in plugin_devices["zoom"]["start_device"]:
             try:
                 return start_zoom(
@@ -827,6 +822,7 @@ def start_zoom(
             except RuntimeError:
                 continue
         device_not_found("Zoom", device_type)
+
     else:
         device_not_found("Zoom", device_type)
 
@@ -884,12 +880,11 @@ def load_filter_wheel_connection(device_info, is_synthetic=False, plugin_devices
             build_filter_wheel_connection,
         )
 
-        tiger_controller = SerialConnectionFactory.build_connection(
+        return SerialConnectionFactory.build_connection(
             build_filter_wheel_connection,
             (device_info["port"], device_info["baudrate"], 0.25),
             exception=Exception,
         )
-        return tiger_controller
 
     elif device_type == "NI":
         return DummyDeviceConnection()
@@ -901,7 +896,6 @@ def load_filter_wheel_connection(device_info, is_synthetic=False, plugin_devices
         return DummyDeviceConnection()
 
     elif "filter_wheel" in plugin_devices:
-
         for load_function in plugin_devices["filter_wheel"]["load_device"]:
             try:
                 return load_function(
@@ -946,12 +940,6 @@ def start_filter_wheel(
     -------
     FilterWheel : class
         FilterWheel class.
-
-    Examples
-    --------
-    >>> start_filter_wheel(microscope_name, device_connection, configuration,
-                           is_synthetic=False)
-
     """
     if device_connection is None:
         device_not_found(microscope_name, "filter_wheel")
@@ -962,20 +950,17 @@ def start_filter_wheel(
 
     if is_synthetic:
         device_type = "SyntheticFilterWheel"
+
     else:
         device_type = device_config["hardware"]["type"]
 
     if device_type == "SutterFilterWheel":
-        from navigate.model.devices.filter_wheel.sutter import (
-            SutterFilterWheel,
-        )
+        from navigate.model.devices.filter_wheel.sutter import SutterFilterWheel
 
         return SutterFilterWheel(device_connection, device_config)
 
     elif device_type == "LUDLFilterWheel":
-        from navigate.model.devices.filter_wheel.ludl import (
-            LUDLFilterWheel,
-        )
+        from navigate.model.devices.filter_wheel.ludl import LUDLFilterWheel
 
         return LUDLFilterWheel(device_connection, device_config)
 
@@ -993,9 +978,7 @@ def start_filter_wheel(
         device_type.lower() == "syntheticfilterwheel"
         or device_type.lower() == "synthetic"
     ):
-        from navigate.model.devices.filter_wheel.synthetic import (
-            SyntheticFilterWheel,
-        )
+        from navigate.model.devices.filter_wheel.synthetic import SyntheticFilterWheel
 
         return SyntheticFilterWheel(device_connection, device_config)
 
@@ -1035,10 +1018,6 @@ def start_daq(configuration, is_synthetic=False):
     -------
     DAQ : class
         DAQ class.
-
-    Examples
-    --------
-    >>> start_daq(configuration, is_synthetic=False)
     """
     if is_synthetic:
         device_type = "SyntheticDAQ"
@@ -1090,15 +1069,11 @@ def start_shutter(
     -------
     Shutter : class
         Shutter class.
-
-    Examples
-    --------
-    >>> start_shutter(microscope_name, device_connection, configuration,
-                      is_synthetic=False)
     """
 
     if is_synthetic:
         device_type = "SyntheticShutter"
+
     else:
         device_type = configuration["configuration"]["microscopes"][microscope_name][
             "shutter"
@@ -1110,19 +1085,17 @@ def start_shutter(
         from navigate.model.devices.shutter.ni import ShutterTTL
 
         return ShutterTTL(microscope_name, None, configuration)
+
     elif (
         device_type.lower() == "syntheticshutter" or device_type.lower() == "synthetic"
     ):
         if device_connection is not None:
             return device_connection
-        from navigate.model.devices.shutter.synthetic import (
-            SyntheticShutter,
-        )
+        from navigate.model.devices.shutter.synthetic import SyntheticShutter
 
         return SyntheticShutter(microscope_name, None, configuration)
 
     elif "shutter" in plugin_devices:
-
         for start_function in plugin_devices["shutter"]["start_device"]:
             try:
                 return start_function(
@@ -1172,15 +1145,11 @@ def start_lasers(
     -------
     Triggers : class
         Trigger class.
-
-    Examples
-    --------
-    >>> start_lasers(microscope_name, device_connection, configuration, id=0,
-                     is_synthetic=False)
     """
 
     if is_synthetic:
         device_type = "SyntheticLaser"
+
     else:
         device_type = configuration["configuration"]["microscopes"][microscope_name][
             "lasers"
@@ -1192,12 +1161,14 @@ def start_lasers(
         from navigate.model.devices.lasers.ni import LaserNI
 
         return LaserNI(microscope_name, device_connection, configuration, id)
+
     elif device_type.lower() == "syntheticlaser" or device_type.lower() == "synthetic":
         if device_connection is not None:
             return device_connection
         from navigate.model.devices.lasers.synthetic import SyntheticLaser
 
         return SyntheticLaser(microscope_name, device_connection, configuration, id)
+
     elif "lasers" in plugin_devices:
         for start_function in plugin_devices["lasers"]["start_device"]:
             try:
@@ -1212,6 +1183,7 @@ def start_lasers(
             except RuntimeError:
                 continue
         device_not_found(microscope_name, "laser", device_type, id)
+
     else:
         device_not_found(microscope_name, "laser", device_type, id)
 
@@ -1245,15 +1217,11 @@ def start_remote_focus_device(
     -------
     Remote Focus : class
         Remote focusing class.
-
-    Examples
-    --------
-    >>> start_remote_focus_device(microscope_name, device_connection, configuration,
-                                  is_synthetic=False)
     """
 
     if is_synthetic:
         device_type = "SyntheticRemoteFocus"
+
     else:
         device_type = configuration["configuration"]["microscopes"][microscope_name][
             "remote_focus_device"
@@ -1284,7 +1252,6 @@ def start_remote_focus_device(
         return SyntheticRemoteFocus(microscope_name, device_connection, configuration)
 
     elif "remote_focus_device" in plugin_devices:
-
         for start_function in plugin_devices["remote_focus_device"]["start_device"]:
             try:
                 return start_function(
@@ -1320,7 +1287,7 @@ def start_galvo(
         Name of microscope in configuration
     device_connection : object
         Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
+    configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
     id : int
         Index of galvo in the configuration dictionary
@@ -1333,15 +1300,11 @@ def start_galvo(
     -------
     Galvo : class
         Galvo scanning class.
-
-    Examples
-    --------
-    >>> start_galvo(microscope_name, device_connection, configuration, id=0,
-                    is_synthetic=False)
     """
 
     if is_synthetic:
         device_type = "SyntheticGalvo"
+
     else:
         device_type = configuration["configuration"]["microscopes"][microscope_name][
             "galvo"
@@ -1351,10 +1314,12 @@ def start_galvo(
         from navigate.model.devices.galvo.ni import GalvoNI
 
         return GalvoNI(microscope_name, device_connection, configuration, id)
+
     elif device_type.lower() == "syntheticgalvo" or device_type.lower() == "synthetic":
         from navigate.model.devices.galvo.synthetic import SyntheticGalvo
 
         return SyntheticGalvo(microscope_name, device_connection, configuration, id)
+
     elif "galvo" in plugin_devices:
         for start_function in plugin_devices["galvo"]["start_device"]:
             try:
@@ -1391,11 +1356,6 @@ def device_not_found(*args):
     -------
     devices : class
         Device class.
-
-    Examples
-    --------
-    >>> device_not_found(microscope_name, "galvo", id, device_type)
-
     """
     print("Device Not Found in Configuration.YML:", args)
     raise RuntimeError(f"Device not found in configuration: {args}")
@@ -1406,7 +1366,7 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
 
     Parameters
     ----------
-    configuration
+    configuration : dict
         Configuration dictionary
     is_synthetic : bool
         Run synthetic version of hardware?
@@ -1417,11 +1377,6 @@ def load_devices(configuration, is_synthetic=False, plugin_devices={}) -> dict:
     -------
     devices : dict
         Dictionary of devices
-
-    Examples
-    --------
-    >>> load_devices(configuration, is_synthetic=False)
-
     """
 
     devices = {}

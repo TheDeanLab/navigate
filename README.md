@@ -11,7 +11,8 @@ navigate
 [![Tests](https://github.com/TheDeanLab/navigate/actions/workflows/push_checks.yaml/badge.svg)](https://github.com/TheDeanLab/navigate/actions/workflows/push_checks.yaml)
 [![codecov](https://codecov.io/gh/TheDeanLab/navigate/branch/develop/graph/badge.svg?token=270RFSZGG5)](https://codecov.io/gh/TheDeanLab/navigate)
 
-Navigate is an open source Python package for control of light-sheet microscopes. It allows for easily reconfigurable hardware setups and automated acquisition rotuines.
+**navigate** is an open source Python package for control of light-sheet microscopes.
+It allows for easily reconfigurable hardware setups and automated acquisition rotuines.
 
 ### Quick install
 
@@ -31,23 +32,27 @@ Please refer to and contribute to the documentation, which can be found on GitHu
 
 ### Command Line Arguments
 
-* optional arguments:
-	*  -h, --help            show this help message and exit
+Below are the optional arguments that can be passed to the navigate software:
 
-* Input Arguments:
-  	* -sh, --synthetic_hardware
-  	* --config_file CONFIG_FILE
-  	* --experiment_file EXPERIMENT_FILE
-  	* --etl_const_file ETL_CONST_FILE
-	*  --rest_api_file REST_API_FILE
-  	* --logging_config LOGGING_CONFIG
-
-### Authors
-* Kevin Dean
-* Zach Marin
-* Xiaoding 'Annie' Wang
-* Dax Collison
-* Sampath Rapuri
-* Samir Mamtani
-* Renil Gupta
-* Andrew Jamieson
+- `-h, --help`
+  Provides information on the optional arguments that can be passed to **navigate**.
+- `-sh, --synthetic_hardware`
+  Open the software without any hardware attached for testing
+  and setting up a new system.
+- `-c, --configurator`
+  Open the **navigate** configuration wizard, which provides a
+  graphical interface for setting up the hardware configuration.
+- `-d`
+  Enables the debugging menu in the software.
+- `--config-file`
+  Pass a non-default `configuration.yaml` file to **navigate**.
+- `--experiment_file`
+  Pass a non-default `experiment.yaml` file to **navigate**.
+- `--gui-config-file`
+  Pass a non-default `gui_config.yaml` file to **navigate**.
+- `--waveform-constants-file`
+  Pass a non-default waveform constants file to **navigate**.
+- `--rest_api_file`
+  Pass a non-default REST API file to **navigate**.
+- `--logging_config`
+  Pass a non-default logging configuration file to **navigate**.

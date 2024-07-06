@@ -45,11 +45,6 @@ from navigate.view.popups.autofocus_setting_popup import AutofocusPopup
 class TestAutofocusPopupController:
     """Class for testing autofocus popup controller
 
-    Attributes
-    ----------
-    af_controller : AutofocusPopupController
-        Controller for autofocus popup
-
     Methods
     -------
     test_init()
@@ -84,9 +79,6 @@ class TestAutofocusPopupController:
     def test_init(self):
         """Tests that the controller is initialized correctly
 
-
-
-
         Raises
         ------
         AssertionError
@@ -97,9 +89,6 @@ class TestAutofocusPopupController:
 
     def test_attr(self):
         """Tests that the attributes are initialized correctly
-
-
-
 
         Raises
         ------
@@ -121,9 +110,6 @@ class TestAutofocusPopupController:
     def test_populate_experiment_values(self):
         """Tests that the values are populated correctly
 
-
-
-
         Raises
         ------
         AssertionError
@@ -143,9 +129,6 @@ class TestAutofocusPopupController:
 
     def test_update_experiment_values(self):
         """Tests that the values are updated correctly
-
-
-
 
         Raises
         ------
@@ -183,9 +166,6 @@ class TestAutofocusPopupController:
     def test_start_autofocus(self):
         """Tests that the start autofocus function works correctly
 
-
-
-
         Raises
         ------
         AssertionError
@@ -206,9 +186,6 @@ class TestAutofocusPopupController:
 
         Todo: Retrieve data from axessubplot instance and
         check that it is correct
-
-
-
 
         Raises
         ------

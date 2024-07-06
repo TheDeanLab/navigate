@@ -39,7 +39,6 @@ import tkinter as tk
 # Local application imports
 from navigate.controller.sub_controllers.gui_controller import GUIController
 
-
 # Logger Setup
 p = __name__.split(".")[1]
 logger = logging.getLogger(p)
@@ -185,8 +184,8 @@ class ChannelSettingController(GUIController):
     def populate_empty_values(self):
         """Populates the View with empty values.
 
-        If the user changes the number of channels, the new channels need to be populated
-        with a default value.
+        If the user changes the number of channels, the new channels need
+        to be populated with a default value.
         """
         for i in range(self.num):
             if self.view.laser_pulldowns[i].get() == "":
@@ -220,17 +219,30 @@ class ChannelSettingController(GUIController):
             Dictionary containing the range limits for the spinboxes.
         """
 
-        temp_dict = {
-            "laser_power": self.view.laserpower_pulldowns,
-            "exposure_time": self.view.exptime_pulldowns,
-            "interval_time": self.view.interval_spins,
-        }
-        for k in temp_dict:
-            widgets = temp_dict[k]
-            for i in range(self.num):
-                widgets[i].configure(from_=settings[k]["min"])
-                widgets[i].configure(to=settings[k]["max"])
-                widgets[i].configure(increment=settings[k]["step"])
+        for i in range(self.num):
+            self.view.laserpower_pulldowns[i].configure(
+                from_=settings["channel_settings"]["laser_power"].get("min", 0),
+                to=settings["channel_settings"]["laser_power"].get("max", 100),
+                increment=settings["channel_settings"]["laser_power"].get("step", 1),
+            )
+
+            self.view.exptime_pulldowns[i].configure(
+                from_=settings["channel_settings"]["exposure_time"].get("min", 0),
+                to=settings["channel_settings"]["exposure_time"].get("max", 100),
+                increment=settings["channel_settings"]["exposure_time"].get("step", 1),
+            )
+
+            self.view.interval_spins[i].configure(
+                from_=settings["channel_settings"]["interval"].get("min", 0),
+                to=settings["channel_settings"]["interval"].get("max", 100),
+                increment=settings["channel_settings"]["interval"].get("step", 1),
+            )
+
+            self.view.defocus_spins[i].configure(
+                from_=settings["channel_settings"]["defocus"].get("min", 0),
+                to=settings["channel_settings"]["defocus"].get("max", 100),
+                increment=settings["channel_settings"]["defocus"].get("step", 0.01),
+            )
 
     def channel_callback(self, channel_id, widget_name):
         """Callback function for the channel widgets.
@@ -305,9 +317,8 @@ class ChannelSettingController(GUIController):
                 #     if widget_name == "camera_exposure_time"
                 #     else widget_name
                 # )
-                # setting_range = self.parent_controller.parent_controller.configuration[
-                #     "configuration"
-                # ]["gui"]["channels"][ref_name]
+                # setting_range = self.parent_controller.parent_controller.
+                # configuration["configuration"]["gui"]["channels"][ref_name]
                 # if (
                 #     setting_dict[widget_name] < setting_range["min"]
                 #     or setting_dict[widget_name] > setting_range["max"]
@@ -339,9 +350,8 @@ class ChannelSettingController(GUIController):
             try:
                 if channel_vals[widget_name].get() is None:
                     return
-            except tk._tkinter.TclError as e:
+            except tk._tkinter.TclError:
                 channel_vals[widget_name].set(0)
-                # logger.error(f"Tcl Error caught: trying to set position and {e}")
                 return
 
             channel_key = prefix + str(channel_id + 1)
@@ -453,28 +463,50 @@ class ChannelSettingController(GUIController):
             idx = int(channel_key[len("channel_") :]) - 1
             if setting_dict["is_selected"]:
                 selected_channel_num += 1
+
+                # TODO: setting_range unspecified.
                 # laser power
                 if (
                     setting_dict["laser_power"]
                     < self.view.laserpower_pulldowns[idx]["from"]
                 ):
-                    return f"Laser power below configured threshold. Please adjust to meet or exceed the specified minimum in the configuration.yaml({setting_range['laser_power']['min']})."
+                    return (
+                        "Laser power below configured threshold. "
+                        # f"Please adjust to meet or exceed the specified minimum "
+                        # f"in the configuration.yaml("
+                        # f"{setting_range['laser_power']['min']})."
+                    )
                 elif (
                     setting_dict["laser_power"]
                     > self.view.laserpower_pulldowns[idx]["to"]
                 ):
-                    return f"Laser power exceeds configured maximum. Please adjust to meet or be below the specified maximum in the configuration.yaml({setting_range['laser_power']['max']})."
+                    return (
+                        "Laser power exceeds configured maximum. "
+                        # f"Please adjust to meet or be below the specified maximum "
+                        # f"in the configuration.yaml("
+                        # f"{setting_range['laser_power']['max']})."
+                    )
                 # exposure time
                 if (
                     setting_dict["camera_exposure_time"]
                     < self.view.exptime_pulldowns[idx]["from"]
                 ):
-                    return f"Exposure time below configured threshold.Please adjust to meet or exceed the specified minimum in the configuration.yaml({setting_range['exposure_time']['min']})."
+                    return (
+                        "Exposure time below configured threshold. "
+                        # f"Please adjust to meet or exceed the specified minimum "
+                        # f"in the configuration.yaml("
+                        # f"{setting_range['exposure_time']['min']})."
+                    )
                 elif (
                     setting_dict["camera_exposure_time"]
                     > self.view.exptime_pulldowns[idx]["to"]
                 ):
-                    return f"Exposure time exceeds configured maximum. Please adjust to meet or be below the specified maximum in the configuration.yaml({setting_range['exposure_time']['max']})"
+                    return (
+                        "Exposure time exceeds configured maximum. "
+                        # f"Please adjust to meet or be below the specified maximum "
+                        # f"in the configuration.yaml("
+                        # f"{setting_range['exposure_time']['max']})"
+                    )
 
         if selected_channel_num == 0:
             return "No selected channel!"

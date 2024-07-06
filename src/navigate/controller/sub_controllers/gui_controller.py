@@ -57,6 +57,7 @@ class GUIController:
         """
         #: tkinter.Tk: GUI view
         self.view = view
+
         #: Controller: parent controller
         self.parent_controller = parent_controller
 

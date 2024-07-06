@@ -88,11 +88,14 @@ class ChannelsTabController(GUIController):
         )
 
         self.view.stack_timepoint_frame.exp_time_spinbox.set_precision(0)
+
         # Get Widgets and Buttons from stack_acquisition_settings in view
         #: dict: The widgets in the stack acquisition settings frame.
         self.stack_acq_widgets = self.view.stack_acq_frame.get_widgets()
+
         #: dict: The values in the stack acquisition settings frame.
         self.stack_acq_vals = self.view.stack_acq_frame.get_variables()
+
         #: dict: The buttons in the stack acquisition settings frame.
         self.stack_acq_buttons = self.view.stack_acq_frame.get_buttons()
 
@@ -111,28 +114,31 @@ class ChannelsTabController(GUIController):
         # stack acquisition_variables
         #: float: The z origin of the stack.
         self.z_origin = 0
+
         #: float: The focus origin of the stack.
         self.focus_origin = 0
+
         #: float: The filter wheel delay.
         self.filter_wheel_delay = None
+
         #: dict: The microscope state dictionary.
-        self.microscope_state_dict = None
+        self.microscope_state_dict = {}
 
         # laser/stack cycling event binds
         self.stack_acq_vals["cycling"].trace_add("write", self.update_cycling_setting)
 
         # time point setting variables
+        temp = self.view.stack_timepoint_frame
+
         #: dict: Dictionary of time point settings.
         self.timepoint_vals = {
-            "is_save": self.view.stack_timepoint_frame.save_data,
-            "timepoints": self.view.stack_timepoint_frame.exp_time_spinval,
-            "stack_acq_time": self.view.stack_timepoint_frame.stack_acq_spinval,
-            "stack_pause": self.view.stack_timepoint_frame.stack_pause_spinval,
-            "experiment_duration": self.view.stack_timepoint_frame.total_time_spinval,
+            "is_save": temp.save_data,
+            "timepoints": temp.exp_time_spinval,
+            "stack_acq_time": temp.stack_acq_spinval,
+            "stack_pause": temp.stack_pause_spinval,
+            "experiment_duration": temp.total_time_spinval,
+            "timepoint_interval": temp.timepoint_interval_spinval,
         }
-        self.timepoint_vals[
-            "timepoint_interval"
-        ] = self.view.stack_timepoint_frame.timepoint_interval_spinval
 
         # timepoint event binds
         self.timepoint_vals["is_save"].trace_add("write", self.update_save_setting)
@@ -146,8 +152,10 @@ class ChannelsTabController(GUIController):
         # Multi Position Acquisition
         #: bool: Whether or not the user has selected to use multiposition.
         self.is_multiposition = False
+
         #: bool: cache multiposition flag
         self.is_multiposition_cache = False
+
         #: bool: Whether or not the user has selected to use multiposition.
         self.is_multiposition_val = self.view.multipoint_frame.on_off
         self.view.multipoint_frame.save_check.configure(
@@ -170,12 +178,7 @@ class ChannelsTabController(GUIController):
         self.initialize()
 
     def initialize(self):
-        """Initializes widgets and gets other necessary configuration
-
-        Examples
-        --------
-        >>> self.initialize()
-        """
+        """Initializes widgets and gets other necessary configuration."""
         config = self.parent_controller.configuration_controller
 
         self.stack_acq_widgets["cycling"].widget["values"] = ["Per Z", "Per Stack"]
@@ -184,16 +187,12 @@ class ChannelsTabController(GUIController):
             for i in range(config.number_of_filter_wheels)
         ]
         self.channel_setting_controller.initialize()
-        # self.set_spinbox_range_limits(config.configuration["configuration"]["gui"])
+        self.set_spinbox_range_limits(self.parent_controller.configuration["gui"])
         self.show_verbose_info("channels tab has been initialized")
 
     def populate_experiment_values(self):
         """Distribute initial MicroscopeState values to this and sub-controllers and
         associated views.
-
-        Examples
-        --------
-        >>> self.populate_experiment_values()
         """
         self.in_initialization = True
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
@@ -249,41 +248,59 @@ class ChannelsTabController(GUIController):
         ----------
         settings : dict
             dictionary of settings from configuration file
-
-        Examples
-        --------
-        >>> self.set_spinbox_range_limits(settings)
         """
-        temp_dict = {
-            self.stack_acq_widgets["step_size"]: settings["stack_acquisition"][
-                "step_size"
-            ],
-            self.stack_acq_widgets["start_position"]: settings["stack_acquisition"][
-                "start_pos"
-            ],
-            self.stack_acq_widgets["end_position"]: settings["stack_acquisition"][
-                "end_pos"
-            ],
-            self.view.stack_timepoint_frame.stack_pause_spinbox: settings["timepoint"][
-                "stack_pause"
-            ],
-            self.view.stack_timepoint_frame.exp_time_spinbox: settings["timepoint"][
-                "timepoints"
-            ],
-        }
-        for idx, widget in enumerate(temp_dict):
-            # Hacky Solution until stack time points are converted to LabelInput
-            if idx < 3:
-                widget.widget.configure(from_=temp_dict[widget]["min"])
-                widget.widget.configure(to=temp_dict[widget]["max"])
-                widget.widget.configure(increment=temp_dict[widget]["step"])
-            else:
-                widget.configure(from_=temp_dict[widget]["min"])
-                widget.configure(to=temp_dict[widget]["max"])
-                widget.configure(increment=temp_dict[widget]["step"])
 
-        # channels setting
-        self.channel_setting_controller.set_spinbox_range_limits(settings["channels"])
+        # Z-Stack Step Size
+        self.stack_acq_widgets["step_size"].widget.configure(
+            from_=settings["stack_acquisition"]["step_size"].get("min", 0.01),
+            to=settings["stack_acquisition"]["step_size"].get("max", 1000),
+            increment=settings["stack_acquisition"]["step_size"].get("step", 0.01),
+        )
+
+        # Z-Stack Z Start Position
+        self.stack_acq_widgets["start_position"].widget.configure(
+            from_=settings["stack_acquisition"]["z_start_pos"].get("min", -1000),
+            to=settings["stack_acquisition"]["z_start_pos"].get("max", 1000),
+            increment=settings["stack_acquisition"]["z_start_pos"].get("step", 1),
+        )
+
+        # Z-Stack Z End Position
+        self.stack_acq_widgets["end_position"].widget.configure(
+            from_=settings["stack_acquisition"]["z_end_pos"].get("min", -1000),
+            to=settings["stack_acquisition"]["z_end_pos"].get("max", 1000),
+            increment=settings["stack_acquisition"]["z_end_pos"].get("step", 1),
+        )
+
+        # Z-Stack F Start Position
+        self.stack_acq_widgets["start_focus"].widget.configure(
+            from_=settings["stack_acquisition"]["f_start_pos"].get("min", -1000),
+            to=settings["stack_acquisition"]["f_start_pos"].get("max", 1000),
+            increment=settings["stack_acquisition"]["f_start_pos"].get("step", 1),
+        )
+
+        # Z-Stack F End Position
+        self.stack_acq_widgets["end_focus"].widget.configure(
+            from_=settings["stack_acquisition"]["f_end_pos"].get("min", -1000),
+            to=settings["stack_acquisition"]["f_end_pos"].get("max", 1000),
+            increment=settings["stack_acquisition"]["f_end_pos"].get("step", 1),
+        )
+
+        # Stack Pause Duration
+        self.view.stack_timepoint_frame.stack_pause_spinbox.configure(
+            from_=settings["time"]["stack_pause"].get("min", 0),
+            to=settings["time"]["stack_pause"].get("max", 100),
+            increment=settings["time"]["stack_pause"].get("step", 1),
+        )
+
+        # Timepoints
+        self.view.stack_timepoint_frame.exp_time_spinbox.configure(
+            from_=settings["time"]["timepoints"].get("min", 1),
+            to=settings["time"]["timepoints"].get("max", 5000),
+            increment=settings["time"]["timepoints"].get("step", 1),
+        )
+
+        # Channel settings
+        self.channel_setting_controller.set_spinbox_range_limits(settings)
 
     def set_mode(self, mode):
         """Change acquisition mode.
@@ -292,16 +309,14 @@ class ChannelsTabController(GUIController):
         ----------
         mode : str
             acquisition mode
-
-        Examples
-        --------
-        >>> self.set_mode(mode)
         """
+
+        # TODO: Why do we have mode and image_mode?
         image_mode = self.microscope_state_dict["image_mode"]
         self.mode = mode
         self.channel_setting_controller.set_mode(mode)
 
-        state_readonly = "readonly" if mode == "stop" else "disabled"
+        # state_readonly = "readonly" if mode == "stop" else "disabled"
         if mode != "stop":
             state = "disabled"
         elif image_mode == "live" or image_mode == "single":
@@ -354,10 +369,6 @@ class ChannelsTabController(GUIController):
         args : dict
             Values is a dict as follows {'step_size':  'start_position': ,
                                          'end_position': ,'number_z_steps'}
-
-        Examples
-        --------
-        >>> self.update_z_steps()
         """
 
         # won't do any calculation when initialization
@@ -442,10 +453,6 @@ class ChannelsTabController(GUIController):
         args : dict
             Values is a dict as follows {'start_position': , 'abs_z_start': ,
             'stack_z_origin': }
-
-        Examples
-        --------
-        >>> self.update_start_position()
         """
 
         # We have a new origin
@@ -476,9 +483,6 @@ class ChannelsTabController(GUIController):
             Values is a dict as follows {'end_position': , 'abs_z_end': ,
             'stack_z_origin': }
 
-        Examples
-        --------
-        >>> self.update_end_position()
         """
         # Grab current values
         z_end = self.parent_controller.configuration["experiment"]["StageParameters"][
@@ -529,9 +533,6 @@ class ChannelsTabController(GUIController):
             Values is a dict as follows {'cycling_setting': , 'cycling_setting': ,
                                          'stack_z_origin': }
 
-        Examples
-        --------
-        >>> self.update_cycling_setting()
         """
         # won't do any calculation when initializing
         if self.in_initialization:
@@ -558,10 +559,6 @@ class ChannelsTabController(GUIController):
         args : dict
             Values is a dict as follows {'save_data': , 'save_data': ,
                                          'stack_z_origin': }
-
-        Examples
-        --------
-        >>> self.update_save_setting()
         """
 
         if self.in_initialization:
@@ -589,9 +586,6 @@ class ChannelsTabController(GUIController):
         call_parent : bool
             Tell parent controller that time point setting has changed.
 
-        Examples
-        --------
-        >>> self.update_timepoint_setting()
         """
 
         if self.in_initialization:
@@ -715,10 +709,6 @@ class ChannelsTabController(GUIController):
         """Toggle Multi-position Acquisition.
 
         Recalculates the experiment duration.
-
-        Examples
-        --------
-        >>> self.toggle_multiposition()
         """
         self.is_multiposition = self.is_multiposition_val.get()
         self.microscope_state_dict["is_multiposition"] = self.is_multiposition
@@ -746,10 +736,6 @@ class ChannelsTabController(GUIController):
 
         Will only launch when button in GUI is pressed, and will not duplicate.
         Pressing button again brings popup to top
-
-        Examples
-        --------
-        >>> self.launch_tiling_wizard()
         """
 
         if hasattr(self, "tiling_wizard_controller"):
@@ -767,11 +753,6 @@ class ChannelsTabController(GUIController):
             List of variables to set.
         values : list
             List of values to set to variables.
-
-        Examples
-        --------
-        >>> self.set_info([self.timepoint_vals['timepoint_interval'],
-                           self.timepoint_vals['stack_pause']], [1, 1])
         """
         for name in values.keys():
             if name in vals:
@@ -792,10 +773,6 @@ class ChannelsTabController(GUIController):
         -------
         command : object
             Returns parent_controller.execute(command) if command = 'get_stage_position'
-
-        Examples
-        --------
-        >>> self.execute('recalculate_timepoint')
         """
         if command == "recalculate_timepoint":
             # update selected channels num
@@ -845,7 +822,7 @@ class ChannelsTabController(GUIController):
                 return "The number of Z steps should be at least 1!"
             try:
                 float(self.microscope_state_dict["stack_pause"])
-            except:
+            except Exception:
                 return "Stack pause should be a valid number!"
             if self.microscope_state_dict["timepoints"] < 1:
                 return "Timepoints should be at least 1!"
@@ -859,7 +836,7 @@ class ChannelsTabController(GUIController):
         channel : str
             Channel name, such as "channel_1", "channel_2",...
         exposure_time : float
-            Exposure time in miliseconds.
+            Exposure time in milliseconds.
         """
         idx = int(channel[channel.index("_") + 1 :]) - 1
         self.channel_setting_controller.in_initialization = True

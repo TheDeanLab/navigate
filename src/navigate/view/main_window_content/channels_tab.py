@@ -270,10 +270,7 @@ class ChannelCreator(ttk.Labelframe):
             self.laserpower_pulldowns.append(
                 ValidatedSpinbox(
                     self.frame_columns[column_id],
-                    from_=0,
-                    to=100.0,
                     textvariable=self.laserpower_variables[num],
-                    increment=5,
                     width=5,
                     font=tk.font.Font(size=11),
                 )
@@ -304,10 +301,7 @@ class ChannelCreator(ttk.Labelframe):
             self.exptime_pulldowns.append(
                 ValidatedSpinbox(
                     self.frame_columns[column_id],
-                    from_=0,
-                    to=1000.0,
                     textvariable=self.exptime_variables[num],
-                    increment=5,
                     width=5,
                     font=tk.font.Font(size=11),
                 )
@@ -322,10 +316,7 @@ class ChannelCreator(ttk.Labelframe):
             self.interval_spins.append(
                 ValidatedSpinbox(
                     self.frame_columns[column_id],
-                    from_=0,
-                    to=1000.0,
                     textvariable=self.interval_variables[num],
-                    increment=5,
                     width=3,
                     font=tk.font.Font(size=11),
                 )
@@ -342,10 +333,7 @@ class ChannelCreator(ttk.Labelframe):
             self.defocus_spins.append(
                 ValidatedSpinbox(
                     self.frame_columns[column_id],
-                    from_=-500.0,
-                    to=500.0,
                     textvariable=self.defocus_variables[num],
-                    increment=0.1,
                     width=4,
                     font=tk.font.Font(size=11),
                 )
@@ -413,7 +401,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 label=start_labels[i],
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"from_": -5000, "to": 10000, "increment": 1, "width": 6},
+                input_args={"width": 6},
             )
             self.inputs[start_names[i]].grid(
                 row=i + 1, column=0, sticky="N", pady=2, padx=(6, 0)
@@ -439,7 +427,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 label=end_labels[i],
                 input_class=ValidatedSpinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"from_": -5000, "to": 10000, "increment": 1, "width": 6},
+                input_args={"width": 6},
             )
             self.inputs[end_names[i]].grid(
                 row=i + 1, column=1, sticky="N", pady=2, padx=(6, 0)
@@ -458,7 +446,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
             parent=self.pos_slice,
             input_class=ValidatedSpinbox,
             input_var=tk.DoubleVar(),
-            input_args={"from_": 0.1, "to": 1000, "increment": 0.1, "width": 6},
+            input_args={"width": 6},
         )
         self.inputs["step_size"].grid(row=1, column=2, sticky="N", padx=6)
 
@@ -474,7 +462,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 label=slice_labels[i],
                 input_class=ttk.Spinbox,
                 input_var=tk.DoubleVar(),
-                input_args={"from_": 0.1, "to": 1000, "increment": 0.1, "width": 6},
+                input_args={"width": 6},
             )
             self.inputs[slice_names[i]].widget.configure(state="disabled")
             self.inputs[slice_names[i]].grid(
@@ -596,13 +584,11 @@ class StackTimePointFrame(ttk.Labelframe):
         )
         #: tk.StringVar: The variable for the timepoints spinbox
         self.exp_time_spinval = tk.StringVar()
+
         #: ttk.Spinbox: The timepoints spinbox
         self.exp_time_spinbox = ValidatedSpinbox(
             self,
-            from_=0,
-            to=5000,
             textvariable=self.exp_time_spinval,
-            increment=1,
             width=3,
         )
         self.exp_time_spinbox.grid(row=1, column=1, sticky=tk.NSEW, pady=2)
@@ -616,13 +602,11 @@ class StackTimePointFrame(ttk.Labelframe):
         # Stack Acq. Time Spinbox
         #: tk.StringVar: The variable for the stack acquisition time spinbox
         self.stack_acq_spinval = tk.StringVar()
+
         #: ttk.Spinbox: The stack acquisition time spinbox
         self.stack_acq_spinbox = ttk.Spinbox(
             self,
-            from_=0,
-            to=5000.0,
             textvariable=self.stack_acq_spinval,  # this holds the data in the entry
-            increment=1,
             width=6,
         )
         self.stack_acq_spinbox.grid(row=2, column=1, sticky=tk.NSEW, pady=2)
@@ -636,13 +620,11 @@ class StackTimePointFrame(ttk.Labelframe):
         # Stack Pause Spinbox
         #: tk.StringVar: The variable for the stack pause spinbox
         self.stack_pause_spinval = tk.StringVar()
+
         #: ttk.Spinbox: The stack pause spinbox
         self.stack_pause_spinbox = ValidatedSpinbox(
             self,
-            from_=0,
-            to=5000.0,
             textvariable=self.stack_pause_spinval,
-            increment=1,
             width=6,
         )
         self.stack_pause_spinbox.grid(row=0, column=3, sticky=tk.NSEW, pady=2)
@@ -661,10 +643,7 @@ class StackTimePointFrame(ttk.Labelframe):
         #: ttk.Spinbox: The timepoint interval spinbox
         self.timepoint_interval_spinbox = ttk.Spinbox(
             self,
-            from_=0,
-            to=5000.0,
             textvariable=self.timepoint_interval_spinval,
-            increment=25,
             width=6,
         )
         self.timepoint_interval_spinbox.grid(row=1, column=3, sticky=tk.NSEW, pady=2)
@@ -685,10 +664,7 @@ class StackTimePointFrame(ttk.Labelframe):
         #: ttk.Spinbox: The total time spinbox
         self.total_time_spinval = ttk.Spinbox(
             self,
-            from_=0,
-            to=5000.0,
             textvariable=self.total_time_spinval,
-            increment=25,
             width=6,
         )
         self.total_time_spinval.grid(row=2, column=3, sticky=tk.NSEW, pady=(2, 6))

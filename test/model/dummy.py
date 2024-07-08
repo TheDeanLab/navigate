@@ -81,22 +81,32 @@ class DummyController:
 
         #: dict: The configuration dictionary.
         self.configuration = DummyModel().configuration
+
         #: list: The list of commands.
         self.commands = []
+
         #: DummyView: The view to be controlled by this controller.
         self.view = view
+
         #: ConfigurationController: The configuration controller.
         self.configuration_controller = ConfigurationController(self.configuration)
+
         #: MenuController: The menu controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
+
+        #: ChannelsTabController: The channels tab controller.
         self.channels_tab_controller = ChannelsTabController(
             self.view.settings.channels_tab, self
         )
+
+        #: MultiPositionController: The multiposition tab controller.
         self.multiposition_tab_controller = MultiPositionController(
             self.view.settings.multiposition_tab.multipoint_list, self
         )
+
         #: dict: The stage positions.
         self.stage_pos = {}
+
         #: dict: The stage offset positions.
         self.off_stage_pos = {}
         base_directory = Path.joinpath(Path(__file__).resolve().parent.parent)
@@ -173,6 +183,9 @@ class DummyModel:
         waveform_constants = Path.joinpath(
             configuration_directory, "waveform_constants.yml"
         )
+        gui_configuration_path = Path.joinpath(
+            configuration_directory, "gui_configuration.yml"
+        )
 
         #: Manager: The manager.
         self.manager = Manager()
@@ -182,6 +195,7 @@ class DummyModel:
             configuration=config,
             experiment=experiment,
             waveform_constants=waveform_constants,
+            gui=gui_configuration_path,
         )
 
         verify_configuration(self.manager, self.configuration)

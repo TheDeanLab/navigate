@@ -63,7 +63,7 @@
 <li class="toctree-l2"><a class="reference internal" href="galvo.html">Galvanometers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="laser.html">Lasers</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Shutters</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#analog-digital-controlled-shutters">Analog/Digital-Controlled Shutters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#national-instruments-ni">National Instruments (NI)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#synthetic-shutter">Synthetic Shutter</a></li>
 </ul>
 </li>
@@ -126,16 +126,30 @@
              
   <section id="shutters">
 <h1>Shutters<a class="headerlink" href="#shutters" title="Permalink to this heading"></a></h1>
-<p>When controlled with analog, digital, or mixed modulation, not all laser sources
-reduce their emitted intensity to 0. In such cases, residual illumination subjects
+<p>When only controlled with analog modulation, many laser sources do not
+reduce their emitted intensity to 0 watts. In such cases, residual illumination subjects
 the specimen to unnecessary irradiation between image acquisitions. Shutters overcome
 this by completely blocking the laser, albeit on a much slower timescale than direct
 modulation of the laser. With <strong>navigate</strong>, shutters automatically open at the start
 of acquisition and close upon finish.</p>
+<p>Most shutters are controlled via a digital voltage. When the voltage is high (e.g., &gt;
+2.5 V), the shutter is open, and when the voltage is low (e.g., &lt; 2.5 V), the shutter
+is closed.</p>
 <hr class="docutils" />
-<section id="analog-digital-controlled-shutters">
-<h2>Analog/Digital-Controlled Shutters<a class="headerlink" href="#analog-digital-controlled-shutters" title="Permalink to this heading"></a></h2>
-<p>Thorlabs shutters are controlled via a digital on off voltage.</p>
+<section id="national-instruments-ni">
+<h2>National Instruments (NI)<a class="headerlink" href="#national-instruments-ni" title="Permalink to this heading"></a></h2>
+<p>We can control these shutters using a digital output from a National
+Instruments (NI) data acquisition card.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the shutter opens and closes immediately upon starting an acquisition, try a
+different port for the digital I/O on the NI data acquisition card. Some NI devices
+(e.g.PCIe-6738) have port/sample size limitations. If the port/sample size is
+exceeded, the shutter will not open. For example, on our <a class="reference external" href="https://www.ni.com/docs/en-US/bundle/pcie-6738-specs/page/specs.html">NI PCIe-6738</a> using port 0 for the
+shutter causes this issue, but switching the shutter to any port 1 channel fixed it.
+In comparison, for the <a class="reference external" href="https://www.ni.com/docs/en-US/bundle/pci-pcie-pxi-pxie-usb-6259-specs/page/specs.html">NI PCIe-6259</a>,
+using port 0 had no averse effects.</p>
+</div>
 <details class="summary-configuration-file">
 <summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>

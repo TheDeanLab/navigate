@@ -33,6 +33,7 @@
 
 # Standard Library Imports
 import unittest
+from unittest.mock import patch, MagicMock
 from pathlib import Path
 
 # Third Party Imports
@@ -40,12 +41,28 @@ from pathlib import Path
 # Local Imports
 from navigate.tools.main_functions import create_parser
 from navigate.config.config import get_navigate_path
+from navigate.main import main
 
 
-class TestMain(unittest.TestCase):
+def get_args():
+    args = MagicMock()
+    args.configurator = False
+    args.config_file = False
+    args.experiment_file = False
+    args.waveform_constants_file = False
+    args.rest_api_file = False
+    args.waveform_templates_file = False
+    args.gui_config_file = False
+    args.logging_config = False
+    args.synthetic_hardware = True
+    return args
+
+
+class TestArgParser(unittest.TestCase):
     """Unit Test for main.py"""
 
     def test_argument_parser(self):
+        """Test Argument Parser"""
         parser = create_parser()
 
         # Boolean arguments
@@ -67,5 +84,38 @@ class TestMain(unittest.TestCase):
             parser.parse_args([arg, str(Path.joinpath(navigate_path, "test.yml"))])
 
 
-if __name__ == "__main__":
-    unittest.main()
+class TestMainController(unittest.TestCase):
+    """Unit Test for main.py"""
+
+    @patch("navigate.main.tk.Tk.mainloop")
+    @patch("navigate.main.Controller")
+    @patch("argparse.ArgumentParser.parse_args")
+    def test_main_call_controller(
+        self, mock_parse_args, mock_controller, mock_mainloop
+    ):
+        args = get_args()
+        mock_parse_args.return_value = args
+
+        mock_mainloop.return_value = MagicMock()
+        main()
+        mock_controller.assert_called_once()
+
+
+# class TestMainConfigurator(unittest.TestCase):
+#     """ Unit Test for main.py """
+#     @patch('navigate.main.tk.Tk.mainloop')
+#     @patch('navigate.main.Controller')
+#     @patch('argparse.ArgumentParser.parse_args')
+#     def test_main_configurator(
+#             self,
+#             mock_parse_args,
+#             mock_controller,
+#             mock_mainloop
+#     ):
+#         args = get_args()
+#         args.configurator = True
+#         mock_parse_args.return_value = args
+#
+#         mock_mainloop.return_value = MagicMock()
+#         main()
+#         mock_controller.assert_not_called()

@@ -39,11 +39,11 @@ import logging
 
 # Local Imports
 from navigate.view.custom_widgets.validation import ValidatedCombobox, ValidatedSpinbox
-from navigate.view.custom_widgets.hovermixin import (
+from navigate.view.custom_widgets.hover import (
     HoverButton,
-    HoverCheckButton,
-    HoverRadioButton,
     HoverTkButton,
+    HoverRadioButton,
+    HoverCheckButton,
 )
 
 # Logger Setup

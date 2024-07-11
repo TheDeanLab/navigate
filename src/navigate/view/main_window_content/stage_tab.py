@@ -39,7 +39,7 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
-from navigate.view.custom_widgets.hovermixin import HoverTkButton
+from navigate.view.custom_widgets.hover import HoverTkButton
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.validation import ValidatedEntry
@@ -704,32 +704,16 @@ class XYFrame(ttk.Labelframe):
         ]
 
         #: HoverTkButton: Up button.
-        self.up_y_btn = HoverTkButton(
-            self,
-            image=self.up_image,
-            borderwidth=0
-        )
+        self.up_y_btn = HoverTkButton(self, image=self.up_image, borderwidth=0)
 
         #: HoverTkButton: Down button.
-        self.down_y_btn = HoverTkButton(
-            self,
-            image=self.down_image,
-            borderwidth=0
-        )
+        self.down_y_btn = HoverTkButton(self, image=self.down_image, borderwidth=0)
 
         #: HoverTkButton: Right button.
-        self.up_x_btn = HoverTkButton(
-            self,
-            image=self.right_image,
-            borderwidth=0
-        )
+        self.up_x_btn = HoverTkButton(self, image=self.right_image, borderwidth=0)
 
         #: HoverTkButton: Left button.
-        self.down_x_btn = HoverTkButton(
-            self,
-            image=self.left_image,
-            borderwidth=0
-        )
+        self.down_x_btn = HoverTkButton(self, image=self.left_image, borderwidth=0)
 
         #: LabelInput: Increment spinbox.
         self.increment_box = LabelInput(

@@ -38,8 +38,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from navigate.view.custom_widgets.hover import Hover
-from navigate.view.custom_widgets.hovermixin import HoverButton
+from navigate.view.custom_widgets.hover import Hover, HoverButton
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 

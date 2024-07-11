@@ -32,11 +32,13 @@
 
 # Standard Library Imports
 import unittest
+from unittest.mock import patch
+import subprocess
 
 # Third Party Imports
 
 # Local Imports
-from navigate._commit import get_git_revision_hash
+from navigate._commit import get_git_revision_hash, get_version_from_file
 
 
 class TestGetGitRevisionHash(unittest.TestCase):
@@ -44,3 +46,45 @@ class TestGetGitRevisionHash(unittest.TestCase):
         """Test that the function returns a string."""
         result = get_git_revision_hash()
         self.assertIsInstance(result, str)
+
+    @patch("navigate._commit.subprocess.check_output")
+    def test_if_not_git_repo(self, mock_check_output):
+        mock_check_output.side_effect = [
+            b"true",
+            # Mock the return value for ["git", "rev-parse", "--is-inside-work-tree"]
+            b"dummy_commit_hash"
+            # Mock the return value for ["git", "rev-parse", "HEAD"]
+        ]
+        result = get_git_revision_hash()
+
+        # Verify the correct calls were made to subprocess.check_output
+        mock_check_output.assert_any_call(
+            ["git", "rev-parse", "--is-inside-work-tree"], stderr=subprocess.DEVNULL
+        )
+        mock_check_output.assert_any_call(["git", "rev-parse", "HEAD"])
+
+        # Assert the returned commit hash
+        self.assertEqual(result, "dummy_commit_hash")
+
+    @patch("navigate._commit.subprocess.check_output")
+    def test_not_git_repo(self, mock_check_output):
+        # throw subprocess.CalledProcessError
+        mock_check_output.side_effect = subprocess.CalledProcessError(1, "git")
+
+        result = get_git_revision_hash()
+
+        # Assert that None is returned
+        self.assertIsNone(result)
+
+
+class TestGetVersionFromFile(unittest.TestCase):
+    def test_file_found(self):
+        result = get_version_from_file()
+        self.assertIsInstance(result, str)
+        self.assertIsNot(result, "unknown")
+
+    @patch("builtins.open")
+    def test_file_not_found(self, mock_open):
+        mock_open.side_effect = FileNotFoundError
+        result = get_version_from_file()
+        self.assertEqual(result, "unknown")

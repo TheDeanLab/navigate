@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
 # Standard Library Imports
 import tkinter as tk
 import logging
+from tkinter import ttk
 
 # Third Party Imports
 
@@ -82,17 +83,23 @@ class Hover(object):
         """
         #: tk.Widget: The widget to which the hover instance is bound
         self.widget = widget
+
         #: tk.Toplevel: The hover window
         self.tipwindow = None
+
         #: int: The id of the widget
         self.id = None
+
         #: int: The x position of the widget
         #: int: The y position of the widget
         self.x = self.y = 0
+
         #: str: The text to be displayed when the hover is shown
         self.text = text
+
         #: str: The current state of the hover
         self.description = None
+
         #: str: The current state of the hover
         self.type = type
 
@@ -227,3 +234,100 @@ class Hover(object):
         self.tipwindow = None
         if tw:
             tw.destroy()
+
+
+class HoverMixin:
+    """Adds hover attribute to widget
+
+    This class is meant to be mixed in with other widgets to add a hover attribute.
+    Hover provides contextual information about the widget when the mouse is over it.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Initializes HoverMixin
+
+        Parameters
+        ----------
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kwargs
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
+        super().__init__(*args, **kwargs)
+        self.hover = Hover(self, text=None, type="free")
+
+
+class HoverButton(HoverMixin, ttk.Button):
+    """Adds hover attribute to ttk.Button
+
+    This class is meant to be mixed in with other widgets to add a hover attribute
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Initializes HoverButton
+
+        Parameters
+        ----------
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kwargs
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
+        super().__init__(*args, **kwargs)
+
+
+class HoverTkButton(HoverMixin, tk.Button):
+    """Adds hover attribute to tk.Button
+
+    This class is meant to be mixed in with other widgets to add a hover attribute
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Initializes HoverTkButton
+
+        Parameters
+        ----------
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kwargs
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
+        super().__init__(*args, **kwargs)
+
+
+class HoverRadioButton(HoverMixin, ttk.Radiobutton):
+    """Adds hover attribute to ttk.Radiobutton
+
+    This class is meant to be mixed in with other widgets to add a hover attribute
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Initializes HoverRadioButton
+
+        Parameters
+        ----------
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kwargs
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
+        super().__init__(*args, **kwargs)
+
+
+class HoverCheckButton(HoverMixin, ttk.Checkbutton):
+    """Adds hover attribute to ttk.Checkbutton
+
+    This class is meant to be mixed in with other widgets to add a hover attribute.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Initializes HoverCheckButton
+
+        Parameters
+        ----------
+        *args
+            Additional arguments to pass to the ttk.Frame constructor.
+        **kwargs
+            Additional keyword arguments to pass to the ttk.Frame constructor.
+        """
+        super().__init__(*args, **kwargs)

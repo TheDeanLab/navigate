@@ -695,6 +695,11 @@ class MoveToNextPositionInMultiPositionTable:
         self.model.move_stage(abs_pos_dict, wait_until_done=True)
 
         self.model.logger.debug("MoveToNextPositionInMultiPosition: move done")
+        
+        # Make sure to go back to the beginning if using LoopByCount
+        if self.current_idx == self.position_count:
+            self.current_idx = 0
+        
         # resume data thread
         if should_pause_data_thread:
             self.model.resume_data_thread()

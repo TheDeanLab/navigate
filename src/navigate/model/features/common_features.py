@@ -201,9 +201,33 @@ class Snap:
 
 
 class WaitForExternalTrigger:
+    """WaitForExternalTrigger class to time parts of the feature list using external input.
+
+    This class waits for either an external trigger (or the timeout) before continuing 
+    on to the next feature block in the list. Useful when combined with LoopByCounts
+    when each iteration may depend on some external event happening.
+
+    Notes:
+    ------
+    - This class pauses the data thread while waiting for the trigger to avoid
+      camera timeout issues.
+    
+    - Only digital triggers are handeled at this time: use the PFI inputs on the DAQ.
+    """
 
     def __init__(self, model, trigger_channel="/PCIe-6738/PFI4", timeout=-1):
+        """Initialize the WaitForExternalTrigger class.
 
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for synchronization.
+        trigger_channel : str
+            The name of the DAQ PFI digital input.
+        timeout : float
+            Continue on anyway if timeout is reached. timeout < 0 will
+            run forever.
+        """
         self.model = model
 
         self.wait_interval = 0.001 # sec
@@ -220,7 +244,7 @@ class WaitForExternalTrigger:
 
     def signal_func(self):
 
-        # Pause the data thread
+        # Pause the data thread to prevent camera timeout
         self.model.pause_data_thread()
 
         # Create a digital input task and wait until either a trigger is detected,
@@ -237,6 +261,7 @@ class WaitForExternalTrigger:
             if self.timeout > 0 and total_wait_time >= self.timeout:
                 break
         
+        # Close the task
         self.task.stop()
         self.task.close()
 

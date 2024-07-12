@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -30,14 +30,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+
+# Standard Library Imports
 import base64
 import requests
 import numpy
 import json
 from io import BytesIO
 from math import ceil
-
 import logging
+
+# Third Party Imports
+
+# Local Imports
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -178,7 +183,7 @@ class IlastikSegmentation:
             )
         except (KeyError, AttributeError):
             return
-        
+
         self.resolution = self.model.configuration["experiment"]["MicroscopeState"][
             "microscope_name"
         ]

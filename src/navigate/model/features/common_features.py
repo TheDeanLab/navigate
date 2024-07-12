@@ -37,6 +37,7 @@ from threading import Lock
 import copy
 
 # Third party imports
+import nidaqmx
 
 # Local application imports
 from .image_writer import ImageWriter
@@ -198,6 +199,51 @@ class Snap:
         )
         return True
 
+
+class WaitForExternalTrigger:
+
+    def __init__(self, model, trigger_channel="/PCIe-6738/PFI4", timeout=-1):
+
+        self.model = model
+
+        self.wait_interval = 0.001 # sec
+
+        self.task = None
+        self.trigger_channel = trigger_channel
+        self.timeout = timeout
+
+        self.config_table = {
+            "signal": {
+                "main": self.signal_func,
+            }
+        }
+
+    def signal_func(self):
+
+        # Pause the data thread
+        self.model.pause_data_thread()
+
+        # Create a digital input task and wait until either a trigger is detected,
+        # or the timeout is exceeded. If timeout < 0, wait forever...
+        self.task = nidaqmx.Task('WaitDigitalEdge')
+        self.task.di_channels.add_di_chan(self.trigger_channel)
+
+        total_wait_time = 0.
+
+        while not self.task.read():
+            time.sleep(self.wait_interval)
+            total_wait_time += self.wait_interval
+
+            if self.timeout > 0 and total_wait_time >= self.timeout:
+                break
+        
+        self.task.stop()
+        self.task.close()
+
+        # Resume the data thread
+        self.model.resume_data_thread()
+
+        return True
 
 class WaitToContinue:
     """WaitToContinue class for synchronizing signal and data acquisition.

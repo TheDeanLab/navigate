@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
 # Standard library imports
 from pathlib import Path
 import os
-import inspect
 import tkinter as tk
 from tkinter import messagebox
 
@@ -45,9 +44,9 @@ from navigate.view.custom_widgets.popup import PopUp
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.tools.common_functions import combine_funcs, load_module_from_file
 from navigate.tools.decorators import AcquisitionMode
-from navigate.model.features import feature_related_functions
 from navigate.controller.sub_controllers.gui_controller import GUIController
 from navigate.view.popups.plugins_popup import PluginsPopup
+from navigate.config import set_feature_attributes
 
 
 class PluginsController:
@@ -137,8 +136,9 @@ class PluginsController:
                     )
                     if plugin_frame_module is None:
                         print(
-                            f"Make sure that the plugin frame name {plugin_class_name} is correct! "
-                            f"Plugin {plugin_name} needs to be uninstalled from navigate or reinstalled!"
+                            f"Make sure that the plugin frame name {plugin_class_name}"
+                            f" is correct! Plugin {plugin_name} needs to be "
+                            f"uninstalled from navigate or reinstalled!"
                         )
                         continue
                     plugin_frame = getattr(
@@ -149,8 +149,9 @@ class PluginsController:
                     )
                     if plugin_controller_module is None:
                         print(
-                            f"Make sure that the plugin controller {plugin_class_name} is correct! "
-                            f"Plugin {plugin_name} needs to be uninstalled from navigate or reinstalled!"
+                            f"Make sure that the plugin controller "
+                            f"{plugin_class_name} is correct! Plugin {plugin_name} "
+                            f"needs to be uninstalled from navigate or reinstalled!"
                         )
                     plugin_controller = getattr(
                         plugin_controller_module, f"{plugin_class_name}Controller"
@@ -169,18 +170,7 @@ class PluginsController:
                             plugin_name, plugin_frame, plugin_controller
                         )
             # feature
-            features_dir = os.path.join(plugin_path, "model", "features")
-            if os.path.exists(features_dir):
-                features = os.listdir(features_dir)
-                for feature in features:
-                    feature_file = os.path.join(features_dir, feature)
-                    if os.path.isfile(feature_file):
-                        module = load_module_from_file(feature, feature_file)
-                        for c in dir(module):
-                            if inspect.isclass(getattr(module, c)):
-                                setattr(
-                                    feature_related_functions, c, getattr(module, c)
-                                )
+            set_feature_attributes(plugin_path)
 
             # acquisition mode
             acquisition_modes = plugin_config.get("acquisition_modes", [])
@@ -223,13 +213,13 @@ class PluginsController:
                 "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
             )
             self.plugins_dict[controller_name] = plugin_controller
-        except:
+        except Exception:
             messagebox.showwarning(
                 title="Warning",
                 message=(
                     f"Plugin {plugin_name} has something went wrong."
                     f"Please make sure the plugin works correctly or uninstall it!"
-                )
+                ),
             )
 
     def build_popup_window(self, plugin_name, frame, controller):
@@ -283,13 +273,14 @@ class PluginsController:
         def func_with_wrapper(*args, **kwargs):
             try:
                 func(*args, **kwargs)
-            except:
+            except Exception:
                 messagebox.showwarning(
                     title="Warning",
                     message=(
-                        f"Plugin {plugin_name} has something went wrong."
-                        f"Please make sure the plugin works correctly or uninstall it from navigate!"
-                    )
+                        f"Plugin {plugin_name} has something went wrong. Please make "
+                        f"sure the plugin works correctly or uninstall it from "
+                        f"navigate!"
+                    ),
                 )
 
         return func_with_wrapper

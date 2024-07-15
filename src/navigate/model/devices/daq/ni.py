@@ -34,6 +34,7 @@
 import logging
 from threading import Lock
 import traceback
+import time
 
 # Third Party Imports
 import nidaqmx
@@ -176,6 +177,53 @@ class NIDAQ(DAQBase):
                 )
                 task.register_done_event(None)
                 task.register_done_event(self.restart_analog_task_callback_func(task))
+
+    def wait_for_external_trigger(
+        self, trigger_channel, wait_internal=0.001, timeout=-1
+    ):
+        """Wait for a digital external trigger.
+
+        Parameters
+        ----------
+        trigger_channel : str
+            The name of the DAQ PFI digital input.
+        wait_internal : float
+            The internal waiting time to check the trigger
+        timeout : float
+            Continue on anyway if timeout is reached. timeout < 0 will
+            run forever.
+
+        Returns
+        -------
+            result : bool
+                True for the trigger, False for no trigger.
+        """
+        if not trigger_channel:
+            logger.info(
+                "No external trigger channel is specified! Return from waiting!"
+            )
+            return False
+        # Create a digital input task and wait until either a trigger is detected,
+        # or the timeout is exceeded. If timeout < 0, wait forever...
+        external_trigger_task = nidaqmx.Task("WaitDigitalEdge")
+        external_trigger_task.di_channels.add_di_chan(trigger_channel)
+
+        total_wait_time = 0.0
+        result = True
+
+        while not external_trigger_task.read():
+            time.sleep(wait_internal)
+            total_wait_time += wait_internal
+
+            if timeout > 0 and total_wait_time >= timeout:
+                result = False
+                break
+
+        # Close the task
+        external_trigger_task.stop()
+        external_trigger_task.close()
+
+        return result
 
     @staticmethod
     def restart_analog_task_callback_func(task):

@@ -34,9 +34,7 @@
 import time
 from functools import reduce
 from threading import Lock
-import copy
 
-# Third party imports
 
 # Local application imports
 from .image_writer import ImageWriter
@@ -198,6 +196,62 @@ class Snap:
         )
         return True
 
+
+class WaitForExternalTrigger:
+    """WaitForExternalTrigger class to time parts of the feature list using external input.
+
+    This class waits for either an external trigger (or the timeout) before continuing 
+    on to the next feature block in the list. Useful when combined with LoopByCounts
+    when each iteration may depend on some external event happening.
+
+    Notes:
+    ------
+    - This class pauses the data thread while waiting for the trigger to avoid
+      camera timeout issues.
+    
+    - Only digital triggers are handeled at this time: use the PFI inputs on the DAQ.
+    """
+
+    def __init__(self, model, trigger_channel="/PCIe-6738/PFI4", timeout=-1):
+        """Initialize the WaitForExternalTrigger class.
+
+        Parameters:
+        ----------
+        model : MicroscopeModel
+            The microscope model object used for synchronization.
+        trigger_channel : str
+            The name of the DAQ PFI digital input.
+        timeout : float
+            Continue on anyway if timeout is reached. timeout < 0 will
+            run forever.
+        """
+        self.model = model
+
+        self.wait_interval = 0.001 # sec
+
+        self.task = None
+        self.trigger_channel = trigger_channel
+        self.timeout = timeout
+
+        self.config_table = {
+            "signal": {
+                "main": self.signal_func,
+            }
+        }
+
+    def signal_func(self):
+
+        # Pause the data thread to prevent camera timeout
+        self.model.pause_data_thread()
+
+        result = self.model.active_microscope.daq.wait_for_external_trigger(
+            self.trigger_channel, self.wait_interval, self.timeout
+        )
+
+        # Resume the data thread
+        self.model.resume_data_thread()
+
+        return result
 
 class WaitToContinue:
     """WaitToContinue class for synchronizing signal and data acquisition.
@@ -619,11 +673,16 @@ class MoveToNextPositionInMultiPositionTable:
             self.model.pause_data_thread()
 
         self.current_idx += 1
+        # Make sure to go back to the beginning if using LoopByCount
+        if self.current_idx == self.position_count:
+            self.current_idx = 0
+
         abs_pos_dict = dict(map(lambda k: (f"{k}_abs", pos_dict[k]), pos_dict.keys()))
         self.model.logger.debug(f"MoveToNextPositionInMultiPosition: " f"{pos_dict}")
         self.model.move_stage(abs_pos_dict, wait_until_done=True)
 
         self.model.logger.debug("MoveToNextPositionInMultiPosition: move done")
+        
         # resume data thread
         if should_pause_data_thread:
             self.model.resume_data_thread()

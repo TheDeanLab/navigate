@@ -206,7 +206,7 @@ class NIDAQ(DAQBase):
         # Create a digital input task and wait until either a trigger is detected,
         # or the timeout is exceeded. If timeout < 0, wait forever...
         external_trigger_task = nidaqmx.Task("WaitDigitalEdge")
-        external_trigger_task.di_channels.add_di_chan(self.trigger_channel)
+        external_trigger_task.di_channels.add_di_chan(trigger_channel)
 
         total_wait_time = 0.0
         result = True

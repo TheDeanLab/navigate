@@ -34,10 +34,7 @@
 import time
 from functools import reduce
 from threading import Lock
-import copy
 
-# Third party imports
-import nidaqmx
 
 # Local application imports
 from .image_writer import ImageWriter
@@ -247,28 +244,14 @@ class WaitForExternalTrigger:
         # Pause the data thread to prevent camera timeout
         self.model.pause_data_thread()
 
-        # Create a digital input task and wait until either a trigger is detected,
-        # or the timeout is exceeded. If timeout < 0, wait forever...
-        self.task = nidaqmx.Task('WaitDigitalEdge')
-        self.task.di_channels.add_di_chan(self.trigger_channel)
-
-        total_wait_time = 0.
-
-        while not self.task.read():
-            time.sleep(self.wait_interval)
-            total_wait_time += self.wait_interval
-
-            if self.timeout > 0 and total_wait_time >= self.timeout:
-                break
-        
-        # Close the task
-        self.task.stop()
-        self.task.close()
+        result = self.model.active_microscope.daq.wait_for_external_trigger(
+            self.trigger_channel, self.wait_interval, self.timeout
+        )
 
         # Resume the data thread
         self.model.resume_data_thread()
 
-        return True
+        return result
 
 class WaitToContinue:
     """WaitToContinue class for synchronizing signal and data acquisition.

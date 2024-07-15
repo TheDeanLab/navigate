@@ -690,15 +690,15 @@ class MoveToNextPositionInMultiPositionTable:
             self.model.pause_data_thread()
 
         self.current_idx += 1
+        # Make sure to go back to the beginning if using LoopByCount
+        if self.current_idx == self.position_count:
+            self.current_idx = 0
+
         abs_pos_dict = dict(map(lambda k: (f"{k}_abs", pos_dict[k]), pos_dict.keys()))
         self.model.logger.debug(f"MoveToNextPositionInMultiPosition: " f"{pos_dict}")
         self.model.move_stage(abs_pos_dict, wait_until_done=True)
 
         self.model.logger.debug("MoveToNextPositionInMultiPosition: move done")
-        
-        # Make sure to go back to the beginning if using LoopByCount
-        if self.current_idx == self.position_count:
-            self.current_idx = 0
         
         # resume data thread
         if should_pause_data_thread:

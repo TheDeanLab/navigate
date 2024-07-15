@@ -38,7 +38,7 @@ from unittest.mock import MagicMock
 # Local application imports
 from navigate.model.device_startup_functions import auto_redial
 from navigate.model.device_startup_functions import load_camera_connection
-from navigate.model.devices.camera.camera_synthetic import SyntheticCameraController
+from navigate.model.devices.camera.synthetic import SyntheticCameraController
 
 
 class TestAutoRedial(unittest.TestCase):
@@ -53,7 +53,13 @@ class TestAutoRedial(unittest.TestCase):
     def test_successful_connection_after_failures(self):
         """Test successful connection after a few failures."""
         mock_func = MagicMock(
-            side_effect=[Exception("fail"), Exception("fail"), "success", Exception("fail"), "success"]
+            side_effect=[
+                Exception("fail"),
+                Exception("fail"),
+                "success",
+                Exception("fail"),
+                "success",
+            ]
         )
         result = auto_redial(mock_func, (), n_tries=5)
         self.assertEqual(result, "success")

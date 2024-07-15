@@ -31,7 +31,7 @@
 
 import unittest
 from unittest.mock import MagicMock
-from navigate.model.devices.galvo.galvo_ni import GalvoNI
+from navigate.model.devices.galvo.ni import GalvoNI
 from navigate.config import (
     load_configs,
     get_configuration_paths,
@@ -65,7 +65,7 @@ class TestGalvoNI(unittest.TestCase):
             waveform_constants=waveform_constants_path,
             rest_api_config=rest_api_path,
             waveform_templates=waveform_templates_path,
-            gui_configuration=gui_configuration_path,
+            gui_configuration_path=gui_configuration_path,
         )
         verify_configuration(self.manager, self.configuration)
         verify_waveform_constants(self.manager, self.configuration)

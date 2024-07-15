@@ -37,7 +37,6 @@ import logging
 
 # Third Party Imports
 import pandas as pd
-from pandastable import TableModel
 
 # Local Imports
 from navigate.controller.sub_controllers.gui_controller import GUIController
@@ -64,6 +63,7 @@ class MultiPositionController(GUIController):
         super().__init__(view, parent_controller)
         #: MultiPositionTable: Multi-Position Acquisition Interface
         self.table = self.view.pt
+
         # self.table.rowheader.bind("<Double-Button-1>", self.handle_double_click)
         self.table.loadCSV = self.load_positions
         self.table.exportCSV = self.export_positions
@@ -88,7 +88,6 @@ class MultiPositionController(GUIController):
 
     def eliminate_tiles(self):
         """Eliminate tiles that do not contain tissue."""
-
         self.parent_controller.execute("eliminate_tiles")
 
     def set_positions(self, positions):
@@ -98,14 +97,6 @@ class MultiPositionController(GUIController):
         ----------
         positions : [[]]
             positions to be set
-
-        Example
-        -------
-        >>>    positions = [
-        >>>    [0, 0, 0, 0, 0],
-        >>>    [1, 1, 1, 1, 1],
-        >>>    [2, 2, 2, 2, 2]]
-        >>>    set_positions(positions)
         """
         axis_dict = {"x": "X", "y": "Y", "z": "Z", "theta": "R", "f": "F"}
         data = {}
@@ -125,10 +116,6 @@ class MultiPositionController(GUIController):
         -------
         list
             positions in the format of [[x, y, z, theta, f], ]
-
-        Example
-        -------
-        >>> get_positions()
         """
         positions = []
         rows = self.table.model.df.shape[0]
@@ -136,7 +123,12 @@ class MultiPositionController(GUIController):
             temp = list(self.table.model.df.iloc[i])
             if (
                 len(
-                    list(filter(lambda v: type(v) in (float, int) and not math.isnan(v), temp))
+                    list(
+                        filter(
+                            lambda v: type(v) in (float, int) and not math.isnan(v),
+                            temp,
+                        )
+                    )
                 )
                 == 5
             ):
@@ -167,7 +159,7 @@ class MultiPositionController(GUIController):
         if list(filter(lambda v: type(v) != int and type(v) != float, temp)):
             messagebox.showwarning(
                 title="Warning",
-                message="The selected position is invalid, can't go to this position!"
+                message="The selected position is invalid, can't go to this position!",
             )
             logger.info("position is invalid")
             return
@@ -188,10 +180,6 @@ class MultiPositionController(GUIController):
         -------
         int
             number of positions
-
-        Example
-        -------
-        >>> get_position_num()
         """
         return self.table.model.df.shape[0]
 
@@ -199,10 +187,6 @@ class MultiPositionController(GUIController):
         """Load a csv file.
 
         The valid csv file should contain the line of headers ['X', 'Y', 'Z', 'R', 'F']
-
-        Example
-        -------
-        >>> load_positions()
         """
         filename = filedialog.askopenfilenames(
             defaultextension=".csv",
@@ -217,7 +201,7 @@ class MultiPositionController(GUIController):
         if not cmp_header.all():
             messagebox.showwarning(
                 title="Warning",
-                message="The csv file isn't right, it should contain [X, Y, Z, R, F]"
+                message="The csv file isn't right, it should contain [X, Y, Z, R, F]",
             )
             logger.info("The csv file isn't right, it should contain [X, Y, Z, R, F]")
             return
@@ -235,10 +219,6 @@ class MultiPositionController(GUIController):
 
         This function opens a dialog that let the user input a filename
         Then, it will export positions to that csv file
-
-        Example
-        -------
-        >>> export_positions()
         """
         filename = filedialog.asksaveasfilename(
             defaultextension=".csv",
@@ -250,23 +230,13 @@ class MultiPositionController(GUIController):
         self.show_verbose_info("exporting csv file", filename)
 
     def move_to_position(self):
-        """Move to a position within the Multi-Position Acquisition Interface.
-
-        Example
-        -------
-        >>> move_to_position()
-        """
+        """Move to a position within the Multi-Position Acquisition Interface."""
         event = type("MyEvent", (object,), {})
         event.x, event.y = 0, 0
         self.handle_double_click(event)
 
     def insert_row_func(self):
-        """Insert a row in the Multi-Position Acquisition Interface.
-
-        Example
-        -------
-        >>> insert_row_func()
-        """
+        """Insert a row in the Multi-Position Acquisition Interface."""
         self.table.model.addRow(self.table.currentrow)
         self.table.update_rowcolors()
         self.table.redraw()
@@ -278,10 +248,6 @@ class MultiPositionController(GUIController):
 
         This function will get the stage's current position,
         Then add it to position list
-
-        Example
-        -------
-        >>> add_stage_position()
         """
         position = self.parent_controller.execute("get_stage_position")
         self.append_position(position)
@@ -293,10 +259,6 @@ class MultiPositionController(GUIController):
         ----------
         position : dict
             position in the format of {axis: value}
-
-        Example
-        -------
-        >>> append_position(position)
         """
         temp = list(map(lambda k: position[k], position))
         self.table.model.df = self.table.model.df.append(

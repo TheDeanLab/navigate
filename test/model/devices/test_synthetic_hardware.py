@@ -2,7 +2,8 @@
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted for academic and research use only (subject to the limitations in the disclaimer below)
+# modification, are permitted for academic and research use only (subject to the
+# limitations in the disclaimer below)
 # provided that the following conditions are met:
 
 #      * Redistributions of source code must retain the above copyright notice,
@@ -44,12 +45,12 @@ class TestSyntheticHardware(unittest.TestCase):
     microscope_name = "Mesoscale"
 
     def test_synthetic_daq(self):
-        from navigate.model.devices.daq.daq_synthetic import SyntheticDAQ
+        from navigate.model.devices.daq.synthetic import SyntheticDAQ
 
         SyntheticDAQ(self.dummy_model.configuration)
 
     def test_synthetic_camera(self):
-        from navigate.model.devices.camera.camera_synthetic import (
+        from navigate.model.devices.camera.synthetic import (
             SyntheticCamera,
             SyntheticCameraController,
         )
@@ -58,21 +59,21 @@ class TestSyntheticHardware(unittest.TestCase):
         SyntheticCamera(self.microscope_name, scc, self.dummy_model.configuration)
 
     def test_synthetic_stage(self):
-        from navigate.model.devices.stages.stage_synthetic import SyntheticStage
+        from navigate.model.devices.stages.synthetic import SyntheticStage
 
         SyntheticStage(self.microscope_name, None, self.dummy_model.configuration)
 
     def test_synthetic_zoom(self):
-        from navigate.model.devices.zoom.zoom_synthetic import SyntheticZoom
+        from navigate.model.devices.zoom.synthetic import SyntheticZoom
 
         SyntheticZoom(self.microscope_name, None, self.dummy_model.configuration)
 
     def test_synthetic_shutter(self):
-        from navigate.model.devices.shutter.laser_shutter_synthetic import SyntheticShutter
+        from navigate.model.devices.shutter.synthetic import SyntheticShutter
 
         SyntheticShutter(self.microscope_name, None, self.dummy_model.configuration)
 
     def test_synthetic_laser(self):
-        from navigate.model.devices.lasers.laser_synthetic import SyntheticLaser
+        from navigate.model.devices.lasers.synthetic import SyntheticLaser
 
         SyntheticLaser(self.microscope_name, None, self.dummy_model.configuration, 0)

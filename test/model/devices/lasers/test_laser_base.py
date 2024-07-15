@@ -1,7 +1,7 @@
 def test_laser_base_functions():
     import random
 
-    from navigate.model.devices.lasers.laser_base import LaserBase
+    from navigate.model.devices.lasers.base import LaserBase
     from test.model.dummy import DummyModel
 
     model = DummyModel()

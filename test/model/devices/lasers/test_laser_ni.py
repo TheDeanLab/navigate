@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from navigate.config import load_configs, get_configuration_paths
-from navigate.model.devices.lasers.laser_ni import LaserNI
+from navigate.model.devices.lasers.ni import LaserNI
 
 
 class TestLaserNI(unittest.TestCase):

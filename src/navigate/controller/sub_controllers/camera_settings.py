@@ -58,44 +58,59 @@ class CameraSettingController(GUIController):
         """
         super().__init__(view, parent_controller)
 
-        # default values
         #: bool: True if in initialization
         self.in_initialization = True
+
         #: str: Resolution value
         self.resolution_value = "1x"
+
         #: str: Mode value
         self.mode = "stop"
+
         #: str: Solvent type
         self.solvent = "BABB"
 
         # Getting Widgets/Buttons
+
         #: dict: Mode widgets
         self.mode_widgets = view.camera_mode.get_widgets()
+
         #: dict: Framerate widgets
         self.framerate_widgets = view.framerate_info.get_widgets()
+
         #: dict: ROI widgets
         self.roi_widgets = view.camera_roi.get_widgets()
+
         #: dict: ROI buttons
         self.roi_btns = view.camera_roi.get_buttons()
 
         # initialize
+
         #: int: Default pixel size
         self.default_pixel_size = None
+
         #: int: Default width
         #: int: Default height
         self.default_width, self.default_height = None, None
+
         #: int: Trigger type - 1: Internal, 2: External, 3: Synchronous
         self.trigger_source = None
+
         #: int: Trigger active - 1: Edge, 2: Level, 3: Synchronous
         self.trigger_active = None
+
         #: int: Readout speed
         self.readout_speed = None
+
         #: int: Camera width step interval
         self.step_width = 4
+
         #: int: Camera height step interval
         self.step_height = 4
+
         #: int: Camera width minimum
         self.min_width = 4
+
         #: int: Camera height minimum
         self.min_height = 4
         self.initialize()
@@ -187,6 +202,7 @@ class CameraSettingController(GUIController):
         self.camera_setting_dict = self.parent_controller.configuration["experiment"][
             "CameraParameters"
         ]
+
         #: dict: Microscope state dictionary
         self.microscope_state_dict = self.parent_controller.configuration["experiment"][
             "MicroscopeState"

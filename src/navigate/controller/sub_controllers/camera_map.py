@@ -62,10 +62,13 @@ class CameraMapSettingPopupController(GUIController):
             Parent controller of this controller.
         """
         super().__init__(view, parent_controller)
+
         #: str: Path to the camera maps directory.
         self.map_path = os.path.join(get_navigate_path(), "camera_maps")
+
         #: np.ndarray: Offset map.
         self.off = None
+
         #: np.ndarray: Variance map.
         self.var = None
 
@@ -79,10 +82,6 @@ class CameraMapSettingPopupController(GUIController):
         """Show the popup.
 
         This method is called by the parent controller.
-
-        Example
-        -------
-        >>> self.parent_controller.show_popup("camera_map_setting_popup")
         """
         self.view.showup()
 
@@ -138,7 +137,6 @@ class CameraMapSettingPopupController(GUIController):
 
         self.view.axs[0].hist(self.off.ravel(), bins=range(0, 2**8))
         self.view.axs[1].hist(self.var.ravel() * 0.47 * 0.47, bins=range(0, 2**8))
-
         self.view.axs[0].set_xlabel("Offset (counts)")
         self.view.axs[0].set_ylabel("Frequency")
         self.view.axs[0].set_yscale("log")
@@ -146,5 +144,4 @@ class CameraMapSettingPopupController(GUIController):
         self.view.axs[1].set_ylabel("Frequency")
         self.view.axs[1].set_yscale("log")
         self.view.fig.tight_layout()
-
         self.view.fig.canvas.draw_idle()

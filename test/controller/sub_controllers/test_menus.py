@@ -223,10 +223,8 @@ class TestMenuController(unittest.TestCase):
                 == i - 1
             )
 
-    @patch("src.navigate.controller.sub_controllers.menu_controller.platform.system")
-    @patch(
-        "src.navigate.controller.sub_controllers.menu_controller.subprocess.check_call"
-    )
+    @patch("src.navigate.controller.sub_controllers.menus.platform.system")
+    @patch("src.navigate.controller.sub_controllers.menus.subprocess.check_call")
     def test_open_folder(self, mock_check_call, mock_system):
         mock_system.return_value = "Darwin"
         self.menu_controller.open_folder("test_path")
@@ -242,14 +240,14 @@ class TestMenuController(unittest.TestCase):
         self.menu_controller.open_folder("test_path")
         self.assertEqual(mock_check_call.call_count, 0)
 
-    @patch("src.navigate.controller.sub_controllers.menu_controller.os.path.join")
+    @patch("src.navigate.controller.sub_controllers.menus.os.path.join")
     def test_open_log_files(self, mock_join):
         with patch.object(self.menu_controller, "open_folder") as mock_open_folder:
             mock_join.return_value = "joined_path"
             self.menu_controller.open_log_files()
             mock_open_folder.assert_called_once_with("joined_path")
 
-    @patch("src.navigate.controller.sub_controllers.menu_controller.os.path.join")
+    @patch("src.navigate.controller.sub_controllers.menus.os.path.join")
     def test_open_configuration_files(self, mock_join):
         with patch.object(self.menu_controller, "open_folder") as mock_open_folder:
             mock_join.return_value = "joined_path"

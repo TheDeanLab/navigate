@@ -60,8 +60,10 @@ class WaveformTabController(GUIController):
             Parent controller for the waveform tab
         """
         super().__init__(view, parent_controller)
+
         #: dict: Dictionary of remote focus waveforms
         self.remote_focus_waveform = 0
+
         #: dict: Dictionary of laser waveforms
         self.laser_ao_waveforms = 0
 
@@ -95,10 +97,6 @@ class WaveformTabController(GUIController):
         ----------
         *args : tuple
             Unused
-
-        Examples
-        --------
-        >>> self.update_sample_rate()
         """
 
         sample_rate = self.view.waveform_settings.inputs["sample_rate"].get()
@@ -110,6 +108,7 @@ class WaveformTabController(GUIController):
         self.parent_controller.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"] = int(sample_rate)
+
         #: int: Sample rate of the waveforms
         self.sample_rate = int(sample_rate)
 
@@ -120,10 +119,6 @@ class WaveformTabController(GUIController):
         ----------
         *args : tuple
             Unused
-
-        Examples
-        --------
-        >>> self.update_waveform_template()
         """
         self.parent_controller.configuration["experiment"]["MicroscopeState"][
             "waveform_template"
@@ -141,10 +136,6 @@ class WaveformTabController(GUIController):
             Dictionary of waveforms
         sample_rate : int
             Sample rate of the waveforms
-
-        Examples
-        --------
-        >>> self.update_waveforms(waveform_dict, sample_rate)
         """
         #: dict: Dictionary of waveforms
         self.waveform_dict = waveform_dict
@@ -154,12 +145,7 @@ class WaveformTabController(GUIController):
         self.plot_waveforms(event)
 
     def initialize_plots(self):
-        """Initialize the plots in the waveform tab
-
-        Examples
-        --------
-        >>> self.initialize_plots()
-        """
+        """Initialize the plots in the waveform tab."""
         self.view.plot_etl = self.view.fig.add_subplot(211)
         self.view.plot_galvo = self.view.fig.add_subplot(212)
         self.view.canvas.get_tk_widget().grid(
@@ -173,10 +159,6 @@ class WaveformTabController(GUIController):
         ----------
         event : Tkinter event
             Tkinter event
-
-        Examples
-        --------
-        >>> self.plot_waveforms(event)
         """
         parent_notebook = self.view.master
 
@@ -339,10 +321,6 @@ class WaveformTabController(GUIController):
         ----------
         mode : str
             Mode to set the waveform tab to
-
-        Examples
-        --------
-        >>> self.set_mode(mode)
         """
         state = "normal" if mode == "stop" else "disabled"
         self.view.waveform_settings.inputs["waveform_template"].widget["state"] = state
@@ -354,10 +332,6 @@ class WaveformTabController(GUIController):
         ----------
         template_name : str
             Set the waveform template name
-
-        Examples
-        --------
-        >>> self.set_waveform_template(template_name)
         """
         self.view.waveform_settings.inputs["waveform_template"].set(template_name)
         self.parent_controller.configuration["experiment"]["MicroscopeState"][

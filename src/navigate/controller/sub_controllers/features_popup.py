@@ -69,10 +69,13 @@ class FeaturePopupController(GUIController):
             The id of the feature list, by default 0
         """
         super().__init__(view, parent_controller)
+
         #: int: The id of the feature in the feature list.
         self.feature_list_id = feature_list_id
+
         #: list: The list of feature names.
         self.features = []
+
         #: list: The list of feature structure.
         self.feature_structure = []
 

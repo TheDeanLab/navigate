@@ -1509,6 +1509,8 @@ class SetCameraParameters:
         waveform_dict = self.model.active_microscope.prepare_acquisition()
         self.model.event_queue.put(("waveform", waveform_dict))
         self.model.event_queue.put(("display_camera_parameters", updated_value))
+        # prepare channel
+        self.model.active_microscope.prepare_next_channel()
         # resume data thread
         self.model.resume_data_thread()
         return True

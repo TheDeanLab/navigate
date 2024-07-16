@@ -38,7 +38,7 @@ import pytest
 import random
 
 # Local Imports
-from navigate.controller.sub_controllers.camera_setting_controller import (
+from navigate.controller.sub_controllers.camera_settings import (
     CameraSettingController,
 )
 
@@ -94,7 +94,7 @@ class TestCameraSettingController:
             "Top-to-Bottom",
             "Bottom-to-Top",
             "Bidirectional",
-            "Rev. Bidirectional"
+            "Rev. Bidirectional",
         ]
         assert (
             str(self.camera_settings.mode_widgets["Readout"].widget["state"])
@@ -202,8 +202,8 @@ class TestCameraSettingController:
 
     def test_populate_experiment_values(self):
         self.camera_settings.parent_controller.configuration["experiment"][
-                "CameraParameters"
-            ]["readout_time"] = 0.1
+            "CameraParameters"
+        ]["readout_time"] = 0.1
         # Populate widgets with values from experiment file and check
         self.camera_settings.populate_experiment_values()
         camera_setting_dict = self.camera_settings.parent_controller.configuration[

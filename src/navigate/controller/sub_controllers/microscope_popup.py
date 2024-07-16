@@ -37,7 +37,7 @@ import tkinter
 # Third Party Imports
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.popups.microscope_setting_popup_window import (
     MicroscopeSettingPopupWindow,
 )

@@ -38,7 +38,7 @@ import matplotlib.ticker as tck
 from tkinter import messagebox
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.common_functions import combine_funcs
 
 
@@ -62,13 +62,17 @@ class AutofocusPopupController(GUIController):
             The parent controller of the autofocus popup.
         """
         super().__init__(view, parent_controller)
+
         #: dict: The autofocus setting dictionary.
         self.widgets = self.view.get_widgets()
+
         #: object: The autofocus figure.
         self.autofocus_fig = self.view.fig
+
         #: object: The autofocus coarse plot.
         self.autofocus_coarse = self.view.coarse
         self.populate_experiment_values()
+
         #: object: The autofocus coarse plot.
         self.coarse_plot = None
 
@@ -147,7 +151,7 @@ class AutofocusPopupController(GUIController):
                     value = float(setting_dict[f"{k}_range"])
                     if step <= 0 or value < step:
                         warning_message += f"{k} settings are not correct!\n"
-                except:
+                except Exception:
                     warning_message += f"{k} settings are not correct!\n"
         if warning_message:
             messagebox.showerror(

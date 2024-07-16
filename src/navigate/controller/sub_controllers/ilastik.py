@@ -38,7 +38,7 @@ import logging
 # Third party imports
 
 # Local application imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.features.restful_features import prepare_service
 
 

@@ -36,7 +36,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -445,7 +445,7 @@ class CameraSettingController(GUIController):
         try:
             x_pixel = float(self.roi_widgets["Width"].get())
             y_pixel = float(self.roi_widgets["Height"].get())
-        except ValueError as e:
+        except ValueError:
             return
 
         microscope_state_dict = self.parent_controller.configuration["experiment"][
@@ -500,7 +500,7 @@ class CameraSettingController(GUIController):
 
         if self.pixel_event_id:
             self.view.after_cancel(self.pixel_event_id)
-        
+
         pixels = self.mode_widgets["Pixels"].get()
         if pixels == "":
             return

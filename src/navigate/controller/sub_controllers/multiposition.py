@@ -39,7 +39,7 @@ import logging
 import pandas as pd
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 
 
 # Logger Setup

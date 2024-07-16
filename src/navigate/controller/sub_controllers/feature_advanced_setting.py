@@ -40,8 +40,6 @@ from tkinter import filedialog, messagebox
 
 # Local application imports
 from navigate.model.features import feature_related_functions
-
-# from navigate.model.features.feature_related_functions import convert_str_to_feature_list
 from navigate.view.popups.feature_list_popup import FeatureAdvancedSettingPopup
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.tools.common_functions import load_module_from_file
@@ -85,7 +83,7 @@ class FeatureAdvancedSettingController:
 
         Parameters
         ----------
-        popup : navigate.view.popups.feature_list_popup.FeatureAdvancedSettingPopup
+        popup : FeatureAdvancedSettingPopup
             The popup window
         """
         feature_name = popup.feature_name_widget.get()
@@ -190,7 +188,9 @@ class FeatureAdvancedSettingController:
                         if row[1].get() == "None":
                             feature_parameter_config[arg_name][row[0].get()] = None
                         else:
-                            feature_parameter_config[arg_name][row[0].get()] = row[1].get()
+                            feature_parameter_config[arg_name][row[0].get()] = row[
+                                1
+                            ].get()
                     else:
                         unloaded_functions.append(row[0].get())
 
@@ -208,14 +208,12 @@ class FeatureAdvancedSettingController:
         if unloaded_functions:
             if len(unloaded_functions) == 1:
                 alert_message = f"Function {unloaded_functions[0]} isn't loaded!"
-            else: 
-                alert_message = f"Functions {', '.join(unloaded_functions)} are not loaded!"
-            messagebox.showwarning(
-                title="Warning",
-                message=alert_message
-            )
+            else:
+                alert_message = (
+                    f"Functions {', '.join(unloaded_functions)} are not loaded!"
+                )
+            messagebox.showwarning(title="Warning", message=alert_message)
         self.popup.popup.attributes("-topmost", 1)
-
 
     def exit_func(self):
         """Exit the popup window"""

@@ -37,7 +37,7 @@ from tkinter import messagebox
 # Third Party Imports
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.popups.acquire_popup import AcquirePopUp
 
 # Logger Setup
@@ -171,10 +171,7 @@ class AcquireBarController(GUIController):
                     except ZeroDivisionError:
                         pass
 
-                if (
-                    mode == "z-stack"
-                    or mode == "ConstantVelocityAcquisition"
-                ):
+                if mode == "z-stack" or mode == "ConstantVelocityAcquisition":
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )
@@ -223,9 +220,7 @@ class AcquireBarController(GUIController):
         hours, remainder = divmod(seconds_left, 3600)
         minutes, seconds = divmod(remainder, 60)
         self.view.total_acquisition_label.config(
-            text=f"{int(hours):02}"
-                 f":{int(minutes):02}"
-                 f":{int(seconds):02}"
+            text=f"{int(hours):02}" f":{int(minutes):02}" f":{int(seconds):02}"
         )
 
     def set_mode(self, mode):

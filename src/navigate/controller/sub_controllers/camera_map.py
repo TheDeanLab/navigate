@@ -39,7 +39,7 @@ from tkinter import filedialog
 import tifffile
 
 # Local application imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.config import get_navigate_path
 from navigate.model.analysis.camera import compute_scmos_offset_and_variance_map
 

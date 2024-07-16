@@ -40,11 +40,11 @@ import numpy as np
 import tkinter as tk
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
-from navigate.controller.sub_controllers.channel_setting_controller import (
+from navigate.controller.sub_controllers.gui import GUIController
+from navigate.controller.sub_controllers.channels_settings import (
     ChannelSettingController,
 )
-from navigate.controller.sub_controllers.tiling_wizard_controller import (
+from navigate.controller.sub_controllers.tiling import (
     TilingWizardController,
 )
 

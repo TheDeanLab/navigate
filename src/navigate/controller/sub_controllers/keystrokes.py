@@ -37,7 +37,7 @@ import platform
 # Third Party Imports
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
 
 # Logger Setup

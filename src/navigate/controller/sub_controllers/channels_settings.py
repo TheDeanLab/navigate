@@ -37,7 +37,7 @@ import tkinter as tk
 # Third party imports
 
 # Local application imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]

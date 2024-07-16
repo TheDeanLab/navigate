@@ -39,7 +39,7 @@ import logging
 # from matplotlib.axes import Axes
 
 # Local application imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -318,7 +318,7 @@ class AdaptiveOpticsPopupController(GUIController):
         # set the saving file name before running
         if self.widgets["save_report"]["variable"].get():
             save_dir = self.parent_controller.configuration["experiment"]["Saving"][
-            "save_directory"
+                "save_directory"
             ]
 
             self.report_path = filedialog.asksaveasfilename(
@@ -334,7 +334,7 @@ class AdaptiveOpticsPopupController(GUIController):
         full_report = {}
 
         for i, page in enumerate(report):
-            full_report[f"iter_{i}"] = page       
+            full_report[f"iter_{i}"] = page
 
         import pandas as pd
 

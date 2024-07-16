@@ -39,7 +39,7 @@ import tkinter as tk
 import pytest
 
 # Local Imports
-from navigate.controller.sub_controllers.menu_controller import (
+from navigate.controller.sub_controllers.menus import (
     MenuController,
     FakeEvent,
 )

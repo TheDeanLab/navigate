@@ -237,6 +237,13 @@ class ChannelsTabController(GUIController):
         # after initialization
         self.in_initialization = False
         self.channel_setting_controller.in_initialization = False
+        # update z and f position
+        self.z_origin = self.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]["z"]
+        self.focus_origin = self.parent_controller.configuration["experiment"][
+            "StageParameters"
+        ]["f"]
         self.update_z_steps()
 
         self.show_verbose_info("Channels tab has been set new values")

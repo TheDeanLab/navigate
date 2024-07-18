@@ -37,7 +37,7 @@ from tkinter import messagebox
 # Third Party Imports
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.popups.acquire_popup import AcquirePopUp
 
 # Logger Setup
@@ -54,9 +54,7 @@ class AcquireBarController(GUIController):
         Parameters
         ----------
         view : object
-            Instance of the Acquire Bar View.
-        parent_view : object
-            Instance of the Main View.
+            Instance of the View.
         parent_controller : object
             Instance of the Main Controller.
         """
@@ -64,10 +62,13 @@ class AcquireBarController(GUIController):
 
         #: str: Acquisition image mode.
         self.mode = "live"
+
         #: bool: Whether the image will be saved.
         self.is_save = False
+
         #: bool: Whether the microscope is acquiring.
         self.is_acquiring = False
+
         #: dict: Dictionary of different operating modes.
         self.mode_dict = {
             "Continuous Scan": "live",
@@ -101,10 +102,6 @@ class AcquireBarController(GUIController):
             Number of images received in the controller.
         stop : bool
             Stop flag to set back to 0.
-
-        Examples
-        --------
-        >>> progress_bar(0, microscope_state, mode)
         """
 
         if images_received == 0:
@@ -171,10 +168,7 @@ class AcquireBarController(GUIController):
                     except ZeroDivisionError:
                         pass
 
-                if (
-                    mode == "z-stack"
-                    or mode == "ConstantVelocityAcquisition"
-                ):
+                if mode == "z-stack" or mode == "ConstantVelocityAcquisition":
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )
@@ -223,9 +217,7 @@ class AcquireBarController(GUIController):
         hours, remainder = divmod(seconds_left, 3600)
         minutes, seconds = divmod(remainder, 60)
         self.view.total_acquisition_label.config(
-            text=f"{int(hours):02}"
-                 f":{int(minutes):02}"
-                 f":{int(seconds):02}"
+            text=f"{int(hours):02}" f":{int(minutes):02}" f":{int(seconds):02}"
         )
 
     def set_mode(self, mode):
@@ -235,10 +227,6 @@ class AcquireBarController(GUIController):
         ----------
         mode: str
             Mode could be: 'live', 'z-stack', 'single', 'projection',
-
-        Examples
-        --------
-        >>> set_mode('live')
         """
         # update pull down combobox
         reverse_dict = dict(map(lambda v: (v[1], v[0]), self.mode_dict.items()))
@@ -258,10 +246,6 @@ class AcquireBarController(GUIController):
         -------
         mode : str
             Current imaging mode.
-
-        Examples
-        --------
-        >>> get_mode()
         """
         return self.mode
 
@@ -271,12 +255,7 @@ class AcquireBarController(GUIController):
             self.view.pull_down["values"] = list(self.mode_dict.keys())
 
     def stop_acquire(self):
-        """Stop the acquisition.
-
-        Examples
-        --------
-        >>> stop_acquire()
-        """
+        """Stop the acquisition."""
         self.stop_progress_bar()
         self.view.acquire_btn.configure(text="Acquire")
         self.view.acquire_btn.configure(state="normal")

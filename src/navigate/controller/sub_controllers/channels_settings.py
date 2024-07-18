@@ -37,7 +37,7 @@ import tkinter as tk
 # Third party imports
 
 # Local application imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -98,10 +98,6 @@ class ChannelSettingController(GUIController):
         ----------
         mode : str
             "stop" or "live"
-
-        Examples
-        --------
-        >>> self.set_mode("live")
         """
 
         self.mode = mode
@@ -127,12 +123,7 @@ class ChannelSettingController(GUIController):
                 self.view.defocus_spins[i].config(state=state)
 
     def initialize(self):
-        """Populates the laser and filter wheel options in the View.
-
-        Examples
-        --------
-        >>> self.initialize()
-        """
+        """Populates the laser and filter wheel options in the View."""
         setting_dict = self.configuration_controller.channels_info
         for i in range(self.num):
             self.view.laser_pulldowns[i]["values"] = setting_dict["laser"]
@@ -263,10 +254,6 @@ class ChannelSettingController(GUIController):
         -------
         success : bool
             Whether the callback function is executed successfully.
-
-        Examples
-        --------
-        >>> self.channel_callback(0, "laser")
         """
 
         channel_vals = self.get_vals_by_channel(channel_id)
@@ -399,10 +386,6 @@ class ChannelSettingController(GUIController):
         -------
         dict
             The values of the channel widgets.
-
-        Examples
-        --------
-        >>> self.get_vals_by_channel(0)
         """
         if index < 0 or index >= self.num:
             return {}
@@ -435,10 +418,6 @@ class ChannelSettingController(GUIController):
         -------
         int
             The index of the value in the dropdown list.
-
-        Examples
-        --------
-        >>> self.get_index("laser", "488")
         """
         if not value:
             return -1

@@ -50,7 +50,7 @@ from navigate.view.popups.waveform_parameter_popup_window import (
     WaveformParameterPopupWindow,
 )
 from navigate.view.popups.feature_list_popup import FeatureListPopup
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.controller.sub_controllers import (
     AutofocusPopupController,
     IlastikPopupController,

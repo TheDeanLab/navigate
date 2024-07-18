@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 @pytest.fixture(scope="module")
 def waveform_popup_controller(dummy_view, dummy_controller):
-    from navigate.controller.sub_controllers.waveform_popup_controller import (
+    from navigate.controller.sub_controllers.waveform_popup import (
         WaveformPopupController,
     )
     from navigate.view.popups.waveform_parameter_popup_window import (

@@ -36,10 +36,9 @@ import logging
 # Third-party imports
 
 # Local application imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.file_functions import save_yaml_file
 from navigate.tools.common_functions import combine_funcs
-from navigate.config.config import update_config_dict
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -310,7 +309,8 @@ class WaveformPopupController(GUIController):
         resolution_value = self.remote_focus_experiment_dict["microscope_name"]
         zoom_value = self.remote_focus_experiment_dict["zoom"]
         mag = zoom_value
-        if (not force_update
+        if (
+            not force_update
             and self.widgets["Mode"].get() == resolution_value
             and self.widgets["Mag"].get() == mag
         ):
@@ -578,7 +578,9 @@ class WaveformPopupController(GUIController):
 
         # Get the light sheet exposure time.
         (
-            light_sheet_exposure_time, _, _,
+            light_sheet_exposure_time,
+            _,
+            _,
         ) = self.parent_controller.model.get_camera_line_interval_and_exposure_time(
             exposure_time, int(number_of_pixels) + 1
         )

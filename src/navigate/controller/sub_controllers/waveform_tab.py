@@ -38,7 +38,7 @@ import numpy as np
 from tkinter import NSEW
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.waveform_template_funcs import get_waveform_template_parameters
 
 # Logger Setup
@@ -60,8 +60,10 @@ class WaveformTabController(GUIController):
             Parent controller for the waveform tab
         """
         super().__init__(view, parent_controller)
+
         #: dict: Dictionary of remote focus waveforms
         self.remote_focus_waveform = 0
+
         #: dict: Dictionary of laser waveforms
         self.laser_ao_waveforms = 0
 
@@ -95,10 +97,6 @@ class WaveformTabController(GUIController):
         ----------
         *args : tuple
             Unused
-
-        Examples
-        --------
-        >>> self.update_sample_rate()
         """
 
         sample_rate = self.view.waveform_settings.inputs["sample_rate"].get()
@@ -110,6 +108,7 @@ class WaveformTabController(GUIController):
         self.parent_controller.configuration["configuration"]["microscopes"][
             microscope_name
         ]["daq"]["sample_rate"] = int(sample_rate)
+
         #: int: Sample rate of the waveforms
         self.sample_rate = int(sample_rate)
 
@@ -120,10 +119,6 @@ class WaveformTabController(GUIController):
         ----------
         *args : tuple
             Unused
-
-        Examples
-        --------
-        >>> self.update_waveform_template()
         """
         self.parent_controller.configuration["experiment"]["MicroscopeState"][
             "waveform_template"
@@ -141,10 +136,6 @@ class WaveformTabController(GUIController):
             Dictionary of waveforms
         sample_rate : int
             Sample rate of the waveforms
-
-        Examples
-        --------
-        >>> self.update_waveforms(waveform_dict, sample_rate)
         """
         #: dict: Dictionary of waveforms
         self.waveform_dict = waveform_dict
@@ -154,12 +145,7 @@ class WaveformTabController(GUIController):
         self.plot_waveforms(event)
 
     def initialize_plots(self):
-        """Initialize the plots in the waveform tab
-
-        Examples
-        --------
-        >>> self.initialize_plots()
-        """
+        """Initialize the plots in the waveform tab."""
         self.view.plot_etl = self.view.fig.add_subplot(211)
         self.view.plot_galvo = self.view.fig.add_subplot(212)
         self.view.canvas.get_tk_widget().grid(
@@ -173,10 +159,6 @@ class WaveformTabController(GUIController):
         ----------
         event : Tkinter event
             Tkinter event
-
-        Examples
-        --------
-        >>> self.plot_waveforms(event)
         """
         parent_notebook = self.view.master
 
@@ -216,14 +198,26 @@ class WaveformTabController(GUIController):
             remote_focus_waveform = self.waveform_dict["remote_focus_waveform"][k]
             if remote_focus_waveform is None:
                 continue
-            max_remote_focus_waveform = np.maximum(max_remote_focus_waveform, np.max(remote_focus_waveform))
-            min_remote_focus_waveform = np.minimum(min_remote_focus_waveform, np.min(remote_focus_waveform))
+            max_remote_focus_waveform = np.maximum(
+                max_remote_focus_waveform, np.max(remote_focus_waveform)
+            )
+            min_remote_focus_waveform = np.minimum(
+                min_remote_focus_waveform, np.min(remote_focus_waveform)
+            )
             camera_waveform = self.waveform_dict["camera_waveform"][k]
-            max_camera_waveform = np.maximum(max_camera_waveform, np.max(camera_waveform))
-            min_camera_waveform = np.minimum(min_camera_waveform, np.min(camera_waveform))
+            max_camera_waveform = np.maximum(
+                max_camera_waveform, np.max(camera_waveform)
+            )
+            min_camera_waveform = np.minimum(
+                min_camera_waveform, np.min(camera_waveform)
+            )
             for galvo_waveform in self.waveform_dict["galvo_waveform"]:
-                max_galvo_waveform = np.maximum(max_galvo_waveform, np.max(galvo_waveform[k]))
-                min_galvo_waveform = np.minimum(min_galvo_waveform, np.min(galvo_waveform[k]))
+                max_galvo_waveform = np.maximum(
+                    max_galvo_waveform, np.max(galvo_waveform[k])
+                )
+                min_galvo_waveform = np.minimum(
+                    min_galvo_waveform, np.min(galvo_waveform[k])
+                )
 
         true_max = np.maximum(max_remote_focus_waveform, max_galvo_waveform)
         true_min = np.minimum(min_remote_focus_waveform, min_galvo_waveform)
@@ -231,7 +225,7 @@ class WaveformTabController(GUIController):
             scale = 1
             true_min = 0
         else:
-            scale = (true_max - true_min)/(max_camera_waveform - min_camera_waveform)
+            scale = (true_max - true_min) / (max_camera_waveform - min_camera_waveform)
 
         for k in sorted(self.waveform_dict["camera_waveform"].keys()):
             if self.waveform_dict["remote_focus_waveform"][k] is None:
@@ -242,11 +236,17 @@ class WaveformTabController(GUIController):
             for galvo_waveform in self.waveform_dict["galvo_waveform"]:
                 if galvo_waveform[k] is None:
                     continue
-                max_galvo_waveform = np.maximum(max_galvo_waveform, np.max(galvo_waveform[k]))
-                min_galvo_waveform = np.minimum(min_galvo_waveform, np.min(galvo_waveform[k]))
+                max_galvo_waveform = np.maximum(
+                    max_galvo_waveform, np.max(galvo_waveform[k])
+                )
+                min_galvo_waveform = np.minimum(
+                    min_galvo_waveform, np.min(galvo_waveform[k])
+                )
                 galvo_waveform_list += [galvo_waveform[k]]
 
-            camera_waveform = scale*self.waveform_dict["camera_waveform"][k] + true_min
+            camera_waveform = (
+                scale * self.waveform_dict["camera_waveform"][k] + true_min
+            )
 
             waveform_repeat_total_num = repeat_num * expand_num
 
@@ -321,10 +321,6 @@ class WaveformTabController(GUIController):
         ----------
         mode : str
             Mode to set the waveform tab to
-
-        Examples
-        --------
-        >>> self.set_mode(mode)
         """
         state = "normal" if mode == "stop" else "disabled"
         self.view.waveform_settings.inputs["waveform_template"].widget["state"] = state
@@ -336,10 +332,6 @@ class WaveformTabController(GUIController):
         ----------
         template_name : str
             Set the waveform template name
-
-        Examples
-        --------
-        >>> self.set_waveform_template(template_name)
         """
         self.view.waveform_settings.inputs["waveform_template"].set(template_name)
         self.parent_controller.configuration["experiment"]["MicroscopeState"][

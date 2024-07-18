@@ -1059,6 +1059,7 @@ class Model:
         try:
             self.active_microscope.turn_on_laser()
             self.active_microscope.daq.run_acquisition()
+            self.logger.debug(f"sending out triggers: {self.frame_id}")
         except:  # noqa
             self.active_microscope.daq.stop_acquisition()
             if self.active_microscope.current_channel == 0:

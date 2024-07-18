@@ -304,6 +304,7 @@ class WaitToContinue:
             "signal": {
                 "init": self.pre_signal_func,
                 "main": self.signal_func,
+                "main-response": self.signal_end_func,
                 "cleanup": self.cleanup,
             },
             "data": {
@@ -311,6 +312,7 @@ class WaitToContinue:
                 "main": self.data_func,
                 "cleanup": self.cleanup,
             },
+            "node": {"device-related": True},
         }
 
     def pre_signal_func(self):
@@ -341,14 +343,16 @@ class WaitToContinue:
            A boolean value indicating the success of the synchronization process.
         """
         self.model.logger.debug(f"--wait to continue: {self.model.frame_id}")
+        if self.pause_data_lock.locked():
+            self.pause_data_lock.release()
+        return True
+    
+    def signal_end_func(self):
         if self.pause_signal_lock.locked():
             self.pause_signal_lock.acquire()
-        elif self.pause_data_lock.locked():
-            self.pause_data_lock.release()
-        self.first_enter_node.value = ""
         self.model.logger.debug(f"--wait to continue is done!: {self.model.frame_id}")
         return True
-
+    
     def pre_data_func(self):
         """Prepare for the data acquisition stage and synchronize with signal
         acquisition.
@@ -384,11 +388,10 @@ class WaitToContinue:
             A boolean value indicating the success of the synchronization process.
         """
         self.model.logger.debug(f"**wait to continue? {frame_ids}")
+        if self.pause_signal_lock.locked():
+            self.pause_signal_lock.release()
         if self.pause_data_lock.locked():
             self.pause_data_lock.acquire()
-        elif self.pause_signal_lock.locked():
-            self.pause_signal_lock.release()
-        self.first_enter_node.value = ""
         self.model.logger.debug(f"**wait to continue is done! {frame_ids}")
         return True
 

@@ -331,9 +331,14 @@ class CameraSettingController(GUIController):
         Parameters
         ----------
         *args : Variable length argument list.
+             usually args[0] is tkinter.Event or a str
         """
         # Camera Mode
-        sensor_value = self.mode_widgets["Sensor"].widget.get()
+        if len(args) > 0 and type(args[0]) is str:
+            sensor_value = args[0]
+            self.mode_widgets["Sensor"].widget.set(sensor_value)
+        else:
+            sensor_value = self.mode_widgets["Sensor"].widget.get()
         if sensor_value == "Normal":
             self.mode_widgets["Readout"].set(" ")
             self.mode_widgets["Readout"].widget["state"] = "disabled"
@@ -574,3 +579,11 @@ class CameraSettingController(GUIController):
         # Center position
         self.roi_widgets["Center_X"].set(self.default_width / 2)
         self.roi_widgets["Center_Y"].set(self.default_height / 2)
+
+    def update_camera_parameters_silent(self, sensor_mode=None, readout_direction=None, number_of_pixels=None):
+        if sensor_mode:
+            self.update_sensor_mode(sensor_mode)
+        if readout_direction:
+            self.mode_widgets["Readout"].set(readout_direction)
+        if number_of_pixels:
+            self.mode_widgets["Pixels"].set(number_of_pixels)

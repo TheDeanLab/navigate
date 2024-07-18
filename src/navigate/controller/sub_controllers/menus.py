@@ -708,10 +708,11 @@ class MenuController(GUIController):
 
         Updates model.experiment and saves it to file.
         """
-        if not self.parent_controller.update_experiment_setting():
+        warning_message = self.parent_controller.update_experiment_setting()
+        if warning_message:
             messagebox.showerror(
                 title="Warning",
-                message="Incorrect/missing settings. "
+                message=f"Incorrect/missing settings: {warning_message}\n"
                 "Cannot save current experiment file.",
             )
             return

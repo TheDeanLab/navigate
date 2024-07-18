@@ -37,7 +37,7 @@ import platform
 # Third Party Imports
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.custom_widgets.validation import ValidatedEntry, ValidatedSpinbox
 
 # Logger Setup
@@ -71,14 +71,17 @@ class KeystrokeController(GUIController):
         # Main view
         #: tk.Frame: Main view
         self.main_view = main_view.root
+
         #: tk.Notebook: Main tabs
         self.main_tabs = main_view.settings
 
         # Controllers for all sub frames
         #: CameraViewController: Camera View Controller
         self.camera_controller = parent_controller.camera_view_controller
+
         #: MultipositionTableController: Multiposition Table Controller
         self.multi_controller = parent_controller.multiposition_tab_controller
+
         #: StageController: Stage Controller
         self.stage_controller = parent_controller.stage_controller
 
@@ -133,11 +136,6 @@ class KeystrokeController(GUIController):
         ----------
         event : tkinter event
             Mouse wheel event
-
-        Example
-        -------
-        >>> self.camera_view.canvas.bind("<Enter>",
-        >>> self.camera_controller_mouse_wheel_enter)
         """
         self.view.root.unbind("<MouseWheel>")  # get rid of scrollbar mousewheel
         if platform.system() != "Linux":
@@ -159,11 +157,6 @@ class KeystrokeController(GUIController):
         ----------
         event : tkinter event
             Mouse wheel event
-
-        Example
-        -------
-        >>> self.camera_view.canvas.bind("<Leave>",
-        >>> self.camera_controller_mouse_wheel_leave)
         """
 
         if platform.system() != "Linux":
@@ -182,10 +175,6 @@ class KeystrokeController(GUIController):
         ----------
         event : tkinter event
             Tab key event
-
-        Example
-        -------
-        >>> self.main_view.bind("<Control-Key-1>", self.switch_tab)
         """
 
         key_val = int(event.keysym)
@@ -199,10 +188,6 @@ class KeystrokeController(GUIController):
         ----------
         event : tkinter event
             Undo key event
-
-        Example
-        -------
-        >>> self.main_view.bind_all('<Control-Key-z>', self.widget_undo)
         """
         if isinstance(event.widget, ValidatedEntry) or isinstance(
             event.widget, ValidatedSpinbox
@@ -216,10 +201,6 @@ class KeystrokeController(GUIController):
         ----------
         event : tkinter event
             Redo key event
-
-        Example
-        -------
-        >>> self.main_view.bind_all('<Control-Key-y>', self.widget_redo)
         """
 
         if isinstance(event.widget, ValidatedEntry) or isinstance(

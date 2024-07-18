@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-from navigate.controller.sub_controllers.camera_view_controller import CameraViewController
+from navigate.controller.sub_controllers.camera_view import CameraViewController
 import pytest
 import random
 from unittest.mock import MagicMock
@@ -537,7 +537,7 @@ class TestCameraViewController:
         # Assert that the tk_image has been created correctly
         assert self.camera_view.tk_image is not None
         self.camera_view.canvas.create_image.assert_called()
-        assert self.camera_view.image_catche_flag == False
+        assert self.camera_view.image_catche_flag is False
 
         # Set display_mask_flag to True
         self.camera_view.display_mask_flag = False
@@ -547,7 +547,7 @@ class TestCameraViewController:
 
         # Assert that the tk_image has been created correctly
         assert self.camera_view.tk_image2 is not None
-        assert self.camera_view.image_catche_flag == True
+        assert self.camera_view.image_catche_flag is True
 
     def test_initialize_non_live_display(self):
         # Create test buffer and microscope_state

@@ -38,7 +38,7 @@ import logging
 # Third party imports
 
 # Local application imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.features.restful_features import prepare_service
 
 
@@ -63,14 +63,19 @@ class IlastikPopupController(GUIController):
             url of the navigate_server for ilastik
         """
         super().__init__(view, parent_controller)
+
         #: str: url of the navigate_server for ilastik
         self.service_url = service_url
+
         #: str: ilastik project file name
         self.project_filename = None
+
         #: bool: show segmentation flag
         self.show_segmentation_flag = False
+
         #: bool: mark position flag
         self.mark_position_flag = False
+
         #: dict: label dictionary
         self.label_dict = None
         self.showup()

@@ -44,7 +44,7 @@ from navigate.tools.multipos_table_tools import (
     calc_num_tiles,
     update_table,
 )
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.common_functions import combine_funcs
 
 # Logger Setup
@@ -108,9 +108,7 @@ class TilingWizardController(GUIController):
 
         # Ref to widgets in other views
         # (Camera Settings, Stage Control Positions, Stack Acq Settings)
-        main_view = (
-            self.parent_controller.parent_controller.view
-        )
+        main_view = self.parent_controller.parent_controller.view
         self.cam_settings_widgets = (
             main_view.settings.camera_settings_tab.camera_roi.get_widgets()
         )
@@ -190,22 +188,14 @@ class TilingWizardController(GUIController):
             "write", lambda *args: self.calculate_tiles("f")
         )
 
-        self.variables["x_start"].trace_add(
-            "write", lambda *args: self.update_fov("x"))
-        self.variables["x_end"].trace_add(
-            "write", lambda *args: self.update_fov("x"))
-        self.variables["y_start"].trace_add(
-            "write", lambda *args: self.update_fov("y"))
-        self.variables["y_end"].trace_add(
-            "write", lambda *args: self.update_fov("y"))
-        self.variables["z_start"].trace_add(
-            "write", lambda *args: self.update_fov("z"))
-        self.variables["z_end"].trace_add(
-            "write", lambda *args: self.update_fov("z"))
-        self.variables["f_start"].trace_add(
-            "write", lambda *args: self.update_fov("f"))
-        self.variables["f_end"].trace_add(
-            "write", lambda *args: self.update_fov("f"))
+        self.variables["x_start"].trace_add("write", lambda *args: self.update_fov("x"))
+        self.variables["x_end"].trace_add("write", lambda *args: self.update_fov("x"))
+        self.variables["y_start"].trace_add("write", lambda *args: self.update_fov("y"))
+        self.variables["y_end"].trace_add("write", lambda *args: self.update_fov("y"))
+        self.variables["z_start"].trace_add("write", lambda *args: self.update_fov("z"))
+        self.variables["z_end"].trace_add("write", lambda *args: self.update_fov("z"))
+        self.variables["f_start"].trace_add("write", lambda *args: self.update_fov("f"))
+        self.variables["f_end"].trace_add("write", lambda *args: self.update_fov("f"))
 
         # Calculating Number of Tiles traces
         self.variables["x_dist"].trace_add(
@@ -246,9 +236,7 @@ class TilingWizardController(GUIController):
             "WM_DELETE_WINDOW",
             combine_funcs(
                 self.view.popup.dismiss,
-                lambda: delattr(
-                    self.parent_controller, "tiling_wizard_controller"
-                ),
+                lambda: delattr(self.parent_controller, "tiling_wizard_controller"),
             ),
         )
 
@@ -266,7 +254,7 @@ class TilingWizardController(GUIController):
             messagebox.showwarning(
                 title="Navigate",
                 message="Can't calculate positions, "
-                        "please make sure all FOV Dists are correct!",
+                "please make sure all FOV Dists are correct!",
             )
             return
 
@@ -355,8 +343,7 @@ class TilingWizardController(GUIController):
         # If we have additional axes, create self.d{axis} for each
         # additional axis, to ensure we keep track of the step size
         config = self.parent_controller.parent_controller.configuration
-        microscope_name = config[
-            "experiment"]["MicroscopeState"]["microscope_name"]
+        microscope_name = config["experiment"]["MicroscopeState"]["microscope_name"]
         scope = config["configuration"]["microscopes"][microscope_name]
         coupled_axes = scope["stage"].get("coupled_axes", None)
         if coupled_axes is not None:

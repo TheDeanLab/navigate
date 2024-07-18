@@ -42,7 +42,7 @@ from PIL import Image, ImageTk
 # Local application imports
 from navigate.view.popups.feature_list_popup import FeatureIcon, FeatureConfigPopup
 from navigate.view.custom_widgets.ArrowLabel import ArrowLabel
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.image import create_arrow_image
 from navigate.tools.file_functions import load_yaml_file, save_yaml_file
 from navigate.model.features.feature_related_functions import (
@@ -69,10 +69,13 @@ class FeaturePopupController(GUIController):
             The id of the feature list, by default 0
         """
         super().__init__(view, parent_controller)
+
         #: int: The id of the feature in the feature list.
         self.feature_list_id = feature_list_id
+
         #: list: The list of feature names.
         self.features = []
+
         #: list: The list of feature structure.
         self.feature_structure = []
 
@@ -195,7 +198,9 @@ class FeaturePopupController(GUIController):
 
 
 class FeatureListGraphController:
-    def __init__(self, feature_list_view, feature_content_view, preview_btn, child_popups=None):
+    def __init__(
+        self, feature_list_view, feature_content_view, preview_btn, child_popups=None
+    ):
         """Initialize feature list window
 
         Parameters
@@ -285,8 +290,7 @@ class FeatureListGraphController:
         return content
 
     def update_feature_content(self):
-        """Update feature content
-        """
+        """Update feature content"""
         self.feature_content_view.delete("1.0", tk.END)
         self.feature_content_view.insert("1.0", self.build_feature_list_text())
 
@@ -494,10 +498,10 @@ class FeatureListGraphController:
                     popup.feature_list_false_frame.feature_view_frame,
                     popup.feature_list_false_frame.content,
                     popup.preview_btn_false,
-                    self.child_popups
+                    self.child_popups,
                 )
                 self.feature_list_graph_controllers_false[idx].update(feature["false"])
-            
+
             # save the popup reference
             self.child_popups.append(popup)
 
@@ -791,7 +795,7 @@ def verify_feature_list(content):
     ----------
     content : str
         The feature list content
-    
+
     Returns
     -------
     feature list : list

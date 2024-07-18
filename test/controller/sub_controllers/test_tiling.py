@@ -5,7 +5,7 @@ import pytest
 @pytest.fixture(scope="module")
 def tiling_wizard_controller(dummy_view, dummy_controller):
     from navigate.view.popups.tiling_wizard_popup2 import TilingWizardPopup
-    from navigate.controller.sub_controllers.tiling_wizard_controller import (
+    from navigate.controller.sub_controllers.tiling import (
         TilingWizardController,
     )
 

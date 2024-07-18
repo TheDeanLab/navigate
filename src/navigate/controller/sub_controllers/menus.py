@@ -50,7 +50,7 @@ from navigate.view.popups.waveform_parameter_popup_window import (
     WaveformParameterPopupWindow,
 )
 from navigate.view.popups.feature_list_popup import FeatureListPopup
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.controller.sub_controllers import (
     AutofocusPopupController,
     IlastikPopupController,
@@ -708,10 +708,11 @@ class MenuController(GUIController):
 
         Updates model.experiment and saves it to file.
         """
-        if not self.parent_controller.update_experiment_setting():
+        warning_message = self.parent_controller.update_experiment_setting()
+        if warning_message:
             messagebox.showerror(
                 title="Warning",
-                message="Incorrect/missing settings. "
+                message=f"Incorrect/missing settings: {warning_message}\n"
                 "Cannot save current experiment file.",
             )
             return

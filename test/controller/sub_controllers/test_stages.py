@@ -44,7 +44,7 @@ def pos_dict(v, axes=AXES):
 
 @pytest.fixture
 def stage_controller(dummy_controller):
-    from navigate.controller.sub_controllers.stage_controller import StageController
+    from navigate.controller.sub_controllers.stages import StageController
 
     dummy_controller.camera_view_controller = MagicMock()
 
@@ -54,6 +54,7 @@ def stage_controller(dummy_controller):
         dummy_controller.camera_view_controller.canvas,
         dummy_controller,
     )
+
 
 # test before set position variables to MagicMock()
 def test_set_position(stage_controller):
@@ -76,7 +77,10 @@ def test_set_position(stage_controller):
         assert float(stage_controller.widget_vals[axis].get()) == position[axis]
         assert widgets[axis].widget.trigger_focusout_validation.called
         assert stage_controller.stage_setting_dict[axis] == position.get(axis, 0)
-    stage_controller.show_verbose_info.assert_has_calls([call("Stage position changed"), call("Set stage position")])
+    stage_controller.show_verbose_info.assert_has_calls(
+        [call("Stage position changed"), call("Set stage position")]
+    )
+
 
 def test_set_position_silent(stage_controller):
 
@@ -99,7 +103,10 @@ def test_set_position_silent(stage_controller):
         widgets[axis].widget.trigger_focusout_validation.assert_called_once()
         assert stage_controller.stage_setting_dict[axis] == position.get(axis, 0)
     stage_controller.show_verbose_info.assert_has_calls([call("Set stage position")])
-    assert call("Stage position changed") not in stage_controller.show_verbose_info.mock_calls
+    assert (
+        call("Stage position changed")
+        not in stage_controller.show_verbose_info.mock_calls
+    )
 
 
 @pytest.mark.parametrize(

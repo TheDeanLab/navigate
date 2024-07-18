@@ -72,10 +72,10 @@ class DummyController:
         """
         from navigate.controller.configuration_controller import ConfigurationController
         from navigate.controller.sub_controllers import MenuController
-        from navigate.controller.sub_controllers.multi_position_controller import (
+        from navigate.controller.sub_controllers.multiposition import (
             MultiPositionController,
         )
-        from navigate.controller.sub_controllers.channels_tab_controller import (
+        from navigate.controller.sub_controllers.channels_tab import (
             ChannelsTabController,
         )
 

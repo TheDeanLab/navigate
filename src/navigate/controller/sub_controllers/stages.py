@@ -38,7 +38,7 @@ import logging
 # Third Party Imports
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 
 # Logger Setup
 p = __name__.split(".")[1]

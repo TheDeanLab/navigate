@@ -37,7 +37,7 @@ import tkinter
 # Third Party Imports
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.view.popups.microscope_setting_popup_window import (
     MicroscopeSettingPopupWindow,
 )
@@ -65,16 +65,22 @@ class MicroscopePopupController(GUIController):
 
         """
         super().__init__(view, parent_controller)
+
         #: tk.Toplevel-derived: The popup window.
         self.view = MicroscopeSettingPopupWindow(view, microscope_info)
+
         #: dict: A dictionary containing the widgets.
         self.widgets = self.view.get_widgets()
+
         #: dict: A dictionary containing the variables.
         self.variables = self.view.get_variables()
+
         #: dict: A dictionary containing the buttons.
         self.buttons = self.view.get_buttons()
+
         #: dict: A dictionary containing the microscope information.
         self.microscope_info = microscope_info
+
         #: str: The name of the primary microscope.
         self.primary_microscope = None
 

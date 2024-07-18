@@ -111,15 +111,19 @@ class TestSutterFilterWheel(unittest.TestCase):
         self.filter_wheel.init_finished = True
 
     def test_set_filter_init_finished(self):
-        self.mock_device_connection.reset_mock()
-        self.filter_wheel.init_finished = True
-        for i in range(6):
-            self.filter_wheel.set_filter(
-                list(self.filter_wheel.filter_dictionary.keys())[i],
-                wait_until_done=True,
-            )
-            self.mock_device_connection.write.assert_called()
-            self.mock_device_connection.read.assert_not_called()
+        for wait_flag, read_num in [(True, 2), (False, 1)]:
+            self.mock_device_connection.reset_mock()
+            self.filter_wheel.init_finished = True
+            read_count = 0
+            for i in range(6):
+                self.filter_wheel.set_filter(
+                    list(self.filter_wheel.filter_dictionary.keys())[i],
+                    wait_until_done=wait_flag,
+                )
+                self.mock_device_connection.write.assert_called()
+                self.mock_device_connection.read.assert_called()
+                read_count += read_num
+                assert self.mock_device_connection.read.call_count == read_count
 
     def test_set_filter_without_waiting(self):
         self.mock_device_connection.reset_mock()
@@ -138,9 +142,14 @@ class TestSutterFilterWheel(unittest.TestCase):
 
     def test_read_wrong_number_bytes_returned(self):
         self.mock_device_connection.reset_mock()
+        # fewer response bytes than expected
         with self.assertRaises(UserWarning):
-            self.mock_device_connection.inWaiting.return_value = b"0x"
+            # in_waiting() returns an integer.
+            self.mock_device_connection.inWaiting.return_value = 1
             self.filter_wheel.read(num_bytes=10)
+        # more response bytes than expected
+        self.mock_device_connection.inWaiting.return_value = 12
+        self.filter_wheel.read(num_bytes=10)
 
     def test_read_correct_number_bytes_returned(self):
         # Mocked device connection expected to return 2 bytes

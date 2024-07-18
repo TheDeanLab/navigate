@@ -44,7 +44,7 @@ import numpy as np
 import copy
 
 # Local Imports
-from navigate.controller.sub_controllers.gui_controller import GUIController
+from navigate.controller.sub_controllers.gui import GUIController
 from navigate.model.analysis.camera import compute_signal_to_noise
 from navigate.tools.common_functions import VariableWithLock
 

@@ -35,10 +35,10 @@ import pytest
 class TestChannelSettingController:
     @pytest.fixture(autouse=True)
     def setup_class(self, dummy_controller):
-        from navigate.controller.sub_controllers.channels_tab_controller import (
+        from navigate.controller.sub_controllers.channels_tab import (
             ChannelsTabController,
         )
-        from navigate.controller.sub_controllers.channel_setting_controller import (
+        from navigate.controller.sub_controllers.channels_settings import (
             ChannelSettingController,
         )
 
@@ -65,7 +65,9 @@ class TestChannelSettingController:
         for i in range(5):
             assert str(self.channel_setting.view.channel_checks[i]["state"]) == state
             # interval widget is disabled now
-            assert str(self.channel_setting.view.interval_spins[i]["state"]) == "disabled"
+            assert (
+                str(self.channel_setting.view.interval_spins[i]["state"]) == "disabled"
+            )
             assert (
                 str(self.channel_setting.view.laser_pulldowns[i]["state"])
                 == state_readonly

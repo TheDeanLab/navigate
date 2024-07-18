@@ -237,10 +237,14 @@ class SutterFilterWheel(FilterWheelBase):
             )
             output_command = output_command.to_bytes(1, "little")
             self.serial.write(output_command)
+            # read echoing back
+            self.read(1)
 
             #  Wheel Position Change Delay
             if wait_until_done:
                 time.sleep(self.wait_until_done_delay)
+                # read 0D back. 
+                self.read(1)
 
     def read(self, num_bytes):
         """Reads the specified number of bytes from the serial port.
@@ -263,7 +267,8 @@ class SutterFilterWheel(FilterWheelBase):
         """
         for i in range(100):
             num_waiting = self.serial.inWaiting()
-            if num_waiting == num_bytes:
+            # if there are unread returns from previous commands
+            if num_waiting >= num_bytes:
                 break
             time.sleep(0.02)
         else:

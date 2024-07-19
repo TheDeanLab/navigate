@@ -75,7 +75,6 @@ class AcquireBarController(GUIController):
             "Z-Stack": "z-stack",
             "Single Acquisition": "single",
             "Customized": "customized",
-            "Constant Velocity Acquisition": "ConstantVelocityAcquisition",
         }
 
         self.view.pull_down["values"] = list(self.mode_dict.keys())
@@ -138,7 +137,7 @@ class AcquireBarController(GUIController):
             number_of_slices = 1
         elif mode == "live" or mode == "customized":
             number_of_slices = 1
-        elif mode == "z-stack" or "ConstantVelocityAcquisition":
+        elif mode == "z-stack":
             number_of_slices = microscope_state["number_z_steps"]
 
         top_anticipated_images = number_of_slices
@@ -168,7 +167,7 @@ class AcquireBarController(GUIController):
                     except ZeroDivisionError:
                         pass
 
-                if mode == "z-stack" or mode == "ConstantVelocityAcquisition":
+                if mode == "z-stack":
                     top_percent_complete = 100 * (
                         images_received / top_anticipated_images
                     )

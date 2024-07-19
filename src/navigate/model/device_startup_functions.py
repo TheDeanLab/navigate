@@ -172,6 +172,9 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
         HamamatsuController = importlib.import_module(
             "navigate.model.devices.APIs.hamamatsu.HamamatsuAPI"
         )
+
+        camera_id = 1
+
         return auto_redial(HamamatsuController.DCAM, (camera_id,), exception=Exception)
 
     elif cam_type.lower() == "syntheticcamera" or cam_type.lower() == "synthetic":

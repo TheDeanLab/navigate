@@ -423,12 +423,15 @@ class NIDAQ(DAQBase):
             self.master_trigger_task.write(
                 [False, True, True, True, False], auto_start=True
             )
+            logger.debug("*** sending out triggers!")
 
         try:
             self.camera_trigger_task.wait_until_done(timeout=10000)
+            logger.debug("*** camera task ends!")
             for task in self.analog_output_tasks.values():
                 if self.trigger_mode == "self-trigger":
                     task.wait_until_done()
+                    logger.debug("*** ao tasks end!")
                 task.stop()
         except Exception:
             # when triggered from external triggers, sometimes the camera trigger task

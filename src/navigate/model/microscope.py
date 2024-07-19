@@ -481,6 +481,8 @@ class Microscope:
             Dictionary of all the waveforms.
         """
         exposure_times, sweep_times = self.calculate_exposure_sweep_times()
+        print("*** exposure time:", exposure_times)
+        print("*** sweeping time:", sweep_times)
         camera_waveform = self.daq.calculate_all_waveforms(
             self.microscope_name, exposure_times, sweep_times
         )

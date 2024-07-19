@@ -498,7 +498,7 @@ class PhotometricsBase(CameraBase):
             del frame
             self._frames_received += 1
             if self._frames_received >= self._numberofframes:
-                self._frames_received = 0
+                self._frames_received = 1
             return [self._frames_received - 1]
         except Exception as e:
             print(str(e))

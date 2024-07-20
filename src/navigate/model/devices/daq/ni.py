@@ -269,10 +269,22 @@ class NIDAQ(DAQBase):
         camera_trigger_out_line = self.configuration["configuration"]["microscopes"][
             self.microscope_name
         ]["daq"]["camera_trigger_out_line"]
-        camera_high_time = 0.004
         sweep_time = self.sweep_times[channel_key]
-        camera_low_time = sweep_time - camera_high_time
         camera_delay = self.camera_delay
+
+        # apply waveform templates
+        camera_waveform_repeat_num = self.waveform_repeat_num * self.waveform_expand_num
+
+        if self.analog_outputs:
+            camera_high_time = 0.004
+            camera_low_time = sweep_time - camera_high_time
+        elif camera_waveform_repeat_num == 1:
+            # if no ao tasks, let the camera task occupy the full sweep time
+            camera_high_time = sweep_time - camera_delay
+            camera_low_time = 0.004
+        else:
+            camera_high_time = sweep_time - 0.004
+            camera_low_time = 0.004
 
         self.camera_trigger_task.co_channels.add_co_pulse_chan_time(
             camera_trigger_out_line,

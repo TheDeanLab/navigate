@@ -75,6 +75,9 @@ class CameraNotebook(DockableNotebook):
         #: CameraTab: The camera tab.
         self.camera_tab = CameraTab(self)
 
+        #: CameraTab: The maximum intensity projection tab.
+        self.mip_tab = MIPTab(self)
+
         #: WaveformTab: The waveform settings tab.
         self.waveform_tab = WaveformTab(self)
 
@@ -83,8 +86,66 @@ class CameraNotebook(DockableNotebook):
         self.set_tablist(tab_list)
 
         # Adding tabs to self notebook
-        self.add(self.camera_tab, text="Camera View", sticky=tk.NSEW)
-        self.add(self.waveform_tab, text="Waveform Settings", sticky=tk.NSEW)
+        self.add(self.camera_tab, text="Camera", sticky=tk.NSEW)
+        self.add(self.mip_tab, text="MIP", sticky=tk.NSEW)
+        self.add(self.waveform_tab, text="Waveforms", sticky=tk.NSEW)
+
+
+class MIPTab(tk.Frame):
+    """MipTab class."""
+
+    def __init__(self, cam_wave, *args, **kwargs):
+        """Initialize the MIPTab class.
+
+        Parameters
+        ----------
+        cam_wave : tk.Frame
+            The frame that will hold the camera tab.
+        *args : tuple
+            Variable length argument list.
+        **kwargs : dict
+            Arbitrary keyword arguments.
+        """
+        #  Init Frame
+        tk.Frame.__init__(self, cam_wave, *args, **kwargs)
+
+        #: int: The index of the tab.
+        self.index = 1
+
+        # Formatting
+        tk.Grid.columnconfigure(self, "all", weight=1)
+        tk.Grid.rowconfigure(self, "all", weight=1)
+
+        #: tk.Frame: The frame that will hold the camera image.
+        self.cam_image = ttk.Frame(self)
+        self.cam_image.grid(row=0, column=0, rowspan=3, sticky=tk.NSEW)
+
+        #: Bool: The popup flag.
+        self.is_popup = False
+
+        #: Bool: The docked flag.
+        self.is_docked = True
+
+        #: int: The width of the canvas.
+        #: int: The height of the canvas.
+        self.canvas_width, self.canvas_height = 512, 512
+
+        #: tk.Canvas: The canvas that will hold the camera image.
+        self.canvas = tk.Canvas(
+            self.cam_image, width=self.canvas_width, height=self.canvas_height
+        )
+        self.canvas.grid(row=0, column=0, sticky=tk.NSEW, padx=5, pady=5)
+
+        #: matplotlib.figure.Figure: The figure that will hold the camera image.
+        self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
+
+        #: matplotlib.backends.backend_tkagg.FigureCanvasTkAgg: The canvas that will
+        # hold the camera image.
+        self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
+
+        #: IntensityFrame: The frame that will hold the scale settings/palette color.
+        self.scale_palette = IntensityFrame(self)
+        self.scale_palette.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
 
 class CameraTab(tk.Frame):
@@ -151,7 +212,7 @@ class CameraTab(tk.Frame):
             tickinterval=20,
             orient=tk.HORIZONTAL,
             showvalue=0,
-            label="Slice Index",
+            label="Slice",
         )
         self.slider.configure(state="disabled")  # 'normal'
         self.slider.grid(row=3, column=0, sticky=tk.NSEW, padx=5, pady=5)
@@ -195,15 +256,7 @@ class RenderFrame(ttk.Labelframe):
         self.live = ttk.Combobox(
             self, textvariable=self.live_var, state="readonly", width=6
         )
-        self.live["values"] = (
-            "Live",
-            "XY Slice",
-            "YZ Slice",
-            "ZY Slice",
-            "XY MIP",
-            "YZ MIP",
-            "ZY MIP",
-        )
+        self.live["values"] = ("Live", "Slice")
         self.live.set("Live")
         self.live.grid(row=0, column=0)
         self.live.state = "readonly"
@@ -256,7 +309,7 @@ class WaveformTab(tk.Frame):
         tk.Frame.__init__(self, cam_wave, *args, **kwargs)
 
         #: int: The index of the tab.
-        self.index = 1
+        self.index = 2
 
         #: bool: The popup flag.
         self.is_docked = True

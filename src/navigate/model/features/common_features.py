@@ -738,8 +738,6 @@ class MoveToNextPositionInMultiPositionTable:
                 ],
             )
         )
-        print("*** should move to:", self.multiposition_table[self.current_idx])
-        print("*** moving to position with offsets:", pos_dict)
         # pause data thread if necessary
         if self.current_idx == 0:
             temp = self.model.get_stage_position()

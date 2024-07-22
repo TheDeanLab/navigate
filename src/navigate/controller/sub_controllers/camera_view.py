@@ -53,8 +53,8 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class CameraViewController(GUIController):
-    """Camera View Controller Class."""
+class BaseViewController(GUIController):
+    """Base View Controller Class."""
 
     def __init__(self, view, parent_controller=None):
         """Initialize the Camera View Controller Class.
@@ -77,6 +77,22 @@ class CameraViewController(GUIController):
 
         #: logging.Logger: The logger for the camera view controller.
         self.logger = logging.getLogger(p)
+
+
+class CameraViewController(BaseViewController):
+    """Camera View Controller Class."""
+
+    def __init__(self, view, parent_controller=None):
+        """Initialize the Camera View Controller Class.
+
+        Parameters
+        ----------
+        view : tkinter.Frame
+            The tkinter frame that contains the widgets.
+        parent_controller : Controller
+            The parent controller of the camera view controller.
+        """
+        super().__init__(view, parent_controller)
 
         #: dict: The dictionary of image metrics widgets.
         self.image_metrics = view.image_metrics.get_widgets()
@@ -359,10 +375,6 @@ class CameraViewController(GUIController):
             The x position of the mouse.
         y : int
             The y position of the mouse.
-
-        Examples
-        --------
-        >>> x, y = self.get_absolute_position()
         """
         x = self.parent_controller.view.winfo_pointerx()
         y = self.parent_controller.view.winfo_pointery()
@@ -375,7 +387,6 @@ class CameraViewController(GUIController):
         ----------
         event : tkinter.Event
             x, y location.  0,0 is top left corner.
-
         """
         try:
             # only popup the menu when click on image
@@ -397,10 +408,6 @@ class CameraViewController(GUIController):
             'minmax', 'image'.
         data : list
             Min and max intensity values.
-
-        Examples
-        --------
-        >>> self.initialize('minmax', [0, 255])
         """
         # Pallete section (colors, autoscale, min/max counts)
         # keys = ['Frames to Avg', 'Image Max Counts', 'Channel']
@@ -435,10 +442,6 @@ class CameraViewController(GUIController):
         ----------
         mode : str
             camera_view_controller mode.
-
-        Examples
-        --------
-        >>> self.set_mode('live')
         """
         self.mode = mode
         if mode == "live" or mode == "stop":
@@ -538,11 +541,6 @@ class CameraViewController(GUIController):
         Parameters
         ----------
         display_flag : bool
-            True to display the image, False to not display the image.
-
-        Examples
-        --------
-        >>> self.reset_display()
         """
         self.zoom_width = self.canvas_width
         self.zoom_height = self.canvas_height
@@ -559,10 +557,6 @@ class CameraViewController(GUIController):
         Applies digital zoom, detects saturation, down-samples the image, scales the
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
-
-        Examples
-        --------
-        >>> self.process_image()
         """
         # self.image -> self.zoom_image.
         self.digital_zoom()
@@ -596,10 +590,6 @@ class CameraViewController(GUIController):
             num = 4 is zoom out.
             num = 5 is zoom in.
             x, y location.  0,0 is top left corner.
-
-        Examples
-        --------
-        >>> self.mouse_wheel(event)
         """
         if event.x >= self.canvas_width or event.y >= self.canvas_height:
             return
@@ -776,11 +766,6 @@ class CameraViewController(GUIController):
             Microscope state.
         camera_parameters : dict
             Camera parameters.
-
-        Example
-        -------
-        >>> self.initialize_non_live_display(buffer,
-        >>> microscope_state, camera_parameters)
         """
         self.data_buffer = buffer
         self.is_displaying_image.value = False
@@ -796,7 +781,6 @@ class CameraViewController(GUIController):
         )
 
         self.update_canvas_size()
-
         self.reset_display(False)
 
     def identify_channel_index_and_slice(self, microscope_state, images_received):
@@ -808,10 +792,6 @@ class CameraViewController(GUIController):
             State of the microscope
         images_received : int
             Number of images received.
-
-        Example
-        -------
-        >>> self.identify_channel_index_and_slice(microscope_state, images_received)
         """
         # Reset the image counter after the full acquisition of an image volume.
         if self.image_counter == self.total_images_per_volume:
@@ -881,10 +861,6 @@ class CameraViewController(GUIController):
             Index of the slider.
         channel_display_index : int
             Index of the channel to display.
-
-        Example
-        -------
-        >>> self.retrieve_image_slice_from_volume(slider_index, channel_display_index)
         """
         if self.display_state == "XY MIP":
             self.image = np.max(
@@ -918,10 +894,6 @@ class CameraViewController(GUIController):
         ----------
         image_id: int
             frame index in the data_buffer.
-
-        Example
-        -------
-        >>> self.display_image(image_id)
         """
 
         # Identify image identity (e.g., slice #, channel #).
@@ -1025,10 +997,6 @@ class CameraViewController(GUIController):
         Returns
         -------
         self.apply_LUT_image : np.arrays
-
-        Example
-        -------
-        >>> self.update_LUT()
         """
         if self.image is None:
             pass
@@ -1103,10 +1071,6 @@ class CameraViewController(GUIController):
             Minimum counts for the image.
         self.max_counts : int
             Maximum counts for the image.
-
-        Example
-        -------
-        >>> self.update_min_max_counts()
         """
         if self.image_palette["Min"].get() != "":
             self.min_counts = float(self.image_palette["Min"].get())
@@ -1128,10 +1092,6 @@ class CameraViewController(GUIController):
         -------
         self.mask_color_table : np.array
             Array of colors to use for the segmentation mask
-
-        Example
-        -------
-        >>> self.set_mask_color_table()
         """
         self.mask_color_table = np.zeros((256, 1, 3), dtype=np.uint8)
         self.mask_color_table[0] = [0, 0, 0]
@@ -1151,11 +1111,7 @@ class CameraViewController(GUIController):
         Parameters
         ----------
         mask : np.array
-            Segmentation mask to display
-
-        Example
-        -------
-        >>> self.display_mask()
+            Segmentation mask to display)
         """
         self.ilastik_seg_mask = cv2.applyColorMap(mask, self.mask_color_table)
         self.ilastik_mask_ready_lock.release()
@@ -1238,3 +1194,20 @@ class CameraViewController(GUIController):
 
         display_thread = threading.Thread(target=self.display_image, args=(image_id,))
         display_thread.start()
+
+
+class MIPViewController(BaseViewController):
+    """MIP View Controller Class."""
+
+    def __init__(self, view, parent_controller=None):
+        """Initialize the MIP View Controller Class.
+
+        Parameters
+        ----------
+        view : tkinter.Frame
+            The tkinter frame that contains the widgets.
+        parent_controller : Controller
+            The parent controller of the camera view controller.
+        """
+        super().__init__(view, parent_controller)
+        pass

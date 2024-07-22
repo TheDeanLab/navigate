@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted for academic and research use only
@@ -56,6 +56,7 @@ from navigate.controller.sub_controllers import (
     StageController,
     CameraSettingController,
     CameraViewController,
+    MIPViewController,
     MultiPositionController,
     ChannelsTabController,
     AcquireBarController,
@@ -211,6 +212,11 @@ class Controller:
         #: CameraViewController: Camera View Tab Sub-Controller.
         self.camera_view_controller = CameraViewController(
             self.view.camera_waveform.camera_tab, self
+        )
+
+        #: MIPSettingController: MIP Settings Tab Sub-Controller.
+        self.mip_setting_controller = MIPViewController(
+            self.view.camera_waveform.mip_tab, self
         )
 
         #: CameraSettingController: Camera Settings Tab Sub-Controller.
@@ -983,6 +989,12 @@ class Controller:
         self.acquire_bar_controller.view.acquire_btn.configure(state="normal")
 
         self.camera_view_controller.initialize_non_live_display(
+            self.data_buffer,
+            self.configuration["experiment"]["MicroscopeState"],
+            self.configuration["experiment"]["CameraParameters"],
+        )
+
+        self.mip_setting_controller.initialize_non_live_display(
             self.data_buffer,
             self.configuration["experiment"]["MicroscopeState"],
             self.configuration["experiment"]["CameraParameters"],

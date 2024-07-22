@@ -192,7 +192,7 @@ class ChannelCreator(ttk.Labelframe):
         #: list: List of the frames for the columns
         self.frame_columns = []
 
-    def populate_frame(self, channels, filter_wheels):
+    def populate_frame(self, channels, filter_wheels, filter_wheel_names):
         """Populates the frame with the widgets.
 
         This function populates the frame with the widgets for the channels. By updating
@@ -206,6 +206,8 @@ class ChannelCreator(ttk.Labelframe):
             The number of channels to be added to the frame.
         filter_wheels : int
             The number of filter wheels
+        filter_wheel_names : list
+            The names of the filter wheels
         """
         if filter_wheels > 1:
             self.label_text = [
@@ -213,8 +215,10 @@ class ChannelCreator(ttk.Labelframe):
                 "Laser",
                 "Power",
             ]
+
             for i in range(filter_wheels):
-                self.label_text.append(f"Filter-{i}")
+                self.label_text.append(filter_wheel_names[i])
+
             self.label_text += ["Exp. Time (ms)", "Interval", "Defocus"]
         #  Creates a column frame for each widget,
         for idx in range(len(self.label_text)):

@@ -32,6 +32,7 @@
 
 # Standard library imports
 import time
+import ast
 from functools import reduce
 from threading import Lock
 
@@ -200,7 +201,7 @@ class Snap:
 class WaitForExternalTrigger:
     """WaitForExternalTrigger class to time parts of the feature list using external input.
 
-    This class waits for either an external trigger (or the timeout) before continuing 
+    This class waits for either an external trigger (or the timeout) before continuing
     on to the next feature block in the list. Useful when combined with LoopByCounts
     when each iteration may depend on some external event happening.
 
@@ -208,7 +209,7 @@ class WaitForExternalTrigger:
     ------
     - This class pauses the data thread while waiting for the trigger to avoid
       camera timeout issues.
-    
+
     - Only digital triggers are handeled at this time: use the PFI inputs on the DAQ.
     """
 
@@ -227,7 +228,7 @@ class WaitForExternalTrigger:
         """
         self.model = model
 
-        self.wait_interval = 0.001 # sec
+        self.wait_interval = 0.001  # sec
 
         self.task = None
         self.trigger_channel = trigger_channel
@@ -252,6 +253,7 @@ class WaitForExternalTrigger:
         self.model.resume_data_thread()
 
         return result
+
 
 class WaitToContinue:
     """WaitToContinue class for synchronizing signal and data acquisition.
@@ -592,13 +594,19 @@ class MoveToNextPositionInMultiPositionTable:
     process, including signal acquisition and cleanup steps.
     """
 
-    def __init__(self, model):
+    def __init__(self, model, resolution_value=None, zoom_value=None, offset=None):
         """Initialize the MoveToNextPositionInMultiPositionTable class.
 
         Parameters:
         ----------
         model : MicroscopeModel
             The microscope model object used for position control.
+        resolution_value : str
+            The resolution/microscope name of the current multiposition table
+        zoom_value : str
+            The zoom name. For example "1x", "2x", ...
+        offset : list
+            The position offset [x, y, z, theta, f]
         """
         #: MicroscopeModel: The microscope model associated with position control.
         self.model = model
@@ -606,6 +614,7 @@ class MoveToNextPositionInMultiPositionTable:
         #: dict: A dictionary defining the configuration for the position control
         self.config_table = {
             "signal": {
+                "init": self.pre_signal_func,
                 "main": self.signal_func,
                 "cleanup": self.cleanup,
             },
@@ -631,6 +640,76 @@ class MoveToNextPositionInMultiPositionTable:
         #: int: The stage distance threshold for pausing the data thread.
         self.stage_distance_threshold = 1000
 
+        #: str: The microscope name/resolution name
+        self.resolution_value = resolution_value
+        #: str: The zoom value
+        self.zoom_value = zoom_value
+        #: dict: stage offset table
+        self.offset = offset
+        #: bool: The flag inidicates whether this node is initialized
+        self.initialized = False
+
+    def pre_signal_func(self):
+        """Calculate stage offset if applicable."""
+        if self.initialized:
+            return
+        self.initialized = True
+        if type(self.offset) is str:
+            try:
+                self.offset = ast.literal_eval(self.offset)
+            except SyntaxError:
+                self.offset = [0] * 5
+        if not self.offset or type(self.offset) is not list:
+            self.offset = [0] * 5
+
+        # assert offset has at least 5 float values
+        if len(self.offset) < 5:
+            self.offset[len(self.offset) : 5] = [0] * (5 - self.offset)
+        for i in range(5):
+            try:
+                self.offset[i] = float(self.offset[i])
+            except (ValueError, TypeError):
+                self.offset[i] = 0
+
+        curr_resolution = self.model.active_microscope_name
+        curr_zoom = self.model.active_microscope.zoom.zoomvalue
+        if not self.resolution_value or not self.zoom_value:
+            return
+        if curr_resolution == self.resolution_value and curr_zoom == self.zoom_value:
+            return
+        # calculate offset
+        if curr_resolution != self.resolution_value:
+            stage_offset = self.model.configuration["configuration"]["microscopes"][
+                self.resolution_value
+            ]["stage"]
+            curr_stage_offset = self.model.configuration["configuration"][
+                "microscopes"
+            ][curr_resolution]["stage"]
+            for i, axis in enumerate(["x", "y", "z", "theta", "f"]):
+                self.offset[i] = (
+                    self.offset[i]
+                    + curr_stage_offset[axis + "_offset"]
+                    - stage_offset[axis + "_offset"]
+                )
+        else:
+            solvent = self.model.configuration["experiment"]["Saving"]["solvent"]
+            stage_solvent_offsets = self.model.active_microscope.zoom.stage_offsets
+            if solvent in stage_solvent_offsets.keys():
+                stage_offset = stage_solvent_offsets[solvent]
+                for i, axis in enumerate(["x", "y", "z", "theta", "f"]):
+                    if axis not in stage_offset.keys():
+                        continue
+                    try:
+                        self.offset[i] = self.offset[i] + float(
+                            stage_offset[axis][self.zoom_value][curr_zoom]
+                        )
+                    except (ValueError, KeyError):
+                        print(
+                            f"*** Offsets from {self.zoom_value} to {curr_zoom} are not implemented!"
+                            "There aren't enough information in the configuration.yaml file!"
+                        )
+        self.model.logger.debug(f"Using stage offset {self.offset}")
+
     def signal_func(self):
         """Move to the next position in the multi-position table and control the data
         thread.
@@ -649,7 +728,18 @@ class MoveToNextPositionInMultiPositionTable:
         )
         if self.current_idx >= self.position_count:
             return False
-        pos_dict = dict(zip(["x", "y", "z", "theta", "f"], self.multiposition_table[self.current_idx]))
+        # add offset
+        pos_dict = dict(
+            zip(
+                ["x", "y", "z", "theta", "f"],
+                [
+                    self.multiposition_table[self.current_idx][i] + self.offset[i]
+                    for i in range(5)
+                ],
+            )
+        )
+        print("*** should move to:", self.multiposition_table[self.current_idx])
+        print("*** moving to position with offsets:", pos_dict)
         # pause data thread if necessary
         if self.current_idx == 0:
             temp = self.model.get_stage_position()
@@ -660,7 +750,15 @@ class MoveToNextPositionInMultiPositionTable:
                 )
             )
         else:
-            pre_stage_pos = dict(zip(["x", "y", "z", "theta", "f"], self.multiposition_table[self.current_idx - 1]))
+            pre_stage_pos = dict(
+                zip(
+                    ["x", "y", "z", "theta", "f"],
+                    [
+                        self.multiposition_table[self.current_idx - 1][i] + self.offset[i]
+                        for i in range(5)
+                    ],
+                )
+            )
         delta_x = abs(pos_dict["x"] - pre_stage_pos["x"])
         delta_y = abs(pos_dict["y"] - pre_stage_pos["y"])
         delta_z = abs(pos_dict["z"] - pre_stage_pos["z"])
@@ -682,7 +780,7 @@ class MoveToNextPositionInMultiPositionTable:
         self.model.move_stage(abs_pos_dict, wait_until_done=True)
 
         self.model.logger.debug("MoveToNextPositionInMultiPosition: move done")
-        
+
         # resume data thread
         if should_pause_data_thread:
             self.model.resume_data_thread()
@@ -970,7 +1068,9 @@ class ZStackAcquisition:
             f"{self.start_z_position}"
         )
         self.current_position_idx = 0
-        self.current_position = dict(zip(["x", "y", "z", "theta", "f"], self.positions[0]))
+        self.current_position = dict(
+            zip(["x", "y", "z", "theta", "f"], self.positions[0])
+        )
         self.z_position_moved_time = 0
         self.need_to_move_new_position = True
         self.need_to_move_z_position = True
@@ -1002,21 +1102,22 @@ class ZStackAcquisition:
         if self.model.stop_acquisition:
             return False
         data_thread_is_paused = False
-        
+
         # move stage X, Y, Theta
         if self.need_to_move_new_position:
             self.need_to_move_new_position = False
 
             self.pre_position = self.current_position
-            self.current_position = dict(zip(["x", "y", "z", "theta", "f"], self.positions[self.current_position_idx]))
+            self.current_position = dict(
+                zip(
+                    ["x", "y", "z", "theta", "f"],
+                    self.positions[self.current_position_idx],
+                )
+            )
 
             # calculate first z, f position
-            self.current_z_position = (
-                self.start_z_position + self.current_position["z"]
-            )
-            self.current_focus_position = (
-                self.start_focus + self.current_position["f"]
-            )
+            self.current_z_position = self.start_z_position + self.current_position["z"]
+            self.current_focus_position = self.start_focus + self.current_position["f"]
             if self.defocus is not None:
                 self.current_focus_position += self.defocus[
                     self.current_channel_in_list
@@ -1035,14 +1136,8 @@ class ZStackAcquisition:
             )
 
             if self.current_position_idx > 0:
-                delta_x = (
-                    self.current_position["x"]
-                    - self.pre_position["x"]
-                )
-                delta_y = (
-                    self.current_position["y"]
-                    - self.pre_position["y"]
-                )
+                delta_x = self.current_position["x"] - self.pre_position["x"]
+                delta_y = self.current_position["y"] - self.pre_position["y"]
                 delta_z = (
                     self.current_position["z"]
                     - self.pre_position["z"]
@@ -1140,12 +1235,8 @@ class ZStackAcquisition:
         if self.z_position_moved_time >= self.number_z_steps:
             self.z_position_moved_time = 0
             # calculate first z, f position
-            self.current_z_position = (
-                self.start_z_position + self.current_position["z"]
-            )
-            self.current_focus_position = (
-                self.start_focus + self.current_position["f"]
-            )
+            self.current_z_position = self.start_z_position + self.current_position["z"]
+            self.current_focus_position = self.start_focus + self.current_position["f"]
             if (
                 self.z_stack_distance > self.stage_distance_threshold
                 or self.f_stack_distance > self.stage_distance_threshold
@@ -1472,6 +1563,7 @@ class FindTissueSimple2D:
 
             self.model.event_queue.put(("multiposition", table_values))
 
+
 class SetCameraParameters:
     """
     SetCameraParameters class for modifying the parameters of a camera.
@@ -1485,7 +1577,13 @@ class SetCameraParameters:
     - If the value of a parameter is None it doesn't update the parameter value.
     """
 
-    def __init__(self, model, sensor_mode="Normal", readout_direction=None, rolling_shutter_width=None):
+    def __init__(
+        self,
+        model,
+        sensor_mode="Normal",
+        readout_direction=None,
+        rolling_shutter_width=None,
+    ):
         """Initialize the ChangeResolution class.
 
 
@@ -1542,22 +1640,32 @@ class SetCameraParameters:
             self.model.active_microscope_name
         ]["camera"]
         updated_value = [None] * 3
-        if self.sensor_mode in ["Normal", "Light-Sheet"] and self.sensor_mode != camera_parameters["sensor_mode"]:
+        if (
+            self.sensor_mode in ["Normal", "Light-Sheet"]
+            and self.sensor_mode != camera_parameters["sensor_mode"]
+        ):
             update_flag = True
             update_sensor_mode = True
             camera_parameters["sensor_mode"] = self.sensor_mode
             updated_value[0] = self.sensor_mode
         if camera_parameters["sensor_mode"] == "Light-Sheet":
-            if self.readout_direction in camera_config["supported_readout_directions"] and \
-                (update_sensor_mode or camera_parameters["readout_direction"] != self.readout_direction):
+            if self.readout_direction in camera_config[
+                "supported_readout_directions"
+            ] and (
+                update_sensor_mode
+                or camera_parameters["readout_direction"] != self.readout_direction
+            ):
                 update_flag = True
                 camera_parameters["readout_direction"] = self.readout_direction
                 updated_value[1] = self.readout_direction
-            if self.rolling_shutter_width and (update_sensor_mode or self.rolling_shutter_width != camera_parameters["number_of_pixels"]):
+            if self.rolling_shutter_width and (
+                update_sensor_mode
+                or self.rolling_shutter_width != camera_parameters["number_of_pixels"]
+            ):
                 update_flag = True
                 camera_parameters["number_of_pixels"] = self.rolling_shutter_width
                 updated_value[2] = self.rolling_shutter_width
-        
+
         if not update_flag:
             return True
         # pause data thread
@@ -1573,6 +1681,6 @@ class SetCameraParameters:
         # resume data thread
         self.model.resume_data_thread()
         return True
-    
+
     def cleanup(self):
         self.model.resume_data_thread()

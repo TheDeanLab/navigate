@@ -316,7 +316,7 @@ class TigerController:
         except UnicodeDecodeError:
             """
             Low-Frequency Serial Communication error:
-            utf-8' codec can't decode byte 0x8c in position 0: 
+            utf-8' codec can't decode byte 0x8c in position 0:
             invalid start byte
             """
             return ""
@@ -805,4 +805,19 @@ class TigerController:
         Halt filter wheel
         """
         self.send_filter_wheel_command("HA")
+        self.read_response()
+
+    def move_dichroic(self, dichroic_id, dichroic_position=0):
+        """
+        Move to dichroic position n , where n is a valid filter position.
+        The Motorized C60 Cube Slider from ASI has 4 positions.
+
+        Parameters
+        ----------
+        dichroic_id : str
+            The ID of the dichroic in the Tiger Controller. e.g., "T"
+        dichroic_position : int
+            The position to move the dichroic to.
+        """
+        self.send_filter_wheel_command(f"MOVE {dichroic_id}={dichroic_position}")
         self.read_response()

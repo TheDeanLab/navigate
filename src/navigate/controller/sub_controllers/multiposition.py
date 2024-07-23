@@ -285,3 +285,9 @@ class MultiPositionController(GUIController):
             p for i, p in enumerate(positions) if (i >= l or position_flag_list[i])
         ]
         self.set_positions(new_positions)
+
+    @property
+    def custom_events(self):
+        return {
+            "remove_positions": self.remove_positions
+        }

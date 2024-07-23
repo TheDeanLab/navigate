@@ -370,6 +370,7 @@ class AdaptiveOpticsPopupController(GUIController):
 
         try:
             coefs = data["coefs"]
+            self.set_widgets_from_coef(coefs)
             self.coefs_bar.clear()
             self.coefs_bar.bar(range(len(coefs)), coefs)
             self.coefs_bar.set_title("Current Coefs")
@@ -410,6 +411,10 @@ class AdaptiveOpticsPopupController(GUIController):
 
         self.plot_tw_trace()
 
+        if data["done"]:
+            print("Tony Wilson done! Updating expt...")
+            self.update_experiment_values()
+
     def plot_tw_trace(self):
         """Plot the tony wilson trace data."""
         mode = self.parent_controller.configuration["experiment"][
@@ -435,3 +440,11 @@ class AdaptiveOpticsPopupController(GUIController):
         # To redraw the plot
         self.fig_tw.tight_layout()
         self.fig_tw.canvas.draw_idle()
+
+    @property
+    def custom_events(self):
+        return {
+            "ao_save_report": self.save_report_to_file,
+            "mirror_update": self.plot_mirror,
+            "tonywilson": self.plot_tonywilson,
+        }

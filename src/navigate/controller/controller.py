@@ -474,6 +474,14 @@ class Controller:
             "multiposition_count"
         ] = len(positions)
 
+        if self.configuration["experiment"]["MicroscopeState"]["is_multiposition"] \
+            and len(positions) == 0:
+            # Update the view and override the settings.
+            self.configuration["experiment"]["MicroscopeState"][
+                "is_multiposition"
+            ] = False
+            self.channels_tab_controller.is_multiposition_val.set(False)
+
         # TODO: validate experiment dict
 
         channel_warning = self.channels_tab_controller.verify_experiment_values()
@@ -1226,13 +1234,6 @@ class Controller:
                 # Display a warning that arises from the model as a top-level GUI popup
                 messagebox.showwarning(title="Navigate", message=value)
 
-            elif event == "waveform":
-                # Update the waveform plot.
-                self.waveform_tab_controller.update_waveforms(
-                    waveform_dict=value,
-                    sample_rate=self.configuration_controller.daq_sample_rate,
-                )
-
             elif event == "multiposition":
                 # Update the multi-position tab without appending to the list
                 update_table(
@@ -1240,40 +1241,6 @@ class Controller:
                     pos=value,
                 )
                 self.channels_tab_controller.is_multiposition_val.set(True)
-                self.channels_tab_controller.toggle_multiposition()
-
-            elif event == "disable_multiposition":
-                self.channels_tab_controller.is_multiposition_val.set(False)
-                self.channels_tab_controller.toggle_multiposition()
-
-            elif event == "ilastik_mask":
-                # Display the ilastik mask
-                self.camera_view_controller.display_mask(mask=value)
-
-            elif event == "autofocus":
-                # Display the autofocus plot
-                if hasattr(self, "af_popup_controller"):
-                    self.af_popup_controller.display_plot(
-                        data=value[0], line_plot=value[1], clear_data=value[2]
-                    )
-
-            elif event == "tonywilson":
-                if hasattr(self, "ao_popup_controller"):
-                    # self.ao_popup_controller.set_widgets_from_coef(value['coefs'])
-                    self.ao_popup_controller.plot_tonywilson(value)
-                    # self.ao_popup_controller.plot_mirror(value)
-                    if value["done"]:
-                        print("Tony Wilson done! Updating expt...")
-                        self.ao_popup_controller.update_experiment_values()
-
-            elif event == "mirror_update":
-                if hasattr(self, "ao_popup_controller"):
-                    self.ao_popup_controller.set_widgets_from_coef(value["coefs"])
-                    self.ao_popup_controller.plot_mirror(value)
-
-            elif event == "ao_save_report":
-                if hasattr(self, "ao_popup_controller"):
-                    self.ao_popup_controller.save_report_to_file(value)
 
             elif event == "stop":
                 # Stop the software
@@ -1287,14 +1254,6 @@ class Controller:
                     except RuntimeError:
                         time.sleep(0.001)
                         pass
-
-            elif event == "remove_positions":
-                self.multiposition_tab_controller.remove_positions(value)
-
-            elif event == "exposure_time":
-                self.channels_tab_controller.set_exposure_time(value[0], value[1])
-            elif event == "display_camera_parameters":
-                self.camera_setting_controller.update_camera_parameters_silent(*value)
 
             elif event in self.event_listeners.keys():
                 try:

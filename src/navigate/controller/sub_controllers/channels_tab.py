@@ -158,9 +158,8 @@ class ChannelsTabController(GUIController):
 
         #: bool: Whether or not the user has selected to use multiposition.
         self.is_multiposition_val = self.view.multipoint_frame.on_off
-        self.view.multipoint_frame.save_check.configure(
-            command=self.toggle_multiposition
-        )
+        self.is_multiposition_val.trace_add("write", self.toggle_multiposition)
+
         self.view.multipoint_frame.buttons["tiling"].configure(
             command=self.launch_tiling_wizard
         )
@@ -350,12 +349,10 @@ class ChannelsTabController(GUIController):
         # multi-position flag
         if mode == "stop":
             self.is_multiposition_val.set(self.is_multiposition_cache)
-            self.toggle_multiposition()
         else:
             self.is_multiposition_cache = self.is_multiposition
             if mode == "customized":
                 self.is_multiposition_val.set(False)
-                self.toggle_multiposition()
 
         if image_mode == "customized" or mode != "stop":
             self.disable_multiposition_btn()
@@ -712,7 +709,7 @@ class ChannelsTabController(GUIController):
             "timepoint settings on channels tab have been changed and recalculated"
         )
 
-    def toggle_multiposition(self):
+    def toggle_multiposition(self, *args):
         """Toggle Multi-position Acquisition.
 
         Recalculates the experiment duration.
@@ -835,17 +832,24 @@ class ChannelsTabController(GUIController):
                 return "Timepoints should be at least 1!"
         return None
 
-    def set_exposure_time(self, channel, exposure_time):
+    def set_exposure_time(self, channel_exposure_time):
         """Set exposure time for a specified channel
 
         Parameters
         ----------
-        channel : str
+        channel_exposure_time : tuple(str, float)
+            (channel_name, exposure_time)
             Channel name, such as "channel_1", "channel_2",...
-        exposure_time : float
             Exposure time in milliseconds.
         """
+        channel, exposure_time = channel_exposure_time
         idx = int(channel[channel.index("_") + 1 :]) - 1
         self.channel_setting_controller.in_initialization = True
         self.channel_setting_controller.view.exptime_variables[idx].set(exposure_time)
         self.channel_setting_controller.in_initialization = False
+
+    @property
+    def custom_events(self):
+        return {
+            "exposure_time": self.set_exposure_time
+        }

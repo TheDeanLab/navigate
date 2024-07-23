@@ -217,12 +217,13 @@ class PluginsController:
         frame: object
             navigate frame object
         controller: object
-            navigate controller
+            Controller Class
         """
         try:
             plugin_frame = frame(self.view.settings)
             self.view.settings.add(plugin_frame, text=plugin_name, sticky=tk.NSEW)
             plugin_controller = controller(plugin_frame, self.parent_controller)
+            self.parent_controller.register_event_listeners(getattr(plugin_controller, "custom_events", {}))
             controller_name = (
                 "__plugin" + "_".join(plugin_name.lower().split()) + "_controller"
             )
@@ -272,6 +273,7 @@ class PluginsController:
             plugin_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
 
             plugin_controller = controller(plugin_frame, self.parent_controller)
+            self.parent_controller.register_event_listeners(getattr(plugin_controller, "custom_events", {}))
 
             plugin_controller.popup = popup
             popup.deiconify()

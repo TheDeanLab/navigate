@@ -195,6 +195,7 @@ class Controller:
         self.view = view(root)
 
         # Sub Gui Controllers
+        self.event_listeners = {}
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(self.view.acqbar, self)
 
@@ -1295,9 +1296,22 @@ class Controller:
             elif event == "display_camera_parameters":
                 self.camera_setting_controller.update_camera_parameters_silent(*value)
 
+            elif event in self.event_listeners.keys():
+                try:
+                    self.event_listeners[event](value)
+                except Exception:
+                    print(f"*** unhandled event: {event}, {value}")
+
     def add_acquisition_mode(self, name, acquisition_obj):
         if name in self.plugin_acquisition_modes:
             print(f"*** plugin acquisition mode {name} exists, can't add another one!")
             return
         self.plugin_acquisition_modes[name] = acquisition_obj(name)
         self.acquire_bar_controller.add_mode(name)
+
+    def register_event_listener(self, event_name, event_handler):
+        self.event_listeners[event_name] = event_handler
+
+    def register_event_listeners(self, events):
+        for event_name, event_handler in events.items():
+            self.register_event_listener(event_name, event_handler)

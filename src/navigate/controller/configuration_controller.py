@@ -408,7 +408,7 @@ class ConfigurationController:
         filter_wheel_names = []
         if self.microscope_config is not None:
             for i in range(self.number_of_filter_wheels):
-                name = self.microscope_config["filter_wheel"][i].get(
+                name = self.microscope_config["filter_wheel"][i]["hardware"].get(
                     "name", f"Filter Wheel {i}"
                 )
                 filter_wheel_names.append(name)

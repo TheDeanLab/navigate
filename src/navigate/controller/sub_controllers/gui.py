@@ -61,6 +61,13 @@ class GUIController:
         #: Controller: parent controller
         self.parent_controller = parent_controller
 
+        # register events
+        for event_label, event_handler in self.custom_events.items():
+            self.register_event_listener(event_label, event_handler)
+        if hasattr(self, "event_listeners"):
+            for event_label, event_label in self.event_listeners.items():
+                self.register_event_listener(event_label, event_handler)
+
     def initialize(self):
         """This function is called when the controller is initialized
 
@@ -108,3 +115,14 @@ class GUIController:
             information to be printed
         """
         logger.info(f"{self.__class__.__name__} : {info}")
+
+    def register_event_listener(self, event_name, event_handler):
+        """Register event listner in the parent_controller
+        """
+        if not hasattr(self.parent_controller, "event_listners"):
+            self.parent_controller.event_listerners = {}
+        self.parent_controller.event_listeners[event_name] = event_handler
+
+    @property
+    def custom_events(self):
+        return {}

@@ -79,20 +79,28 @@ class TigerController:
         """
         #: Serial: Serial port object
         self.serial_port = Serial()
+
         #: str: COM port of the Tiger Controller
         self.com_port = com_port
+
         #: int: Baud rate of the Tiger Controller
         self.baud_rate = baud_rate
+
         #: bool: If True, will print out messages to the console
         self.verbose = verbose
+
         #: list[str]: Default axes sequence of the Tiger Controller
         self.default_axes_sequence = None
+
         #: list[float]: Maximum speeds of the Tiger Controller
         self._max_speeds = None
+
         #: threading.Event: Event to indicate if it is safe to write to the serial port
         self.safe_to_write = threading.Event()
+
         #: threading.Event.set(): Set the safe_to_write event
         self.safe_to_write.set()
+
         #: float: Last time a command was sent to the Tiger Controller
         self._last_cmd_send_time = time.perf_counter()
 
@@ -194,10 +202,23 @@ class TigerController:
     def set_feedback_alignment(self, axis, aa):
         """Set the stage feedback alignment.
 
+        Adjusts the drive strength by writing to a non-volatile on-board
+        potentiometer. Normally done once at the factory (to a very conservative
+        value) and never adjusted again. If the AA is off, the stage may be sluggish
+        (too low) or it may oscillate, buzz, or sound like it's grinding (too high).
+        After changing the AA value the AZERO command should be run until zeroed.
+
+        To optimize stage performance a high AA is desirable, but too high and there
+        are big problems. AA can be increased until oscillations occur and then
+        decreased by 1 or 2 as described at the page on tuning stages to minimize
+        move time.
+
         Parameters
         ----------
         axis : str
             Stage axis
+        aa : float
+            Hardware potentiometer value
         """
         self.send_command(f"AA {axis}={aa}\r")
         self.read_response()
@@ -206,6 +227,19 @@ class TigerController:
 
     def set_backlash(self, axis, val):
         """Enable/disable stage backlash correction.
+
+        This command sets (or displays) the amount of distance in millimeters of the
+        anti-backlash move which absorbs the lash in the axis' gearing at the end of
+        commanded moves1). This behind-the-scenes move ensures that the controller
+        approaches the final target from the same direction, which improves
+        repeatability when using rotary encoders. A value of zero (0) disables the
+        anti-backlash algorithm for that axis. The default value depends on motor
+        build but is 0.04 for most common 4 TPI leadscrew pitch with rotary encoder,
+        0.01 for most common 16 TPI leadscrew pitch, and 0.02 for the x-axis of
+        scan-optimized stages. For linear encoders a backlash move is not necessary
+        and there is no reason to change the setting from the default value of zero (
+        0). Moves with manual input devices (joystick or knobs) do not have any
+        anti-backlash move.
 
         Parameters
         ----------
@@ -220,6 +254,15 @@ class TigerController:
     def set_finishing_accuracy(self, axis, ac):
         """Set the stage finishing accuracy.
 
+        This command sets/displays the Finish Error setting, which controls when the
+        motor algorithm routines will turn off. The setting controls the crossover
+        position error (in millimeters) between the target and position at which the
+        controller will stop attempting to move the stage closer to achieve the ideal
+        position=target. This is value also determines the maximum error allowable
+        before a move is considered complete. This value is by default set to the
+        value of the smallest move step size according to the encoder resolution,
+        but many applications do not require such tight landing tolerance.
+
         Parameters
         ----------
         axis : str
@@ -231,8 +274,15 @@ class TigerController:
         self.read_response()
 
     def set_error(self, axis, ac):
-        """
-        Set the stage drift error
+        """Set the stage drift error
+
+        This command sets the Drift Error setting. This setting controls the
+        crossover position error (in millimeters) between the target and position at
+        which the controller considers an axis to be too far out of position when
+        resting. When this limit is reached, the controller will re-attempt to move
+        the axis back within the Finish Error (PC) limit. The current value for this
+        setting can be viewed using the INFO command or by placing a ? after the axis
+        name. Entries of zero value, e.g., ERROR X=0 are ignored.
 
         Parameters
         ----------
@@ -687,8 +737,7 @@ class TigerController:
         self.read_response()
 
     def start_scan(self, axis: str, is_single_axis_scan: bool = True):
-        """
-        Start scan
+        """Start scan
 
         Parameters
         ----------
@@ -768,47 +817,59 @@ class TigerController:
         0> FW 1 1 Normal – switch to FW 1
         1> FW 0 ERR FW 0 not ready
         0> Although FW 0 not ready – can still change FW 0 parameters.
+
+        Parameters
+        ----------
+        filter_wheel_number : int
+            The filter wheel number to select.
         """
         self.send_filter_wheel_command(f"FW {filter_wheel_number}")
         self.read_response()
 
     def move_filter_wheel(self, filter_wheel_position=0):
-        """
+        """Move Filter Wheel
+
         Move to filter position n , where n is a valid filter position.
+
+        Parameters
+        ----------
+        filter_wheel_position : int
+            The position to move the filter wheel to.
         """
         assert filter_wheel_position in range(8)
         self.send_filter_wheel_command(f"MP {filter_wheel_position}")
         self.read_response()
 
     def move_filter_wheel_to_home(self):
-        """
+        """Move the Filter Wheel to Home Position
+
         Causes current wheel to seek its home position.
         """
         self.send_filter_wheel_command("HO")
         self.read_response()
 
     def change_filter_wheel_speed(self, speed=0):
-        """
+        """Change the Filter Wheel Speed
+
         Selects a consistent set of preset acceleration and speed parameters.
         Supported in version 2.4 and later.
 
         0	Default - directly set and saved AU, AD, and VR parameters are used.
         1	Slowest and smoothest switching speed.
         2 to 8	Intermediate switching speeds.
-        9	Fastest and but least reliable switching speed.
+        9	Fastest but least reliable switching speed.
         """
         self.send_filter_wheel_command(f"SV {speed}")
         self.read_response()
 
     def halt_filter_wheel(self):
-        """
-        Halt filter wheel
-        """
+        """Halt filter wheel"""
         self.send_filter_wheel_command("HA")
         self.read_response()
 
     def move_dichroic(self, dichroic_id, dichroic_position=0):
-        """
+        """Move Dichroic Slider.
+
         Move to dichroic position n , where n is a valid filter position.
         The Motorized C60 Cube Slider from ASI has 4 positions.
 

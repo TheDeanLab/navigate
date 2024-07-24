@@ -46,6 +46,7 @@ from navigate.model.features.common_features import (
     Snap,  # noqa
     WaitToContinue,  # noqa
     WaitForExternalTrigger,  # noqa
+    SendExternalTrigger, # noqa
     LoopByCount,  # noqa
     PrepareNextChannel,  # noqa
     MoveToNextPositionInMultiPositionTable,  # noqa

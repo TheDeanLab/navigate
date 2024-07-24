@@ -178,6 +178,20 @@ class NIDAQ(DAQBase):
                 task.register_done_event(None)
                 task.register_done_event(self.restart_analog_task_callback_func(task))
 
+    def send_external_trigger(
+            self, trigger_channel, wait_internal=0.05
+    ):
+
+        out_trigger_task = nidaqmx.Task("SendDigitalEdge")
+        out_trigger_task.do_channels.add_do_chan(trigger_channel)
+
+        out_trigger_task.write([True], auto_start=True)
+        time.sleep(wait_internal)
+        out_trigger_task.write([False], auto_start=True)
+
+        out_trigger_task.stop()
+        out_trigger_task.close()
+
     def wait_for_external_trigger(
         self, trigger_channel, wait_internal=0.001, timeout=-1
     ):

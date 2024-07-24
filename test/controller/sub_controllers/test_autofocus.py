@@ -198,5 +198,5 @@ class TestAutofocusPopupController:
         x_data = np.linspace(start=69750.0, stop=70250.0, num=101)
         y_data = np.random.rand(101)
         data = [x_data, y_data]
-        self.autofocus_controller.display_plot(data)
+        self.autofocus_controller.display_plot(data, False, True)
         pass

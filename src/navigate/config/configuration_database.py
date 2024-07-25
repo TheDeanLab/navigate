@@ -57,7 +57,8 @@ camera_hardware_widgets = {
 
 filter_wheel_device_types = {
     "Sutter Instruments": "SutterFilterWheel",
-    "Applied Scientific Instrumentation": "ASI",
+    "ASI Filter Wheel": "ASI",
+    "ASI Dichroic Slider": "ASICubeSlider",
     "Ludl Electronic Products": "LUDLFilterWheel",
     "Analog/Digital Device": "NI",
     "Virtual Device": "synthetic",
@@ -85,6 +86,7 @@ filter_wheel_hardware_widgets = {
     "hardware/wheel_number": ["Number of Wheels", "Spinbox", "int", None, "Example: 1"],
     "hardware/port": ["Serial Port", "Input", "string", None, "Example: COM1"],
     "hardware/baudrate": ["Baudrate", "Input", "int", None, "Example: 9600"],
+    "hardware/name": ["GUI Label", "Input", "string", None, "Example: Filter Wheel 1"],
     "filter_wheel_delay": [
         "Filter Wheel Delay (s)",
         "Input",

@@ -108,16 +108,6 @@ class ASIFilterWheel(FilterWheelBase):
         #: int: Filter wheel position.
         self.filter_wheel_position = 0
 
-    def __enter__(self):
-        """Enter the ASI Filter Wheel context manager."""
-        return self
-
-    def __exit__(self):
-        """Exit the ASI Filter Wheel context manager."""
-        if self.filter_wheel.is_open():
-            logger.debug("ASI Filter Wheel - Closing Device.")
-            self.filter_wheel.disconnect_from_serial()
-
     def filter_change_delay(self, filter_name):
         """Estimate duration of time necessary to move the filter wheel
 
@@ -169,3 +159,94 @@ class ASIFilterWheel(FilterWheelBase):
             self.filter_wheel.move_filter_wheel_to_home()
             logger.debug("ASI Filter Wheel - Closing Device.")
             self.filter_wheel.disconnect_from_serial()
+
+
+class ASICubeSlider(FilterWheelBase):
+    """ASICubeSlider - Class for controlling the C60 Cube Slider from ASI.
+
+    Note
+    ----
+        Additional information on the ASI Filter Wheel can be found at:
+        www.asiimaging.com/docs/filter_and_turret_changer?s%5B%5D=filter&s%5B%5D=slider
+
+        Maximum number of positions is 4.
+
+        Typical switch time between adjacent positions is < 250 ms.
+    """
+
+    def __init__(self, device_connection, device_config):
+        """Initialize the ASICubeSlider class.
+
+        Parameters
+        ----------
+        device_connection : dict
+            Dictionary of device connections.
+        device_config : dict
+            Dictionary of device configuration parameters.
+        """
+
+        super().__init__(device_connection, device_config)
+
+        #: obj: ASI Tiger Controller object.
+        self.dichroic = device_connection
+
+        #: float: Delay for filter wheel to change positions.
+        self.wait_until_done_delay = device_config["filter_wheel_delay"]
+
+        #: str: The ID of the dichroic in the Tiger Controller. e.g., "T"
+        self.dichroic_id = self.filter_wheel_number
+
+        self.dichroic.move_dichroic(dichroic_id=self.dichroic_id, dichroic_position=0)
+
+        #: int: Filter wheel position.
+        self.dichroic_position = 0
+
+    def filter_change_delay(self, filter_name):
+        """Estimate duration of time necessary to move the dichroic
+
+        Assumes that it is <250 ms per adjacent position.
+
+        Parameters
+        ----------
+        filter_name : str
+            Name of filter to move to.
+
+        """
+        old_position = self.dichroic_position
+        new_position = self.filter_dictionary[filter_name]
+        delta_position = int(abs(old_position - new_position))
+        self.wait_until_done_delay = delta_position * 0.25
+
+    def set_filter(self, filter_name, wait_until_done=True):
+        """Change the dichroic position.
+
+        Parameters
+        ----------
+        filter_name : str
+            Name of filter to move to.
+        wait_until_done : bool
+            Waits duration of time necessary for filter wheel to change positions.
+        """
+        if self.check_if_filter_in_filter_dictionary(filter_name) is True:
+
+            # Calculate the Delay Needed to Change the Positions
+            self.filter_change_delay(filter_name)
+            dichroic_position = self.filter_dictionary[filter_name]
+
+            assert dichroic_position in range(4)
+            self.dichroic.move_dichroic(
+                dichroic_id=self.dichroic_id, dichroic_position=dichroic_position
+            )
+
+            #  Wheel Position Change Delay
+            if wait_until_done:
+                time.sleep(self.wait_until_done_delay)
+
+    def close(self):
+        """Close the ASI Filter Wheel serial port.
+
+        Sets the filter wheel to the home position and then closes the port.
+        """
+        if self.dichroic.is_open():
+            logger.debug("ASI C60 Motorized Slider - Closing Device.")
+            self.dichroic.disconnect_from_serial()

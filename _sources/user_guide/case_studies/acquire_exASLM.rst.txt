@@ -12,9 +12,11 @@ To achieve this, **navigate** receives a `trigger signal <http://www.asiimaging.
 from the stage controller to start image acquisition once
 the stage has reached the desired position and velocity. Thereafter, **navigate** acquires images
 at a constant rate until the stage has reached the end position. This mode of acquisition is termed
-"Constant Velocity Acquisition", and is implemented as a feature in **navigate**.
+"Constant Velocity Acquisition", and is implemented as a plugin in **navigate**. To
+download the plugin, please visit `navigate-constant-velocity-acquisition
+<https://github.com/TheDeanLab/navigate-constant-velocity-acquisition>`_.
 
-Furthermore, since the stage moves at a 45 degree angle relative to the microscope detection axis,
+Since the stage moves at a 45 degree angle relative to the microscope detection axis,
 computational shearing of the data is necessary. For large data sets, this can become computationally challenging and
 unnecessarily results in greater data overhead owing to empty space introduced in the data.
 To avoid this, we also provide a guide on how to perform two axis stage

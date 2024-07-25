@@ -117,12 +117,20 @@ class GUIController:
         logger.info(f"{self.__class__.__name__} : {info}")
 
     def register_event_listener(self, event_name, event_handler):
-        """Register event listner in the parent_controller
+        """Register event listener in the parent_controller
+
+        Parameters
+        ----------
+        event_name : str
+            event name
+        event_handler : function
+            event handler
         """
-        if not hasattr(self.parent_controller, "event_listners"):
-            self.parent_controller.event_listerners = {}
+        if not hasattr(self.parent_controller, "event_listeners"):
+            self.parent_controller.event_listeners = {}
         self.parent_controller.event_listeners[event_name] = event_handler
 
     @property
     def custom_events(self):
+        """Custom events for the controller"""
         return {}

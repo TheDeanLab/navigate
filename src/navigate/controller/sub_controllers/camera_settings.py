@@ -582,7 +582,7 @@ class CameraSettingController(GUIController):
 
     def update_camera_parameters_silent(self, value):
         """Update GUI camera parameters
-        
+
         Parameters
         ----------
         value : tuple
@@ -598,6 +598,5 @@ class CameraSettingController(GUIController):
 
     @property
     def custom_events(self):
-        return {
-            "display_camera_parameters": self.update_camera_parameters_silent
-        }
+        """dict: Custom events for this controller"""
+        return {"display_camera_parameters": self.update_camera_parameters_silent}

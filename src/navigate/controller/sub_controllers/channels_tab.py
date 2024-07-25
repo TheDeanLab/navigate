@@ -103,9 +103,8 @@ class ChannelsTabController(GUIController):
         self.stack_acq_vals["step_size"].trace_add("write", self.update_z_steps)
         self.stack_acq_vals["start_position"].trace_add("write", self.update_z_steps)
         self.stack_acq_vals["end_position"].trace_add("write", self.update_z_steps)
-        self.stack_acq_vals["start_focus"].trace_add(
-            "write", self.update_z_steps
-        )  # TODO: could be remove later
+        # TODO: could be remove later
+        self.stack_acq_vals["start_focus"].trace_add("write", self.update_z_steps)
         self.stack_acq_buttons["set_start"].configure(
             command=self.update_start_position
         )
@@ -850,6 +849,5 @@ class ChannelsTabController(GUIController):
 
     @property
     def custom_events(self):
-        return {
-            "exposure_time": self.set_exposure_time
-        }
+        """Custom events for the channels tab."""
+        return {"exposure_time": self.set_exposure_time}

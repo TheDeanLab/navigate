@@ -443,6 +443,7 @@ class AdaptiveOpticsPopupController(GUIController):
 
     @property
     def custom_events(self):
+        """dict: Custom events for this controller"""
         return {
             "ao_save_report": self.save_report_to_file,
             "mirror_update": self.plot_mirror,

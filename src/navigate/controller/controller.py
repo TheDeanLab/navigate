@@ -174,28 +174,24 @@ class Controller:
         logger.info(f"Spec - Waveform Constants Path: {waveform_constants_path}")
         logger.info(f"Spec - Rest API Path: {rest_api_path}")
 
-        # Wire up pipes
         #: mp.Pipe: Pipe for sending images from model to view.
         self.show_img_pipe = self.model.create_pipe("show_img_pipe")
 
-        # save default experiment file
         #: string: Path to the default experiment yaml file.
         self.default_experiment_file = experiment_path
 
-        # waveform setting file
         #: string: Path to the waveform constants yaml file.
         self.waveform_constants_path = waveform_constants_path
 
-        # Configuration Reader
         #: ConfigurationController: Configuration Controller object.
         self.configuration_controller = ConfigurationController(self.configuration)
 
-        # Initialize the View
         #: View: View object in MVC architecture.
         self.view = view(root)
 
-        # Sub Gui Controllers
+        #: dict: Event listeners for the controller.
         self.event_listeners = {}
+
         #: AcquireBarController: Acquire Bar Sub-Controller.
         self.acquire_bar_controller = AcquireBarController(self.view.acqbar, self)
 
@@ -235,7 +231,7 @@ class Controller:
         #: KeystrokeController: Keystroke Sub-Controller.
         self.keystroke_controller = KeystrokeController(self.view, self)
 
-        # Exit
+        # Exit the program when the window is closed
         self.view.root.protocol(
             "WM_DELETE_WINDOW", self.acquire_bar_controller.exit_program
         )
@@ -249,7 +245,6 @@ class Controller:
         # self.microscope = self.configuration['configuration']
         # ['microscopes'].keys()[0]  # Default to the first microscope
 
-        # Initialize the menus
         #: MenuController: Menu Sub-Controller.
         self.menu_controller = MenuController(view=self.view, parent_controller=self)
         self.menu_controller.initialize_menus()
@@ -257,14 +252,12 @@ class Controller:
         #: dict: acquisition modes from plugins
         self.plugin_acquisition_modes = {}
 
-        # add plugin menus
         #: PluginsController: Plugin Sub-Controller
         self.plugin_controller = PluginsController(
             view=self.view, parent_controller=self
         )
         self.plugin_controller.load_plugins()
 
-        # Create default data buffer
         #: int: Number of x_pixels from microscope configuration file.
         self.img_width = 0
 
@@ -474,8 +467,10 @@ class Controller:
             "multiposition_count"
         ] = len(positions)
 
-        if self.configuration["experiment"]["MicroscopeState"]["is_multiposition"] \
-            and len(positions) == 0:
+        if (
+            self.configuration["experiment"]["MicroscopeState"]["is_multiposition"]
+            and len(positions) == 0
+        ):
             # Update the view and override the settings.
             self.configuration["experiment"]["MicroscopeState"][
                 "is_multiposition"
@@ -1262,6 +1257,15 @@ class Controller:
                     print(f"*** unhandled event: {event}, {value}")
 
     def add_acquisition_mode(self, name, acquisition_obj):
+        """Add and Acquisition Mode.
+
+        Parameters
+        ----------
+        name : string
+            Name of the acquisition mode.
+        acquisition_obj : object
+            Object of the acquisition mode.
+        """
         if name in self.plugin_acquisition_modes:
             print(f"*** plugin acquisition mode {name} exists, can't add another one!")
             return
@@ -1269,8 +1273,24 @@ class Controller:
         self.acquire_bar_controller.add_mode(name)
 
     def register_event_listener(self, event_name, event_handler):
+        """Register an event listener.
+
+        Parameters
+        ----------
+        event_name : string
+            Name of the event.
+        event_handler : function
+            Function to handle the event.
+        """
         self.event_listeners[event_name] = event_handler
 
     def register_event_listeners(self, events):
+        """Register multiple event listeners.
+
+        Parameters
+        ----------
+        events : dict
+            Dictionary of event names and handlers.
+        """
         for event_name, event_handler in events.items():
             self.register_event_listener(event_name, event_handler)

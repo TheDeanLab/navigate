@@ -337,6 +337,5 @@ class WaveformTabController(GUIController):
 
     @property
     def custom_events(self):
-        return {
-            "waveform": self.update_waveforms
-        }
+        """Custom events for the waveform tab"""
+        return {"waveform": self.update_waveforms}

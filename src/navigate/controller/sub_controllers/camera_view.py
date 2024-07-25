@@ -1241,6 +1241,5 @@ class CameraViewController(GUIController):
 
     @property
     def custom_events(self):
-        return {
-            "ilastik_mask": self.display_mask
-        }
+        """dict: Custom events for this controller"""
+        return {"ilastik_mask": self.display_mask}

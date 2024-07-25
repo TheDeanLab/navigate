@@ -274,6 +274,5 @@ class AutofocusPopupController(GUIController):
 
     @property
     def custom_events(self):
-        return {
-            "autofocus": self.display_plot
-        }
+        """dict: Custom events for this controller"""
+        return {"autofocus": self.display_plot}

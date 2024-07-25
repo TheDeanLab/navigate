@@ -288,6 +288,5 @@ class MultiPositionController(GUIController):
 
     @property
     def custom_events(self):
-        return {
-            "remove_positions": self.remove_positions
-        }
+        """Return custom events for the Multi-Position Controller."""
+        return {"remove_positions": self.remove_positions}

@@ -35,6 +35,7 @@ navigate.controller.configuration\_controller.ConfigurationController
       ~ConfigurationController.camera_pixels
       ~ConfigurationController.channels_info
       ~ConfigurationController.daq_sample_rate
+      ~ConfigurationController.filter_wheel_names
       ~ConfigurationController.filter_wheel_setting_dict
       ~ConfigurationController.galvo_parameter_dict
       ~ConfigurationController.gui_setting

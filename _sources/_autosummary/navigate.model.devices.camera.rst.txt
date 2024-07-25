@@ -28,8 +28,8 @@ navigate.model.devices.camera
    :template: custom_module.rst
    :recursive:
 
-   navigate.model.devices.camera.camera_base
-   navigate.model.devices.camera.camera_hamamatsu
-   navigate.model.devices.camera.camera_photometrics
-   navigate.model.devices.camera.camera_synthetic
+   navigate.model.devices.camera.base
+   navigate.model.devices.camera.hamamatsu
+   navigate.model.devices.camera.photometrics
+   navigate.model.devices.camera.synthetic
 

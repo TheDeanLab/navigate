@@ -177,7 +177,7 @@
 <td><p>Initialize the Tiger Controller class</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.change_filter_wheel_speed" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.change_filter_wheel_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">change_filter_wheel_speed</span></code></a>([speed])</p></td>
-<td><p>Selects a consistent set of preset acceleration and speed parameters.</p></td>
+<td><p>Change the Filter Wheel Speed</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.connect_to_serial" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.connect_to_serial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_to_serial</span></code></a>([rx_size, tx_size, ...])</p></td>
 <td><p>Connect to the serial port.</p></td>
@@ -224,73 +224,76 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_axis" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_axis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_axis</span></code></a>(axis, distance)</p></td>
 <td><p>Move the stage with an absolute move on one axis</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_filter_wheel</span></code></a>([filter_wheel_position])</p></td>
-<td><p>Move to filter position n , where n is a valid filter position.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_dichroic" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_dichroic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_dichroic</span></code></a>(dichroic_id[, dichroic_position])</p></td>
+<td><p>Move Dichroic Slider.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel_to_home" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel_to_home"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_filter_wheel_to_home</span></code></a>()</p></td>
-<td><p>Causes current wheel to seek its home position.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_filter_wheel</span></code></a>([filter_wheel_position])</p></td>
+<td><p>Move Filter Wheel</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.moverel" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.moverel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">moverel</span></code></a>([x, y, z])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel_to_home" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel_to_home"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_filter_wheel_to_home</span></code></a>()</p></td>
+<td><p>Move the Filter Wheel to Home Position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.moverel" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.moverel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">moverel</span></code></a>([x, y, z])</p></td>
 <td><p>Move the stage with a relative move on multiple axes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.moverel_axis" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.moverel_axis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">moverel_axis</span></code></a>(axis, distance)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.moverel_axis" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.moverel_axis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">moverel_axis</span></code></a>(axis, distance)</p></td>
 <td><p>Move the stage with a relative move on one axis</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.read_response" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.read_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_response</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.read_response" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.read_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_response</span></code></a>()</p></td>
 <td><p>Read a line from the serial response.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.report_to_console" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.report_to_console"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_to_console</span></code></a>(message)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.report_to_console" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.report_to_console"><code class="xref py py-obj docutils literal notranslate"><span class="pre">report_to_console</span></code></a>(message)</p></td>
 <td><p>Print message to the output device, usually the console.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scan_ports" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scan_ports"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scan_ports</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scan_ports" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scan_ports"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scan_ports</span></code></a>()</p></td>
 <td><p>Scans for available COM ports</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scanr" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scanr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanr</span></code></a>(start_position_mm, end_position_mm[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scanr" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scanr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanr</span></code></a>(start_position_mm, end_position_mm[, ...])</p></td>
 <td><p>Set scanr operation mode.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scanv" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scanv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanv</span></code></a>(start_position_mm, end_position_mm, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scanv" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.scanv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scanv</span></code></a>(start_position_mm, end_position_mm, ...)</p></td>
 <td><p>Set scanv operation mode.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.select_filter_wheel" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.select_filter_wheel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_filter_wheel</span></code></a>([filter_wheel_number])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.select_filter_wheel" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.select_filter_wheel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_filter_wheel</span></code></a>([filter_wheel_number])</p></td>
 <td><p>Select the filter wheel, e.g., 0, 1...</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.send_command" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.send_command"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_command</span></code></a>(cmd)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.send_command" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.send_command"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_command</span></code></a>(cmd)</p></td>
 <td><p>Send a serial command to the device.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.send_filter_wheel_command" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.send_filter_wheel_command"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_filter_wheel_command</span></code></a>(cmd)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.send_filter_wheel_command" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.send_filter_wheel_command"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_filter_wheel_command</span></code></a>(cmd)</p></td>
 <td><p>Send a serial command to the filter wheel.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_backlash" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_backlash"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_backlash</span></code></a>(axis, val)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_backlash" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_backlash"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_backlash</span></code></a>(axis, val)</p></td>
 <td><p>Enable/disable stage backlash correction.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_error" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error</span></code></a>(axis, ac)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_error" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_error</span></code></a>(axis, ac)</p></td>
 <td><p>Set the stage drift error</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_feedback_alignment" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_feedback_alignment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_feedback_alignment</span></code></a>(axis, aa)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_feedback_alignment" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_feedback_alignment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_feedback_alignment</span></code></a>(axis, aa)</p></td>
 <td><p>Set the stage feedback alignment.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_finishing_accuracy" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_finishing_accuracy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_finishing_accuracy</span></code></a>(axis, ac)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_finishing_accuracy" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_finishing_accuracy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_finishing_accuracy</span></code></a>(axis, ac)</p></td>
 <td><p>Set the stage finishing accuracy.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_max_speed" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_max_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_max_speed</span></code></a>(axis, speed)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_max_speed" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_max_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_max_speed</span></code></a>(axis, speed)</p></td>
 <td><p>Set the speed on a specific axis.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_speed" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_speed</span></code></a>(speed_dict)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_speed" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_speed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_speed</span></code></a>(speed_dict)</p></td>
 <td><p>Set speed</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_speed_as_percent_max" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_speed_as_percent_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_speed_as_percent_max</span></code></a>(pct)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_speed_as_percent_max" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_speed_as_percent_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_speed_as_percent_max</span></code></a>(pct)</p></td>
 <td><p>Set speed as a percentage of the maximum speed</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.start_scan" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.start_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_scan</span></code></a>(axis[, is_single_axis_scan])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.start_scan" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.start_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_scan</span></code></a>(axis[, is_single_axis_scan])</p></td>
 <td><p>Start scan</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.stop" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.stop" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
 <td><p>Stop all stage movement immediately</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.stop_scan" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.stop_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_scan</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.stop_scan" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.stop_scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_scan</span></code></a>()</p></td>
 <td><p>Stop scan.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.wait_for_device" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.wait_for_device"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_for_device</span></code></a>([timeout])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.wait_for_device" title="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.wait_for_device"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait_for_device</span></code></a>([timeout])</p></td>
 <td><p>Waits for the all motors to stop moving.</p></td>
 </tr>
 </tbody>
@@ -303,12 +306,13 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.change_filter_wheel_speed">
 <span class="sig-name descname"><span class="pre">change_filter_wheel_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.change_filter_wheel_speed" title="Permalink to this definition"></a></dt>
-<dd><p>Selects a consistent set of preset acceleration and speed parameters.
+<dd><p>Change the Filter Wheel Speed</p>
+<p>Selects a consistent set of preset acceleration and speed parameters.
 Supported in version 2.4 and later.</p>
 <p>0       Default - directly set and saved AU, AD, and VR parameters are used.
 1       Slowest and smoothest switching speed.
 2 to 8  Intermediate switching speeds.
-9       Fastest and but least reliable switching speed.</p>
+9       Fastest but least reliable switching speed.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -528,15 +532,38 @@ B - there is a motor running from a serial command</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_dichroic">
+<span class="sig-name descname"><span class="pre">move_dichroic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dichroic_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dichroic_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_dichroic" title="Permalink to this definition"></a></dt>
+<dd><p>Move Dichroic Slider.</p>
+<p>Move to dichroic position n , where n is a valid filter position.
+The Motorized C60 Cube Slider from ASI has 4 positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dichroic_id</strong> (<em>str</em>) – The ID of the dichroic in the Tiger Controller. e.g., “T”</p></li>
+<li><p><strong>dichroic_position</strong> (<em>int</em>) – The position to move the dichroic to.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel">
 <span class="sig-name descname"><span class="pre">move_filter_wheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_wheel_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel" title="Permalink to this definition"></a></dt>
-<dd><p>Move to filter position n , where n is a valid filter position.</p>
+<dd><p>Move Filter Wheel</p>
+<p>Move to filter position n , where n is a valid filter position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filter_wheel_position</strong> (<em>int</em>) – The position to move the filter wheel to.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel_to_home">
 <span class="sig-name descname"><span class="pre">move_filter_wheel_to_home</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.move_filter_wheel_to_home" title="Permalink to this definition"></a></dt>
-<dd><p>Causes current wheel to seek its home position.</p>
+<dd><p>Move the Filter Wheel to Home Position</p>
+<p>Causes current wheel to seek its home position.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -652,6 +679,11 @@ the wheel is not ready for any reason, the response ERR is returned. Example:</p
 <p>0&gt; FW 1 1 Normal – switch to FW 1
 1&gt; FW 0 ERR FW 0 not ready
 0&gt; Although FW 0 not ready – can still change FW 0 parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filter_wheel_number</strong> (<em>int</em>) – The filter wheel number to select.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -680,6 +712,18 @@ the wheel is not ready for any reason, the response ERR is returned. Example:</p
 <dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_backlash">
 <span class="sig-name descname"><span class="pre">set_backlash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_backlash" title="Permalink to this definition"></a></dt>
 <dd><p>Enable/disable stage backlash correction.</p>
+<p>This command sets (or displays) the amount of distance in millimeters of the
+anti-backlash move which absorbs the lash in the axis’ gearing at the end of
+commanded moves1). This behind-the-scenes move ensures that the controller
+approaches the final target from the same direction, which improves
+repeatability when using rotary encoders. A value of zero (0) disables the
+anti-backlash algorithm for that axis. The default value depends on motor
+build but is 0.04 for most common 4 TPI leadscrew pitch with rotary encoder,
+0.01 for most common 16 TPI leadscrew pitch, and 0.02 for the x-axis of
+scan-optimized stages. For linear encoders a backlash move is not necessary
+and there is no reason to change the setting from the default value of zero (
+0). Moves with manual input devices (joystick or knobs) do not have any
+anti-backlash move.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -694,6 +738,13 @@ the wheel is not ready for any reason, the response ERR is returned. Example:</p
 <dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_error">
 <span class="sig-name descname"><span class="pre">set_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ac</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_error" title="Permalink to this definition"></a></dt>
 <dd><p>Set the stage drift error</p>
+<p>This command sets the Drift Error setting. This setting controls the
+crossover position error (in millimeters) between the target and position at
+which the controller considers an axis to be too far out of position when
+resting. When this limit is reached, the controller will re-attempt to move
+the axis back within the Finish Error (PC) limit. The current value for this
+setting can be viewed using the INFO command or by placing a ? after the axis
+name. Entries of zero value, e.g., ERROR X=0 are ignored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -708,9 +759,21 @@ the wheel is not ready for any reason, the response ERR is returned. Example:</p
 <dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_feedback_alignment">
 <span class="sig-name descname"><span class="pre">set_feedback_alignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aa</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_feedback_alignment" title="Permalink to this definition"></a></dt>
 <dd><p>Set the stage feedback alignment.</p>
+<p>Adjusts the drive strength by writing to a non-volatile on-board
+potentiometer. Normally done once at the factory (to a very conservative
+value) and never adjusted again. If the AA is off, the stage may be sluggish
+(too low) or it may oscillate, buzz, or sound like it’s grinding (too high).
+After changing the AA value the AZERO command should be run until zeroed.</p>
+<p>To optimize stage performance a high AA is desirable, but too high and there
+are big problems. AA can be increased until oscillations occur and then
+decreased by 1 or 2 as described at the page on tuning stages to minimize
+move time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>str</em>) – Stage axis</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>str</em>) – Stage axis</p></li>
+<li><p><strong>aa</strong> (<em>float</em>) – Hardware potentiometer value</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -719,6 +782,14 @@ the wheel is not ready for any reason, the response ERR is returned. Example:</p
 <dt class="sig sig-object py" id="navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_finishing_accuracy">
 <span class="sig-name descname"><span class="pre">set_finishing_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ac</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.devices.APIs.asi.asi_MFC_controller.MFCTwoThousand.set_finishing_accuracy" title="Permalink to this definition"></a></dt>
 <dd><p>Set the stage finishing accuracy.</p>
+<p>This command sets/displays the Finish Error setting, which controls when the
+motor algorithm routines will turn off. The setting controls the crossover
+position error (in millimeters) between the target and position at which the
+controller will stop attempting to move the stage closer to achieve the ideal
+position=target. This is value also determines the maximum error allowable
+before a move is considered complete. This value is by default set to the
+value of the smallest move step size according to the encoder resolution,
+but many applications do not require such tight landing tolerance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

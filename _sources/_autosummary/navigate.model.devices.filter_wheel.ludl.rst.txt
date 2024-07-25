@@ -1,0 +1,38 @@
+navigate.model.devices.filter\_wheel.ludl
+=========================================
+
+.. automodule:: navigate.model.devices.filter_wheel.ludl
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      build_filter_wheel_connection
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      LUDLFilterWheel
+   
+   
+
+   
+   
+   
+
+
+

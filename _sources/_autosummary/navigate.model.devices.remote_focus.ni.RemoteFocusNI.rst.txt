@@ -1,0 +1,44 @@
+navigate.model.devices.remote\_focus.ni.RemoteFocusNI
+=====================================================
+
+.. currentmodule:: navigate.model.devices.remote_focus.ni
+
+.. autoclass:: RemoteFocusNI
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RemoteFocusNI.__init__
+      ~RemoteFocusNI.adjust
+      ~RemoteFocusNI.move
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RemoteFocusNI.trigger_source
+      ~RemoteFocusNI.daq
+      ~RemoteFocusNI.board_name
+      ~RemoteFocusNI.configuration
+      ~RemoteFocusNI.microscope_name
+      ~RemoteFocusNI.device_config
+      ~RemoteFocusNI.sample_rate
+      ~RemoteFocusNI.sweep_time
+      ~RemoteFocusNI.camera_delay
+      ~RemoteFocusNI.remote_focus_max_voltage
+      ~RemoteFocusNI.remote_focus_min_voltage
+      ~RemoteFocusNI.waveform_dict
+   
+   

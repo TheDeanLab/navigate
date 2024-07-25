@@ -1,0 +1,59 @@
+navigate.model.devices.camera.hamamatsu.HamamatsuOrca
+=====================================================
+
+.. currentmodule:: navigate.model.devices.camera.hamamatsu
+
+.. autoclass:: HamamatsuOrca
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~HamamatsuOrca.__init__
+      ~HamamatsuOrca.calculate_light_sheet_exposure_time
+      ~HamamatsuOrca.calculate_readout_time
+      ~HamamatsuOrca.close_camera
+      ~HamamatsuOrca.close_image_series
+      ~HamamatsuOrca.get_line_interval
+      ~HamamatsuOrca.get_new_frame
+      ~HamamatsuOrca.get_offset_variance_maps
+      ~HamamatsuOrca.initialize_image_series
+      ~HamamatsuOrca.report_settings
+      ~HamamatsuOrca.set_ROI
+      ~HamamatsuOrca.set_binning
+      ~HamamatsuOrca.set_exposure_time
+      ~HamamatsuOrca.set_line_interval
+      ~HamamatsuOrca.set_readout_direction
+      ~HamamatsuOrca.set_sensor_mode
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~HamamatsuOrca.offset
+      ~HamamatsuOrca.serial_number
+      ~HamamatsuOrca.variance
+      ~HamamatsuOrca.configuration
+      ~HamamatsuOrca.camera_controller
+      ~HamamatsuOrca.camera_parameters
+      ~HamamatsuOrca.is_acquiring
+      ~HamamatsuOrca.min_image_width
+      ~HamamatsuOrca.min_image_height
+      ~HamamatsuOrca.step_image_width
+      ~HamamatsuOrca.step_image_height
+      ~HamamatsuOrca.x_pixels
+      ~HamamatsuOrca.y_pixels
+      ~HamamatsuOrca.minimum_exposure_time
+   
+   

@@ -28,7 +28,7 @@ navigate.model.devices.mirrors
    :template: custom_module.rst
    :recursive:
 
-   navigate.model.devices.mirrors.mirror_base
-   navigate.model.devices.mirrors.mirror_imop
-   navigate.model.devices.mirrors.mirror_synthetic
+   navigate.model.devices.mirrors.base
+   navigate.model.devices.mirrors.imop
+   navigate.model.devices.mirrors.synthetic
 

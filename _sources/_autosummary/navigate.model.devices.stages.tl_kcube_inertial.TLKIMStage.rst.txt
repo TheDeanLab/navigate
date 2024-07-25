@@ -1,0 +1,45 @@
+navigate.model.devices.stages.tl\_kcube\_inertial.TLKIMStage
+============================================================
+
+.. currentmodule:: navigate.model.devices.stages.tl_kcube_inertial
+
+.. autoclass:: TLKIMStage
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~TLKIMStage.__init__
+      ~TLKIMStage.close
+      ~TLKIMStage.get_abs_position
+      ~TLKIMStage.get_position_dict
+      ~TLKIMStage.move_absolute
+      ~TLKIMStage.move_axis_absolute
+      ~TLKIMStage.report_position
+      ~TLKIMStage.stop
+      ~TLKIMStage.verify_abs_position
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TLKIMStage.axes_mapping
+      ~TLKIMStage.kim_axes
+      ~TLKIMStage.kim_controller
+      ~TLKIMStage.serial_number
+      ~TLKIMStage.axes
+      ~TLKIMStage.stage_feedback
+      ~TLKIMStage.stage_limits
+   
+   

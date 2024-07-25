@@ -1,0 +1,38 @@
+navigate.model.devices.stages.pi
+================================
+
+.. automodule:: navigate.model.devices.stages.pi
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      build_PIStage_connection
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      PIStage
+   
+   
+
+   
+   
+   
+
+
+

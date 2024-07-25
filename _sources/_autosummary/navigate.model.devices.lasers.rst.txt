@@ -28,7 +28,7 @@ navigate.model.devices.lasers
    :template: custom_module.rst
    :recursive:
 
-   navigate.model.devices.lasers.laser_base
-   navigate.model.devices.lasers.laser_ni
-   navigate.model.devices.lasers.laser_synthetic
+   navigate.model.devices.lasers.base
+   navigate.model.devices.lasers.ni
+   navigate.model.devices.lasers.synthetic
 

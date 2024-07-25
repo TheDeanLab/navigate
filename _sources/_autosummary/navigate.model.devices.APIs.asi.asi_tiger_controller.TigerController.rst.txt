@@ -33,6 +33,7 @@ navigate.model.devices.APIs.asi.asi\_tiger\_controller.TigerController
       ~TigerController.is_open
       ~TigerController.move
       ~TigerController.move_axis
+      ~TigerController.move_dichroic
       ~TigerController.move_filter_wheel
       ~TigerController.move_filter_wheel_to_home
       ~TigerController.moverel

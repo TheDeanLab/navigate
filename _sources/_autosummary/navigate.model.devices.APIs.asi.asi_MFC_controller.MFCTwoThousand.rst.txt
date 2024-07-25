@@ -33,6 +33,7 @@ navigate.model.devices.APIs.asi.asi\_MFC\_controller.MFCTwoThousand
       ~MFCTwoThousand.is_open
       ~MFCTwoThousand.move
       ~MFCTwoThousand.move_axis
+      ~MFCTwoThousand.move_dichroic
       ~MFCTwoThousand.move_filter_wheel
       ~MFCTwoThousand.move_filter_wheel_to_home
       ~MFCTwoThousand.moverel

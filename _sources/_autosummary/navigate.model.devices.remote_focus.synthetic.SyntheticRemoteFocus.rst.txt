@@ -1,0 +1,41 @@
+navigate.model.devices.remote\_focus.synthetic.SyntheticRemoteFocus
+===================================================================
+
+.. currentmodule:: navigate.model.devices.remote_focus.synthetic
+
+.. autoclass:: SyntheticRemoteFocus
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SyntheticRemoteFocus.__init__
+      ~SyntheticRemoteFocus.adjust
+      ~SyntheticRemoteFocus.move
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SyntheticRemoteFocus.configuration
+      ~SyntheticRemoteFocus.microscope_name
+      ~SyntheticRemoteFocus.device_config
+      ~SyntheticRemoteFocus.sample_rate
+      ~SyntheticRemoteFocus.sweep_time
+      ~SyntheticRemoteFocus.camera_delay
+      ~SyntheticRemoteFocus.remote_focus_max_voltage
+      ~SyntheticRemoteFocus.remote_focus_min_voltage
+      ~SyntheticRemoteFocus.waveform_dict
+   
+   

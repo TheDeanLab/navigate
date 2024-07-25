@@ -76,8 +76,10 @@
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.LoopByCount.html">navigate.model.features.common_features.LoopByCount</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.html">navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.PrepareNextChannel.html">navigate.model.features.common_features.PrepareNextChannel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.SetCameraParameters.html">navigate.model.features.common_features.SetCameraParameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.Snap.html">navigate.model.features.common_features.Snap</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.StackPause.html">navigate.model.features.common_features.StackPause</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.WaitForExternalTrigger.html">navigate.model.features.common_features.WaitForExternalTrigger</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.WaitToContinue.html">navigate.model.features.common_features.WaitToContinue</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.ZStackAcquisition.html">navigate.model.features.common_features.ZStackAcquisition</a></li>
 </ul>
@@ -155,11 +157,17 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.common_features.PrepareNextChannel.html#navigate.model.features.common_features.PrepareNextChannel" title="navigate.model.features.common_features.PrepareNextChannel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PrepareNextChannel</span></code></a>(model)</p></td>
 <td><p>PrepareNextChannel class for preparing microscopes for the next imaging channel.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.common_features.Snap.html#navigate.model.features.common_features.Snap" title="navigate.model.features.common_features.Snap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Snap</span></code></a>(model)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.common_features.SetCameraParameters.html#navigate.model.features.common_features.SetCameraParameters" title="navigate.model.features.common_features.SetCameraParameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SetCameraParameters</span></code></a>(model[, sensor_mode, ...])</p></td>
+<td><p>SetCameraParameters class for modifying the parameters of a camera.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.common_features.Snap.html#navigate.model.features.common_features.Snap" title="navigate.model.features.common_features.Snap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Snap</span></code></a>(model)</p></td>
 <td><p>Snap class for capturing data frames using a microscope.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.common_features.StackPause.html#navigate.model.features.common_features.StackPause" title="navigate.model.features.common_features.StackPause"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StackPause</span></code></a>(model[, pause_num])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.common_features.StackPause.html#navigate.model.features.common_features.StackPause" title="navigate.model.features.common_features.StackPause"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StackPause</span></code></a>(model[, pause_num])</p></td>
 <td><p>StackPause class for pausing stack acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="navigate.model.features.common_features.WaitForExternalTrigger.html#navigate.model.features.common_features.WaitForExternalTrigger" title="navigate.model.features.common_features.WaitForExternalTrigger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaitForExternalTrigger</span></code></a>(model[, ...])</p></td>
+<td><p>WaitForExternalTrigger class to time parts of the feature list using external input.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="navigate.model.features.common_features.WaitToContinue.html#navigate.model.features.common_features.WaitToContinue" title="navigate.model.features.common_features.WaitToContinue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaitToContinue</span></code></a>(model)</p></td>
 <td><p>WaitToContinue class for synchronizing signal and data acquisition.</p></td>

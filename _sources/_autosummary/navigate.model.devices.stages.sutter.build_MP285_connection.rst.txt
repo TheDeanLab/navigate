@@ -1,0 +1,6 @@
+navigate.model.devices.stages.sutter.build\_MP285\_connection
+=============================================================
+
+.. currentmodule:: navigate.model.devices.stages.sutter
+
+.. autofunction:: build_MP285_connection

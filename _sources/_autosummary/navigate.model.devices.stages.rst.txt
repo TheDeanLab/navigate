@@ -28,15 +28,15 @@ navigate.model.devices.stages
    :template: custom_module.rst
    :recursive:
 
-   navigate.model.devices.stages.stage_asi
-   navigate.model.devices.stages.stage_asi_MFCTwoThousand
-   navigate.model.devices.stages.stage_asi_MSTwoThousand
-   navigate.model.devices.stages.stage_base
-   navigate.model.devices.stages.stage_galvo
-   navigate.model.devices.stages.stage_mcl
-   navigate.model.devices.stages.stage_pi
-   navigate.model.devices.stages.stage_sutter
-   navigate.model.devices.stages.stage_synthetic
-   navigate.model.devices.stages.stage_tl_kcube_inertial
-   navigate.model.devices.stages.stage_tl_kcube_steppermotor
+   navigate.model.devices.stages.asi
+   navigate.model.devices.stages.asi_MFCTwoThousand
+   navigate.model.devices.stages.asi_MSTwoThousand
+   navigate.model.devices.stages.base
+   navigate.model.devices.stages.mcl
+   navigate.model.devices.stages.ni
+   navigate.model.devices.stages.pi
+   navigate.model.devices.stages.sutter
+   navigate.model.devices.stages.synthetic
+   navigate.model.devices.stages.tl_kcube_inertial
+   navigate.model.devices.stages.tl_kcube_steppermotor
 

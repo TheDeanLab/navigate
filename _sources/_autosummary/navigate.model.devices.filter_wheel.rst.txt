@@ -28,10 +28,10 @@ navigate.model.devices.filter\_wheel
    :template: custom_module.rst
    :recursive:
 
-   navigate.model.devices.filter_wheel.filter_wheel_asi
-   navigate.model.devices.filter_wheel.filter_wheel_base
-   navigate.model.devices.filter_wheel.filter_wheel_daq
-   navigate.model.devices.filter_wheel.filter_wheel_ludl
-   navigate.model.devices.filter_wheel.filter_wheel_sutter
-   navigate.model.devices.filter_wheel.filter_wheel_synthetic
+   navigate.model.devices.filter_wheel.asi
+   navigate.model.devices.filter_wheel.base
+   navigate.model.devices.filter_wheel.ludl
+   navigate.model.devices.filter_wheel.ni
+   navigate.model.devices.filter_wheel.sutter
+   navigate.model.devices.filter_wheel.synthetic
 

@@ -1,0 +1,55 @@
+navigate.model.devices.remote\_focus.equipment\_solutions.RemoteFocusEquipmentSolutions
+=======================================================================================
+
+.. currentmodule:: navigate.model.devices.remote_focus.equipment_solutions
+
+.. autoclass:: RemoteFocusEquipmentSolutions
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RemoteFocusEquipmentSolutions.__init__
+      ~RemoteFocusEquipmentSolutions.adjust
+      ~RemoteFocusEquipmentSolutions.close_connection
+      ~RemoteFocusEquipmentSolutions.move
+      ~RemoteFocusEquipmentSolutions.read_bytes
+      ~RemoteFocusEquipmentSolutions.send_command
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RemoteFocusEquipmentSolutions.comport
+      ~RemoteFocusEquipmentSolutions.baud_rate
+      ~RemoteFocusEquipmentSolutions.byte_size
+      ~RemoteFocusEquipmentSolutions.parity
+      ~RemoteFocusEquipmentSolutions.stop_bits
+      ~RemoteFocusEquipmentSolutions.timeout
+      ~RemoteFocusEquipmentSolutions.read_on_init
+      ~RemoteFocusEquipmentSolutions.debug
+      ~RemoteFocusEquipmentSolutions.trigger_source
+      ~RemoteFocusEquipmentSolutions.daq
+      ~RemoteFocusEquipmentSolutions.board_name
+      ~RemoteFocusEquipmentSolutions.configuration
+      ~RemoteFocusEquipmentSolutions.microscope_name
+      ~RemoteFocusEquipmentSolutions.device_config
+      ~RemoteFocusEquipmentSolutions.sample_rate
+      ~RemoteFocusEquipmentSolutions.sweep_time
+      ~RemoteFocusEquipmentSolutions.camera_delay
+      ~RemoteFocusEquipmentSolutions.remote_focus_max_voltage
+      ~RemoteFocusEquipmentSolutions.remote_focus_min_voltage
+      ~RemoteFocusEquipmentSolutions.waveform_dict
+   
+   

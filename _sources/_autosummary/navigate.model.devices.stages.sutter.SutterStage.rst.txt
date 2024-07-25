@@ -1,0 +1,49 @@
+navigate.model.devices.stages.sutter.SutterStage
+================================================
+
+.. currentmodule:: navigate.model.devices.stages.sutter
+
+.. autoclass:: SutterStage
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SutterStage.__init__
+      ~SutterStage.close
+      ~SutterStage.get_abs_position
+      ~SutterStage.get_position_dict
+      ~SutterStage.move_absolute
+      ~SutterStage.move_axis_absolute
+      ~SutterStage.report_position
+      ~SutterStage.stop
+      ~SutterStage.verify_abs_position
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SutterStage.stage
+      ~SutterStage.axes_mapping
+      ~SutterStage.device_axes
+      ~SutterStage.resolution
+      ~SutterStage.speed
+      ~SutterStage.stage_x_pos
+      ~SutterStage.stage_y_pos
+      ~SutterStage.stage_z_pos
+      ~SutterStage.axes
+      ~SutterStage.stage_feedback
+      ~SutterStage.stage_limits
+   
+   

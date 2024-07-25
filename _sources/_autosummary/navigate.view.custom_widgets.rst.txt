@@ -33,8 +33,6 @@ navigate.view.custom\_widgets
    navigate.view.custom_widgets.DockableNotebook
    navigate.view.custom_widgets.LabelInputWidgetFactory
    navigate.view.custom_widgets.hover
-   navigate.view.custom_widgets.hoverbar
-   navigate.view.custom_widgets.hovermixin
    navigate.view.custom_widgets.popup
    navigate.view.custom_widgets.scrollbars
    navigate.view.custom_widgets.validation

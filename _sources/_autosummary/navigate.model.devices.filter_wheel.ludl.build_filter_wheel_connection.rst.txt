@@ -1,0 +1,6 @@
+navigate.model.devices.filter\_wheel.ludl.build\_filter\_wheel\_connection
+==========================================================================
+
+.. currentmodule:: navigate.model.devices.filter_wheel.ludl
+
+.. autofunction:: build_filter_wheel_connection

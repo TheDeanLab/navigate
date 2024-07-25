@@ -1,0 +1,38 @@
+navigate.model.devices.stages.mcl
+=================================
+
+.. automodule:: navigate.model.devices.stages.mcl
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      build_MCLStage_connection
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      MCLStage
+   
+   
+
+   
+   
+   
+
+
+

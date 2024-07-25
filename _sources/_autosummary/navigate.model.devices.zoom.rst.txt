@@ -28,7 +28,7 @@ navigate.model.devices.zoom
    :template: custom_module.rst
    :recursive:
 
-   navigate.model.devices.zoom.zoom_base
-   navigate.model.devices.zoom.zoom_dynamixel
-   navigate.model.devices.zoom.zoom_synthetic
+   navigate.model.devices.zoom.base
+   navigate.model.devices.zoom.dynamixel
+   navigate.model.devices.zoom.synthetic
 

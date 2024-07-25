@@ -28,7 +28,7 @@ navigate.model.devices.galvo
    :template: custom_module.rst
    :recursive:
 
-   navigate.model.devices.galvo.galvo_base
-   navigate.model.devices.galvo.galvo_ni
-   navigate.model.devices.galvo.galvo_synthetic
+   navigate.model.devices.galvo.base
+   navigate.model.devices.galvo.ni
+   navigate.model.devices.galvo.synthetic
 

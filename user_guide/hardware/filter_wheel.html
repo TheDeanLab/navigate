@@ -22,7 +22,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Galvanometers" href="galvo.html" />
+    <link rel="next" title="Dichroic Turrets" href="dichroic.html" />
     <link rel="prev" title="Stages" href="stage.html" /> 
 </head>
 
@@ -76,6 +76,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#synthetic-filter-wheel">Synthetic Filter Wheel</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="dichroic.html">Dichroic Turrets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="galvo.html">Galvanometers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="laser.html">Lasers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shutter.html">Shutters</a></li>
@@ -149,6 +150,7 @@ file as follows:</p>
 <span class="w">    </span><span class="p p-Indicator">-</span>
 <span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Lower Filter Wheel</span>
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span>
 <span class="w">          </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM1</span>
@@ -162,6 +164,7 @@ file as follows:</p>
 <span class="w">    </span><span class="p p-Indicator">-</span>
 <span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upper Filter Wheel</span>
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SutterFilterWheel</span>
 <span class="w">          </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM1</span>
@@ -176,6 +179,12 @@ file as follows:</p>
 </div>
 </details><div class="line-block">
 <div class="line"><br /></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <cite>name</cite> parameter under <cite>hardware</cite> is optional. If not provided, the name of the
+device will be default to Filter 0, Filter 1, … Filter N in the GUI. However, if
+is is provided, then the GUI will automatically use the name provided as a label.</p>
 </div>
 <hr class="docutils" />
 <section id="sutter-instruments">
@@ -231,7 +240,7 @@ for the stage. A single communication instance is used for both the stage and fi
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
 <span class="w">          </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM1</span>
-<span class="w">          </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9600</span>
+<span class="w">          </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
 <span class="w">        </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.03</span>
 <span class="w">        </span><span class="nt">available_filters</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">Empty-Alignment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
@@ -338,7 +347,7 @@ filter wheel.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="stage.html" class="btn btn-neutral float-left" title="Stages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="galvo.html" class="btn btn-neutral float-right" title="Galvanometers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="dichroic.html" class="btn btn-neutral float-right" title="Dichroic Turrets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

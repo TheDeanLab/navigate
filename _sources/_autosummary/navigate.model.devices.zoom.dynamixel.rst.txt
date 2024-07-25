@@ -1,0 +1,38 @@
+navigate.model.devices.zoom.dynamixel
+=====================================
+
+.. automodule:: navigate.model.devices.zoom.dynamixel
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      build_dynamixel_zoom_connection
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      DynamixelZoom
+   
+   
+
+   
+   
+   
+
+
+

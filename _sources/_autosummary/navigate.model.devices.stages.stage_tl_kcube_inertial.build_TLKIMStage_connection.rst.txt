@@ -1,6 +1,0 @@
-navigate.model.devices.stages.stage\_tl\_kcube\_inertial.build\_TLKIMStage\_connection
-======================================================================================
-
-.. currentmodule:: navigate.model.devices.stages.stage_tl_kcube_inertial
-
-.. autofunction:: build_TLKIMStage_connection

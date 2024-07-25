@@ -1,6 +1,0 @@
-navigate.model.devices.stages.stage\_tl\_kcube\_steppermotor.build\_TLKSTStage\_connection
-==========================================================================================
-
-.. currentmodule:: navigate.model.devices.stages.stage_tl_kcube_steppermotor
-
-.. autofunction:: build_TLKSTStage_connection

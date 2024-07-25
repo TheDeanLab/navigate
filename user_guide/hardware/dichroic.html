@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dichroic Turrets &mdash; navigate 0.0.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Galvanometers" href="galvo.html" />
+    <link rel="prev" title="Filter Wheels" href="filter_wheel.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            navigate
+              <img src="../../_static/mic.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../software_installation.html">Software Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../i_want_to.html">I Want To…</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="hardware_home.html">Supported Hardware</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="daq.html">Data Acquisition Cards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html">Cameras</a></li>
+<li class="toctree-l2"><a class="reference internal" href="remote_focus.html">Remote Focusing Devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stage.html">Stages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter_wheel.html">Filter Wheels</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Dichroic Turrets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#asi">ASI</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#c60-cube-sldr">C60-CUBE-SLDR</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="galvo.html">Galvanometers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="laser.html">Lasers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shutter.html">Shutters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zoom.html">Mechanical Zoom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deformable_mirror.html">Deformable Mirrors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../file_formats.html">Supported File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gui_walkthrough.html">User Interface Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_microscope.html">Setting Up A Microscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../acquiring_home.html">Acquiring Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../case_studies/case_studies_home.html">Case Studies</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/software_architecture.html">Software Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/contributing_guidelines.html">Contributing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/feature_container.html">Feature Container</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../restapi.html">REST-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plugin/plugin_home.html">Plugin Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-plugin-template">navigate Plugin Template</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-confocal-projection">navigate Confocal Projection Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-at-scale">navigate at Scale</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-mmcore-plugin">navigate MMCore Plugin</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/TheDeanLab/navigate-ilastik-server">navigate ilastik Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../implementations/implementations.html">Implemented Microscopes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Software API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">navigate</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="hardware_home.html">Supported Hardware</a></li>
+      <li class="breadcrumb-item active">Dichroic Turrets</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user_guide/hardware/dichroic.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dichroic-turrets">
+<h1>Dichroic Turrets<a class="headerlink" href="#dichroic-turrets" title="Permalink to this heading"></a></h1>
+<p>Dichroics can be used to reflect the excitation light towards the camera, while
+permitting the emission light that is captured by the objective to be transmitted
+to the camera. Alternatively, they can be placed in the detection path to separate
+different emission wavelengths and to direct it to the appropriate camera.</p>
+<p>Currently, <strong>navigate</strong> incorporates a dichroic turret as a filter wheel, which enables
+you to add as many different dichroic turrets as you would like.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <cite>name</cite> parameter under <cite>hardware</cite> is optional. If not provided, the name of the
+device will be default to Filter 0, Filter 1, … Filter N in the GUI. However, if
+is is provided, then the GUI will automatically use the name provided as a label.</p>
+</div>
+<section id="asi">
+<h2>ASI<a class="headerlink" href="#asi" title="Permalink to this heading"></a></h2>
+<section id="c60-cube-sldr">
+<h3>C60-CUBE-SLDR<a class="headerlink" href="#c60-cube-sldr" title="Permalink to this heading"></a></h3>
+<p>The <a class="reference external" href="https://www.asiimaging.com/illumination-control/c60-cube-sldr/">C60-CUBE-SLDR</a>
+is a motorized dichroic slider that can be controlled by the ASI Tiger Controller.
+The example below shows the configuration file with one dichroic turret, and one
+filter wheel. The same communication instance is used for both the stage and filter
+wheel. It holds a maximum of 4 dichroics.</p>
+<details class="summary-configuration-file">
+<summary>Configuration File</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">microscopes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">microscope_name</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASI</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Filter Wheel 1</span>
+<span class="w">          </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM1</span>
+<span class="w">          </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
+<span class="w">        </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.03</span>
+<span class="w">        </span><span class="nt">available_filters</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">Empty-Alignment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">GFP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">RFP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">          </span><span class="nt">Far-Red</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">    </span><span class="p p-Indicator">-</span>
+<span class="w">      </span><span class="nt">filter_wheel</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hardware</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASICubeSlider</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dichroic Turret 1</span>
+<span class="w">          </span><span class="nt">wheel_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COM1</span>
+<span class="w">          </span><span class="nt">baudrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">115200</span>
+<span class="w">        </span><span class="nt">filter_wheel_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span>
+<span class="w">        </span><span class="nt">available_filters</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">510LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">          </span><span class="nt">560LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="nt">600LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">          </span><span class="nt">660LP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="filter_wheel.html" class="btn btn-neutral float-left" title="Filter Wheels" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="galvo.html" class="btn btn-neutral float-right" title="Galvanometers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dean Lab, UT Southwestern Medical Center.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

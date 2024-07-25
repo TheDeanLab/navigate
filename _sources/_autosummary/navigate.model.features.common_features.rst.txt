@@ -24,8 +24,10 @@ navigate.model.features.common\_features
       LoopByCount
       MoveToNextPositionInMultiPositionTable
       PrepareNextChannel
+      SetCameraParameters
       Snap
       StackPause
+      WaitForExternalTrigger
       WaitToContinue
       ZStackAcquisition
    

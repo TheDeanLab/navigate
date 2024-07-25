@@ -1,0 +1,38 @@
+navigate.model.devices.stages.tl\_kcube\_inertial
+=================================================
+
+.. automodule:: navigate.model.devices.stages.tl_kcube_inertial
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      build_TLKIMStage_connection
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      TLKIMStage
+   
+   
+
+   
+   
+   
+
+
+

@@ -17,6 +17,7 @@ file as follows:
           -
             filter_wheel:
               hardware:
+                name: Lower Filter Wheel
                 type: SutterFilterWheel
                 wheel_number: 1
                 port: COM1
@@ -30,6 +31,7 @@ file as follows:
           -
             filter_wheel:
               hardware:
+                name: Upper Filter Wheel
                 type: SutterFilterWheel
                 wheel_number: 2
                 port: COM1
@@ -41,6 +43,12 @@ file as follows:
                 RFP: 2
                 Far-Red: 3
 |
+
+.. note::
+
+    The `name` parameter under `hardware` is optional. If not provided, the name of the
+    device will be default to Filter 0, Filter 1, ... Filter N in the GUI. However, if
+    is is provided, then the GUI will automatically use the name provided as a label.
 
 -----------
 
@@ -107,7 +115,7 @@ for the stage. A single communication instance is used for both the stage and fi
                 type: ASI
                 wheel_number: 1
                 port: COM1
-                baudrate: 9600
+                baudrate: 115200
               filter_wheel_delay: 0.03
               available_filters:
                 Empty-Alignment: 0

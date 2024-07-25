@@ -76,8 +76,10 @@
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.LoopByCount.html">navigate.model.features.common_features.LoopByCount</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.PrepareNextChannel.html">navigate.model.features.common_features.PrepareNextChannel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.SetCameraParameters.html">navigate.model.features.common_features.SetCameraParameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.Snap.html">navigate.model.features.common_features.Snap</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.StackPause.html">navigate.model.features.common_features.StackPause</a></li>
+<li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.WaitForExternalTrigger.html">navigate.model.features.common_features.WaitForExternalTrigger</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.WaitToContinue.html">navigate.model.features.common_features.WaitToContinue</a></li>
 <li class="toctree-l4"><a class="reference internal" href="navigate.model.features.common_features.ZStackAcquisition.html">navigate.model.features.common_features.ZStackAcquisition</a></li>
 </ul>
@@ -140,7 +142,7 @@
 <h1>navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable<a class="headerlink" href="#navigate-model-features-common-features-movetonextpositioninmultipositiontable" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.features.common_features.</span></span><span class="sig-name descname"><span class="pre">MoveToNextPositionInMultiPositionTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.features.common_features.</span></span><span class="sig-name descname"><span class="pre">MoveToNextPositionInMultiPositionTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>MoveToNextPositionInMultiPositionTable class for advancing in a multi-position
 table.</p>
@@ -169,12 +171,18 @@ management.</p>
 <p>process, including signal acquisition and cleanup steps.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize the MoveToNextPositionInMultiPositionTable class.</p>
 <section id="parameters">
 <h3>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>model<span class="classifier">MicroscopeModel</span></dt><dd><p>The microscope model object used for position control.</p>
+</dd>
+<dt>resolution_value<span class="classifier">str</span></dt><dd><p>The resolution/microscope name of the current multiposition table</p>
+</dd>
+<dt>zoom_value<span class="classifier">str</span></dt><dd><p>The zoom name. For example “1x”, “2x”, …</p>
+</dd>
+<dt>offset<span class="classifier">list</span></dt><dd><p>The position offset [x, y, z, theta, f]</p>
 </dd>
 </dl>
 </section>
@@ -183,13 +191,16 @@ management.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, resolution_value, ...])</p></td>
 <td><p>Initialize the MoveToNextPositionInMultiPositionTable class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.cleanup" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a>()</p></td>
 <td><p>Cleanup method to resume the data thread.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.signal_func" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_func</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.pre_signal_func" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.pre_signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_signal_func</span></code></a>()</p></td>
+<td><p>Calculate stage offset if applicable.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.signal_func" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.signal_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_func</span></code></a>()</p></td>
 <td><p>Move to the next position in the multi-position table and control the data thread.</p></td>
 </tr>
 </tbody>
@@ -218,6 +229,18 @@ management.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.stage_distance_threshold" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.stage_distance_threshold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stage_distance_threshold</span></code></a></p></td>
 <td><p>The stage distance threshold for pausing the data thread.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.resolution_value" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.resolution_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolution_value</span></code></a></p></td>
+<td><p>The microscope name/resolution name</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.zoom_value" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.zoom_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zoom_value</span></code></a></p></td>
+<td><p>The zoom value</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.offset" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">offset</span></code></a></p></td>
+<td><p>stage offset table</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.initialized" title="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.initialized"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialized</span></code></a></p></td>
+<td><p>The flag inidicates whether this node is initialized</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -225,6 +248,12 @@ management.</p>
 <span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.cleanup" title="Permalink to this definition"></a></dt>
 <dd><p>Cleanup method to resume the data thread.</p>
 <p>This method is responsible for resuming the data thread after position control.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.pre_signal_func">
+<span class="sig-name descname"><span class="pre">pre_signal_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.pre_signal_func" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate stage offset if applicable.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -267,6 +296,17 @@ position-related information.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.initialized">
+<span class="sig-name descname"><span class="pre">initialized</span></span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.initialized" title="Permalink to this definition"></a></dt>
+<dd><p>The flag inidicates whether this node is initialized</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.model">
 <span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.model" title="Permalink to this definition"></a></dt>
 <dd><p>The microscope model associated with position control.</p>
@@ -281,6 +321,17 @@ position-related information.</p>
 <dt class="sig sig-object py" id="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.multiposition_table">
 <span class="sig-name descname"><span class="pre">multiposition_table</span></span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.multiposition_table" title="Permalink to this definition"></a></dt>
 <dd><p>A dictionary defining the configuration for the position control</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.offset" title="Permalink to this definition"></a></dt>
+<dd><p>stage offset table</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
@@ -311,12 +362,34 @@ position-related information.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.resolution_value">
+<span class="sig-name descname"><span class="pre">resolution_value</span></span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.resolution_value" title="Permalink to this definition"></a></dt>
+<dd><p>The microscope name/resolution name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.stage_distance_threshold">
 <span class="sig-name descname"><span class="pre">stage_distance_threshold</span></span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.stage_distance_threshold" title="Permalink to this definition"></a></dt>
 <dd><p>The stage distance threshold for pausing the data thread.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.zoom_value">
+<span class="sig-name descname"><span class="pre">zoom_value</span></span><a class="headerlink" href="#navigate.model.features.common_features.MoveToNextPositionInMultiPositionTable.zoom_value" title="Permalink to this definition"></a></dt>
+<dd><p>The zoom value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>

@@ -1,0 +1,41 @@
+navigate.model.devices.mirrors.imop.ImagineOpticsMirror
+=======================================================
+
+.. currentmodule:: navigate.model.devices.mirrors.imop
+
+.. autoclass:: ImagineOpticsMirror
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ImagineOpticsMirror.__init__
+      ~ImagineOpticsMirror.display_modes
+      ~ImagineOpticsMirror.flat
+      ~ImagineOpticsMirror.get_modal_coefs
+      ~ImagineOpticsMirror.save_wcs_file
+      ~ImagineOpticsMirror.set_from_wcs_file
+      ~ImagineOpticsMirror.set_positions_flat
+      ~ImagineOpticsMirror.zero_flatness
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ImagineOpticsMirror.configuration
+      ~ImagineOpticsMirror.mirror_controller
+      ~ImagineOpticsMirror.mirror_parameters
+      ~ImagineOpticsMirror.is_synthetic
+   
+   

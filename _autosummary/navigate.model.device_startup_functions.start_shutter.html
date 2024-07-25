@@ -167,7 +167,7 @@ Thus, requires both to be enabled.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>microscope_name</strong> (<em>str</em>) – Name of microscope in configuration</p></li>
 <li><p><strong>device_connection</strong> (<em>object</em>) – Hardware device to connect to</p></li>
-<li><p><strong>configuration</strong> (<em>multiprocesing.managers.DictProxy</em>) – Global configuration of the microscope</p></li>
+<li><p><strong>configuration</strong> (<em>multiprocessing.managers.DictProxy</em>) – Global configuration of the microscope</p></li>
 <li><p><strong>is_synthetic</strong> (<em>bool</em>) – Run synthetic version of hardware?</p></li>
 <li><p><strong>plugin_devices</strong> (<em>dict</em>) – Dictionary of plugin devices</p></li>
 </ul>
@@ -179,11 +179,6 @@ Thus, requires both to be enabled.</p>
 <dd class="field-odd"><p>class</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">start_shutter</span><span class="p">(</span><span class="n">microscope_name</span><span class="p">,</span> <span class="n">device_connection</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span>
-<span class="go">                  is_synthetic=False)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 </section>

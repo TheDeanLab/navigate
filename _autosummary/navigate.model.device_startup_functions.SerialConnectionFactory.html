@@ -159,6 +159,8 @@
 <dt class="sig sig-object py" id="navigate.model.device_startup_functions.SerialConnectionFactory">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">navigate.model.device_startup_functions.</span></span><span class="sig-name descname"><span class="pre">SerialConnectionFactory</span></span><a class="headerlink" href="#navigate.model.device_startup_functions.SerialConnectionFactory" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Serial Connection Factory.</p>
+<p>This class is used to build serial connections to devices.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="navigate.model.device_startup_functions.SerialConnectionFactory.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.device_startup_functions.SerialConnectionFactory.__init__" title="Permalink to this definition"></a></dt>
@@ -170,11 +172,32 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#navigate.model.device_startup_functions.SerialConnectionFactory.__init__" title="navigate.model.device_startup_functions.SerialConnectionFactory.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_connection</span></code>(build_connection_function, args)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#navigate.model.device_startup_functions.SerialConnectionFactory.build_connection" title="navigate.model.device_startup_functions.SerialConnectionFactory.build_connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_connection</span></code></a>(build_connection_function, args)</p></td>
+<td><p>Builds a serial connection to a device.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="navigate.model.device_startup_functions.SerialConnectionFactory.build_connection">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">build_connection_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exception=&lt;class</span> <span class="pre">'Exception'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navigate.model.device_startup_functions.SerialConnectionFactory.build_connection" title="Permalink to this definition"></a></dt>
+<dd><p>Builds a serial connection to a device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>build_connection_function</strong> (<em>function</em>) – Function that builds the connection to the device.</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – Arguments to the build_connection_function</p></li>
+<li><p><strong>exception</strong> (<em>Exception</em>) – Exception to catch when building the connection</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>connection</strong> – Connection to the device</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

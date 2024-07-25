@@ -28,7 +28,7 @@ navigate.model.devices.shutter
    :template: custom_module.rst
    :recursive:
 
-   navigate.model.devices.shutter.laser_shutter_base
-   navigate.model.devices.shutter.laser_shutter_synthetic
-   navigate.model.devices.shutter.laser_shutter_ttl
+   navigate.model.devices.shutter.base
+   navigate.model.devices.shutter.ni
+   navigate.model.devices.shutter.synthetic
 

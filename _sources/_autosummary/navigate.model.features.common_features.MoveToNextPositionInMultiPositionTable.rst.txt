@@ -18,6 +18,7 @@ navigate.model.features.common\_features.MoveToNextPositionInMultiPositionTable
    
       ~MoveToNextPositionInMultiPositionTable.__init__
       ~MoveToNextPositionInMultiPositionTable.cleanup
+      ~MoveToNextPositionInMultiPositionTable.pre_signal_func
       ~MoveToNextPositionInMultiPositionTable.signal_func
    
    
@@ -35,5 +36,9 @@ navigate.model.features.common\_features.MoveToNextPositionInMultiPositionTable
       ~MoveToNextPositionInMultiPositionTable.multiposition_table
       ~MoveToNextPositionInMultiPositionTable.position_count
       ~MoveToNextPositionInMultiPositionTable.stage_distance_threshold
+      ~MoveToNextPositionInMultiPositionTable.resolution_value
+      ~MoveToNextPositionInMultiPositionTable.zoom_value
+      ~MoveToNextPositionInMultiPositionTable.offset
+      ~MoveToNextPositionInMultiPositionTable.initialized
    
    

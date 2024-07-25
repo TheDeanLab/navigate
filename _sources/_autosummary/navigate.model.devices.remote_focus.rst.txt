@@ -28,8 +28,8 @@ navigate.model.devices.remote\_focus
    :template: custom_module.rst
    :recursive:
 
-   navigate.model.devices.remote_focus.remote_focus_base
-   navigate.model.devices.remote_focus.remote_focus_equipment_solutions
-   navigate.model.devices.remote_focus.remote_focus_ni
-   navigate.model.devices.remote_focus.remote_focus_synthetic
+   navigate.model.devices.remote_focus.base
+   navigate.model.devices.remote_focus.equipment_solutions
+   navigate.model.devices.remote_focus.ni
+   navigate.model.devices.remote_focus.synthetic
 

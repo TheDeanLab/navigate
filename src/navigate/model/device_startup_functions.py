@@ -307,7 +307,7 @@ def load_mirror(configuration, is_synthetic=False):
 
         return auto_redial(IMOP_Mirror, (), exception=Exception)
 
-    elif mirror_type == "SyntheticMirror":
+    elif mirror_type.lower() == "syntheticmirror" or mirror_type.lower() == "synthetic":
         return DummyDeviceConnection()
 
     else:
@@ -356,7 +356,7 @@ def start_mirror(
 
         return ImagineOpticsMirror(microscope_name, device_connection, configuration)
 
-    elif mirror_type == "SyntheticMirror":
+    elif mirror_type.lower() == "syntheticmirror" or mirror_type.lower() == "synthetic":
         from navigate.model.devices.mirrors.synthetic import SyntheticMirror
 
         return SyntheticMirror(microscope_name, device_connection, configuration)

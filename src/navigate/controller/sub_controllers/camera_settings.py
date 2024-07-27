@@ -580,10 +580,23 @@ class CameraSettingController(GUIController):
         self.roi_widgets["Center_X"].set(self.default_width / 2)
         self.roi_widgets["Center_Y"].set(self.default_height / 2)
 
-    def update_camera_parameters_silent(self, sensor_mode=None, readout_direction=None, number_of_pixels=None):
+    def update_camera_parameters_silent(self, value):
+        """Update GUI camera parameters
+
+        Parameters
+        ----------
+        value : tuple
+            (sensor_mode, readout_direction, number_of_pixels)
+        """
+        sensor_mode, readout_direction, number_of_pixels = value
         if sensor_mode:
             self.update_sensor_mode(sensor_mode)
         if readout_direction:
             self.mode_widgets["Readout"].set(readout_direction)
         if number_of_pixels:
             self.mode_widgets["Pixels"].set(number_of_pixels)
+
+    @property
+    def custom_events(self):
+        """dict: Custom events for this controller"""
+        return {"display_camera_parameters": self.update_camera_parameters_silent}

@@ -189,8 +189,6 @@ def load_camera_connection(configuration, camera_id=0, is_synthetic=False):
         camera_connection = configuration["configuration"]["hardware"]["camera"][
             camera_id
         ]["camera_connection"]
-
-        # return camera object in the auto_redial function.
         return auto_redial(
             build_photometrics_connection, (camera_connection,), exception=Exception
         )
@@ -875,7 +873,7 @@ def load_filter_wheel_connection(device_info, is_synthetic=False, plugin_devices
             exception=Exception,
         )
 
-    elif device_type == "ASI":
+    elif device_type == "ASI" or device_type == "ASICubeSlider":
         from navigate.model.devices.filter_wheel.asi import (
             build_filter_wheel_connection,
         )
@@ -969,6 +967,11 @@ def start_filter_wheel(
 
         return ASIFilterWheel(device_connection, device_config)
 
+    elif device_type == "ASICubeSlider":
+        from navigate.model.devices.filter_wheel.asi import ASICubeSlider
+
+        return ASICubeSlider(device_connection, device_config)
+
     elif device_type == "NI":
         from navigate.model.devices.filter_wheel.ni import DAQFilterWheel
 
@@ -1058,7 +1061,7 @@ def start_shutter(
         Name of microscope in configuration
     device_connection : object
         Hardware device to connect to
-    configuration : multiprocesing.managers.DictProxy
+    configuration : multiprocessing.managers.DictProxy
         Global configuration of the microscope
     is_synthetic : bool
         Run synthetic version of hardware?

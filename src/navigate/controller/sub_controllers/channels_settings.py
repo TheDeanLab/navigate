@@ -70,7 +70,9 @@ class ChannelSettingController(GUIController):
             self.configuration_controller.number_of_filter_wheels
         )
         self.view.populate_frame(
-            channels=self.num, filter_wheels=self.number_of_filter_wheels
+            channels=self.num,
+            filter_wheels=self.number_of_filter_wheels,
+            filter_wheel_names=self.configuration_controller.filter_wheel_names,
         )
 
         #: str: The mode of the channel setting controller. Either 'live' or 'stop'.

@@ -204,19 +204,20 @@ class AutofocusPopupController(GUIController):
 
         return func
 
-    def display_plot(self, data, line_plot=False, clear_data=True):
+    def display_plot(self, data_and_flags):
         """Displays the autofocus plot
 
-        data : numpy.ndarray
-            The data to be plotted.
-        line_plot : bool
-            If True, the plot will be a line plot.
-            If False, the plot will be a scatter plot.
-        clear_data : bool
-            If True, the plot will be cleared before plotting.
-            If False, the plot will be added to the existing plot.
+        data : tuple (numpy.ndarray, bool, bool)
+            (data, line_plot, clear_data)
+            data: The data to be plotted.
+            line_plot:
+                If True, the plot will be a line plot.
+                If False, the plot will be a scatter plot.
+            clear_data:
+                If True, the plot will be cleared before plotting.
+                If False, the plot will be added to the existing plot.
         """
-
+        data, line_plot, clear_data = data_and_flags
         data = np.asarray(data)
         coarse_range = self.setting_dict.get("coarse_range", 500)
         coarse_step = self.setting_dict.get("coarse_step_size", 50)
@@ -270,3 +271,8 @@ class AutofocusPopupController(GUIController):
         self.autofocus_coarse.xaxis.set_minor_locator(tck.AutoMinorLocator())
         self.autofocus_fig.tight_layout()
         self.autofocus_fig.canvas.draw_idle()
+
+    @property
+    def custom_events(self):
+        """dict: Custom events for this controller"""
+        return {"autofocus": self.display_plot}

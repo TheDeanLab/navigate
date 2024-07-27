@@ -72,7 +72,7 @@ first establish communication with the device using `ASI provided software <http
                   stages:
                   refmode:
                   port: COM12
-                  baudrate: 9600
+                  baudrate: 115200
                   timeout: 0.25
               joystick_axes: [x, y, z]
               x_min: -10000.0
@@ -233,7 +233,7 @@ the software is restarted, it should work.
                   serial_number: 001
                   axes: [x, y, z]
                   axes_mapping: [x, y, z]
-                  feedback_alignment: 
+                  feedback_alignment:
                   volts_per_micron: 0.0
                   min: 0.0
                   max: 25000
@@ -314,16 +314,16 @@ C-884
                   serial_number: 119060508
                   axes: [x, y, z, theta, f]
                   axes_mapping: [1, 2, 3, 4, 5]
-                  feedback_alignment: 
+                  feedback_alignment:
                   volts_per_micron: 0.0
-                  min: 
-                  max: 
+                  min:
+                  max:
                   controllername: C-884
                   stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
                   refmode: FRF FRF FRF FRF FRF FRF
-                  port: 
-                  baudrate: 
-                  timeout: 
+                  port:
+                  baudrate:
+                  timeout:
               joystick_axes: [x, y, z]
               x_min: -10000.0
               x_max: 10000.0
@@ -365,16 +365,16 @@ E-709
                   serial_number: 119060508
                   axes: [x, y, z, theta, f]
                   axes_mapping: [1, 2, 3, 4, 5]
-                  feedback_alignment: 
+                  feedback_alignment:
                   volts_per_micron: 0.0
-                  min: 
-                  max: 
+                  min:
+                  max:
                   controllername: E-709
                   stages: L-509.20DG10 L-509.40DG10 L-509.20DG10 M-060.DG M-406.4PD NOSTAGE
                   refmode: FRF FRF FRF FRF FRF FRF
-                  port: 
-                  baudrate: 
-                  timeout: 
+                  port:
+                  baudrate:
+                  timeout:
               joystick_axes: [x, y, z]
               x_min: -10000.0
               x_max: 10000.0
@@ -424,16 +424,16 @@ positioning.
                   serial_number: 74000375
                   axes: [f]
                   axes_mapping: [1]
-                  feedback_alignment: 
+                  feedback_alignment:
                   volts_per_micron: 0.0
-                  min: 
-                  max: 
+                  min:
+                  max:
                   controllername:
-                  stages: 
-                  refmode: 
-                  port: 
-                  baudrate: 
-                  timeout: 
+                  stages:
+                  refmode:
+                  port:
+                  baudrate:
+                  timeout:
               joystick_axes: [f]
               x_min: -10000.0
               x_max: 10000.0
@@ -481,11 +481,11 @@ KST101
                   min: 0
                   max: 25
                   controllername:
-                  stages: 
-                  refmode: 
-                  port: 
-                  baudrate: 
-                  timeout: 
+                  stages:
+                  refmode:
+                  port:
+                  baudrate:
+                  timeout:
               joystick_axes: [f]
               x_min: -10000.0
               x_max: 10000.0

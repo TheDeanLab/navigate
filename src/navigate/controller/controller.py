@@ -968,6 +968,7 @@ class Controller:
         args : function-specific passes.
         """
         self.camera_view_controller.image_count = 0
+        self.mip_setting_controller.image_count = 0
 
         # Start up Progress Bars
         images_received = 0
@@ -1004,6 +1005,8 @@ class Controller:
             self.configuration["experiment"]["CameraParameters"],
         )
 
+        self.mip_setting_controller.preallocate_matrices()
+
         self.stop_acquisition_flag = False
         start_time = time.time()
         self.camera_setting_controller.update_readout_time()
@@ -1026,6 +1029,7 @@ class Controller:
 
             # Display the Image in the View
             self.camera_view_controller.try_to_display_image(image_id=image_id)
+            self.mip_setting_controller.try_to_display_image(image_id=image_id)
             images_received += 1
 
             # Update progress bar.

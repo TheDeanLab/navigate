@@ -78,6 +78,250 @@ class BaseViewController(GUIController):
         #: logging.Logger: The logger for the camera view controller.
         self.logger = logging.getLogger(p)
 
+        #: int: Number of images received.
+        self.image_count = 0
+
+        #: int: Index of the slice.
+        self.slice_index = 0
+
+        #: str: The stack cycling mode.
+        self.stack_cycling_mode = "per_stack"
+
+        #: int: Number of channels.
+        self.number_of_channels = 0
+
+        #: int: Number of slices.
+        self.number_of_slices = 0
+
+        #: int: Total number of images per volume.
+        self.total_images_per_volume = 0
+
+        #: int: The original image height.
+        self.original_image_height = 2048  # 2014
+
+        #: int: The original image width.
+        self.original_image_width = 2048  # 2014
+
+        #: bool: Flat to flip the camera
+        self.flip_flags = None
+
+        #: int: The canvas width.
+        self.canvas_width = 512
+
+        #: int: The canvas height.
+        self.canvas_height = 512
+
+        #: int: The zoom width.
+        self.zoom_width = self.canvas_width
+
+        #: int: The zoom height.
+        self.zoom_height = self.canvas_height
+
+        #: numpy.ndarray: The zoom rectangle.
+        self.zoom_rect = np.array([[0, self.canvas_width], [0, self.canvas_height]])
+
+        #: numpy.ndarray: The zoom offset.
+        self.zoom_offset = np.array([[0], [0]])
+
+        #: float: The zoom value.
+        self.zoom_value = 1
+
+        #: float: The zoom scale.
+        self.zoom_scale = 1
+
+        #: float: The canvas width scale.
+        self.canvas_width_scale = 1
+
+        #: float: The canvas height scale.
+        self.canvas_height_scale = 1
+
+        #: bool: The crosshair flag.
+        self.apply_cross_hair = True
+
+        #: event: The resize event id.
+        self.resize_event_id = None
+
+        #: tkinter.Canvas: The tkinter canvas that displays the image.
+        self.canvas = self.view.canvas
+
+    def try_to_display_image(self, image_id):
+        """Try to display an image.
+
+        Parameters
+        ----------
+        image_id : int
+            Frame index in the data_buffer.
+        """
+        with self.is_displaying_image as is_displaying_image:
+            if is_displaying_image.value:
+                return
+            is_displaying_image.value = True
+
+        display_thread = threading.Thread(target=self.display_image, args=(image_id,))
+        display_thread.start()
+
+    def identify_channel_index_and_slice(self):
+        """As images arrive, identify channel index and slice.
+
+        Returns
+        -------
+        channel_idx : int
+            The channel index.
+        slice_idx : int
+            The slice index.
+        """
+        # Reset the image count after the full acquisition of an image volume.
+        if self.image_count == self.total_images_per_volume:
+            self.image_count = 0
+
+        # Store each image to the pre-allocated memory.
+        if self.stack_cycling_mode == "per_stack":
+            for i in range(self.number_of_channels):
+                if (
+                    i * self.number_of_slices
+                    <= self.image_count
+                    < (i + 1) * self.number_of_slices
+                ):
+                    channel_idx = i
+                    slice_idx = self.image_count - i * self.number_of_slices
+                    break
+
+        elif self.stack_cycling_mode == "per_z":
+            # Every image that comes in will be the next channel.
+            channel_idx = self.image_count % self.number_of_channels
+            slice_idx = self.image_count // self.number_of_channels
+
+        self.image_count += 1
+        return channel_idx, slice_idx
+
+    def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
+        """Initialize the non-live display.
+
+        Starts image and slice counter, number of channels, number of slices,
+        images per volume, and image volume.
+
+        Parameters
+        ----------
+        buffer : numpy.ndarray
+            Image data.
+        microscope_state : dict
+            Microscope state.
+        camera_parameters : dict
+            Camera parameters.
+        """
+        self.data_buffer = buffer
+        self.is_displaying_image.value = False
+        self.image_count = 0  # was image_counter
+        self.slice_index = 0
+
+        self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
+        self.number_of_channels = int(microscope_state["selected_channels"])
+        self.number_of_slices = int(microscope_state["number_z_steps"])
+        self.total_images_per_volume = self.number_of_channels * self.number_of_slices
+        self.original_image_width = int(camera_parameters["x_pixels"])
+        self.original_image_height = int(camera_parameters["y_pixels"])
+
+        self.flip_flags = (
+            self.parent_controller.configuration_controller.camera_flip_flags
+        )
+
+        self.update_canvas_size()
+        self.reset_display(False)
+
+    def reset_display(self, display_flag=True):
+        """Set the display back to the original digital zoom.
+
+        Parameters
+        ----------
+        display_flag : bool
+        """
+        self.zoom_width = self.canvas_width
+        self.zoom_height = self.canvas_height
+        self.zoom_rect = np.array([[0, self.zoom_width], [0, self.zoom_height]])
+        self.zoom_offset = np.array([[0], [0]])
+        self.zoom_value = 1
+        self.zoom_scale = 1
+        if display_flag:
+            self.process_image()
+
+    def update_canvas_size(self):
+        """Update the canvas size."""
+        r_canvas_width = int(self.view.canvas["width"])
+        r_canvas_height = int(self.view.canvas["height"])
+        img_ratio = self.original_image_width / self.original_image_height
+        canvas_ratio = r_canvas_width / r_canvas_height
+
+        if canvas_ratio > img_ratio:
+            self.canvas_height = r_canvas_height
+            self.canvas_width = int(r_canvas_height * img_ratio)
+        else:
+            self.canvas_width = r_canvas_width
+            self.canvas_height = int(r_canvas_width / img_ratio)
+
+        self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
+        self.canvas_height_scale = float(
+            self.original_image_height / self.canvas_height
+        )
+
+    def left_click(self, event):
+        """Toggles cross-hair on image upon left click event.
+
+        Parameters
+        ----------
+        event : tkinter.Event
+            Tkinter event.
+        """
+        if self.image is not None:
+            # If True, make False. If False, make True.
+            self.apply_cross_hair = not self.apply_cross_hair
+            self.add_crosshair()
+            self.apply_LUT()
+            self.populate_image()
+
+    def resize(self, event):
+        """Resize the window.
+
+        Parameters
+        ----------
+        event : tkinter.Event
+            Tkinter event.
+        """
+        if self.view.is_popup is False and event.widget != self.view:
+            return
+        if self.view.is_popup is True and event.widget.widgetName != "toplevel":
+            return
+        if self.resize_event_id:
+            self.view.after_cancel(self.resize_event_id)
+        self.resize_event_id = self.view.after(
+            1000, lambda: self.refresh(event.width, event.height)
+        )
+
+    def refresh(self, width, height):
+        """Refresh the window.
+
+        Parameters
+        ----------
+        width : int
+            Width of the window.
+        height : int
+            Height of the window.
+        """
+        if width == self.width and height == self.height:
+            return
+        self.canvas_width = width - self.view.image_metrics.winfo_width() - 24
+        self.canvas_height = height - 85
+        self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
+        self.view.update_idletasks()
+
+        if self.view.is_popup:
+            self.width, self.height = self.view.winfo_width(), self.view.winfo_height()
+        else:
+            self.width, self.height = width, height
+
+        # if resize the window during acquisition, the image showing should be updated
+        self.update_canvas_size()
+        self.reset_display(False)
+
 
 class CameraViewController(BaseViewController):
     """Camera View Controller Class."""
@@ -99,9 +343,6 @@ class CameraViewController(BaseViewController):
 
         #: dict: The dictionary of image palette widgets.
         self.image_palette = view.scale_palette.get_widgets()
-
-        #: tkinter.Canvas: The tkinter canvas that displays the image.
-        self.canvas = self.view.canvas
 
         # Bindings for changes to the LUT
         for color in self.image_palette.values():
@@ -207,35 +448,11 @@ class CameraViewController(BaseViewController):
         #: int: The bit-depth for PIL presentation.
         self.bit_depth = 8
 
-        #: float: The zoom value for image display.
-        self.zoom_value = 1
-
-        #: float: The zoom scale for image display.
-        self.zoom_scale = 1
-
-        #: numpy.ndarray: The zoom rectangle.
-        self.zoom_rect = np.array([[0, self.canvas_width], [0, self.canvas_height]])
-
-        #: numpy.ndarray: The zoom offset.
-        self.zoom_offset = np.array([[0], [0]])
-
-        #: int: The zoom width.
-        self.zoom_width = self.canvas_width
-
-        #: int: The zoom height.
-        self.zoom_height = self.canvas_height
-
         #: int: The canvas width scaling factor.
         self.canvas_width_scale = 4
 
         #: int: The canvas height scaling factor.
         self.canvas_height_scale = 4
-
-        #: int: The original image height.
-        self.original_image_height = 2014
-
-        #: int: The original image width.
-        self.original_image_width = 2014
 
         #: int: The number of slices.
         self.number_of_slices = 0
@@ -535,22 +752,6 @@ class CameraViewController(BaseViewController):
                 title="Warning", message="Can't move to there! Invalid stage position!"
             )
 
-    def reset_display(self, display_flag=True):
-        """Set the display back to the original digital zoom.
-
-        Parameters
-        ----------
-        display_flag : bool
-        """
-        self.zoom_width = self.canvas_width
-        self.zoom_height = self.canvas_height
-        self.zoom_rect = np.array([[0, self.zoom_width], [0, self.zoom_height]])
-        self.zoom_offset = np.array([[0], [0]])
-        self.zoom_value = 1
-        self.zoom_scale = 1
-        if display_flag:
-            self.process_image()
-
     def process_image(self):
         """Process the image to be displayed.
 
@@ -654,21 +855,6 @@ class CameraViewController(BaseViewController):
             ),
         ]
 
-    def left_click(self, event):
-        """Toggles cross-hair on image upon left click event.
-
-        Parameters
-        ----------
-        event : tkinter.Event
-            Tkinter event.
-        """
-        if self.image is not None:
-            # If True, make False. If False, make True.
-            self.apply_cross_hair = not self.apply_cross_hair
-            self.add_crosshair()
-            self.apply_LUT()
-            self.populate_image()
-
     def update_max_counts(self):
         """Update the max counts in the camera view.
 
@@ -749,109 +935,6 @@ class CameraViewController(BaseViewController):
 
         self.image_catche_flag = not self.image_catche_flag
 
-    def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
-        """Initialize the non-live display.
-
-        Starts image and slice counter,
-        number of channels,
-        number of slices,
-        images per volume,
-        and image volume.
-
-        Parameters
-        ----------
-        buffer : numpy.ndarray
-            Image data.
-        microscope_state : dict
-            Microscope state.
-        camera_parameters : dict
-            Camera parameters.
-        """
-        self.data_buffer = buffer
-        self.is_displaying_image.value = False
-        self.image_counter = 0
-        self.slice_index = 0
-        self.number_of_channels = len(microscope_state["channels"])
-        self.number_of_slices = int(microscope_state["number_z_steps"])
-        self.total_images_per_volume = self.number_of_channels * self.number_of_slices
-        self.original_image_width = int(camera_parameters["x_pixels"])
-        self.original_image_height = int(camera_parameters["y_pixels"])
-        self.flip_flags = (
-            self.parent_controller.configuration_controller.camera_flip_flags
-        )
-
-        self.update_canvas_size()
-        self.reset_display(False)
-
-    def identify_channel_index_and_slice(self, microscope_state, images_received):
-        """As images arrive, identify channel index and slice.
-
-        Parameters
-        ----------
-        microscope_state : dict
-            State of the microscope
-        images_received : int
-            Number of images received.
-        """
-        # Reset the image counter after the full acquisition of an image volume.
-        if self.image_counter == self.total_images_per_volume:
-            self.image_counter = 0
-
-        # Store each image to the pre-allocated memory.
-        if microscope_state["stack_cycling_mode"] == "per_stack":
-            if (
-                0 * self.number_of_slices
-                <= self.image_counter
-                < 1 * self.number_of_slices
-            ):
-                self.channel_index = 0
-            elif (
-                1 * self.number_of_slices
-                <= self.image_counter
-                < 2 * self.number_of_slices
-            ):
-                self.channel_index = 1
-            elif (
-                2 * self.number_of_slices
-                <= self.image_counter
-                < 3 * self.number_of_slices
-            ):
-                self.channel_index = 2
-            elif (
-                3 * self.number_of_slices
-                <= self.image_counter
-                < 4 * self.number_of_slices
-            ):
-                self.channel_index = 3
-            elif (
-                4 * self.number_of_slices
-                <= self.image_counter
-                < 5 * self.number_of_slices
-            ):
-                self.channel_index = 4
-            else:
-                self.channel_index = 0
-                print(
-                    "Camera View Controller - "
-                    "Cannot identify proper channel for per_stack imaging mode."
-                )
-
-            self.slice_index = self.image_counter - (
-                self.channel_index * self.number_of_slices
-            )
-            self.image_counter += 1
-
-        elif microscope_state["stack_cycling_mode"] == "per_z":
-            # Every image that comes in will be the next channel.
-            self.channel_index = images_received % self.number_of_channels
-            self.image_volume[:, :, self.slice_index, self.channel_index] = self.image
-            if self.channel_index == (self.number_of_channels - 1):
-                self.slice_index += 1
-            if self.slice_index == self.total_images_per_volume:
-                self.slice_index = 0
-
-        # print(self.channel_index, self.slice_index)
-
     def retrieve_image_slice_from_volume(self, slider_index, channel_display_index):
         """Retrieve image slice from volume.
 
@@ -895,15 +978,6 @@ class CameraViewController(BaseViewController):
         image_id: int
             frame index in the data_buffer.
         """
-
-        # Identify image identity (e.g., slice #, channel #).
-        # self.identify_channel_index_and_slice(microscope_state=microscope_state,
-        #                                       images_received=images_received)
-
-        # Place image in memory
-        # TODO: This is the slow part
-        # self.image_volume[:, :, self.slice_index,
-        # self.channel_index] = image[:, ] # copy
 
         # Store the maximum intensity value for the image.
         image = self.data_buffer[image_id]
@@ -956,14 +1030,6 @@ class CameraViewController(BaseViewController):
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
         """
-        # if self.colormap == 'gradient':
-        #     self.cross_hair_image = self.rainbow_lut(self.cross_hair_image)
-        # elif self.colormap == 'rainbow':
-        #     self.cross_hair_image = self.gradient_lut(self.cross_hair_image)
-        # elif self.colormap == 'RdBu_r':
-        #     self.cross_hair_image = self.rdbu_r_lut(self.cross_hair_image)
-        # else:
-        #     self.cross_hair_image = self.gray_lut(self.cross_hair_image)
         self.cross_hair_image = self.colormap(self.cross_hair_image)
 
         # Convert RGBA to RGB Image.
@@ -1116,85 +1182,6 @@ class CameraViewController(BaseViewController):
         self.ilastik_seg_mask = cv2.applyColorMap(mask, self.mask_color_table)
         self.ilastik_mask_ready_lock.release()
 
-    def resize(self, event):
-        """Resize the window.
-
-        Parameters
-        ----------
-        event : tkinter.Event
-            Tkinter event.
-        """
-        if self.view.is_popup is False and event.widget != self.view:
-            return
-        if self.view.is_popup is True and event.widget.widgetName != "toplevel":
-            return
-        if self.resize_event_id:
-            self.view.after_cancel(self.resize_event_id)
-        self.resize_event_id = self.view.after(
-            1000, lambda: self.refresh(event.width, event.height)
-        )
-
-    def refresh(self, width, height):
-        """Refresh the window.
-
-        Parameters
-        ----------
-        width : int
-            Width of the window.
-        height : int
-            Height of the window.
-        """
-        if width == self.width and height == self.height:
-            return
-        self.canvas_width = width - self.view.image_metrics.winfo_width() - 24
-        self.canvas_height = height - 85
-        self.view.canvas.config(width=self.canvas_width, height=self.canvas_height)
-        self.view.update_idletasks()
-
-        if self.view.is_popup:
-            self.width, self.height = self.view.winfo_width(), self.view.winfo_height()
-        else:
-            self.width, self.height = width, height
-
-        # if resize the window during acquisition, the image showing should be updated
-        self.update_canvas_size()
-        self.reset_display(False)
-
-    def update_canvas_size(self):
-        """Update the canvas size."""
-        r_canvas_width = int(self.view.canvas["width"])
-        r_canvas_height = int(self.view.canvas["height"])
-        img_ratio = self.original_image_width / self.original_image_height
-        canvas_ratio = r_canvas_width / r_canvas_height
-
-        if canvas_ratio > img_ratio:
-            self.canvas_height = r_canvas_height
-            self.canvas_width = int(r_canvas_height * img_ratio)
-        else:
-            self.canvas_width = r_canvas_width
-            self.canvas_height = int(r_canvas_width / img_ratio)
-
-        self.canvas_width_scale = float(self.original_image_width / self.canvas_width)
-        self.canvas_height_scale = float(
-            self.original_image_height / self.canvas_height
-        )
-
-    def try_to_display_image(self, image_id):
-        """Try to display an image.
-
-        Parameters
-        ----------
-        image_id : int
-            Frame index in the data_buffer.
-        """
-        with self.is_displaying_image as is_displaying_image:
-            if is_displaying_image.value:
-                return
-            is_displaying_image.value = True
-
-        display_thread = threading.Thread(target=self.display_image, args=(image_id,))
-        display_thread.start()
-
     @property
     def custom_events(self):
         """dict: Custom events for this controller"""
@@ -1215,4 +1202,61 @@ class MIPViewController(BaseViewController):
             The parent controller of the camera view controller.
         """
         super().__init__(view, parent_controller)
-        pass
+        self.zx_mip = None
+        self.zy_mip = None
+        self.xy_mip = None
+
+    def preallocate_matrices(self):
+        """Preallocate the matrices for the MIP."""
+
+        self.xy_mip = np.zeros(
+            (
+                self.number_of_channels,
+                self.original_image_height,
+                self.original_image_width,
+            ),
+            dtype=np.uint16,
+        )
+
+        self.zy_mip = np.zeros(
+            (
+                self.number_of_channels,
+                self.number_of_slices,
+                self.original_image_width,
+            ),
+            dtype=np.uint16,
+        )
+
+        self.zx_mip = np.zeros(
+            (
+                self.number_of_channels,
+                self.number_of_slices,
+                self.original_image_height,
+            ),
+            dtype=np.uint16,
+        )
+
+    def try_to_display_image(self, image_id):
+        """Display the image.
+
+        Parameters
+        ----------
+        image_id : int
+            The image id.
+        """
+        channel_idx, slice_idx = self.identify_channel_index_and_slice()
+
+        image = self.data_buffer[image_id]
+
+        print("Image size!", image.shape)
+
+        # Take maximum of the current image and the MIP image.
+        self.xy_mip[channel_idx] = np.maximum(self.xy_mip[channel_idx], image)
+
+        self.populate_image(self.xy_mip[channel_idx])
+
+    def populate_image(self, image):
+        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
+        temp_img = Image.fromarray(image.astype(np.uint8))
+        tk_image = ImageTk.PhotoImage(temp_img)
+        self.canvas.create_image(0, 0, image=tk_image, anchor="nw")

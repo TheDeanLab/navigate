@@ -1238,3 +1238,8 @@ class CameraViewController(GUIController):
 
         display_thread = threading.Thread(target=self.display_image, args=(image_id,))
         display_thread.start()
+
+    @property
+    def custom_events(self):
+        """dict: Custom events for this controller"""
+        return {"ilastik_mask": self.display_mask}

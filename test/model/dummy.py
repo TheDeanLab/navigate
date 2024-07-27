@@ -84,6 +84,9 @@ class DummyController:
 
         #: list: The list of commands.
         self.commands = []
+    
+        #: dict: The custom events
+        self.event_listeners = {}
 
         #: DummyView: The view to be controlled by this controller.
         self.view = view

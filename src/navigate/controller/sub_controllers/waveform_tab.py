@@ -77,6 +77,7 @@ class WaveformTabController(GUIController):
                 microscope_name
             ]["daq"]["sample_rate"]
         )
+        self.update_sample_rate()
         self.view.waveform_settings.inputs["sample_rate"].get_variable().trace_add(
             "write", self.update_sample_rate
         )
@@ -127,20 +128,16 @@ class WaveformTabController(GUIController):
         event = type("MyEvent", (object,), {})
         self.plot_waveforms(event)
 
-    def update_waveforms(self, waveform_dict, sample_rate):
+    def update_waveforms(self, waveform_dict):
         """Update the waveforms in the waveform tab
 
         Parameters
         ----------
         waveform_dict : dict
             Dictionary of waveforms
-        sample_rate : int
-            Sample rate of the waveforms
         """
         #: dict: Dictionary of waveforms
         self.waveform_dict = waveform_dict
-        self.sample_rate = sample_rate
-
         event = type("MyEvent", (object,), {})
         self.plot_waveforms(event)
 
@@ -337,3 +334,8 @@ class WaveformTabController(GUIController):
         self.parent_controller.configuration["experiment"]["MicroscopeState"][
             "waveform_template"
         ] = template_name
+
+    @property
+    def custom_events(self):
+        """Custom events for the waveform tab"""
+        return {"waveform": self.update_waveforms}

@@ -229,10 +229,7 @@ class Metadata:
         state = self.configuration["experiment"]["MicroscopeState"]
         self._per_stack = (
             state["stack_cycling_mode"] == "per_stack"
-            and state["image_mode"] == "z-stack"
-        ) or (
-            state["conpro_cycling_mode"] == "per_stack"
-            and state["image_mode"] == "confocal-projection"
+            and state["image_mode"] != "single"
         )
 
     @property

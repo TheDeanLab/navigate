@@ -156,6 +156,7 @@ class PluginsController:
                             f"Plugin {plugin_name} needs to be uninstalled from "
                             f"navigate or reinstalled!"
                         )
+                        continue
                     plugin_controller = getattr(
                         plugin_controller_module, f"{plugin_class_name}Controller"
                     )

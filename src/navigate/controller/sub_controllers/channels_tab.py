@@ -223,11 +223,6 @@ class ChannelsTabController(GUIController):
             if self.microscope_state_dict["stack_cycling_mode"] == "per_z"
             else "Per Stack"
         )
-        if self.microscope_state_dict["conpro_cycling_mode"] not in [
-            "per_plane",
-            "per_stack",
-        ]:
-            self.microscope_state_dict["conpro_cycling_mode"] = "per_plane"
         self.channel_setting_controller.populate_experiment_values(
             self.microscope_state_dict["channels"]
         )

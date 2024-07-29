@@ -302,7 +302,7 @@ class BaseViewController(GUIController, ABaseViewController):
         if self.image is not None:
             # If True, make False. If False, make True.
             self.apply_cross_hair = not self.apply_cross_hair
-            self.add_crosshair()
+            self.add_crosshair(image=self.image)
             self.apply_LUT()
             self.populate_image()
 
@@ -781,20 +781,11 @@ class CameraViewController(BaseViewController):
         image intensity, adds a crosshair, applies the lookup table, and populates the
         image.
         """
-        # self.image -> self.zoom_image.
-        self.digital_zoom()
-
-        # self.zoom_image -> self.zoom_image
-        self.detect_saturation()
-
-        # self.zoom_image -> self.down_sampled_image
-        self.down_sample_image()
-
-        # self.down_sampled_image  -> self.down_sampled_image
-        self.scale_image_intensity()
-
-        # self_down_sampled_image -> self.cross_hair_image
-        self.add_crosshair()
+        image = self.digital_zoom()
+        self.detect_saturation(image)
+        image = self.down_sample_image(image)
+        image = self.scale_image_intensity(image)
+        self.add_crosshair(image)
 
         # self_cross_hair_image -> self.cross_hair_image)
         self.apply_LUT()
@@ -859,7 +850,7 @@ class CameraViewController(BaseViewController):
         y_start_index = int(-self.zoom_rect[1][0] / self.zoom_scale)
         y_end_index = int(y_start_index + self.zoom_height)
 
-        self.zoom_image = self.image[
+        zoom_image = self.image[
             int(y_start_index * self.canvas_height_scale) : int(
                 y_end_index * self.canvas_height_scale
             ),
@@ -868,7 +859,7 @@ class CameraViewController(BaseViewController):
             ),
         ]
 
-        # return zoom_image
+        return zoom_image
 
     def update_max_counts(self):
         """Update the max counts in the camera view.
@@ -904,28 +895,24 @@ class CameraViewController(BaseViewController):
             )
             self.image_metrics["Image"].set(f"{rolling_average:.0f}")
 
-    def down_sample_image(self):
+    def down_sample_image(self, image):
         """Down-sample the data for image display according to widget size."""
         sx, sy = self.canvas_width, self.canvas_height
-        self.down_sampled_image = cv2.resize(self.zoom_image, (sx, sy))
+        down_sampled_image = cv2.resize(image, (sx, sy))
+        return down_sampled_image
 
-    def scale_image_intensity(self):
+    def scale_image_intensity(self, image):
         """Scale the data to the min/max counts, and adjust bit-depth."""
         if self.autoscale is True:
-            self.max_counts = np.max(self.down_sampled_image)
-            self.min_counts = np.min(self.down_sampled_image)
+            self.max_counts = np.max(image)
+            self.min_counts = np.min(image)
         else:
             self.update_min_max_counts()
 
-        scaling_factor = 1
-        self.down_sampled_image = scaling_factor * (
-            (self.down_sampled_image - self.min_counts)
-            / (self.max_counts - self.min_counts)
-        )
-        self.down_sampled_image[self.down_sampled_image < 0] = 0
-        self.down_sampled_image[
-            self.down_sampled_image > scaling_factor
-        ] = scaling_factor
+        image = (image - self.min_counts) / (self.max_counts - self.min_counts)
+        image[image < 0] = 0
+        image[image > 1] = 1
+        return image
 
     def populate_image(self):
         """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
@@ -1032,9 +1019,9 @@ class CameraViewController(BaseViewController):
         with self.is_displaying_image as is_displaying_image:
             is_displaying_image.value = False
 
-    def add_crosshair(self):
+    def add_crosshair(self, image):
         """Adds a cross-hair to the image."""
-        self.cross_hair_image = np.copy(self.down_sampled_image)
+        self.cross_hair_image = np.copy(image)
         if self.apply_cross_hair:
             crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
             crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
@@ -1098,21 +1085,10 @@ class CameraViewController(BaseViewController):
             self.populate_image()
             logger.debug(f"Updating the LUT, {cmap_name}")
 
-    def detect_saturation(self):
-        """Look for any pixels at the maximum intensity allowable for the camera.
-
-        Parameters
-        ----------
-        self.image : np.array
-            Must be a 2D image.
-
-        Returns
-        -------
-        self.saturated_pixels : np.array
-            Boolean array of the same size as the image.
-        """
+    def detect_saturation(self, image):
+        """Look for any pixels at the maximum intensity allowable for the camera."""
         saturation_value = 2**16 - 1
-        self.saturated_pixels = self.zoom_image[self.zoom_image > saturation_value]
+        self.saturated_pixels = image[image > saturation_value]
 
     def toggle_min_max_buttons(self):
         """Checks the value of the autoscale widget.

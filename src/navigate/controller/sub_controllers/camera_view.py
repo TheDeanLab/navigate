@@ -42,6 +42,7 @@ from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
+from abc import ABCMeta
 
 # Local Imports
 from navigate.controller.sub_controllers.gui import GUIController
@@ -53,7 +54,34 @@ p = __name__.split(".")[1]
 logger = logging.getLogger(p)
 
 
-class BaseViewController(GUIController):
+class ABaseViewController(metaclass=ABCMeta):
+    """Abstract Base View Controller Class."""
+
+    def __init__(self):
+        pass
+
+    def update_snr(self):
+        """Updates the signal to noise ratio."""
+        pass
+
+    def initialize(self):
+        """Initializes the camera view controller."""
+        pass
+
+    def set_mode(self, mode=""):
+        """Sets mode of camera_view_controller."""
+        pass
+
+    def initialize_non_live_display(self, buffer, microscope_state, camera_parameters):
+        """Initialize the non-live display."""
+        pass
+
+    def try_to_display_image(self, image_id):
+        """Try to display an image."""
+        pass
+
+
+class BaseViewController(GUIController, ABaseViewController):
     """Base View Controller Class."""
 
     def __init__(self, view, parent_controller=None):
@@ -475,12 +503,6 @@ class CameraViewController(BaseViewController):
         #: int: The channel index.
         self.channel_index = 0
 
-        #: int: The crosshair x position.
-        self.crosshair_x = None
-
-        #: int: The crosshair y position.
-        self.crosshair_y = None
-
         #: bool: The display mask flag.
         self.mask_color_table = None
 
@@ -833,18 +855,9 @@ class CameraViewController(BaseViewController):
 
         x_start_index = int(-self.zoom_rect[0][0] / self.zoom_scale)
         x_end_index = int(x_start_index + self.zoom_width)
+
         y_start_index = int(-self.zoom_rect[1][0] / self.zoom_scale)
         y_end_index = int(y_start_index + self.zoom_height)
-
-        # crosshair
-        crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
-        crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
-        if crosshair_x < 0 or crosshair_x >= self.canvas_width:
-            crosshair_x = -1
-        if crosshair_y < 0 or crosshair_y >= self.canvas_height:
-            crosshair_y = -1
-        self.crosshair_x = int(crosshair_x)
-        self.crosshair_y = int(crosshair_y)
 
         self.zoom_image = self.image[
             int(y_start_index * self.canvas_height_scale) : int(
@@ -854,6 +867,8 @@ class CameraViewController(BaseViewController):
                 x_end_index * self.canvas_width_scale
             ),
         ]
+
+        # return zoom_image
 
     def update_max_counts(self):
         """Update the max counts in the camera view.
@@ -1021,8 +1036,14 @@ class CameraViewController(BaseViewController):
         """Adds a cross-hair to the image."""
         self.cross_hair_image = np.copy(self.down_sampled_image)
         if self.apply_cross_hair:
-            self.cross_hair_image[:, self.crosshair_x] = 1
-            self.cross_hair_image[self.crosshair_y, :] = 1
+            crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
+            crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
+            if crosshair_x < 0 or crosshair_x >= self.canvas_width:
+                crosshair_x = -1
+            if crosshair_y < 0 or crosshair_y >= self.canvas_height:
+                crosshair_y = -1
+            self.cross_hair_image[:, int(crosshair_x)] = 1
+            self.cross_hair_image[int(crosshair_y), :] = 1
 
     def apply_LUT(self):
         """Applies a LUT to an image.

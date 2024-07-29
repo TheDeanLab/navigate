@@ -300,11 +300,10 @@ class BaseViewController(GUIController, ABaseViewController):
             Tkinter event.
         """
         if self.image is not None:
-            # If True, make False. If False, make True.
             self.apply_cross_hair = not self.apply_cross_hair
-            self.add_crosshair(image=self.image)
-            self.apply_LUT()
-            self.populate_image()
+            image = self.add_crosshair(image=self.image)
+            image = self.apply_LUT(image=image)
+            self.populate_image(image=image)
 
     def resize(self, event):
         """Resize the window.
@@ -368,6 +367,9 @@ class CameraViewController(BaseViewController):
 
         #: dict: The dictionary of image metrics widgets.
         self.image_metrics = view.image_metrics.get_widgets()
+
+        #: bool: The signal to noise ratio flag.
+        self._snr_selected = False
 
         #: dict: The dictionary of image palette widgets.
         self.image_palette = view.scale_palette.get_widgets()
@@ -785,13 +787,9 @@ class CameraViewController(BaseViewController):
         self.detect_saturation(image)
         image = self.down_sample_image(image)
         image = self.scale_image_intensity(image)
-        self.add_crosshair(image)
-
-        # self_cross_hair_image -> self.cross_hair_image)
-        self.apply_LUT()
-
-        # self.cross_hair_image -> display...
-        self.populate_image()
+        image = self.add_crosshair(image)
+        image = self.apply_LUT(image)
+        self.populate_image(image)
 
     def mouse_wheel(self, event):
         """Digitally zooms in or out on the image upon scroll wheel event.
@@ -914,17 +912,18 @@ class CameraViewController(BaseViewController):
         image[image > 1] = 1
         return image
 
-    def populate_image(self):
+    def populate_image(self, image):
         """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
         if self.display_mask_flag:
             self.ilastik_mask_ready_lock.acquire()
-            temp_img1 = self.cross_hair_image.astype(np.uint8)
+            temp_img1 = image.astype(np.uint8)
             img1 = Image.fromarray(temp_img1)
+
             temp_img2 = cv2.resize(self.ilastik_seg_mask, temp_img1.shape[:2])
             img2 = Image.fromarray(temp_img2)
             temp_img = Image.blend(img1, img2, 0.2)
         else:
-            temp_img = Image.fromarray(self.cross_hair_image.astype(np.uint8))
+            temp_img = Image.fromarray(image.astype(np.uint8))
 
         # when calling ImageTk.PhotoImage() to generate a new image, it will destroy
         # what the canvas is showing and cause a blink.
@@ -1021,7 +1020,6 @@ class CameraViewController(BaseViewController):
 
     def add_crosshair(self, image):
         """Adds a cross-hair to the image."""
-        self.cross_hair_image = np.copy(image)
         if self.apply_cross_hair:
             crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
             crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
@@ -1029,19 +1027,22 @@ class CameraViewController(BaseViewController):
                 crosshair_x = -1
             if crosshair_y < 0 or crosshair_y >= self.canvas_height:
                 crosshair_y = -1
-            self.cross_hair_image[:, int(crosshair_x)] = 1
-            self.cross_hair_image[int(crosshair_y), :] = 1
+            image[:, int(crosshair_x)] = 1
+            image[int(crosshair_y), :] = 1
+            return image
+        else:
+            return image
 
-    def apply_LUT(self):
+    def apply_LUT(self, image):
         """Applies a LUT to an image.
 
         Red is reserved for saturated pixels.
         self.color_values = ['gray', 'gradient', 'rainbow']
         """
-        self.cross_hair_image = self.colormap(self.cross_hair_image)
+        image = self.colormap(image)
 
         # Convert RGBA to RGB Image.
-        self.cross_hair_image = self.cross_hair_image[:, :, :3]
+        image = image[:, :, :3]
 
         # Specify the saturated values in the red channel
         if np.any(self.saturated_pixels):
@@ -1050,12 +1051,13 @@ class CameraViewController(BaseViewController):
 
             # Pull out the red image from the RGBA
             # Set saturated pixels to 1, put back into array.
-            red_image = self.cross_hair_image[:, :, 2]
+            red_image = image[:, :, 2]
             red_image[self.saturated_pixels] = 1
-            self.cross_hair_image[:, :, 2] = red_image
+            image[:, :, 2] = red_image
 
         # Scale back to an 8-bit image.
-        self.cross_hair_image = self.cross_hair_image * (2**self.bit_depth - 1)
+        image = image * (2**self.bit_depth - 1)
+        return image
 
     def update_LUT(self):
         """Update the LUT in the Camera View.
@@ -1080,9 +1082,9 @@ class CameraViewController(BaseViewController):
                 True if cmap_name == "RdBu_r" else False
             )  # TODO: Don't use a proxy for SNR
             self.colormap = plt.get_cmap(cmap_name)
-            self.add_crosshair()
-            self.apply_LUT()
-            self.populate_image()
+            image = self.add_crosshair(image=self.image)
+            image = self.apply_LUT(image=image)
+            self.populate_image(image=image)
             logger.debug(f"Updating the LUT, {cmap_name}")
 
     def detect_saturation(self, image):

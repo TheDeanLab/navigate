@@ -78,18 +78,18 @@ class CameraSettingsTab(tk.Frame):
         # Camera Modes Frame
         #: tk.Frame: The camera mode frame
         self.camera_mode = CameraMode(self)
-        self.camera_mode.grid(row=0, column=0, sticky=(tk.NSEW), padx=10, pady=10)
+        self.camera_mode.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
 
         # Framerate Label Frame
         #: tk.Frame: The framerate label frame
         self.framerate_info = FramerateInfo(self)
-        self.framerate_info.grid(row=0, column=1, sticky=(tk.NSEW), padx=10, pady=10)
+        self.framerate_info.grid(row=0, column=1, sticky=tk.NSEW, padx=10, pady=10)
 
         # Region of Interest Settings
         #: tk.Frame: The region of interest settings frame
         self.camera_roi = ROI(self)
         self.camera_roi.grid(
-            row=1, column=0, columnspan=2, sticky=(tk.NSEW), padx=10, pady=10
+            row=1, column=0, columnspan=2, sticky=tk.NSEW, padx=10, pady=10
         )
 
 

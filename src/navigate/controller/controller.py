@@ -1005,7 +1005,7 @@ class Controller:
             self.configuration["experiment"]["CameraParameters"],
         )
 
-        self.mip_setting_controller.preallocate_matrices()
+        self.mip_setting_controller.prepare_mip_view()
 
         self.stop_acquisition_flag = False
         start_time = time.time()

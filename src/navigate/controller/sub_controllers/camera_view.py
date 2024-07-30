@@ -61,7 +61,7 @@ class ABaseViewController(metaclass=ABCMeta):
         pass
 
     def update_snr(self):
-        """Updates the signal to noise ratio."""
+        """Updates the signal-to-noise ratio."""
         pass
 
     def initialize(self):
@@ -125,10 +125,10 @@ class BaseViewController(GUIController, ABaseViewController):
         self.total_images_per_volume = 0
 
         #: int: The original image height.
-        self.original_image_height = 2048  # 2014
+        self.original_image_height = 2048
 
         #: int: The original image width.
-        self.original_image_width = 2048  # 2014
+        self.original_image_width = 2048
 
         #: bool: Flat to flip the camera
         self.flip_flags = None
@@ -181,26 +181,8 @@ class BaseViewController(GUIController, ABaseViewController):
         #: bool: The display mask flag for ilastik.
         self.display_mask_flag = False
 
-        #: bool: Image catche flag
-        self.image_catche_flag = True
-
-        #: dict: The dictionary of image palette widgets.
-        self.image_palette = view.scale_palette.get_widgets()
-
-        # Binding for adjusting the lookup table min and max counts.
-        # keys = ['Autoscale', 'Min','Max']
-        self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
-        self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
-        self.image_palette["Autoscale"].widget.config(
-            command=self.toggle_min_max_buttons
-        )
-
-        # Bindings for changes to the LUT
-        for color in self.image_palette.values():
-            color.widget.config(command=self.update_LUT)
-
-        # Transpose and live bindings
-        self.image_palette["Flip XY"].widget.config(command=self.transpose_image)
+        #: bool: Image cache flag
+        self.image_cache_flag = True
 
     def update_LUT(self):
         """Update the LUT in the Camera View.
@@ -363,6 +345,13 @@ class BaseViewController(GUIController, ABaseViewController):
 
         self.stack_cycling_mode = microscope_state["stack_cycling_mode"]
         self.number_of_channels = int(microscope_state["selected_channels"])
+
+        self.selected_channels = []
+        for channel_name, channel_data in microscope_state["channels"].items():
+            if channel_data["is_selected"]:
+                channel_idx = channel_name.split("_")[-1]
+                self.selected_channels.append(f"CH{channel_idx}")
+
         self.number_of_slices = int(microscope_state["number_z_steps"])
         self.total_images_per_volume = self.number_of_channels * self.number_of_slices
         self.original_image_width = int(camera_parameters["x_pixels"])
@@ -497,14 +486,14 @@ class BaseViewController(GUIController, ABaseViewController):
 
         # when calling ImageTk.PhotoImage() to generate a new image, it will destroy
         # what the canvas is showing and cause a blink.
-        if self.image_catche_flag:
+        if self.image_cache_flag:
             self.tk_image = ImageTk.PhotoImage(temp_img)
             self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
         else:
             self.tk_image2 = ImageTk.PhotoImage(temp_img)
             self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
 
-        self.image_catche_flag = not self.image_catche_flag
+        self.image_cache_flag = not self.image_cache_flag
 
     def process_image(self):
         """Process the image to be displayed.
@@ -619,7 +608,25 @@ class CameraViewController(BaseViewController):
         #: dict: The dictionary of image metrics widgets.
         self.image_metrics = view.image_metrics.get_widgets()
 
-        #: bool: The signal to noise ratio flag.
+        #: dict: The dictionary of image palette widgets.
+        self.image_palette = view.scale_palette.get_widgets()
+
+        # Binding for adjusting the lookup table min and max counts.
+        # keys = ['Autoscale', 'Min','Max']
+        self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
+        self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
+        self.image_palette["Autoscale"].widget.config(
+            command=self.toggle_min_max_buttons
+        )
+
+        # Bindings for changes to the LUT
+        for color in self.image_palette.values():
+            color.widget.config(command=self.update_LUT)
+
+        # Transpose and live bindings
+        self.image_palette["Flip XY"].widget.config(command=self.transpose_image)
+
+        #: bool: The signal-to-noise ratio flag.
         self._snr_selected = False
 
         self.update_snr()
@@ -746,9 +753,10 @@ class CameraViewController(BaseViewController):
         self.ilastik_seg_mask = None
 
     def update_snr(self):
-        """Updates the signal to noise ratio."""
-        #: bool: The signal to noise ratio flag.
+        """Updates the signal-to-noise ratio."""
+        #: bool: The signal-to-noise ratio flag.
         self._snr_selected = False
+
         #: numpy.ndarray: The offset of the image.
         #: numpy.ndarray: The variance of the image.
         self._offset, self._variance = None, None
@@ -1204,11 +1212,24 @@ class MIPViewController(BaseViewController):
             The parent controller of the camera view controller.
         """
         super().__init__(view, parent_controller)
+        self.view = view
         self.image = None
         self.zx_mip = None
         self.zy_mip = None
         self.xy_mip = None
         self.autoscale = True
+        self.lut_widgets = self.view.lut.get_widgets()
+        self.lut_widgets["Gray"].widget.invoke()
+        self.lut_widgets["Autoscale"].widget.invoke()
+
+        self.render_widgets = self.view.render.get_widgets()
+        self.render_widgets["perspective"].widget["values"] = ("XY", "ZY", "ZX")
+        self.render_widgets["perspective"].set("XY")
+        self.render_widgets["channel"].set("CH0")
+
+    def prepare_mip_view(self):
+        self.render_widgets["channel"].widget["values"] = self.selected_channels
+        self.preallocate_matrices()
 
     def preallocate_matrices(self):
         """Preallocate the matrices for the MIP."""
@@ -1254,6 +1275,19 @@ class MIPViewController(BaseViewController):
 
         # Take maximum of the current image and the MIP image.
         self.xy_mip[channel_idx] = np.maximum(self.xy_mip[channel_idx], image)
+        self.zy_mip[channel_idx, slice_idx] = np.maximum(
+            self.zy_mip[channel_idx, slice_idx], np.max(image, axis=0)
+        )
+        self.zx_mip[channel_idx, slice_idx] = np.maximum(
+            self.zx_mip[channel_idx, slice_idx], np.max(image, axis=1)
+        )
 
-        self.image = self.xy_mip[channel_idx]
+        display_mode = self.render_widgets["perspective"].get()
+        if display_mode == "XY":
+            self.image = self.xy_mip[channel_idx]
+        elif display_mode == "ZY":
+            self.image = self.zy_mip[channel_idx]
+        elif display_mode == "ZX":
+            self.image = self.zx_mip[channel_idx]
+
         self.process_image()

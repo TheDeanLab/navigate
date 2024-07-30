@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022  The University of Texas Southwestern Medical Center.
+# Copyright (c) 2021-2024  The University of Texas Southwestern Medical Center.
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@ from matplotlib.figure import Figure
 # Local Imports
 from navigate.view.custom_widgets.DockableNotebook import DockableNotebook
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
-
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -139,13 +138,16 @@ class MIPTab(tk.Frame):
         #: matplotlib.figure.Figure: The figure that will hold the camera image.
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
 
-        #: matplotlib.backends.backend_tkagg.FigureCanvasTkAgg: The canvas that will
-        # hold the camera image.
+        #: FigureCanvasTkAgg: The canvas that will hold the camera image.
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
-        self.scale_palette = IntensityFrame(self)
-        self.scale_palette.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
+        self.lut = IntensityFrame(self)
+        self.lut.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
+
+        #: RenderFrame: The frame that will hold the live display functionality.
+        self.render = MipRenderFrame(self)
+        self.render.grid(row=1, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
 
 class CameraTab(tk.Frame):
@@ -196,8 +198,7 @@ class CameraTab(tk.Frame):
         #: matplotlib.figure.Figure: The figure that will hold the camera image.
         self.matplotlib_figure = Figure(figsize=[6, 6], tight_layout=True)
 
-        #: matplotlib.backends.backend_tkagg.FigureCanvasTkAgg: The canvas that will
-        # hold the camera image.
+        #: FigureCanvasTkAgg: The canvas that will hold the camera image.
         self.matplotlib_canvas = FigureCanvasTkAgg(self.matplotlib_figure, self.canvas)
 
         #: IntensityFrame: The frame that will hold the scale settings/palette color.
@@ -280,11 +281,78 @@ class RenderFrame(ttk.Labelframe):
         """Function to get the widgets.
 
         The key is the widget name, value is the LabelInput class that has all the data.
+        """
+        return self.inputs
+
+
+class MipRenderFrame(ttk.Labelframe):
+    """This class is the frame that holds the live display functionality."""
+
+    def __init__(self, cam_view, *args, **kwargs):
+        """Initialize the RenderFrame class.
+
+        Parameters
+        ----------
+        cam_view : tk.Frame
+            The frame that will hold the live display functionality.
+        *args : tuple
+            Variable length argument list.
+        **kwargs : dict
+            Arbitrary keyword arguments.
+        """
+        # Init Frame
+        text_label = "Display"
+        ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
+
+        # Formatting
+        Grid.columnconfigure(self, "all", weight=1)
+        Grid.rowconfigure(self, "all", weight=1)
+
+        # Label Strings
+        perspective = f"{'Perspective':<11}"
+        channel = f"{'Channel':>13}"
+
+        #: dict: The dictionary that holds the widgets.
+        self.inputs = {
+            "perspective": LabelInput(
+                parent=self,
+                label=perspective,
+                input_class=ttk.Combobox,
+                input_var=tk.StringVar(),
+                input_args={"width": 5},
+            ),
+            "channel": LabelInput(
+                parent=self,
+                label=channel,
+                input_class=ttk.Combobox,
+                input_var=tk.StringVar(),
+                input_args={"width": 5},
+            ),
+        }
+
+        self.inputs["perspective"].grid(row=0, column=0, sticky=tk.EW, padx=3, pady=3)
+        self.inputs["channel"].grid(row=1, column=0, sticky=tk.EW, padx=3, pady=3)
+        self.columnconfigure(0, weight=1)
+
+    def get_variables(self):
+        """Function to get the variables.
+
+        The key is the widget name, value is the variable associated.
 
         Returns
         -------
-        self.inputs : dict
-            The dictionary that holds the widgets.
+        variables : dict
+            The dictionary that holds the variables.
+        """
+        variables = {}
+        for key, widget in self.inputs.items():
+            variables[key] = widget.get()
+        return variables
+
+    def get_widgets(self):
+        """Function to get the widgets.
+
+        The key is the widget name, value is the LabelInput class that has all the data.
         """
         return self.inputs
 
@@ -325,8 +393,7 @@ class WaveformTab(tk.Frame):
         #: matplotlib.figure.Figure: The figure that will hold the waveform plots.
         self.fig = Figure(figsize=(6, 6), dpi=100)
 
-        #: matplotlib.backends.backend_tkagg.FigureCanvasTkAgg: The canvas that will
-        # hold the waveform plots.
+        #: FigureCanvasTkAgg: The canvas that will hold the waveform plots.
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.waveform_plots)
         self.canvas.draw()
 
@@ -359,15 +426,16 @@ class WaveformSettingsFrame(ttk.Labelframe):
         tk.Grid.rowconfigure(self, "all", weight=1)
 
         #: dict: The dictionary that holds the widgets.
-        self.inputs = {}
+        self.inputs = {
+            "sample_rate": LabelInput(
+                parent=self,
+                label="Sample rate",
+                input_class=ttk.Spinbox,
+                input_var=tk.IntVar(),
+                input_args={"from_": 1, "to": 2**16 - 1, "increment": 1, "width": 5},
+            )
+        }
 
-        self.inputs["sample_rate"] = LabelInput(
-            parent=self,
-            label="Sample rate",
-            input_class=ttk.Spinbox,
-            input_var=tk.IntVar(),
-            input_args={"from_": 1, "to": 2**16 - 1, "increment": 1, "width": 5},
-        )
         self.inputs["sample_rate"].grid(row=0, column=0, sticky=tk.NSEW, padx=3, pady=3)
 
         self.inputs["waveform_template"] = LabelInput(
@@ -395,13 +463,7 @@ class WaveformSettingsFrame(ttk.Labelframe):
         return variables
 
     def get_widgets(self):
-        """Function to get the widgets.
-
-        Returns
-        -------
-        self.inputs : dict
-            The dictionary that holds the widgets.
-        """
+        """Function to get the widgets."""
         return self.inputs
 
 
@@ -420,21 +482,17 @@ class MetricsFrame(ttk.Labelframe):
         **kwargs : dict
             Arbitrary keyword arguments.
         """
-        # Init Labelframe
         text_label = "Image Metrics"
         ttk.Labelframe.__init__(self, cam_view, text=text_label, *args, **kwargs)
-
-        # Formatting
         tk.Grid.columnconfigure(self, "all", weight=1)
         tk.Grid.rowconfigure(self, "all", weight=1)
 
-        # Dictionary for widgets
         #: dict: The dictionary that holds the widgets.
         self.inputs = {}
 
-        # Labels and names
         #: list: The list of labels for the widgets.
         self.labels = ["Frames to Avg", "Image Max Counts", "Channel"]
+
         #: list: The list of names for the widgets.
         self.names = ["Frames", "Image", "Channel"]
 
@@ -462,7 +520,7 @@ class MetricsFrame(ttk.Labelframe):
                     label_pos="top",
                 )
                 self.inputs[self.names[i]].grid(
-                    row=i, column=0, sticky=(tk.NSEW), padx=5, pady=3
+                    row=i, column=0, sticky=tk.NSEW, padx=5, pady=3
                 )
                 self.inputs[self.names[i]].configure(width=5)
 
@@ -486,11 +544,6 @@ class MetricsFrame(ttk.Labelframe):
         """This function returns the dictionary that holds the widgets.
 
         The key is the widget name, value is the LabelInput class that has all the data.
-
-        Returns
-        -------
-        self.inputs : dict
-            The dictionary that holds the widgets.
         """
         return self.inputs
 
@@ -624,10 +677,5 @@ class IntensityFrame(ttk.Labelframe):
         """This function returns the dictionary that holds the widgets.
 
         The key is the widget name, value is the LabelInput class that has all the data.
-
-        Returns
-        -------
-        self.inputs : dict
-            The dictionary that holds the widgets.
         """
         return self.inputs

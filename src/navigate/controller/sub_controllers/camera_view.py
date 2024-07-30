@@ -172,6 +172,96 @@ class BaseViewController(GUIController, ABaseViewController):
         #: tkinter.Canvas: The tkinter canvas that displays the image.
         self.canvas = self.view.canvas
 
+        #: matplotlib.colors.LinearSegmentedColormap: The colormap.
+        self.colormap = plt.get_cmap("gist_gray")
+
+        #: int: The bit-depth for PIL presentation.
+        self.bit_depth = 8
+
+        #: bool: The display mask flag for ilastik.
+        self.display_mask_flag = False
+
+        #: bool: Image catche flag
+        self.image_catche_flag = True
+
+        #: dict: The dictionary of image palette widgets.
+        self.image_palette = view.scale_palette.get_widgets()
+
+        # Binding for adjusting the lookup table min and max counts.
+        # keys = ['Autoscale', 'Min','Max']
+        self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
+        self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
+        self.image_palette["Autoscale"].widget.config(
+            command=self.toggle_min_max_buttons
+        )
+
+        # Bindings for changes to the LUT
+        for color in self.image_palette.values():
+            color.widget.config(command=self.update_LUT)
+
+        # Transpose and live bindings
+        self.image_palette["Flip XY"].widget.config(command=self.transpose_image)
+
+    def update_LUT(self):
+        """Update the LUT in the Camera View.
+
+        When the LUT is changed in the GUI, this function is called.
+        Updates the LUT.
+
+        Parameters
+        ----------
+        self.image : np.array
+            Must be a 2D image.
+
+        Returns
+        -------
+        self.apply_LUT_image : np.arrays
+        """
+        if self.image is None:
+            pass
+        else:
+            cmap_name = self.view.scale_palette.color.get()
+            self._snr_selected = (
+                True if cmap_name == "RdBu_r" else False
+            )  # TODO: Don't use a proxy for SNR
+            self.colormap = plt.get_cmap(cmap_name)
+            image = self.add_crosshair(image=self.image)
+            image = self.apply_LUT(image=image)
+            self.populate_image(image=image)
+            logger.debug(f"Updating the LUT, {cmap_name}")
+
+    def transpose_image(self):
+        """Get Flip XY widget value from the View.
+
+        If True, transpose the image.
+
+        Returns
+        -------
+        self.image : np.array
+            Transposed image.
+        """
+        self.transpose = self.image_palette["Flip XY"].get()
+
+    def toggle_min_max_buttons(self):
+        """Checks the value of the autoscale widget.
+
+        If enabled, the min and max widgets are disabled and the image intensity is
+        autoscaled. If disabled, miu and max widgets are enabled, and image intensity
+        scaled.
+        """
+        self.autoscale = self.image_palette["Autoscale"].get()
+
+        if self.autoscale is True:  # Autoscale Enabled
+            self.image_palette["Min"].widget["state"] = "disabled"
+            self.image_palette["Max"].widget["state"] = "disabled"
+            logger.info("Autoscale Enabled")
+
+        elif self.autoscale is False:  # Autoscale Disabled
+            self.image_palette["Min"].widget["state"] = "normal"
+            self.image_palette["Max"].widget["state"] = "normal"
+            logger.info("Autoscale Disabled")
+            self.update_min_max_counts()
+
     def try_to_display_image(self, image_id):
         """Try to display an image.
 
@@ -187,6 +277,35 @@ class BaseViewController(GUIController, ABaseViewController):
 
         display_thread = threading.Thread(target=self.display_image, args=(image_id,))
         display_thread.start()
+
+    def apply_LUT(self, image):
+        """Applies a LUT to an image.
+
+        Red is reserved for saturated pixels.
+        self.color_values = ['gray', 'gradient', 'rainbow']
+
+        Parameters
+        ----------
+        """
+        image = self.colormap(image)
+
+        # Convert RGBA to RGB Image.
+        image = image[:, :, :3]
+
+        # Specify the saturated values in the red channel
+        if np.any(self.saturated_pixels):
+            # Saturated pixels is an array of True or
+            # False statements same size as the image.
+
+            # Pull out the red image from the RGBA
+            # Set saturated pixels to 1, put back into array.
+            red_image = image[:, :, 2]
+            red_image[self.saturated_pixels] = 1
+            image[:, :, 2] = red_image
+
+        # Scale back to an 8-bit image.
+        image = image * (2**self.bit_depth - 1)
+        return image
 
     def identify_channel_index_and_slice(self):
         """As images arrive, identify channel index and slice.
@@ -291,6 +410,117 @@ class BaseViewController(GUIController, ABaseViewController):
             self.original_image_height / self.canvas_height
         )
 
+    def digital_zoom(self):
+        """Apply digital zoom.
+
+        The x and y positions are between 0
+        and the canvas width and height respectively.
+
+        """
+        self.zoom_rect = self.zoom_rect - self.zoom_offset
+        self.zoom_rect = self.zoom_rect * self.zoom_value
+        self.zoom_rect = self.zoom_rect + self.zoom_offset
+        self.zoom_offset.fill(0)
+        self.zoom_value = 1
+
+        if self.zoom_rect[0][0] > 0 or self.zoom_rect[1][0] > 0:
+            self.reset_display(False)
+
+        x_start_index = int(-self.zoom_rect[0][0] / self.zoom_scale)
+        x_end_index = int(x_start_index + self.zoom_width)
+
+        y_start_index = int(-self.zoom_rect[1][0] / self.zoom_scale)
+        y_end_index = int(y_start_index + self.zoom_height)
+
+        zoom_image = self.image[
+            int(y_start_index * self.canvas_height_scale) : int(
+                y_end_index * self.canvas_height_scale
+            ),
+            int(x_start_index * self.canvas_width_scale) : int(
+                x_end_index * self.canvas_width_scale
+            ),
+        ]
+
+        return zoom_image
+
+    def detect_saturation(self, image):
+        """Look for any pixels at the maximum intensity allowable for the camera."""
+        saturation_value = 2**16 - 1
+        self.saturated_pixels = image[image > saturation_value]
+
+    def down_sample_image(self, image):
+        """Down-sample the data for image display according to widget size."""
+        sx, sy = self.canvas_width, self.canvas_height
+        down_sampled_image = cv2.resize(image, (sx, sy))
+        return down_sampled_image
+
+    def scale_image_intensity(self, image):
+        """Scale the data to the min/max counts, and adjust bit-depth."""
+        if self.autoscale is True:
+            self.max_counts = np.max(image)
+            self.min_counts = np.min(image)
+        else:
+            self.update_min_max_counts()
+
+        image = (image - self.min_counts) / (self.max_counts - self.min_counts)
+        image[image < 0] = 0
+        image[image > 1] = 1
+        return image
+
+    def add_crosshair(self, image):
+        """Adds a cross-hair to the image."""
+        if self.apply_cross_hair:
+            crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
+            crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
+            if crosshair_x < 0 or crosshair_x >= self.canvas_width:
+                crosshair_x = -1
+            if crosshair_y < 0 or crosshair_y >= self.canvas_height:
+                crosshair_y = -1
+            image[:, int(crosshair_x)] = 1
+            image[int(crosshair_y), :] = 1
+            return image
+        else:
+            return image
+
+    def populate_image(self, image):
+        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
+        if self.display_mask_flag:
+            self.ilastik_mask_ready_lock.acquire()
+            temp_img1 = image.astype(np.uint8)
+            img1 = Image.fromarray(temp_img1)
+
+            temp_img2 = cv2.resize(self.ilastik_seg_mask, temp_img1.shape[:2])
+            img2 = Image.fromarray(temp_img2)
+            temp_img = Image.blend(img1, img2, 0.2)
+        else:
+            temp_img = Image.fromarray(image.astype(np.uint8))
+
+        # when calling ImageTk.PhotoImage() to generate a new image, it will destroy
+        # what the canvas is showing and cause a blink.
+        if self.image_catche_flag:
+            self.tk_image = ImageTk.PhotoImage(temp_img)
+            self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
+        else:
+            self.tk_image2 = ImageTk.PhotoImage(temp_img)
+            self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
+
+        self.image_catche_flag = not self.image_catche_flag
+
+    def process_image(self):
+        """Process the image to be displayed.
+
+        Applies digital zoom, detects saturation, down-samples the image, scales the
+        image intensity, adds a crosshair, applies the lookup table, and populates the
+        image.
+        """
+        image = self.digital_zoom()
+        self.detect_saturation(image)
+        image = self.down_sample_image(image)
+        image = self.scale_image_intensity(image)
+        image = self.add_crosshair(image)
+        image = self.apply_LUT(image)
+        self.populate_image(image)
+
     def left_click(self, event):
         """Toggles cross-hair on image upon left click event.
 
@@ -349,6 +579,27 @@ class BaseViewController(GUIController, ABaseViewController):
         self.update_canvas_size()
         self.reset_display(False)
 
+    def update_min_max_counts(self):
+        """Get min and max count values from the View.
+
+        When the min and max counts are toggled in the GUI, this function is called.
+        Updates the min and max values.
+
+        Returns
+        -------
+        self.min_counts : int
+            Minimum counts for the image.
+        self.max_counts : int
+            Maximum counts for the image.
+        """
+        if self.image_palette["Min"].get() != "":
+            self.min_counts = float(self.image_palette["Min"].get())
+        if self.image_palette["Max"].get() != "":
+            self.max_counts = float(self.image_palette["Max"].get())
+        logger.debug(
+            f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}"
+        )
+
 
 class CameraViewController(BaseViewController):
     """Camera View Controller Class."""
@@ -371,24 +622,8 @@ class CameraViewController(BaseViewController):
         #: bool: The signal to noise ratio flag.
         self._snr_selected = False
 
-        #: dict: The dictionary of image palette widgets.
-        self.image_palette = view.scale_palette.get_widgets()
-
-        # Bindings for changes to the LUT
-        for color in self.image_palette.values():
-            color.widget.config(command=self.update_LUT)
         self.update_snr()
 
-        # Binding for adjusting the lookup table min and max counts.
-        # keys = ['Autoscale', 'Min','Max']
-        self.image_palette["Min"].widget.config(command=self.update_min_max_counts)
-        self.image_palette["Max"].widget.config(command=self.update_min_max_counts)
-        self.image_palette["Autoscale"].widget.config(
-            command=self.toggle_min_max_buttons
-        )
-
-        # Transpose and live bindings
-        self.image_palette["Flip XY"].widget.config(command=self.transpose_image)
         self.view.live_frame.live.bind(
             "<<ComboboxSelected>>", self.update_display_state
         )
@@ -459,10 +694,6 @@ class CameraViewController(BaseViewController):
         #: str: The display state.
         self.display_state = "Live"
 
-        # Colormap Information
-        #: matplotlib.colors.LinearSegmentedColormap: The colormap.
-        self.colormap = plt.get_cmap("gist_gray")
-
         #: int: The number of images displayed.
         self.image_count = 0
 
@@ -474,9 +705,6 @@ class CameraViewController(BaseViewController):
 
         #: list: The list of maximum intensity values.
         self.max_intensity_history = []
-
-        #: int: The bit-depth for PIL presentation.
-        self.bit_depth = 8
 
         #: int: The canvas width scaling factor.
         self.canvas_width_scale = 4
@@ -510,13 +738,6 @@ class CameraViewController(BaseViewController):
 
         #: bool: Whether or not to flip the image.
         self.flip_flags = None
-
-        #: bool: Image catche flag
-        self.image_catche_flag = True
-
-        # ilastik mask
-        #: bool: The display mask flag for ilastik.
-        self.display_mask_flag = False
 
         #: threading.Lock: The lock for the ilastik mask.
         self.ilastik_mask_ready_lock = threading.Lock()
@@ -776,21 +997,6 @@ class CameraViewController(BaseViewController):
                 title="Warning", message="Can't move to there! Invalid stage position!"
             )
 
-    def process_image(self):
-        """Process the image to be displayed.
-
-        Applies digital zoom, detects saturation, down-samples the image, scales the
-        image intensity, adds a crosshair, applies the lookup table, and populates the
-        image.
-        """
-        image = self.digital_zoom()
-        self.detect_saturation(image)
-        image = self.down_sample_image(image)
-        image = self.scale_image_intensity(image)
-        image = self.add_crosshair(image)
-        image = self.apply_LUT(image)
-        self.populate_image(image)
-
     def mouse_wheel(self, event):
         """Digitally zooms in or out on the image upon scroll wheel event.
 
@@ -826,39 +1032,6 @@ class CameraViewController(BaseViewController):
 
         self.process_image()
 
-    def digital_zoom(self):
-        """Apply digital zoom.
-
-        The x and y positions are between 0
-        and the canvas width and height respectively.
-
-        """
-        self.zoom_rect = self.zoom_rect - self.zoom_offset
-        self.zoom_rect = self.zoom_rect * self.zoom_value
-        self.zoom_rect = self.zoom_rect + self.zoom_offset
-        self.zoom_offset.fill(0)
-        self.zoom_value = 1
-
-        if self.zoom_rect[0][0] > 0 or self.zoom_rect[1][0] > 0:
-            self.reset_display(False)
-
-        x_start_index = int(-self.zoom_rect[0][0] / self.zoom_scale)
-        x_end_index = int(x_start_index + self.zoom_width)
-
-        y_start_index = int(-self.zoom_rect[1][0] / self.zoom_scale)
-        y_end_index = int(y_start_index + self.zoom_height)
-
-        zoom_image = self.image[
-            int(y_start_index * self.canvas_height_scale) : int(
-                y_end_index * self.canvas_height_scale
-            ),
-            int(x_start_index * self.canvas_width_scale) : int(
-                x_end_index * self.canvas_width_scale
-            ),
-        ]
-
-        return zoom_image
-
     def update_max_counts(self):
         """Update the max counts in the camera view.
 
@@ -892,49 +1065,6 @@ class CameraViewController(BaseViewController):
                 / self.rolling_frames
             )
             self.image_metrics["Image"].set(f"{rolling_average:.0f}")
-
-    def down_sample_image(self, image):
-        """Down-sample the data for image display according to widget size."""
-        sx, sy = self.canvas_width, self.canvas_height
-        down_sampled_image = cv2.resize(image, (sx, sy))
-        return down_sampled_image
-
-    def scale_image_intensity(self, image):
-        """Scale the data to the min/max counts, and adjust bit-depth."""
-        if self.autoscale is True:
-            self.max_counts = np.max(image)
-            self.min_counts = np.min(image)
-        else:
-            self.update_min_max_counts()
-
-        image = (image - self.min_counts) / (self.max_counts - self.min_counts)
-        image[image < 0] = 0
-        image[image > 1] = 1
-        return image
-
-    def populate_image(self, image):
-        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
-        if self.display_mask_flag:
-            self.ilastik_mask_ready_lock.acquire()
-            temp_img1 = image.astype(np.uint8)
-            img1 = Image.fromarray(temp_img1)
-
-            temp_img2 = cv2.resize(self.ilastik_seg_mask, temp_img1.shape[:2])
-            img2 = Image.fromarray(temp_img2)
-            temp_img = Image.blend(img1, img2, 0.2)
-        else:
-            temp_img = Image.fromarray(image.astype(np.uint8))
-
-        # when calling ImageTk.PhotoImage() to generate a new image, it will destroy
-        # what the canvas is showing and cause a blink.
-        if self.image_catche_flag:
-            self.tk_image = ImageTk.PhotoImage(temp_img)
-            self.canvas.create_image(0, 0, image=self.tk_image, anchor="nw")
-        else:
-            self.tk_image2 = ImageTk.PhotoImage(temp_img)
-            self.canvas.create_image(0, 0, image=self.tk_image2, anchor="nw")
-
-        self.image_catche_flag = not self.image_catche_flag
 
     def retrieve_image_slice_from_volume(self, slider_index, channel_display_index):
         """Retrieve image slice from volume.
@@ -1018,133 +1148,6 @@ class CameraViewController(BaseViewController):
         with self.is_displaying_image as is_displaying_image:
             is_displaying_image.value = False
 
-    def add_crosshair(self, image):
-        """Adds a cross-hair to the image."""
-        if self.apply_cross_hair:
-            crosshair_x = (self.zoom_rect[0][0] + self.zoom_rect[0][1]) / 2
-            crosshair_y = (self.zoom_rect[1][0] + self.zoom_rect[1][1]) / 2
-            if crosshair_x < 0 or crosshair_x >= self.canvas_width:
-                crosshair_x = -1
-            if crosshair_y < 0 or crosshair_y >= self.canvas_height:
-                crosshair_y = -1
-            image[:, int(crosshair_x)] = 1
-            image[int(crosshair_y), :] = 1
-            return image
-        else:
-            return image
-
-    def apply_LUT(self, image):
-        """Applies a LUT to an image.
-
-        Red is reserved for saturated pixels.
-        self.color_values = ['gray', 'gradient', 'rainbow']
-        """
-        image = self.colormap(image)
-
-        # Convert RGBA to RGB Image.
-        image = image[:, :, :3]
-
-        # Specify the saturated values in the red channel
-        if np.any(self.saturated_pixels):
-            # Saturated pixels is an array of True or
-            # False statements same size as the image.
-
-            # Pull out the red image from the RGBA
-            # Set saturated pixels to 1, put back into array.
-            red_image = image[:, :, 2]
-            red_image[self.saturated_pixels] = 1
-            image[:, :, 2] = red_image
-
-        # Scale back to an 8-bit image.
-        image = image * (2**self.bit_depth - 1)
-        return image
-
-    def update_LUT(self):
-        """Update the LUT in the Camera View.
-
-        When the LUT is changed in the GUI, this function is called.
-        Updates the LUT.
-
-        Parameters
-        ----------
-        self.image : np.array
-            Must be a 2D image.
-
-        Returns
-        -------
-        self.apply_LUT_image : np.arrays
-        """
-        if self.image is None:
-            pass
-        else:
-            cmap_name = self.view.scale_palette.color.get()
-            self._snr_selected = (
-                True if cmap_name == "RdBu_r" else False
-            )  # TODO: Don't use a proxy for SNR
-            self.colormap = plt.get_cmap(cmap_name)
-            image = self.add_crosshair(image=self.image)
-            image = self.apply_LUT(image=image)
-            self.populate_image(image=image)
-            logger.debug(f"Updating the LUT, {cmap_name}")
-
-    def detect_saturation(self, image):
-        """Look for any pixels at the maximum intensity allowable for the camera."""
-        saturation_value = 2**16 - 1
-        self.saturated_pixels = image[image > saturation_value]
-
-    def toggle_min_max_buttons(self):
-        """Checks the value of the autoscale widget.
-
-        If enabled, the min and max widgets are disabled and the image intensity is
-        autoscaled. If disabled, miu and max widgets are enabled, and image intensity
-        scaled.
-        """
-        self.autoscale = self.image_palette["Autoscale"].get()
-
-        if self.autoscale is True:  # Autoscale Enabled
-            self.image_palette["Min"].widget["state"] = "disabled"
-            self.image_palette["Max"].widget["state"] = "disabled"
-            logger.info("Autoscale Enabled")
-
-        elif self.autoscale is False:  # Autoscale Disabled
-            self.image_palette["Min"].widget["state"] = "normal"
-            self.image_palette["Max"].widget["state"] = "normal"
-            logger.info("Autoscale Disabled")
-            self.update_min_max_counts()
-
-    def transpose_image(self):
-        """Get Flip XY widget value from the View.
-
-        If True, transpose the image.
-
-        Returns
-        -------
-        self.image : np.array
-            Transposed image.
-        """
-        self.transpose = self.image_palette["Flip XY"].get()
-
-    def update_min_max_counts(self):
-        """Get min and max count values from the View.
-
-        When the min and max counts are toggled in the GUI, this function is called.
-        Updates the min and max values.
-
-        Returns
-        -------
-        self.min_counts : int
-            Minimum counts for the image.
-        self.max_counts : int
-            Maximum counts for the image.
-        """
-        if self.image_palette["Min"].get() != "":
-            self.min_counts = float(self.image_palette["Min"].get())
-        if self.image_palette["Max"].get() != "":
-            self.max_counts = float(self.image_palette["Max"].get())
-        logger.debug(
-            f"Min and Max counts scaled to, {self.min_counts}, {self.max_counts}"
-        )
-
     def set_mask_color_table(self, colors):
         """Set up segmentation mask color table
 
@@ -1201,9 +1204,11 @@ class MIPViewController(BaseViewController):
             The parent controller of the camera view controller.
         """
         super().__init__(view, parent_controller)
+        self.image = None
         self.zx_mip = None
         self.zy_mip = None
         self.xy_mip = None
+        self.autoscale = True
 
     def preallocate_matrices(self):
         """Preallocate the matrices for the MIP."""
@@ -1247,15 +1252,8 @@ class MIPViewController(BaseViewController):
 
         image = self.data_buffer[image_id]
 
-        print("Image size!", image.shape)
-
         # Take maximum of the current image and the MIP image.
         self.xy_mip[channel_idx] = np.maximum(self.xy_mip[channel_idx], image)
 
-        self.populate_image(self.xy_mip[channel_idx])
-
-    def populate_image(self, image):
-        """Converts image to an ImageTk.PhotoImage and populates the Tk Canvas"""
-        temp_img = Image.fromarray(image.astype(np.uint8))
-        tk_image = ImageTk.PhotoImage(temp_img)
-        self.canvas.create_image(0, 0, image=tk_image, anchor="nw")
+        self.image = self.xy_mip[channel_idx]
+        self.process_image()

@@ -207,7 +207,6 @@ class ASIStage(StageBase):
                 setattr(self, f"{ax}_pos", float(pos) / 10.0)
         except MS2000Exception as e:
             logger.exception("ASI Stage Exception", e)
-
         return self.get_position_dict()
 
     def move_axis_absolute(self, axis, abs_pos, wait_until_done=False):
@@ -237,7 +236,6 @@ class ASIStage(StageBase):
         if axis_abs == -1e50:
             logger.debug("move_axis_absolute failed, axis_abs == -1e50")
             return False
-
         # Move stage
         try:
             # The 10 is to account for the ASI units, 1/10 of a micron
@@ -297,6 +295,7 @@ class ASIStage(StageBase):
             Was the move successful?
         """
         abs_pos_dict = self.verify_abs_position(move_dictionary)
+        
         if not abs_pos_dict:
             return False
         abs_pos_dict = self.verify_move(abs_pos_dict)
@@ -317,6 +316,7 @@ class ASIStage(StageBase):
             self.ms2000_controller.wait_for_device()
 
         return True
+
 
     def stop(self):
         """Stop all stage movement abruptly."""

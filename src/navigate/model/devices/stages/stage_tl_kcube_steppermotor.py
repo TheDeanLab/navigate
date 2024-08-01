@@ -124,7 +124,6 @@ class TLKSTStage(StageBase):
             self.axes_mapping = {
                 self.axes[0]: axes_mapping[self.axes[0]]
             }
-
         #: list: List of KST axes available.
         self.KST_axes = list(self.axes_mapping.values())
 
@@ -135,8 +134,8 @@ class TLKSTStage(StageBase):
             #: str: Serial number of the stage.
             self.serial_number = str(device_config[device_id]["serial_number"])
 
-            #: float: Device units per mm.
-            self.device_unit_scale = device_config[device_id]["device_units_per_mm"]
+            #: float: Device units per mm., scale to um.
+            self.device_unit_scale = device_config[device_id]["device_units_per_mm"] * 1e-3
         else:
             self.serial_number = device_config["serial_number"]
             self.device_unit_scale = device_config["device_units_per_mm"]
@@ -174,10 +173,10 @@ class TLKSTStage(StageBase):
         """
 
         try:
-            pos = (
+            pos = round(
                 self.kst_controller.KST_GetCurrentPosition(self.serial_number)
-                / float(self.device_unit_scale)
-            )
+                / float(self.device_unit_scale), 1
+            ) 
             setattr(self, f"{self.axes[0]}_pos", pos)
         except (
             self.kst_controller.TLFTDICommunicationError,
@@ -209,24 +208,35 @@ class TLKSTStage(StageBase):
         axis_abs = self.get_abs_position(axes, abs_pos)
         if axis_abs == -1e50:
             return False
-
+        
+        if wait_until_done:
+            t_move = time.time()
+            kst101_dz = axis_abs - self.kst_controller.KST_GetCurrentPosition(self.serial_number) / self.device_unit_scale
+            
         self.kst_controller.KST_SetAbsolutePosition(
             self.serial_number, int(axis_abs * self.device_unit_scale)
         )
         self.kst_controller.KST_MoveAbsolute(self.serial_number)
-
+        
         if wait_until_done:
-            stage_pos, n_tries, i = -1e50, 1000, 0
-            target_pos = axis_abs
-            while (round(stage_pos, 6) != round(target_pos, 6)) and (i < n_tries):
+            n_tries, i = 5000, 0
+            stage_pos = self.kst_controller.KST_GetCurrentPosition(self.serial_number) / self.device_unit_scale
+            while (round(stage_pos,0) != round(axis_abs,0)) and (i < n_tries):
                 stage_pos = (
                     self.kst_controller.KST_GetCurrentPosition(self.serial_number)
                     / self.device_unit_scale
                 )
                 i += 1
-                time.sleep(0.01)
-            if stage_pos != target_pos:
-                return False
+                time.sleep(0.001)
+
+            # print("-------------\n",
+            #     f"KST101 move axis absolute:\n",
+            #     f"dz={round(kst101_dz,2)}um, dt={round(time.time() - t_move,3)}sec\n",
+            #     "-------------\n")
+            
+            if round(stage_pos, 0) != round(axis_abs, 0):
+                return False    
+                    
         return True
 
     def move_absolute(self, move_dictionary, wait_until_done=False):
@@ -255,7 +265,7 @@ class TLKSTStage(StageBase):
 
         return result
 
-    def move_to_position(self, position, wait_until_done=False):
+    def move_to_position(self, position, wait_until_done=True):
         """Perform a move to position
 
         Parameters
@@ -273,11 +283,10 @@ class TLKSTStage(StageBase):
         self.kst_controller.KST_MoveToPosition(
             self.serial_number, position * self.device_unit_scale
         )
-
         if wait_until_done:
-            stage_pos, n_tries, i = -1e50, 1000, 0
-            target_pos = position
-            while (round(stage_pos, 4) != round(target_pos, 4)) and (i < n_tries):
+            n_tries, i = 1000, 0
+            target_pos = round(position, 2)
+            while (round(stage_pos,2) != target_pos) and (i < n_tries):
                 stage_pos = (
                     self.kst_controller.KST_GetCurrentPosition(self.serial_number)
                     / self.device_unit_scale

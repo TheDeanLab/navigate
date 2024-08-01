@@ -525,7 +525,7 @@ class PositionFrame(ttk.Labelframe):
                 input_args={
                     "required": True,
                     "precision": 0.1,
-                    "width": 6,
+                    "width": 10,
                     "takefocus": False,
                 },
             )
@@ -535,7 +535,7 @@ class PositionFrame(ttk.Labelframe):
             self.frame_back_list[i].grid(row=i, column=0)
             self.inputs[entry_names[i]].grid(row=i, column=0)
             self.frame_back_list[i].lower()
-
+        
     def get_widgets(self):
         """Get all widgets in the position frame
 

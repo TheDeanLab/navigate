@@ -145,11 +145,13 @@ class PhotometricsBase(CameraBase):
 
         logger.info("Photometrics Initialized")
 
+
     def __del__(self):
         """Delete PhotometricsBase object."""
         if hasattr(self, "camera_controller"):
             self.camera_controller.close()
         logger.info("PhotometricsBase Shutdown")
+
 
     @property
     def serial_number(self):
@@ -161,6 +163,7 @@ class PhotometricsBase(CameraBase):
             Serial number for the camera.
         """
         return self.camera_controller.serial_no
+
 
     def report_settings(self):
         """Print Camera Settings."""
@@ -177,9 +180,11 @@ class PhotometricsBase(CameraBase):
         print("image_height and width" + str(self.x_pixels) + ", " + str(self.y_pixels))
         print("exposure_time" + str(self._exposuretime))
 
+
     def close_camera(self):
         """Close Photometrics Camera"""
         self.camera_controller.close()
+
 
     def set_sensor_mode(self, mode):
         """Set Photometrics sensor mode
@@ -199,6 +204,7 @@ class PhotometricsBase(CameraBase):
             print("Camera mode not supported" + str(modes_dict[mode]))
             logger.info("Camera mode not supported" + str(modes_dict[mode]))
 
+
     def set_readout_direction(self, mode):
         """Set Photometrics readout direction.
 
@@ -209,9 +215,6 @@ class PhotometricsBase(CameraBase):
             Scan direction options: {'Down': 0, 'Up': 1, 'Down/Up Alternate': 2}
 
         """
-        # print("available scan directions on camera are:")
-        # print(str(self.camera_controller.prog_scan_dirs))
-
         if mode == "Top-to-Bottom":
             #  'Down' readout direction
             self.camera_controller.prog_scan_dir = 0
@@ -222,6 +225,7 @@ class PhotometricsBase(CameraBase):
             self.camera_controller.prog_scan_dir = 2
         else:
             logger.info("Camera readout direction not supported")
+
 
     def calculate_readout_time(self):
         """Calculate duration of time needed to readout an image.
@@ -244,6 +248,7 @@ class PhotometricsBase(CameraBase):
 
         return readout_time_ms / 1000
 
+
     def set_exposure_time(self, exposure_time):
         """Set Photometrics exposure time.
 
@@ -264,6 +269,7 @@ class PhotometricsBase(CameraBase):
         self.camera_controller.start_live(self._exposuretime)
         return exposure_time
 
+
     def set_line_interval(self, line_interval_time):
         """Set Photometrics line interval.
 
@@ -274,6 +280,7 @@ class PhotometricsBase(CameraBase):
         """
         # todo calculate line delay from scandelay
         self._scandelay = line_interval_time
+
 
     def calculate_light_sheet_exposure_time(
         self, full_chip_exposure_time, shutter_width
@@ -330,6 +337,7 @@ class PhotometricsBase(CameraBase):
         self._scandelay = ASLM_line_delay
         return ASLM_lineExposure / 1000, ASLM_line_delay, ASLM_acquisition_time / 1000
 
+
     def set_binning(self, binning_string):
         """Set Photometrics binning mode.
 
@@ -353,7 +361,6 @@ class PhotometricsBase(CameraBase):
         }
         if binning_string not in binning_dict.keys():
             logger.debug(f"can't set binning to {binning_string}")
-            print(f"Can't set binning to {binning_string}")
             return False
         self.camera_controller.binning = binning_dict[binning_string]
         idx = binning_string.index("x")
@@ -370,6 +377,7 @@ class PhotometricsBase(CameraBase):
         #: int: Number of pixels in y direction
         self.y_pixels = int(self.y_pixels / self.y_binning)
         return True
+
 
     def set_ROI(self, roi_height=3200, roi_width=3200):
         """Change the size of the active region on the camera.
@@ -416,6 +424,7 @@ class PhotometricsBase(CameraBase):
         logger.info(f"Photometrics ROI shape, {self.camera_controller.shape()}")
         return self.x_pixels == roi_width and self.y_pixels == roi_height
 
+
     def initialize_image_series(self, data_buffer=None, number_of_frames=100):
         """Initialize Photometrics image series. This is for starting stacks etc.
 
@@ -436,15 +445,11 @@ class PhotometricsBase(CameraBase):
             self.camera_controller.exp_mode = "Edge Trigger"
             self.camera_controller.prog_scan_line_delay = self._scandelay
             self.camera_controller.exp_out_mode = 4
-            print(
-                "camera ready to acquire programmable scan mode "
-                "with scandelay {}".format(self._scandelay)
-            )
+            
         else:
             # Normal mode
             self.camera_controller.exp_out_mode = "Any Row"
             self.camera_controller.exp_mode = "Edge Trigger"
-            print("camera ready to acquire static light sheet mode")
 
         # Prepare for buffered acquisition
         #: int: Number of frames
@@ -468,6 +473,7 @@ class PhotometricsBase(CameraBase):
         # with the current exposure time.
         self.camera_controller.start_live()
 
+
     def _receive_images(self):
         """
         Update image in the data buffer if the Photometrics camera acquired a new
@@ -490,14 +496,19 @@ class PhotometricsBase(CameraBase):
             # Delete copied frame for memory management
             frame = None
             del frame
+
+            frame_to_return = [self._frames_received]
             self._frames_received += 1
+            # check to make sure the next frame exist in buffer
             if self._frames_received >= self._numberofframes:
                 self._frames_received = 0
-            return [self._frames_received - 1]
+            return frame_to_return
+        
         except Exception as e:
             print(str(e))
 
         return []
+
 
     def get_new_frame(self):
         """
@@ -511,6 +522,7 @@ class PhotometricsBase(CameraBase):
         """
         return self._receive_images()
 
+
     def close_image_series(self):
         """Close Photometrics image series.
 
@@ -518,3 +530,4 @@ class PhotometricsBase(CameraBase):
         """
         self.camera_controller.finish()
         self.is_acquiring = False
+

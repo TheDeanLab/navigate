@@ -257,8 +257,11 @@ def start_camera(
         for start_function in plugin_devices["camera"]["start_device"]:
             try:
                 return start_function(
-                    microscope_name, device_connection, configuration, is_synthetic,
-                    device_type="camera"
+                    microscope_name,
+                    device_connection,
+                    configuration,
+                    is_synthetic,
+                    device_type="camera",
                 )
             except RuntimeError:
                 continue
@@ -438,9 +441,10 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                     exception=TLFTDICommunicationError,
                 )
             )
+
         elif stage_type == "KST101":
             from navigate.model.devices.stages.stage_tl_kcube_steppermotor import (
-                build_TLKSTStage_connection
+                build_TLKSTStage_connection,
             )
 
             stage_devices.append(
@@ -450,6 +454,7 @@ def load_stages(configuration, is_synthetic=False, plugin_devices={}):
                     exception=Exception,
                 )
             )
+
         elif stage_type == "MCL" and platform.system() == "Windows":
             from navigate.model.devices.stages.stage_mcl import (
                 build_MCLStage_connection,
@@ -644,12 +649,12 @@ def start_stage(
         from navigate.model.devices.stages.stage_tl_kcube_inertial import TLKIMStage
 
         return TLKIMStage(microscope_name, device_connection, configuration, id)
-    
+
     elif device_type == "KST101":
         from navigate.model.devices.stages.stage_tl_kcube_steppermotor import TLKSTStage
 
         return TLKSTStage(microscope_name, device_connection, configuration, id)
-    
+
     elif device_type == "MCL":
         from navigate.model.devices.stages.stage_mcl import MCLStage
 
@@ -685,8 +690,12 @@ def start_stage(
         for start_function in plugin_devices["stage"]["start_device"]:
             try:
                 return start_function(
-                    microscope_name, device_connection, configuration, is_synthetic,
-                    device_type="stage", id=id
+                    microscope_name,
+                    device_connection,
+                    configuration,
+                    is_synthetic,
+                    device_type="stage",
+                    id=id,
                 )
             except RuntimeError:
                 continue
@@ -812,8 +821,11 @@ def start_zoom(
         for start_zoom in plugin_devices["zoom"]["start_device"]:
             try:
                 return start_zoom(
-                    microscope_name, device_connection, configuration, is_synthetic,
-                    device_type="zoom"
+                    microscope_name,
+                    device_connection,
+                    configuration,
+                    is_synthetic,
+                    device_type="zoom",
                 )
             except RuntimeError:
                 continue
@@ -874,7 +886,7 @@ def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devic
 
     elif device_type == "NI":
         return DummyDeviceConnection()
-    
+
     elif (
         device_type.lower() == "syntheticfilterwheel"
         or device_type.lower() == "synthetic"
@@ -891,6 +903,7 @@ def load_filter_wheel_connection(configuration, is_synthetic=False, plugin_devic
             except RuntimeError:
                 continue
         device_not_found("filter_wheel", device_type)
+
     else:
         device_not_found("filter_wheel", device_type)
 
@@ -939,6 +952,7 @@ def start_filter_wheel(
         device_type = configuration["configuration"]["microscopes"][microscope_name][
             "filter_wheel"
         ]["hardware"]["type"]
+
     if device_type == "SutterFilterWheel":
         from navigate.model.devices.filter_wheel.filter_wheel_sutter import (
             SutterFilterWheel,
@@ -952,11 +966,10 @@ def start_filter_wheel(
         return ASIFilterWheel(microscope_name, device_connection, configuration)
 
     elif device_type == "NI":
-        
         from navigate.model.devices.filter_wheel.filter_wheel_daq import DAQFilterWheel
-        
+
         return DAQFilterWheel(microscope_name, device_connection, configuration)
-    
+
     elif (
         device_type.lower() == "syntheticfilterwheel"
         or device_type.lower() == "synthetic"
@@ -968,16 +981,19 @@ def start_filter_wheel(
         return SyntheticFilterWheel(microscope_name, device_connection, configuration)
 
     elif "filter_wheel" in plugin_devices:
-
         for start_function in plugin_devices["filter_wheel"]["start_device"]:
             try:
                 return start_function(
-                    microscope_name, device_connection, configuration, is_synthetic,
-                    device_type="filter_wheel"
+                    microscope_name,
+                    device_connection,
+                    configuration,
+                    is_synthetic,
+                    device_type="filter_wheel",
                 )
             except RuntimeError:
                 continue
         device_not_found(microscope_name, "filter_wheel", device_type)
+
     else:
         device_not_found(microscope_name, "filter_wheel", device_type)
 
@@ -1090,8 +1106,11 @@ def start_shutter(
         for start_function in plugin_devices["shutter"]["start_device"]:
             try:
                 return start_function(
-                    microscope_name, None, configuration, is_synthetic,
-                    device_type="shutter"
+                    microscope_name,
+                    None,
+                    configuration,
+                    is_synthetic,
+                    device_type="shutter",
                 )
             except RuntimeError:
                 continue
@@ -1163,7 +1182,12 @@ def start_lasers(
         for start_function in plugin_devices["lasers"]["start_device"]:
             try:
                 return start_function(
-                    microscope_name, device_connection, configuration, is_synthetic, device_type="lasers", id=id
+                    microscope_name,
+                    device_connection,
+                    configuration,
+                    is_synthetic,
+                    device_type="lasers",
+                    id=id,
                 )
             except RuntimeError:
                 continue
@@ -1217,14 +1241,12 @@ def start_remote_focus_device(
 
     if device_type == "NI":
         from navigate.model.devices.remote_focus.remote_focus_ni import RemoteFocusNI
-
         return RemoteFocusNI(microscope_name, device_connection, configuration)
 
     elif device_type == "EquipmentSolutions":
         from navigate.model.devices.remote_focus.remote_focus_equipment_solutions import (
             RemoteFocusEquipmentSolutions,
         )
-
         return RemoteFocusEquipmentSolutions(
             microscope_name, device_connection, configuration
         )
@@ -1244,8 +1266,11 @@ def start_remote_focus_device(
         for start_function in plugin_devices["remote_focus_device"]["start_device"]:
             try:
                 return start_function(
-                    microscope_name, device_connection, configuration, is_synthetic,
-                    device_type="remote_focus_device"
+                    microscope_name,
+                    device_connection,
+                    configuration,
+                    is_synthetic,
+                    device_type="remote_focus_device",
                 )
             except RuntimeError:
                 continue
@@ -1312,8 +1337,12 @@ def start_galvo(
         for start_function in plugin_devices["galvo"]["start_device"]:
             try:
                 return start_function(
-                    microscope_name, device_connection, configuration, is_synthetic,
-                    device_type="galvo", id=id
+                    microscope_name,
+                    device_connection,
+                    configuration,
+                    is_synthetic,
+                    device_type="galvo",
+                    id=id,
                 )
             except RuntimeError:
                 continue

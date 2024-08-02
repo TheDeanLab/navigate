@@ -63,7 +63,7 @@ def test_metadata_shape(dummy_model):
     "image_mode",
     [
         "single",
-        "live",
+        "Confocal Projection",
         "z-stack",
     ],
 )
@@ -89,6 +89,8 @@ def test_metadata_set_stack_order_from_configuration_experiment(
     md.configuration = dummy_model.configuration
 
     if image_mode == "z-stack" and stack_cycling_mode == "per_stack":
+        assert md._per_stack is True
+    elif image_mode == "Confocal Projection" and stack_cycling_mode == "per_stack":
         assert md._per_stack is True
     else:
         assert md._per_stack is False

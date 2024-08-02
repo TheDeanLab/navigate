@@ -445,14 +445,6 @@ class Microscope:
     def end_acquisition(self):
         """End the acquisition."""
         self.daq.stop_acquisition()
-        # set NI Galvo stage to normal stage mode
-        if (
-            self.configuration["experiment"]["MicroscopeState"]["image_mode"]
-            == "confocal-projection"
-        ):
-            for stage, _ in self.stages_list:
-                if type(stage).__name__ == "GalvoNIStage":
-                    stage.switch_mode("normal")
         self.stop_stage()
         if self.central_focus is not None:
             self.move_stage({"f_abs": self.central_focus})

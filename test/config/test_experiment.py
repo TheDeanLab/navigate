@@ -171,11 +171,6 @@ class TextExperimentFile(unittest.TestCase):
             "end_focus": float,
             "abs_z_start": float,
             "abs_z_end": float,
-            "scanrange": float,
-            "n_plane": int,
-            "offset_start": float,
-            "offset_end": float,
-            "conpro_cycling_mode": str,
             "waveform_template": str,
         }
 

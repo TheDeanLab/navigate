@@ -482,8 +482,6 @@ class Controller:
         channel_warning = self.channels_tab_controller.verify_experiment_values()
         if channel_warning:
             return channel_warning
-        if self.configuration["experiment"]["MicroscopeState"]["scanrange"] == 0:
-            return "Scan range shouldn't be 0!"
         return ""
 
     def resize(self, event):
